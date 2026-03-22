@@ -1,180 +1,116 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+import dash
+from Projetos import Projeto
+from Furo import Furo
+from Material import Material
+
+from dash import html, dcc, Input, Output
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+
+# ==========================
+# EXEMPLO DE PROJETOS
+# ==========================
+projeto1 = Projeto("Projeto Alpha", "Descrição do Projeto Alpha", (38.0, -8.0), "Cliente A")
+projeto2 = Projeto("Projeto Beta", "Descrição do Projeto Beta", (37.5, -7.8), "Cliente B")
+projetos = [projeto1, projeto2]
+
+# ==========================
+# INICIALIZA DASH
+# ==========================
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# ==========================
+# MENU LATERAL
+# ==========================
+sidebar = dbc.Nav(
+    [
+        html.H2("Menu", className="display-5"),
+        html.Hr(),
+        dbc.NavLink("Projetos", href="/", id="link-projetos"),
+        dbc.NavLink("Empregados", href="/empregados", id="link-empregados"),
+        dbc.NavLink("Máquinas", href="/maquinas", id="link-maquinas"),
+        dbc.NavLink("Materiais", href="/materiais", id="link-materiais"),
+    ],
+    vertical=True,
+    pills=True,
+    style={"height": "100vh", "position": "fixed", "width": "15%", "padding": "20px"}
+)
+
+# ==========================
+# CONTEÚDO
+# ==========================
+conteudo = html.Div(id="page-content", style={"margin-left": "17%", "padding": "20px"})
+
+# ==========================
+# LAYOUT
+# ==========================
+app.layout = html.Div([sidebar, conteudo])
+
+# ==========================
+# CALLBACKS
+# ==========================
+@app.callback(
+    Output("page-content", "children"),
+    Input("link-projetos", "n_clicks"),
+    Input("link-empregados", "n_clicks"),
+    Input("link-maquinas", "n_clicks"),
+    Input("link-materiais", "n_clicks")
+)
+def render_page(n_proj, n_emp, n_maq, n_mat):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        btn_id = "link-projetos"
+    else:
+        btn_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if btn_id == "link-projetos":
+        # MAPA INTERATIVO
+        lats = [p.localizacao[0] for p in projetos]
+        lons = [p.localizacao[1] for p in projetos]
+        nomes = [p.nome for p in projetos]
+
+        fig = go.Figure(go.Scattergeo(
+            lat=lats,
+            lon=lons,
+            text=nomes,
+            mode='markers',
+            marker=dict(size=10)
+        ))
+
+        fig.update_layout(
+            geo=dict(projection_type='orthographic'),
+            margin={"r":0,"t":0,"l":0,"b":0}
+        )
+
+        # LISTA DE PROJETOS COM CLIQUE SIMULADO
+        lista = []
+        for p in projetos:
+            lista.append(html.Div([
+                html.H5(p.nome),
+                html.P(f"Cliente: {p.cliente}"),
+                html.P(f"Localização: {p.localizacao}"),
+            ], style={"border": "1px solid #ccc", "padding": "10px", "margin": "5px"}))
+
+        return html.Div([
+            dcc.Graph(figure=fig),
+            html.Hr(),
+            html.H4("Projetos:"),
+            html.Div(lista)
+        ])
+
+    elif btn_id == "link-empregados":
+        return html.H3("Empregados - lista e detalhes aqui")
+    elif btn_id == "link-maquinas":
+        return html.H3("Máquinas - lista e detalhes aqui")
+    elif btn_id == "link-materiais":
+        return html.H3("Materiais - lista e detalhes aqui")
+
+    return html.H3("Página não encontrada")
 
 
-# Formula base para calcular a trajetória de um poço a partir de MD, INC e AZIM:
-# dx = ΔMD * sin(INC) * cos(AZIM)
-# dy = ΔMD * sin(INC) * sin(AZIM)
-# dz = ΔMD * cos(INC)
-
-# ====================
-# Gerador de Dados (Simula Sensor)
-# ====================
-
-def gerar_dados():
-    md = 0
-    while True:
-        md += 5  # Incrementa MD a cada leitura
-        inc = min(md * 0.5, 30) # aumenta a inclinação com a profundidade, mas limita a 30 graus
-        azim = md * 2 # roda direção com a profundidade
-
-        yield md, inc, azim
-
-
-# ====================
-# Variáveis Globais
-# ====================
-md_list = [0]
-inc_list = [0]
-azim_list = [0]
-
-x = [0]
-y= [0]
-z = [0]
-
-data_gen = gerar_dados()
-
-# ====================
-# Atualização do Gráfico
-# ====================
-def update(frame):
-
-    global md_list, inc_list, azim_list, x, y, z
-
-    # receber novo ponto
-    md, inc, azim = next(data_gen)
-
-    md_list.append(md)
-    inc_list.append(np.radians(inc))
-    azim_list.append(np.radians(azim))
-                     
-    # calcular novo ponto
-    dmd = md_list[-1] - md_list[-2]
-
-    dx = dmd * np.sin(inc_list[-1]) * np.cos(azim_list[-1])
-    dy = dmd * np.sin(inc_list[-1]) * np.sin(azim_list[-1])
-    dz = dmd * np.cos(inc_list[-1])
-
-    x.append(x[-1] + dx)
-    y.append(y[-1] + dy)
-    z.append(z[-1] - dz)  # negativo porque Z aumenta para baixo (profundidade)
-
-    ax.clear()
-
-    ax.plot(x, y, z, marker='o')
-
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Profundidade")
-
-    ax.set_title(f"MD: {md:.1f} m | INC: {inc:.1f}° | AZIM: {azim:.1f}°")
-
-
-# ====================
-# Plot
-# ====================
-fig = plt.figure()
-ax = fig.add_subplot(projection='3d')
-
-ani = FuncAnimation(fig, update, frames=100, interval=1000)
-
-plt.show()
-
-""" 
-def dados_simulados():
-    # MD (profundidade medida)
-    md = np.array([0, 20, 40, 60, 80, 100])  # em metros
-    # Inclinação (em graus)
-    inc = np.array([36, 35, 33, 32, 31, 30])  # em graus
-    # Azimute (em graus)
-    azim = np.array([25, 26, 25, 24, 25, 26])
-    return md,inc, azim
-
-# ====================
-# 2. Ler CSV
-# ====================
-def ler_csv(nome_ficheiro):
-    dados = np.loadtxt(nome_ficheiro, delimiter=",", skiprows=1)
-    md = dados[:, 0]  # Coluna de MD
-    inc = dados[:, 1]  # Coluna de INC
-    azim = dados[:, 2]  # Coluna de AZIM
-    return md, inc, azim
-
-
-# ====================
-# 3. Dados em tempo Real
-# ====================
-def ler_sensor():
-    # simulação de leitura continua
-    md = np.array([0, 10, 20,30, 40, 50])  # em metros
-    inc = np.array([0, 3, 7, 12, 18, 25])  # em graus
-    azim = np.array([0, 20, 40, 60, 80, 100])
-    return md, inc, azim
-
-# ====================
-# 4. Cálculo da trajetória
-# ====================
-
-def calcular_trajetoria(md, inc, azim):
-    inc = np.radians(inc)
-    azim = np.radians(azim)
-
-    x= [0]
-    y = [0]
-    z = [0]
-
-    for i in range(1, len(md)):
-        dmd = md[i] - md[i-1]
-
-        dx = dmd * np.sin(inc[i]) * np.cos(azim[i])
-        dy = dmd * np.sin(inc[i]) * np.sin(azim[i])
-        dz = dmd * np.cos(inc[i])
-
-        x.append(x[-1] + dx)
-        y.append(y[-1] + dy)
-        z.append(z[-1] - dz)  # negativo porque Z aumenta para baixo (profundidade)
-    
-    return x, y, z
-
-# ====================
-# 5. Visualização em 3D
-# ====================
-
-def mostrar_3d(x, y, z):
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    
-    ax.plot(x, y, z, marker='o')
-
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Profundidade")
-
-    plt.show()
-
-
-# ====================
-# 6. Escolher Modo de Entrada
-# ====================
-
-modo = input("Escolhe o modo: 1-Simulado | 2-CSV | 3-Tempo Real: ")
-
-if modo == "1":
-    md, inc, azim = dados_simulados()
-
-elif modo == "2":
-    md, inc, azim = ler_csv("dados.csv")
-
-elif modo == "3":
-    md, inc, azim = ler_sensor()
-
-else:
-    print("Modo inválido")
-    exit()
-
-
-x, y, z = calcular_trajetoria(md, inc, azim)
-mostrar_3d(x, y, z)
-
-# O código acima é um exemplo básico de como calcular e visualizar a trajetória de um poço usando dados de MD, INC e AZIM. Ele inclui três modos de entrada: dados simulados, leitura de um arquivo CSV e simulação de leitura em tempo real. A trajetória é calculada usando as fórmulas de deslocamento e visualizada em um gráfico 3D. Para um uso real, seria necessário adaptar a leitura de dados em tempo real para se conectar a sensores reais e garantir que os dados estejam formatados corretamente. """
+# ==========================
+# RUN SERVER
+# ==========================
+if __name__ == "__main__":
+    app.run(debug=True)
