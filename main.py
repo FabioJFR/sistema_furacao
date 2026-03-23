@@ -220,6 +220,84 @@ def navegar(click_globo, click_furo, data):
 
     return dash.no_update
 
+#================== CALLBACK PARA FILTRAR LISTA DE FUROS =================
+@app.callback(
+    Output("lista-furos", "children"),
+    Input("filtro-projeto", "value"),
+    Input("filtro-prof", "value"),
+    Input("store-projetos", "data"),
+    prevent_initial_call=False
+)
+def atualizar_lista_furos(filtro_projeto, filtro_prof, data):
+
+    projetos = [Projeto.from_dict(p) for p in data]
+
+    cards = []
+
+    for p in projetos:
+
+        if filtro_projeto and p.nome != filtro_projeto:
+            continue
+
+        for f in p.furos:
+
+            ultima = f.medicoes[-1] if f.medicoes else None
+
+            if filtro_prof and (not ultima or ultima["profundidade"] < filtro_prof):
+                continue
+
+            cor = "success" if ultima and ultima["profundidade"] > 50 else "warning"
+
+            cards.append(
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardBody([
+
+                            html.H5(f.nome),
+                            html.H6(f"Projeto: {p.nome}", className="text-muted"),
+
+                            html.Hr(),
+
+                            html.P([
+                                html.Strong("Profundidade: "),
+                                f"{ultima['profundidade']} m" if ultima else "N/A"
+                            ]),
+
+                            html.P([
+                                html.Strong("Inclinação: "),
+                                f"{ultima['inclinacao']}°" if ultima else "N/A"
+                            ]),
+
+                            html.P([
+                                html.Strong("Azimute: "),
+                                f"{ultima['azimute']}°" if ultima else "N/A"
+                            ]),
+
+                            dbc.Badge(
+                                "Ativo" if cor == "success" else "Raso",
+                                color=cor
+                            ),
+
+                            html.Br(),
+
+                            dbc.Button(
+                                "🔍 Ver Detalhes",
+                                href=f"/furo/{f.id}",
+                                color="primary",
+                                size="sm"
+                            )
+
+                        ])
+                    ], className="h-100 shadow-sm"),
+                    width=4
+                )
+            )
+
+    if not cards:
+        return dbc.Alert("Nenhum furo encontrado.", color="warning")
+
+    return dbc.Row(cards, className="g-3")
+
 # ================= RUN =================
 if __name__ == "__main__":
     app.run(debug=True)

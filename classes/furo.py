@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+
 class Furo:
     """Classe que representa um Furo"""
 
@@ -14,7 +15,14 @@ class Furo:
         self.estado = False
         self.sondadores = []
         self.ajudantes = []
-
+        self.inclinacao = 0.0
+        self.azimute = 0.0
+        self.profundidade_alvo = 0.0
+        self.profundidade_final = 0.0
+        self.profundidade_atual = 0.0
+        self.detalhes = ""
+        
+    # mudar este método para receber um objeto Medicao ao invés de parâmetros separados, e o atributo de mediçao da classe deve receber varias listas de objetos Medicao
     def adicionar_medicao(self, profundidade, inclinacao, azimute):
         """Adiciona uma medição diária com data atual"""
         self.medicoes.append({
