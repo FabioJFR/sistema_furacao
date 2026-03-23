@@ -66,68 +66,69 @@ def layout(projetos):
         dcc.Link("⬅ Voltar", href="/")
 
     ]) """
-from dash import html, dcc, Input, Output
+
+# pages/furos/listar.py
+from dash import html, dcc
 import dash_bootstrap_components as dbc
-import dash
+from utils.alertas import analisar_furo
 
 def layout(projetos):
+    cards = []
 
-    # ================= STATS =================
-    total_furos = sum(len(p.furos) for p in projetos)
+    for p in projetos:
+        for f in p.furos:
 
-    total_metros = sum(
-        f.medicoes[-1]["profundidade"]
-        for p in projetos
-        for f in p.furos
-        if f.medicoes
-    )
+            # 🔹 Garantir que estado é sempre string
+            estado = str(f.estado).lower()
 
-    projetos_nomes = list(set(p.nome for p in projetos))
+            # 🔹 Cor do badge
+            cor_estado = {
+                "ativo": "success",
+                "parado": "warning",
+                "concluido": "secondary"
+            }.get(estado, "dark")
+
+            # 🔹 Última medição segura
+            ultima = f.medicoes[-1] if f.medicoes else None
+
+            # 🔹 Alertas automáticos
+            alertas = analisar_furo(f)
+
+            card = dbc.Card(
+                dbc.CardBody([
+                    html.H5(f"{f.nome} (Projeto: {p.nome})"),
+
+                    dbc.Badge(estado.upper(), color=cor_estado),
+                    html.Br(),
+
+                    # Última medição
+                    html.P(f"Profundidade: {ultima['profundidade']} m" if ultima else "Sem medições"),
+                    html.P(f"Inclinação: {ultima['inclinacao']}" if ultima else ""),
+                    html.P(f"Azimute: {ultima['azimute']}" if ultima else ""),
+
+                    # Alertas
+                    html.Div([
+                        dbc.Alert(a, color="danger", className="p-1")
+                        for a in alertas
+                    ]) if alertas else None,
+
+                    # Botões
+                    html.Div([
+                        dcc.Link("🔍 Detalhes", href=f"/furo/{f.id}", style={"margin-right": "10px"}),
+                        dcc.Link("📍 Ver no Mapa", href=f"/projeto/{p.id}")
+                    ])
+                ]),
+                style={"margin": "5px"}
+            )
+
+            cards.append(card)
+
+    if not cards:
+        cards.append(html.P("Não existem furos cadastrados."))
 
     return html.Div([
-        html.H2("🕳️ Painel de Furos", className="mb-4"),
-
-        # ================= CARDS =================
-        dbc.Row([
-            dbc.Col(dbc.Card(dbc.CardBody([
-                html.H4(total_furos), html.P("Furos")
-            ]), color="primary", inverse=True), width=3),
-
-            dbc.Col(dbc.Card(dbc.CardBody([
-                html.H4(f"{total_metros:.1f} m"), html.P("Metros Perfurados")
-            ]), color="success", inverse=True), width=3),
-
-            dbc.Col(dbc.Card(dbc.CardBody([
-                html.H4(len(projetos_nomes)), html.P("Projetos")
-            ]), color="dark", inverse=True), width=3),
-        ], className="mb-4"),
-
-        # ================= FILTROS =================
-        dbc.Card([
-            dbc.CardBody([
-                html.H5("🔎 Filtros"),
-
-                dbc.Row([
-                    dbc.Col([
-                        dbc.Label("Projeto"),
-                        dcc.Dropdown(
-                            id="filtro-projeto",
-                            options=[{"label": p, "value": p} for p in projetos_nomes],
-                            placeholder="Todos os projetos",
-                            clearable=True
-                        )
-                    ], width=4),
-
-                    dbc.Col([
-                        dbc.Label("Profundidade mínima"),
-                        dbc.Input(id="filtro-prof", type="number")
-                    ], width=4),
-                ])
-            ])
-        ], className="mb-4"),
-
-        html.Div(id="lista-furos"),
-
+        html.H3("Painel de Furos"),
+        dbc.Row([dbc.Col(card, width=4) for card in cards]),
         html.Br(),
         dcc.Link("⬅ Voltar", href="/")
     ])

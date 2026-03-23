@@ -3,16 +3,21 @@ import uuid
 class Maquina:
     """Classe que representa uma máquina"""
 
-    def __init__(self, nome="", tipo="", modelo="", numero_serie="", km=0, ano=0, data_compra="", valor=0, id=None):
+    def __init__(self, nome="", tipo="", modelo="", data_compra="",id=None):
         self.id = id or str(uuid.uuid4())
         self.nome = nome
         self.tipo = tipo
         self.modelo = modelo
-        self.numero_serie = numero_serie
-        self.km = km
-        self.ano = ano
+        self.numero_serie = ""
+        self.data_registo = None
+        self.data_revisao = None
+        self.estado = "Operacional"
+        self.seguro = ""
+        self.data_iuc = None
+        self.km = 0.0
+        self.ano_registo = 0
         self.data_compra = data_compra
-        self.valor = valor
+        self.valor = 0.0
         self.despesas = []
 
     def editar(self, **kwargs):

@@ -3,6 +3,7 @@ from dash import html, dcc, Input, Output, State, callback_context as ctx
 import dash_bootstrap_components as dbc
 import uuid
 
+from utils.alertas import analisar_furo
 from utils.persistencia import carregar_projetos, salvar_projetos
 from classes.projeto import Projeto
 from classes.furo import Furo
@@ -242,6 +243,7 @@ def atualizar_lista_furos(filtro_projeto, filtro_prof, data):
         for f in p.furos:
 
             ultima = f.medicoes[-1] if f.medicoes else None
+            alertas = analisar_furo(f)
 
             if filtro_prof and (not ultima or ultima["profundidade"] < filtro_prof):
                 continue
