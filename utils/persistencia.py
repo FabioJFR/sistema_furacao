@@ -1,21 +1,21 @@
 import json
+import os
 from classes.projeto import Projeto
 
-def salvar_projetos(projetos, filename="data/projetos.json"):
-    with open(filename,"w") as f:
-        json.dump([p.to_dict() for p in projetos], f, indent=4)
+FILE = "dados.json"
 
-
-def carregar_projetos(filename="data/projetos.json"):
-    try:
-        with open(filename,"r") as f:
-            content = f.read().strip()
-            if not content:  # se estiver vazio
-                return []
-            data = json.loads(content)
-            return [Projeto.from_dict(d) for d in data]
-    except FileNotFoundError:
-        # cria arquivo vazio automaticamente
-        with open(filename, "w") as f:
-            f.write("[]")
+# Carrega projetos do JSON
+def carregar_projetos():
+    if not os.path.exists(FILE):
         return []
+    with open(FILE, "r") as f:
+        try:
+            data = json.load(f)
+        except:
+            return []
+    return [Projeto.from_dict(p) for p in data]
+
+# Salva projetos no JSON
+def salvar_projetos(projetos):
+    with open(FILE, "w") as f:
+        json.dump([p.to_dict() for p in projetos], f, indent=4)

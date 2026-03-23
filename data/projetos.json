@@ -6,9 +6,55 @@
             45.0
         ],
         "cliente": "almina",
-        "furos": [],
-        "empregados": [],
-        "maquinas": [],
+        "furos": [
+            {
+                "nome": "MM26014",
+                "inclinacao": -36.0,
+                "azimute": 10.0,
+                "profundidade": 340.0,
+                "localizacao": [
+                    37.86960299488243,
+                    -8.169148507774661
+                ],
+                "desvios": [],
+                "relatorios": [],
+                "imagens": [],
+                "estado": false,
+                "sondadores": [],
+                "ajudantes": [],
+                "trajetoria": []
+            }
+        ],
+        "empregados": [
+            {
+                "nome": "fabio",
+                "numero": "305",
+                "idade": 45,
+                "doc_id": "111111",
+                "nib": "222222",
+                "morada": "aljustrel",
+                "nacionalidade": "portugues",
+                "nif": "333333",
+                "categoria": "Sondador",
+                "salario": 1350.0,
+                "projetos": [],
+                "furos": []
+            }
+        ],
+        "maquinas": [
+            {
+                "nome": "CS-10",
+                "tipo": "superficie",
+                "modelo": null,
+                "numero_serie": "1111",
+                "km": 12234556.0,
+                "ano": 2010,
+                "data_compra": "2012",
+                "valor": 100000.0,
+                "despesas": [],
+                "projetos": []
+            }
+        ],
         "materiais": []
     },
     {
