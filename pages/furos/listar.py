@@ -1,73 +1,3 @@
-""" from dash import html, dcc
-import dash_bootstrap_components as dbc
-
-def layout(projetos):
-    cards = []
-
-    for p in projetos:
-        for f in p.furos:
-
-            ultima = f.medicoes[-1] if f.medicoes else None
-
-            card = dbc.Col(
-                dbc.Card([
-                    dbc.CardBody([
-
-                        html.H5(f.nome, className="card-title"),
-                        html.H6(f"Projeto: {p.nome}", className="card-subtitle mb-2 text-muted"),
-
-                        html.Hr(),
-
-                        html.P([
-                            html.Strong("Profundidade: "),
-                            f"{ultima['profundidade']} m" if ultima else "N/A"
-                        ]),
-
-                        html.P([
-                            html.Strong("Inclinação: "),
-                            f"{ultima['inclinacao']}°" if ultima else "N/A"
-                        ]),
-
-                        html.P([
-                            html.Strong("Azimute: "),
-                            f"{ultima['azimute']}°" if ultima else "N/A"
-                        ]),
-
-                        html.Br(),
-
-                        dbc.Button(
-                            "🔍 Ver Detalhes",
-                            href=f"/furo/{f.id}",
-                            color="primary",
-                            size="sm"
-                        )
-
-                    ])
-                ], className="h-100 shadow-sm"),
-                width=4  # 3 por linha
-            )
-
-            cards.append(card)
-
-    if not cards:
-        return html.Div([
-            dbc.Alert("Não existem furos cadastrados.", color="warning"),
-            html.Br(),
-            dcc.Link("⬅ Voltar", href="/")
-        ])
-
-    return html.Div([
-
-        html.H2("🕳️ Lista de Furos", className="mb-4"),
-
-        dbc.Row(cards, className="g-3"),
-
-        html.Br(),
-        dcc.Link("⬅ Voltar", href="/")
-
-    ]) """
-
-# pages/furos/listar.py
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from utils.alertas import analisar_furo
@@ -81,37 +11,72 @@ def layout(projetos):
             # 🔹 Garantir que estado é sempre string
             estado = str(f.estado).lower()
 
-            # 🔹 Cor do badge
-            cor_estado = {
-                "ativo": "success",
-                "parado": "warning",
-                "concluido": "secondary"
-            }.get(estado, "dark")
-
             # 🔹 Última medição segura
             ultima = f.medicoes[-1] if f.medicoes else None
 
             # 🔹 Alertas automáticos
             alertas = analisar_furo(f)
 
-            card = dbc.Card(
-                dbc.CardBody([
-                    html.H5(f"{f.nome} (Projeto: {p.nome})"),
+            # 🔹 Bola indicador
+            cor_bola = {
+                "ativo": "green",
+                "parado": "orange",
+                "concluido": "gray"
+            }.get(estado, "blue")  # cor padrão
+            if alertas:
+                cor_bola = "red"  # sobrescreve se houver alertas
 
-                    dbc.Badge(estado.upper(), color=cor_estado),
-                    html.Br(),
+            bola = html.Span(
+                "●",
+                style={"color": cor_bola, "margin-right": "5px", "font-size": "18px"}
+            )
 
-                    # Última medição
-                    html.P(f"Profundidade: {ultima['profundidade']} m" if ultima else "Sem medições"),
-                    html.P(f"Inclinação: {ultima['inclinacao']}" if ultima else ""),
-                    html.P(f"Azimute: {ultima['azimute']}" if ultima else ""),
-
-                    # Alertas
+            # 🔹 Accordion para dados dentro do card
+            accordion = dbc.Accordion([
+                dbc.AccordionItem(
+                    [
+                        html.P(f"Profundidade Alvo: {f.profundidade_alvo} m"),
+                        html.P(f"Inclinação: {f.inclinacao}°"),
+                        html.P(f"Azimute: {f.azimute}°"),
+                        html.P(f"Local de Sondagem: {f.local_sondagem}"),
+                        html.P(f"Tipo: {f.tipo}")
+                    ],
+                    title="📌 Dados Planejados"
+                ),
+                dbc.AccordionItem(
+                    [
+                        html.P(f"Profundidade Atual: {ultima.profundidade} m" if ultima else "Sem medições"),
+                        html.P(f"Inclinação Atual: {ultima.inclinacao}°" if ultima else "—"),
+                        html.P(f"Azimute Atual: {ultima.azimute}°" if ultima else "—"),
+                        html.P(f"Magnetismo: {ultima.magnetismo}" if ultima else "—"),
+                    ],
+                    title="⏱️ Última Medição"
+                ),
+                dbc.AccordionItem(
+                    [
+                        html.P(f"Profundidade Atual: {f.profundidade_atual} m"),
+                        html.P(f"Nº Medições: {len(f.medicoes)}"),
+                        html.P(f"Metros Furados Diário: {sum(f.metros_furados_diario):.2f} m"),
+                        html.P(f"Total Metros Furados: {f.metros_furados:.2f} m")
+                    ],
+                    title="📊 Estado Atual"
+                ),
+                dbc.AccordionItem(
                     html.Div([
                         dbc.Alert(a, color="danger", className="p-1")
                         for a in alertas
-                    ]) if alertas else None,
+                    ]) if alertas else html.P("Sem alertas"),
+                    title="⚠️ Alertas"
+                )
+            ], always_open=True)
 
+            card = dbc.Card(
+                dbc.CardBody([
+                    # Nome do furo com indicador
+                    html.H5([bola, f"{f.nome} (Projeto: {p.nome})"]),
+                    html.Hr(),
+                    accordion,
+                    html.Hr(),
                     # Botões
                     html.Div([
                         dcc.Link("🔍 Detalhes", href=f"/furo/{f.id}", style={"margin-right": "10px"}),

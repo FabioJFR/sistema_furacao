@@ -25,6 +25,7 @@ from pages.maquinas.novo import layout as novo_maquina_layout
 from pages.maquinas.listar import layout as listar_maquina_layout
 from pages.materiais.novo import layout as novo_material_layout
 from pages.materiais.listar import layout as listar_material_layout
+# main.py é o ponto de entrada da aplicação, onde inicializamos o Dash, definimos o layout principal, o menu lateral e as rotas para cada página. Também é onde carregamos os dados dos projetos e definimos os callbacks para interatividade, como adicionar medições a um furo ou filtrar a lista de furos e empregados. A estrutura é modular, com cada página e classe definida em arquivos separados para manter o código organizado e fácil de manter.
 
 # ================= CARREGA DADOS =================
 projetos = carregar_projetos()
@@ -89,7 +90,13 @@ sidebar = html.Div([
 # ================= LAYOUT PRINCIPAL =================
 app.layout = html.Div([
     dcc.Location(id="url"),
+
+    # Store dos projetos
     dcc.Store(id="store-projetos", data=[p.to_dict() for p in projetos]),
+
+    # Store dos empregados (para filtros rápidos)
+    dcc.Store(id="store-empregados", data=[e.to_dict() for p in projetos for e in p.empregados]),
+
     sidebar,
     html.Div(id="page-content", style={"margin-left": "20%", "padding": "20px"})
 ])
@@ -162,19 +169,25 @@ def router(pathname, data):
 
     return html.H3("Página não encontrada")
 
+
 # ================= CALLBACKS =================
+
+
+#================== Callback para adicionar nova medição a um furo =================
+
 @app.callback(
     Output("store-projetos", "data"),
     Input("btn-add-med", "n_clicks"),
     State("med-prof", "value"),
     State("med-inc", "value"),
     State("med-azi", "value"),
+    State("med-mag", "value"),  # novo campo
     State("url", "pathname"),
     State("store-projetos", "data"),
     prevent_initial_call=True
 )
-def add_medicao_furo(n_clicks, profundidade, inclinacao, azimute, pathname, data):
-    if not profundidade:
+def add_medicao_furo(n_clicks, profundidade, inclinacao, azimute, magnetismo, pathname, data):
+    if profundidade is None:
         return dash.no_update
 
     projetos = [Projeto.from_dict(p) for p in data]
@@ -183,12 +196,13 @@ def add_medicao_furo(n_clicks, profundidade, inclinacao, azimute, pathname, data
     for p in projetos:
         for f in p.furos:
             if f.id == furo_id:
-                f.adicionar_medicao(profundidade, inclinacao, azimute)
+                f.adicionar_medicao(profundidade, inclinacao, azimute, magnetismo)
 
     salvar_projetos(projetos)
     return [p.to_dict() for p in projetos]
 
-# ================= CALLBACK UNIFICADO PARA NAVEGAÇÃO =================
+
+#================== Callback unificado para navegação =================
 @app.callback(
     Output("url", "pathname"),
     Input("mapa-projetos", "clickData", allow_optional=True),
@@ -196,32 +210,32 @@ def add_medicao_furo(n_clicks, profundidade, inclinacao, azimute, pathname, data
     State("store-projetos", "data"),
     prevent_initial_call=True
 )
-def navegar(click_globo, click_furo, data):
-    projetos = [Projeto.from_dict(p) for p in data]
+def navegar_mapas(click_proj, click_furo, data):
+    triggered = ctx.triggered_id
 
-    if not ctx.triggered:
+    if not triggered or not data:
         return dash.no_update
 
-    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    projetos = [Projeto.from_dict(p) for p in data]
 
-    # Clique no globo → mapa local do projeto
-    if trigger_id == "mapa-projetos" and click_globo:
-        proj_id = click_globo["points"][0]["customdata"][0]  # pega o id do projeto
-        for p in projetos:
-            if p.id == proj_id:
-                return f"/projeto/{p.id}"
+    if triggered == "mapa-projetos" and click_proj:
+        try:
+            proj_id = click_proj["points"][0]["customdata"][0]
+            return f"/projeto/{proj_id}"
+        except:
+            return dash.no_update
 
-    # Clique no mapa local → detalhe do furo
-    if trigger_id == "mapa-furos" and click_furo:
-        furo_nome = click_furo["points"][0]["text"]
-        for p in projetos:
-            for f in p.furos:
-                if f.nome == furo_nome:
-                    return f"/furo/{f.id}"
+    if triggered == "mapa-furos" and click_furo:
+        try:
+            furo_id = click_furo["points"][0]["customdata"][0]
+            return f"/furo/{furo_id}"
+        except:
+            return dash.no_update
 
     return dash.no_update
 
 #================== CALLBACK PARA FILTRAR LISTA DE FUROS =================
+
 @app.callback(
     Output("lista-furos", "children"),
     Input("filtro-projeto", "value"),
@@ -299,6 +313,108 @@ def atualizar_lista_furos(filtro_projeto, filtro_prof, data):
         return dbc.Alert("Nenhum furo encontrado.", color="warning")
 
     return dbc.Row(cards, className="g-3")
+
+
+#================== Calllback de criação de empregados =================
+
+@app.callback(
+    Output("store-empregados", "data"),
+    Input("btn-salvar-emp", "n_clicks"),
+    State("emp-nome", "value"),
+    State("emp-numero", "value"),
+    State("emp-idade", "value"),
+    State("emp-doc", "value"),
+    State("emp-nib", "value"),
+    State("emp-morada", "value"),
+    State("emp-nacionalidade", "value"),
+    State("emp-nif", "value"),
+    State("emp-categoria", "value"),
+    State("emp-salario", "value"),
+    State("store-empregados", "data"),
+    prevent_initial_call=True
+)
+def adicionar_empregado(n_clicks, nome, numero, idade, doc, nib, morada,
+                       nacionalidade, nif, categoria, salario, data_empregados):
+    if not nome:  # validação mínima
+        return dash.no_update
+
+    # Reconstruir lista existente
+    empregados = [Empregado.from_dict(d) for d in data_empregados] if data_empregados else []
+
+    # Criar novo empregado
+    e = Empregado(nome=nome, numero=numero, categoria=categoria)
+    e.idade = int(idade) if idade else 0
+    e.doc_id = doc or ""
+    e.nib = nib or ""
+    e.morada = morada or ""
+    e.nacionalidade = nacionalidade or ""
+    e.nif = nif or ""
+    e.salario = float(salario) if salario else 0.0
+
+    empregados.append(e)
+
+    return [emp.to_dict() for emp in empregados]
+
+
+#================== Função para criar cards de empregados =================
+# (usada na página de listagem de empregados, com alertas automáticos)
+# A função de callback para filtrar empregados também está nessa página, para manter a lógica de alertas centralizada.
+# A função de análise de alertas está em utils/alertas.py, para ser reutilizada em outros contextos (ex: detalhes do empregado, gráficos mensais, etc).
+# A função de criação de cards é simples e pode ser expandida com mais detalhes ou ações conforme necessário.
+# A ideia é que a página de listagem de empregados seja um dashboard rápido para monitorar a situação geral dos empregados, com alertas visíveis e filtros para encontrar rapidamente quem precisa de atenção.
+# Necessario para o callback de filtragem, que reconstrói os objetos Empregado a partir dos dicts armazenados no dcc.Store, aplica os filtros e depois gera os cards atualizados.
+import dash_bootstrap_components as dbc
+from dash import html
+
+def criar_cards(empregados):
+    """Gera cards de empregados"""
+    cards = []
+    for e in empregados:
+        card = dbc.Card(
+            dbc.CardBody([
+                html.H5(e.nome),
+                dbc.Badge(e.categoria, color="primary", className="mb-2"),
+                html.P(f"Número: {e.numero}"),
+                html.P(f"Idade: {e.idade}"),
+                html.P(f"Salário: {e.salario}"),
+                html.Div([
+                    dbc.Button("👁 Ver", size="sm", color="info"),
+                    dbc.Button("✏ Editar", size="sm", color="warning", className="mx-1"),
+                    dbc.Button("🗑 Remover", size="sm", color="danger")
+                ])
+            ]),
+            style={"margin":"5px"}
+        )
+        cards.append(dbc.Col(card, width=4))
+    return cards
+
+
+#================== CALLBACK PARA FILTRAR LISTA DE EMPREGADOS =================
+
+@app.callback(
+    Output("cards-empregados", "children"),
+    Input("filtro-nome", "value"),
+    Input("filtro-categoria", "value"),
+    Input("ordenar-por", "value"),
+    State("store-empregados", "data")  # lista de empregados em dicts
+)
+def filtrar_empregados(nome, categoria, ordenar_por, data_empregados):
+    # reconstruir objetos Empregado
+    empregados = [Empregado.from_dict(d) for d in data_empregados]
+    if nome:
+        empregados = [e for e in empregados if nome.lower() in e.nome.lower()]
+    if categoria:
+        empregados = [e for e in empregados if e.categoria == categoria]
+    if ordenar_por:
+        if ordenar_por == "salario":
+            empregados.sort(key=lambda e: e.salario, reverse=True)
+        elif ordenar_por == "tempo":
+            empregados.sort(key=lambda e: e.data_inicio_contrato)
+        elif ordenar_por == "metros":
+            empregados.sort(key=lambda e: e.metros_furados, reverse=True)
+    # criar cards filtrados
+    return criar_cards(empregados)
+
 
 # ================= RUN =================
 if __name__ == "__main__":

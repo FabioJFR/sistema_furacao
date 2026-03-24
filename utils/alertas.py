@@ -10,11 +10,11 @@ def analisar_furo(furo):
     prev = furo.medicoes[-2]
 
     # 🚨 Inclinação anormal
-    if abs(ult["inclinacao"] - prev["inclinacao"]) > 5:
+    if abs(ult.inclinacao - prev.inclinacao) > 5:
         alertas.append("⚠️ Variação brusca de inclinação")
 
     # 🚨 Azimute estranho
-    if abs(ult["azimute"] - prev["azimute"]) > 10:
+    if abs(ult.azimute - prev.azimute) > 10:
         alertas.append("⚠️ Desvio de direção")
 
     return alertas
