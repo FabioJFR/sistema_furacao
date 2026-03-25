@@ -1,28 +1,14 @@
-""" from dash import html, dcc
-import dash_bootstrap_components as dbc
-
-def layout():
-    return html.Div([
-        html.H3("Nova Máquina"),
-        dbc.Input(id="maq-nome", placeholder="Nome"),
-        dbc.Input(id="maq-tipo", placeholder="Tipo"),
-        dbc.Input(id="maq-modelo", placeholder="Modelo"),
-        dbc.Input(id="maq-num-serie", placeholder="Número de Série"),
-        dbc.Input(id="maq-km", placeholder="Quilometragem"),
-        dbc.Input(id="maq-ano", placeholder="Ano de Fabricação"),
-        dbc.Input(id="maq-data-compra", placeholder="Data de Compra"),
-        dbc.Input(id="maq-valor", placeholder="Valor"),
-        html.Br(),
-        dbc.Button("Salvar", id="btn-salvar-maq", color="success"),
-        html.Br(),
-        dcc.Link("⬅ Voltar", href="/")
-    ]) """
-
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-def layout():
-    return html.Div([
+# pages/maquinas/novo.py
+def layout(prefix="novo"):
+    """
+    Layout para criar ou editar uma máquina.
+    prefix: string para IDs dinâmicos ('novo', '123', etc.)
+    """
+
+    return dbc.Container([
 
         html.H3("🚜 Nova Máquina", className="mb-4"),
 
@@ -34,24 +20,24 @@ def layout():
                 dbc.Row([
                     dbc.Col([
                         dbc.Label("Nome"),
-                        dbc.Input(id="maq-nome", placeholder="Nome da máquina")
+                        dbc.Input(id={"type": "maq-nome", "index": prefix}, placeholder="Nome da máquina", value="")
                     ], width=6),
 
                     dbc.Col([
                         dbc.Label("Tipo"),
-                        dbc.Input(id="maq-tipo", placeholder="Ex: Sonda, Compressor")
+                        dbc.Input(id={"type": "maq-tipo", "index": prefix}, placeholder="Ex: Sonda, Compressor", value="")
                     ], width=6),
                 ], className="mb-3"),
 
                 dbc.Row([
                     dbc.Col([
                         dbc.Label("Modelo"),
-                        dbc.Input(id="maq-modelo", placeholder="Modelo")
+                        dbc.Input(id={"type": "maq-modelo", "index": prefix}, placeholder="Modelo", value="")
                     ], width=6),
 
                     dbc.Col([
                         dbc.Label("Número de Série"),
-                        dbc.Input(id="maq-num-serie", placeholder="Nº de série")
+                        dbc.Input(id={"type": "maq-num-serie", "index": prefix}, placeholder="Nº de série", value="")
                     ], width=6),
                 ], className="mb-4"),
 
@@ -60,17 +46,17 @@ def layout():
                 dbc.Row([
                     dbc.Col([
                         dbc.Label("Quilometragem / Horas"),
-                        dbc.Input(id="maq-km", type="number", placeholder="Ex: 12000")
+                        dbc.Input(id={"type": "maq-km", "index": prefix}, type="number", placeholder="Ex: 12000", value=0)
                     ], width=4),
 
                     dbc.Col([
                         dbc.Label("Ano de Fabricação"),
-                        dbc.Input(id="maq-ano", type="number", placeholder="Ano")
+                        dbc.Input(id={"type": "maq-ano", "index": prefix}, type="number", placeholder="Ano", value=0)
                     ], width=4),
 
                     dbc.Col([
                         dbc.Label("Data de Compra"),
-                        dbc.Input(id="maq-data-compra", type="date")
+                        dbc.Input(id={"type": "maq-data-compra", "index": prefix}, type="date", value="")
                     ], width=4),
                 ], className="mb-4"),
 
@@ -79,14 +65,14 @@ def layout():
                 dbc.Row([
                     dbc.Col([
                         dbc.Label("Valor (€)"),
-                        dbc.Input(id="maq-valor", type="number", placeholder="Valor da máquina")
+                        dbc.Input(id={"type": "maq-valor", "index": prefix}, type="number", placeholder="Valor da máquina", value=0)
                     ], width=6),
                 ], className="mb-4"),
 
                 # 🔹 Botões
                 dbc.Row([
                     dbc.Col(
-                        dbc.Button("💾 Salvar", id="btn-salvar-maq", color="success", size="lg"),
+                        dbc.Button("💾 Salvar", id={"type": "btn-salvar-maq", "index": prefix}, color="success", size="lg"),
                         width="auto"
                     ),
                     dbc.Col(
@@ -98,4 +84,4 @@ def layout():
             ])
         ])
 
-    ], style={"maxWidth": "900px"})
+    ], style={"maxWidth": "900px"}, fluid=True)

@@ -1,53 +1,18 @@
-""" from dash import html, dcc
-import plotly.express as px
-import pandas as pd
-
-def layout(projetos):
-    if not projetos:
-        return html.H3("Sem projetos - crie um novo pelo menu")
-
-    # Cria um DataFrame temporário com dados dos projetos
-    df = pd.DataFrame({
-        "lat": [p.localizacao[0] for p in projetos],
-        "lon": [p.localizacao[1] for p in projetos],
-        "nome": [p.nome for p in projetos],
-        "id": [p.id for p in projetos]  # id único usado no callback
-    })
-
-    fig = px.scatter_geo(
-        df,
-        lat="lat",
-        lon="lon",
-        text="nome",
-        custom_data=["id"],  # agora é aceito pelo Plotly
-        projection="orthographic"  # globo 3D
-    )
-    fig.update_traces(marker=dict(size=10, color="red"))
-
-    fig.update_layout(
-        geo=dict(
-            showland=True,
-            landcolor='rgb(243,243,243)',
-            oceancolor='rgb(204,224,255)',
-            showcountries=True
-        ),
-        margin={"l":0,"r":0,"t":0,"b":0},
-        height=600
-    )
-
-    return html.Div([
-        html.H2("Globo de Projetos"),
-        dcc.Graph(id="mapa-projetos", figure=fig)
-    ]) """
 from dash import html, dcc
 import plotly.express as px
 import pandas as pd
 import dash_bootstrap_components as dbc
 
-def layout(projetos):
+# pages/home.py
+def layout(projetos, prefix=""):
+    """
+    projetos: lista de projetos
+    ip: IP dinâmico para links
+    prefix: prefixo para IDs dinâmicos
+    """
     if not projetos:
         return html.Div([
-            dbc.Alert("Sem projetos - crie um novo pelo menu", color="warning")
+            dbc.Alert("Sem projetos - crie um novo pelo menu", color="warning", id=f"{prefix}alert-sem-projetos")
         ])
 
     # ================= DADOS =================
@@ -91,7 +56,7 @@ def layout(projetos):
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4(len(projetos), className="card-title"),
+                    html.H4(len(projetos), className="card-title", id=f"{prefix}card-projetos"),
                     html.P("Projetos")
                 ])
             ], color="primary", inverse=True),
@@ -100,7 +65,7 @@ def layout(projetos):
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4(total_furos, className="card-title"),
+                    html.H4(total_furos, className="card-title", id=f"{prefix}card-furos"),
                     html.P("Furos")
                 ])
             ], color="success", inverse=True),
@@ -109,7 +74,7 @@ def layout(projetos):
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4("Online", className="card-title"),
+                    html.H4("Online", className="card-title", id=f"{prefix}card-sistema"),
                     html.P("Sistema")
                 ])
             ], color="dark", inverse=True),
@@ -120,7 +85,7 @@ def layout(projetos):
     # ================= LAYOUT FINAL =================
     return html.Div([
 
-        html.H2("🌍 Dashboard de Perfuração", style={"margin-bottom": "20px"}),
+        html.H2("🌍 Dashboard de Perfuração", style={"margin-bottom": "20px"}, id=f"{prefix}titulo-home"),
 
         cards,
 
@@ -128,7 +93,7 @@ def layout(projetos):
             dbc.CardBody([
                 html.H4("Globo de Projetos"),
                 html.P("Clique num ponto para ver os detalhes do projeto."),
-                dcc.Graph(id="mapa-projetos", figure=fig)
+                dcc.Graph(id=f"{prefix}mapa-projetos", figure=fig)
             ])
         ])
 

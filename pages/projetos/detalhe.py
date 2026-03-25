@@ -1,45 +1,14 @@
-""" from dash import html, dcc
-import plotly.graph_objects as go
-
-def layout(projeto):
-    if not projeto:
-        return html.H3("Projeto não encontrado")
-
-    lat0, lon0 = projeto.localizacao
-    lats = [f.localizacao[0] for f in projeto.furos]
-    lons = [f.localizacao[1] for f in projeto.furos]
-    nomes = [f.nome for f in projeto.furos]
-
-    fig = go.Figure()
-    fig.add_trace(go.Scattermapbox(
-        lat=lats,
-        lon=lons,
-        mode='markers',
-        text=nomes,
-        marker=dict(size=10, color="blue"),
-        name="Furos"
-    ))
-    fig.update_layout(
-        mapbox_style="open-street-map",
-        mapbox_zoom=14,
-        mapbox_center={"lat": lat0, "lon": lon0},
-        margin={"r":0,"t":0,"l":0,"b":0}
-    )
-
-    return html.Div([
-        html.H3(f"Projeto: {projeto.nome}"),
-        dcc.Graph(id="mapa-furos", figure=fig),
-        dcc.Store(id="furo-clicked"),  # armazena furo clicado
-        dcc.Link("⬅ Voltar", href="/")
-    ]) """
-
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
-def layout(projeto):
+def layout(projeto, prefix="mapa"):
+    """
+    projeto: objeto do projeto
+    prefix: prefixo para IDs dinâmicos
+    """
     if not projeto:
-        return html.H3("Projeto não encontrado")
+        return html.H3("Projeto não encontrado", id={"type": "proj-nao-encontrado", "index": prefix})
 
     lat0, lon0 = projeto.localizacao
 
@@ -50,7 +19,6 @@ def layout(projeto):
 
     # ================= MAPA =================
     fig = go.Figure()
-
     fig.add_trace(go.Scattermapbox(
         lat=lats,
         lon=lons,
@@ -76,30 +44,30 @@ def layout(projeto):
     kpis = dbc.Row([
         dbc.Col(dbc.Card(dbc.CardBody([
             html.H6("Furos"),
-            html.H4(total_furos)
+            html.H4(total_furos, id={"type": "kpi-furos", "index": prefix})
         ])), width=3),
 
         dbc.Col(dbc.Card(dbc.CardBody([
             html.H6("Cliente"),
-            html.H4(projeto.cliente)
+            html.H4(projeto.cliente, id={"type": "kpi-cliente", "index": prefix})
         ])), width=3),
     ], className="mb-3")
 
     # ================= LAYOUT =================
     return html.Div([
 
-        html.H3(f"📍 Projeto: {projeto.nome}"),
+        html.H3(f"📍 Projeto: {projeto.nome}", id={"type": "titulo-projeto", "index": prefix}),
 
         kpis,
 
         dbc.Card([
             dbc.CardBody([
-                dcc.Graph(id="mapa-furos", figure=fig)
+                dcc.Graph(id={"type": "mapa-furos", "index": prefix}, figure=fig)
             ])
         ]),
 
         html.Br(),
 
-        dbc.Button("⬅ Voltar", href="/", color="secondary")
+        dcc.Link("⬅ Voltar", href="/", id={"type": "link-voltar", "index": prefix}, className="btn btn-secondary")
 
     ])
