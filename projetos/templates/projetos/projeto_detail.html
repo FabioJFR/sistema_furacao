@@ -1,0 +1,104 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Detalhes do Projeto{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+
+    <!-- CARD PRINCIPAL -->
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <!-- HEADER -->
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">{{ projeto.nome }}</h1>
+            <div class="flex gap-3">
+                <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
+                   class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                    ✏️ Editar
+                </a>
+                <a href="{% url 'projetos:projeto_delete' projeto.pk %}" 
+                   class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                    🗑️ Apagar
+                </a>
+            </div>
+        </div>
+
+        <!-- INFORMAÇÕES DO PROJETO -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+            <p><strong>Cliente:</strong> {{ projeto.cliente }}</p>
+            <p><strong>Cidade:</strong> {{ projeto.cidade }}</p>
+            <p><strong>País:</strong> {{ projeto.pais }}</p>
+            <p><strong>Status:</strong> {{ projeto.status }}</p>
+            {% if projeto.notas %}
+                <p class="sm:col-span-2"><strong>Notas:</strong> {{ projeto.notas }}</p>
+            {% endif %}
+        </div>
+
+        <!-- MAPA -->
+        {% if projeto.localizacao_lat and projeto.localizacao_lon %}
+        <div id="map" class="w-full h-96 rounded-lg shadow-md mt-4"></div>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+        <script>
+            const cidade = "{{ projeto.cidade|escapejs }}";
+            const pais = "{{ projeto.pais|escapejs }}";
+            const lat = {{ projeto.localizacao_lat }};
+            const lon = {{ projeto.localizacao_lon }};
+            const map = L.map('map').setView([lat, lon], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup(`<strong>${cidade}, ${pais}</strong>`)
+                .openPopup();
+
+            {% for furo in projeto.furos.all %}
+                {% if furo.latitude and furo.longitude %}
+                L.marker([{{ furo.latitude }}, {{ furo.longitude }}])
+                    .addTo(map)
+                    .bindPopup(`<a href="{% url 'projetos:furo_detail' furo.pk %}">Furo {{ forloop.counter }}: {{ furo.nome|escapejs }}</a>`);
+                {% endif %}
+            {% endfor %}
+        </script>
+        {% endif %}
+
+        <!-- FUROS DO PROJETO -->
+        <div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Furos do Projeto</h2>
+            {% if projeto.furos.exists %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for furo in projeto.furos.all %}
+                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
+                    <h3 class="font-semibold text-gray-800">Furo {{ forloop.counter }}: {{ furo.nome }}</h3>
+                    <p><strong>Profundidade:</strong> {{ furo.profundidade }} m</p>
+                    <p><strong>Inclinação:</strong> {{ furo.inclinacao|default:"-" }}</p>
+                    <p><strong>Azimute:</strong> {{ furo.azimute|default:"-" }}</p>
+                    <a href="{% url 'projetos:furo_detail' furo.pk %}" 
+                       class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                       Ver Detalhes
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500">Nenhum furo registrado neste projeto.</p>
+            {% endif %}
+        </div>
+
+        <!-- BOTÃO VOLTAR -->
+        <div class="mt-6">
+            <a href="{% url 'projetos:projeto_list' %}" 
+               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+               🔙 Voltar à Lista de Projetos
+            </a>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'projetos/base.html' %}
+<!-- projetos/templates/projetos/maquina_form.html -->
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:40px auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); color:#ecf0f1;">
+    <h2 style="text-align:center; margin-bottom:25px;">{{ titulo }}</h2>
+
+    <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:10px;">
+            <button type="submit" style="
+                background-color:#27ae60;
+                color:white;
+                padding:10px 20px;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+                cursor:pointer;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                💾 Salvar
+            </button>
+
+            <a href="{% url 'projetos:maquina_list' %}" style="
+                background-color:#2980b9;
+                color:white;
+                padding:10px 20px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                text-align:center;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Voltar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

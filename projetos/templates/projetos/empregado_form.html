@@ -1,0 +1,47 @@
+{% extends "projetos/base.html" %}
+{% load widget_tweaks %}
+<!-- projetos/templates/projetos/empregado_form.html -->
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="card max-w-lg mx-auto p-6">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">{{ titulo }}</h2>
+
+        <form method="POST" class="flex flex-col gap-4">
+            {% csrf_token %}
+            
+            <div>
+                <label for="id_nome" class="block font-semibold mb-1">Nome</label>
+                {{ form.nome|add_class:"w-full p-2 border rounded" }}
+            </div>
+
+            <div>
+                <label for="id_funcao" class="block font-semibold mb-1">Função</label>
+                {{ form.funcao|add_class:"w-full p-2 border rounded" }}
+            </div>
+
+            <div>
+                <label for="id_email" class="block font-semibold mb-1">Email</label>
+                {{ form.email|add_class:"w-full p-2 border rounded" }}
+            </div>
+
+            <div>
+                <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
+                {{ form.data_admissao|add_class:"w-full p-2 border rounded" }}
+            </div>
+
+            <button type="submit" class="btn btn-success mt-4 w-full text-center">
+                💾 Salvar
+            </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'projetos:empregado_list' %}" class="btn btn-primary">
+                🔙 Voltar à Lista
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

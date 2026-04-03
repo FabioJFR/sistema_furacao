@@ -1,0 +1,29 @@
+{% extends 'projeto/base.html' %}
+
+{% block title %}Visualização 3D - {{ projeto.nome }}{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+
+    <!-- HEADER -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+        🖥️ Visualização 3D do Projeto: {{ projeto.nome }}
+    </h1>
+
+    <!-- CARD DO GRÁFICO -->
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-600 mb-6">
+        <div id="graph">
+            {{ graph|safe }}
+        </div>
+    </div>
+
+    <!-- BOTÃO VOLTAR -->
+    <div class="text-center">
+        <a href="{% url 'projeto_detail' projeto.id %}" 
+           class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+            🔙 Voltar ao Projeto
+        </a>
+    </div>
+
+</section>
+{% endblock %}

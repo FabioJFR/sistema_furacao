@@ -1,0 +1,46 @@
+{% extends "projetos/base.html" %}
+<!-- projetos/templates/projetos/maquina_detail.html -->
+
+{% block title %}Detalhes da Máquina{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; background: #34495e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); color: #ecf0f1;">
+    
+    <h1 style="text-align:center; margin-bottom: 20px;">{{ maquina.nome }}</h1>
+
+    <p><strong>Modelo:</strong> {{ maquina.modelo }}</p>
+    <p><strong>Marca:</strong> {{ maquina.marca }}</p>
+    <p><strong>Ano:</strong> {{ maquina.ano }}</p>
+
+    <div style="text-align:center; margin-top:30px;">
+        {% if maquina.projeto %}
+            <a href="{% url 'projetos:projeto_detail' maquina.projeto.id %}" style="
+                display:inline-block;
+                background:#2980b9;
+                color:white;
+                padding:10px 15px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Voltar ao Projeto
+            </a>
+        {% else %}
+            <a href="{% url 'projetos:maquina_list' %}" style="
+                display:inline-block;
+                background:#2980b9;
+                color:white;
+                padding:10px 15px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Voltar à Lista de Máquinas
+            </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

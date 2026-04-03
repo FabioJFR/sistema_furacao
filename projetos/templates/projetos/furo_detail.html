@@ -1,0 +1,191 @@
+{% extends "projetos/base.html" %}
+
+{% block content %}
+<div style="max-width:1200px; margin:30px auto; padding:30px; background:#34495e; color:#ecf0f1; border-radius:10px; box-shadow:0 6px 15px rgba(0,0,0,0.3); line-height:1.6;">
+
+    <h1 style="text-align:center; margin-bottom:30px;">Furo: {{ furo.nome }}</h1>
+
+    <!-- Detalhes do Furo -->
+    <h2 style="margin-top:20px; margin-bottom:15px;">Detalhes do Furo</h2>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:30px;">
+        <div><strong>Profundidade:</strong> {{ furo.profundidade }} m</div>
+        <div><strong>Inclinação:</strong> {{ furo.inclinacao }}°</div>
+        <div><strong>Azimute:</strong> {{ furo.azimute }}°</div>
+        <div><strong>Magnetismo:</strong> {{ furo.magnetismo }}</div>
+        <div><strong>Latitude:</strong> {{ furo.latitude }}</div>
+        <div><strong>Longitude:</strong> {{ furo.longitude }}</div>
+        <div><strong>Altitude:</strong> {{ furo.altitude }}</div>
+        <div><strong>Data:</strong> {{ furo.data }}</div>
+    </div>
+
+    <!-- Mapa -->
+    <h2 style="margin-bottom:15px;">Mapa do Furo</h2>
+    <div id="map" style="height:50vh; margin-bottom:15px; border-radius:10px; border:1px solid #7f8c8d;"></div>
+
+    <!-- Botão 3D -->
+    <a href="{% url 'projetos:furo_3d' furo.id %}" 
+       style="display:inline-block; background:#8e44ad; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none; margin-bottom:30px;">
+       Ver Trajetória 3D
+    </a>
+
+    <!-- Cards lado a lado -->
+    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px;">
+
+        <!-- Card 1: Materiais, Máquinas, Empregados -->
+        <div style="flex:1; min-width:300px; background:#2c3e50; padding:20px; border-radius:10px;">
+            <h3 style="margin-bottom:15px;">Materiais usados</h3>
+            <ul style="padding-left:20px; margin-bottom:20px;">
+                {% for material in furo.materiais.all %}
+                <li style="margin-bottom:8px;">{{ material.nome }} — Qtde: {{ material.quantidade }} — Valor: {{ material.valor }}€</li>
+                {% empty %}
+                <li>Nenhum material registrado.</li>
+                {% endfor %}
+            </ul>
+
+            <h3 style="margin-bottom:15px;">Máquinas usadas</h3>
+            <ul style="padding-left:20px; margin-bottom:20px;">
+                {% for maquina in furo.maquinas.all %}
+                <li style="margin-bottom:8px;">{{ maquina.nome }} — Modelo: {{ maquina.modelo }} — Estado: {{ maquina.estado }}</li>
+                {% empty %}
+                <li>Nenhuma máquina registrada.</li>
+                {% endfor %}
+            </ul>
+
+            <h3 style="margin-bottom:15px;">Empregados envolvidos</h3>
+            <ul style="padding-left:20px;">
+                {% for empregado in furo.empregados.all %}
+                <li style="margin-bottom:8px;">{{ empregado.nome }} — Função: {{ empregado.funcao }}</li>
+                {% empty %}
+                <li>Nenhum empregado registrado.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Card 2: Formulário Nova Medição -->
+        <div style="flex:1; min-width:300px; background:#2c3e50; padding:20px; border-radius:10px;">
+            <h3 style="margin-bottom:15px;">Adicionar Nova Medição</h3>
+            <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:15px;" onsubmit="return confirmarMedicao()">
+                {% csrf_token %}
+                
+                <label style="font-weight:bold; color:white;">Profundidade (m)</label>
+                <input type="number" name="profundidade" placeholder="Profundidade" required 
+                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+
+                <label style="font-weight:bold; color:white;">Inclinação (°)</label>
+                <input type="number" name="inclinacao" placeholder="Inclinação" 
+                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+
+                <label style="font-weight:bold; color:white;">Azimute (°)</label>
+                <input type="number" name="azimute" placeholder="Azimute" 
+                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+
+                <label style="font-weight:bold; color:white;">Magnetismo</label>
+                <input type="number" name="magnetismo" placeholder="Magnetismo" 
+                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+
+                <label style="font-weight:bold; color:white;">Imagem</label>
+                <input type="file" name="imagem" accept="image/*" capture="environment" 
+                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+
+                <button type="submit" 
+                        style="background:#27ae60; color:white; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;"
+                        onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                    💾 Registar Medição
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medições -->
+    <h2 style="margin-bottom:15px;">Medições</h2>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+        <thead style="background:#2c3e50; color:white;">
+            <tr>
+                <th style="padding:8px; text-align:left;">Data</th>
+                <th style="padding:8px; text-align:left;">Profundidade (m)</th>
+                <th style="padding:8px; text-align:left;">Inclinação (°)</th>
+                <th style="padding:8px; text-align:left;">Azimute (°)</th>
+                <th style="padding:8px; text-align:left;">Magnetismo</th>
+                <th style="padding:8px; text-align:left;">Latitude</th>
+                <th style="padding:8px; text-align:left;">Longitude</th>
+                <th style="padding:8px; text-align:left;">Altitude</th>
+                <th style="padding:8px; text-align:left;">Imagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicao in furo.medicoes.all %}
+            <tr style="border-bottom:1px solid #7f8c8d;">
+                <td style="padding:6px;">{{ medicao.data }}</td>
+                <td style="padding:6px;">{{ medicao.profundidade }}</td>
+                <td style="padding:6px;">{{ medicao.inclinacao }}</td>
+                <td style="padding:6px;">{{ medicao.azimute }}</td>
+                <td style="padding:6px;">{{ medicao.magnetismo }}</td>
+                <td style="padding:6px;">{{ medicao.latitude }}</td>
+                <td style="padding:6px;">{{ medicao.longitude }}</td>
+                <td style="padding:6px;">{{ medicao.altitude }}</td>
+                <td style="padding:6px;">
+                    {% if medicao.imagem %}
+                    <img src="{{ medicao.imagem.url }}" width="50" style="cursor:pointer; border-radius:5px;" onclick="abrirModal('{{ medicao.imagem.url }}')">
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" style="text-align:center; padding:10px;">Nenhuma medição registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Botões do furo -->
+    <div style="display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
+        <a href="{% url 'projetos:furo_update' furo.id %}" style="flex:1; min-width:150px; text-align:center; background:#27ae60; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;">✏️ Editar Furo</a>
+        <a href="{% url 'projetos:furo_delete' furo.id %}" style="flex:1; min-width:150px; text-align:center; background:#e74c3c; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;">🗑️ Apagar Furo</a>
+        <a href="{% url 'projetos:furo_list' %}" style="flex:1; min-width:150px; text-align:center; background:#2980b9; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;">🔙 Voltar</a>
+    </div>
+
+</div>
+
+<!-- Leaflet CSS e JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+function confirmarMedicao() {
+    return confirm("Tem certeza que deseja salvar esta medição?");
+}
+
+function abrirModal(src) {
+    document.getElementById("modal_img").src = src;
+    document.getElementById("modal").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+function fecharModal() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+}
+
+// Inicializa o mapa Leaflet
+var map = L.map('map').setView([{{ furo.latitude|default:"0" }}, {{ furo.longitude|default:"0" }}], 15);
+
+// Tile Layer OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Marcador do furo
+L.marker([{{ furo.latitude|default:"0" }}, {{ furo.longitude|default:"0" }}]).addTo(map)
+    .bindPopup("<b>{{ furo.nome }}</b><br>Profundidade: {{ furo.profundidade }} m")
+    .openPopup();
+</script>
+
+<!-- Modal de imagem -->
+<div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
+<div id="modal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:8px; z-index:1000;">
+    <img id="modal_img" style="max-width:100%; height:auto; border-radius:5px;">
+    <br><br>
+    <button onclick="fecharModal()" style="background:#e74c3c; color:white; padding:8px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">Fechar</button>
+</div>
+
+{% endblock %}

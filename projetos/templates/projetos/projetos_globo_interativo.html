@@ -1,0 +1,58 @@
+{% extends 'projeto/base.html' %}
+
+{% block title %}Globo de Projetos{% endblock %}
+
+{% block content %}
+<div id="cesiumContainer" class="w-full h-screen"></div>
+
+<!-- Dados do Django em JSON -->
+{{ projetos|json_script:"projetos_data" }}
+
+<!-- Cesium JS -->
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Cesium.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<script>
+    // Inicializa o Viewer
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(),
+        timeline: false,
+        animation: false,
+        sceneModePicker: true
+    });
+
+    // Lê os dados do Django
+    const projetos = JSON.parse(document.getElementById('projetos_data').textContent);
+
+    projetos.forEach(projeto => {
+        if (projeto.localizacao_lat && projeto.localizacao_lon) {
+            viewer.entities.add({
+                name: projeto.nome,
+                position: Cesium.Cartesian3.fromDegrees(projeto.localizacao_lon, projeto.localizacao_lat, 100),
+                point: { pixelSize: 12, color: Cesium.Color.RED },
+                description: `<div style="background: rgba(255,255,255,0.95); padding: 10px; border-radius: 5px; max-width: 250px; font-family: sans-serif;">
+                                <strong>${projeto.nome}</strong><br>
+                                <a href='/projetos/${projeto.id}/'>Ver detalhes do projeto</a>
+                              </div>`
+            });
+        }
+    });
+
+    // Ajusta a câmera para todos os projetos
+    if (viewer.entities.values.length > 0) {
+        viewer.zoomTo(viewer.entities);
+    }
+
+    // Clique para selecionar entidade
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    handler.setInputAction(function(click) {
+        const pickedObject = viewer.scene.pick(click.position);
+        if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+            viewer.selectedEntity = pickedObject.id;
+        } else {
+            viewer.selectedEntity = undefined;
+        }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+</script>
+
+{% endblock %}

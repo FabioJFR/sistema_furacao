@@ -1,0 +1,70 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Lista de Projetos{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+
+    <!-- CABEÇALHO -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">📂 Projetos</h1>
+        <a href="{% url 'projetos:projeto_create' %}" 
+           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
+           ➕ Criar Projeto
+        </a>
+    </div>
+
+    <!-- LISTA DE PROJETOS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for projeto in projetos %}
+        <div class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition space-y-2">
+            <h2 class="font-bold text-xl text-gray-800">{{ projeto.nome }}</h2>
+            <p><strong>Cliente:</strong> {{ projeto.cliente }}</p>
+            <p><strong>Cidade:</strong> {{ projeto.cidade }}</p>
+            <p><strong>País:</strong> {{ projeto.pais }}</p>
+            <div class="flex gap-2 mt-2">
+                <a href="{% url 'projetos:projeto_detail' projeto.pk %}" 
+                   class="flex-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition text-center">
+                   🔎 Detalhes
+                </a>
+                <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
+                   class="flex-1 bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition text-center">
+                   ✏️ Editar
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-500 col-span-3">Nenhum projeto encontrado.</p>
+        {% endfor %}
+    </div>
+
+    <!-- MAPA DE PROJETOS -->
+    <h2 class="mt-12 mb-4 text-2xl font-bold text-gray-800">🗺️ Mapa de Projetos</h2>
+    <div id="map" class="w-full h-96 rounded-xl shadow-md mb-6"></div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- JSON de projetos -->
+    {{ projetos|json_script:"projetos-data" }}
+
+    <script>
+    const map = L.map('map').setView([0,0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
+
+    projetos.forEach(p => {
+        if (p.localizacao_lat && p.localizacao_lon) {
+            L.marker([p.localizacao_lat, p.localizacao_lon])
+             .addTo(map)
+             .bindPopup(`<strong>${p.nome} - ${p.cidade}, ${p.pais}</strong>`);
+        }
+    });
+    </script>
+
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+/* ---------------- Card ---------------- */
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* ---------------- Botões ---------------- */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%; /* Faz o botão ocupar toda a largura do container pai */
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* ---------------- Links como Botões ---------------- */
+.link-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #17a2b8;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    text-decoration: none;
+    margin: 5px 0;
+    box-sizing: border-box;
+}
+
+.link-btn:hover {
+    background-color: #138496;
+}
+
+/* ---------------- Layout de Cards ---------------- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+/* ---------------- Formulários ---------------- */
+form .btn {
+    margin-top: 10px;
+}

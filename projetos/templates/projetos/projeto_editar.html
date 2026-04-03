@@ -1,0 +1,78 @@
+{% extends "projetos/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Editar Projeto{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+
+    <div class="max-w-2xl mx-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg p-8 space-y-6">
+
+        <!-- Título -->
+        <h2 class="text-2xl font-bold text-center">✏️ Editar Projeto</h2>
+
+        <!-- FORMULÁRIO -->
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- CAMPOS -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-1 font-semibold" for="{{ form.nome.id_for_label }}">Nome</label>
+                    {{ form.nome|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-semibold" for="{{ form.cliente.id_for_label }}">Cliente</label>
+                    {{ form.cliente|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 font-semibold" for="{{ form.cidade.id_for_label }}">Cidade</label>
+                        {{ form.cidade|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="{{ form.pais.id_for_label }}">País</label>
+                        {{ form.pais|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-semibold" for="{{ form.status.id_for_label }}">Status</label>
+                    {{ form.status|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-semibold" for="{{ form.notas.id_for_label }}">Notas</label>
+                    {{ form.notas|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 font-semibold" for="{{ form.localizacao_lat.id_for_label }}">Latitude</label>
+                        {{ form.localizacao_lat|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="{{ form.localizacao_lon.id_for_label }}">Longitude</label>
+                        {{ form.localizacao_lon|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÕES -->
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 transition text-white font-semibold py-2 rounded-lg shadow">
+                    💾 Salvar Alterações
+                </button>
+                <a href="{% url 'projetos:projeto_detail' projeto.pk %}" 
+                   class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
+                    🔙 Voltar ao Projeto
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+</section>
+{% endblock %}

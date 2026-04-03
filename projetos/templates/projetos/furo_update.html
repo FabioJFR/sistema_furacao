@@ -1,0 +1,33 @@
+{% extends "projetos/base.html" %}
+
+{% block content %}
+<div style="background:#34495e; min-height:100vh; padding:40px;">
+    <div style="max-width:700px; margin:0 auto; padding:30px; background:#ecf0f1; color:#000; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+
+        <h1 style="text-align:center; margin-bottom:30px;">Editar Furo: {{ form.instance.nome }}</h1>
+
+        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:15px;">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div style="display:flex; flex-direction:column;">
+                    <label for="{{ field.id_for_label }}" style="font-weight:bold; margin-bottom:5px;">{{ field.label }}</label>
+                    {{ field }}  <!-- já vai herdar a classe definida no forms.py -->
+                    {% if field.errors %}
+                        <p style="color:red; font-size:0.9em; margin-top:3px;">{{ field.errors }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div style="margin-top:10px; display:flex; gap:10px;">
+                <button type="submit" style="background:#27ae60; color:white; padding:10px 15px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;"
+                    onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">💾 Salvar</button>
+
+                <a href="{% url 'projetos:furo_detail' furo.id %}" style="display:inline-block; background:#e74c3c; color:white; padding:10px 15px; border-radius:5px; font-weight:bold; text-decoration:none;"
+                    onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">❌ Cancelar</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

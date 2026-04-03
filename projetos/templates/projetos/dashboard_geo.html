@@ -1,0 +1,82 @@
+{% extends "projetos/base.html" %}
+<!-- projetos/templates/projetos/dashboard_geo.html -->
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <!-- TÍTULO -->
+    <div class="header-bar mb-6">
+        <h1 class="title">📊 Dashboard Geológico - {{ furo.nome }}</h1>
+    </div>
+
+    <!-- CARD DO GRÁFICO -->
+    <div class="card" style="max-width:900px; margin:0 auto; height:400px;">
+        <canvas id="grafico" style="width:100%; height:100%;"></canvas>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let chart;
+
+async function carregarDados() {
+    try {
+        const res = await fetch("/furo/{{ furo.id }}/medicoes-json/");
+        const data = await res.json();
+
+        const labels = data.map(d => d.profundidade);
+        const dureza = data.map(d => d.dureza);
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = dureza;
+            chart.update();
+        } else {
+            chart = new Chart(document.getElementById("grafico"), {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Dureza da Rocha",
+                        data: dureza,
+                        borderColor: "#2563eb", // padronizado azul
+                        backgroundColor: "rgba(37,99,235,0.1)",
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: "Dureza" },
+                            ticks: { color: "#1f2937" }
+                        },
+                        x: {
+                            title: { display: true, text: "Profundidade (m)" },
+                            ticks: { color: "#1f2937" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: "#1f2937" }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+    }
+}
+
+// Atualiza a cada 5 segundos
+setInterval(carregarDados, 5000);
+carregarDados();
+</script>
+{% endblock %}

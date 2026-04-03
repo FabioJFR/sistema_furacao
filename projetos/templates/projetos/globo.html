@@ -1,0 +1,65 @@
+{% extends "projetos/base.html" %}
+<!-- projetos/templates/projetos/globo.html -->
+
+
+{% block content %}
+<div id="cesiumContainer" style="width: 100%; height: 80vh;"></div>
+
+<!-- Dados dos projetos em JSON -->
+{{ projetos|json_script:"projetos-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Cesium.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<script>
+    // Insira seu token Cesium Ion aqui
+    Cesium.Ion.defaultAccessToken = 'SEU_TOKEN_AQUI';
+
+    // Inicializa o Cesium Viewer
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(),
+        timeline: false,
+        animation: false,
+        sceneModePicker: true
+    });
+
+    // Pega os dados do Django
+    const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
+
+    // Adiciona marcadores dos projetos
+    projetos.forEach(p => {
+        viewer.entities.add({
+            name: p.nome,
+            position: Cesium.Cartesian3.fromDegrees(p.localizacao_lon, p.localizacao_lat, p.altitude || 0),
+            point: {
+                pixelSize: 12,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2
+            },
+            description: `<div style="padding:10px; max-width:250px;">
+                            <strong>${p.nome}</strong><br>
+                            <a href='/projeto/${p.id}/'>Ver detalhes do projeto</a>
+                          </div>`
+        });
+    });
+
+    // Zoom automático para mostrar todos os projetos
+    if (projetos.length > 0) {
+        viewer.zoomTo(viewer.entities);
+    }
+
+    // Clique em entidades
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    handler.setInputAction(function(click) {
+        const pickedObject = viewer.scene.pick(click.position);
+        if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+            viewer.selectedEntity = pickedObject.id;
+        } else {
+            viewer.selectedEntity = undefined;
+        }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+</script>
+{% endblock %}

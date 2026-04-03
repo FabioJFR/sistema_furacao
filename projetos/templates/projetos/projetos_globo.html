@@ -1,0 +1,44 @@
+{% extends 'projeto/base.html' %}
+
+{% block title %}Globo de Projetos{% endblock %}
+
+{% block content %}
+<div id="cesiumContainer" class="w-full h-screen"></div>
+
+<!-- Cesium CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.114.1/Build/Cesium/Widgets/widgets.css">
+
+<!-- Dados do Django -->
+{{ projetos|json_script:"projetos_data" }}
+
+<!-- Cesium JS -->
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.114.1/Build/Cesium/Cesium.js"></script>
+<script>
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(),
+        timeline: false,
+        animation: false,
+        sceneModePicker: true
+    });
+
+    const projetos = JSON.parse(document.getElementById('projetos_data').textContent);
+
+    projetos.forEach(projeto => {
+        if(projeto.localizacao_lat && projeto.localizacao_lon) {
+            viewer.entities.add({
+                name: projeto.nome,
+                position: Cesium.Cartesian3.fromDegrees(projeto.localizacao_lon, projeto.localizacao_lat, 100),
+                point: { pixelSize: 12, color: Cesium.Color.RED },
+                description: `<div style="background: rgba(255,255,255,0.95); padding: 10px; border-radius: 5px;">
+                                <strong>${projeto.nome}</strong><br>
+                                <a href='/projeto/${projeto.id}/'>Ver detalhes</a>
+                              </div>`
+            });
+        }
+    });
+
+    if(viewer.entities.values.length > 0) {
+        viewer.zoomTo(viewer.entities);
+    }
+</script>
+{% endblock %}

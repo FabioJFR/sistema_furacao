@@ -1,0 +1,95 @@
+{% extends 'projetos/base.html' %}
+<!-- projetos/templates/projetos/material_list.html -->
+
+{% block title %}Lista de Materiais{% endblock %}
+
+{% block content %}
+<section style="max-width:1000px; margin:40px auto;">
+
+    <h1 style="text-align:center; margin-bottom:25px; color:#2c3e50;">Lista de Materiais</h1>
+
+    <div style="text-align:center; margin-bottom:30px;">
+        <a href="{% url 'projetos:material_create' %}" style="
+            background-color:#2980b9;
+            color:white;
+            padding:12px 25px;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:bold;
+            transition:0.2s;
+        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+            ➕ Adicionar Novo Material
+        </a>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
+        {% for material in materiais %}
+        <div style="
+            background:#f4f4f4;
+            border-radius:12px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.1);
+            padding:25px;
+            width:280px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+        ">
+            <h2 style="margin-top:0; color:#2c3e50;">{{ material.nome }}</h2>
+            <p><strong>Valor:</strong> €{{ material.valor }}</p>
+            <p><strong>Quantidade:</strong> {{ material.quantidade }}</p>
+            <p><strong>Diâmetro:</strong> {{ material.diametro }}</p>
+            <p><strong>Tipo:</strong> {{ material.tipo }}</p>
+            <p><strong>Nº Série:</strong> {{ material.numero_serie }}</p>
+            <p><strong>Estado:</strong> {{ material.estado }}</p>
+
+            <div style="margin-top:15px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <a href="{% url 'projetos:material_detail' material.id %}" style="
+                    flex:1;
+                    text-align:center;
+                    background-color:#27ae60;
+                    color:white;
+                    padding:10px 0;
+                    border-radius:6px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition:0.2s;
+                " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                    🔍 Ver
+                </a>
+
+                <a href="{% url 'projetos:material_update' material.id %}" style="
+                    flex:1;
+                    text-align:center;
+                    background-color:#f39c12;
+                    color:white;
+                    padding:10px 0;
+                    border-radius:6px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition:0.2s;
+                " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                    ✏️ Editar
+                </a>
+
+                <a href="{% url 'projetos:material_delete' material.id %}" style="
+                    flex:1;
+                    text-align:center;
+                    background-color:#c0392b;
+                    color:white;
+                    padding:10px 0;
+                    border-radius:6px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition:0.2s;
+                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                    🗑️ Apagar
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <p style="text-align:center; width:100%; color:#7f8c8d;">Nenhum material registrado.</p>
+        {% endfor %}
+    </div>
+
+</section>
+{% endblock %}

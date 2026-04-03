@@ -1,0 +1,49 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Apagar Projeto{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6 flex items-center justify-center min-h-[70vh]">
+
+    <div class="max-w-md w-full bg-gray-800 text-gray-100 rounded-xl shadow-xl p-8 border-t-4 border-red-600">
+
+        <!-- Título -->
+        <h2 class="text-2xl font-bold text-center mb-4">
+            ⚠️ Confirmar Exclusão
+        </h2>
+
+        <!-- Mensagem -->
+        <p class="text-center text-gray-300 mb-6">
+            Tem certeza que deseja apagar o projeto:
+        </p>
+
+        <p class="text-center text-lg font-semibold text-white mb-6">
+            {{ projeto.nome }}
+        </p>
+
+        <p class="text-center text-sm text-red-400 mb-6">
+            Esta ação não pode ser desfeita!
+        </p>
+
+        <!-- FORM -->
+        <form method="POST" class="flex gap-3">
+            {% csrf_token %}
+
+            <!-- Apagar -->
+            <button type="submit" 
+                class="flex-1 bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-lg shadow">
+                🗑️ Apagar
+            </button>
+
+            <!-- Cancelar -->
+            <a href="{% url 'projetos:projeto_detail' projeto.pk %}" 
+               class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
+                ❌ Cancelar
+            </a>
+
+        </form>
+
+    </div>
+
+</section>
+{% endblock %}

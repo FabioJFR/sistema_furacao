@@ -1,0 +1,39 @@
+{% extends 'projetos/base.html' %}
+<!-- projetos/templates/projetos/material_delete.html -->
+
+{% block title %}Apagar Material{% endblock %}
+
+{% block content %}
+<div style="max-width:500px; margin:50px auto; background:#34495e; color:#ecf0f1; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); text-align:center;">
+    <h1>Deletar Material</h1>
+    <p>Tem certeza que deseja deletar "<strong>{{ material }}</strong>"?</p>
+
+    <form method="post" style="margin-top:20px; display:flex; justify-content:center; gap:15px;">
+        {% csrf_token %}
+        <button type="submit" style="
+            background-color:#c0392b;
+            color:white;
+            padding:10px 20px;
+            border:none;
+            border-radius:5px;
+            font-weight:bold;
+            cursor:pointer;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+            🗑️ Sim, deletar
+        </button>
+
+        <a href="{% url 'material_list' %}" style="
+            background-color:#2980b9;
+            color:white;
+            padding:10px 20px;
+            border-radius:5px;
+            font-weight:bold;
+            text-decoration:none;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+            🔙 Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}

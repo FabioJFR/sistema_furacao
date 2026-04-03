@@ -1,0 +1,44 @@
+{% extends "projetos/base.html" %}
+{% block title %}Dashboard de Furos{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px; margin:40px auto; padding:20px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <h1 style="margin:0;">Dashboard de Furos</h1>
+        <a href="{% url 'projetos:furo_create' %}" style="display:flex; align-items:center; gap:5px; background:#27ae60; color:white; padding:10px 15px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+            ➕ Criar Novo Furo
+        </a>
+    </div>
+
+    {% if furos %}
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+        {% for furo in furos %}
+        <div style="padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2); background:#2c3e50; color:white; display:flex; flex-direction:column; justify-content:space-between; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+            
+            <div>
+                <h3 style="margin-top:0;">
+                    {{ furo.nome }}
+                </h3>
+                <p><strong>Inclinação:</strong> {{ furo.inclinacao }}°</p>
+                <p><strong>Azimute:</strong> {{ furo.azimute }}°</p>
+                <p><strong>Latitude:</strong> {{ furo.latitude }}</p>
+                <p><strong>Longitude:</strong> {{ furo.longitude }}</p>
+                <p><strong>Altitude:</strong> {{ furo.altitude }}</p>
+                <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }}</p>
+            </div>
+
+            <div style="margin-top:15px; display:flex; gap:10px;">
+                <!-- Botão de Detalhes -->
+                <a href="{% url 'projetos:furo_detail' furo.id %}" style="flex:1; text-align:center; background:#2980b9; color:white; padding:8px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">ℹ️ Detalhes</a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:#34495e; font-weight:bold; text-align:center; margin-top:50px;">Nenhum furo registrado ainda.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

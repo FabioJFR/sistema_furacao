@@ -1,0 +1,78 @@
+{% extends "projetos/base.html" %}
+{% block content %}
+
+<!-- CONTAINER DO DASHBOARD -->
+<div style="position: relative; width: 100%; height: calc(100vh - 64px);"> <!-- 64px = altura da navbar -->
+    
+    <!-- GLOBO -->
+    <div id="cesiumContainer" style="
+        width: 100%;
+        height: 100%;
+        background: #f3f4f6;
+    "></div>
+
+    <!-- JANELA FIXA COM NÚMERO DE PROJETOS -->
+    <div style="
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255,255,255,0.95);
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 120px;
+        text-align: center;
+    ">
+        <div style="font-size: 14px; font-weight: 600; color: #374151;">Projetos</div>
+        <div style="font-size: 24px; font-weight: bold; color: #2563eb;">{{ projetos|length }}</div>
+    </div>
+
+</div>
+
+{{ projetos|json_script:"projetos-data" }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Cesium.js"></script>
+
+<script>
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhM2RhNGUwZS1mZTdhLTQxYzgtODM0MC0wZmM4ZDkxMmMxYzAiLCJpZCI6NDEyMzAxLCJpYXQiOjE3NzUwMzY3OTd9.4Awi01Ptul3Qjs_VoqwhJZbBgw80HdOdJknsmGzTTx8';
+
+const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
+
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    terrain: Cesium.Terrain.fromWorldTerrain(),
+    timeline: false,
+    animation: false,
+    sceneModePicker: true,
+    infoBox: true,
+    selectionIndicator: true,
+    navigationHelpButton: false,
+});
+
+viewer.scene.globe.enableLighting = false;
+
+projetos.forEach(p => {
+    if (p.localizacao_lat && p.localizacao_lon) {
+        viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(
+                p.localizacao_lon,
+                p.localizacao_lat,
+                p.altitude || 0
+            ),
+            point: {
+                pixelSize: 10,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2
+            },
+            name: p.nome,
+            description: `<strong>${p.nome}</strong><br><a href="/projeto/${p.id}/">Ver projeto</a>`
+        });
+    }
+});
+
+viewer.zoomTo(viewer.entities);
+</script>
+{% endblock %}

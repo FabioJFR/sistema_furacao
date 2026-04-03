@@ -1,0 +1,41 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Excluir Empregado{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div style="max-width:500px; margin:0 auto; padding:30px; background:#e74c3c; color:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); text-align:center;">
+        <h2 style="margin-bottom:20px;">Excluir Empregado</h2>
+        <p>Tem certeza que deseja excluir o empregado <strong>{{ empregado.nome }}</strong>?</p>
+
+        <form method="POST" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+            {% csrf_token %}
+            <button type="submit" style="
+                background:#c0392b;
+                color:white;
+                padding:10px 20px;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+                cursor:pointer;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                🗑️ Excluir
+            </button>
+
+            <a href="{% url 'projetos:empregado_list' %}" style="
+                display:inline-block;
+                background:#2980b9;
+                color:white;
+                padding:10px 15px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Cancelar
+            </a>
+        </form>
+    </div>
+</section>
+{% endblock %}

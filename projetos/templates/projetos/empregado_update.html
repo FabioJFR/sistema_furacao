@@ -1,0 +1,63 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div style="max-width:600px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
+        <h2 style="text-align:center; margin-bottom:20px;">{{ titulo }}</h2>
+
+        <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_nome" class="block font-semibold mb-1">Nome</label>
+                {{ form.nome }}
+            </div>
+
+            <div>
+                <label for="id_funcao" class="block font-semibold mb-1">Função</label>
+                {{ form.funcao }}
+            </div>
+
+            <div>
+                <label for="id_email" class="block font-semibold mb-1">Email</label>
+                {{ form.email }}
+            </div>
+
+            <div>
+                <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
+                {{ form.data_admissao }}
+            </div>
+
+            <button type="submit" style="
+                background:#27ae60;
+                color:white;
+                padding:10px 15px;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+                cursor:pointer;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                💾 Salvar Alterações
+            </button>
+        </form>
+
+        <div style="text-align:center; margin-top:15px;">
+            <a href="{% url 'projetos:empregado_list' %}" style="
+                display:inline-block;
+                background:#2980b9;
+                color:white;
+                padding:10px 15px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Voltar à Lista
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'projetos/base.html' %}
+<!-- projetos/templates/projetos/maquina_list.html -->
+
+{% block title %}Lista de Máquinas{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 30px auto;">
+    <h1 style="text-align:center; margin-bottom:20px;">Lista de Máquinas</h1>
+
+    <div style="text-align:right; margin-bottom:20px;">
+        <a href="{% url 'projetos:maquina_create' %}" style="
+            background-color:#27ae60;
+            color:white;
+            padding:10px 20px;
+            border-radius:5px;
+            font-weight:bold;
+            text-decoration:none;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+            ➕ Adicionar Nova Máquina
+        </a>
+    </div>
+
+    {% if maquinas %}
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+        {% for maquina in maquinas %}
+        <div style="
+            background:#34495e;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.3);
+            color:#ecf0f1;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+            
+            <div>
+                <h2 style="margin-top:0; margin-bottom:10px;">{{ maquina.nome }}</h2>
+                <p><strong>Modelo:</strong> {{ maquina.modelo }}</p>
+                <p><strong>Marca:</strong> {{ maquina.marca }}</p>
+                <p><strong>Ano:</strong> {{ maquina.ano }}</p>
+                <p><strong>Estado:</strong> {{ maquina.estado }}</p>
+            </div>
+
+            <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="{% url 'projetos:maquina_detail' maquina.id %}" style="
+                    background:#2980b9;
+                    color:white;
+                    padding:8px 12px;
+                    border-radius:5px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                    🔍 Ver
+                </a>
+                <a href="{% url 'projetos:maquina_update' maquina.id %}" style="
+                    background:#f39c12;
+                    color:white;
+                    padding:8px 12px;
+                    border-radius:5px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                    ✏️ Editar
+                </a>
+                <a href="{% url 'projetos:maquina_delete' maquina.id %}" style="
+                    background:#c0392b;
+                    color:white;
+                    padding:8px 12px;
+                    border-radius:5px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                    🗑️ Apagar
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center; font-style:italic; margin-top:20px; color:#ecf0f1;">Nenhuma máquina registrada.</p>
+    {% endif %}
+</div>
+{% endblock %}

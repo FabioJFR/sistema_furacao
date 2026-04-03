@@ -1,0 +1,91 @@
+{% extends "projetos/base.html" %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div style="max-width:1200px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
+        <h1 style="text-align:center; margin-bottom:20px;">Furo 3D Geológico: {{ furo.nome }}</h1>
+
+        <!-- Gráfico 3D grande -->
+        <div id="grafico" style="width:100%; height:800px; margin-bottom:20px;">
+            {{ graph|safe }}
+        </div>
+
+        <!-- Botão voltar -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <a href="{% url 'projetos:furo_detail' furo.id %}" 
+               style="background:#27ae60; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
+               onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+               🔙 Voltar para Detalhes do Furo
+            </a>
+        </div>
+
+        <!-- Botão de rotação -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <button id="rotacionarBtn" style="
+                background:#2980b9; color:white; padding:10px 15px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; transition:background 0.2s;"
+                onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                ▶️ Ativar/Desativar Rotação
+            </button>
+        </div>
+
+        <!-- Modal para imagem -->
+        <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#ecf0f1; padding:20px; border-radius:8px; text-align:center;">
+                <img id="imagem_rocha" width="400" style="max-width:100%; height:auto;">
+                <br><br>
+                <button onclick="fechar()" style="
+                    background:#c0392b;
+                    color:white;
+                    padding:10px 15px;
+                    border:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+const plot = document.querySelector('.plotly-graph-div');
+let rotacionando = false;
+let angulo = 0;
+let rotacaoInterval;
+
+// Clique em ponto abre a imagem
+if(plot) {
+    plot.on('plotly_click', function(data) {
+        const ponto = data.points[0];
+        const imagem = ponto.customdata[4]; // imagem no customdata
+        if (imagem) {
+            document.getElementById("imagem_rocha").src = imagem;
+            document.getElementById("modal").style.display = "block";
+        }
+    });
+}
+
+// Botão de rotação
+document.getElementById('rotacionarBtn').addEventListener('click', () => {
+    rotacionando = !rotacionando;
+    if(rotacionando) {
+        rotacaoInterval = setInterval(() => {
+            angulo += 1; // 1 grau por frame
+            Plotly.relayout(plot, 'scene.camera', {
+                eye: {x: Math.cos(angulo*Math.PI/180)*2, y: Math.sin(angulo*Math.PI/180)*2, z: 1.25}
+            });
+        }, 50);
+    } else {
+        clearInterval(rotacaoInterval);
+    }
+});
+
+// Fechar modal
+function fechar() {
+    document.getElementById("modal").style.display = "none";
+}
+</script>
+{% endblock %}

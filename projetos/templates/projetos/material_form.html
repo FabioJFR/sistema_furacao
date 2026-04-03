@@ -1,0 +1,107 @@
+{% extends 'projetos/base.html' %}
+<!-- projetos/templates/projetos/material_form.html -->
+
+{% block title %}Formulário Material{% endblock %}
+
+{% block content %}
+<section style="max-width:600px; margin:60px auto;">
+
+    <div style="
+        background:#ffffff;
+        padding:30px;
+        border-radius:12px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.1);
+        border-top:5px solid #2980b9;
+    ">
+
+        <!-- HEADER -->
+        <h1 style="
+            text-align:center;
+            margin-bottom:25px;
+            font-size:1.8rem;
+            color:#2c3e50;
+        ">
+            {% if material %}✏️ Editar{% else %}➕ Criar{% endif %} Material
+        </h1>
+
+        <!-- FORM -->
+        <form method="post" style="display:flex; flex-direction:column; gap:18px;">
+            {% csrf_token %}
+
+            <!-- NOME -->
+            <div>
+                <label for="nome" style="font-weight:600; color:#34495e;">Nome</label>
+                <input type="text" id="nome" name="nome" value="{{ material.nome|default:'' }}" required
+                       style="
+                        width:100%;
+                        padding:10px;
+                        border:1px solid #ddd;
+                        border-radius:6px;
+                        margin-top:5px;
+                        transition:0.2s;
+                       "
+                       onfocus="this.style.borderColor='#2980b9';"
+                       onblur="this.style.borderColor='#ddd';">
+            </div>
+
+            <!-- QUANTIDADE -->
+            <div>
+                <label for="quantidade" style="font-weight:600; color:#34495e;">Quantidade</label>
+                <input type="number" id="quantidade" name="quantidade" value="{{ material.quantidade|default:'' }}" required
+                       style="
+                        width:100%;
+                        padding:10px;
+                        border:1px solid #ddd;
+                        border-radius:6px;
+                        margin-top:5px;
+                        transition:0.2s;
+                       "
+                       onfocus="this.style.borderColor='#2980b9';"
+                       onblur="this.style.borderColor='#ddd';">
+            </div>
+
+            <!-- BOTÕES -->
+            <div style="display:flex; gap:10px; margin-top:25px;">
+
+                <!-- SALVAR -->
+                <button type="submit" style="
+                    flex:1;
+                    background:#27ae60;
+                    color:white;
+                    border:none;
+                    padding:12px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    transition:0.2s;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+                "
+                onmouseover="this.style.background='#2ecc71'; this.style.transform='scale(1.02)';"
+                onmouseout="this.style.background='#27ae60'; this.style.transform='scale(1)';">
+                    💾 Salvar
+                </button>
+
+                <!-- VOLTAR -->
+                <a href="{% url 'projetos:material_list' %}" style="
+                    flex:1;
+                    text-align:center;
+                    background:#e74c3c;
+                    color:white;
+                    padding:12px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    transition:0.2s;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+                "
+                onmouseover="this.style.background='#c0392b'; this.style.transform='scale(1.02)';"
+                onmouseout="this.style.background='#e74c3c'; this.style.transform='scale(1)';">
+                    🔙 Voltar
+                </a>
+
+            </div>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

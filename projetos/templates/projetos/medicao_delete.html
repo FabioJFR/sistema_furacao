@@ -1,0 +1,22 @@
+{% extends 'projetos/base.html' %}
+
+{% block title %}Apagar Medição #{{ medicao.id }}{% endblock %}
+
+{% block content %}
+<section class="max-w-lg mx-auto mt-16 p-6 bg-gray-800 text-white rounded-xl shadow-lg text-center">
+    <h1 class="text-2xl font-bold mb-4">🗑️ Apagar Medição #{{ medicao.id }}</h1>
+    <p class="mb-6 text-gray-300">Tem certeza que deseja apagar esta medição?</p>
+
+    <form method="post" class="flex flex-col sm:flex-row justify-center gap-4">
+        {% csrf_token %}
+        <button type="submit" 
+                class="flex-1 bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 px-4 rounded shadow">
+            Apagar
+        </button>
+        <a href="{% url 'projetos:medicao_list' %}" 
+           class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 px-4 rounded shadow">
+            Cancelar
+        </a>
+    </form>
+</section>
+{% endblock %}

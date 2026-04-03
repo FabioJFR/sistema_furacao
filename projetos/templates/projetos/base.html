@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema de Perfuração{% endblock %}</title>
+
+    <!-- Cesium CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+    <!-- Tailwind CDN (para utilitários rápidos) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+        }
+
+        /* Navbar topo */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #1f2937;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            z-index: 3000;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .layout {
+            display: flex;
+            margin-top: 60px; /* espaço para navbar */
+        }
+
+        /* Sidebar lateral */
+        .sidebar {
+            width: 220px;
+            min-height: calc(100vh - 60px);
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            top: 60px;
+            left: 0;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #d1d5db;
+            padding: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: #374151;
+            color: white;
+        }
+
+        /* Conteúdo principal */
+        .content {
+            margin-left: 240px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Botões globais */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; }
+
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <a href="{% url 'projetos:dashboard' %}" class="navbar-logo">
+        ⛏ Sistema Furação
+    </a>
+</div>
+
+<div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
+        <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
+        <a href="{% url 'projetos:furo_list' %}">🕳 Furos</a>
+        <a href="{% url 'projetos:medicao_list' %}">📊 Medições</a>
+        <a href="{% url 'projetos:material_list' %}">📦 Materiais</a>
+        <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
+        <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

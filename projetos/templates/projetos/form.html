@@ -1,0 +1,53 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Criar Novo Furo{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div style="max-width:600px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
+        <h2 style="text-align:center; margin-bottom:20px;">Criar Novo Furo</h2>
+
+        <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div>
+                    <label style="font-weight:bold;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color:#e74c3c; font-size:0.875rem;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" style="
+                background:#27ae60;
+                color:white;
+                padding:10px 15px;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+                cursor:pointer;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                💾 Salvar
+            </button>
+        </form>
+
+        <div style="text-align:center; margin-top:15px;">
+            <a href="{% url 'projetos:furo_list' %}" style="
+                display:inline-block;
+                background:#2980b9;
+                color:white;
+                padding:10px 15px;
+                border-radius:5px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+                🔙 Voltar à Lista
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
