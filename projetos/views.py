@@ -169,40 +169,46 @@ def projeto_3d(request, projeto_id):
 
 def furo_3d_geologico(request, furo_id):
     furo = get_object_or_404(Furo, id=furo_id)
-    medicoes = furo.medicoes.all().order_by("profundidade")
+    medicoes = list(furo.medicoes.all().order_by("profundidade"))
 
-    # 🔥 AGORA RECEBE TAMBÉM ALERTAS
-    pontos, doglegs, alertas = calcular_trajetoria_min_curv(medicoes)
+    profundidade_inicial = furo.profundidade_inicial or 0.0
+    pontos, doglegs, alertas = calcular_trajetoria_min_curv(
+        medicoes,
+        profundidade_inicial=profundidade_inicial
+    )
 
     x, y, z = [], [], []
     customdata = []
 
-    for i, p in enumerate(pontos):
-        x_coord, y_coord, z_coord = p
+    total_pontos = min(len(pontos), len(medicoes))
 
-        med = medicoes[i] if i < len(medicoes) else None
+    for i in range(total_pontos):
+        x_coord, y_coord, z_coord = pontos[i]
+        med = medicoes[i]
 
-        prof = med.profundidade if med else 0
-        incl = med.inclinacao if med else 0
-        azim = med.azimute if med else 0
-        mag = getattr(med, 'magnetismo', None) if med else None
+        prof = med.profundidade or 0.0
+        incl = med.inclinacao or 0.0
+        azim = med.azimute or 0.0
+        mag = med.magnetismo if med.magnetismo is not None else 0.0
 
-        img = getattr(med, 'imagem', None) if med else None
+        img = med.imagem if med.imagem else None
         img_url = img.url if img else None
+
+        estado = alertas[i] if i < len(alertas) else "OK"
 
         x.append(x_coord)
         y.append(y_coord)
         z.append(z_coord)
 
-        # ✅ ALERTA INCLUÍDO
-        estado = alertas[i] if i < len(alertas) else "OK"
-
         customdata.append([prof, incl, azim, mag, img_url, estado])
 
-    # 🔺 CONES (setas alinhadas + escala corrigida)
+    # cones menos densos e menores
     seta_tracos = []
     for i in range(1, len(x)):
-        x0, y0, z0 = x[i-1], y[i-1], z[i-1]
+        if i % 3 != 0:
+            continue
+
+        x0, y0, z0 = x[i - 1], y[i - 1], z[i - 1]
         x1, y1, z1 = x[i], y[i], z[i]
 
         seta_tracos.append(go.Cone(
@@ -213,13 +219,13 @@ def furo_3d_geologico(request, furo_id):
             v=[y1 - y0],
             w=[z1 - z0],
             sizemode="absolute",
-            sizeref=2,
+            sizeref=8,
             anchor="tail",
             colorscale="Viridis",
-            showscale=False
+            showscale=False,
+            hoverinfo="skip"
         ))
 
-    # 📊 Scatter principal com Dogleg + ALERTAS
     scatter = go.Scatter3d(
         x=x,
         y=y,
@@ -228,7 +234,7 @@ def furo_3d_geologico(request, furo_id):
         line=dict(width=4, color='blue'),
         marker=dict(
             size=6,
-            color=doglegs,
+            color=doglegs[:len(x)],
             colorscale=[
                 [0, "green"],
                 [0.5, "yellow"],
@@ -242,12 +248,12 @@ def furo_3d_geologico(request, furo_id):
             "Profundidade: %{customdata[0]:.2f} m<br>"
             "Inclinação: %{customdata[1]:.2f}°<br>"
             "Azimute: %{customdata[2]:.2f}°<br>"
-            "Magnetismo: %{customdata[3]}<br>"
+            "Magnetismo: %{customdata[3]:.2f}<br>"
             "Estado: %{customdata[5]}<br>"
+            "<extra></extra>"
         )
     )
 
-    # 🧱 TUBO 3D
     tubo = go.Scatter3d(
         x=x,
         y=y,
@@ -261,6 +267,13 @@ def furo_3d_geologico(request, furo_id):
     )
 
     fig = go.Figure(data=[tubo, scatter] + seta_tracos)
+
+    dogleg_max = max(doglegs) if doglegs else 0.0
+    estado_max = "OK"
+    if any(a == "CRÍTICO" for a in alertas):
+        estado_max = "CRÍTICO"
+    elif any(a == "ATENÇÃO" for a in alertas):
+        estado_max = "ATENÇÃO"
 
     fig.update_layout(
         scene=dict(
@@ -278,7 +291,11 @@ def furo_3d_geologico(request, furo_id):
 
     return render(request, "projetos/furo_3d.html", {
         "furo": furo,
-        "graph": graph
+        "graph": graph,
+        "numero_medicoes": len(medicoes),
+        "profundidade_final": medicoes[-1].profundidade if medicoes else 0.0,
+        "dogleg_max": dogleg_max,
+        "estado_max": estado_max,
     })
 
 # ---------------- JSON ----------------

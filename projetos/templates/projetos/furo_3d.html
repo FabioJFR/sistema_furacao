@@ -5,6 +5,34 @@
     <div style="max-width:1200px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
         <h1 style="text-align:center; margin-bottom:20px;">Furo 3D Geológico: {{ furo.nome }}</h1>
 
+        <!-- Resumo -->
+        <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; margin-bottom:20px;">
+            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
+                <strong>Medições:</strong> {{ numero_medicoes }}
+            </div>
+            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
+                <strong>Profundidade final:</strong> {{ profundidade_final|floatformat:2 }} m
+            </div>
+            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
+                <strong>Dogleg máx:</strong> {{ dogleg_max|floatformat:2 }} °/30m
+            </div>
+            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
+                <strong>Estado:</strong> {{ estado_max }}
+            </div>
+        </div>
+
+        <!-- Legenda -->
+        <div style="display:flex; gap:20px; justify-content:center; margin-bottom:20px; flex-wrap:wrap;">
+            <div><span style="display:inline-block; width:14px; height:14px; background:green; border-radius:50%; margin-right:6px;"></span>OK</div>
+            <div><span style="display:inline-block; width:14px; height:14px; background:yellow; border-radius:50%; margin-right:6px;"></span>ATENÇÃO</div>
+            <div><span style="display:inline-block; width:14px; height:14px; background:red; border-radius:50%; margin-right:6px;"></span>CRÍTICO</div>
+        </div>
+
+        <!-- Referência espacial -->
+        <div style="text-align:center; margin-bottom:15px; opacity:0.9;">
+            Referência espacial: X = Este, Y = Norte, Z = Profundidade
+        </div>
+
         <!-- Gráfico 3D grande -->
         <div id="grafico" style="width:100%; height:800px; margin-bottom:20px;">
             {{ graph|safe }}
@@ -28,9 +56,12 @@
             </button>
         </div>
 
+        <!-- Aviso visual -->
+        <div id="estadoAviso" style="display:none; text-align:center; margin-bottom:20px; padding:10px 15px; border-radius:8px; font-weight:bold;"></div>
+
         <!-- Modal para imagem -->
         <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#ecf0f1; padding:20px; border-radius:8px; text-align:center;">
+            <div id="modalBox" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#ecf0f1; padding:20px; border-radius:8px; text-align:center;">
                 <img id="imagem_rocha" width="400" style="max-width:100%; height:auto;">
                 <br><br>
                 <button onclick="fechar()" style="
@@ -52,47 +83,77 @@
 
 <script>
 const plot = document.querySelector('.plotly-graph-div');
+const botaoRotacao = document.getElementById('rotacionarBtn');
+const aviso = document.getElementById('estadoAviso');
+const modal = document.getElementById('modal');
+const modalBox = document.getElementById('modalBox');
+
 let rotacionando = false;
 let angulo = 0;
-let rotacaoInterval;
+let rotacaoInterval = null;
 
-// Clique em ponto abre a imagem
-if(plot) {
+if (plot) {
     plot.on('plotly_click', function(data) {
         const ponto = data.points[0];
-        const imagem = ponto.customdata[4]; // imagem no customdata
-        const estado = ponto.customdata[5]; // estado no customdata
+        const imagem = ponto.customdata[4];
+        const estado = ponto.customdata[5];
+
         if (imagem) {
             document.getElementById("imagem_rocha").src = imagem;
-            document.getElementById("modal").style.display = "block";
+            modal.style.display = "block";
         }
-        // Opcional: alerta visual do estado
+
         if (estado === "CRÍTICO") {
-            alert("⚠️ Dogleg CRÍTICO neste ponto!");
+            aviso.style.display = "block";
+            aviso.style.background = "#e74c3c";
+            aviso.style.color = "white";
+            aviso.innerText = "⚠️ Dogleg CRÍTICO neste ponto!";
         } else if (estado === "ATENÇÃO") {
-            console.warn("⚠️ Dogleg ATENÇÃO neste ponto!");
+            aviso.style.display = "block";
+            aviso.style.background = "#f1c40f";
+            aviso.style.color = "#2c3e50";
+            aviso.innerText = "⚠️ Dogleg em ATENÇÃO neste ponto.";
+        } else {
+            aviso.style.display = "block";
+            aviso.style.background = "#27ae60";
+            aviso.style.color = "white";
+            aviso.innerText = "✅ Ponto em estado OK.";
         }
     });
 }
 
-// Botão de rotação
-document.getElementById('rotacionarBtn').addEventListener('click', () => {
-    rotacionando = !rotacionando;
-    if(rotacionando) {
-        rotacaoInterval = setInterval(() => {
-            angulo += 1; // 1 grau por frame
-            Plotly.relayout(plot, 'scene.camera', {
-                eye: {x: Math.cos(angulo*Math.PI/180)*2, y: Math.sin(angulo*Math.PI/180)*2, z: 1.25}
-            });
-        }, 50);
-    } else {
-        clearInterval(rotacaoInterval);
-    }
-});
+if (plot && botaoRotacao) {
+    botaoRotacao.addEventListener('click', () => {
+        rotacionando = !rotacionando;
 
-// Fechar modal
+        if (rotacionando) {
+            rotacaoInterval = setInterval(() => {
+                angulo += 1;
+                Plotly.relayout(plot, 'scene.camera', {
+                    eye: {
+                        x: Math.cos(angulo * Math.PI / 180) * 2,
+                        y: Math.sin(angulo * Math.PI / 180) * 2,
+                        z: 1.25
+                    }
+                });
+            }, 50);
+        } else if (rotacaoInterval) {
+            clearInterval(rotacaoInterval);
+            rotacaoInterval = null;
+        }
+    });
+}
+
 function fechar() {
-    document.getElementById("modal").style.display = "none";
+    modal.style.display = "none";
+}
+
+if (modal) {
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            fechar();
+        }
+    });
 }
 </script>
 {% endblock %}
