@@ -85,14 +85,6 @@ def projeto_delete(request, pk):
 
 
 # ---------------- FUROS ----------------
-from django.shortcuts import render, get_object_or_404, redirect
-from .forms import FuroForm
-from .models import Furo
-
-# projetos/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Furo
-from .forms import FuroForm
 
 def furo_create(request):
     if request.method == 'POST':
@@ -174,35 +166,45 @@ def projeto_3d(request, projeto_id):
         "graph": graph
     })
 
+
 def furo_3d_geologico(request, furo_id):
     furo = get_object_or_404(Furo, id=furo_id)
     medicoes = furo.medicoes.all().order_by("profundidade")
 
-    # Calcular trajetoria para curvatura real
-    pontos = calcular_trajetoria_min_curv(medicoes)
+    # 🔥 AGORA RECEBE TAMBÉM ALERTAS
+    pontos, doglegs, alertas = calcular_trajetoria_min_curv(medicoes)
 
     x, y, z = [], [], []
     customdata = []
 
     for i, p in enumerate(pontos):
-        x_coord = p[0] # Este (easting)
-        y_coord = p[1] # Norte (Northing)
-        z_coord = -p[2] # Profundidade negativa (desce)
-        mag = getattr(medicoes[i], 'magnetismo', None)
-        img = getattr(medicoes[i], 'imagem', None)
-        img_url = img.url if img else None  # ✅ converter para URL
+        x_coord, y_coord, z_coord = p
+
+        med = medicoes[i] if i < len(medicoes) else None
+
+        prof = med.profundidade if med else 0
+        incl = med.inclinacao if med else 0
+        azim = med.azimute if med else 0
+        mag = getattr(med, 'magnetismo', None) if med else None
+
+        img = getattr(med, 'imagem', None) if med else None
+        img_url = img.url if img else None
 
         x.append(x_coord)
         y.append(y_coord)
         z.append(z_coord)
 
-        customdata.append([x, y, z, mag, img_url])
+        # ✅ ALERTA INCLUÍDO
+        estado = alertas[i] if i < len(alertas) else "OK"
 
-    # Criar setas de curvatura real (opcional, usando segmento entre pontos)
+        customdata.append([prof, incl, azim, mag, img_url, estado])
+
+    # 🔺 CONES (setas alinhadas + escala corrigida)
     seta_tracos = []
-    for i in range(1, len(pontos)):
+    for i in range(1, len(x)):
         x0, y0, z0 = x[i-1], y[i-1], z[i-1]
         x1, y1, z1 = x[i], y[i], z[i]
+
         seta_tracos.append(go.Cone(
             x=[x0],
             y=[y0],
@@ -211,13 +213,13 @@ def furo_3d_geologico(request, furo_id):
             v=[y1 - y0],
             w=[z1 - z0],
             sizemode="absolute",
-            sizeref=8,
+            sizeref=2,
             anchor="tail",
             colorscale="Viridis",
             showscale=False
         ))
 
-    # Scatter3D com cores por profundidade e hover detalhado
+    # 📊 Scatter principal com Dogleg + ALERTAS
     scatter = go.Scatter3d(
         x=x,
         y=y,
@@ -226,9 +228,13 @@ def furo_3d_geologico(request, furo_id):
         line=dict(width=4, color='blue'),
         marker=dict(
             size=6,
-            color=y,  # cor por profundidade
-            colorscale='Viridis',
-            colorbar=dict(title='Profundidade (m)'),
+            color=doglegs,
+            colorscale=[
+                [0, "green"],
+                [0.5, "yellow"],
+                [1, "red"]
+            ],
+            colorbar=dict(title='Dogleg (°/30m)'),
             showscale=True
         ),
         customdata=customdata,
@@ -237,18 +243,32 @@ def furo_3d_geologico(request, furo_id):
             "Inclinação: %{customdata[1]:.2f}°<br>"
             "Azimute: %{customdata[2]:.2f}°<br>"
             "Magnetismo: %{customdata[3]}<br>"
+            "Estado: %{customdata[5]}<br>"
         )
     )
 
-    fig = go.Figure(data=[scatter] + seta_tracos)
+    # 🧱 TUBO 3D
+    tubo = go.Scatter3d(
+        x=x,
+        y=y,
+        z=z,
+        mode='lines',
+        line=dict(
+            width=12,
+            color='rgba(52, 152, 219, 0.6)'
+        ),
+        hoverinfo='skip'
+    )
+
+    fig = go.Figure(data=[tubo, scatter] + seta_tracos)
+
     fig.update_layout(
         scene=dict(
-            xaxis_title='Este (°)',
-            yaxis_title='Norte (º)',
+            xaxis_title='Este (m)',
+            yaxis_title='Norte (m)',
             zaxis_title='Profundidade (m)',
-            zaxis=dict(
-                autorange="reversed" # profundidade cresce para baixo
-            )
+            zaxis=dict(autorange="reversed"),
+            aspectmode='data'
         ),
         margin=dict(l=0, r=0, t=0, b=0),
         height=800
@@ -409,12 +429,6 @@ def globo_projetos(request):
 
 
 #-------------- MEDICOAO -----------------------
-
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Medicao
-from .forms import MedicaoForm
 
 # Listar medições
 def medicao_list(request):

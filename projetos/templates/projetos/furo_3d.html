@@ -61,9 +61,16 @@ if(plot) {
     plot.on('plotly_click', function(data) {
         const ponto = data.points[0];
         const imagem = ponto.customdata[4]; // imagem no customdata
+        const estado = ponto.customdata[5]; // estado no customdata
         if (imagem) {
             document.getElementById("imagem_rocha").src = imagem;
             document.getElementById("modal").style.display = "block";
+        }
+        // Opcional: alerta visual do estado
+        if (estado === "CRÍTICO") {
+            alert("⚠️ Dogleg CRÍTICO neste ponto!");
+        } else if (estado === "ATENÇÃO") {
+            console.warn("⚠️ Dogleg ATENÇÃO neste ponto!");
         }
     });
 }

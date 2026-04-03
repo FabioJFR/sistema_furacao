@@ -2,52 +2,52 @@
 import math
 
 def calcular_trajetoria_min_curv(medicoes):
-    pontos = [(0, 0, 0)]
-
     x, y, z = 0, 0, 0
+    pontos = [(x, y, z)]
+    doglegs = [0]
+    alertas = ["OK"]  # primeiro ponto
 
     for i in range(1, len(medicoes)):
-        m1 = medicoes[i - 1]
-        m2 = medicoes[i]
+        p1, p2 = medicoes[i-1], medicoes[i]
+        dmd = p2.profundidade - p1.profundidade
 
-        inc1 = math.radians(m1.inclinacao)
-        azi1 = math.radians(m1.azimute)
+        I1 = math.radians(p1.inclinacao or 0)
+        I2 = math.radians(p2.inclinacao or 0)
+        A1 = math.radians(p1.azimute or 0)
+        A2 = math.radians(p2.azimute or 0)
 
-        inc2 = math.radians(m2.inclinacao)
-        azi2 = math.radians(m2.azimute)
+        # Dogleg robusto
+        cos_beta = (math.cos(I1) * math.cos(I2)) + \
+                   (math.sin(I1) * math.sin(I2) * math.cos(A2 - A1))
+        cos_beta = max(min(cos_beta, 1.0), -1.0)
 
-        md = m2.profundidade - m1.profundidade
+        dogleg = math.acos(cos_beta)
 
-        cos_beta = (
-            math.cos(inc1) * math.cos(inc2) +
-            math.sin(inc1) * math.sin(inc2) * math.cos(azi2 - azi1)
-        )
+        # Ratio Factor
+        RF = (2 / dogleg) * math.tan(dogleg / 2) if dogleg > 1e-7 else 1
 
-        beta = math.acos(max(min(cos_beta, 1), -1))
-
-        if beta != 0:
-            rf = (2 / beta) * math.tan(beta / 2)
-        else:
-            rf = 1
-
-        dx = (md / 2) * (
-            math.sin(inc1) * math.cos(azi1) +
-            math.sin(inc2) * math.cos(azi2)
-        ) * rf
-
-        dy = (md / 2) * (
-            math.sin(inc1) * math.sin(azi1) +
-            math.sin(inc2) * math.sin(azi2)
-        ) * rf
-
-        dz = (md / 2) * (
-            math.cos(inc1) + math.cos(inc2)
-        ) * rf
+        # Incrementos (East, North, TVD)
+        dx = (dmd / 2) * (math.sin(I1) * math.sin(A1) + math.sin(I2) * math.sin(A2)) * RF
+        dy = (dmd / 2) * (math.sin(I1) * math.cos(A1) + math.sin(I2) * math.cos(A2)) * RF
+        dz = (dmd / 2) * (math.cos(I1) + math.cos(I2)) * RF
 
         x += dx
         y += dy
-        z -= dz
+        z += dz
 
         pontos.append((x, y, z))
 
-    return pontos
+        # Dogleg Severity (°/30m)
+        dogleg_deg = math.degrees(dogleg)
+        dls = (dogleg_deg / dmd) * 30 if dmd != 0 else 0
+        doglegs.append(dls)
+
+        # 🚨 ALERTAS
+        if dls > 5:
+            alertas.append("CRÍTICO")
+        elif dls > 3:
+            alertas.append("ATENÇÃO")
+        else:
+            alertas.append("OK")
+
+    return pontos, doglegs, alertas

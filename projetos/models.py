@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.postgres.fields import JSONField  # Para PostgreSQL; se usar SQLite >=3.9, use models.JSONField
-
+# models.py
 
 import uuid
 from django.db import models
