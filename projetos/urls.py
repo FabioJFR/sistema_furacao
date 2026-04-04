@@ -37,8 +37,10 @@ urlpatterns = [
     path('maquinas/<uuid:maquina_id>/editar/', views.maquina_update, name='maquina_update'),
     path('maquinas/<uuid:maquina_id>/delete/', views.maquina_delete, name='maquina_delete'),
 
-
     # ---------------- EMPREGADOS ----------------
+    path('registo/', views.registo_empregado, name='registo_empregado'),
+    path('empregados/pendentes/', views.empregado_pendentes, name='empregado_pendentes'),
+    path('empregados/<uuid:pk>/aprovar/', views.empregado_aprovar, name='empregado_aprovar'),
     path('empregados/', views.empregado_list, name='empregado_list'),
     path('empregados/novo/', views.empregado_create, name='empregado_create'),
     path('empregados/<uuid:pk>/', views.empregado_detail, name='empregado_detail'),
@@ -49,7 +51,11 @@ urlpatterns = [
     path('empregados/<uuid:pk>/projetos/<int:ligacao_id>/terminar/', views.empregado_terminar_projeto, name='empregado_terminar_projeto'),
     path('empregados/<uuid:pk>/adicionar-ficheiro/', views.empregado_adicionar_ficheiro, name='empregado_adicionar_ficheiro'),
     path('empregados/<uuid:pk>/ficheiros/<int:ficheiro_id>/apagar/', views.empregado_apagar_ficheiro, name='empregado_apagar_ficheiro'),
+    path('minha-area/', views.area_empregado, name='area_empregado'),
+    path('meus-registos/', views.registo_diario_list, name='registo_diario_list'),
+    path('meus-registos/novo/', views.registo_diario_create, name='registo_diario_create'),
 
+    path('redirect-after-login/', views.redirect_after_login, name='redirect_after_login'),
 
     # ---------------- MATERIAL ----------------
     path('materiais/', views.material_list, name='material_list'),

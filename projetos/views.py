@@ -10,9 +10,19 @@ import math
 import requests
 from urllib.parse import quote
 from django.utils import timezone
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import resolve_url
+from .decorators import admin_required, empregado_required
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
+
 
 
 # -------------- DASHBOARD ---------------
+@login_required
+@admin_required
 def dashboard(request):
     projetos = list(
         Projeto.objects.all().values(
@@ -47,6 +57,8 @@ def home(request):
 
 
 # ---------------- PROJETOS ----------------
+@login_required
+@admin_required
 def projeto_list(request):
     projetos_qs = Projeto.objects.all()
     projetos_serializaveis = list(projetos_qs.values(
@@ -55,11 +67,14 @@ def projeto_list(request):
     context = {'projetos': projetos_serializaveis}
     return render(request, 'projetos/projeto_list.html', context)
 
+@login_required
+@admin_required
 def projeto_detail(request, pk):  # ✅ usar pk
     projeto = get_object_or_404(Projeto, pk=pk)
     return render(request, "projetos/projeto_detail.html", {"projeto": projeto})
 
-
+@login_required
+@admin_required
 def projeto_create(request):
     if request.method == 'POST':
         form = ProjetoForm(request.POST)
@@ -84,7 +99,8 @@ def projeto_create(request):
 
     return render(request, 'projetos/projeto_form.html', {'form': form})
 
-
+@login_required
+@admin_required
 def projeto_update(request, pk):
     projeto = get_object_or_404(Projeto, pk=pk)
     form = ProjetoForm(request.POST or None, instance=projeto)
@@ -112,7 +128,8 @@ def projeto_update(request, pk):
         "projeto": projeto
     })
 
-
+@login_required
+@admin_required
 def projeto_delete(request, pk):
     projeto = get_object_or_404(Projeto, pk=pk)
 
@@ -126,7 +143,8 @@ def projeto_delete(request, pk):
 
 
 # ---------------- FUROS ----------------
-
+@login_required
+@admin_required
 def furo_create(request):
     if request.method == 'POST':
         form = FuroCreateForm(request.POST)
@@ -157,7 +175,8 @@ def furo_create(request):
         'titulo': 'Criar Novo Furo'
     })
 
-
+@login_required
+@admin_required
 def furo_detail(request, pk):
     furo = get_object_or_404(Furo, pk=pk)
 
@@ -207,11 +226,14 @@ def furo_detail(request, pk):
     }
     return render(request, 'projetos/furo_detail.html', context)
 
-
+@login_required
+@admin_required
 def furo_list(request):
     furos = Furo.objects.all()
     return render(request, 'projetos/furo_list.html', {'furos': furos})
 
+@login_required
+@admin_required
 def furo_update(request, pk):
     furo = get_object_or_404(Furo, pk=pk)
 
@@ -251,6 +273,8 @@ def furo_update(request, pk):
         'furo': furo
     })
 
+@login_required
+@admin_required
 def furo_delete(request, pk):
     furo = get_object_or_404(Furo, pk=pk)
     if request.method == 'POST':
@@ -260,6 +284,8 @@ def furo_delete(request, pk):
 
 
 # ---------------- 3D ----------------
+@login_required
+@admin_required
 def projeto_3d(request, pk):
     projeto = get_object_or_404(Projeto, id=pk)
     fig = go.Figure()
@@ -370,7 +396,8 @@ def projeto_3d(request, pk):
         "graph": graph
     })
 
-
+@login_required
+@admin_required
 def furo_3d_geologico(request, furo_id):
     furo = get_object_or_404(Furo, id=furo_id)
     medicoes = list(furo.medicoes.all().order_by("profundidade"))
@@ -559,29 +586,16 @@ def furo_3d_geologico(request, furo_id):
     })
 
 
-# ---------------- JSON ----------------
-def medicoes_json(request, furo_id):
-    furo = get_object_or_404(Furo, id=furo_id)
-
-    data = [
-        {
-            "profundidade": m.profundidade,
-            "rocha": m.tipo_rocha,
-            "dureza": m.dureza
-        }
-        for m in furo.medicoes.all()
-    ]
-
-    return JsonResponse(data, safe=False)
-
-
 # ---------------- MAQUINAS ----------------
+@login_required
+@admin_required
 def maquina_list(request):
     return render(request, "projetos/maquina_list.html", {
         "maquinas": Maquina.objects.all()
     })
 
-
+@login_required
+@admin_required
 def maquina_detail(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
     return render(request, "projetos/maquina_detail.html", {"maquina": maquina})
@@ -589,6 +603,8 @@ def maquina_detail(request, maquina_id):
 
 
 # Criar
+@login_required
+@admin_required
 def maquina_create(request):
     form = MaquinaCreateForm(request.POST or None)
     if form.is_valid():
@@ -597,6 +613,8 @@ def maquina_create(request):
     return render(request, 'projetos/maquina_form.html', {'form': form, 'titulo': 'Nova Máquina'})
 
 # Editar
+@login_required
+@admin_required
 def maquina_update(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
     form = MaquinaUpdateForm(request.POST or None, instance=maquina)
@@ -606,6 +624,8 @@ def maquina_update(request, maquina_id):
     return render(request, 'projetos/maquina_form.html', {'form': form, 'titulo': 'Editar Máquina'})
 
 # Apagar
+@login_required
+@admin_required
 def maquina_delete(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
     maquina.delete()
@@ -614,35 +634,94 @@ def maquina_delete(request, maquina_id):
 
 
 # ---------------- EMPREGADOS ----------------
+def registo_empregado(request):
+    if request.method == "POST":
+        form = EmpregadoRegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.email = form.cleaned_data['email']
+            user.is_active = False
+            user.save()
+
+            Empregados.objects.create(
+                user=user,
+                nome=form.cleaned_data['nome'],
+                email=form.cleaned_data['email'],
+                telefone=form.cleaned_data.get('telefone'),
+                funcao=form.cleaned_data.get('funcao'),
+                aprovado=False
+            )
+
+            messages.success(request, "Registo enviado com sucesso. Aguarde aprovação do administrador.")
+            return redirect('login')
+        else:
+            messages.error(request, "Existem erros no formulário. Corrija os campos assinalados.")
+            print("ERROS REGISTO:", form.errors)
+    else:
+        form = EmpregadoRegistroForm()
+
+    return render(request, "projetos/registo_empregado.html", {
+        "form": form,
+        "titulo": "Registo de Empregado"
+    })
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+@admin_required
 def empregado_list(request):
     empregados = Empregados.objects.all().order_by('nome')
     return render(request, "projetos/empregado_list.html", {
         "empregados": empregados
     })
 
+from django.contrib.auth.models import User, Group
+@login_required
+@admin_required
 def empregado_create(request):
-    if request.method == "POST":
-        form = EmpregadoCreateForm(request.POST, request.FILES)
-        if form.is_valid():
-            empregado = form.save()
-            messages.success(request, "Empregado criado com sucesso.")
-            return redirect("projetos:empregado_detail", pk=empregado.id)
-        else:
-            messages.error(request, "Erro ao criar empregado. Verifique os dados.")
-    else:
-        form = EmpregadoCreateForm()
+    form = EmpregadoCreateForm(request.POST or None, request.FILES or None)
+
+    if form.is_valid():
+        empregado = form.save()
+
+        # 🔹 Criar user automaticamente
+        username = empregado.email or empregado.nome.replace(" ", "").lower()
+        password = "123456"  # depois podes melhorar isto
+
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=empregado.email
+        )
+
+        # 🔹 ligar ao empregado
+        empregado.user = user
+        empregado.save()
+
+        # 🔹 adicionar ao grupo empregado
+        grupo = Group.objects.get(name='Empregados')
+        user.groups.add(grupo)
+
+        messages.success(request, "Empregado criado com sucesso.")
+        return redirect("projetos:empregado_detail", pk=empregado.id)
 
     return render(request, "projetos/empregado_form.html", {
         "form": form,
         "titulo": "Novo Empregado"
     })
 
+@login_required
+@admin_required
 def empregado_detail(request, pk):
     empregado = get_object_or_404(Empregados, pk=pk)
     return render(request, "projetos/empregado_detail.html", {
         "empregado": empregado
     })
 
+@login_required
+@admin_required
 def empregado_update(request, pk):
     empregado = get_object_or_404(Empregados, pk=pk)
 
@@ -664,6 +743,8 @@ def empregado_update(request, pk):
         "empregado": empregado
     })
 
+@login_required
+@admin_required
 def empregado_delete(request, pk):
     empregado = get_object_or_404(Empregados, pk=pk)
 
@@ -676,6 +757,8 @@ def empregado_delete(request, pk):
         "empregado": empregado
     })
 
+@login_required
+@admin_required
 def empregado_adicionar_projeto(request, pk):
     empregado = get_object_or_404(Empregados, pk=pk)
 
@@ -709,6 +792,8 @@ def empregado_adicionar_projeto(request, pk):
         "titulo": "Associar Projeto ao Empregado"
     })
 
+@login_required
+@admin_required
 def empregado_editar_projeto(request, pk, ligacao_id):
     empregado = get_object_or_404(Empregados, pk=pk)
     ligacao = get_object_or_404(EmpregadoProjeto, id=ligacao_id, empregado=empregado)
@@ -742,6 +827,8 @@ def empregado_editar_projeto(request, pk, ligacao_id):
         "titulo": "Editar Ligação de Projeto"
     })
 
+@login_required
+@admin_required
 def empregado_terminar_projeto(request, pk, ligacao_id):
     empregado = get_object_or_404(Empregados, pk=pk)
     ligacao = get_object_or_404(EmpregadoProjeto, id=ligacao_id, empregado=empregado)
@@ -760,6 +847,8 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
         "ligacao": ligacao
     })
 
+@login_required
+@admin_required
 def empregado_adicionar_ficheiro(request, pk):
     empregado = get_object_or_404(Empregados, pk=pk)
 
@@ -782,7 +871,8 @@ def empregado_adicionar_ficheiro(request, pk):
         "titulo": "Adicionar Ficheiro ao Empregado"
     })
 
-
+@login_required
+@admin_required
 def empregado_apagar_ficheiro(request, pk, ficheiro_id):
     empregado = get_object_or_404(Empregados, pk=pk)
     ficheiro = get_object_or_404(EmpregadoFicheiro, id=ficheiro_id, empregado=empregado)
@@ -799,11 +889,172 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
         "ficheiro": ficheiro
     })
 
+@login_required
+@admin_required
+def empregado_pendentes(request):
+    empregados = Empregados.objects.filter(aprovado=False).order_by('-data_registo')
+    return render(request, "projetos/empregado_pendentes.html", {
+        "empregados": empregados
+    })
+
+@login_required
+@admin_required
+def empregado_aprovar(request, pk):
+    empregado = get_object_or_404(Empregados, pk=pk)
+
+    if request.method == "POST":
+        empregado.aprovado = True
+        empregado.data_aprovacao = timezone.now()
+        empregado.save()
+
+        if empregado.user:
+            empregado.user.is_active = True
+            empregado.user.save()
+
+            grupo, _ = Group.objects.get_or_create(name='Empregados')
+            empregado.user.groups.add(grupo)
+
+        messages.success(request, "Empregado aprovado com sucesso.")
+        return redirect('projetos:empregado_pendentes')
+
+    return render(request, "projetos/empregado_aprovar_confirm.html", {
+        "empregado": empregado
+    })
+
+@login_required
+@empregado_required
+def area_empregado(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    registos_recentes = empregado.registos_diarios.all()[:5]
+
+    return render(request, "projetos/area_empregado.html", {
+        "empregado": empregado,
+        "registos_recentes": registos_recentes
+    })
+
+
+def redirect_after_login(request):
+    if request.user.is_superuser or request.user.groups.filter(name='Administradores').exists():
+        return redirect('projetos:dashboard')
+
+    if request.user.groups.filter(name='Empregados').exists():
+        return redirect('projetos:area_empregado')
+
+    return redirect('login')
+
+@login_required
+@empregado_required
+def registo_diario_create(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+
+    if request.method == "POST":
+        form = RegistoDiarioEmpregadoForm(request.POST, empregado=empregado)
+        if form.is_valid():
+            registo = form.save(commit=False)
+            registo.empregado = empregado
+            registo.save()
+
+            messages.success(request, "Registo diário guardado com sucesso.")
+            return redirect('projetos:area_empregado')
+        else:
+            messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
+    else:
+        form = RegistoDiarioEmpregadoForm(
+            empregado=empregado,
+            initial={'data': timezone.now().date()}
+        )
+
+    return render(request, "projetos/registo_diario_form.html", {
+        "form": form,
+        "empregado": empregado,
+        "titulo": "Novo Registo Diário"
+    })
+
+
+@login_required
+@empregado_required
+def registo_diario_list(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    registos = empregado.registos_diarios.all()
+
+    return render(request, "projetos/registo_diario_list.html", {
+        "empregado": empregado,
+        "registos": registos
+    })
+
+@login_required
+@empregado_required
+def registo_diario_create(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+
+    if request.method == "POST":
+        form = RegistoDiarioEmpregadoForm(request.POST, empregado=empregado)
+        if form.is_valid():
+            registo = form.save(commit=False)
+            registo.empregado = empregado
+            registo.save()
+
+            # -------- EMPREGADO --------
+            horas = registo.horas_trabalhadas or 0
+
+            empregado.horas_total = (empregado.horas_total or 0) + horas
+
+            hoje = registo.data
+            inicio_mes = hoje.replace(day=1)
+
+            horas_mes = empregado.registos_diarios.filter(
+                data__gte=inicio_mes,
+                data__lte=hoje
+            ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+            horas_dia = empregado.registos_diarios.filter(
+                data=hoje
+            ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+            empregado.horas_trabalhadas_mes = horas_mes
+            empregado.horas_diarias = horas_dia
+            empregado.save(update_fields=[
+                'horas_total',
+                'horas_trabalhadas_mes',
+                'horas_diarias',
+            ])
+
+            # -------- FURO --------
+            if registo.furo:
+                metros = registo.metros_furados or 0
+
+                registo.furo.profundidade_atual = (registo.furo.profundidade_atual or 0) + metros
+
+                if (registo.furo.profundidade_atual or 0) > (registo.furo.profundidade_final or 0):
+                    registo.furo.profundidade_final = registo.furo.profundidade_atual
+
+                registo.furo.save(update_fields=['profundidade_atual', 'profundidade_final'])
+
+            messages.success(request, "Registo diário guardado com sucesso.")
+            return redirect('projetos:area_empregado')
+        else:
+            messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
+    else:
+        form = RegistoDiarioEmpregadoForm(
+            empregado=empregado,
+            initial={'data': timezone.now().date()}
+        )
+
+    return render(request, "projetos/registo_diario_form.html", {
+        "form": form,
+        "empregado": empregado,
+        "titulo": "Novo Registo Diário"
+    })
+
 # ---------------- MATERIAIS ----------------
+@login_required
+@admin_required
 def material_list(request):
     materiais = Material.objects.all()
     return render(request, 'projetos/material_list.html', {'materiais': materiais})
 
+@login_required
+@admin_required
 def material_create(request):
     if request.method == "POST":
         nome = request.POST.get("nome")
@@ -821,10 +1072,14 @@ def material_create(request):
         "titulo": "Novo Material"
     })
 
+@login_required
+@admin_required
 def material_edit(request, pk):
     material = get_object_or_404(Material, pk=pk)
     return HttpResponse(f"Editar Material {pk} - em construção")
 
+@login_required
+@admin_required
 def material_delete(request, pk):
     material = get_object_or_404(Material, pk=pk)
     return HttpResponse(f"Deletar Material {pk} - em construção")
@@ -832,6 +1087,8 @@ def material_delete(request, pk):
 
 
 # ----------------- Globo ------------------------------ #
+@login_required
+@admin_required
 def globo_projetos(request):
     projetos = Projeto.objects.exclude(
         localizacao_lat__isnull=True
@@ -858,11 +1115,15 @@ def globo_projetos(request):
 #-------------- MEDICOAO -----------------------
 
 # Listar medições
+@login_required
+@admin_required
 def medicao_list(request):
     medicoes = Medicao.objects.all()
     return render(request, 'projetos/medicao_list.html', {'medicoes': medicoes})
 
 # Criar medição (somente campos obrigatórios)
+@login_required
+@admin_required
 def medicao_create(request, furo_id):
     furo = get_object_or_404(Furo, pk=furo_id)
 
@@ -911,6 +1172,8 @@ def medicao_create(request, furo_id):
     })
 
 # Editar medição (todos os campos)
+@login_required
+@admin_required
 def medicao_update(request, pk):
     medicao = get_object_or_404(Medicao, pk=pk)
 
@@ -949,12 +1212,31 @@ def medicao_update(request, pk):
     })
 
 # Apagar medição
+@login_required
+@admin_required
 def medicao_delete(request, pk):
     medicao = get_object_or_404(Medicao, pk=pk)
     if request.method == "POST":
         medicao.delete()
         return redirect('projetos:medicao_list')
     return render(request, 'projetos/medicao_confirm_delete.html', {'medicao': medicao})
+
+# ---------------- JSON ----------------
+@login_required
+@admin_required
+def medicoes_json(request, furo_id):
+    furo = get_object_or_404(Furo, id=furo_id)
+
+    data = [
+        {
+            "profundidade": m.profundidade,
+            "rocha": m.tipo_rocha,
+            "dureza": m.dureza
+        }
+        for m in furo.medicoes.all()
+    ]
+
+    return JsonResponse(data, safe=False)
 
 
 #--------- corversor de latitude e longitude -----------

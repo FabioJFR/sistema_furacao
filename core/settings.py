@@ -104,9 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-pt'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Lisbon'
 
 USE_I18N = True
 
@@ -140,3 +140,7 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = 'projetos:redirect_after_login'
+LOGOUT_REDIRECT_URL = '/login/'

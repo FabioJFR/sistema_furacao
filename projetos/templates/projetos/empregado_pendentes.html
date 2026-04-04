@@ -1,0 +1,45 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Empregados Pendentes{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Empregados Pendentes de Aprovação</h1>
+
+        {% if empregados %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3">Nome</th>
+                            <th class="text-left px-4 py-3">Email</th>
+                            <th class="text-left px-4 py-3">Função</th>
+                            <th class="text-left px-4 py-3">Registo</th>
+                            <th class="text-left px-4 py-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empregado in empregados %}
+                            <tr class="border-t border-gray-200">
+                                <td class="px-4 py-3">{{ empregado.nome }}</td>
+                                <td class="px-4 py-3">{{ empregado.email|default:"-" }}</td>
+                                <td class="px-4 py-3">{{ empregado.funcao|default:"-" }}</td>
+                                <td class="px-4 py-3">{{ empregado.data_registo }}</td>
+                                <td class="px-4 py-3">
+                                    <a href="{% url 'projetos:empregado_aprovar' empregado.id %}"
+                                       class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                        Aprovar
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">Sem registos pendentes.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

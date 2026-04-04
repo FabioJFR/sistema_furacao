@@ -1,6 +1,8 @@
 from django import forms
 import json
-from .models import Projeto, Furo, Empregados, Maquina, Material, Medicao, EmpregadoProjeto, EmpregadoFicheiro
+from .models import Projeto, Furo, Empregados, EmpregadoProjeto, EmpregadoFicheiro, RegistoDiarioEmpregado, Maquina, Material, Medicao
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 
 class ProjetoForm(forms.ModelForm):
@@ -227,6 +229,67 @@ class FuroCreateForm(forms.ModelForm):
 
 
 # ---------------- Empregados ----------------
+
+class EmpregadoRegistroForm(UserCreationForm):
+    username = forms.CharField(
+        label="Nome de utilizador",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    nome = forms.CharField(
+        label="Nome completo",
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    telefone = forms.CharField(
+        label="Telefone",
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    funcao = forms.CharField(
+        label="Função",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    password1 = forms.CharField(
+        label="Palavra-passe",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text="A palavra-passe deve ter pelo menos 8 caracteres e não deve ser parecida com o nome de utilizador."
+    )
+    password2 = forms.CharField(
+        label="Confirmar palavra-passe",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text="Introduza novamente a mesma palavra-passe."
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'nome', 'email', 'telefone', 'funcao', 'password1', 'password2']
+
+    def clean_nome(self):
+        valor = self.cleaned_data.get('nome', '').strip()
+        if len(valor) < 3:
+            raise forms.ValidationError("O nome deve ter pelo menos 3 caracteres.")
+        return valor
+
+    def clean_telefone(self):
+        valor = self.cleaned_data.get('telefone')
+        if valor:
+            return str(valor).strip()
+        return valor
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Já existe uma conta com este email.")
+        return email
+
+
 class EmpregadosForm(forms.ModelForm):
     alertas = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 2}),
@@ -383,6 +446,51 @@ class EmpregadoFicheiroForm(forms.ModelForm):
             'ficheiro': forms.FileInput(attrs={'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+class RegistoDiarioEmpregadoForm(forms.ModelForm):
+    class Meta:
+        model = RegistoDiarioEmpregado
+        fields = ['projeto', 'furo', 'data', 'horas_trabalhadas', 'metros_furados', 'observacoes']
+        widgets = {
+            'projeto': forms.Select(attrs={'class': 'form-control'}),
+            'furo': forms.Select(attrs={'class': 'form-control'}),
+            'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'horas_trabalhadas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'metros_furados': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def __init__(self, *args, empregado=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empregado = empregado
+
+        if empregado:
+            self.fields['projeto'].queryset = empregado.projetos_atuais
+            self.fields['furo'].queryset = Furo.objects.filter(
+                projeto__in=empregado.projetos_atuais
+            ).distinct()
+
+    def clean_horas_trabalhadas(self):
+        valor = self.cleaned_data.get('horas_trabalhadas')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("As horas trabalhadas não podem ser negativas.")
+        return valor
+
+    def clean_metros_furados(self):
+        valor = self.cleaned_data.get('metros_furados')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("Os metros furados não podem ser negativos.")
+        return valor
+
+    def clean(self):
+        cleaned = super().clean()
+        projeto = cleaned.get('projeto')
+        furo = cleaned.get('furo')
+
+        if furo and projeto and furo.projeto_id != projeto.id:
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto escolhido.')
+
+        return cleaned
 
 
 # ---------------- Máquinas ----------------

@@ -1,0 +1,47 @@
+{% extends "projetos/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
+            {{ titulo }}
+        </h2>
+
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for field in form %}
+                    <div class="{% if field.name == 'observacoes' %}md:col-span-2{% endif %}">
+                        <label class="block font-semibold mb-1">{{ field.label }}</label>
+                        {{ field|add_class:"w-full p-2 border rounded" }}
+
+                        {% if field.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-success mt-4 w-full text-center">
+                💾 Guardar Registo
+            </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'projetos:area_empregado' %}" class="btn btn-primary">
+                🔙 Voltar
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

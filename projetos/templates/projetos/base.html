@@ -5,13 +5,8 @@
     <meta charset="UTF-8">
     <title>{% block title %}Sistema de Perfuração{% endblock %}</title>
 
-    <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{% static 'img/sistema_furacao_logo.png' %}">
-
-    <!-- Cesium CSS -->
     <link href="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -35,16 +30,27 @@
             background: #1f2937;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 20px;
             color: white;
             z-index: 3000;
+            box-sizing: border-box;
         }
 
         .navbar-logo {
+            display: flex;
+            align-items: center;
             font-weight: bold;
             font-size: 1.25rem;
+            gap: 10px;
             text-decoration: none;
             color: white;
+        }
+
+        .navbar-logo img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
         }
 
         .layout {
@@ -61,6 +67,7 @@
             position: fixed;
             top: 60px;
             left: 0;
+            box-sizing: border-box;
         }
 
         .sidebar a {
@@ -78,16 +85,42 @@
             color: white;
         }
 
-        .content {
+        .content-com-sidebar {
             margin-left: 220px;
-            padding: 10px;
+            padding: 20px;
             width: calc(100% - 220px);
+            box-sizing: border-box;
         }
 
-        /* Botão X hover */
-        .close-btn:hover {
-            opacity: 1;
+        .content-sem-sidebar {
+            margin-left: 0;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
         }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; }
+
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
     </style>
 </head>
 
@@ -95,26 +128,51 @@
 
 <!-- NAVBAR -->
 <div class="navbar">
-    <a href="{% url 'projetos:dashboard' %}" class="navbar-logo">
-        Sistema Furação
+    <a href="
+        {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+                {% url 'projetos:dashboard' %}
+            {% else %}
+                {% url 'projetos:area_empregado' %}
+            {% endif %}
+        {% else %}
+            {% url 'login' %}
+        {% endif %}
+    " class="navbar-logo">
+        <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo">
+        <span>Sistema Furação</span>
     </a>
+
+    {% if user.is_authenticated %}
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:14px; color:#d1d5db;">{{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
+        </div>
+    {% endif %}
 </div>
 
 <div class="layout">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
-        <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
-        <a href="{% url 'projetos:furo_list' %}">🕳 Furos</a>
-        <a href="{% url 'projetos:medicao_list' %}">📊 Medições</a>
-        <a href="{% url 'projetos:material_list' %}">📦 Materiais</a>
-        <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
-        <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
-    </div>
+    {% if user.is_authenticated %}
+        <div class="sidebar">
+            {% if user.is_superuser %}
+                <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
+                <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
+                <a href="{% url 'projetos:furo_list' %}">🕳 Furos</a>
+                <a href="{% url 'projetos:medicao_list' %}">📊 Medições</a>
+                <a href="{% url 'projetos:material_list' %}">📦 Materiais</a>
+                <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
+                <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
+                <a href="{% url 'projetos:empregado_pendentes' %}">📝 Registos Pendentes</a>
+            {% else %}
+                <a href="{% url 'projetos:area_empregado' %}">👤 Minha Área</a>
+            {% endif %}
+        </div>
 
-    <!-- CONTEÚDO -->
-    <div class="content">
+        <div class="content-com-sidebar">
+    {% else %}
+        <div class="content-sem-sidebar">
+    {% endif %}
 
         {% if messages %}
             <div style="max-width:900px; margin:0 auto 20px auto;">
@@ -138,38 +196,32 @@
                             background:#7f8c8d; color:white;
                         {% endif %}
                     ">
-
                         {{ message }}
-
-                        <span class="close-btn" onclick="fecharMensagem(this)" style="
+                        <span onclick="fecharMensagem(this)" style="
                             position:absolute;
                             right:12px;
                             top:8px;
                             cursor:pointer;
                             font-size:18px;
                             font-weight:bold;
-                            opacity:0.7;
+                            opacity:0.8;
                         ">×</span>
-
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
 
         {% block content %}{% endblock %}
-
     </div>
 </div>
 
 {% block extra_scripts %}{% endblock %}
 
-<!-- JS CORRETAMENTE AQUI -->
 <script>
 function fecharMensagem(el) {
     const box = el.parentElement;
     box.style.opacity = "0";
     box.style.transform = "translateY(-10px)";
-    
     setTimeout(() => {
         box.remove();
     }, 300);

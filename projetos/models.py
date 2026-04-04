@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.contrib.auth.models import User
 
 # models.py
 
@@ -123,6 +124,13 @@ class Furo(models.Model):
 # ------------------------
 class Empregados(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='empregado'
+    )
     furos = models.ManyToManyField(Furo, blank=True, related_name='empregados')
 
     nome = models.CharField(max_length=200, blank=True, default="Empregado")
@@ -148,6 +156,10 @@ class Empregados(models.Model):
     horas_trabalhadas_mes = models.IntegerField(default=0, blank=True)
     horas_total = models.IntegerField(default=0, blank=True)
     alertas = models.JSONField(default=list, blank=True)
+
+    aprovado = models.BooleanField(default=False)
+    data_registo = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    data_aprovacao = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.nome if self.nome else "Empregado sem nome"
@@ -205,6 +217,44 @@ class EmpregadoFicheiro(models.Model):
 
     def __str__(self):
         return f"{self.empregado.nome} - {self.get_tipo_display()}"
+
+
+class RegistoDiarioEmpregado(models.Model):
+    empregado = models.ForeignKey(
+        Empregados,
+        on_delete=models.CASCADE,
+        related_name='registos_diarios'
+    )
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='registos_empregados'
+    )
+    furo = models.ForeignKey(
+        Furo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='registos_empregados'
+    )
+
+    data = models.DateField()
+    horas_trabalhadas = models.FloatField(default=0.0)
+    metros_furados = models.FloatField(default=0.0)
+    observacoes = models.TextField(blank=True)
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-data', '-criado_em']
+        verbose_name = "Registo Diário do Empregado"
+        verbose_name_plural = "Registos Diários dos Empregados"
+
+    def __str__(self):
+        return f"{self.empregado.nome} - {self.data}"
 
 
 # ------------------------
