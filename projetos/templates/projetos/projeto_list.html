@@ -14,10 +14,87 @@
         </a>
     </div>
 
+    <!-- PAINEL DE NAVEGAÇÃO -->
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+        background:#f8fafc;
+        border:1px solid #e5e7eb;
+        border-radius:12px;
+        padding:14px 16px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.06);
+        margin-bottom:20px;
+    ">
+
+        <button id="prevProjetoBtn" type="button" style="
+            width:44px;
+            height:44px;
+            border:none;
+            border-radius:10px;
+            background:#2563eb;
+            color:white;
+            font-size:20px;
+            font-weight:bold;
+            cursor:pointer;
+            box-shadow:0 4px 10px rgba(37,99,235,0.25);
+            transition:0.2s;
+        " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+            ◀
+        </button>
+
+        <button id="nextProjetoBtn" type="button" style="
+            width:44px;
+            height:44px;
+            border:none;
+            border-radius:10px;
+            background:#2563eb;
+            color:white;
+            font-size:20px;
+            font-weight:bold;
+            cursor:pointer;
+            box-shadow:0 4px 10px rgba(37,99,235,0.25);
+            transition:0.2s;
+        " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+            ▶
+        </button>
+
+        <div id="projetoInfo" style="
+            flex:1;
+            min-width:220px;
+            color:#1f2937;
+            font-size:14px;
+            line-height:1.5;
+            font-weight:600;
+            padding:4px 8px;
+        ">
+            Nenhum projeto selecionado
+        </div>
+
+        <button id="abrirProjetoBtn" type="button" style="
+            border:none;
+            border-radius:10px;
+            background:#16a34a;
+            color:white;
+            padding:10px 16px;
+            font-size:14px;
+            font-weight:bold;
+            cursor:pointer;
+            box-shadow:0 4px 10px rgba(22,163,74,0.25);
+            transition:0.2s;
+        " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+            Abrir Projeto
+        </button>
+
+    </div>
+
     <!-- LISTA DE PROJETOS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for projeto in projetos %}
-        <div class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition space-y-2">
+        <div id="projeto-{{ forloop.counter0 }}"
+             class="projeto-card bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition space-y-2"
+             style="transition:0.2s; cursor:pointer;">
             <h2 class="font-bold text-xl text-gray-800">{{ projeto.nome }}</h2>
             <p><strong>Cliente:</strong> {{ projeto.cliente }}</p>
             <p><strong>Cidade:</strong> {{ projeto.cidade }}</p>
@@ -49,21 +126,197 @@
     {{ projetos|json_script:"projetos-data" }}
 
     <script>
-    const map = L.map('map').setView([0,0], 2);
+    const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
+
+    const map = L.map('map').setView([0, 0], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
+    let projetoIndex = 0;
+    const marcadores = [];
+    let marcadorSelecionado = null;
 
-    projetos.forEach(p => {
-        if (p.localizacao_lat && p.localizacao_lon) {
-            L.marker([p.localizacao_lat, p.localizacao_lon])
-             .addTo(map)
-             .bindPopup(`<strong>${p.nome} - ${p.cidade}, ${p.pais}</strong>`);
+    const info = document.getElementById("projetoInfo");
+    const prevBtn = document.getElementById("prevProjetoBtn");
+    const nextBtn = document.getElementById("nextProjetoBtn");
+    const abrirBtn = document.getElementById("abrirProjetoBtn");
+
+    projetos.forEach((p, index) => {
+        if (p.localizacao_lat !== null && p.localizacao_lon !== null) {
+            const marker = L.circleMarker([p.localizacao_lat, p.localizacao_lon], {
+                radius: 8,
+                color: "#ffffff",
+                weight: 2,
+                fillColor: "#2563eb",
+                fillOpacity: 0.95
+            }).addTo(map);
+
+            marker.bindPopup(`<strong>${p.nome}</strong><br>${p.cidade || '-'}, ${p.pais || '-'}`);
+
+            marker.on("click", function () {
+                selecionarProjeto(index, true);
+            });
+
+            marker.on("dblclick", function () {
+                window.location.href = `/projetos/${p.id}/`;
+            });
+
+            marcadores.push({ index, marker });
         }
     });
+
+    function resetarCards() {
+        document.querySelectorAll(".projeto-card").forEach(el => {
+            el.style.border = "none";
+            el.style.transform = "scale(1)";
+            el.style.boxShadow = "";
+        });
+    }
+
+    function destacarCardAtual() {
+        resetarCards();
+        const el = document.getElementById(`projeto-${projetoIndex}`);
+        if (!el) return;
+
+        el.style.border = "3px solid #2563eb";
+        el.style.transform = "scale(1.02)";
+        el.style.boxShadow = "0 8px 20px rgba(37,99,235,0.15)";
+    }
+
+    function resetarMarcadores() {
+        marcadores.forEach(item => {
+            item.marker.setStyle({
+                radius: 8,
+                color: "#ffffff",
+                weight: 2,
+                fillColor: "#2563eb",
+                fillOpacity: 0.95
+            });
+        });
+    }
+
+    function destacarMarcadorAtual() {
+        resetarMarcadores();
+
+        const item = marcadores.find(m => m.index === projetoIndex);
+        if (!item) return;
+
+        item.marker.setStyle({
+            radius: 11,
+            color: "#111827",
+            weight: 3,
+            fillColor: "#f59e0b",
+            fillOpacity: 1
+        });
+
+        marcadorSelecionado = item.marker;
+    }
+
+    function atualizarInfo() {
+        if (projetos.length === 0) {
+            info.innerHTML = "Sem projetos.";
+            abrirBtn.disabled = true;
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            return;
+        }
+
+        const p = projetos[projetoIndex];
+        info.innerHTML = `
+            <strong>${p.nome}</strong><br>
+            Cliente: ${p.cliente || '-'} |
+            Cidade: ${p.cidade || '-'} |
+            País: ${p.pais || '-'}
+        `;
+        abrirBtn.disabled = false;
+    }
+
+    function focarProjeto() {
+        const p = projetos[projetoIndex];
+
+        destacarCardAtual();
+        destacarMarcadorAtual();
+        atualizarInfo();
+
+        const el = document.getElementById(`projeto-${projetoIndex}`);
+        if (el) {
+            el.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
+
+        if (p.localizacao_lat !== null && p.localizacao_lon !== null) {
+            map.flyTo([p.localizacao_lat, p.localizacao_lon], 7, { duration: 1.2 });
+
+            const item = marcadores.find(m => m.index === projetoIndex);
+            if (item) item.marker.openPopup();
+        }
+    }
+
+    function selecionarProjeto(index, focar = true) {
+        projetoIndex = index;
+
+        destacarCardAtual();
+        destacarMarcadorAtual();
+        atualizarInfo();
+
+        if (focar) {
+            const p = projetos[projetoIndex];
+            if (p.localizacao_lat !== null && p.localizacao_lon !== null) {
+                map.flyTo([p.localizacao_lat, p.localizacao_lon], 7, { duration: 1.2 });
+
+                const item = marcadores.find(m => m.index === projetoIndex);
+                if (item) item.marker.openPopup();
+            }
+        }
+    }
+
+    prevBtn.addEventListener("click", () => {
+        if (projetos.length === 0) return;
+        projetoIndex = (projetoIndex - 1 + projetos.length) % projetos.length;
+        focarProjeto();
+    });
+
+    nextBtn.addEventListener("click", () => {
+        if (projetos.length === 0) return;
+        projetoIndex = (projetoIndex + 1) % projetos.length;
+        focarProjeto();
+    });
+
+    abrirBtn.addEventListener("click", () => {
+        if (projetos.length === 0) return;
+        const p = projetos[projetoIndex];
+        window.location.href = `/projetos/${p.id}/`;
+    });
+
+    document.querySelectorAll(".projeto-card").forEach((card, index) => {
+        card.addEventListener("click", () => {
+            selecionarProjeto(index, true);
+        });
+
+        card.addEventListener("dblclick", () => {
+            const p = projetos[index];
+            window.location.href = `/projetos/${p.id}/`;
+        });
+    });
+
+    const bounds = [];
+    projetos.forEach(p => {
+        if (p.localizacao_lat !== null && p.localizacao_lon !== null) {
+            bounds.push([p.localizacao_lat, p.localizacao_lon]);
+        }
+    });
+
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+    }
+
+    if (projetos.length > 0) {
+        selecionarProjeto(0, false);
+    }
     </script>
 
 </section>

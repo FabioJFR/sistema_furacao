@@ -8,13 +8,17 @@
     <!-- Detalhes do Furo -->
     <h2 style="margin-top:20px; margin-bottom:15px;">Detalhes do Furo</h2>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:30px;">
-        <div><strong>Profundidade:</strong> {{ furo.profundidade }} m</div>
+        <div><strong>Profundidade Inicial:</strong> {{ furo.profundidade_inicial }} m</div>
+        <div><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</div>
+        <div><strong>Profundidade Final:</strong> {{ furo.profundidade_final }} m</div>
+        <div><strong>Profundidade Alvo:</strong> {{ furo.profundidade_alvo }} m</div>
         <div><strong>Inclinação:</strong> {{ furo.inclinacao }}°</div>
         <div><strong>Azimute:</strong> {{ furo.azimute }}°</div>
         <div><strong>Magnetismo:</strong> {{ furo.magnetismo }}</div>
         <div><strong>Latitude:</strong> {{ furo.latitude }}</div>
         <div><strong>Longitude:</strong> {{ furo.longitude }}</div>
         <div><strong>Altitude:</strong> {{ furo.altitude }}</div>
+        <div><strong>Sistema de Coordenadas:</strong> {{ furo.get_sistema_coordenadas_display }}</div>
         <div><strong>Data:</strong> {{ furo.data }}</div>
     </div>
 
@@ -68,24 +72,37 @@
                 {% csrf_token %}
                 
                 <label style="font-weight:bold; color:white;">Profundidade (m)</label>
-                <input type="number" name="profundidade" placeholder="Profundidade" required 
-                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+                {{ form.profundidade }}
 
                 <label style="font-weight:bold; color:white;">Inclinação (°)</label>
-                <input type="number" name="inclinacao" placeholder="Inclinação" 
-                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+                {{ form.inclinacao }}
 
                 <label style="font-weight:bold; color:white;">Azimute (°)</label>
-                <input type="number" name="azimute" placeholder="Azimute" 
-                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+                {{ form.azimute }}
 
                 <label style="font-weight:bold; color:white;">Magnetismo</label>
-                <input type="number" name="magnetismo" placeholder="Magnetismo" 
-                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+                {{ form.magnetismo }}
 
                 <label style="font-weight:bold; color:white;">Imagem</label>
-                <input type="file" name="imagem" accept="image/*" capture="environment" 
-                       style="padding:10px; border-radius:5px; border:1px solid #ccc; color:black; background:white;">
+                {{ form.imagem }}
+
+                <label style="font-weight:bold; color:white;">Latitude</label>
+                {{ form.latitude }}
+
+                <label style="font-weight:bold; color:white;">Longitude</label>
+                {{ form.longitude }}
+
+                <label style="font-weight:bold; color:white;">Altitude</label>
+                {{ form.altitude }}
+
+                <label style="font-weight:bold; color:white;">Observações</label>
+                {{ form.observacoes }}
+
+                {% if form.errors %}
+                    <div style="background:#c0392b; color:white; padding:10px; border-radius:6px;">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
 
                 <button type="submit" 
                         style="background:#27ae60; color:white; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;"
@@ -166,8 +183,9 @@ function fecharModal() {
     document.getElementById("overlay").style.display = "none";
 }
 
+{% if furo.latitude and furo.longitude %}
 // Inicializa o mapa Leaflet
-var map = L.map('map').setView([{{ furo.latitude|default:"0" }}, {{ furo.longitude|default:"0" }}], 15);
+var map = L.map('map').setView([{{ furo.latitude }}, {{ furo.longitude }}], 15);
 
 // Tile Layer OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -175,9 +193,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Marcador do furo
-L.marker([{{ furo.latitude|default:"0" }}, {{ furo.longitude|default:"0" }}]).addTo(map)
-    .bindPopup("<b>{{ furo.nome }}</b><br>Profundidade: {{ furo.profundidade }} m")
+L.marker([{{ furo.latitude }}, {{ furo.longitude }}]).addTo(map)
+    .bindPopup("<b>{{ furo.nome }}</b><br>Profundidade atual: {{ furo.profundidade_atual }} m")
     .openPopup();
+{% else %}
+document.getElementById('map').innerHTML = "<div style='display:flex; align-items:center; justify-content:center; height:100%; color:#ecf0f1;'>Sem coordenadas para mostrar o mapa.</div>";
+{% endif %}
 </script>
 
 <!-- Modal de imagem -->

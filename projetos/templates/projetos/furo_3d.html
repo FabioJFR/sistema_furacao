@@ -33,26 +33,41 @@
             Referência espacial: X = Este, Y = Norte, Z = Profundidade
         </div>
 
-        <!-- Gráfico 3D grande -->
+        <!-- Gráfico 3D -->
         <div id="grafico" style="width:100%; height:800px; margin-bottom:20px;">
-            {{ graph|safe }}
+            {% if graph %}
+                {{ graph|safe }}
+            {% else %}
+                <div style="text-align:center; padding:40px;">
+                    <h3>⚠️ Sem dados suficientes</h3>
+                    <p>Adicione medições para visualizar o furo em 3D.</p>
+                </div>
+            {% endif %}
         </div>
 
-        <!-- Botão voltar -->
-        <div style="text-align:center; margin-bottom:20px;">
+        <!-- Botões principais -->
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
             <a href="{% url 'projetos:furo_detail' furo.id %}" 
                style="background:#27ae60; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
                onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
                🔙 Voltar para Detalhes do Furo
             </a>
-        </div>
 
-        <!-- Botão de rotação -->
-        <div style="text-align:center; margin-bottom:20px;">
             <button id="rotacionarBtn" style="
                 background:#2980b9; color:white; padding:10px 15px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; transition:background 0.2s;"
                 onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
                 ▶️ Ativar/Desativar Rotação
+            </button>
+
+            <button onclick="window.print()" style="
+                background:#8e44ad;
+                color:white;
+                padding:10px 15px;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+                cursor:pointer;">
+                📄 Exportar / Imprimir
             </button>
         </div>
 
@@ -86,7 +101,6 @@ const plot = document.querySelector('.plotly-graph-div');
 const botaoRotacao = document.getElementById('rotacionarBtn');
 const aviso = document.getElementById('estadoAviso');
 const modal = document.getElementById('modal');
-const modalBox = document.getElementById('modalBox');
 
 let rotacionando = false;
 let angulo = 0;

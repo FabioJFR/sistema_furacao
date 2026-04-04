@@ -4,34 +4,69 @@
 
 {% block content %}
 <section class="container mx-auto p-6">
-    <div style="max-width:600px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
-        <h2 style="text-align:center; margin-bottom:20px;">Criar Novo Furo</h2>
+    <div style="max-width:700px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
+        <h2 style="text-align:center; margin-bottom:20px;">{{ titulo|default:"Criar Novo Furo" }}</h2>
 
-        <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+        {% if form.non_field_errors %}
+            <div style="background:#e74c3c; color:white; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:18px;">
             {% csrf_token %}
 
             {% for field in form %}
-                <div>
-                    <label style="font-weight:bold;">{{ field.label }}</label>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label for="{{ field.id_for_label }}" style="font-weight:bold;">
+                        {{ field.label }}
+                    </label>
+
                     {{ field }}
+
+                    {% if field.help_text %}
+                        <small style="color:#bdc3c7;">{{ field.help_text }}</small>
+                    {% endif %}
+
                     {% if field.errors %}
-                        <div style="color:#e74c3c; font-size:0.875rem;">{{ field.errors }}</div>
+                        <div style="color:#ffb3b3; font-size:0.875rem;">
+                            {{ field.errors }}
+                        </div>
                     {% endif %}
                 </div>
             {% endfor %}
 
-            <button type="submit" style="
-                background:#27ae60;
-                color:white;
-                padding:10px 15px;
-                border:none;
-                border-radius:5px;
-                font-weight:bold;
-                cursor:pointer;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
-                💾 Salvar
-            </button>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
+                <button type="submit" style="
+                    flex:1;
+                    min-width:180px;
+                    background:#27ae60;
+                    color:white;
+                    padding:12px 15px;
+                    border:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+                    💾 Salvar
+                </button>
+
+                <a href="{% url 'projetos:furo_list' %}" style="
+                    flex:1;
+                    min-width:180px;
+                    text-align:center;
+                    background:#7f8c8d;
+                    color:white;
+                    padding:12px 15px;
+                    border-radius:5px;
+                    font-weight:bold;
+                    text-decoration:none;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#95a5a6'" onmouseout="this.style.background='#7f8c8d'">
+                    ❌ Cancelar
+                </a>
+            </div>
         </form>
 
         <div style="text-align:center; margin-top:15px;">

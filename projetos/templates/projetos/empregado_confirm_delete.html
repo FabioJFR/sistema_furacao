@@ -1,0 +1,36 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Apagar Empregado{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <h1 class="text-2xl font-bold text-gray-800">Apagar Empregado</h1>
+
+        <div class="text-gray-700 space-y-2">
+            <p><strong>Nome:</strong> {{ empregado.nome }}</p>
+            <p><strong>Função:</strong> {{ empregado.funcao|default:"-" }}</p>
+            <p><strong>Email:</strong> {{ empregado.email|default:"-" }}</p>
+        </div>
+
+        <p class="text-gray-600">
+            Tem a certeza que deseja apagar este empregado? Esta ação não pode ser desfeita.
+        </p>
+
+        <form method="post" class="flex gap-3 flex-wrap">
+            {% csrf_token %}
+            <button type="submit"
+                    class="bg-red-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                🗑️ Confirmar
+            </button>
+
+            <a href="{% url 'projetos:empregado_detail' empregado.id %}"
+               class="bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+                Cancelar
+            </a>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

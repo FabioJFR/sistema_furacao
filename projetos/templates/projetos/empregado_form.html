@@ -1,35 +1,197 @@
 {% extends "projetos/base.html" %}
 {% load widget_tweaks %}
-<!-- projetos/templates/projetos/empregado_form.html -->
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
-    <div class="card max-w-lg mx-auto p-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">{{ titulo }}</h2>
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
 
-        <form method="POST" class="flex flex-col gap-4">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
+            {{ titulo }}
+        </h2>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
-            
-            <div>
-                <label for="id_nome" class="block font-semibold mb-1">Nome</label>
-                {{ form.nome|add_class:"w-full p-2 border rounded" }}
-            </div>
 
-            <div>
-                <label for="id_funcao" class="block font-semibold mb-1">Função</label>
-                {{ form.funcao|add_class:"w-full p-2 border rounded" }}
-            </div>
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-            <div>
-                <label for="id_email" class="block font-semibold mb-1">Email</label>
-                {{ form.email|add_class:"w-full p-2 border rounded" }}
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <div>
-                <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
-                {{ form.data_admissao|add_class:"w-full p-2 border rounded" }}
+                <div>
+                    <label for="id_nome" class="block font-semibold mb-1">Nome</label>
+                    {{ form.nome|add_class:"w-full p-2 border rounded" }}
+                    {% if form.nome.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.nome.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="id_funcao" class="block font-semibold mb-1">Função</label>
+                    {{ form.funcao|add_class:"w-full p-2 border rounded" }}
+                    {% if form.funcao.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.funcao.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="id_email" class="block font-semibold mb-1">Email</label>
+                    {{ form.email|add_class:"w-full p-2 border rounded" }}
+                    {% if form.email.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+
+                {% if form.telefone %}
+                <div>
+                    <label for="id_telefone" class="block font-semibold mb-1">Telefone</label>
+                    {{ form.telefone|add_class:"w-full p-2 border rounded" }}
+                    {% if form.telefone.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.telefone.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.data_admissao %}
+                <div>
+                    <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
+                    {{ form.data_admissao|add_class:"w-full p-2 border rounded" }}
+                    {% if form.data_admissao.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.data_admissao.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.data_inicio_contrato %}
+                <div>
+                    <label for="id_data_inicio_contrato" class="block font-semibold mb-1">Início do Contrato</label>
+                    {{ form.data_inicio_contrato|add_class:"w-full p-2 border rounded" }}
+                    {% if form.data_inicio_contrato.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.data_inicio_contrato.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.data_fim_contrato %}
+                <div>
+                    <label for="id_data_fim_contrato" class="block font-semibold mb-1">Fim do Contrato</label>
+                    {{ form.data_fim_contrato|add_class:"w-full p-2 border rounded" }}
+                    {% if form.data_fim_contrato.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.data_fim_contrato.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.nif %}
+                <div>
+                    <label for="id_nif" class="block font-semibold mb-1">NIF</label>
+                    {{ form.nif|add_class:"w-full p-2 border rounded" }}
+                    {% if form.nif.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.nif.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.nib %}
+                <div>
+                    <label for="id_nib" class="block font-semibold mb-1">NIB / IBAN</label>
+                    {{ form.nib|add_class:"w-full p-2 border rounded" }}
+                    {% if form.nib.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.nib.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.nacionalidade %}
+                <div>
+                    <label for="id_nacionalidade" class="block font-semibold mb-1">Nacionalidade</label>
+                    {{ form.nacionalidade|add_class:"w-full p-2 border rounded" }}
+                    {% if form.nacionalidade.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.nacionalidade.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.idade %}
+                <div>
+                    <label for="id_idade" class="block font-semibold mb-1">Idade</label>
+                    {{ form.idade|add_class:"w-full p-2 border rounded" }}
+                    {% if form.idade.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.idade.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.salario %}
+                <div>
+                    <label for="id_salario" class="block font-semibold mb-1">Salário</label>
+                    {{ form.salario|add_class:"w-full p-2 border rounded" }}
+                    {% if form.salario.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.salario.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.curriculo %}
+                <div class="md:col-span-2">
+                    <label for="id_curriculo" class="block font-semibold mb-1">Currículo</label>
+                    {{ form.curriculo|add_class:"w-full p-2 border rounded" }}
+                    {% if empregado and empregado.curriculo %}
+                        <p class="text-sm text-gray-600 mt-1">
+                            Atual:
+                            <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                Ver ficheiro
+                            </a>
+                        </p>
+                    {% endif %}
+                    {% if form.curriculo.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.curriculo.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.contrato %}
+                <div class="md:col-span-2">
+                    <label for="id_contrato" class="block font-semibold mb-1">Contrato</label>
+                    {{ form.contrato|add_class:"w-full p-2 border rounded" }}
+                    {% if empregado and empregado.contrato %}
+                        <p class="text-sm text-gray-600 mt-1">
+                            Atual:
+                            <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                Ver ficheiro
+                            </a>
+                        </p>
+                    {% endif %}
+                    {% if form.contrato.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.contrato.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.morada %}
+                <div class="md:col-span-2">
+                    <label for="id_morada" class="block font-semibold mb-1">Morada</label>
+                    {{ form.morada|add_class:"w-full p-2 border rounded" }}
+                    {% if form.morada.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.morada.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.alertas %}
+                <div class="md:col-span-2">
+                    <label for="id_alertas" class="block font-semibold mb-1">Alertas (JSON)</label>
+                    {{ form.alertas|add_class:"w-full p-2 border rounded" }}
+                    {% if form.alertas.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.alertas.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
             </div>
 
             <button type="submit" class="btn btn-success mt-4 w-full text-center">

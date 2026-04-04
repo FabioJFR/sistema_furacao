@@ -30,4 +30,9 @@
 
     </div>
 </div>
+{% if form.errors %}
+    <div style="background:#e74c3c; color:white; padding:12px; border-radius:8px; margin-bottom:20px;">
+        {{ form.errors }}
+    </div>
+{% endif %}
 {% endblock %}

@@ -1,36 +1,219 @@
 {% extends "projetos/base.html" %}
-<!-- projetos/templates/projetos/empregado_detail.html -->
+
+{% block title %}Detalhes do Empregado{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
-    <div class="card max-w-lg mx-auto p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ empregado.nome }}</h2>
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
-        <p><strong>Função:</strong> {{ empregado.funcao }}</p>
-        <p><strong>Email:</strong> {{ empregado.email }}</p>
-        <p><strong>Data de Admissão:</strong> {{ empregado.data_admissao }}</p>
+        <!-- HEADER -->
+        <div class="flex justify-between items-center flex-wrap gap-3">
+            <h2 class="text-2xl font-bold text-gray-800">{{ empregado.nome }}</h2>
 
-        <!-- BOTÕES -->
-        <div class="flex gap-3 mt-6">
-            <!-- Editar -->
-            <a href="{% url 'projetos:empregado_update' empregado.id %}" 
-               class="btn btn-warning flex-1 text-center">
-                ✏️ Editar
-            </a>
+            <div class="flex gap-3 flex-wrap">
+                <a href="{% url 'projetos:empregado_adicionar_projeto' empregado.id %}" 
+                   class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+                    ➕ Associar Projeto
+                </a>
 
-            <!-- Apagar -->
-            <a href="{% url 'projetos:empregado_delete' empregado.id %}" 
-               class="btn btn-danger flex-1 text-center">
-                🗑️ Apagar
-            </a>
+                <a href="{% url 'projetos:empregado_update' empregado.id %}" 
+                   class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                    ✏️ Editar
+                </a>
+
+                <a href="{% url 'projetos:empregado_delete' empregado.id %}" 
+                   class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                    🗑️ Apagar
+                </a>
+            </div>
         </div>
 
-        <!-- Voltar -->
-        <div class="mt-4">
-            <a href="{% url 'projetos:empregado_list' %}" class="btn btn-primary">
+        <!-- DADOS DO EMPREGADO -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+            <p><strong>Função:</strong> {{ empregado.funcao|default:"-" }}</p>
+            <p><strong>Email:</strong> {{ empregado.email|default:"-" }}</p>
+            <p><strong>Data de Admissão:</strong> {{ empregado.data_admissao|default:"-" }}</p>
+            <p><strong>Idade:</strong> {{ empregado.idade|default:"-" }}</p>
+            <p><strong>Nacionalidade:</strong> {{ empregado.nacionalidade|default:"-" }}</p>
+            <p><strong>NIF:</strong> {{ empregado.nif|default:"-" }}</p>
+            <p><strong>Salário:</strong> {{ empregado.salario|default:"-" }}</p>
+            <p><strong>Horas Diárias:</strong> {{ empregado.horas_diarias|default:"-" }}</p>
+        </div>
+
+        <!-- PROJETOS ATUAIS -->
+        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Projetos Atuais</h3>
+
+            {% if empregado.projetos_atuais %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for projeto in empregado.projetos_atuais %}
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <p class="font-semibold text-gray-800">{{ projeto.nome }}</p>
+                            <p class="text-sm text-gray-600">{{ projeto.cidade|default:"-" }}, {{ projeto.pais|default:"-" }}</p>
+
+                            <div class="mt-3">
+                                <a href="{% url 'projetos:projeto_detail' projeto.id %}" 
+                                   class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                   Ver Projeto
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">Sem projetos atuais.</p>
+            {% endif %}
+        </div>
+
+        <!-- HISTÓRICO -->
+        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Histórico de Projetos</h3>
+
+            {% if empregado.ligacoes_projetos.all %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3">Projeto</th>
+                                <th class="text-left px-4 py-3">Início</th>
+                                <th class="text-left px-4 py-3">Fim</th>
+                                <th class="text-left px-4 py-3">Estado</th>
+                                <th class="text-left px-4 py-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ligacao in empregado.ligacoes_projetos.all %}
+                                <tr class="border-t border-gray-200">
+                                    <td class="px-4 py-3 font-medium text-gray-800">
+                                        {{ ligacao.projeto.nome }}
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-700">
+                                        {{ ligacao.data_inicio|default:"-" }}
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-700">
+                                        {{ ligacao.data_fim|default:"-" }}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        {% if ligacao.ativo %}
+                                            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                                Atual
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                                Concluído
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-2 flex-wrap">
+                                            <a href="{% url 'projetos:empregado_editar_projeto' empregado.id ligacao.id %}"
+                                            class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                                Editar
+                                            </a>
+
+                                            {% if ligacao.ativo %}
+                                                <a href="{% url 'projetos:empregado_terminar_projeto' empregado.id ligacao.id %}"
+                                                class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                                    Terminar
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Sem histórico de projetos.</p>
+            {% endif %}
+        </div>
+
+
+        <!-- FICHEIROS DO EMPREGADO -->
+        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
+            <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Ficheiros do Empregado</h3>
+
+                <a href="{% url 'projetos:empregado_adicionar_ficheiro' empregado.id %}" 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                    📎 Adicionar Ficheiro
+                </a>
+            </div>
+
+            {% if empregado.curriculo or empregado.contrato %}
+            <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% if empregado.curriculo %}
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <p class="font-semibold text-gray-800">Currículo principal</p>
+                    <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
+                        Ver ficheiro
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if empregado.contrato %}
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <p class="font-semibold text-gray-800">Contrato principal</p>
+                    <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
+                        Ver ficheiro
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if empregado.ficheiros.all %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3">Tipo</th>
+                                <th class="text-left px-4 py-3">Título</th>
+                                <th class="text-left px-4 py-3">Upload</th>
+                                <th class="text-left px-4 py-3">Observações</th>
+                                <th class="text-left px-4 py-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ficheiro in empregado.ficheiros.all %}
+                                <tr class="border-t border-gray-200">
+                                    <td class="px-4 py-3">{{ ficheiro.get_tipo_display }}</td>
+                                    <td class="px-4 py-3">{{ ficheiro.titulo|default:"-" }}</td>
+                                    <td class="px-4 py-3">{{ ficheiro.data_upload }}</td>
+                                    <td class="px-4 py-3">{{ ficheiro.observacoes|default:"-" }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-2 flex-wrap">
+                                            <a href="{{ ficheiro.ficheiro.url }}" target="_blank"
+                                            class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                                Ver
+                                            </a>
+
+                                            <a href="{% url 'projetos:empregado_apagar_ficheiro' empregado.id ficheiro.id %}"
+                                            class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                                Apagar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Sem ficheiros adicionais.</p>
+            {% endif %}
+        </div>
+
+
+        <!-- VOLTAR -->
+        <div class="pt-2">
+            <a href="{% url 'projetos:empregado_list' %}" 
+               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
                 🔙 Voltar à Lista
             </a>
         </div>
+
     </div>
 </section>
 {% endblock %}

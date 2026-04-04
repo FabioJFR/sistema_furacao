@@ -5,13 +5,16 @@
 {% block content %}
 <section class="container mx-auto p-6">
 
-    <!-- CARD PRINCIPAL -->
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <!-- HEADER -->
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center flex-wrap gap-3">
             <h1 class="text-2xl font-bold text-gray-800">{{ projeto.nome }}</h1>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
+                <a href="{% url 'projetos:projeto_3d' projeto.pk %}" 
+                   class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                    🖥️ Ver 3D
+                </a>
                 <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
                    class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
                     ✏️ Editar
@@ -28,10 +31,84 @@
             <p><strong>Cliente:</strong> {{ projeto.cliente }}</p>
             <p><strong>Cidade:</strong> {{ projeto.cidade }}</p>
             <p><strong>País:</strong> {{ projeto.pais }}</p>
-            <p><strong>Status:</strong> {{ projeto.status }}</p>
+            <p><strong>Status:</strong> {{ projeto.get_status_display }}</p>
             {% if projeto.notas %}
                 <p class="sm:col-span-2"><strong>Notas:</strong> {{ projeto.notas }}</p>
             {% endif %}
+        </div>
+
+        <!-- PAINEL DE NAVEGAÇÃO DOS FUROS -->
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            background:#f8fafc;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            padding:14px 16px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.06);
+            margin-top:10px;
+            margin-bottom:14px;
+        ">
+            <button id="prevFuroBtn" type="button" style="
+                width:44px;
+                height:44px;
+                border:none;
+                border-radius:10px;
+                background:#2563eb;
+                color:white;
+                font-size:20px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                ◀
+            </button>
+
+            <button id="nextFuroBtn" type="button" style="
+                width:44px;
+                height:44px;
+                border:none;
+                border-radius:10px;
+                background:#2563eb;
+                color:white;
+                font-size:20px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                ▶
+            </button>
+
+            <div id="furoInfo" style="
+                flex:1;
+                min-width:220px;
+                color:#1f2937;
+                font-size:14px;
+                line-height:1.5;
+                font-weight:600;
+                padding:4px 8px;
+            ">
+                Nenhum furo selecionado
+            </div>
+
+            <button id="abrirFuroBtn" type="button" style="
+                border:none;
+                border-radius:10px;
+                background:#16a34a;
+                color:white;
+                padding:10px 16px;
+                font-size:14px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(22,163,74,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+                Abrir Furo
+            </button>
         </div>
 
         <!-- MAPA -->
@@ -46,24 +123,162 @@
             const pais = "{{ projeto.pais|escapejs }}";
             const lat = {{ projeto.localizacao_lat }};
             const lon = {{ projeto.localizacao_lon }};
+
             const map = L.map('map').setView([lat, lon], 12);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
+            // Marcador principal do projeto
             L.marker([lat, lon])
                 .addTo(map)
-                .bindPopup(`<strong>${cidade}, ${pais}</strong>`)
-                .openPopup();
+                .bindPopup(`<strong>${cidade}, ${pais}</strong>`);
+
+            // ---------------- FUROS ----------------
+            const furos = [];
+            let furoIndex = 0;
 
             {% for furo in projeto.furos.all %}
                 {% if furo.latitude and furo.longitude %}
-                L.marker([{{ furo.latitude }}, {{ furo.longitude }}])
-                    .addTo(map)
-                    .bindPopup(`<a href="{% url 'projetos:furo_detail' furo.pk %}">Furo {{ forloop.counter }}: {{ furo.nome|escapejs }}</a>`);
+                    const marker{{ forloop.counter }} = L.circleMarker(
+                        [{{ furo.latitude }}, {{ furo.longitude }}],
+                        {
+                            radius: 8,
+                            color: "#ffffff",
+                            weight: 2,
+                            fillColor: "#2563eb",
+                            fillOpacity: 0.95
+                        }
+                    ).addTo(map);
+
+                    marker{{ forloop.counter }}.bindPopup(`
+                        <strong>{{ furo.nome|escapejs }}</strong><br>
+                        Profundidade atual: {{ furo.profundidade_atual }} m<br>
+                        Inclinação: {{ furo.inclinacao|default:"-" }}°<br>
+                        Azimute: {{ furo.azimute|default:"-" }}°
+                    `);
+
+                    marker{{ forloop.counter }}.on("click", function () {
+                        selecionarFuro({{ forloop.counter0 }}, true);
+                    });
+
+                    marker{{ forloop.counter }}.on("dblclick", function () {
+                        window.location.href = "{% url 'projetos:furo_detail' furo.pk %}";
+                    });
+
+                    furos.push({
+                        id: "{{ furo.pk }}",
+                        nome: "{{ furo.nome|escapejs }}",
+                        profundidade_atual: "{{ furo.profundidade_atual }}",
+                        inclinacao: "{{ furo.inclinacao|default:'-' }}",
+                        azimute: "{{ furo.azimute|default:'-' }}",
+                        lat: {{ furo.latitude }},
+                        lon: {{ furo.longitude }},
+                        marker: marker{{ forloop.counter }}
+                    });
                 {% endif %}
             {% endfor %}
+
+            // ---------------- ELEMENTOS UI ----------------
+            const info = document.getElementById("furoInfo");
+            const prevBtn = document.getElementById("prevFuroBtn");
+            const nextBtn = document.getElementById("nextFuroBtn");
+            const abrirBtn = document.getElementById("abrirFuroBtn");
+
+            // ---------------- FUNÇÕES ----------------
+            function resetarMarcadores() {
+                furos.forEach(f => {
+                    f.marker.setStyle({
+                        radius: 8,
+                        color: "#ffffff",
+                        weight: 2,
+                        fillColor: "#2563eb",
+                        fillOpacity: 0.95
+                    });
+                });
+            }
+
+            function destacarFuroAtual() {
+                if (furos.length === 0) return;
+
+                resetarMarcadores();
+
+                const f = furos[furoIndex];
+                f.marker.setStyle({
+                    radius: 11,
+                    color: "#111827",
+                    weight: 3,
+                    fillColor: "#f59e0b",
+                    fillOpacity: 1
+                });
+            }
+
+            function atualizarInfo() {
+                if (furos.length === 0) {
+                    info.innerHTML = "Sem furos com coordenadas.";
+                    abrirBtn.disabled = true;
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                    return;
+                }
+
+                const f = furos[furoIndex];
+
+                info.innerHTML = `
+                    <strong>${f.nome}</strong><br>
+                    Profundidade atual: ${f.profundidade_atual} m |
+                    Inclinação: ${f.inclinacao}° |
+                    Azimute: ${f.azimute}°
+                `;
+                abrirBtn.disabled = false;
+            }
+
+            function focarFuro() {
+                if (furos.length === 0) return;
+
+                const f = furos[furoIndex];
+                map.flyTo([f.lat, f.lon], 14, { duration: 1.2 });
+                destacarFuroAtual();
+                f.marker.openPopup();
+                atualizarInfo();
+            }
+
+            function selecionarFuro(index, focar=true) {
+                furoIndex = index;
+                destacarFuroAtual();
+                atualizarInfo();
+
+                if (focar) {
+                    const f = furos[furoIndex];
+                    map.flyTo([f.lat, f.lon], 14, { duration: 1.2 });
+                    f.marker.openPopup();
+                }
+            }
+
+            // ---------------- BOTÕES ----------------
+            prevBtn.addEventListener("click", () => {
+                if (furos.length === 0) return;
+                furoIndex = (furoIndex - 1 + furos.length) % furos.length;
+                focarFuro();
+            });
+
+            nextBtn.addEventListener("click", () => {
+                if (furos.length === 0) return;
+                furoIndex = (furoIndex + 1) % furos.length;
+                focarFuro();
+            });
+
+            abrirBtn.addEventListener("click", () => {
+                if (furos.length === 0) return;
+                const f = furos[furoIndex];
+                window.location.href = `/furos/${f.id}/`;
+            });
+
+            // ---------------- INICIAL ----------------
+            if (furos.length > 0) {
+                selecionarFuro(0, false);
+            }
         </script>
         {% endif %}
 
@@ -75,13 +290,22 @@
                 {% for furo in projeto.furos.all %}
                 <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
                     <h3 class="font-semibold text-gray-800">Furo {{ forloop.counter }}: {{ furo.nome }}</h3>
-                    <p><strong>Profundidade:</strong> {{ furo.profundidade }} m</p>
-                    <p><strong>Inclinação:</strong> {{ furo.inclinacao|default:"-" }}</p>
-                    <p><strong>Azimute:</strong> {{ furo.azimute|default:"-" }}</p>
-                    <a href="{% url 'projetos:furo_detail' furo.pk %}" 
-                       class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                       Ver Detalhes
-                    </a>
+                    <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
+                    <p><strong>Inclinação:</strong> {{ furo.inclinacao|default:"-" }}°</p>
+                    <p><strong>Azimute:</strong> {{ furo.azimute|default:"-" }}°</p>
+                    <p><strong>Sistema Coord.:</strong> {{ furo.get_sistema_coordenadas_display }}</p>
+
+                    <div class="flex gap-2 flex-wrap pt-2">
+                        <a href="{% url 'projetos:furo_detail' furo.pk %}" 
+                           class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                           Ver Detalhes
+                        </a>
+
+                        <a href="{% url 'projetos:medicao_create' furo.pk %}" 
+                           class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                           Nova Medição
+                        </a>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

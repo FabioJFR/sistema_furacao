@@ -1,10 +1,8 @@
 import uuid
 from django.db import models
-from django.contrib.postgres.fields import JSONField  # Para PostgreSQL; se usar SQLite >=3.9, use models.JSONField
+
 # models.py
 
-import uuid
-from django.db import models
 
 # ------------------------
 # Projeto
@@ -50,6 +48,11 @@ class Furo(models.Model):
         ('parado', 'Parado'),
         ('concluido', 'Concluído'),
         ('pausado', 'Pausado')
+    ]
+    SISTEMA_COORDENADAS_CHOICES = [
+        ('local', 'Local'),
+        ('utm', 'UTM'),
+        ('wgs84', 'WGS84'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -98,6 +101,17 @@ class Furo(models.Model):
     trabalhadores = models.JSONField(default=list, blank=True)
     metros_furados_diario = models.JSONField(default=list, blank=True)
 
+    origem_este = models.FloatField(default=0.0)
+    origem_norte = models.FloatField(default=0.0)
+    origem_tvd = models.FloatField(default=0.0)
+
+    # opcional (futuro)
+    sistema_coordenadas = models.CharField(
+        max_length=50,
+        choices=SISTEMA_COORDENADAS_CHOICES,
+        default='local'
+    )
+
     data = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -109,33 +123,88 @@ class Furo(models.Model):
 # ------------------------
 class Empregados(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE, related_name='empregados')
     furos = models.ManyToManyField(Furo, blank=True, related_name='empregados')
-    nome = models.CharField(max_length=200, blank=True, null=True)
+
+    nome = models.CharField(max_length=200, blank=True, default="Empregado")
     funcao = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True, null=True)
     data_admissao = models.DateField(null=True, blank=True)
     numero = models.IntegerField(blank=True, null=True)
     data_inicio_contrato = models.DateField(blank=True, null=True)
     data_fim_contrato = models.DateField(blank=True, null=True)
+    telefone = models.CharField(max_length=30, blank=True, null=True)
     idade = models.IntegerField(blank=True, null=True)
     doc_id = models.BigIntegerField(blank=True, null=True)
     nib = models.CharField(max_length=50, blank=True, null=True)
     morada = models.CharField(max_length=200, blank=True, null=True)
     nacionalidade = models.CharField(max_length=100, blank=True, null=True)
     nif = models.BigIntegerField(blank=True, null=True)
-    curriculo = models.TextField(blank=True, null=True)
-    contrato = models.TextField(blank=True, null=True)
+    curriculo = models.FileField(upload_to='empregados/curriculos/', blank=True, null=True)
+    contrato = models.FileField(upload_to='empregados/contratos/', blank=True, null=True)
     salario = models.FloatField(default=0.0)
-    horas_diarias = models.IntegerField(default=0)
-    horas_mensais = models.IntegerField(default=0)
-    horas_extra = models.IntegerField(default=0)
-    horas_trabalhadas_mes = models.IntegerField(default=0)
-    projetos_ativos = models.JSONField(default=list, blank=True)  # lista de IDs de projetos
+    horas_diarias = models.IntegerField(default=0, blank=True)
+    horas_mensais = models.IntegerField(default=0, blank=True)
+    horas_extra = models.IntegerField(default=0, blank=True)
+    horas_trabalhadas_mes = models.IntegerField(default=0, blank=True)
+    horas_total = models.IntegerField(default=0, blank=True)
     alertas = models.JSONField(default=list, blank=True)
 
     def __str__(self):
-        return self.nome
+        return self.nome if self.nome else "Empregado sem nome"
+
+    @property
+    def projetos_atuais(self):
+        return Projeto.objects.filter(
+            empregado_projetos__empregado=self,
+            empregado_projetos__ativo=True
+        ).distinct()
+
+    @property
+    def projetos_historico(self):
+        return Projeto.objects.filter(
+            empregado_projetos__empregado=self
+        ).distinct()
+    
+
+class EmpregadoProjeto(models.Model):
+    empregado = models.ForeignKey(Empregados, on_delete=models.CASCADE, related_name='ligacoes_projetos')
+    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE, related_name='empregado_projetos')
+
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('empregado', 'projeto', 'data_inicio')
+        ordering = ['-ativo', '-data_inicio']
+
+    def __str__(self):
+        return f"{self.empregado.nome} - {self.projeto.nome}"
+
+
+class EmpregadoFicheiro(models.Model):
+    TIPO_CHOICES = [
+        ('foto', 'Foto'),
+        ('bi', 'BI / Cartão de Cidadão'),
+        ('nib', 'NIB / IBAN'),
+        ('contrato', 'Contrato'),
+        ('curriculo', 'Currículo'),
+        ('outro', 'Outro'),
+    ]
+
+    empregado = models.ForeignKey(
+        Empregados,
+        on_delete=models.CASCADE,
+        related_name='ficheiros'
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='outro')
+    titulo = models.CharField(max_length=200, blank=True, default="")
+    ficheiro = models.FileField(upload_to='empregados/ficheiros/')
+    data_upload = models.DateTimeField(auto_now_add=True)
+    observacoes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.empregado.nome} - {self.get_tipo_display()}"
 
 
 # ------------------------
