@@ -3,82 +3,256 @@
 {% block title %}Minha Área{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+<section class="max-w-6xl mx-auto">
 
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">
-                Bem-vindo, {{ empregado.nome }}
-            </h1>
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+        <h2 class="text-2xl font-bold">👤 Bem-vindo, {{ empregado.nome }}</h2>
 
-            <div class="flex gap-3 flex-wrap">
-                <a href="{% url 'projetos:registo_diario_create' %}"
-                   class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                    ➕ Novo Registo
-                </a>
-                <a href="{% url 'projetos:registo_diario_list' %}"
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                    📋 Ver Registos
-                </a>
-            </div>
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-success">
+                ➕ Novo Registo Diário
+            </a>
+            <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-primary">
+                📋 Ver Registos
+            </a>
+            <a href="{% url 'projetos:levantamento_material_create' %}" class="btn btn-warning">
+                📦 Levantar Material
+            </a>
+
+            <a href="{% url 'projetos:levantamento_material_list' %}" class="btn btn-primary">
+                📋 Meus Levantamentos
+            </a>
+            <a href="{% url 'projetos:devolucao_material_create' %}" class="btn btn-warning">
+                ↩️ Devolver Material
+            </a>
+
+            <a href="{% url 'projetos:devolucao_material_list' %}" class="btn btn-primary">
+                📋 Minhas Devoluções
+            </a>
+        </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6">
+
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Horas Hoje</div>
+            <div class="text-2xl font-bold">{{ horas_hoje|floatformat:2 }}</div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>Função:</strong> {{ empregado.funcao|default:"-" }}</p>
-            <p><strong>Email:</strong> {{ empregado.email|default:"-" }}</p>
-            <p><strong>Telefone:</strong> {{ empregado.telefone|default:"-" }}</p>
-            <p><strong>Data de Admissão:</strong> {{ empregado.data_admissao|default:"-" }}</p>
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Horas Mês</div>
+            <div class="text-2xl font-bold">{{ horas_mes|floatformat:2 }}</div>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Projetos Atuais</h2>
-
-            {% if empregado.projetos_atuais %}
-                <ul class="space-y-2">
-                    {% for projeto in empregado.projetos_atuais %}
-                        <li class="bg-white border border-gray-200 rounded-lg p-3">
-                            {{ projeto.nome }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-gray-500">Sem projetos atuais.</p>
-            {% endif %}
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Total Horas</div>
+            <div class="text-2xl font-bold">{{ horas_total|floatformat:2 }}</div>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Registos Recentes</h2>
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Metros Hoje</div>
+            <div class="text-2xl font-bold">{{ metros_hoje|floatformat:2 }} m</div>
+        </div>
 
-            {% if registos_recentes %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                        <thead class="bg-gray-100 text-gray-700">
-                            <tr>
-                                <th class="text-left px-4 py-3">Data</th>
-                                <th class="text-left px-4 py-3">Projeto</th>
-                                <th class="text-left px-4 py-3">Furo</th>
-                                <th class="text-left px-4 py-3">Horas</th>
-                                <th class="text-left px-4 py-3">Metros</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for registo in registos_recentes %}
-                                <tr class="border-t border-gray-200">
-                                    <td class="px-4 py-3">{{ registo.data }}</td>
-                                    <td class="px-4 py-3">{{ registo.projeto.nome|default:"-" }}</td>
-                                    <td class="px-4 py-3">{{ registo.furo.nome|default:"-" }}</td>
-                                    <td class="px-4 py-3">{{ registo.horas_trabalhadas }}</td>
-                                    <td class="px-4 py-3">{{ registo.metros_furados }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-gray-500">Ainda não existem registos.</p>
-            {% endif %}
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Total Metros</div>
+            <div class="text-2xl font-bold">{{ metros_total|floatformat:2 }} m</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Furos Trabalhados</div>
+            <div class="text-2xl font-bold">{{ total_furos }}</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Média m/h</div>
+            <div class="text-2xl font-bold">{{ media_metros_hora|floatformat:2 }}</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow">
+            <div class="text-gray-500 text-sm">Média m/dia</div>
+            <div class="text-2xl font-bold">{{ media_metros_dia|floatformat:2 }}</div>
         </div>
 
     </div>
+
+    <!-- PROJETOS ATUAIS -->
+    <div class="bg-white rounded-xl shadow p-4 mb-6">
+        <h3 class="text-lg font-semibold mb-4">📁 Projetos Atuais</h3>
+
+        {% if empregado.projetos_atuais %}
+            <div class="flex flex-wrap gap-2">
+                {% for projeto in empregado.projetos_atuais %}
+                    <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                        {{ projeto.nome }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">Sem projetos atuais.</p>
+        {% endif %}
+    </div>
+
+
+    <!-- GRÁFICOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <div class="bg-white rounded-xl shadow p-4">
+            <h3 class="text-lg font-semibold mb-4">📈 Metros por Dia</h3>
+            <canvas id="graficoMetros"></canvas>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-4">
+            <h3 class="text-lg font-semibold mb-4">⏱️ Horas por Dia</h3>
+            <canvas id="graficoHoras"></canvas>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-4">
+            <h3 class="text-lg font-semibold mb-4">⚙️ Produtividade (m/h)</h3>
+            <canvas id="graficoProdutividade"></canvas>
+        </div>
+
+    </div>
+
+    <!-- FUROS TRABALHADOS -->
+    <div class="bg-white rounded-xl shadow p-4 mb-6">
+        <h3 class="text-lg font-semibold mb-4">🕳 Furos em que Trabalhei</h3>
+
+        {% if furos_trabalhados %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for furo in furos_trabalhados %}
+                    <div class="border rounded-lg p-4 space-y-2">
+                        <h4 class="font-bold text-gray-800">{{ furo.nome }}</h4>
+                        <p><strong>Projeto:</strong> {{ furo.projeto.nome }}</p>
+                        <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
+
+                        <div class="flex gap-2 flex-wrap pt-2">
+                            <a href="{% url 'projetos:furo_detail' furo.id %}"
+                            class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                                Ver Detalhes
+                            </a>
+
+                            <a href="{% url 'projetos:furo_3d' furo.id %}"
+                            class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                                Ver 3D
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">Ainda não existem furos associados aos teus registos.</p>
+        {% endif %}
+    </div>
+
+    <!-- ÚLTIMOS REGISTOS -->
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="text-lg font-semibold mb-4">📋 Últimos Registos</h3>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left border-b">
+                        <th class="py-2">Data</th>
+                        <th class="py-2">Projeto</th>
+                        <th class="py-2">Furo</th>
+                        <th class="py-2">Horas</th>
+                        <th class="py-2">Paragem</th>
+                        <th class="py-2">Tipo</th>
+                        <th class="py-2">Metros</th>
+                        <th class="py-2">Foto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in ultimos_registos %}
+                    <tr class="border-b">
+                        <td class="py-2">{{ r.data }}</td>
+                        <td class="py-2">{{ r.projeto.nome|default:"-" }}</td>
+                        <td class="py-2">{{ r.furo.nome|default:"-" }}</td>
+                        <td class="py-2">{{ r.horas_trabalhadas|floatformat:2 }}</td>
+                        <td class="py-2">{{ r.horas_paragem|floatformat:2 }}</td>
+                        <td class="py-2">{{ r.get_tipo_paragem_display|default:"-" }}</td>
+                        <td class="py-2">{{ r.metros_furados|floatformat:2 }}</td>
+                        <td class="py-2">
+                            {% if r.relatorio_foto %}
+                                <a href="{{ r.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                    Ver
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="py-4 text-gray-500">Sem registos ainda</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </section>
+{{ grafico_labels|json_script:"grafico-labels" }}
+{{ grafico_metros|json_script:"grafico-metros" }}
+{{ grafico_horas|json_script:"grafico-horas" }}
+{{ grafico_produtividade|json_script:"grafico-produtividade" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const labels = JSON.parse(document.getElementById('grafico-labels').textContent);
+    const dadosMetros = JSON.parse(document.getElementById('grafico-metros').textContent);
+    const dadosHoras = JSON.parse(document.getElementById('grafico-horas').textContent);
+    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produtividade').textContent);
+
+    new Chart(document.getElementById('graficoMetros'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Metros',
+                data: dadosMetros,
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    new Chart(document.getElementById('graficoHoras'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Horas',
+                data: dadosHoras,
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    new Chart(document.getElementById('graficoProdutividade'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'm/h',
+                data: dadosProdutividade,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
 {% endblock %}

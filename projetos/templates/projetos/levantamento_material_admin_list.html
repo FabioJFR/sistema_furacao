@@ -1,0 +1,121 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Levantamentos de Material{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <div class="flex justify-between items-center flex-wrap gap-3">
+            <h1 class="text-2xl font-bold text-gray-800">📦 Levantamentos de Material</h1>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="bg-gray-50 rounded-xl p-4 shadow-sm">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Empregado</label>
+                    <select name="empregado" class="w-full p-2 border rounded">
+                        <option value="">Todos</option>
+                        {% for e in empregados %}
+                            <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
+                                {{ e.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Material</label>
+                    <select name="material" class="w-full p-2 border rounded">
+                        <option value="">Todos</option>
+                        {% for m in materiais %}
+                            <option value="{{ m.id }}" {% if filtros.material == m.id|stringformat:"s" %}selected{% endif %}>
+                                {{ m.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Projeto</label>
+                    <select name="projeto" class="w-full p-2 border rounded">
+                        <option value="">Todos</option>
+                        {% for p in projetos %}
+                            <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
+                                {{ p.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Data início</label>
+                    <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full p-2 border rounded">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Data fim</label>
+                    <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="md:col-span-5 flex gap-3 pt-2">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'projetos:levantamento_material_admin_list' %}" class="btn btn-warning">Limpar</a>
+                </div>
+            </form>
+        </div>
+
+        {% if levantamentos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3">Data</th>
+                            <th class="text-left px-4 py-3">Empregado</th>
+                            <th class="text-left px-4 py-3">Material</th>
+                            <th class="text-left px-4 py-3">Quantidade</th>
+                            <th class="text-left px-4 py-3">Projeto</th>
+                            <th class="text-left px-4 py-3">Furo</th>
+                            <th class="text-left px-4 py-3">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for levantamento in levantamentos %}
+                            <tr class="border-t border-gray-200">
+                                <td class="px-4 py-3">{{ levantamento.data }}</td>
+                                <td class="px-4 py-3">{{ levantamento.empregado.nome }}</td>
+                                <td class="px-4 py-3">{{ levantamento.material.nome }}</td>
+                                <td class="px-4 py-3">{{ levantamento.quantidade }}</td>
+                                <td class="px-4 py-3">
+                                    {% if levantamento.projeto %}
+                                        <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}" class="text-blue-600 hover:underline">
+                                            {{ levantamento.projeto.nome }}
+                                        </a>
+                                    {% else %}
+                                        Stock
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3">
+                                    {% if levantamento.furo %}
+                                        <a href="{% url 'projetos:furo_detail' levantamento.furo.id %}" class="text-blue-600 hover:underline">
+                                            {{ levantamento.furo.nome }}
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3">{{ levantamento.observacoes|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">Ainda não existem levantamentos registados.</p>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

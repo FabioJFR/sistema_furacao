@@ -1,0 +1,46 @@
+{% extends 'projetos/base.html' %}
+
+{% block title %}Apagar Máquina{% endblock %}
+
+{% block content %}
+<div style="max-width:500px; margin:60px auto; background:#34495e; padding:30px; border-radius:12px; text-align:center; color:#ecf0f1;">
+
+    <h2 style="margin-bottom:20px;">⚠️ Apagar Máquina</h2>
+
+    <p style="margin-bottom:20px;">
+        Tem a certeza que deseja apagar a máquina:
+    </p>
+
+    <h3 style="margin-bottom:30px;">{{ maquina.nome }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+            <button type="submit" style="
+                background:#c0392b;
+                color:white;
+                padding:10px 20px;
+                border:none;
+                border-radius:6px;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+                🗑️ Sim, apagar
+            </button>
+
+            <a href="{% url 'projetos:maquina_detail' maquina.id %}" style="
+                background:#2980b9;
+                color:white;
+                padding:10px 20px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+            ">
+                🔙 Cancelar
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

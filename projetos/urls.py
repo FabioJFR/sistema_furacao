@@ -54,10 +54,25 @@ urlpatterns = [
     path('minha-area/', views.area_empregado, name='area_empregado'),
     path('meus-registos/', views.registo_diario_list, name='registo_diario_list'),
     path('meus-registos/novo/', views.registo_diario_create, name='registo_diario_create'),
+    path('registos/novo/', views.registo_diario_create, name='registo_diario_create'),
+    path('registos/admin/', views.registos_admin_list, name='registos_admin_list'),
+    path('meus-registos/<int:pk>/editar/', views.registo_diario_update, name='registo_diario_update'),
+    path('registos/admin/<int:pk>/editar/', views.registo_admin_update, name='registo_admin_update'),
 
     path('redirect-after-login/', views.redirect_after_login, name='redirect_after_login'),
 
     # ---------------- MATERIAL ----------------
     path('materiais/', views.material_list, name='material_list'),
     path('materiais/novo/', views.material_create, name='material_create'),
+    path('materiais/<uuid:material_id>/', views.material_detail, name='material_detail'),
+    path('materiais/<uuid:material_id>/editar/', views.material_update, name='material_update'),
+    path('materiais/<uuid:material_id>/apagar/', views.material_delete, name='material_delete'),
+    path('meus-levantamentos/', views.levantamento_material_list, name='levantamento_material_list'),
+    path('meus-levantamentos/novo/', views.levantamento_material_create, name='levantamento_material_create'),
+    path('levantamentos/admin/',views.levantamento_material_admin_list,name='levantamento_material_admin_list'),
+    path('minhas-devolucoes/', views.devolucao_material_list, name='devolucao_material_list'),
+    path('minhas-devolucoes/nova/', views.devolucao_material_create, name='devolucao_material_create'),
+    path('devolucoes/admin/', views.devolucao_material_admin_list, name='devolucao_material_admin_list'),
+
+    path('graficos/', views.graficos_dashboard, name='graficos_dashboard'),
 ]

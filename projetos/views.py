@@ -17,34 +17,136 @@ from django.shortcuts import resolve_url
 from .decorators import admin_required, empregado_required
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-
+from django.utils.dateparse import parse_date
+from collections import OrderedDict
+from django.db.models import Sum, Count, F
+from datetime import timedelta
 
 
 # -------------- DASHBOARD ---------------
+
+
 @login_required
 @admin_required
 def dashboard(request):
-    projetos = list(
-        Projeto.objects.all().values(
-            "id",
-            "nome",
-            "cidade",
-            "pais",
-            "status",
-            "localizacao_lat",
-            "localizacao_lon"
-        )
-    )
+    projetos_qs = Projeto.objects.all().order_by('nome')
+
+    projetos = []
+    for p in projetos_qs:
+        projetos.append({
+            "id": str(p.id),
+            "nome": p.nome,
+            "cidade": p.cidade,
+            "pais": p.pais,
+            "status": p.status,
+            "localizacao_lat": float(p.localizacao_lat) if p.localizacao_lat is not None else None,
+            "localizacao_lon": float(p.localizacao_lon) if p.localizacao_lon is not None else None,
+        })
+
+    # -------- TOTAIS GERAIS --------
+    total_projetos = Projeto.objects.count()
+    total_furos = Furo.objects.count()
+    total_empregados = Empregados.objects.count()
+    total_maquinas = Maquina.objects.count()
+    total_materiais = Material.objects.count()
+
+    # -------- ALERTAS --------
+    materiais_stock_baixo = Material.objects.filter(
+        ativo=True,
+        quantidade__lte=F('stock_minimo')
+    ).order_by('quantidade')
+
+    maquinas_alerta = Maquina.objects.filter(
+        estado__in=['avariada', 'reparacao', 'parada']
+    ).order_by('nome')
+
+    # -------- REGISTOS DIÁRIOS --------
+    registos = RegistoDiarioEmpregado.objects.select_related(
+        'empregado', 'projeto', 'furo'
+    ).order_by('data')
+
+    agregados_dia = OrderedDict()
+
+    for registo in registos:
+        if not registo.data:
+            continue
+
+        chave = registo.data.strftime("%d/%m/%Y")
+
+        if chave not in agregados_dia:
+            agregados_dia[chave] = {
+                "metros": 0,
+                "horas": 0,
+            }
+
+        agregados_dia[chave]["metros"] += registo.metros_furados or 0
+        agregados_dia[chave]["horas"] += registo.horas_trabalhadas or 0
+
+    labels_dia = []
+    metros_dia = []
+    horas_dia = []
+    produtividade_dia = []
+
+    for data_label, valores in agregados_dia.items():
+        labels_dia.append(data_label)
+
+        metros = valores["metros"]
+        horas = valores["horas"]
+        produtividade = metros / horas if horas > 0 else 0
+
+        metros_dia.append(round(metros, 2))
+        horas_dia.append(round(horas, 2))
+        produtividade_dia.append(round(produtividade, 2))
+
+    # -------- METROS POR EMPREGADO --------
+    empregados_stats = Empregados.objects.order_by('-total_metros_furados')[:10]
+    labels_empregados = [e.nome for e in empregados_stats]
+    metros_empregados = [round(e.total_metros_furados or 0, 2) for e in empregados_stats]
+
+    # -------- METROS POR PROJETO --------
+    projetos_stats = Projeto.objects.annotate(
+        total_metros=Sum('registos_empregados__metros_furados')
+    ).order_by('-total_metros')[:10]
+
+    labels_projetos = [p.nome for p in projetos_stats]
+    metros_projetos = [round(p.total_metros or 0, 2) for p in projetos_stats]
+
+    # -------- METROS POR FURO --------
+    furos_stats = Furo.objects.annotate(
+        total_metros=Sum('registos_empregados__metros_furados')
+    ).order_by('-total_metros')[:10]
+
+    labels_furos = [f.nome for f in furos_stats]
+    metros_furos = [round(f.total_metros or 0, 2) for f in furos_stats]
 
     context = {
-        "total_projetos": Projeto.objects.count(),
-        "total_furos": Furo.objects.count(),
-        "total_maquinas": Maquina.objects.count(),
-        "total_empregados": Empregados.objects.count(),
-        "projetos": projetos,
-    }
-    return render(request, "projetos/dashboard.html", context)
+        "total_projetos": total_projetos,
+        "total_furos": total_furos,
+        "total_empregados": total_empregados,
+        "total_maquinas": total_maquinas,
+        "total_materiais": total_materiais,
 
+        "projetos": projetos,
+
+        "materiais_stock_baixo": materiais_stock_baixo,
+        "maquinas_alerta": maquinas_alerta,
+
+        "labels_dia": labels_dia,
+        "metros_dia": metros_dia,
+        "horas_dia": horas_dia,
+        "produtividade_dia": produtividade_dia,
+
+        "labels_empregados": labels_empregados,
+        "metros_empregados": metros_empregados,
+
+        "labels_projetos": labels_projetos,
+        "metros_projetos": metros_projetos,
+
+        "labels_furos": labels_furos,
+        "metros_furos": metros_furos,
+    }
+
+    return render(request, "projetos/dashboard.html", context)
 
 # ---------------- HOME ----------------
 def home(request):
@@ -67,11 +169,16 @@ def projeto_list(request):
     context = {'projetos': projetos_serializaveis}
     return render(request, 'projetos/projeto_list.html', context)
 
-@login_required
-@admin_required
-def projeto_detail(request, pk):  # ✅ usar pk
+def projeto_detail(request, pk):
     projeto = get_object_or_404(Projeto, pk=pk)
-    return render(request, "projetos/projeto_detail.html", {"projeto": projeto})
+    levantamentos = projeto.levantamentos_materiais.select_related(
+        'empregado', 'material', 'furo'
+    ).all()
+
+    return render(request, "projetos/projeto_detail.html", {
+        "projeto": projeto,
+        "levantamentos": levantamentos,
+    })
 
 @login_required
 @admin_required
@@ -180,6 +287,10 @@ def furo_create(request):
 def furo_detail(request, pk):
     furo = get_object_or_404(Furo, pk=pk)
 
+    levantamentos = furo.levantamentos_materiais.select_related(
+        'empregado', 'material', 'projeto'
+    ).all()
+
     if request.method == "POST":
         form = MedicaoForm(request.POST, request.FILES, furo=furo)
         if form.is_valid():
@@ -223,6 +334,7 @@ def furo_detail(request, pk):
     context = {
         'furo': furo,
         'form': form,
+        'levantamentos': levantamentos,
     }
     return render(request, 'projetos/furo_detail.html', context)
 
@@ -397,9 +509,24 @@ def projeto_3d(request, pk):
     })
 
 @login_required
-@admin_required
 def furo_3d_geologico(request, furo_id):
     furo = get_object_or_404(Furo, id=furo_id)
+
+    # ---------------- CONTROLO DE ACESSO ----------------
+    is_admin = request.user.is_superuser or request.user.groups.filter(name='Administradores').exists()
+
+    if not is_admin:
+        empregado = get_object_or_404(Empregados, user=request.user)
+
+        trabalhou_no_furo = RegistoDiarioEmpregado.objects.filter(
+            empregado=empregado,
+            furo=furo
+        ).exists()
+
+        if not trabalhou_no_furo:
+            messages.error(request, "Não tens permissão para ver o 3D deste furo.")
+            return redirect('projetos:area_empregado')
+
     medicoes = list(furo.medicoes.all().order_by("profundidade"))
 
     if not medicoes:
@@ -508,10 +635,10 @@ def furo_3d_geologico(request, furo_id):
             ],
             colorbar=dict(
                 title='Dogleg',
-                len=0.6,        # 👈 altura (0 a 1)
-                thickness=12,   # 👈 largura
-                x=1.08,         # 👈 posição horizontal (mais à direita)
-                y=0.45,         # 👈 posição vertical (baixa)
+                len=0.6,
+                thickness=12,
+                x=1.08,
+                y=0.45,
             ),
             showscale=True
         ),
@@ -585,53 +712,81 @@ def furo_3d_geologico(request, furo_id):
         "estado_max": estado_max,
     })
 
-
 # ---------------- MAQUINAS ----------------
 @login_required
 @admin_required
 def maquina_list(request):
+    maquinas = Maquina.objects.all().order_by('nome')
     return render(request, "projetos/maquina_list.html", {
-        "maquinas": Maquina.objects.all()
+        "maquinas": maquinas
     })
+
 
 @login_required
 @admin_required
 def maquina_detail(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
-    return render(request, "projetos/maquina_detail.html", {"maquina": maquina})
+    return render(request, "projetos/maquina_detail.html", {
+        "maquina": maquina
+    })
 
 
-
-# Criar
 @login_required
 @admin_required
 def maquina_create(request):
-    form = MaquinaCreateForm(request.POST or None)
-    if form.is_valid():
-        maquina = form.save()
-        return redirect('projetos:maquina_detail', maquina_id=maquina.id)
-    return render(request, 'projetos/maquina_form.html', {'form': form, 'titulo': 'Nova Máquina'})
+    if request.method == "POST":
+        form = MaquinaForm(request.POST)
+        if form.is_valid():
+            maquina = form.save()
+            messages.success(request, "Máquina criada com sucesso.")
+            return redirect('projetos:maquina_detail', maquina_id=maquina.id)
+        else:
+            messages.error(request, "Erro ao criar a máquina. Verifique os dados.")
+    else:
+        form = MaquinaForm()
 
-# Editar
+    return render(request, 'projetos/maquina_form.html', {
+        'form': form,
+        'titulo': 'Nova Máquina'
+    })
+
+
 @login_required
 @admin_required
 def maquina_update(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
-    form = MaquinaUpdateForm(request.POST or None, instance=maquina)
-    if form.is_valid():
-        form.save()
-        return redirect('projetos:maquina_detail', maquina_id=maquina.id)
-    return render(request, 'projetos/maquina_form.html', {'form': form, 'titulo': 'Editar Máquina'})
 
-# Apagar
+    if request.method == "POST":
+        form = MaquinaForm(request.POST, instance=maquina)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Máquina atualizada com sucesso.")
+            return redirect('projetos:maquina_detail', maquina_id=maquina.id)
+        else:
+            messages.error(request, "Erro ao atualizar a máquina. Verifique os dados.")
+    else:
+        form = MaquinaForm(instance=maquina)
+
+    return render(request, 'projetos/maquina_form.html', {
+        'form': form,
+        'titulo': 'Editar Máquina',
+        'maquina': maquina
+    })
+
+
 @login_required
 @admin_required
 def maquina_delete(request, maquina_id):
     maquina = get_object_or_404(Maquina, id=maquina_id)
-    maquina.delete()
-    return redirect('projetos:maquina_list')
 
+    if request.method == "POST":
+        maquina.delete()
+        messages.success(request, "Máquina apagada com sucesso.")
+        return redirect('projetos:maquina_list')
 
+    return render(request, 'projetos/maquina_confirm_delete.html', {
+        'maquina': maquina
+    })
 
 # ---------------- EMPREGADOS ----------------
 def registo_empregado(request):
@@ -677,7 +832,6 @@ def empregado_list(request):
         "empregados": empregados
     })
 
-from django.contrib.auth.models import User, Group
 @login_required
 @admin_required
 def empregado_create(request):
@@ -921,18 +1075,85 @@ def empregado_aprovar(request, pk):
         "empregado": empregado
     })
 
+#-------------- AREA EMPREGADO ------------- #
 @login_required
 @empregado_required
 def area_empregado(request):
     empregado = get_object_or_404(Empregados, user=request.user)
-    registos_recentes = empregado.registos_diarios.all()[:5]
+    furos_trabalhados = Furo.objects.filter(
+        registos_empregados__empregado=empregado
+    ).distinct()
+    ultimos_registos = empregado.registos_diarios.select_related(
+        'projeto', 'furo'
+    ).all()[:5]
+
+    # -------- DADOS RESUMIDOS --------
+    horas_hoje = empregado.horas_diarias or 0
+    horas_mes = empregado.horas_trabalhadas_mes or 0
+    horas_total = empregado.horas_total or 0
+
+    metros_hoje = empregado.metros_furados_hoje or 0
+    metros_total = empregado.total_metros_furados or 0
+
+    total_furos = empregado.total_furos_trabalhados or 0
+    media_metros_hora = empregado.media_metros_por_hora or 0
+    media_metros_dia = empregado.media_metros_por_dia or 0
+
+    # -------- DADOS PARA GRÁFICOS --------
+    registos_grafico = empregado.registos_diarios.order_by('data')
+
+    labels = []
+    metros_por_dia = []
+    horas_por_dia = []
+    produtividade_por_dia = []
+
+    agregados = {}
+
+    for registo in registos_grafico:
+        if not registo.data:
+            continue
+
+        chave = registo.data.strftime("%d/%m/%Y")
+
+        if chave not in agregados:
+            agregados[chave] = {
+                "metros": 0,
+                "horas": 0,
+            }
+
+        agregados[chave]["metros"] += registo.metros_furados or 0
+        agregados[chave]["horas"] += registo.horas_trabalhadas or 0
+
+    for data_label, valores in agregados.items():
+        labels.append(data_label)
+        metros = valores["metros"]
+        horas = valores["horas"]
+        produtividade = (metros / horas) if horas > 0 else 0
+
+        metros_por_dia.append(round(metros, 2))
+        horas_por_dia.append(round(horas, 2))
+        produtividade_por_dia.append(round(produtividade, 2))
 
     return render(request, "projetos/area_empregado.html", {
         "empregado": empregado,
-        "registos_recentes": registos_recentes
+        "horas_hoje": horas_hoje,
+        "horas_mes": horas_mes,
+        "horas_total": horas_total,
+        "metros_hoje": metros_hoje,
+        "metros_total": metros_total,
+        "total_furos": total_furos,
+        "media_metros_hora": media_metros_hora,
+        "media_metros_dia": media_metros_dia,
+        "ultimos_registos": ultimos_registos,
+        "grafico_labels": labels,
+        "grafico_metros": metros_por_dia,
+        "grafico_horas": horas_por_dia,
+        "grafico_produtividade": produtividade_por_dia,
+        "furos_trabalhados": furos_trabalhados,
     })
 
 
+# --------- REDIRECT ------------
 def redirect_after_login(request):
     if request.user.is_superuser or request.user.groups.filter(name='Administradores').exists():
         return redirect('projetos:dashboard')
@@ -942,46 +1163,8 @@ def redirect_after_login(request):
 
     return redirect('login')
 
-@login_required
-@empregado_required
-def registo_diario_create(request):
-    empregado = get_object_or_404(Empregados, user=request.user)
 
-    if request.method == "POST":
-        form = RegistoDiarioEmpregadoForm(request.POST, empregado=empregado)
-        if form.is_valid():
-            registo = form.save(commit=False)
-            registo.empregado = empregado
-            registo.save()
-
-            messages.success(request, "Registo diário guardado com sucesso.")
-            return redirect('projetos:area_empregado')
-        else:
-            messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
-    else:
-        form = RegistoDiarioEmpregadoForm(
-            empregado=empregado,
-            initial={'data': timezone.now().date()}
-        )
-
-    return render(request, "projetos/registo_diario_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": "Novo Registo Diário"
-    })
-
-
-@login_required
-@empregado_required
-def registo_diario_list(request):
-    empregado = get_object_or_404(Empregados, user=request.user)
-    registos = empregado.registos_diarios.all()
-
-    return render(request, "projetos/registo_diario_list.html", {
-        "empregado": empregado,
-        "registos": registos
-    })
-
+# -------- REGISTOS --------------
 @login_required
 @empregado_required
 def registo_diario_create(request):
@@ -1046,44 +1229,506 @@ def registo_diario_create(request):
         "titulo": "Novo Registo Diário"
     })
 
+
+@login_required
+@empregado_required
+def registo_diario_list(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    registos = empregado.registos_diarios.all()
+
+    return render(request, "projetos/registo_diario_list.html", {
+        "empregado": empregado,
+        "registos": registos
+    })
+
+@login_required
+@empregado_required
+def registo_diario_create(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+
+    if request.method == "POST":
+        form = RegistoDiarioEmpregadoForm(request.POST, request.FILES, empregado=empregado)
+        if form.is_valid():
+            registo = form.save(commit=False)
+            registo.empregado = empregado
+            registo.save()
+
+            recalcular_resumo_empregado(empregado)
+
+            if registo.furo:
+                recalcular_resumo_furo(registo.furo)
+
+            messages.success(request, "Registo diário guardado com sucesso.")
+            return redirect('projetos:area_empregado')
+        else:
+            messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
+    else:
+        form = RegistoDiarioEmpregadoForm(
+            empregado=empregado,
+            initial={'data': timezone.now().date()}
+        )
+
+    return render(request, "projetos/registo_diario_form.html", {
+        "form": form,
+        "empregado": empregado,
+        "titulo": "Novo Registo Diário"
+    })
+
+@login_required
+@empregado_required
+def registo_diario_update(request, pk):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    registo = get_object_or_404(RegistoDiarioEmpregado, pk=pk, empregado=empregado)
+
+    furo_antigo = registo.furo
+
+    if request.method == "POST":
+        form = RegistoDiarioEmpregadoForm(
+            request.POST,
+            request.FILES,
+            instance=registo,
+            empregado=empregado
+        )
+        if form.is_valid():
+            registo = form.save(commit=False)
+            registo.editado_por_empregado = True
+            registo.editado_em = timezone.now()
+            registo.save()
+
+            recalcular_resumo_empregado(empregado)
+
+            if furo_antigo:
+                recalcular_resumo_furo(furo_antigo)
+
+            if registo.furo and registo.furo != furo_antigo:
+                recalcular_resumo_furo(registo.furo)
+
+            elif registo.furo:
+                recalcular_resumo_furo(registo.furo)
+
+            messages.success(request, "Registo diário atualizado com sucesso.")
+            return redirect('projetos:registo_diario_list')
+        else:
+            messages.error(request, "Erro ao atualizar o registo diário.")
+    else:
+        form = RegistoDiarioEmpregadoForm(instance=registo, empregado=empregado)
+
+    return render(request, "projetos/registo_diario_form.html", {
+        "form": form,
+        "empregado": empregado,
+        "titulo": "Editar Registo Diário"
+    })
+
+
+@login_required
+@admin_required
+def registos_admin_list(request):
+    registos = RegistoDiarioEmpregado.objects.select_related(
+        'empregado', 'projeto', 'furo'
+    ).all()
+
+    empregado_id = request.GET.get('empregado')
+    projeto_id = request.GET.get('projeto')
+    furo_id = request.GET.get('furo')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+
+    if empregado_id:
+        registos = registos.filter(empregado_id=empregado_id)
+
+    if projeto_id:
+        registos = registos.filter(projeto_id=projeto_id)
+
+    if furo_id:
+        registos = registos.filter(furo_id=furo_id)
+
+    if data_inicio:
+        registos = registos.filter(data__gte=parse_date(data_inicio))
+
+    if data_fim:
+        registos = registos.filter(data__lte=parse_date(data_fim))
+
+    totais = registos.aggregate(
+        total_horas=Sum('horas_trabalhadas'),
+        total_metros=Sum('metros_furados'),
+        total_paragem=Sum('horas_paragem'),
+    )
+
+    empregados = Empregados.objects.all().order_by('nome')
+    projetos = Projeto.objects.all().order_by('nome')
+    furos = Furo.objects.all().order_by('nome')
+
+    return render(request, "projetos/registos_admin_list.html", {
+        "registos": registos,
+        "empregados": empregados,
+        "projetos": projetos,
+        "furos": furos,
+        "filtros": {
+            "empregado": empregado_id or "",
+            "projeto": projeto_id or "",
+            "furo": furo_id or "",
+            "data_inicio": data_inicio or "",
+            "data_fim": data_fim or "",
+        },
+        "total_horas": totais['total_horas'] or 0,
+        "total_metros": totais['total_metros'] or 0,
+        "total_paragem": totais['total_paragem'] or 0,
+    })
+
+
+@login_required
+@admin_required
+def registo_admin_update(request, pk):
+    registo = get_object_or_404(RegistoDiarioEmpregado, pk=pk)
+
+    empregado_antigo = registo.empregado
+    furo_antigo = registo.furo
+
+    if request.method == "POST":
+        form = RegistoDiarioEmpregadoAdminForm(
+            request.POST,
+            request.FILES,
+            instance=registo
+        )
+        if form.is_valid():
+            registo = form.save()
+
+            recalcular_resumo_empregado(empregado_antigo)
+            if registo.empregado != empregado_antigo:
+                recalcular_resumo_empregado(registo.empregado)
+
+            if furo_antigo:
+                recalcular_resumo_furo(furo_antigo)
+            if registo.furo and registo.furo != furo_antigo:
+                recalcular_resumo_furo(registo.furo)
+            elif registo.furo:
+                recalcular_resumo_furo(registo.furo)
+
+            messages.success(request, "Registo corrigido com sucesso.")
+            return redirect('projetos:registos_admin_list')
+        else:
+            messages.error(request, "Erro ao corrigir o registo.")
+    else:
+        form = RegistoDiarioEmpregadoAdminForm(instance=registo)
+
+    return render(request, "projetos/registo_admin_form.html", {
+        "form": form,
+        "registo": registo,
+        "titulo": "Corrigir Registo de Produção"
+    })
+
+
+# ------ RECALCULAR RESUMO EMPREGADO ---- ####
+def recalcular_resumo_empregado(empregado):
+    hoje = timezone.now().date()
+    inicio_mes = hoje.replace(day=1)
+
+    total_horas = empregado.registos_diarios.aggregate(
+        total=Sum('horas_trabalhadas')
+    )['total'] or 0
+
+    horas_mes = empregado.registos_diarios.filter(
+        data__gte=inicio_mes,
+        data__lte=hoje
+    ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+    horas_hoje = empregado.registos_diarios.filter(
+        data=hoje
+    ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+    total_metros = empregado.registos_diarios.aggregate(
+        total=Sum('metros_furados')
+    )['total'] or 0
+
+    metros_mes = empregado.registos_diarios.filter(
+        data__gte=inicio_mes,
+        data__lte=hoje
+    ).aggregate(total=Sum('metros_furados'))['total'] or 0
+
+    metros_hoje = empregado.registos_diarios.filter(
+        data=hoje
+    ).aggregate(total=Sum('metros_furados'))['total'] or 0
+
+    total_furos = empregado.registos_diarios.exclude(
+        furo__isnull=True
+    ).values('furo').distinct().count()
+
+    total_dias_com_registo = empregado.registos_diarios.values('data').distinct().count()
+
+    media_m_h = total_metros / total_horas if total_horas > 0 else 0
+    media_m_d = total_metros / total_dias_com_registo if total_dias_com_registo > 0 else 0
+
+    empregado.horas_total = total_horas
+    empregado.horas_trabalhadas_mes = horas_mes
+    empregado.horas_diarias = horas_hoje
+
+    empregado.total_metros_furados = total_metros
+    empregado.metros_furados_mes = metros_mes
+    empregado.metros_furados_hoje = metros_hoje
+    empregado.total_furos_trabalhados = total_furos
+    empregado.media_metros_por_hora = round(media_m_h, 2)
+    empregado.media_metros_por_dia = round(media_m_d, 2)
+
+    empregado.save(update_fields=[
+        'horas_total',
+        'horas_trabalhadas_mes',
+        'horas_diarias',
+        'total_metros_furados',
+        'metros_furados_mes',
+        'metros_furados_hoje',
+        'total_furos_trabalhados',
+        'media_metros_por_hora',
+        'media_metros_por_dia',
+    ])
+
+
+def recalcular_resumo_furo(furo):
+    total_metros = furo.registos_empregados.aggregate(
+        total=Sum('metros_furados')
+    )['total'] or 0
+
+    furo.profundidade_atual = total_metros
+    furo.profundidade_final = total_metros
+
+    furo.save(update_fields=[
+        'profundidade_atual',
+        'profundidade_final',
+    ])
+
 # ---------------- MATERIAIS ----------------
 @login_required
 @admin_required
 def material_list(request):
-    materiais = Material.objects.all()
-    return render(request, 'projetos/material_list.html', {'materiais': materiais})
+    materiais = Material.objects.select_related('projeto', 'furo').all().order_by('nome')
+    return render(request, 'projetos/material_list.html', {
+        'materiais': materiais
+    })
+
+
+@login_required
+@admin_required
+def material_detail(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+    devolucoes = material.devolucoes.select_related(
+        'empregado', 'projeto', 'furo'
+    ).all()
+    levantamentos = material.levantamentos.select_related(
+        'empregado', 'projeto', 'furo'
+    ).all()
+
+    return render(request, 'projetos/material_detail.html', {
+        'material': material,
+        'levantamentos': levantamentos,
+        'devolucoes': devolucoes,
+    })
+
 
 @login_required
 @admin_required
 def material_create(request):
     if request.method == "POST":
-        nome = request.POST.get("nome")
-        valor = request.POST.get("valor")
-        quantidade = request.POST.get("quantidade")
+        form = MaterialForm(request.POST)
+        if form.is_valid():
+            material = form.save()
+            messages.success(request, "Material criado com sucesso.")
+            return redirect('projetos:material_detail', material_id=material.id)
+        else:
+            messages.error(request, "Erro ao criar o material. Verifique os dados.")
+    else:
+        form = MaterialForm()
 
-        Material.objects.create(
-            nome=nome,
-            valor=valor,
-            quantidade=quantidade
+    return render(request, 'projetos/material_form.html', {
+        'form': form,
+        'titulo': 'Novo Material'
+    })
+
+
+@login_required
+@admin_required
+def material_update(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+
+    if request.method == "POST":
+        form = MaterialForm(request.POST, instance=material)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Material atualizado com sucesso.")
+            return redirect('projetos:material_detail', material_id=material.id)
+        else:
+            messages.error(request, "Erro ao atualizar o material. Verifique os dados.")
+    else:
+        form = MaterialForm(instance=material)
+
+    return render(request, 'projetos/material_form.html', {
+        'form': form,
+        'titulo': 'Editar Material',
+        'material': material
+    })
+
+
+@login_required
+@admin_required
+def material_delete(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+
+    if request.method == "POST":
+        material.delete()
+        messages.success(request, "Material apagado com sucesso.")
+        return redirect('projetos:material_list')
+
+    return render(request, 'projetos/material_confirm_delete.html', {
+        'material': material
+    })
+
+
+# ------------ Levantamento Materiais ----------------- #
+
+@login_required
+@empregado_required
+def levantamento_material_create(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+
+    if request.method == "POST":
+        form = LevantamentoMaterialForm(request.POST, empregado=empregado)
+        if form.is_valid():
+            levantamento = form.save(commit=False)
+            levantamento.empregado = empregado
+            levantamento.save()
+
+            material = levantamento.material
+            material.quantidade = material.quantidade - levantamento.quantidade
+            material.save(update_fields=['quantidade'])
+
+            messages.success(request, "Levantamento de material registado com sucesso.")
+            return redirect('projetos:levantamento_material_list')
+        else:
+            messages.error(request, "Erro ao registar o levantamento. Verifique os dados.")
+    else:
+        form = LevantamentoMaterialForm(
+            empregado=empregado,
+            initial={'data': timezone.now().date()}
         )
-        return redirect('material_list')
 
-    return render(request, "projetos/material_form.html", {
-        "titulo": "Novo Material"
+    return render(request, "projetos/levantamento_material_form.html", {
+        "form": form,
+        "titulo": "Levantar Material"
+    })
+
+
+@login_required
+@empregado_required
+def levantamento_material_list(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    levantamentos = empregado.levantamentos_materiais.select_related(
+        'material', 'projeto', 'furo'
+    ).all()
+
+    return render(request, "projetos/levantamento_material_list.html", {
+        "levantamentos": levantamentos
     })
 
 @login_required
 @admin_required
-def material_edit(request, pk):
-    material = get_object_or_404(Material, pk=pk)
-    return HttpResponse(f"Editar Material {pk} - em construção")
+def levantamento_material_admin_list(request):
+    levantamentos = LevantamentoMaterial.objects.select_related(
+        'empregado', 'material', 'projeto', 'furo'
+    ).all().order_by('-data', '-criado_em')
+
+    empregado_id = request.GET.get('empregado')
+    material_id = request.GET.get('material')
+    projeto_id = request.GET.get('projeto')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+
+    if empregado_id:
+        levantamentos = levantamentos.filter(empregado_id=empregado_id)
+
+    if material_id:
+        levantamentos = levantamentos.filter(material_id=material_id)
+
+    if projeto_id:
+        levantamentos = levantamentos.filter(projeto_id=projeto_id)
+
+    if data_inicio:
+        levantamentos = levantamentos.filter(data__gte=parse_date(data_inicio))
+
+    if data_fim:
+        levantamentos = levantamentos.filter(data__lte=parse_date(data_fim))
+
+    empregados = Empregados.objects.all().order_by('nome')
+    materiais = Material.objects.all().order_by('nome')
+    projetos = Projeto.objects.all().order_by('nome')
+
+    return render(request, "projetos/levantamento_material_admin_list.html", {
+        "levantamentos": levantamentos,
+        "empregados": empregados,
+        "materiais": materiais,
+        "projetos": projetos,
+        "filtros": {
+            "empregado": empregado_id or "",
+            "material": material_id or "",
+            "projeto": projeto_id or "",
+            "data_inicio": data_inicio or "",
+            "data_fim": data_fim or "",
+        }
+    })
+
+# ----------- Devolução MAteriais -----------------------#
+
+@login_required
+@empregado_required
+def devolucao_material_create(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+
+    if request.method == "POST":
+        form = DevolucaoMaterialForm(request.POST, empregado=empregado)
+        if form.is_valid():
+            devolucao = form.save(commit=False)
+            devolucao.empregado = empregado
+            devolucao.save()
+
+            material = devolucao.material
+            material.quantidade = material.quantidade + devolucao.quantidade
+            material.save(update_fields=['quantidade'])
+
+            messages.success(request, "Devolução de material registada com sucesso.")
+            return redirect('projetos:devolucao_material_list')
+        else:
+            messages.error(request, "Erro ao registar a devolução. Verifique os dados.")
+    else:
+        form = DevolucaoMaterialForm(
+            empregado=empregado,
+            initial={'data': timezone.now().date()}
+        )
+
+    return render(request, "projetos/devolucao_material_form.html", {
+        "form": form,
+        "titulo": "Devolver Material"
+    })
+
+
+@login_required
+@empregado_required
+def devolucao_material_list(request):
+    empregado = get_object_or_404(Empregados, user=request.user)
+    devolucoes = empregado.devolucoes_materiais.select_related(
+        'material', 'projeto', 'furo'
+    ).all()
+
+    return render(request, "projetos/devolucao_material_list.html", {
+        "devolucoes": devolucoes
+    })
 
 @login_required
 @admin_required
-def material_delete(request, pk):
-    material = get_object_or_404(Material, pk=pk)
-    return HttpResponse(f"Deletar Material {pk} - em construção")
+def devolucao_material_admin_list(request):
+    devolucoes = DevolucaoMaterial.objects.select_related(
+        'empregado', 'material', 'projeto', 'furo'
+    ).all().order_by('-data', '-criado_em')
 
+    return render(request, "projetos/devolucao_material_admin_list.html", {
+        "devolucoes": devolucoes
+    })
 
 
 # ----------------- Globo ------------------------------ #
@@ -1264,3 +1909,190 @@ def obter_coordenadas_por_cidade_pais(cidade, pais):
         print("Erro ao obter coordenadas:", e)
 
     return None, None
+
+
+# ----------- GRAFICOS ---------------------
+
+@login_required
+@admin_required
+def graficos_dashboard(request):
+    hoje = timezone.now().date()
+
+    periodo = request.GET.get('periodo', '30_dias')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+
+    # -------- DEFINIR INTERVALO --------
+    inicio = None
+    fim = hoje
+
+    if periodo == 'hoje':
+        inicio = hoje
+    elif periodo == '7_dias':
+        inicio = hoje - timedelta(days=6)
+    elif periodo == '30_dias':
+        inicio = hoje - timedelta(days=29)
+    elif periodo == 'mes':
+        inicio = hoje.replace(day=1)
+    elif periodo == 'personalizado':
+        inicio = parse_date(data_inicio) if data_inicio else None
+        fim = parse_date(data_fim) if data_fim else hoje
+
+    # -------- TOTAIS GERAIS --------
+    total_projetos = Projeto.objects.count()
+    total_furos = Furo.objects.count()
+    total_empregados = Empregados.objects.count()
+    total_maquinas = Maquina.objects.count()
+    total_materiais = Material.objects.count()
+
+    materiais_stock_baixo = Material.objects.filter(
+        ativo=True,
+        quantidade__lte=F('stock_minimo')
+    ).order_by('quantidade')
+
+    maquinas_alerta = Maquina.objects.filter(
+        estado__in=['avariada', 'reparacao', 'parada']
+    ).order_by('nome')
+
+    # -------- REGISTOS FILTRADOS --------
+    registos = RegistoDiarioEmpregado.objects.select_related(
+        'empregado', 'projeto', 'furo'
+    ).order_by('data')
+
+    if inicio:
+        registos = registos.filter(data__gte=inicio)
+    if fim:
+        registos = registos.filter(data__lte=fim)
+
+    agregados_dia = OrderedDict()
+
+    for registo in registos:
+        if not registo.data:
+            continue
+
+        chave = registo.data.strftime("%d/%m/%Y")
+
+        if chave not in agregados_dia:
+            agregados_dia[chave] = {
+                "metros": 0,
+                "horas": 0,
+            }
+
+        agregados_dia[chave]["metros"] += registo.metros_furados or 0
+        agregados_dia[chave]["horas"] += registo.horas_trabalhadas or 0
+
+    labels_dia = []
+    metros_dia = []
+    horas_dia = []
+    produtividade_dia = []
+
+    for data_label, valores in agregados_dia.items():
+        labels_dia.append(data_label)
+        metros = valores["metros"]
+        horas = valores["horas"]
+        produtividade = metros / horas if horas > 0 else 0
+
+        metros_dia.append(round(metros, 2))
+        horas_dia.append(round(horas, 2))
+        produtividade_dia.append(round(produtividade, 2))
+
+    # -------- TOP EMPREGADOS FILTRADOS --------
+    empregados_stats = Empregados.objects.all()
+    empregados_labels = []
+    empregados_metros = []
+
+    for empregado in empregados_stats:
+        regs = empregado.registos_diarios.all()
+
+        if inicio:
+            regs = regs.filter(data__gte=inicio)
+        if fim:
+            regs = regs.filter(data__lte=fim)
+
+        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
+
+        if total > 0:
+            empregados_labels.append(empregado.nome)
+            empregados_metros.append(round(total, 2))
+
+    top_empregados = sorted(
+        zip(empregados_labels, empregados_metros),
+        key=lambda x: x[1],
+        reverse=True
+    )[:10]
+
+    labels_empregados = [x[0] for x in top_empregados]
+    metros_empregados = [x[1] for x in top_empregados]
+
+    # -------- TOP PROJETOS FILTRADOS --------
+    projetos_stats = Projeto.objects.all()
+    projetos_labels = []
+    projetos_metros = []
+
+    for projeto in projetos_stats:
+        regs = projeto.registos_empregados.all()
+        if inicio:
+            regs = regs.filter(data__gte=inicio)
+        if fim:
+            regs = regs.filter(data__lte=fim)
+
+        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
+        if total > 0:
+            projetos_labels.append(projeto.nome)
+            projetos_metros.append(round(total, 2))
+
+    top_projetos = sorted(zip(projetos_labels, projetos_metros), key=lambda x: x[1], reverse=True)[:10]
+    labels_projetos = [x[0] for x in top_projetos]
+    metros_projetos = [x[1] for x in top_projetos]
+
+    # -------- TOP FUROS FILTRADOS --------
+    furos_stats = Furo.objects.all()
+    furos_labels = []
+    furos_metros = []
+
+    for furo in furos_stats:
+        regs = furo.registos_empregados.all()
+        if inicio:
+            regs = regs.filter(data__gte=inicio)
+        if fim:
+            regs = regs.filter(data__lte=fim)
+
+        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
+        if total > 0:
+            furos_labels.append(furo.nome)
+            furos_metros.append(round(total, 2))
+
+    top_furos = sorted(zip(furos_labels, furos_metros), key=lambda x: x[1], reverse=True)[:10]
+    labels_furos = [x[0] for x in top_furos]
+    metros_furos = [x[1] for x in top_furos]
+
+    return render(request, "projetos/graficos_dashboard.html", {
+        "total_projetos": total_projetos,
+        "total_furos": total_furos,
+        "total_empregados": total_empregados,
+        "total_maquinas": total_maquinas,
+        "total_materiais": total_materiais,
+
+        "materiais_stock_baixo": materiais_stock_baixo,
+        "maquinas_alerta": maquinas_alerta,
+
+        "labels_dia": labels_dia,
+        "metros_dia": metros_dia,
+        "horas_dia": horas_dia,
+        "produtividade_dia": produtividade_dia,
+
+        "labels_empregados": labels_empregados,
+        "metros_empregados": metros_empregados,
+
+        "labels_projetos": labels_projetos,
+        "metros_projetos": metros_projetos,
+
+        "labels_furos": labels_furos,
+        "metros_furos": metros_furos,
+
+        "filtros": {
+            "periodo": periodo,
+            "data_inicio": data_inicio or "",
+            "data_fim": data_fim or "",
+        }
+    })

@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
 # models.py
 
@@ -156,7 +158,15 @@ class Empregados(models.Model):
     horas_trabalhadas_mes = models.IntegerField(default=0, blank=True)
     horas_total = models.IntegerField(default=0, blank=True)
     alertas = models.JSONField(default=list, blank=True)
+    total_metros_furados = models.FloatField(default=0.0)
+    metros_furados_mes = models.FloatField(default=0.0)
+    metros_furados_hoje = models.FloatField(default=0.0)
+    total_furos_trabalhados = models.IntegerField(default=0)
+    media_metros_por_hora = models.FloatField(default=0.0)
+    media_metros_por_dia = models.FloatField(default=0.0)
 
+    total_levantamentos = models.IntegerField(default=0)
+    total_devolucoes = models.IntegerField(default=0)
     aprovado = models.BooleanField(default=False)
     data_registo = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     data_aprovacao = models.DateTimeField(null=True, blank=True)
@@ -220,6 +230,12 @@ class EmpregadoFicheiro(models.Model):
 
 
 class RegistoDiarioEmpregado(models.Model):
+    TIPO_PARAGEM_CHOICES = [
+        ('', '---------'),
+        ('cliente', 'Cliente'),
+        ('empresa', 'Empresa'),
+    ]
+
     empregado = models.ForeignKey(
         Empregados,
         on_delete=models.CASCADE,
@@ -240,10 +256,33 @@ class RegistoDiarioEmpregado(models.Model):
         related_name='registos_empregados'
     )
 
-    data = models.DateField()
+    data = models.DateField(null=True, blank=True)
+
+    hora_inicio = models.TimeField(null=True, blank=True)
+    hora_inicio_pausa = models.TimeField(null=True, blank=True)
+    hora_fim_pausa = models.TimeField(null=True, blank=True)
+    hora_fim = models.TimeField(null=True, blank=True)
+
     horas_trabalhadas = models.FloatField(default=0.0)
+    horas_paragem = models.FloatField(default=0.0)
+    tipo_paragem = models.CharField(
+        max_length=20,
+        choices=TIPO_PARAGEM_CHOICES,
+        blank=True,
+        default=''
+    )
+
     metros_furados = models.FloatField(default=0.0)
     observacoes = models.TextField(blank=True)
+
+    relatorio_foto = models.ImageField(
+        upload_to='registos_diarios/relatorios/',
+        blank=True,
+        null=True
+    )
+
+    editado_por_empregado = models.BooleanField(default=False)
+    editado_em = models.DateTimeField(null=True, blank=True)
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -256,6 +295,45 @@ class RegistoDiarioEmpregado(models.Model):
     def __str__(self):
         return f"{self.empregado.nome} - {self.data}"
 
+    def clean(self):
+        if self.furo and self.projeto and self.furo.projeto_id != self.projeto.id:
+            raise ValidationError("O furo selecionado não pertence ao projeto escolhido.")
+
+        if self.hora_inicio and self.hora_inicio_pausa and self.hora_inicio_pausa <= self.hora_inicio:
+            raise ValidationError("A hora de início da pausa deve ser posterior à hora de início.")
+
+        if self.hora_inicio_pausa and self.hora_fim_pausa and self.hora_fim_pausa <= self.hora_inicio_pausa:
+            raise ValidationError("A hora de fim da pausa deve ser posterior à hora de início da pausa.")
+
+        if self.hora_fim_pausa and self.hora_fim and self.hora_fim <= self.hora_fim_pausa:
+            raise ValidationError("A hora de fim deve ser posterior à hora de fim da pausa.")
+
+        if self.metros_furados is not None and self.metros_furados < 0:
+            raise ValidationError("Os metros furados não podem ser negativos.")
+
+        if self.horas_paragem is not None and self.horas_paragem < 0:
+            raise ValidationError("As horas de paragem não podem ser negativas.")
+
+    def calcular_horas_trabalhadas(self):
+        if not all([self.data, self.hora_inicio, self.hora_inicio_pausa, self.hora_fim_pausa, self.hora_fim]):
+            return 0
+
+        dt_inicio = datetime.combine(self.data, self.hora_inicio)
+        dt_inicio_pausa = datetime.combine(self.data, self.hora_inicio_pausa)
+        dt_fim_pausa = datetime.combine(self.data, self.hora_fim_pausa)
+        dt_fim = datetime.combine(self.data, self.hora_fim)
+
+        periodo_total = (dt_fim - dt_inicio).total_seconds()
+        pausa = (dt_fim_pausa - dt_inicio_pausa).total_seconds()
+
+        # horas_paragem NÃO desconta nas horas trabalhadas
+        horas = (periodo_total - pausa) / 3600
+        return max(round(horas, 2), 0)
+
+    def save(self, *args, **kwargs):
+        self.horas_trabalhadas = self.calcular_horas_trabalhadas()
+        super().save(*args, **kwargs)
+
 
 # ------------------------
 # Maquina
@@ -266,29 +344,60 @@ class Maquina(models.Model):
         ('avariada', 'Avariada'),
         ('reparacao', 'Reparação'),
         ('sucata', 'Sucata'),
-        ('parada', 'Parada')
+        ('parada', 'Parada'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    projetos = models.ManyToManyField(Projeto, blank=True, related_name='maquinas')
-    projeto_atual = models.CharField(max_length=20, null=True, blank=True)
-    furos = models.ManyToManyField(Furo, blank=True, related_name='maquinas')
+
+    projetos = models.ManyToManyField(
+        Projeto,
+        blank=True,
+        related_name='maquinas'
+    )
+    projeto_atual = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='maquinas_atuais'
+    )
+
+    furos = models.ManyToManyField(
+        Furo,
+        blank=True,
+        related_name='maquinas'
+    )
+
     nome = models.CharField(max_length=200)
     tipo = models.CharField(max_length=100, blank=True)
+    marca = models.CharField(max_length=100, blank=True)
     modelo = models.CharField(max_length=100, blank=True)
     numero_serie = models.CharField(max_length=100, blank=True)
+
     data_compra = models.DateField(null=True, blank=True)
     data_registo = models.DateField(null=True, blank=True)
     data_revisao = models.DateField(null=True, blank=True)
+
     matricula = models.CharField(max_length=20, null=True, blank=True)
     seguro = models.CharField(max_length=200, blank=True)
     data_seguro = models.DateField(null=True, blank=True)
     data_iuc = models.DateField(null=True, blank=True)
-    km = models.BigIntegerField(default=0)
-    ano_registo = models.IntegerField(default=0)
-    valor = models.FloatField(default=0.0)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='operacional')
-    despesas = models.JSONField(default=list, blank=True)  # imagens ou ficheiros
+
+    km = models.BigIntegerField(default=0, blank=True)
+    horimetro = models.FloatField(default=0.0, blank=True)
+    ano_registo = models.IntegerField(default=0, blank=True)
+    valor = models.FloatField(default=0.0, blank=True)
+
+    localizacao_atual = models.CharField(max_length=200, blank=True)
+    observacoes = models.TextField(blank=True)
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='operacional'
+    )
+
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nome
@@ -302,21 +411,50 @@ class Material(models.Model):
         ('em_estoque', 'Em estoque'),
         ('sem_stock', 'Sem stock'),
         ('recebido', 'Recebido'),
-        ('encomendado', 'Encomendado')
+        ('encomendado', 'Encomendado'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE, related_name='materiais')
-    furo = models.ForeignKey(Furo, on_delete=models.CASCADE, related_name='materiais', null=True, blank=True)
+
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='materiais'
+    )
+    furo = models.ForeignKey(
+        Furo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='materiais'
+    )
+
     nome = models.CharField(max_length=200)
-    valor = models.FloatField(default=0.0)
-    quantidade = models.IntegerField(default=0)
-    diametro = models.FloatField(default=0.0)
     tipo = models.CharField(max_length=100, blank=True)
+    marca = models.CharField(max_length=100, blank=True)
     numero_serie = models.CharField(max_length=100, blank=True)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='em_estoque')
+    stock_minimo = models.IntegerField(default=5)
+    quantidade = models.IntegerField(default=0)
+    unidade = models.CharField(max_length=50, blank=True, default='un')
+    diametro = models.FloatField(default=0.0, blank=True)
+
+    valor = models.FloatField(default=0.0)
+    fornecedor = models.CharField(max_length=200, blank=True)
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='em_estoque'
+    )
+
+    localizacao = models.CharField(max_length=200, blank=True)
+    observacoes = models.TextField(blank=True)
+
     data_compra = models.DateField(null=True, blank=True)
-    faturas = models.JSONField(default=list, blank=True)
+
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nome
@@ -344,3 +482,200 @@ class Medicao(models.Model):
 
     def __str__(self):
         return f"{self.furo.nome} - {self.profundidade}m"
+    
+
+###############################
+##### DESPESAS ###########
+####################
+class Despesa(models.Model):
+    TIPO_CHOICES = [
+        ('maquina', 'Máquina'),
+        ('projeto', 'Projeto'),
+        ('furo', 'Furo'),
+        ('geral', 'Geral'),
+    ]
+    CATEGORIA_CHOICES = [
+        ('combustivel', 'Combustível'),
+        ('manutencao', 'Manutenção'),
+        ('pecas', 'Peças'),
+        ('salarios', 'Salários'),
+        ('outros', 'Outros'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='outros')
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+
+    maquina = models.ForeignKey(
+        'Maquina',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='despesas'
+    )
+
+    projeto = models.ForeignKey(
+        'Projeto',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='despesas'
+    )
+
+    furo = models.ForeignKey(
+        'Furo',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='despesas'
+    )
+
+    descricao = models.CharField(max_length=255)
+    valor = models.FloatField(default=0.0)
+
+    data = models.DateField()
+    observacoes = models.TextField(blank=True)
+
+    comprovativo = models.FileField(
+        upload_to='despesas/comprovativos/',
+        null=True,
+        blank=True
+    )
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.descricao} - {self.valor}€"
+    
+    def clean(self):
+        ligados = [self.maquina, self.projeto, self.furo]
+        preenchidos = [x for x in ligados if x]
+
+        if len(preenchidos) > 1:
+            raise ValidationError("A despesa deve estar associada a apenas um: máquina, projeto ou furo.")
+
+        if len(preenchidos) == 0:
+            raise ValidationError("A despesa deve estar associada a pelo menos um elemento.")
+        
+
+
+##################################
+######### LEVANTAMENTO MATERIAL ##
+##################################
+class LevantamentoMaterial(models.Model):
+    empregado = models.ForeignKey(
+        Empregados,
+        on_delete=models.CASCADE,
+        related_name='levantamentos_materiais'
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.CASCADE,
+        related_name='levantamentos'
+    )
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='levantamentos_materiais'
+    )
+    furo = models.ForeignKey(
+        Furo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='levantamentos_materiais'
+    )
+
+    quantidade = models.IntegerField(default=1)
+    data = models.DateField()
+    observacoes = models.TextField(blank=True)
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data', '-criado_em']
+        verbose_name = "Levantamento de Material"
+        verbose_name_plural = "Levantamentos de Materiais"
+
+    def __str__(self):
+        return f"{self.empregado.nome} - {self.material.nome} ({self.quantidade})"
+    empregado = models.ForeignKey(
+        Empregados,
+        on_delete=models.CASCADE,
+        related_name='levantamentos_materiais'
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.CASCADE,
+        related_name='levantamentos'
+    )
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='levantamentos_materiais'
+    )
+    furo = models.ForeignKey(
+        Furo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='levantamentos_materiais'
+    )
+
+    quantidade = models.IntegerField(default=1)
+    data = models.DateField()
+    observacoes = models.TextField(blank=True)
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.empregado.nome} - {self.material.nome} ({self.quantidade})"
+
+
+
+####################################
+##### DEVOLUÇÂO DE MATERIAL ########
+####################################
+class DevolucaoMaterial(models.Model):
+    empregado = models.ForeignKey(
+        Empregados,
+        on_delete=models.CASCADE,
+        related_name='devolucoes_materiais'
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.CASCADE,
+        related_name='devolucoes'
+    )
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='devolucoes_materiais'
+    )
+    furo = models.ForeignKey(
+        Furo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='devolucoes_materiais'
+    )
+
+    quantidade = models.IntegerField(default=1)
+    data = models.DateField()
+    observacoes = models.TextField(blank=True)
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data', '-criado_em']
+        verbose_name = "Devolução de Material"
+        verbose_name_plural = "Devoluções de Materiais"
+
+    def __str__(self):
+        return f"{self.empregado.nome} devolveu {self.quantidade} x {self.material.nome}"

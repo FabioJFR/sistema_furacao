@@ -1,6 +1,6 @@
 from django import forms
 import json
-from .models import Projeto, Furo, Empregados, EmpregadoProjeto, EmpregadoFicheiro, RegistoDiarioEmpregado, Maquina, Material, Medicao
+from .models import Projeto, Furo, Empregados, EmpregadoProjeto, EmpregadoFicheiro, RegistoDiarioEmpregado, Maquina, Material, Medicao, LevantamentoMaterial, DevolucaoMaterial
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -450,13 +450,36 @@ class EmpregadoFicheiroForm(forms.ModelForm):
 class RegistoDiarioEmpregadoForm(forms.ModelForm):
     class Meta:
         model = RegistoDiarioEmpregado
-        fields = ['projeto', 'furo', 'data', 'horas_trabalhadas', 'metros_furados', 'observacoes']
+        fields = [
+            'projeto',
+            'furo',
+            'data',
+            'hora_inicio',
+            'hora_inicio_pausa',
+            'hora_fim_pausa',
+            'hora_fim',
+            'horas_paragem',
+            'tipo_paragem',
+            'metros_furados',
+            'relatorio_foto',
+            'observacoes'
+        ]
         widgets = {
             'projeto': forms.Select(attrs={'class': 'form-control'}),
             'furo': forms.Select(attrs={'class': 'form-control'}),
             'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'horas_trabalhadas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'hora_inicio': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_inicio_pausa': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fim_pausa': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fim': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'horas_paragem': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Horas de paragem'
+            }),
+            'tipo_paragem': forms.Select(attrs={'class': 'form-control'}),
             'metros_furados': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'relatorio_foto': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
@@ -465,21 +488,239 @@ class RegistoDiarioEmpregadoForm(forms.ModelForm):
         self.empregado = empregado
 
         if empregado:
-            self.fields['projeto'].queryset = empregado.projetos_atuais
+            projetos_atuais = empregado.projetos_atuais
+            self.fields['projeto'].queryset = projetos_atuais
             self.fields['furo'].queryset = Furo.objects.filter(
-                projeto__in=empregado.projetos_atuais
+                projeto__in=projetos_atuais
             ).distinct()
-
-    def clean_horas_trabalhadas(self):
-        valor = self.cleaned_data.get('horas_trabalhadas')
-        if valor is not None and valor < 0:
-            raise forms.ValidationError("As horas trabalhadas não podem ser negativas.")
-        return valor
 
     def clean_metros_furados(self):
         valor = self.cleaned_data.get('metros_furados')
         if valor is not None and valor < 0:
             raise forms.ValidationError("Os metros furados não podem ser negativos.")
+        return valor
+
+    def clean_horas_paragem(self):
+        valor = self.cleaned_data.get('horas_paragem')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("As horas de paragem não podem ser negativas.")
+        return valor
+
+    def clean(self):
+        cleaned = super().clean()
+        projeto = cleaned.get('projeto')
+        furo = cleaned.get('furo')
+        hora_inicio = cleaned.get('hora_inicio')
+        hora_inicio_pausa = cleaned.get('hora_inicio_pausa')
+        hora_fim_pausa = cleaned.get('hora_fim_pausa')
+        hora_fim = cleaned.get('hora_fim')
+        horas_paragem = cleaned.get('horas_paragem')
+        tipo_paragem = cleaned.get('tipo_paragem')
+
+        if furo and projeto and furo.projeto_id != projeto.id:
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto escolhido.')
+
+        if hora_inicio and hora_inicio_pausa and hora_inicio_pausa <= hora_inicio:
+            self.add_error('hora_inicio_pausa', 'A pausa deve começar depois da hora de início.')
+
+        if hora_inicio_pausa and hora_fim_pausa and hora_fim_pausa <= hora_inicio_pausa:
+            self.add_error('hora_fim_pausa', 'A pausa deve terminar depois de começar.')
+
+        if hora_fim_pausa and hora_fim and hora_fim <= hora_fim_pausa:
+            self.add_error('hora_fim', 'A hora de fim deve ser posterior ao fim da pausa.')
+
+        if horas_paragem and horas_paragem > 0 and not tipo_paragem:
+            self.add_error('tipo_paragem', 'Selecione se a paragem é Cliente ou Empresa.')
+
+        return cleaned
+
+
+# ---------------- Máquinas ----------------
+class MaquinaForm(forms.ModelForm):
+
+    class Meta:
+        model = Maquina
+        fields = '__all__'
+
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo': forms.TextInput(attrs={'class': 'form-control'}),
+            'marca': forms.TextInput(attrs={'class': 'form-control'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-control'}),
+            'numero_serie': forms.TextInput(attrs={'class': 'form-control'}),
+
+            'projetos': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'projeto_atual': forms.Select(attrs={'class': 'form-control'}),
+            'furos': forms.SelectMultiple(attrs={'class': 'form-control'}),
+
+            'data_compra': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_registo': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_revisao': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+
+            'matricula': forms.TextInput(attrs={'class': 'form-control'}),
+            'seguro': forms.TextInput(attrs={'class': 'form-control'}),
+            'data_seguro': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_iuc': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+
+            'km': forms.NumberInput(attrs={'class': 'form-control'}),
+            'horimetro': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'ano_registo': forms.NumberInput(attrs={'class': 'form-control'}),
+            'valor': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+
+            'localizacao_atual': forms.TextInput(attrs={'class': 'form-control'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
+            'estado': forms.Select(attrs={'class': 'form-control'}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+        labels = {
+            'nome': 'Nome da Máquina',
+            'tipo': 'Tipo',
+            'marca': 'Marca',
+            'modelo': 'Modelo',
+            'numero_serie': 'Nº Série',
+            'km': 'Quilómetros',
+            'horimetro': 'Horímetro',
+            'valor': 'Valor (€)',
+            'localizacao_atual': 'Localização Atual',
+            'projeto_atual': 'Projeto Atual',
+            'data_compra': 'Data de Compra',
+            'data_registo': 'Data de Registo',
+            'data_revisao': 'Data de Revisão',
+            'data_seguro': 'Validade do Seguro',
+            'data_iuc': 'Validade do IUC',
+        }
+
+    # ---------------- INIT ----------------
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields['projeto_atual'].queryset = self.instance.projetos.all()
+
+    # ---------------- VALIDAÇÕES ----------------
+
+    def clean_km(self):
+        valor = self.cleaned_data.get('km')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("Os quilómetros não podem ser negativos.")
+        return valor
+
+    def clean_horimetro(self):
+        valor = self.cleaned_data.get('horimetro')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("O horímetro não pode ser negativo.")
+        return valor
+
+    def clean_valor(self):
+        valor = self.cleaned_data.get('valor')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("O valor não pode ser negativo.")
+        return valor
+
+    def clean_ano_registo(self):
+        valor = self.cleaned_data.get('ano_registo')
+        if valor is not None and valor < 1900:
+            raise forms.ValidationError("Ano inválido.")
+        return valor
+
+    def clean(self):
+        cleaned = super().clean()
+
+        projeto_atual = cleaned.get('projeto_atual')
+        projetos = cleaned.get('projetos')
+
+        data_compra = cleaned.get('data_compra')
+        data_revisao = cleaned.get('data_revisao')
+        data_seguro = cleaned.get('data_seguro')
+        data_iuc = cleaned.get('data_iuc')
+
+        # 🔹 Projeto atual tem de estar nos projetos
+        if projeto_atual and projetos and projeto_atual not in projetos:
+            self.add_error('projeto_atual', 'O projeto atual deve estar na lista de projetos da máquina.')
+
+        # 🔹 Datas coerentes
+        if data_compra and data_revisao and data_revisao < data_compra:
+            self.add_error('data_revisao', 'A revisão não pode ser anterior à compra.')
+
+        # 🔹 Avisos úteis (não bloqueiam)
+        if data_seguro and data_iuc:
+            if data_seguro < data_iuc:
+                pass  # aqui podes futuramente lançar warning (não erro)
+
+        return cleaned
+
+
+# ---------------- Materiais ----------------
+class MaterialForm(forms.ModelForm):
+    class Meta:
+        model = Material
+        fields = '__all__'
+
+        widgets = {
+            'projeto': forms.Select(attrs={'class': 'form-control'}),
+            'furo': forms.Select(attrs={'class': 'form-control'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo': forms.TextInput(attrs={'class': 'form-control'}),
+            'marca': forms.TextInput(attrs={'class': 'form-control'}),
+            'numero_serie': forms.TextInput(attrs={'class': 'form-control'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'form-control'}),
+            'unidade': forms.TextInput(attrs={'class': 'form-control'}),
+            'diametro': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'valor': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'fornecedor': forms.TextInput(attrs={'class': 'form-control'}),
+            'estado': forms.Select(attrs={'class': 'form-control'}),
+            'localizacao': forms.TextInput(attrs={'class': 'form-control'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'data_compra': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+        labels = {
+            'nome': 'Nome do Material',
+            'tipo': 'Tipo',
+            'marca': 'Marca',
+            'numero_serie': 'Nº Série',
+            'quantidade': 'Quantidade',
+            'unidade': 'Unidade',
+            'diametro': 'Diâmetro',
+            'valor': 'Valor (€)',
+            'fornecedor': 'Fornecedor',
+            'localizacao': 'Localização',
+            'data_compra': 'Data de Compra',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # furo não obrigatório
+        self.fields['furo'].required = False
+
+        if self.instance and self.instance.pk and self.instance.projeto_id:
+            self.fields['furo'].queryset = Furo.objects.filter(
+                projeto_id=self.instance.projeto_id
+            )
+        else:
+            self.fields['furo'].queryset = Furo.objects.none()
+
+
+    def clean_quantidade(self):
+        valor = self.cleaned_data.get('quantidade')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("A quantidade não pode ser negativa.")
+        return valor
+
+    def clean_valor(self):
+        valor = self.cleaned_data.get('valor')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("O valor não pode ser negativo.")
+        return valor
+
+    def clean_diametro(self):
+        valor = self.cleaned_data.get('diametro')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("O diâmetro não pode ser negativo.")
         return valor
 
     def clean(self):
@@ -488,62 +729,9 @@ class RegistoDiarioEmpregadoForm(forms.ModelForm):
         furo = cleaned.get('furo')
 
         if furo and projeto and furo.projeto_id != projeto.id:
-            self.add_error('furo', 'O furo selecionado não pertence ao projeto escolhido.')
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto.')
 
         return cleaned
-
-
-# ---------------- Máquinas ----------------
-class MaquinaForm(forms.ModelForm):
-    despesas = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 2}),
-        required=False,
-        help_text='Lista JSON de despesas (imagens, ficheiros, etc.)'
-    )
-
-    class Meta:
-        model = Maquina
-        fields = '__all__'
-
-    def clean_despesas(self):
-        data = self.cleaned_data.get('despesas', '[]')
-        try:
-            return json.loads(data)
-        except json.JSONDecodeError:
-            raise forms.ValidationError('JSON inválido para despesas')
-
-
-class MaquinaCreateForm(forms.ModelForm):
-    class Meta:
-        model = Maquina
-        fields = ['nome', 'modelo', 'estado']
-
-
-class MaquinaUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Maquina
-        fields = '__all__'
-
-
-# ---------------- Materiais ----------------
-class MaterialForm(forms.ModelForm):
-    faturas = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 2}),
-        required=False,
-        help_text='Lista JSON de faturas'
-    )
-
-    class Meta:
-        model = Material
-        fields = '__all__'
-
-    def clean_faturas(self):
-        data = self.cleaned_data.get('faturas', '[]')
-        try:
-            return json.loads(data)
-        except json.JSONDecodeError:
-            raise forms.ValidationError('JSON inválido para faturas')
-
 
 # ---------------- Medições ----------------
 class MedicaoForm(forms.ModelForm):
@@ -622,5 +810,196 @@ class MedicaoForm(forms.ModelForm):
                     raise forms.ValidationError(
                         f"A profundidade deve ser maior que a última medição ({ultima.profundidade} m)."
                     )
+
+        return cleaned
+    
+
+# ------------- Registo Diario Empregado Admin -------- #
+
+class RegistoDiarioEmpregadoAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = RegistoDiarioEmpregado
+        fields = [
+            'empregado',
+            'projeto',
+            'furo',
+            'data',
+            'hora_inicio',
+            'hora_inicio_pausa',
+            'hora_fim_pausa',
+            'hora_fim',
+            'horas_paragem',
+            'tipo_paragem',
+            'metros_furados',
+            'relatorio_foto',
+            'observacoes'
+        ]
+        widgets = {
+            'empregado': forms.Select(attrs={'class': 'form-control'}),
+            'projeto': forms.Select(attrs={'class': 'form-control'}),
+            'furo': forms.Select(attrs={'class': 'form-control'}),
+            'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'hora_inicio': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_inicio_pausa': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fim_pausa': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fim': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'horas_paragem': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'tipo_paragem': forms.Select(attrs={'class': 'form-control'}),
+            'metros_furados': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'relatorio_foto': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def clean_metros_furados(self):
+        valor = self.cleaned_data.get('metros_furados')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("Os metros furados não podem ser negativos.")
+        return valor
+
+    def clean_horas_paragem(self):
+        valor = self.cleaned_data.get('horas_paragem')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("As horas de paragem não podem ser negativas.")
+        return valor
+
+    def clean(self):
+        cleaned = super().clean()
+        projeto = cleaned.get('projeto')
+        furo = cleaned.get('furo')
+        hora_inicio = cleaned.get('hora_inicio')
+        hora_inicio_pausa = cleaned.get('hora_inicio_pausa')
+        hora_fim_pausa = cleaned.get('hora_fim_pausa')
+        hora_fim = cleaned.get('hora_fim')
+        horas_paragem = cleaned.get('horas_paragem')
+        tipo_paragem = cleaned.get('tipo_paragem')
+
+        if furo and projeto and furo.projeto_id != projeto.id:
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto escolhido.')
+
+        if hora_inicio and hora_inicio_pausa and hora_inicio_pausa <= hora_inicio:
+            self.add_error('hora_inicio_pausa', 'A pausa deve começar depois da hora de início.')
+
+        if hora_inicio_pausa and hora_fim_pausa and hora_fim_pausa <= hora_inicio_pausa:
+            self.add_error('hora_fim_pausa', 'A pausa deve terminar depois de começar.')
+
+        if hora_fim_pausa and hora_fim and hora_fim <= hora_fim_pausa:
+            self.add_error('hora_fim', 'A hora de fim deve ser posterior ao fim da pausa.')
+
+        if horas_paragem and horas_paragem > 0 and not tipo_paragem:
+            self.add_error('tipo_paragem', 'Selecione se a paragem é Cliente ou Empresa.')
+
+        return cleaned
+
+# ------------ Levantamento Material ----------------- #
+
+class LevantamentoMaterialForm(forms.ModelForm):
+    class Meta:
+        model = LevantamentoMaterial
+        fields = ['material', 'projeto', 'furo', 'quantidade', 'data', 'observacoes']
+        widgets = {
+            'material': forms.Select(attrs={'class': 'form-control'}),
+            'projeto': forms.Select(attrs={'class': 'form-control'}),
+            'furo': forms.Select(attrs={'class': 'form-control'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'form-control'}),
+            'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, empregado=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empregado = empregado
+
+        self.fields['furo'].required = False
+
+        # só materiais ativos e com stock
+        self.fields['material'].queryset = Material.objects.filter(
+            ativo=True,
+            quantidade__gt=0
+        ).order_by('nome')
+
+        if empregado:
+            projetos_atuais = empregado.projetos_atuais
+            self.fields['projeto'].queryset = projetos_atuais
+            self.fields['furo'].queryset = Furo.objects.filter(
+                projeto__in=projetos_atuais
+            ).distinct()
+        else:
+            self.fields['projeto'].queryset = Projeto.objects.none()
+            self.fields['furo'].queryset = Furo.objects.none()
+
+    def clean_quantidade(self):
+        quantidade = self.cleaned_data.get('quantidade')
+        material = self.cleaned_data.get('material')
+
+        if quantidade is None or quantidade <= 0:
+            raise forms.ValidationError("A quantidade deve ser maior que zero.")
+
+        if material and quantidade > material.quantidade:
+            raise forms.ValidationError("Quantidade superior ao stock disponível.")
+
+        return quantidade
+
+    def clean(self):
+        cleaned = super().clean()
+        projeto = cleaned.get('projeto')
+        furo = cleaned.get('furo')
+
+        if furo and projeto and furo.projeto_id != projeto.id:
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto.')
+
+        return cleaned
+    
+
+# -------------- Devolução Material ----------------- #
+
+class DevolucaoMaterialForm(forms.ModelForm):
+    class Meta:
+        model = DevolucaoMaterial
+        fields = ['material', 'projeto', 'furo', 'quantidade', 'data', 'observacoes']
+        widgets = {
+            'material': forms.Select(attrs={'class': 'form-control'}),
+            'projeto': forms.Select(attrs={'class': 'form-control'}),
+            'furo': forms.Select(attrs={'class': 'form-control'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'form-control'}),
+            'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, empregado=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empregado = empregado
+
+        self.fields['furo'].required = False
+
+        self.fields['material'].queryset = Material.objects.filter(
+            ativo=True
+        ).order_by('nome')
+
+        if empregado:
+            projetos_atuais = empregado.projetos_atuais
+            self.fields['projeto'].queryset = projetos_atuais
+            self.fields['furo'].queryset = Furo.objects.filter(
+                projeto__in=projetos_atuais
+            ).distinct()
+        else:
+            self.fields['projeto'].queryset = Projeto.objects.none()
+            self.fields['furo'].queryset = Furo.objects.none()
+
+    def clean_quantidade(self):
+        quantidade = self.cleaned_data.get('quantidade')
+
+        if quantidade is None or quantidade <= 0:
+            raise forms.ValidationError("A quantidade deve ser maior que zero.")
+
+        return quantidade
+
+    def clean(self):
+        cleaned = super().clean()
+        projeto = cleaned.get('projeto')
+        furo = cleaned.get('furo')
+
+        if furo and projeto and furo.projeto_id != projeto.id:
+            self.add_error('furo', 'O furo selecionado não pertence ao projeto.')
 
         return cleaned

@@ -1,14 +1,13 @@
 {% extends 'projetos/base.html' %}
-<!-- projetos/templates/projetos/material_list.html -->
 
 {% block title %}Lista de Materiais{% endblock %}
 
 {% block content %}
-<section style="max-width:1000px; margin:40px auto;">
+<section style="max-width:1100px; margin:40px auto;">
 
-    <h1 style="text-align:center; margin-bottom:25px; color:#2c3e50;">Lista de Materiais</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
+        <h1 style="margin:0; color:#2c3e50;">Lista de Materiais</h1>
 
-    <div style="text-align:center; margin-bottom:30px;">
         <a href="{% url 'projetos:material_create' %}" style="
             background-color:#2980b9;
             color:white;
@@ -22,27 +21,45 @@
         </a>
     </div>
 
-    <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
+    {% if materiais %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
         {% for material in materiais %}
         <div style="
             background:#f4f4f4;
             border-radius:12px;
-            box-shadow:0 8px 20px rgba(0,0,0,0.1);
+            box-shadow:0 8px 20px rgba(0,0,0,0.08);
             padding:25px;
-            width:280px;
             display:flex;
             flex-direction:column;
             justify-content:space-between;
         ">
-            <h2 style="margin-top:0; color:#2c3e50;">{{ material.nome }}</h2>
-            <p><strong>Valor:</strong> €{{ material.valor }}</p>
-            <p><strong>Quantidade:</strong> {{ material.quantidade }}</p>
-            <p><strong>Diâmetro:</strong> {{ material.diametro }}</p>
-            <p><strong>Tipo:</strong> {{ material.tipo }}</p>
-            <p><strong>Nº Série:</strong> {{ material.numero_serie }}</p>
-            <p><strong>Estado:</strong> {{ material.estado }}</p>
+            <div>
+                <h2 style="margin-top:0; color:#2c3e50;">{{ material.nome }}</h2>
 
-            <div style="margin-top:15px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <p><strong>Projeto:</strong> {{ material.projeto.nome }}</p>
+
+                <p><strong>Furo:</strong>
+                    {% if material.furo %}
+                        {{ material.furo.nome }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </p>
+
+                <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
+                <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>
+                <p><strong>Nº Série:</strong> {{ material.numero_serie|default:"-" }}</p>
+
+                <p><strong>Quantidade:</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
+                <p><strong>Diâmetro:</strong> {{ material.diametro|default:"0"|floatformat:2 }}</p>
+                <p><strong>Valor:</strong> €{{ material.valor|floatformat:2 }}</p>
+
+                <p><strong>Fornecedor:</strong> {{ material.fornecedor|default:"-" }}</p>
+                <p><strong>Estado:</strong> {{ material.get_estado_display }}</p>
+                <p><strong>Localização:</strong> {{ material.localizacao|default:"-" }}</p>
+            </div>
+
+            <div style="margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;">
                 <a href="{% url 'projetos:material_detail' material.id %}" style="
                     flex:1;
                     text-align:center;
@@ -86,10 +103,20 @@
                 </a>
             </div>
         </div>
-        {% empty %}
-        <p style="text-align:center; width:100%; color:#7f8c8d;">Nenhum material registrado.</p>
         {% endfor %}
     </div>
+    {% else %}
+    <div style="
+        background:white;
+        padding:30px;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.06);
+        text-align:center;
+        color:#7f8c8d;
+    ">
+        Nenhum material registado.
+    </div>
+    {% endif %}
 
 </section>
 {% endblock %}

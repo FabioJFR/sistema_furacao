@@ -154,6 +154,62 @@
         </tbody>
     </table>
 
+
+    <!-- LEVANTAMENTOS DE MATERIAL DO FURO -->
+    <div style="margin-bottom:30px;">
+        <h2 style="margin-bottom:15px; color:#ecf0f1;">Levantamentos de Material</h2>
+
+        {% if levantamentos %}
+        <div style="
+            overflow-x:auto;
+            background:#2c3e50;
+            border-radius:10px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.2);
+        ">
+            <table style="width:100%; border-collapse:collapse; color:#ecf0f1;">
+                <thead style="background:#22313f;">
+                    <tr>
+                        <th style="padding:10px; text-align:left;">Data</th>
+                        <th style="padding:10px; text-align:left;">Empregado</th>
+                        <th style="padding:10px; text-align:left;">Material</th>
+                        <th style="padding:10px; text-align:left;">Quantidade</th>
+                        <th style="padding:10px; text-align:left;">Projeto</th>
+                        <th style="padding:10px; text-align:left;">Observações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for levantamento in levantamentos %}
+                    <tr style="border-top:1px solid #3d566e;">
+                        <td style="padding:10px;">{{ levantamento.data }}</td>
+                        <td style="padding:10px;">{{ levantamento.empregado.nome }}</td>
+                        <td style="padding:10px;">
+                            <a href="{% url 'projetos:material_detail' levantamento.material.id %}"
+                            style="color:#5dade2; font-weight:bold; text-decoration:none;">
+                                {{ levantamento.material.nome }}
+                            </a>
+                        </td>
+                        <td style="padding:10px;">{{ levantamento.quantidade }}</td>
+                        <td style="padding:10px;">
+                            {% if levantamento.projeto %}
+                                <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}"
+                                style="color:#5dade2; text-decoration:none;">
+                                    {{ levantamento.projeto.nome }}
+                                </a>
+                            {% else %}
+                                Stock
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px;">{{ levantamento.observacoes|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:#bdc3c7;">Ainda não existem levantamentos de material neste furo.</p>
+        {% endif %}
+    </div>
+
     <!-- Botões do furo -->
     <div style="display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
         <a href="{% url 'projetos:furo_update' furo.id %}" style="flex:1; min-width:150px; text-align:center; background:#27ae60; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;">✏️ Editar Furo</a>

@@ -314,6 +314,143 @@
             {% endif %}
         </div>
 
+        <!-- MÁQUINAS DO PROJETO -->
+        <div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Máquinas Associadas</h2>
+
+            {% if projeto.maquinas.exists %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for maquina in projeto.maquinas.all %}
+                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
+                    <h3 class="font-semibold text-gray-800">{{ maquina.nome }}</h3>
+
+                    <p><strong>Tipo:</strong> {{ maquina.tipo|default:"-" }}</p>
+                    <p><strong>Marca:</strong> {{ maquina.marca|default:"-" }}</p>
+                    <p><strong>Modelo:</strong> {{ maquina.modelo|default:"-" }}</p>
+                    <p><strong>Estado:</strong> {{ maquina.get_estado_display }}</p>
+                    <p><strong>Horímetro:</strong> {{ maquina.horimetro|default:"0" }}</p>
+                    <p><strong>Localização:</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
+
+                    {% if maquina.projeto_atual %}
+                        <p><strong>Projeto Atual:</strong> {{ maquina.projeto_atual.nome }}</p>
+                    {% endif %}
+
+                    <div class="flex gap-2 flex-wrap pt-2">
+                        <a href="{% url 'projetos:maquina_detail' maquina.id %}" 
+                        class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                        Ver Detalhes
+                        </a>
+
+                        <a href="{% url 'projetos:maquina_update' maquina.id %}" 
+                        class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
+                        Editar
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500">Nenhuma máquina associada a este projeto.</p>
+            {% endif %}
+        </div>
+
+        <!-- MATERIAIS DO PROJETO -->
+        <div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Materiais Associados</h2>
+
+            {% if projeto.materiais.exists %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for material in projeto.materiais.all %}
+                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
+                    <h3 class="font-semibold text-gray-800">{{ material.nome }}</h3>
+
+                    <p><strong>Furo:</strong>
+                        {% if material.furo %}
+                            <a href="{% url 'projetos:furo_detail' material.furo.id %}"
+                            class="text-blue-600 hover:underline font-semibold">
+                                {{ material.furo.nome }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
+                    <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>
+                    <p><strong>Quantidade:</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
+                    <p><strong>Valor:</strong> {{ material.valor|floatformat:2 }} €</p>
+                    <p><strong>Fornecedor:</strong> {{ material.fornecedor|default:"-" }}</p>
+                    <p><strong>Estado:</strong> {{ material.get_estado_display }}</p>
+
+                    <div class="flex gap-2 flex-wrap pt-2">
+                        <a href="{% url 'projetos:material_detail' material.id %}" 
+                        class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                        Ver Detalhes
+                        </a>
+
+                        <a href="{% url 'projetos:material_update' material.id %}" 
+                        class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
+                        Editar
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500">Nenhum material associado a este projeto.</p>
+            {% endif %}
+        </div>
+
+        <!-- LEVANTAMENTOS DE MATERIAL DO PROJETO -->
+        <div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Levantamentos de Material</h2>
+
+            {% if levantamentos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3">Data</th>
+                            <th class="text-left px-4 py-3">Empregado</th>
+                            <th class="text-left px-4 py-3">Material</th>
+                            <th class="text-left px-4 py-3">Quantidade</th>
+                            <th class="text-left px-4 py-3">Furo</th>
+                            <th class="text-left px-4 py-3">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for levantamento in levantamentos %}
+                        <tr class="border-t border-gray-200">
+                            <td class="px-4 py-3">{{ levantamento.data }}</td>
+                            <td class="px-4 py-3">{{ levantamento.empregado.nome }}</td>
+                            <td class="px-4 py-3">
+                                <a href="{% url 'projetos:material_detail' levantamento.material.id %}"
+                                class="text-blue-600 hover:underline font-semibold">
+                                    {{ levantamento.material.nome }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-3">{{ levantamento.quantidade }}</td>
+                            <td class="px-4 py-3">
+                                {% if levantamento.furo %}
+                                    <a href="{% url 'projetos:furo_detail' levantamento.furo.id %}"
+                                    class="text-blue-600 hover:underline">
+                                        {{ levantamento.furo.nome }}
+                                    </a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">{{ levantamento.observacoes|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500">Ainda não existem levantamentos de material neste projeto.</p>
+            {% endif %}
+        </div>
+
         <!-- BOTÃO VOLTAR -->
         <div class="mt-6">
             <a href="{% url 'projetos:projeto_list' %}" 

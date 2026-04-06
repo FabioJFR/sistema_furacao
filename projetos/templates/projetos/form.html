@@ -4,11 +4,11 @@
 
 {% block content %}
 <section class="container mx-auto p-6">
-    <div style="max-width:700px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
+    <div style="max-width:700px; margin:0 auto; background:#121A21; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#000000;">
         <h2 style="text-align:center; margin-bottom:20px;">{{ titulo|default:"Criar Novo Furo" }}</h2>
 
         {% if form.non_field_errors %}
-            <div style="background:#e74c3c; color:white; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
+            <div style="background:#e74c3c; color:rgb(255, 255, 255); padding:12px 15px; border-radius:8px; margin-bottom:20px;">
                 {{ form.non_field_errors }}
             </div>
         {% endif %}
@@ -18,7 +18,7 @@
 
             {% for field in form %}
                 <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label for="{{ field.id_for_label }}" style="font-weight:bold;">
+                    <label for="{{ field.id_for_label }}" style="font-weight:bold;color:aliceblue">
                         {{ field.label }}
                     </label>
 

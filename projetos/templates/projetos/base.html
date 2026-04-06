@@ -157,12 +157,16 @@
         <div class="sidebar">
             {% if user.is_superuser %}
                 <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
+                <a href="{% url 'projetos:graficos_dashboard' %}">📊 Gráficos</a>
                 <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
+                <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
+                <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
                 <a href="{% url 'projetos:furo_list' %}">🕳 Furos</a>
                 <a href="{% url 'projetos:medicao_list' %}">📊 Medições</a>
                 <a href="{% url 'projetos:material_list' %}">📦 Materiais</a>
-                <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
-                <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
+                <a href="{% url 'projetos:registos_admin_list' %}">📈 Produção</a>
+                <a href="{% url 'projetos:levantamento_material_admin_list' %}">📦 Levantamentos</a>
+                <a href="{% url 'projetos:devolucao_material_admin_list' %}">↩️ Devoluções</a>
                 <a href="{% url 'projetos:empregado_pendentes' %}">📝 Registos Pendentes</a>
             {% else %}
                 <a href="{% url 'projetos:area_empregado' %}">👤 Minha Área</a>

@@ -1,4 +1,6 @@
 import math
+from django.utils import timezone
+from django.db.models import Sum
 
 def calcular_trajetoria_min_curv(medicoes, origem=(0.0, 0.0, 0.0)):
     x = float(origem[0] or 0.0)
@@ -110,3 +112,64 @@ def calcular_trajetoria_min_curv(medicoes, origem=(0.0, 0.0, 0.0)):
             alertas.append("OK")
 
     return pontos, doglegs, alertas
+
+
+def recalcular_resumo_empregado(empregado):
+    hoje = timezone.now().date()
+    inicio_mes = hoje.replace(day=1)
+
+    registos = empregado.registos_diarios.all()
+
+    total_horas = registos.aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+    total_metros = registos.aggregate(total=Sum('metros_furados'))['total'] or 0
+
+    horas_mes = registos.filter(
+        data__gte=inicio_mes,
+        data__lte=hoje
+    ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+    metros_mes = registos.filter(
+        data__gte=inicio_mes,
+        data__lte=hoje
+    ).aggregate(total=Sum('metros_furados'))['total'] or 0
+
+    horas_hoje = registos.filter(
+        data=hoje
+    ).aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+    metros_hoje = registos.filter(
+        data=hoje
+    ).aggregate(total=Sum('metros_furados'))['total'] or 0
+
+    total_furos = registos.exclude(
+        furo__isnull=True
+    ).values('furo').distinct().count()
+
+    total_dias = registos.values('data').distinct().count()
+
+    media_m_h = total_metros / total_horas if total_horas > 0 else 0
+    media_m_d = total_metros / total_dias if total_dias > 0 else 0
+
+    empregado.total_metros_furados = total_metros
+    empregado.metros_furados_mes = metros_mes
+    empregado.metros_furados_hoje = metros_hoje
+    empregado.total_furos_trabalhados = total_furos
+    empregado.media_metros_por_hora = round(media_m_h, 2)
+    empregado.media_metros_por_dia = round(media_m_d, 2)
+
+    empregado.horas_total = total_horas
+    empregado.horas_trabalhadas_mes = horas_mes
+    empregado.horas_diarias = horas_hoje
+
+    empregado.save(update_fields=[
+        'total_metros_furados',
+        'metros_furados_mes',
+        'metros_furados_hoje',
+        'total_furos_trabalhados',
+        'media_metros_por_hora',
+        'media_metros_por_dia',
+        'horas_total',
+        'horas_trabalhadas_mes',
+        'horas_diarias',
+    ])
+

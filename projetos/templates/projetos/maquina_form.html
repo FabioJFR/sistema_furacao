@@ -1,15 +1,38 @@
 {% extends 'projetos/base.html' %}
-<!-- projetos/templates/projetos/maquina_form.html -->
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div style="max-width:600px; margin:40px auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); color:#ecf0f1;">
+<div style="max-width:900px; margin:40px auto; background:#34495e; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.25); color:#ecf0f1;">
+
     <h2 style="text-align:center; margin-bottom:25px;">{{ titulo }}</h2>
 
-    <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+    <form method="POST" style="display:flex; flex-direction:column; gap:20px;">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        {% if form.non_field_errors %}
+            <div style="background:#e74c3c; padding:10px; border-radius:6px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;color:black;">
+            {% for field in form %}
+                <div>
+                    <label style="font-weight:bold; margin-bottom:4px; display:block;color: aliceblue;">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div style="color:#ff6b6b; font-size:13px; margin-top:4px;">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
 
         <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:10px;">
             <button type="submit" style="
@@ -17,7 +40,7 @@
                 color:white;
                 padding:10px 20px;
                 border:none;
-                border-radius:5px;
+                border-radius:6px;
                 font-weight:bold;
                 cursor:pointer;
                 transition: background 0.2s;
@@ -29,7 +52,7 @@
                 background-color:#2980b9;
                 color:white;
                 padding:10px 20px;
-                border-radius:5px;
+                border-radius:6px;
                 font-weight:bold;
                 text-decoration:none;
                 text-align:center;
@@ -38,6 +61,7 @@
                 🔙 Voltar
             </a>
         </div>
+
     </form>
 </div>
 {% endblock %}

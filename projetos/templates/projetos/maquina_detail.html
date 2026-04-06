@@ -1,45 +1,150 @@
 {% extends "projetos/base.html" %}
-<!-- projetos/templates/projetos/maquina_detail.html -->
 
 {% block title %}Detalhes da Máquina{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 40px auto; background: #34495e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); color: #ecf0f1;">
-    
-    <h1 style="text-align:center; margin-bottom: 20px;">{{ maquina.nome }}</h1>
+<div style="max-width: 900px; margin: 40px auto; background: #34495e; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); color: #ecf0f1;">
 
-    <p><strong>Modelo:</strong> {{ maquina.modelo }}</p>
-    <p><strong>Marca:</strong> {{ maquina.marca }}</p>
-    <p><strong>Ano:</strong> {{ maquina.ano }}</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
+        <h1 style="margin:0;">{{ maquina.nome }}</h1>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{% url 'projetos:maquina_update' maquina.id %}" style="
+                background:#f39c12;
+                color:white;
+                padding:10px 14px;
+                border-radius:6px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                ✏️ Editar
+            </a>
+
+            <a href="{% url 'projetos:maquina_delete' maquina.id %}" style="
+                background:#c0392b;
+                color:white;
+                padding:10px 14px;
+                border-radius:6px;
+                font-weight:bold;
+                text-decoration:none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                🗑️ Apagar
+            </a>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px;">
+        <div>
+            <p><strong>Tipo:</strong> {{ maquina.tipo|default:"-" }}</p>
+            <p><strong>Marca:</strong> {{ maquina.marca|default:"-" }}</p>
+            <p><strong>Modelo:</strong> {{ maquina.modelo|default:"-" }}</p>
+            <p><strong>Nº Série:</strong> {{ maquina.numero_serie|default:"-" }}</p>
+            <p><strong>Estado:</strong> {{ maquina.get_estado_display }}</p>
+            <p><strong>Ativa:</strong> {% if maquina.ativo %}Sim{% else %}Não{% endif %}</p>
+        </div>
+
+        <div>
+            <p><strong>Matrícula:</strong> {{ maquina.matricula|default:"-" }}</p>
+            <p><strong>Quilómetros:</strong> {{ maquina.km|default:"0" }}</p>
+            <p><strong>Horímetro:</strong> {{ maquina.horimetro|default:"0" }}</p>
+            <p><strong>Ano Registo:</strong> {{ maquina.ano_registo|default:"-" }}</p>
+            <p><strong>Valor:</strong> {{ maquina.valor|floatformat:2 }} €</p>
+            <p><strong>Localização Atual:</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
+        </div>
+
+        <div>
+            <p><strong>Data Compra:</strong> {{ maquina.data_compra|default:"-" }}</p>
+            <p><strong>Data Registo:</strong> {{ maquina.data_registo|default:"-" }}</p>
+            <p><strong>Data Revisão:</strong> {{ maquina.data_revisao|default:"-" }}</p>
+            <p><strong>Seguro:</strong> {{ maquina.seguro|default:"-" }}</p>
+            <p><strong>Validade Seguro:</strong> {{ maquina.data_seguro|default:"-" }}</p>
+            <p><strong>Validade IUC:</strong> {{ maquina.data_iuc|default:"-" }}</p>
+        </div>
+    </div>
+
+    <div style="margin-top:30px;">
+        <h3 style="margin-bottom:10px;">Projeto Atual</h3>
+        {% if maquina.projeto_atual %}
+            <div style="background: rgba(255,255,255,0.08); padding:12px; border-radius:8px;">
+                <a href="{% url 'projetos:projeto_detail' maquina.projeto_atual.id %}" style="color:#8ecdf7; font-weight:bold; text-decoration:none;">
+                    {{ maquina.projeto_atual.nome }}
+                </a>
+            </div>
+        {% else %}
+            <p style="color:#d1d5db;">Sem projeto atual.</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top:25px;">
+        <h3 style="margin-bottom:10px;">Projetos Associados</h3>
+        {% if maquina.projetos.all %}
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                {% for projeto in maquina.projetos.all %}
+                    <a href="{% url 'projetos:projeto_detail' projeto.id %}" style="
+                        display:inline-block;
+                        background:#2c3e50;
+                        color:#ecf0f1;
+                        padding:8px 12px;
+                        border-radius:999px;
+                        text-decoration:none;
+                        font-weight:bold;
+                    ">
+                        {{ projeto.nome }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color:#d1d5db;">Sem projetos associados.</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top:25px;">
+        <h3 style="margin-bottom:10px;">Furos Associados</h3>
+        {% if maquina.furos.all %}
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                {% for furo in maquina.furos.all %}
+                    <a href="{% url 'projetos:furo_detail' furo.id %}" style="
+                        display:inline-block;
+                        background:#2c3e50;
+                        color:#ecf0f1;
+                        padding:8px 12px;
+                        border-radius:999px;
+                        text-decoration:none;
+                        font-weight:bold;
+                    ">
+                        {{ furo.nome }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color:#d1d5db;">Sem furos associados.</p>
+        {% endif %}
+    </div>
+
+    {% if maquina.observacoes %}
+    <div style="margin-top:25px;">
+        <h3 style="margin-bottom:10px;">Observações</h3>
+        <div style="background: rgba(255,255,255,0.08); padding:12px; border-radius:8px; white-space:pre-line;">
+            {{ maquina.observacoes }}
+        </div>
+    </div>
+    {% endif %}
 
     <div style="text-align:center; margin-top:30px;">
-        {% if maquina.projeto %}
-            <a href="{% url 'projetos:projeto_detail' maquina.projeto.id %}" style="
-                display:inline-block;
-                background:#2980b9;
-                color:white;
-                padding:10px 15px;
-                border-radius:5px;
-                font-weight:bold;
-                text-decoration:none;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
-                🔙 Voltar ao Projeto
-            </a>
-        {% else %}
-            <a href="{% url 'projetos:maquina_list' %}" style="
-                display:inline-block;
-                background:#2980b9;
-                color:white;
-                padding:10px 15px;
-                border-radius:5px;
-                font-weight:bold;
-                text-decoration:none;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
-                🔙 Voltar à Lista de Máquinas
-            </a>
-        {% endif %}
+        <a href="{% url 'projetos:maquina_list' %}" style="
+            display:inline-block;
+            background:#2980b9;
+            color:white;
+            padding:10px 15px;
+            border-radius:6px;
+            font-weight:bold;
+            text-decoration:none;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+            🔙 Voltar à Lista de Máquinas
+        </a>
     </div>
 
 </div>

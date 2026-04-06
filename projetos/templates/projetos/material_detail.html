@@ -1,53 +1,224 @@
 {% extends 'projetos/base.html' %}
-<!-- projetos/templates/projetos/material_detail.html -->
 
 {% block title %}Detalhes do Material{% endblock %}
 
 {% block content %}
-<div style="max-width:600px; margin:40px auto; background:#f4f4f4; padding:30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
-    
-    <h2 style="text-align:center; margin-bottom:20px;">{{ material.nome }}</h2>
+<div style="max-width:900px; margin:40px auto; background:#f4f4f4; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
 
-    <div style="display:flex; flex-direction:column; gap:10px; font-size:16px;">
-        <p><strong>Valor:</strong> {{ material.valor }}€</p>
-        <p><strong>Quantidade:</strong> {{ material.quantidade }}</p>
-        <p><strong>Diâmetro:</strong> {{ material.diametro }}</p>
-        <p><strong>Tipo:</strong> {{ material.tipo }}</p>
-        <p><strong>Número de Série:</strong> {{ material.numero_serie }}</p>
-        <p><strong>Estado:</strong> {{ material.estado }}</p>
-        {% if material.furo %}
-        <p><strong>Furo:</strong> <a href="{% url 'projetos:furo_detail' material.furo.id %}" style="color:#2980b9;">{{ material.furo.nome }}</a></p>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
+        <h2 style="margin:0;">{{ material.nome }}</h2>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{% url 'projetos:material_update' material.id %}" style="
+                background:#f39c12;
+                color:white;
+                padding:10px 15px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                ✏️ Editar
+            </a>
+
+            <a href="{% url 'projetos:material_delete' material.id %}" style="
+                background:#c0392b;
+                color:white;
+                padding:10px 15px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                🗑️ Apagar
+            </a>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px; font-size:16px;">
+
+        <div>
+            <p><strong>Projeto:</strong>
+                {% if material.projeto %}
+                    <a href="{% url 'projetos:projeto_detail' material.projeto.id %}" style="color:#2980b9; text-decoration:none; font-weight:bold;">
+                        {{ material.projeto.nome }}
+                    </a>
+                {% else %}
+                    Stock
+                {% endif %}
+            </p>
+
+            <p><strong>Furo:</strong>
+                {% if material.furo %}
+                    <a href="{% url 'projetos:furo_detail' material.furo.id %}" style="color:#2980b9; text-decoration:none; font-weight:bold;">
+                        {{ material.furo.nome }}
+                    </a>
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+
+            <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
+            <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>
+            <p><strong>Número de Série:</strong> {{ material.numero_serie|default:"-" }}</p>
+        </div>
+
+        <div>
+            <p><strong>Quantidade em stock:</strong>
+                <span style="
+                    padding:4px 10px;
+                    border-radius:6px;
+                    font-weight:bold;
+                    background:{% if material.quantidade > 10 %}#2ecc71{% elif material.quantidade > 0 %}#f39c12{% else %}#e74c3c{% endif %};
+                    color:white;
+                ">
+                    {{ material.quantidade }}
+                </span>
+                {{ material.unidade|default:"" }}
+            </p>
+
+            <p><strong>Diâmetro:</strong> {{ material.diametro|floatformat:2 }}</p>
+            <p><strong>Valor:</strong> {{ material.valor|floatformat:2 }}€</p>
+            <p><strong>Estado:</strong> {{ material.get_estado_display }}</p>
+            <p><strong>Ativo:</strong> {% if material.ativo %}Sim{% else %}Não{% endif %}</p>
+        </div>
+
+        <div>
+            <p><strong>Fornecedor:</strong> {{ material.fornecedor|default:"-" }}</p>
+            <p><strong>Localização:</strong> {{ material.localizacao|default:"-" }}</p>
+            <p><strong>Data Compra:</strong> {{ material.data_compra|default:"-" }}</p>
+        </div>
+    </div>
+
+    {% if material.observacoes %}
+    <div style="margin-top:25px;">
+        <h3 style="margin-bottom:10px;">Observações</h3>
+        <div style="
+            background:white;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ddd;
+            white-space:pre-line;
+        ">
+            {{ material.observacoes }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- HISTÓRICO DE LEVANTAMENTOS -->
+    <div style="margin-top:30px;">
+        <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Histórico de Levantamentos</h2>
+
+        {% if levantamentos %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; background:white;">
+                <thead style="background:#f1f1f1;">
+                    <tr>
+                        <th style="padding:10px; text-align:left;">Data</th>
+                        <th style="padding:10px; text-align:left;">Empregado</th>
+                        <th style="padding:10px; text-align:left;">Quantidade</th>
+                        <th style="padding:10px; text-align:left;">Projeto</th>
+                        <th style="padding:10px; text-align:left;">Furo</th>
+                        <th style="padding:10px; text-align:left;">Observações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for levantamento in levantamentos %}
+                    <tr style="border-top:1px solid #ddd;">
+                        <td style="padding:10px;">{{ levantamento.data }}</td>
+                        <td style="padding:10px;">{{ levantamento.empregado.nome }}</td>
+                        <td style="padding:10px;">{{ levantamento.quantidade }}</td>
+
+                        <td style="padding:10px;">
+                            {% if levantamento.projeto %}
+                                <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}" style="color:#2980b9;">
+                                    {{ levantamento.projeto.nome }}
+                                </a>
+                            {% else %}
+                                Stock
+                            {% endif %}
+                        </td>
+
+                        <td style="padding:10px;">
+                            {% if levantamento.furo %}
+                                <a href="{% url 'projetos:furo_detail' levantamento.furo.id %}" style="color:#2980b9;">
+                                    {{ levantamento.furo.nome }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td style="padding:10px;">{{ levantamento.observacoes|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:#7f8c8d;">Ainda não existem levantamentos para este material.</p>
         {% endif %}
     </div>
 
-    <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <a href="{% url 'material_update' material.id %}" style="
-            background:#f39c12;
-            color:white;
-            padding:10px 15px;
-            border-radius:5px;
-            text-decoration:none;
-            font-weight:bold;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
-            ✏️ Editar
-        </a>
-        <a href="{% url 'material_delete' material.id %}" style="
-            background:#c0392b;
-            color:white;
-            padding:10px 15px;
-            border-radius:5px;
-            text-decoration:none;
-            font-weight:bold;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
-            🗑️ Apagar
-        </a>
-        <a href="{% url 'material_list' %}" style="
+    <!-- HISTORICO DE DEVOLUÇÔES -->
+    <div style="margin-top:30px;">
+        <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Histórico de Devoluções</h2>
+
+        {% if devolucoes %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; background:white;">
+                <thead style="background:#f1f1f1;">
+                    <tr>
+                        <th style="padding:10px; text-align:left;">Data</th>
+                        <th style="padding:10px; text-align:left;">Empregado</th>
+                        <th style="padding:10px; text-align:left;">Quantidade</th>
+                        <th style="padding:10px; text-align:left;">Projeto</th>
+                        <th style="padding:10px; text-align:left;">Furo</th>
+                        <th style="padding:10px; text-align:left;">Observações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for devolucao in devolucoes %}
+                    <tr style="border-top:1px solid #ddd;">
+                        <td style="padding:10px;">{{ devolucao.data }}</td>
+                        <td style="padding:10px;">{{ devolucao.empregado.nome }}</td>
+                        <td style="padding:10px;">{{ devolucao.quantidade }}</td>
+                        <td style="padding:10px;">
+                            {% if devolucao.projeto %}
+                                <a href="{% url 'projetos:projeto_detail' devolucao.projeto.id %}" style="color:#2980b9;">
+                                    {{ devolucao.projeto.nome }}
+                                </a>
+                            {% else %}
+                                Stock
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px;">
+                            {% if devolucao.furo %}
+                                <a href="{% url 'projetos:furo_detail' devolucao.furo.id %}" style="color:#2980b9;">
+                                    {{ devolucao.furo.nome }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px;">{{ devolucao.observacoes|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:#7f8c8d;">Ainda não existem devoluções para este material.</p>
+        {% endif %}
+    </div>
+
+
+    <div style="margin-top:25px; text-align:center;">
+        <a href="{% url 'projetos:material_list' %}" style="
             background:#2980b9;
             color:white;
             padding:10px 15px;
-            border-radius:5px;
+            border-radius:6px;
             text-decoration:none;
             font-weight:bold;
             transition: background 0.2s;
