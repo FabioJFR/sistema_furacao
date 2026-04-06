@@ -1,4 +1,10 @@
 # 🛠️ Sistema de Gestão de Diamond Drilling
+![Django](https://img.shields.io/badge/Django-6-092E20?logo=django)
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python)
+![Status](https://img.shields.io/badge/status-active-success)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Version](https://img.shields.io/badge/version-v0.1-blue)
+![Made by](https://img.shields.io/badge/made%20by-Fabio%20Revez-black)
 
 Sistema web desenvolvido em **Django** para gestão operacional de projetos de perfuração (diamond drilling), com foco em controlo de produção, materiais, equipamentos e análise de dados em tempo real.
 
