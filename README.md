@@ -109,7 +109,7 @@ Este sistema foi desenvolvido para:
 ## 📌 Estado do Projeto
 
 🚧 Em desenvolvimento ativo  
-Versão atual: **v0.9.0-beta**
+Versão atual: **v0.7.0-beta**
 
 ---
 
