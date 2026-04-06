@@ -1,0 +1,8 @@
+
+._*
+.DS_Store
+db.sqlite3
+*.sqlite3
+.venv/
+__pycache__/
+*.py[cod]
