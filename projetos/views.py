@@ -21,15 +21,31 @@ from django.utils.dateparse import parse_date
 from collections import OrderedDict
 from django.db.models import Sum, Count, F
 from datetime import timedelta
-
+from .utils_dashboard import (
+    obter_intervalo_filtros,
+    obter_cards_dashboard,
+    obter_alertas_dashboard,
+    obter_graficos_dashboard,
+)
 
 # -------------- DASHBOARD ---------------
+from django.contrib.auth.decorators import login_required
+from django.db.models import F, Sum
+from django.shortcuts import render
 
+from .models import Projeto, Furo, Empregados, Maquina, Material, RegistoDiarioEmpregado
+from .utils_dashboard import (
+    obter_intervalo_filtros,
+    obter_cards_dashboard,
+    obter_alertas_dashboard,
+    obter_graficos_dashboard,
+)
 
+# --------- DASHBOARD ------------ #
 @login_required
 @admin_required
 def dashboard(request):
-    projetos_qs = Projeto.objects.all().order_by('nome')
+    projetos_qs = Projeto.objects.all().order_by("nome")
 
     projetos = []
     for p in projetos_qs:
@@ -43,110 +59,35 @@ def dashboard(request):
             "localizacao_lon": float(p.localizacao_lon) if p.localizacao_lon is not None else None,
         })
 
-    # -------- TOTAIS GERAIS --------
-    total_projetos = Projeto.objects.count()
-    total_furos = Furo.objects.count()
-    total_empregados = Empregados.objects.count()
-    total_maquinas = Maquina.objects.count()
-    total_materiais = Material.objects.count()
+    filtros = obter_intervalo_filtros(request)
 
-    # -------- ALERTAS --------
-    materiais_stock_baixo = Material.objects.filter(
-        ativo=True,
-        quantidade__lte=F('stock_minimo')
-    ).order_by('quantidade')
-
-    maquinas_alerta = Maquina.objects.filter(
-        estado__in=['avariada', 'reparacao', 'parada']
-    ).order_by('nome')
-
-    # -------- REGISTOS DIÁRIOS --------
-    registos = RegistoDiarioEmpregado.objects.select_related(
-        'empregado', 'projeto', 'furo'
-    ).order_by('data')
-
-    agregados_dia = OrderedDict()
-
-    for registo in registos:
-        if not registo.data:
-            continue
-
-        chave = registo.data.strftime("%d/%m/%Y")
-
-        if chave not in agregados_dia:
-            agregados_dia[chave] = {
-                "metros": 0,
-                "horas": 0,
-            }
-
-        agregados_dia[chave]["metros"] += registo.metros_furados or 0
-        agregados_dia[chave]["horas"] += registo.horas_trabalhadas or 0
-
-    labels_dia = []
-    metros_dia = []
-    horas_dia = []
-    produtividade_dia = []
-
-    for data_label, valores in agregados_dia.items():
-        labels_dia.append(data_label)
-
-        metros = valores["metros"]
-        horas = valores["horas"]
-        produtividade = metros / horas if horas > 0 else 0
-
-        metros_dia.append(round(metros, 2))
-        horas_dia.append(round(horas, 2))
-        produtividade_dia.append(round(produtividade, 2))
-
-    # -------- METROS POR EMPREGADO --------
-    empregados_stats = Empregados.objects.order_by('-total_metros_furados')[:10]
-    labels_empregados = [e.nome for e in empregados_stats]
-    metros_empregados = [round(e.total_metros_furados or 0, 2) for e in empregados_stats]
-
-    # -------- METROS POR PROJETO --------
-    projetos_stats = Projeto.objects.annotate(
-        total_metros=Sum('registos_empregados__metros_furados')
-    ).order_by('-total_metros')[:10]
-
-    labels_projetos = [p.nome for p in projetos_stats]
-    metros_projetos = [round(p.total_metros or 0, 2) for p in projetos_stats]
-
-    # -------- METROS POR FURO --------
-    furos_stats = Furo.objects.annotate(
-        total_metros=Sum('registos_empregados__metros_furados')
-    ).order_by('-total_metros')[:10]
-
-    labels_furos = [f.nome for f in furos_stats]
-    metros_furos = [round(f.total_metros or 0, 2) for f in furos_stats]
+    cards = obter_cards_dashboard()
+    alertas = obter_alertas_dashboard()
+    graficos = obter_graficos_dashboard(
+        inicio=filtros["inicio"],
+        fim=filtros["fim"],
+        projeto_id=filtros["projeto_id"],
+        empregado_id=filtros["empregado_id"],
+    )
 
     context = {
-        "total_projetos": total_projetos,
-        "total_furos": total_furos,
-        "total_empregados": total_empregados,
-        "total_maquinas": total_maquinas,
-        "total_materiais": total_materiais,
+        **cards,
+        **alertas,
+        **graficos,
 
         "projetos": projetos,
 
-        "materiais_stock_baixo": materiais_stock_baixo,
-        "maquinas_alerta": maquinas_alerta,
-
-        "labels_dia": labels_dia,
-        "metros_dia": metros_dia,
-        "horas_dia": horas_dia,
-        "produtividade_dia": produtividade_dia,
-
-        "labels_empregados": labels_empregados,
-        "metros_empregados": metros_empregados,
-
-        "labels_projetos": labels_projetos,
-        "metros_projetos": metros_projetos,
-
-        "labels_furos": labels_furos,
-        "metros_furos": metros_furos,
+        "periodo": filtros["periodo"],
+        "inicio": filtros["inicio"],
+        "fim": filtros["fim"],
+        "data_inicio": filtros["data_inicio"],
+        "data_fim": filtros["data_fim"],
+        "projeto_id": filtros["projeto_id"],
+        "empregado_id": filtros["empregado_id"],
     }
 
     return render(request, "projetos/dashboard.html", context)
+
 
 # ---------------- HOME ----------------
 def home(request):
@@ -1916,183 +1857,26 @@ def obter_coordenadas_por_cidade_pais(cidade, pais):
 @login_required
 @admin_required
 def graficos_dashboard(request):
-    hoje = timezone.now().date()
+    filtros = obter_intervalo_filtros(request)
 
-    periodo = request.GET.get('periodo', '30_dias')
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-
-    # -------- DEFINIR INTERVALO --------
-    inicio = None
-    fim = hoje
-
-    if periodo == 'hoje':
-        inicio = hoje
-    elif periodo == '7_dias':
-        inicio = hoje - timedelta(days=6)
-    elif periodo == '30_dias':
-        inicio = hoje - timedelta(days=29)
-    elif periodo == 'mes':
-        inicio = hoje.replace(day=1)
-    elif periodo == 'personalizado':
-        inicio = parse_date(data_inicio) if data_inicio else None
-        fim = parse_date(data_fim) if data_fim else hoje
-
-    # -------- TOTAIS GERAIS --------
-    total_projetos = Projeto.objects.count()
-    total_furos = Furo.objects.count()
-    total_empregados = Empregados.objects.count()
-    total_maquinas = Maquina.objects.count()
-    total_materiais = Material.objects.count()
-
-    materiais_stock_baixo = Material.objects.filter(
-        ativo=True,
-        quantidade__lte=F('stock_minimo')
-    ).order_by('quantidade')
-
-    maquinas_alerta = Maquina.objects.filter(
-        estado__in=['avariada', 'reparacao', 'parada']
-    ).order_by('nome')
-
-    # -------- REGISTOS FILTRADOS --------
-    registos = RegistoDiarioEmpregado.objects.select_related(
-        'empregado', 'projeto', 'furo'
-    ).order_by('data')
-
-    if inicio:
-        registos = registos.filter(data__gte=inicio)
-    if fim:
-        registos = registos.filter(data__lte=fim)
-
-    agregados_dia = OrderedDict()
-
-    for registo in registos:
-        if not registo.data:
-            continue
-
-        chave = registo.data.strftime("%d/%m/%Y")
-
-        if chave not in agregados_dia:
-            agregados_dia[chave] = {
-                "metros": 0,
-                "horas": 0,
-            }
-
-        agregados_dia[chave]["metros"] += registo.metros_furados or 0
-        agregados_dia[chave]["horas"] += registo.horas_trabalhadas or 0
-
-    labels_dia = []
-    metros_dia = []
-    horas_dia = []
-    produtividade_dia = []
-
-    for data_label, valores in agregados_dia.items():
-        labels_dia.append(data_label)
-        metros = valores["metros"]
-        horas = valores["horas"]
-        produtividade = metros / horas if horas > 0 else 0
-
-        metros_dia.append(round(metros, 2))
-        horas_dia.append(round(horas, 2))
-        produtividade_dia.append(round(produtividade, 2))
-
-    # -------- TOP EMPREGADOS FILTRADOS --------
-    empregados_stats = Empregados.objects.all()
-    empregados_labels = []
-    empregados_metros = []
-
-    for empregado in empregados_stats:
-        regs = empregado.registos_diarios.all()
-
-        if inicio:
-            regs = regs.filter(data__gte=inicio)
-        if fim:
-            regs = regs.filter(data__lte=fim)
-
-        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
-
-        if total > 0:
-            empregados_labels.append(empregado.nome)
-            empregados_metros.append(round(total, 2))
-
-    top_empregados = sorted(
-        zip(empregados_labels, empregados_metros),
-        key=lambda x: x[1],
-        reverse=True
-    )[:10]
-
-    labels_empregados = [x[0] for x in top_empregados]
-    metros_empregados = [x[1] for x in top_empregados]
-
-    # -------- TOP PROJETOS FILTRADOS --------
-    projetos_stats = Projeto.objects.all()
-    projetos_labels = []
-    projetos_metros = []
-
-    for projeto in projetos_stats:
-        regs = projeto.registos_empregados.all()
-        if inicio:
-            regs = regs.filter(data__gte=inicio)
-        if fim:
-            regs = regs.filter(data__lte=fim)
-
-        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
-        if total > 0:
-            projetos_labels.append(projeto.nome)
-            projetos_metros.append(round(total, 2))
-
-    top_projetos = sorted(zip(projetos_labels, projetos_metros), key=lambda x: x[1], reverse=True)[:10]
-    labels_projetos = [x[0] for x in top_projetos]
-    metros_projetos = [x[1] for x in top_projetos]
-
-    # -------- TOP FUROS FILTRADOS --------
-    furos_stats = Furo.objects.all()
-    furos_labels = []
-    furos_metros = []
-
-    for furo in furos_stats:
-        regs = furo.registos_empregados.all()
-        if inicio:
-            regs = regs.filter(data__gte=inicio)
-        if fim:
-            regs = regs.filter(data__lte=fim)
-
-        total = regs.aggregate(total=Sum('metros_furados'))['total'] or 0
-        if total > 0:
-            furos_labels.append(furo.nome)
-            furos_metros.append(round(total, 2))
-
-    top_furos = sorted(zip(furos_labels, furos_metros), key=lambda x: x[1], reverse=True)[:10]
-    labels_furos = [x[0] for x in top_furos]
-    metros_furos = [x[1] for x in top_furos]
-
-    return render(request, "projetos/graficos_dashboard.html", {
-        "total_projetos": total_projetos,
-        "total_furos": total_furos,
-        "total_empregados": total_empregados,
-        "total_maquinas": total_maquinas,
-        "total_materiais": total_materiais,
-
-        "materiais_stock_baixo": materiais_stock_baixo,
-        "maquinas_alerta": maquinas_alerta,
-
-        "labels_dia": labels_dia,
-        "metros_dia": metros_dia,
-        "horas_dia": horas_dia,
-        "produtividade_dia": produtividade_dia,
-
-        "labels_empregados": labels_empregados,
-        "metros_empregados": metros_empregados,
-
-        "labels_projetos": labels_projetos,
-        "metros_projetos": metros_projetos,
-
-        "labels_furos": labels_furos,
-        "metros_furos": metros_furos,
-
+    context = {
+        **obter_cards_dashboard(),
+        **obter_alertas_dashboard(),
+        **obter_graficos_dashboard(
+            inicio=filtros["inicio"],
+            fim=filtros["fim"],
+            projeto_id=filtros["projeto_id"],
+            empregado_id=filtros["empregado_id"],
+        ),
         "filtros": {
-            "periodo": periodo,
-            "data_inicio": data_inicio or "",
-            "data_fim": data_fim or "",
-        }
-    })
+            "periodo": filtros["periodo"],
+            "data_inicio": filtros["data_inicio"],
+            "data_fim": filtros["data_fim"],
+            "projeto_id": filtros["projeto_id"],
+            "empregado_id": filtros["empregado_id"],
+        },
+        "projetos_filtro": Projeto.objects.all().order_by("nome"),
+        "empregados_filtro": Empregados.objects.all().order_by("nome"),
+    }
+
+    return render(request, "projetos/graficos_dashboard.html", context)
