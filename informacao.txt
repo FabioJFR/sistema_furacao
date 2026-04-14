@@ -1,0 +1,21 @@
+Usa esta regra:
+	•	models/ → estrutura de dados
+	•	views/ → recebem request e devolvem response
+	•	selectors/ → leituras, métricas, queries, rankings
+	•	services/ → ações e regras de negócio
+	•	utils/ → helpers genéricos
+	•	core/ → coisas transversais ao sistema
+
+
+Ordem exata para implementares sem te perderes
+
+Faz por esta ordem:
+	1.	criar core/
+	2.	criar projetos/views/, selectors/, services/
+	3.	mover utils_dashboard.py para projetos/selectors/dashboard.py
+	4.	criar projetos/selectors/projetos.py
+	5.	mover dashboard() e graficos_dashboard() para views/
+	6.	ajustar urls.py
+	7.	testar se tudo abre
+	8.	só depois mexer em models/
+	9.	depois criar settings/base.py, dev.py, prod.py

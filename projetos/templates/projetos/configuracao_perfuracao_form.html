@@ -1,0 +1,100 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto p-6">
+    <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <div class="flex justify-between items-center flex-wrap gap-3">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ titulo }}</h1>
+                {% if empregado_obj %}
+                    <p class="text-gray-500 mt-1">Empregado: {{ empregado_obj.nome }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Furo</label>
+                    {{ form.furo }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do tubo (m)</label>
+                    {{ form.comprimento_tubo }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do Karoutier (m)</label>
+                    {{ form.comprimento_karoutier }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do acrescento (m)</label>
+                    {{ form.comprimento_acrescento }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do calibrador (m)</label>
+                    {{ form.comprimento_calibrador }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do record (m)</label>
+                    {{ form.comprimento_record }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do bit (m)</label>
+                    {{ form.comprimento_bit }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento da caixa de mola (m)</label>
+                    {{ form.comprimento_caixa_mola }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento do tubo interior (m)</label>
+                    {{ form.comprimento_tubo_interior }}
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Comprimento da cabeça de interior (m)</label>
+                    {{ form.comprimento_cabeca_interior }}
+                </div>
+            </div>
+
+            <div class="flex gap-3 flex-wrap pt-4">
+                <button type="submit"
+                        class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
+                    💾 Guardar
+                </button>
+
+                {% if modo_admin %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}"
+                       class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                        🔙 Voltar
+                    </a>
+                {% else %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
+                       class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                        🔙 Voltar
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

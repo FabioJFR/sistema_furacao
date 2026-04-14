@@ -11,6 +11,24 @@
             {{ titulo }}
         </h2>
 
+        {% if titulo == "Novo Empregado" %}
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
+                <h3 class="font-bold mb-2">Acesso automático à plataforma</h3>
+                <p class="text-sm leading-6">
+                    Ao criar um novo empregado, o sistema gera automaticamente um nome de utilizador e uma palavra-passe temporária.
+                    Depois de guardar, essas credenciais são mostradas ao administrador para poder entregar ao empregado.
+                </p>
+            </div>
+        {% elif empregado and not empregado.aprovado %}
+            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-900">
+                <h3 class="font-bold mb-2">Registo pendente de aprovação</h3>
+                <p class="text-sm leading-6">
+                    Este empregado ainda não está aprovado. A aprovação pode ser feita na área de detalhes do empregado,
+                    onde também ficará visível o utilizador associado.
+                </p>
+            </div>
+        {% endif %}
+
         <form method="POST" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
 
@@ -194,6 +212,15 @@
 
             </div>
 
+            {% if empregado and empregado.user %}
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
+                    <p><strong>Utilizador associado:</strong> {{ empregado.user.username }}</p>
+                    <p class="mt-1 text-gray-600">
+                        A palavra-passe não é mostrada aqui por segurança. Se precisares de entregar novo acesso,
+                        redefine a palavra-passe do utilizador associado.
+                    </p>
+                </div>
+            {% endif %}
             <button type="submit" class="btn btn-success mt-4 w-full text-center">
                 💾 Salvar
             </button>

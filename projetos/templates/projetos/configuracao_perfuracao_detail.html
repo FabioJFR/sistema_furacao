@@ -1,0 +1,134 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Detalhe da Configuração{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto p-6 space-y-6">
+
+    <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <div class="flex justify-between items-center flex-wrap gap-3">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">⚙️ Detalhe da Configuração de Perfuração</h1>
+                <p class="text-gray-500 mt-1">
+                    Empregado: {{ configuracao.empregado.nome }} |
+                    Furo: {{ configuracao.furo.nome }}
+                </p>
+            </div>
+
+            <div class="flex gap-3 flex-wrap">
+                {% if modo_admin %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_update_admin' configuracao.pk %}"
+                       class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                        ✏️ Editar
+                    </a>
+
+                    <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' configuracao.pk %}"
+                       class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                        🗑️ Apagar
+                    </a>
+
+                    <a href="{% url 'projetos:historico_configuracao_list_admin' empregado_obj.pk %}"
+                       class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                        🕘 Ver Histórico
+                    </a>
+                {% else %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao.pk %}"
+                       class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                        ✏️ Editar
+                    </a>
+
+                    <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' configuracao.pk %}"
+                       class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                        🗑️ Apagar
+                    </a>
+
+                    <a href="{% url 'projetos:historico_configuracao_list_empregado' %}"
+                       class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                        🕘 Ver Histórico
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+            <div><strong>Tubo:</strong> {{ configuracao.comprimento_tubo }} m</div>
+            <div><strong>Karoutier:</strong> {{ configuracao.comprimento_karoutier }} m</div>
+            <div><strong>Acrescento:</strong> {{ configuracao.comprimento_acrescento }} m</div>
+            <div><strong>Calibrador:</strong> {{ configuracao.comprimento_calibrador }} m</div>
+            <div><strong>Record:</strong> {{ configuracao.comprimento_record }} m</div>
+            <div><strong>Bit:</strong> {{ configuracao.comprimento_bit }} m</div>
+            <div><strong>Caixa de mola:</strong> {{ configuracao.comprimento_caixa_mola }} m</div>
+            <div><strong>Tubo interior:</strong> {{ configuracao.comprimento_tubo_interior }} m</div>
+            <div><strong>Cabeça de interior:</strong> {{ configuracao.comprimento_cabeca_interior }} m</div>
+        </div>
+
+        <div class="border-t pt-4">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Última alteração</h2>
+
+            {% if ultimo_historico %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                    <div><strong>Ação:</strong> {{ ultimo_historico.get_acao_display }}</div>
+                    <div><strong>Data:</strong> {{ ultimo_historico.criado_em }}</div>
+                    <div><strong>Alterado por:</strong> {{ ultimo_historico.alterado_por|default:"-" }}</div>
+                    <div><strong>Observações:</strong> {{ ultimo_historico.observacoes|default:"-" }}</div>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Ainda não existe histórico associado a esta configuração.</p>
+            {% endif %}
+        </div>
+
+        <div class="border-t pt-4">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Últimos registos do histórico</h2>
+
+            {% if historicos %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3">Data</th>
+                                <th class="text-left px-4 py-3">Ação</th>
+                                <th class="text-left px-4 py-3">Alterado por</th>
+                                <th class="text-left px-4 py-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in historicos %}
+                                <tr class="border-t">
+                                    <td class="px-4 py-3">{{ h.criado_em }}</td>
+                                    <td class="px-4 py-3">{{ h.get_acao_display }}</td>
+                                    <td class="px-4 py-3">{{ h.alterado_por|default:"-" }}</td>
+                                    <td class="px-4 py-3">
+                                        <a href="{% url 'projetos:historico_configuracao_detail' h.pk %}"
+                                           class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                            Ver detalhe
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Sem histórico disponível.</p>
+            {% endif %}
+        </div>
+
+        <div class="pt-2">
+            {% if modo_admin %}
+                <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                    🔙 Voltar
+                </a>
+            {% else %}
+                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                    🔙 Voltar
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

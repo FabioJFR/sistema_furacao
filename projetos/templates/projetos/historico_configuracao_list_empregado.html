@@ -1,0 +1,64 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Histórico de Configurações{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto p-6 space-y-6">
+
+    <div class="flex justify-between items-center flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">🕘 Histórico das Minhas Configurações</h1>
+            <p class="text-gray-500 mt-1">Empregado: {{ empregado.nome }}</p>
+        </div>
+
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                ⚙️ Ver Configurações
+            </a>
+
+            <a href="{% url 'projetos:area_empregado' %}"
+               class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+                🔙 Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-4">
+        {% if historicos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3">Data</th>
+                            <th class="text-left px-4 py-3">Furo</th>
+                            <th class="text-left px-4 py-3">Ação</th>
+                            <th class="text-left px-4 py-3">Alterado por</th>
+                            <th class="text-left px-4 py-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in historicos %}
+                            <tr class="border-t">
+                                <td class="px-4 py-3">{{ h.criado_em }}</td>
+                                <td class="px-4 py-3">{{ h.furo.nome|default:"-" }}</td>
+                                <td class="px-4 py-3">{{ h.get_acao_display }}</td>
+                                <td class="px-4 py-3">{{ h.alterado_por|default:"-" }}</td>
+                                <td class="px-4 py-3">
+                                    <a href="{% url 'projetos:historico_configuracao_detail' h.pk %}"
+                                       class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                        Ver detalhe
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">Ainda não existe histórico para este empregado.</p>
+        {% endif %}
+    </div>
+
+</section>
+{% endblock %}

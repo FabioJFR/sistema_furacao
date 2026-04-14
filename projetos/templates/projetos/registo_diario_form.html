@@ -1,11 +1,12 @@
 {% extends "projetos/base.html" %}
 {% load widget_tweaks %}
+<!-- registo_diario_form.html -->
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
-    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
         <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
             {{ titulo }}
         </h2>
@@ -22,16 +23,22 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 {% for field in form %}
-                    <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' %}md:col-span-2{% endif %}">
+                    <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' or field.name == 'fotos_amostra' %}md:col-span-2{% endif %}">
                         <label class="block font-semibold mb-1">{{ field.label }}</label>
                         {{ field|add_class:"w-full p-2 border rounded" }}
 
-                        {% if field.errors %}
-                            <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                        {% if field.help_text %}
+                            <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
                         {% endif %}
 
-                        {% if field.name == 'relatorio_foto' and form.instance.relatorio_foto %}
-                            <p class="text-sm text-gray-600 mt-1">
+                        {% if field.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.name == 'relatorio_foto' and form.instance.pk and form.instance.relatorio_foto %}
+                            <p class="text-sm text-gray-600 mt-2">
                                 Atual:
                                 <a href="{{ form.instance.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
                                     Ver imagem
@@ -41,6 +48,26 @@
                     </div>
                 {% endfor %}
             </div>
+
+            {% if form.instance.pk and form.instance.fotos_amostra.all %}
+                <div class="mt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">Fotos de Amostra já guardadas</h3>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% for foto in form.instance.fotos_amostra.all %}
+                            <div class="border rounded-lg p-2 bg-gray-50">
+                                <a href="{{ foto.imagem.url }}" target="_blank">
+                                    <img src="{{ foto.imagem.url }}" alt="Foto amostra" class="w-full h-32 object-cover rounded">
+                                </a>
+
+                                {% if foto.descricao %}
+                                    <p class="text-sm text-gray-600 mt-2">{{ foto.descricao }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
 
             <button type="submit" class="btn btn-success mt-4 w-full text-center">
                 💾 Guardar Registo

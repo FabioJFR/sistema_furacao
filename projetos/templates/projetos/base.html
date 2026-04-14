@@ -35,6 +35,12 @@
             color: white;
             z-index: 3000;
             box-sizing: border-box;
+            position: fixed;
+        }
+        .menu-toggle {
+            display: none;
+            font-size: 22px;
+            cursor: pointer;
         }
 
         .navbar-logo {
@@ -59,8 +65,8 @@
         }
 
         .sidebar {
-            width: 220px;
-            min-height: calc(100vh - 60px);
+            width: 240px;
+            height: calc(100vh - 60px);
             background: #1f2937;
             color: white;
             padding: 20px;
@@ -68,16 +74,30 @@
             top: 60px;
             left: 0;
             box-sizing: border-box;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #6b7280 #1f2937;
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin: 18px 0 10px 10px;
+            letter-spacing: 0.5px;
         }
 
         .sidebar a {
             display: block;
             color: #d1d5db;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 10px 12px;
+            border-radius: 8px;
             text-decoration: none;
             margin-bottom: 8px;
             transition: 0.2s;
+            font-weight: 600;
         }
 
         .sidebar a:hover {
@@ -85,10 +105,29 @@
             color: white;
         }
 
+        .sidebar::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+            border: 2px solid #1f2937;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
         .content-com-sidebar {
-            margin-left: 220px;
+            margin-left: 240px;
             padding: 20px;
-            width: calc(100% - 220px);
+            width: calc(100% - 240px);
             box-sizing: border-box;
         }
 
@@ -121,6 +160,36 @@
 
         .btn-danger { background: #dc2626; color: white; }
         .btn-danger:hover { background: #b91c1c; }
+
+        @media (max-width: 1024px) {
+            .menu-toggle {
+                display: block;
+                color: white;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 60px;
+                left: -260px;
+                width: 240px;
+                height: calc(100vh - 60px);
+                transition: left 0.3s ease;
+                z-index: 2000;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .layout {
+                flex-direction: column;
+            }
+
+            .content-com-sidebar {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -128,9 +197,10 @@
 
 <!-- NAVBAR -->
 <div class="navbar">
+    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <a href="
         {% if user.is_authenticated %}
-            {% if user.is_superuser %}
+            {% if user.is_staff %}
                 {% url 'projetos:dashboard' %}
             {% else %}
                 {% url 'projetos:area_empregado' %}
@@ -155,8 +225,12 @@
 
     {% if user.is_authenticated %}
         <div class="sidebar">
-            {% if user.is_superuser %}
+
+            {% if user.is_staff %}
+                <div class="sidebar-section-title">Administração</div>
+
                 <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
+                
                 <a href="{% url 'projetos:graficos_dashboard' %}">📊 Gráficos</a>
                 <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
                 <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
@@ -167,9 +241,22 @@
                 <a href="{% url 'projetos:registos_admin_list' %}">📈 Produção</a>
                 <a href="{% url 'projetos:levantamento_material_admin_list' %}">📦 Levantamentos</a>
                 <a href="{% url 'projetos:devolucao_material_admin_list' %}">↩️ Devoluções</a>
-                <a href="{% url 'projetos:empregado_pendentes' %}">📝 Registos Pendentes</a>
+                <a href="{% url 'projetos:empregado_pendentes' %}">📝 Empregados Pendentes</a>
+
             {% else %}
-                <a href="{% url 'projetos:area_empregado' %}">👤 Minha Área</a>
+                <div class="sidebar-section-title">Minha Área</div>
+
+                <a href="{% url 'projetos:area_empregado' %}">🏠 Painel</a>
+                <a href="{% url 'projetos:meus_dados_empregado' %}">👤 Meus Dados</a>
+                <a href="{% url 'projetos:registo_diario_create' %}">➕ Novo Registo Diário</a>
+                <a href="{% url 'projetos:registo_diario_list' %}">📋 Meus Registos</a>
+                <a href="{% url 'projetos:levantamento_material_create' %}">📦 Levantar Material</a>
+                <a href="{% url 'projetos:levantamento_material_list' %}">📋 Meus Levantamentos</a>
+                <a href="{% url 'projetos:devolucao_material_create' %}">↩️ Devolver Material</a>
+                <a href="{% url 'projetos:devolucao_material_list' %}">📋 Minhas Devoluções</a>
+                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}">⚙️ Minhas Configurações</a>
+                <a href="{% url 'projetos:historico_configuracao_list_empregado' %}">🕘 Histórico Configurações</a>
+                <a href="{% url 'projetos:diario_tecnico' %}">📘 Diário Técnico</a>
             {% endif %}
         </div>
 
@@ -229,6 +316,10 @@ function fecharMensagem(el) {
     setTimeout(() => {
         box.remove();
     }, 300);
+}
+function toggleMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
 }
 </script>
 

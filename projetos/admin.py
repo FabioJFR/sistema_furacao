@@ -7,12 +7,22 @@ class ProjetoAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'cliente', 'cidade', 'pais')
     list_filter = ('status', 'pais')
 
-
 @admin.register(Furo)
 class FuroAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nome', 'projeto', 'profundidade_alvo', 'profundidade_atual', 'estado')
+    list_display = (
+        'id',
+        'nome',
+        'projeto',
+        'get_profundidade_alvo',
+        'profundidade_atual',
+        'estado'
+    )
     search_fields = ('nome', 'projeto__nome', 'localizacao', 'local_sondagem')
     list_filter = ('estado', 'tipo', 'projeto')
+
+    def get_profundidade_alvo(self, obj):
+        return obj.profundidade_alvo_atual or obj.profundidade_alvo_inicial
+    get_profundidade_alvo.short_description = "Profundidade Alvo"
 
 
 @admin.register(Empregados)

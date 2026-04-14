@@ -11,13 +11,40 @@
                 <strong>Medições:</strong> {{ numero_medicoes }}
             </div>
             <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Profundidade final:</strong> {{ profundidade_final|floatformat:2 }} m
+                <strong>Profundidade Atual Medida:</strong> {{ profundidade_final|floatformat:2 }} m
+            </div>
+            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
+                <strong>Profundidade Alvo Atual:</strong> {{ furo.profundidade_alvo_atual|default:0|floatformat:2 }} m
             </div>
             <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
                 <strong>Dogleg máx:</strong> {{ dogleg_max|floatformat:2 }} °/30m
             </div>
             <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
                 <strong>Estado:</strong> {{ estado_max }}
+            </div>
+        </div>
+
+        <!-- Planeamento e Estado -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:15px; margin-bottom:20px;">
+            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
+                <h3 style="margin-bottom:10px;">Planeamento Inicial</h3>
+                <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
+                <div><strong>Inclinação planeada inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
+                <div><strong>Azimute planeado inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
+            </div>
+
+            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
+                <h3 style="margin-bottom:10px;">Planeamento Atual</h3>
+                <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
+                <div><strong>Inclinação planeada atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
+                <div><strong>Azimute planeado atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
+            </div>
+
+            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
+                <h3 style="margin-bottom:10px;">Estado Real Atual</h3>
+                <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
+                <div><strong>Inclinação real atual:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
+                <div><strong>Azimute real atual:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
             </div>
         </div>
 
@@ -30,7 +57,7 @@
 
         <!-- Referência espacial -->
         <div style="text-align:center; margin-bottom:15px; opacity:0.9;">
-            Referência espacial: X = Este, Y = Norte, Z = Profundidade
+            Referência espacial: X = Este, Y = Norte, Z = TVD / Profundidade Vertical
         </div>
 
         <!-- Gráfico 3D -->
@@ -47,7 +74,7 @@
 
         <!-- Botões principais -->
         <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
-            <a href="{% url 'projetos:furo_detail' furo.id %}" 
+            <a href="{% url 'projetos:furo_detail' furo.id %}"
                style="background:#27ae60; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
                onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
                🔙 Voltar para Detalhes do Furo

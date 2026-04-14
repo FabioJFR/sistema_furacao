@@ -1,0 +1,85 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Configurações de Perfuração{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto p-6 space-y-6">
+
+    <div class="flex justify-between items-center flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">⚙️ Configurações de Perfuração</h1>
+            <p class="text-gray-500 mt-1">Empregado: {{ empregado_obj.nome }}</p>
+        </div>
+
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado_obj.pk %}"
+               class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+                ➕ Nova Configuração
+            </a>
+            <a href="{% url 'projetos:historico_configuracao_list_admin' empregado_obj.pk %}"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                🕘 Ver Histórico
+            </a>
+            <a href="{% url 'projetos:empregado_detail' empregado_obj.pk %}"
+               class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+                🔙 Voltar ao Empregado
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-4">
+        {% if configuracoes %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3">Furo</th>
+                            <th class="text-left px-4 py-3">Tubo</th>
+                            <th class="text-left px-4 py-3">Karoutier</th>
+                            <th class="text-left px-4 py-3">Record</th>
+                            <th class="text-left px-4 py-3">Bit</th>
+                            <th class="text-left px-4 py-3">Atualizado por</th>
+                            <th class="text-left px-4 py-3">Atualizado em</th>
+                            <th class="text-left px-4 py-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for config in configuracoes %}
+                            <tr class="border-t">
+                                <td class="px-4 py-3">{{ config.furo.nome }}</td>
+                                <td class="px-4 py-3">{{ config.comprimento_tubo }}</td>
+                                <td class="px-4 py-3">{{ config.comprimento_karoutier }}</td>
+                                <td class="px-4 py-3">{{ config.comprimento_record }}</td>
+                                <td class="px-4 py-3">{{ config.comprimento_bit }}</td>
+                                <td class="px-4 py-3">{{ config.atualizado_por|default:"-" }}</td>
+                                <td class="px-4 py-3">{{ config.atualizado_em|default:"-" }}</td>
+                                <td class="px-4 py-3">
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-2 flex-wrap">
+                                            <a href="{% url 'projetos:configuracao_perfuracao_detail_admin' config.pk %}"
+                                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                                Ver
+                                            </a>
+                                            <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
+                                            class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                                ✏️ Editar
+                                            </a>
+                                            <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' config.pk %}"
+                                            class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                                🗑️ Apagar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">Ainda não existem configurações de perfuração para este empregado.</p>
+        {% endif %}
+    </div>
+
+</section>
+{% endblock %}

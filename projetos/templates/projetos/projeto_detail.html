@@ -112,83 +112,101 @@
         </div>
 
         <!-- MAPA -->
-        {% if projeto.localizacao_lat and projeto.localizacao_lon %}
+        {{ projeto_mapa|json_script:"projeto-data" }}
+        {{ furos_mapa|json_script:"furos-data" }}
+
+        {% if furos_mapa %}
         <div id="map" class="w-full h-96 rounded-lg shadow-md mt-4"></div>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
         <script>
-            const cidade = "{{ projeto.cidade|escapejs }}";
-            const pais = "{{ projeto.pais|escapejs }}";
-            const lat = {{ projeto.localizacao_lat }};
-            const lon = {{ projeto.localizacao_lon }};
+            const projetoMapa = JSON.parse(document.getElementById("projeto-data").textContent || "{}");
+            const furosRaw = JSON.parse(document.getElementById("furos-data").textContent || "[]");
 
-            const map = L.map('map').setView([lat, lon], 12);
+            const furos = furosRaw
+                .map(f => ({
+                    ...f,
+                    lat: Number(f.lat),
+                    lon: Number(f.lon),
+                }))
+                .filter(f => Number.isFinite(f.lat) && Number.isFinite(f.lon));
+
+            console.log("Projeto mapa:", projetoMapa);
+            console.log("Furos válidos:", furos);
+
+            let centroLat = Number(projetoMapa.lat);
+            let centroLon = Number(projetoMapa.lon);
+
+            if ((!Number.isFinite(centroLat) || !Number.isFinite(centroLon)) && furos.length > 0) {
+                centroLat = furos[0].lat;
+                centroLon = furos[0].lon;
+            }
+
+            if (!Number.isFinite(centroLat) || !Number.isFinite(centroLon)) {
+                centroLat = 39.5;
+                centroLon = -8.0;
+            }
+
+            const map = L.map('map').setView([centroLat, centroLon], 12);
+
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 200);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Marcador principal do projeto
-            L.marker([lat, lon])
-                .addTo(map)
-                .bindPopup(`<strong>${cidade}, ${pais}</strong>`);
+            const projetoLat = Number(projetoMapa.lat);
+            const projetoLon = Number(projetoMapa.lon);
 
-            // ---------------- FUROS ----------------
-            const furos = [];
-            let furoIndex = 0;
+            if (Number.isFinite(projetoLat) && Number.isFinite(projetoLon)) {
+                L.marker([projetoLat, projetoLon])
+                    .addTo(map)
+                    .bindPopup(
+                        `<strong>${projetoMapa.nome || "Projeto"}</strong><br>${projetoMapa.cidade || "-"}, ${projetoMapa.pais || "-"}`
+                    );
+            }
 
-            {% for furo in projeto.furos.all %}
-                {% if furo.latitude and furo.longitude %}
-                    const marker{{ forloop.counter }} = L.circleMarker(
-                        [{{ furo.latitude }}, {{ furo.longitude }}],
-                        {
-                            radius: 8,
-                            color: "#ffffff",
-                            weight: 2,
-                            fillColor: "#2563eb",
-                            fillOpacity: 0.95
-                        }
-                    ).addTo(map);
-
-                    marker{{ forloop.counter }}.bindPopup(`
-                        <strong>{{ furo.nome|escapejs }}</strong><br>
-                        Profundidade atual: {{ furo.profundidade_atual }} m<br>
-                        Inclinação: {{ furo.inclinacao|default:"-" }}°<br>
-                        Azimute: {{ furo.azimute|default:"-" }}°
-                    `);
-
-                    marker{{ forloop.counter }}.on("click", function () {
-                        selecionarFuro({{ forloop.counter0 }}, true);
-                    });
-
-                    marker{{ forloop.counter }}.on("dblclick", function () {
-                        window.location.href = "{% url 'projetos:furo_detail' furo.pk %}";
-                    });
-
-                    furos.push({
-                        id: "{{ furo.pk }}",
-                        nome: "{{ furo.nome|escapejs }}",
-                        profundidade_atual: "{{ furo.profundidade_atual }}",
-                        inclinacao: "{{ furo.inclinacao|default:'-' }}",
-                        azimute: "{{ furo.azimute|default:'-' }}",
-                        lat: {{ furo.latitude }},
-                        lon: {{ furo.longitude }},
-                        marker: marker{{ forloop.counter }}
-                    });
-                {% endif %}
-            {% endfor %}
-
-            // ---------------- ELEMENTOS UI ----------------
             const info = document.getElementById("furoInfo");
             const prevBtn = document.getElementById("prevFuroBtn");
             const nextBtn = document.getElementById("nextFuroBtn");
             const abrirBtn = document.getElementById("abrirFuroBtn");
 
-            // ---------------- FUNÇÕES ----------------
+            furos.forEach((f, index) => {
+                const marker = L.circleMarker([f.lat, f.lon], {
+                    radius: 8,
+                    color: "#ffffff",
+                    weight: 2,
+                    fillColor: "#2563eb",
+                    fillOpacity: 0.95
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <strong>${f.nome}</strong><br>
+                    Profundidade atual: ${f.profundidade_atual} m<br>
+                    Inclinação: ${f.inclinacao}°<br>
+                    Azimute: ${f.azimute}°
+                `);
+
+                marker.on("click", function () {
+                    selecionarFuro(index, true);
+                });
+
+                marker.on("dblclick", function () {
+                    window.location.href = `/furos/${f.id}/`;
+                });
+
+                f.marker = marker;
+            });
+
+            let furoIndex = 0;
+
             function resetarMarcadores() {
                 furos.forEach(f => {
+                    if (!f.marker) return;
                     f.marker.setStyle({
                         radius: 8,
                         color: "#ffffff",
@@ -200,7 +218,7 @@
             }
 
             function destacarFuroAtual() {
-                if (furos.length === 0) return;
+                if (!furos.length) return;
 
                 resetarMarcadores();
 
@@ -215,7 +233,7 @@
             }
 
             function atualizarInfo() {
-                if (furos.length === 0) {
+                if (!furos.length) {
                     info.innerHTML = "Sem furos com coordenadas.";
                     abrirBtn.disabled = true;
                     prevBtn.disabled = true;
@@ -232,10 +250,12 @@
                     Azimute: ${f.azimute}°
                 `;
                 abrirBtn.disabled = false;
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
             }
 
             function focarFuro() {
-                if (furos.length === 0) return;
+                if (!furos.length) return;
 
                 const f = furos[furoIndex];
                 map.flyTo([f.lat, f.lon], 14, { duration: 1.2 });
@@ -244,7 +264,9 @@
                 atualizarInfo();
             }
 
-            function selecionarFuro(index, focar=true) {
+            function selecionarFuro(index, focar = true) {
+                if (!furos.length) return;
+
                 furoIndex = index;
                 destacarFuroAtual();
                 atualizarInfo();
@@ -256,30 +278,34 @@
                 }
             }
 
-            // ---------------- BOTÕES ----------------
             prevBtn.addEventListener("click", () => {
-                if (furos.length === 0) return;
+                if (!furos.length) return;
                 furoIndex = (furoIndex - 1 + furos.length) % furos.length;
                 focarFuro();
             });
 
             nextBtn.addEventListener("click", () => {
-                if (furos.length === 0) return;
+                if (!furos.length) return;
                 furoIndex = (furoIndex + 1) % furos.length;
                 focarFuro();
             });
 
             abrirBtn.addEventListener("click", () => {
-                if (furos.length === 0) return;
+                if (!furos.length) return;
                 const f = furos[furoIndex];
                 window.location.href = `/furos/${f.id}/`;
             });
 
-            // ---------------- INICIAL ----------------
             if (furos.length > 0) {
+                const bounds = L.latLngBounds(furos.map(f => [f.lat, f.lon]));
+                map.fitBounds(bounds.pad(0.2));
                 selecionarFuro(0, false);
+            } else {
+                atualizarInfo();
             }
         </script>
+        {% else %}
+        <p class="text-gray-500 mt-4">Nenhum furo deste projeto tem coordenadas para mostrar no mapa.</p>
         {% endif %}
 
         <!-- FUROS DO PROJETO -->

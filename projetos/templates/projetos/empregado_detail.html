@@ -15,7 +15,12 @@
                    class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
                     ➕ Associar Projeto
                 </a>
-
+                {% if not empregado.aprovado %}
+                    <a href="{% url 'projetos:empregado_aprovar' empregado.id %}"
+                       class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                        ✅ Aprovar Registo
+                    </a>
+                {% endif %}
                 <a href="{% url 'projetos:empregado_update' empregado.id %}" 
                    class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
                     ✏️ Editar
@@ -28,9 +33,41 @@
             </div>
         </div>
 
+        <!-- ACESSO À PLATAFORMA -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">
+            <h3 class="text-xl font-bold text-blue-900 mb-4">Acesso à Plataforma</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                <p>
+                    <strong>Estado de aprovação:</strong>
+                    {% if empregado.aprovado %}
+                        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            Aprovado
+                        </span>
+                    {% else %}
+                        <span class="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            Pendente
+                        </span>
+                    {% endif %}
+                </p>
+
+                <p><strong>Data de aprovação:</strong> {{ empregado.data_aprovacao|default:"-" }}</p>
+                <p><strong>Nome de utilizador:</strong> {{ username_gerado|default:"-" }}</p>
+                <p><strong>Ligado a utilizador:</strong> {% if empregado.user %}Sim{% else %}Não{% endif %}</p>
+            </div>
+
+            <div class="mt-4 text-sm text-blue-900 bg-white border border-blue-100 rounded-lg p-4">
+                <p class="font-semibold mb-1">Nota importante</p>
+                <p>
+                    A palavra-passe temporária é mostrada ao administrador no momento da criação ou aprovação do empregado.
+                    Se precisares de entregar novo acesso ao empregado, o mais seguro é redefinir a palavra-passe no utilizador associado.
+                </p>
+            </div>
+        </div>
+
         <!-- DADOS DO EMPREGADO -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>Função:</strong> {{ empregado.funcao|default:"-" }}</p>
+            <p><strong>Função:</strong> {{ empregado.get_funcao_display|default:"-" }}</p>
             <p><strong>Email:</strong> {{ empregado.email|default:"-" }}</p>
             <p><strong>Data de Admissão:</strong> {{ empregado.data_admissao|default:"-" }}</p>
             <p><strong>Idade:</strong> {{ empregado.idade|default:"-" }}</p>
@@ -128,7 +165,41 @@
                 <p class="text-gray-500">Sem histórico de projetos.</p>
             {% endif %}
         </div>
+        
+        <!--  CONFIGURAÇÃO DE PERFURAÇÃO -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Configurações de Perfuração</h2>
 
+                <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado.pk %}"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Ver / Editar
+                </a>
+            </div>
+
+            {% if empregado.configuracoes_perfuracao.all %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                    {% for config in empregado.configuracoes_perfuracao.all %}
+                        <div class="border rounded-lg p-4">
+                            <div><strong>Furo:</strong> {{ config.furo.nome }}</div>
+                            <div><strong>Tubo:</strong> {{ config.comprimento_tubo }} m</div>
+                            <div><strong>Karoutier:</strong> {{ config.comprimento_karoutier }} m</div>
+                            <div><strong>Acrescento:</strong> {{ config.comprimento_acrescento }} m</div>
+                            <div><strong>Calibrador:</strong> {{ config.comprimento_calibrador }} m</div>
+                            <div><strong>Record:</strong> {{ config.comprimento_record }} m</div>
+                            <div><strong>Bit:</strong> {{ config.comprimento_bit }} m</div>
+                            <div><strong>Caixa de mola:</strong> {{ config.comprimento_caixa_mola }} m</div>
+                            <div><strong>Tubo interior:</strong> {{ config.comprimento_tubo_interior }} m</div>
+                            <div><strong>Cabeça de interior:</strong> {{ config.comprimento_cabeca_interior }} m</div>
+                            <div><strong>Atualizado em:</strong> {{ config.atualizado_em }}</div>
+                            <div><strong>Atualizado por:</strong> {{ config.atualizado_por|default:"-" }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">Ainda não existem configurações de perfuração para este empregado.</p>
+            {% endif %}
+        </div>
 
         <!-- FICHEIROS DO EMPREGADO -->
         <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
@@ -205,6 +276,7 @@
             {% endif %}
         </div>
 
+        <!-- CONFIGURAÇÃO MATERIAL PERFURAÇÃO -->
 
         <!-- VOLTAR -->
         <div class="pt-2">

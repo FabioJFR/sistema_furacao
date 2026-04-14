@@ -9,85 +9,6 @@
         <h1 style="font-size:30px; font-weight:bold; color:#1f2937; margin:0;">📊 Gráficos e Indicadores</h1>
     </div>
 
-    <!-- CARTÕES -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #2563eb;">
-            <div style="font-size:14px; color:#6b7280; font-weight:600;">Projetos</div>
-            <div style="font-size:30px; font-weight:bold; color:#2563eb;">{{ total_projetos }}</div>
-        </div>
-
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #16a34a;">
-            <div style="font-size:14px; color:#6b7280; font-weight:600;">Furos</div>
-            <div style="font-size:30px; font-weight:bold; color:#16a34a;">{{ total_furos }}</div>
-        </div>
-
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #f59e0b;">
-            <div style="font-size:14px; color:#6b7280; font-weight:600;">Máquinas</div>
-            <div style="font-size:30px; font-weight:bold; color:#f59e0b;">{{ total_maquinas }}</div>
-        </div>
-
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #7c3aed;">
-            <div style="font-size:14px; color:#6b7280; font-weight:600;">Empregados</div>
-            <div style="font-size:30px; font-weight:bold; color:#7c3aed;">{{ total_empregados }}</div>
-        </div>
-
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #dc2626;">
-            <div style="font-size:14px; color:#6b7280; font-weight:600;">Materiais</div>
-            <div style="font-size:30px; font-weight:bold; color:#dc2626;">{{ total_materiais }}</div>
-        </div>
-    </div>
-
-    <!-- ALERTAS -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#dc2626;">⚠️ Stock Baixo</h3>
-
-            {% if materiais_stock_baixo %}
-                <ul style="margin:0; padding-left:18px; color:#374151;">
-                    {% for m in materiais_stock_baixo %}
-                        <li style="margin-bottom:8px;">
-                            <a href="{% url 'projetos:material_detail' m.id %}" style="color:#dc2626; font-weight:bold; text-decoration:none;">
-                                {{ m.nome }}
-                            </a>
-                            — {{ m.quantidade }} / {{ m.stock_minimo }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p style="margin:0; color:#6b7280;">Sem alertas de stock.</p>
-            {% endif %}
-        </div>
-
-        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#f59e0b;">⚙️ Máquinas em Alerta</h3>
-
-            {% if maquinas_alerta %}
-                <ul style="margin:0; padding-left:18px; color:#374151;">
-                    {% for maq in maquinas_alerta %}
-                        <li style="margin-bottom:8px;">
-                            <a href="{% url 'projetos:maquina_detail' maq.id %}" style="color:#1f2937; text-decoration:none; font-weight:bold;">
-                                {{ maq.nome }}
-                            </a>
-                            — {{ maq.get_estado_display }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p style="margin:0; color:#6b7280;">Tudo operacional.</p>
-            {% endif %}
-        </div>
-    </div>
-
     <!-- FILTROS -->
     <div style="
         background:white;
@@ -124,6 +45,30 @@
                 <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
             </div>
 
+            <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:6px;">Projeto</label>
+                <select name="projeto" class="w-full p-2 border rounded">
+                    <option value="">Todos</option>
+                    {% for p in projetos_filtro %}
+                        <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
+                            {{ p.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:6px;">Empregado</label>
+                <select name="empregado" class="w-full p-2 border rounded">
+                    <option value="">Todos</option>
+                    {% for e in empregados_filtro %}
+                        <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
+                            {{ e.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">Limpar</a>
@@ -132,8 +77,8 @@
         </form>
     </div>
 
-    <!-- RESUMO DO FILTRO SELECIONADO -->
-     <div style="
+    <!-- RESUMO DO FILTRO -->
+    <div style="
         background:#eff6ff;
         border:1px solid #bfdbfe;
         color:#1e3a8a;
@@ -155,178 +100,276 @@
         {% endif %}
     </div>
 
-    <!-- GRÁFICOS PRINCIPAIS -->
+    <!-- CARDS OPERACIONAIS -->
+    <div style="
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap:20px;
+        margin-bottom:25px;
+    ">
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #2563eb;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Metros no período</div>
+            <div style="font-size:30px; font-weight:bold; color:#2563eb;">{{ total_metros }}</div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #16a34a;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Horas no período</div>
+            <div style="font-size:30px; font-weight:bold; color:#16a34a;">{{ total_horas }}</div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #f59e0b;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Produtividade média</div>
+            <div style="font-size:30px; font-weight:bold; color:#f59e0b;">{{ produtividade_media }}</div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #7c3aed;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Empregados ativos</div>
+            <div style="font-size:30px; font-weight:bold; color:#7c3aed;">{{ empregados_ativos }}</div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #dc2626;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Furos ativos</div>
+            <div style="font-size:30px; font-weight:bold; color:#dc2626;">{{ furos_ativos }}</div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #0891b2;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Projetos ativos</div>
+            <div style="font-size:30px; font-weight:bold; color:#0891b2;">{{ projetos_ativos }}</div>
+        </div>
+    </div>
+
+    <!-- CARDS ESTRUTURA -->
+    <div style="
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap:20px;
+        margin-bottom:25px;
+    ">
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Projetos totais</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_projetos }}</div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Furos totais</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_furos }}</div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Empregados totais</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_empregados }}</div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Máquinas totais</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_maquinas }}</div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Materiais totais</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_materiais }}</div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#6b7280; font-weight:600;">Registos no período</div>
+            <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_registos }}</div>
+        </div>
+    </div>
+
+    <!-- ALERTAS -->
     <div style="
         display:grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap:20px;
         margin-bottom:25px;
     ">
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">📈 Metros por Dia</h3>
-            <canvas id="graficoMetros"></canvas>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#dc2626;">⚠️ Stock Baixo</h3>
+
+            {% if materiais_stock_baixo %}
+                <ul style="margin:0; padding-left:18px; color:#374151;">
+                    {% for m in materiais_stock_baixo|slice:":5" %}
+                        <li style="margin-bottom:8px;">
+                            <a href="{% url 'projetos:material_detail' m.id %}" style="color:#dc2626; font-weight:bold; text-decoration:none;">
+                                {{ m.nome }}
+                            </a>
+                            — {{ m.quantidade }} / {{ m.stock_minimo }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="margin:0; color:#6b7280;">Sem alertas de stock.</p>
+            {% endif %}
         </div>
 
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">⏱️ Horas por Dia</h3>
-            <canvas id="graficoHoras"></canvas>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#f59e0b;">⚙️ Máquinas em Alerta</h3>
+
+            {% if maquinas_alerta %}
+                <ul style="margin:0; padding-left:18px; color:#374151;">
+                    {% for maq in maquinas_alerta|slice:":5" %}
+                        <li style="margin-bottom:8px;">
+                            <a href="{% url 'projetos:maquina_detail' maq.id %}" style="color:#1f2937; text-decoration:none; font-weight:bold;">
+                                {{ maq.nome }}
+                            </a>
+                            — {{ maq.get_estado_display }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="margin:0; color:#6b7280;">Tudo operacional.</p>
+            {% endif %}
         </div>
 
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">⚙️ Produtividade (m/h)</h3>
-            <canvas id="graficoProd"></canvas>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#111827;">🐢 Furos com baixa produção</h3>
+
+            {% if furos_baixa_producao %}
+                <ul style="margin:0; padding-left:18px; color:#374151;">
+                    {% for furo in furos_baixa_producao %}
+                        <li style="margin-bottom:8px;">
+                            {{ furo.furo__nome }} — {{ furo.total_metros|default:0 }} m / {{ furo.total_horas|default:0 }} h
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="margin:0; color:#6b7280;">Sem alertas de baixa produção.</p>
+            {% endif %}
         </div>
     </div>
 
-    <!-- GRÁFICOS DE TOP -->
+    <!-- GRÁFICOS -->
     <div style="
         display:grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap:20px;
+        margin-bottom:25px;
     ">
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">👷 Top Empregados</h3>
-            <canvas id="graficoEmpregados"></canvas>
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">📈 Produção por Dia</h3>
+            <div style="position:relative; height:260px;">
+                <canvas id="graficoDia"></canvas>
+            </div>
         </div>
 
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">📁 Top Projetos</h3>
-            <canvas id="graficoProjetos"></canvas>
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">👷 Produção por Empregado</h3>
+            <div style="position:relative; height:260px;">
+                <canvas id="graficoEmpregados"></canvas>
+            </div>
         </div>
 
-        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h3 style="font-size:18px; font-weight:bold; margin:0 0 12px 0; color:#1f2937;">🕳️ Top Furos</h3>
-            <canvas id="graficoFuros"></canvas>
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">🕳 Produção por Furo</h3>
+            <div style="position:relative; height:260px;">
+                <canvas id="graficoFuros"></canvas>
+            </div>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">📁 Produção por Projeto</h3>
+            <div style="position:relative; height:260px;">
+                <canvas id="graficoProjetos"></canvas>
+            </div>
         </div>
     </div>
 
 </section>
 
-{{ labels_dia|json_script:"labels-dia" }}
-{{ metros_dia|json_script:"metros-dia" }}
-{{ horas_dia|json_script:"horas-dia" }}
-{{ produtividade_dia|json_script:"prod-dia" }}
+{{ labels_dia|json_script:"labels-dia-data" }}
+{{ metros_dia|json_script:"metros-dia-data" }}
+{{ horas_dia|json_script:"horas-dia-data" }}
+{{ labels_empregados|json_script:"labels-empregados-data" }}
+{{ metros_empregados|json_script:"metros-empregados-data" }}
+{{ labels_furos|json_script:"labels-furos-data" }}
+{{ metros_furos|json_script:"metros-furos-data" }}
+{{ labels_projetos|json_script:"labels-projetos-data" }}
+{{ metros_projetos|json_script:"metros-projetos-data" }}
+{% endblock %}
 
-{{ labels_empregados|json_script:"labels-emp" }}
-{{ metros_empregados|json_script:"metros-emp" }}
-
-{{ labels_projetos|json_script:"labels-proj" }}
-{{ metros_projetos|json_script:"metros-proj" }}
-
-{{ labels_furos|json_script:"labels-furo" }}
-{{ metros_furos|json_script:"metros-furo" }}
-
+{% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const labels = JSON.parse(document.getElementById('labels-dia').textContent);
-const metros = JSON.parse(document.getElementById('metros-dia').textContent);
-const horas = JSON.parse(document.getElementById('horas-dia').textContent);
-const prod = JSON.parse(document.getElementById('prod-dia').textContent);
+const labelsDia = JSON.parse(document.getElementById('labels-dia-data').textContent || "[]");
+const metrosDia = JSON.parse(document.getElementById('metros-dia-data').textContent || "[]");
+const horasDia = JSON.parse(document.getElementById('horas-dia-data').textContent || "[]");
+const labelsEmpregados = JSON.parse(document.getElementById('labels-empregados-data').textContent || "[]");
+const metrosEmpregados = JSON.parse(document.getElementById('metros-empregados-data').textContent || "[]");
+const labelsFuros = JSON.parse(document.getElementById('labels-furos-data').textContent || "[]");
+const metrosFuros = JSON.parse(document.getElementById('metros-furos-data').textContent || "[]");
+const labelsProjetos = JSON.parse(document.getElementById('labels-projetos-data').textContent || "[]");
+const metrosProjetos = JSON.parse(document.getElementById('metros-projetos-data').textContent || "[]");
 
-new Chart(document.getElementById('graficoMetros'), {
-    type: 'line',
+new Chart(document.getElementById("graficoDia"), {
+    type: "line",
     data: {
-        labels: labels,
-        datasets: [{
-            label: 'Metros',
-            data: metros,
-            borderWidth: 2,
-            tension: 0.3
-        }]
+        labels: labelsDia,
+        datasets: [
+            {
+                label: "Metros",
+                data: metrosDia,
+                borderWidth: 2,
+                tension: 0.3
+            },
+            {
+                label: "Horas",
+                data: horasDia,
+                borderWidth: 2,
+                tension: 0.3
+            }
+        ]
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: false
     }
 });
 
-new Chart(document.getElementById('graficoHoras'), {
-    type: 'line',
+new Chart(document.getElementById("graficoEmpregados"), {
+    type: "bar",
     data: {
-        labels: labels,
+        labels: labelsEmpregados,
         datasets: [{
-            label: 'Horas',
-            data: horas,
-            borderWidth: 2,
-            tension: 0.3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true
-    }
-});
-
-new Chart(document.getElementById('graficoProd'), {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: 'm/h',
-            data: prod,
+            label: "Metros",
+            data: metrosEmpregados,
             borderWidth: 1
         }]
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: false
     }
 });
 
-const labelsEmp = JSON.parse(document.getElementById('labels-emp').textContent);
-const metrosEmp = JSON.parse(document.getElementById('metros-emp').textContent);
-
-new Chart(document.getElementById('graficoEmpregados'), {
-    type: 'bar',
+new Chart(document.getElementById("graficoFuros"), {
+    type: "bar",
     data: {
-        labels: labelsEmp,
+        labels: labelsFuros,
         datasets: [{
-            label: 'Metros',
-            data: metrosEmp,
+            label: "Metros",
+            data: metrosFuros,
             borderWidth: 1
         }]
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: false
     }
 });
 
-const labelsProj = JSON.parse(document.getElementById('labels-proj').textContent);
-const metrosProj = JSON.parse(document.getElementById('metros-proj').textContent);
-
-new Chart(document.getElementById('graficoProjetos'), {
-    type: 'bar',
+new Chart(document.getElementById("graficoProjetos"), {
+    type: "bar",
     data: {
-        labels: labelsProj,
+        labels: labelsProjetos,
         datasets: [{
-            label: 'Metros',
-            data: metrosProj,
+            label: "Metros",
+            data: metrosProjetos,
             borderWidth: 1
         }]
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true
-    }
-});
-
-const labelsFuro = JSON.parse(document.getElementById('labels-furo').textContent);
-const metrosFuro = JSON.parse(document.getElementById('metros-furo').textContent);
-
-new Chart(document.getElementById('graficoFuros'), {
-    type: 'bar',
-    data: {
-        labels: labelsFuro,
-        datasets: [{
-            label: 'Metros',
-            data: metrosFuro,
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: false
     }
 });
 </script>

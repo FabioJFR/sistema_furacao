@@ -1,0 +1,48 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Apagar Configuração{% endblock %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto p-6">
+    <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <div>
+            <h1 class="text-2xl font-bold text-red-600">🗑️ Apagar Configuração de Perfuração</h1>
+            <p class="text-gray-600 mt-2">
+                Tens a certeza que queres apagar esta configuração?
+            </p>
+        </div>
+
+        <div class="bg-gray-50 border rounded-lg p-4 text-gray-700 space-y-2">
+            <div><strong>Empregado:</strong> {{ empregado_obj.nome }}</div>
+            <div><strong>Furo:</strong> {{ configuracao.furo.nome }}</div>
+            <div><strong>Tubo:</strong> {{ configuracao.comprimento_tubo }} m</div>
+            <div><strong>Karoutier:</strong> {{ configuracao.comprimento_karoutier }} m</div>
+            <div><strong>Record:</strong> {{ configuracao.comprimento_record }} m</div>
+            <div><strong>Bit:</strong> {{ configuracao.comprimento_bit }} m</div>
+        </div>
+
+        <form method="post" class="flex gap-3 flex-wrap">
+            {% csrf_token %}
+
+            <button type="submit"
+                    class="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition shadow font-semibold">
+                Confirmar Apagar
+            </button>
+
+            {% if modo_admin %}
+                <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                    Cancelar
+                </a>
+            {% else %}
+                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+                    Cancelar
+                </a>
+            {% endif %}
+        </form>
+
+    </div>
+</section>
+{% endblock %}

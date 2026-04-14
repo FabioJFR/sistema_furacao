@@ -1,0 +1,8 @@
+<h1>Saída de material</h1>
+<p>Material: {{ material.nome }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Registar saída</button>
+</form>

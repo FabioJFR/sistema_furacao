@@ -1,0 +1,84 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Diário Técnico{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <div class="flex justify-between items-center flex-wrap gap-3">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📘 Diário Técnico</h1>
+            <p class="text-gray-600 mt-1">
+                Base de consulta rápida para ajudantes, sondadores e equipa de perfuração.
+            </p>
+        </div>
+
+        <a href="{% url 'projetos:area_empregado' %}"
+           class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+            🔙 Voltar à Minha Área
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- MENU LATERAL -->
+        <aside class="bg-white rounded-xl shadow p-4 h-fit">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">Secções</h2>
+            <nav class="space-y-2">
+                {% for secao in secoes %}
+                    <a href="#{{ secao.id }}"
+                       class="block px-3 py-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition">
+                        {{ secao.icone }} {{ secao.titulo }}
+                    </a>
+                {% endfor %}
+            </nav>
+        </aside>
+
+        <!-- CONTEÚDO -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+                <h2 class="text-xl font-bold text-blue-900 mb-2">Objetivo desta área</h2>
+                <p class="text-blue-800">
+                    Esta página foi criada para apoiar trabalhadores novos e experientes com informação técnica essencial
+                    sobre diamond drilling, componentes, brocas, matrizes, parâmetros de perfuração, segurança e boas práticas.
+                </p>
+            </div>
+
+            {% for secao in secoes %}
+                <section id="{{ secao.id }}" class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        {{ secao.icone }} {{ secao.titulo }}
+                    </h2>
+
+                    <div class="space-y-3 text-gray-700">
+                        {% for item in secao.conteudo %}
+                            <p>• {{ item }}</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endfor %}
+
+            <section class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">📚 Referências técnicas usadas</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for ref in referencias %}
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <h3 class="font-bold text-gray-800">{{ ref.titulo }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">{{ ref.arquivo }}</p>
+                            <p class="text-sm text-gray-700 mt-2">{{ ref.resumo }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 text-sm text-gray-500">
+                    Futuramente esta área pode mostrar imagens, PDFs anexados, vídeos e fichas técnicas por componente.
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+</section>
+{% endblock %}

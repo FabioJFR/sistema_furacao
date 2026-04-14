@@ -6,4 +6,5 @@ class ProjetosConfig(AppConfig):
     name = 'projetos'
 
     def ready(self):
-        import projetos.signals
+        pass
+        # import projetos.signals

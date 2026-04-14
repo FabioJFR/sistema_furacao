@@ -1,39 +1,17 @@
 {% extends "projetos/base.html" %}
+<!-- area_empregado.html-->
 
 {% block title %}Minha Área{% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto">
+<div class="space-y-6">
 
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-        <h2 class="text-2xl font-bold">👤 Bem-vindo, {{ empregado.nome }}</h2>
-
-        <div class="flex gap-3 flex-wrap">
-            <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-success">
-                ➕ Novo Registo Diário
-            </a>
-            <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-primary">
-                📋 Ver Registos
-            </a>
-            <a href="{% url 'projetos:levantamento_material_create' %}" class="btn btn-warning">
-                📦 Levantar Material
-            </a>
-
-            <a href="{% url 'projetos:levantamento_material_list' %}" class="btn btn-primary">
-                📋 Meus Levantamentos
-            </a>
-            <a href="{% url 'projetos:devolucao_material_create' %}" class="btn btn-warning">
-                ↩️ Devolver Material
-            </a>
-
-            <a href="{% url 'projetos:devolucao_material_list' %}" class="btn btn-primary">
-                📋 Minhas Devoluções
-            </a>
-        </div>
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-2xl font-bold">👋 Bem-vindo, {{ empregado.nome }}</h2>
+        <p class="text-gray-500 mt-1">Resumo geral da tua atividade.</p>
     </div>
 
-    <!-- CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-4">
 
         <div class="bg-white p-4 rounded-xl shadow">
             <div class="text-gray-500 text-sm">Horas Hoje</div>
@@ -77,8 +55,7 @@
 
     </div>
 
-    <!-- PROJETOS ATUAIS -->
-    <div class="bg-white rounded-xl shadow p-4 mb-6">
+    <div class="bg-white rounded-xl shadow p-4">
         <h3 class="text-lg font-semibold mb-4">📁 Projetos Atuais</h3>
 
         {% if empregado.projetos_atuais %}
@@ -94,10 +71,7 @@
         {% endif %}
     </div>
 
-
-    <!-- GRÁFICOS -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow p-4">
             <h3 class="text-lg font-semibold mb-4">📈 Metros por Dia</h3>
             <canvas id="graficoMetros"></canvas>
@@ -112,15 +86,13 @@
             <h3 class="text-lg font-semibold mb-4">⚙️ Produtividade (m/h)</h3>
             <canvas id="graficoProdutividade"></canvas>
         </div>
-
     </div>
 
-    <!-- FUROS TRABALHADOS -->
-    <div class="bg-white rounded-xl shadow p-4 mb-6">
+    <div class="bg-white rounded-xl shadow p-4">
         <h3 class="text-lg font-semibold mb-4">🕳 Furos em que Trabalhei</h3>
 
         {% if furos_trabalhados %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {% for furo in furos_trabalhados %}
                     <div class="border rounded-lg p-4 space-y-2">
                         <h4 class="font-bold text-gray-800">{{ furo.nome }}</h4>
@@ -128,13 +100,13 @@
                         <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
 
                         <div class="flex gap-2 flex-wrap pt-2">
-                            <a href="{% url 'projetos:furo_detail' furo.id %}"
-                            class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                            <a href="{% url 'projetos:furo_detail_empregado' furo.id %}"
+                               class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
                                 Ver Detalhes
-                            </a>
+                            </>
 
                             <a href="{% url 'projetos:furo_3d' furo.id %}"
-                            class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                               class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
                                 Ver 3D
                             </a>
                         </div>
@@ -146,7 +118,6 @@
         {% endif %}
     </div>
 
-    <!-- ÚLTIMOS REGISTOS -->
     <div class="bg-white rounded-xl shadow p-4">
         <h3 class="text-lg font-semibold mb-4">📋 Últimos Registos</h3>
 
@@ -194,19 +165,19 @@
         </div>
     </div>
 
-</section>
+</div>
+
 {{ grafico_labels|json_script:"grafico-labels" }}
 {{ grafico_metros|json_script:"grafico-metros" }}
 {{ grafico_horas|json_script:"grafico-horas" }}
 {{ grafico_produtividade|json_script:"grafico-produtividade" }}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     const labels = JSON.parse(document.getElementById('grafico-labels').textContent);
     const dadosMetros = JSON.parse(document.getElementById('grafico-metros').textContent);
     const dadosHoras = JSON.parse(document.getElementById('grafico-horas').textContent);
-    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produtividade').textContent);
+    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produdividade')?.textContent || document.getElementById('grafico-produtividade').textContent);
 
     new Chart(document.getElementById('graficoMetros'), {
         type: 'line',
@@ -219,9 +190,7 @@
                 tension: 0.3
             }]
         },
-        options: {
-            responsive: true
-        }
+        options: { responsive: true }
     });
 
     new Chart(document.getElementById('graficoHoras'), {
@@ -235,9 +204,7 @@
                 tension: 0.3
             }]
         },
-        options: {
-            responsive: true
-        }
+        options: { responsive: true }
     });
 
     new Chart(document.getElementById('graficoProdutividade'), {
@@ -250,9 +217,7 @@
                 borderWidth: 1
             }]
         },
-        options: {
-            responsive: true
-        }
+        options: { responsive: true }
     });
 </script>
 {% endblock %}
