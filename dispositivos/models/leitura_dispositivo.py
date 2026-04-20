@@ -1,5 +1,4 @@
-
-
+# dispositivos/models/leitura_dispositivo.py
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -20,7 +19,15 @@ class LeituraDispositivo(models.Model):
         related_name="leituras_dispositivos",
     )
 
-    timestamp_device = models.DateTimeField()
+    leitura_bruta = models.ForeignKey(
+        "dispositivos.LeituraBrutaDispositivo",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="leituras_processadas",
+    )
+
+    timestamp_device = models.DateTimeField(null=True, blank=True)
     profundidade_m = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     inclinacao_deg = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     azimute_deg = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
@@ -34,6 +41,12 @@ class LeituraDispositivo(models.Model):
         verbose_name = "Leitura de Dispositivo"
         verbose_name_plural = "Leituras de Dispositivos"
         ordering = ["-timestamp_device", "-criado_em"]
+        indexes = [
+            models.Index(fields=["empresa", "criado_em"]),
+            models.Index(fields=["sessao", "criado_em"]),
+            models.Index(fields=["sessao", "timestamp_device"]),
+            models.Index(fields=["sessao", "profundidade_m"]),
+        ]
 
     def __str__(self):
         return f"Leitura {self.id} - sessão {self.sessao_id}"
@@ -46,17 +59,22 @@ class LeituraDispositivo(models.Model):
                 "empresa": "A empresa da leitura deve ser a mesma da sessão."
             })
 
+        if self.leitura_bruta and self.sessao_id and self.leitura_bruta.sessao_id != self.sessao_id:
+            raise ValidationError({
+                "leitura_bruta": "A leitura bruta deve pertencer à mesma sessão da leitura processada."
+            })
+
         if self.profundidade_m is not None and self.profundidade_m < 0:
             raise ValidationError({
                 "profundidade_m": "A profundidade não pode ser negativa."
             })
 
-        if self.azimute_deg is not None and (self.azimute_deg < 0 or self.azimute_deg > 360):
+        if self.azimute_deg is not None and not (0 <= self.azimute_deg <= 360):
             raise ValidationError({
                 "azimute_deg": "O azimute deve estar entre 0 e 360 graus."
             })
 
-        if self.inclinacao_deg is not None and (self.inclinacao_deg < -90 or self.inclinacao_deg > 90):
+        if self.inclinacao_deg is not None and not (-90 <= self.inclinacao_deg <= 90):
             raise ValidationError({
                 "inclinacao_deg": "A inclinação deve estar entre -90 e 90 graus."
             })

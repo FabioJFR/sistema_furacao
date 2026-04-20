@@ -1,19 +1,21 @@
 # dispositivos/models/__init__.py
-
-# Models expostos da app dispositivos
-
+# Core
 from .dispositivo import Dispositivo
 from .sessao_dispositivo import SessaoDispositivo
-from .leitura_dispositivo import LeituraDispositivo
+
+# Dados
 from .leitura_bruta_dispositivo import LeituraBrutaDispositivo
-from .leitura_medicao_link import LeituraDispositivoMedicaoLink
+from .leitura_dispositivo import LeituraDispositivo
+
+# Domínio técnico
 from .survey_shot import SurveyShot
+from .leitura_medicao_link import LeituraDispositivoMedicaoLink
 
 __all__ = [
     "Dispositivo",
     "SessaoDispositivo",
-    "LeituraDispositivo",
     "LeituraBrutaDispositivo",
-    "LeituraDispositivoMedicaoLink",
+    "LeituraDispositivo",
     "SurveyShot",
+    "LeituraDispositivoMedicaoLink",
 ]

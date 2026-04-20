@@ -1,3 +1,4 @@
+# dispositivos/drivers/magcruiser/simulador.py
 class MagCruiserSimulatorDriver:
     def __init__(self):
         self.connected = False

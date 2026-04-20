@@ -1,3 +1,4 @@
+# dispositivos/models/sessao_dispositivo.py
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -50,6 +51,12 @@ class SessaoDispositivo(models.Model):
         verbose_name = "Sessão de Dispositivo"
         verbose_name_plural = "Sessões de Dispositivos"
         ordering = ["-iniciado_em"]
+        indexes = [
+            models.Index(fields=["empresa", "status"]),
+            models.Index(fields=["dispositivo", "iniciado_em"]),
+            models.Index(fields=["furo", "iniciado_em"]),
+            models.Index(fields=["empregado", "iniciado_em"]),
+        ]
 
     def __str__(self):
         nome_dispositivo = self.dispositivo.nome if self.dispositivo else "-"
@@ -86,6 +93,16 @@ class SessaoDispositivo(models.Model):
         if self.terminado_em and self.terminado_em < self.iniciado_em:
             raise ValidationError({
                 "terminado_em": "A data de término não pode ser inferior à data de início."
+            })
+
+        if self.status == "erro" and not self.mensagem_erro.strip():
+            raise ValidationError({
+                "mensagem_erro": "Informe a mensagem de erro quando a sessão estiver em estado de erro."
+            })
+
+        if self.status == "encerrada" and not self.terminado_em:
+            raise ValidationError({
+                "terminado_em": "Uma sessão encerrada deve ter data de término."
             })
 
     def save(self, *args, **kwargs):

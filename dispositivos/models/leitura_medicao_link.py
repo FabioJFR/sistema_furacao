@@ -1,5 +1,4 @@
-
-
+# dispositivos/models/leitura_medicao_link.py
 from django.core.exceptions import ValidationError
 from django.db import models
 

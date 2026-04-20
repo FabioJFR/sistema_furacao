@@ -1,5 +1,4 @@
-
-
+# dispositivos/models/leitura_bruta_dispositivo.py
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -7,6 +6,14 @@ from django.db import models
 
 
 class LeituraBrutaDispositivo(models.Model):
+    ORIGEM_CHOICES = [
+        ("usb", "USB"),
+        ("bluetooth", "Bluetooth"),
+        ("manual", "Manual"),
+        ("importacao", "Importação"),
+        ("simulador", "Simulador"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     sessao = models.ForeignKey(
@@ -21,17 +28,35 @@ class LeituraBrutaDispositivo(models.Model):
     )
 
     sequencia = models.PositiveIntegerField(default=1)
+    origem = models.CharField(max_length=30, choices=ORIGEM_CHOICES, default="usb")
+
     payload_texto = models.TextField(blank=True)
     payload_json = models.JSONField(null=True, blank=True)
     payload_hex = models.TextField(blank=True)
+    payload_binario = models.BinaryField(null=True, blank=True, editable=False)
+
+    metadados = models.JSONField(null=True, blank=True)
 
     recebido_em = models.DateTimeField(auto_now_add=True)
+
+    origem = models.CharField(max_length=30, default="usb")
+    payload_binario = models.BinaryField(null=True, blank=True, editable=False)
+    metadados = models.JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Leitura Bruta de Dispositivo"
         verbose_name_plural = "Leituras Brutas de Dispositivos"
         ordering = ["-recebido_em"]
-        unique_together = [("sessao", "sequencia")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["sessao", "sequencia"],
+                name="unique_leitura_bruta_sessao_sequencia",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["empresa", "recebido_em"]),
+            models.Index(fields=["sessao", "sequencia"]),
+        ]
 
     def __str__(self):
         return f"Leitura bruta {self.sequencia} - sessão {self.sessao_id}"
@@ -49,7 +74,7 @@ class LeituraBrutaDispositivo(models.Model):
                 "sequencia": "A sequência deve ser maior que zero."
             })
 
-        if not self.payload_texto and not self.payload_json and not self.payload_hex:
+        if not self.payload_texto and not self.payload_json and not self.payload_hex and not self.payload_binario:
             raise ValidationError(
                 "A leitura bruta deve conter pelo menos um tipo de payload."
             )

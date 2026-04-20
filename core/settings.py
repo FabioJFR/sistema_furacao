@@ -4,11 +4,23 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-ahs1cu-_etpmaxvd&k-iu@mdhc+w7g6=x+blxrwe7bs57=b2*9'
 
-DEBUG = True
+def env(name, default=None):
+    return os.getenv(name, default)
 
-ALLOWED_HOSTS = []
+
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+SECRET_KEY = env("DJANGO_SECRET_KEY", 'django-insecure-ahs1cu-_etpmaxvd&k-iu@mdhc+w7g6=x+blhfuifhiuwhihxrwe7bs57=b2*9')
+
+DEBUG = env_bool("DJANGO_DEBUG", True)
+
+ALLOWED_HOSTS = [host.strip() for host in env("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,14 +71,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+import os
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "sistema_furacao",
-        "USER": "fabiorevez",
-        "PASSWORD": "",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "NAME": os.getenv("POSTGRES_DB", "sistema_furacao"),
+        "USER": os.getenv("POSTGRES_USER", "fabiorevez"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "fabio12345"),
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 

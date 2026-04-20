@@ -1,0 +1,1 @@
+# dispositivos/drivers/magcruiser/protocol.py

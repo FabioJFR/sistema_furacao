@@ -1,5 +1,4 @@
-
-
+# dispositivos/models/survey_shot.py
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -38,8 +37,8 @@ class SurveyShot(models.Model):
 
     magnetismo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     temperatura = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    valido = models.BooleanField(default=True)
 
+    valido = models.BooleanField(default=True)
     origem = models.CharField(max_length=30, choices=ORIGEM_CHOICES, default="magcruiser")
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -47,6 +46,11 @@ class SurveyShot(models.Model):
         verbose_name = "Survey Shot"
         verbose_name_plural = "Survey Shots"
         ordering = ["-criado_em"]
+        indexes = [
+            models.Index(fields=["empresa", "furo"]),
+            models.Index(fields=["sessao", "criado_em"]),
+            models.Index(fields=["furo", "profundidade"]),
+        ]
 
     def __str__(self):
         nome_furo = self.furo.nome if self.furo else "-"
@@ -77,12 +81,12 @@ class SurveyShot(models.Model):
                 "profundidade": "A profundidade não pode ser negativa."
             })
 
-        if self.azimute is not None and (self.azimute < 0 or self.azimute > 360):
+        if self.azimute is not None and not (0 <= self.azimute <= 360):
             raise ValidationError({
                 "azimute": "O azimute deve estar entre 0 e 360 graus."
             })
 
-        if self.inclinacao is not None and (self.inclinacao < -90 or self.inclinacao > 90):
+        if self.inclinacao is not None and not (-90 <= self.inclinacao <= 90):
             raise ValidationError({
                 "inclinacao": "A inclinação deve estar entre -90 e 90 graus."
             })

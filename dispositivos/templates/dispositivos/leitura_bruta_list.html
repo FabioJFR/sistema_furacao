@@ -1,0 +1,90 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+<!-- templates/dispositivos/leitura_bruta_list.html -->
+{% block title %}{% trans "Leituras Brutas" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                    {% trans "Leituras Brutas do Dispositivo" %}
+                </h1>
+                <p class="text-gray-500">
+                    {% trans "Dados recebidos diretamente do dispositivo (debug e análise)." %}
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <a href="{% url 'dispositivos:dashboard' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+                    ← {% trans "Dashboard" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+
+        {% if leituras %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left">
+                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">{% trans "Sessão" %}</th>
+                            <th class="px-6 py-4">{% trans "Sequência" %}</th>
+                            <th class="px-6 py-4">{% trans "Recebido em" %}</th>
+                            <th class="px-6 py-4">{% trans "Preview" %}</th>
+                            <th class="px-6 py-4 text-right">{% trans "Ações" %}</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                        {% for l in leituras %}
+                            <tr class="hover:bg-gray-50 transition">
+
+                                <td class="px-6 py-4 text-gray-700">
+                                    {{ l.sessao_id }}
+                                </td>
+
+                                <td class="px-6 py-4 font-semibold text-gray-800">
+                                    {{ l.sequencia }}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-600">
+                                    {{ l.recebido_em|date:"d/m/Y H:i:s" }}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-600">
+                                    {% if l.payload_texto %}
+                                        {{ l.payload_texto|truncatechars:80 }}
+                                    {% elif l.payload_hex %}
+                                        {{ l.payload_hex|truncatechars:80 }}
+                                    {% elif l.payload_json %}
+                                        {{ l.payload_json|truncatechars:80 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{% url 'dispositivos:leitura_bruta_detail' l.pk %}" class="inline-flex px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium transition">
+                                        👁 {% trans "Ver detalhe" %}
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-10 text-center text-gray-500">
+                {% trans "Ainda não existem leituras brutas registadas." %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

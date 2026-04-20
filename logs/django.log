@@ -10619,3 +10619,448 @@ django.core.exceptions.ValidationError: ['“basic” is not a valid UUID.']
 [2026-04-20 00:42:50,776] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
 [2026-04-20 00:43:28,220] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
 [2026-04-20 00:43:28,230] INFO django.server | "GET / HTTP/1.1" 200 2913
+[2026-04-20 01:47:54,280] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 01:49:09,054] WARNING django.request | Not Found: /home
+[2026-04-20 01:49:09,054] WARNING django.server | "GET /home HTTP/1.1" 404 5153
+[2026-04-20 01:50:52,416] INFO django.server | "GET / HTTP/1.1" 200 2913
+[2026-04-20 02:01:46,573] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 02:05:34,449] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 02:05:44,142] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 02:05:44,169] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 02:05:44,169] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 02:05:44,171] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 02:05:44,207] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 02:05:44,525] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 200 11869
+[2026-04-20 02:05:44,526] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 200 11582
+[2026-04-20 02:05:59,498] INFO django.server | "GET /plataforma/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 02:06:05,676] INFO django.server | "GET /app/dispositivos/lista/ HTTP/1.1" 200 0
+[2026-04-20 02:11:38,606] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py changed, reloading.
+[2026-04-20 02:11:39,092] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:36:01,376] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/admin.py changed, reloading.
+[2026-04-20 08:36:01,944] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:37:37,663] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/admin.py changed, reloading.
+[2026-04-20 08:37:38,149] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:37:52,827] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/survey_shot.py changed, reloading.
+[2026-04-20 08:37:53,271] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:42:31,855] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/survey_shot.py changed, reloading.
+[2026-04-20 08:42:32,306] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:43:07,226] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:43:12,161] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 08:43:12,584] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-20 08:43:12,585] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-20 08:43:19,895] INFO django.server | "GET /plataforma/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 08:45:18,075] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/survey_shot.py changed, reloading.
+[2026-04-20 08:45:18,548] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:45:53,179] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/sessao_dispositivo.py changed, reloading.
+[2026-04-20 08:45:53,657] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:48:34,077] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/sessao_dispositivo.py changed, reloading.
+[2026-04-20 08:48:34,567] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 08:49:09,180] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/leitura_medicao_link.py changed, reloading.
+[2026-04-20 08:49:09,641] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:14:47,973] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/leitura_dispositivo.py changed, reloading.
+[2026-04-20 09:14:48,470] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:20:26,695] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/leitura_dispositivo.py changed, reloading.
+[2026-04-20 09:20:27,190] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:21:10,082] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/leitura_bruta_dispositivo.py changed, reloading.
+[2026-04-20 09:21:10,642] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:24:36,676] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/leitura_bruta_dispositivo.py changed, reloading.
+[2026-04-20 09:24:37,175] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:25:01,352] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/dispositivo.py changed, reloading.
+[2026-04-20 09:25:01,783] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 09:28:27,827] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/models/dispositivo.py changed, reloading.
+[2026-04-20 09:28:28,277] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:17:34,051] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:17:40,989] INFO django.server | "GET /plataforma/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 10:17:41,024] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-20 10:21:57,086] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py changed, reloading.
+[2026-04-20 10:21:57,641] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:22:04,073] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py changed, reloading.
+[2026-04-20 10:22:04,508] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:29:28,250] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:43:41,957] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 10:43:45,051] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 10:43:48,142] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 10:43:51,266] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 10:43:51,290] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 10:43:51,290] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 10:43:51,293] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 10:43:51,326] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 10:43:51,637] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-20 11:41:02,359] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 11:42:53,392] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/core/settings.py changed, reloading.
+[2026-04-20 11:42:53,920] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 11:45:24,114] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/core/settings.py changed, reloading.
+[2026-04-20 11:45:24,641] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 11:58:28,629] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/core/settings.py changed, reloading.
+[2026-04-20 11:58:29,188] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:00:00,747] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:04:15,782] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:04:19,944] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:12:08,342] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:23:40,334] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:26:01,614] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:26:53,182] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:27:44,803] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:35:25,004] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:46:22,552] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:55:35,519] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:56:32,662] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 12:56:50,747] WARNING django.security.SuspiciousSession | Session data corrupted
+[2026-04-20 12:56:50,788] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 302 0
+[2026-04-20 12:56:50,805] WARNING django.security.SuspiciousSession | Session data corrupted
+[2026-04-20 12:56:50,814] INFO django.server | "GET /login/?next=/plataforma/dashboard/ HTTP/1.1" 200 4748
+[2026-04-20 12:56:50,818] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-20 12:56:56,597] WARNING django.security.SuspiciousSession | Session data corrupted
+[2026-04-20 12:56:56,915] INFO django.server | "POST /login/?next=/plataforma/dashboard/ HTTP/1.1" 302 0
+[2026-04-20 12:56:56,956] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 12:56:56,962] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-20 13:11:49,843] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-20 13:11:49,858] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 13:11:57,497] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 13:11:57,831] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 13:11:57,831] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 13:12:00,648] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 13:12:00,663] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 13:12:00,663] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 13:12:00,666] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 13:12:00,701] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 13:12:01,028] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 200 11869
+[2026-04-20 13:12:01,029] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 200 11582
+[2026-04-20 13:12:01,057] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-20 13:12:01,057] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-20 13:12:01,238] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-20 13:12:01,239] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-20 13:12:01,298] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 13:12:01,299] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 13:12:16,742] ERROR django.request | Internal Server Error: /plataforma/dispositivos/lista/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 128, in dispositivo_list
+    return render(request, "dispositivos/dispositivo_list.html", context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+[2026-04-20 13:12:16,747] ERROR django.server | "GET /plataforma/dispositivos/lista/ HTTP/1.1" 500 130117
+[2026-04-20 13:13:22,774] ERROR django.request | Internal Server Error: /plataforma/dispositivos/lista/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: templates/plataforma/base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 128, in dispositivo_list
+    return render(request, "dispositivos/dispositivo_list.html", context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: templates/plataforma/base.html
+[2026-04-20 13:13:22,778] ERROR django.server | "GET /plataforma/dispositivos/lista/ HTTP/1.1" 500 131097
+[2026-04-20 13:13:34,267] ERROR django.request | Internal Server Error: /plataforma/dispositivos/lista/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: templates/plataforma/base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 128, in dispositivo_list
+    return render(request, "dispositivos/dispositivo_list.html", context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: templates/plataforma/base.html
+[2026-04-20 13:13:34,270] ERROR django.server | "GET /plataforma/dispositivos/lista/ HTTP/1.1" 500 131097
+[2026-04-20 13:13:43,648] ERROR django.request | Internal Server Error: /plataforma/dispositivos/sessoes/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 89, in sessao_dispositivo_list
+    return render(request, "dispositivos/sessao_list.html", {
+        "sessoes": sessoes,
+    })
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+[2026-04-20 13:13:43,652] ERROR django.server | "GET /plataforma/dispositivos/sessoes/ HTTP/1.1" 500 129188
+[2026-04-20 13:13:54,955] ERROR django.request | Internal Server Error: /plataforma/dispositivos/sessoes/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 89, in sessao_dispositivo_list
+    return render(request, "dispositivos/sessao_list.html", {
+        "sessoes": sessoes,
+    })
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+[2026-04-20 13:13:54,959] ERROR django.server | "GET /plataforma/dispositivos/sessoes/ HTTP/1.1" 500 129188
+[2026-04-20 13:17:18,563] INFO django.server | "GET /plataforma/dispositivos/sessoes/ HTTP/1.1" 200 4233
+[2026-04-20 13:17:26,693] INFO django.server | "GET /plataforma/dispositivos/lista/ HTTP/1.1" 200 5707
+[2026-04-20 13:17:33,884] WARNING django.request | Not Found: /app/dispositivos/novo/
+[2026-04-20 13:17:33,885] WARNING django.server | "GET /app/dispositivos/novo/ HTTP/1.1" 404 13061
+[2026-04-20 13:17:39,024] INFO django.server | "GET /plataforma/dispositivos/sessoes/ HTTP/1.1" 200 4233
+[2026-04-20 13:17:43,879] INFO django.server | "GET /plataforma/dispositivos/leituras-brutas/ HTTP/1.1" 200 4232
+[2026-04-20 13:17:46,429] INFO django.server | "GET /plataforma/dispositivos/shots/ HTTP/1.1" 200 53
+[2026-04-20 13:19:37,436] INFO django.server | "GET /plataforma/dispositivos/shots/ HTTP/1.1" 200 53
+[2026-04-20 13:19:45,590] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 6466
+[2026-04-20 13:19:59,814] INFO django.server | "GET /app/dispositivos/lista/ HTTP/1.1" 200 5718
+[2026-04-20 13:20:09,677] INFO django.server | "GET /app/dispositivos/sessoes/ HTTP/1.1" 200 4244
+[2026-04-20 13:20:12,076] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 6466
+[2026-04-20 13:20:14,397] INFO django.server | "GET /app/dispositivos/leituras-brutas/ HTTP/1.1" 200 4243
+[2026-04-20 13:20:16,575] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 6466
+[2026-04-20 13:20:18,985] INFO django.server | "GET /app/dispositivos/shots/ HTTP/1.1" 200 53
+[2026-04-20 13:21:58,435] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 13:22:01,187] INFO django.server | "GET /app/dispositivos/shots/ HTTP/1.1" 200 53
+[2026-04-20 13:22:06,276] INFO django.server | "GET /plataforma/dispositivos/shots/ HTTP/1.1" 200 53
+[2026-04-20 13:25:23,628] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 13:25:49,839] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 13:25:52,320] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 13:26:07,376] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 13:26:10,132] INFO django.server | "GET /plataforma/dispositivos/ HTTP/1.1" 200 6455
+[2026-04-20 13:30:07,360] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 13:30:07,406] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 200 1268999
+[2026-04-20 13:30:07,443] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-20 13:30:07,448] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-20 13:30:07,451] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-20 13:30:07,451] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-20 13:30:07,451] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 13:30:07,452] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 13:30:08,017] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 13:30:19,928] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 13:30:23,029] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 13:30:23,053] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 13:30:23,053] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 13:30:23,055] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 13:30:23,090] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398

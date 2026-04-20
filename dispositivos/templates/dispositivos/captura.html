@@ -1,0 +1,85 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+    <div class="bg-white p-6 rounded-2xl shadow mb-6">
+        <h1 class="text-2xl font-bold mb-4">📡 Aquisição de Dados</h1>
+
+        <form method="post" id="capturaForm">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2">Dispositivo</label>
+                <select name="dispositivo_id" id="dispositivo_id"
+                        class="w-full border rounded-lg px-3 py-2">
+                    {% for d in dispositivos %}
+                        <option value="{{ d.id }}">
+                            {{ d.nome }} ({{ d.get_canal_display }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex gap-3 flex-wrap">
+                <button type="button" onclick="testarLigacao()" class="btn btn-warning">
+                    🔌 Testar ligação
+                </button>
+
+                <button type="button" onclick="capturarLeitura()" class="btn btn-primary">
+                    📥 Capturar leitura
+                </button>
+
+                <button type="button" onclick="capturaContinua()" class="btn btn-success">
+                    🔄 Captura contínua
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-black text-green-400 font-mono text-sm p-4 rounded-xl h-80 overflow-y-auto"
+         id="terminal">
+        <div>> Sistema pronto...</div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function log(msg) {
+    const terminal = document.getElementById("terminal");
+    const line = document.createElement("div");
+    line.innerText = "> " + msg;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function testarLigacao() {
+    log("Testando ligação...");
+    fetch("/app/dispositivos/api/testar/")
+        .then(r => r.json())
+        .then(data => log(JSON.stringify(data)))
+        .catch(e => log("Erro: " + e));
+}
+
+function capturarLeitura() {
+    log("Capturando leitura...");
+    fetch("/app/dispositivos/api/capturar/")
+        .then(r => r.json())
+        .then(data => log(JSON.stringify(data)))
+        .catch(e => log("Erro: " + e));
+}
+
+function capturaContinua() {
+    log("Captura contínua iniciada...");
+
+    setInterval(() => {
+        fetch("/app/dispositivos/api/capturar/")
+            .then(r => r.json())
+            .then(data => log("DATA: " + JSON.stringify(data)))
+    }, 3000);
+}
+</script>
+{% endblock %}

@@ -151,3 +151,27 @@ Se tiver interesse no projeto ou quiser colaborar, entre em contacto.
 ## ⭐ Contribuição
 
 Sugestões e melhorias são bem-vindas!
+
+## 🐳 Postgres com Docker
+
+Para começar a usar o PostgreSQL em Docker:
+
+1. Criar o ficheiro `.env` a partir de `.env.example`
+2. Subir a base de dados com `docker compose up -d`
+3. Aplicar migrações com `python3 manage.py migrate`
+4. Iniciar o projeto normalmente
+
+Exemplo rápido:
+
+```bash
+cp .env.example .env
+docker compose up -d
+python3 manage.py migrate
+python3 manage.py runserver
+```
+
+Notas:
+
+- O Django agora lê `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` e `POSTGRES_PORT` a partir do ambiente.
+- Se no futuro o Django também correr em Docker, o `POSTGRES_HOST` deve passar de `127.0.0.1` para `db`.
+- Os dados ficam persistidos no volume Docker `postgres_data`.

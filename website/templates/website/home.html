@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -5,58 +6,409 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Furação</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #111827; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .btn { padding: 12px 18px; border-radius: 10px; text-decoration: none; font-weight: 700; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-light { background: white; color: #111827; border: 1px solid #d1d5db; }
-        .hero { padding: 60px 0 40px; }
-        .hero h1 { font-size: 48px; margin-bottom: 16px; }
-        .hero p { font-size: 18px; color: #4b5563; max-width: 760px; }
-        .actions { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
-        .card { background: white; border-radius: 16px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        .muted { color: #6b7280; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 34px; } }
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #dbe2ea;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(to bottom, #f8fbff, #f5f7fb);
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            background: white;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-light {
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-light:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 28px;
+            align-items: center;
+            padding: 50px 0 30px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin: 0 0 16px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #4b5563;
+            max-width: 760px;
+            margin: 0;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            margin-bottom: 18px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .actions {
+            margin-top: 28px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid #eef2f7;
+        }
+
+        .hero-logo-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+
+        .hero-logo {
+            width: 180px;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.18));
+        }
+
+        .hero-card h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eef2f7;
+            gap: 12px;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric strong {
+            font-size: 18px;
+            color: var(--primary);
+            text-align: right;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 36px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid #eef2f7;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .muted {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .section-title {
+            margin-top: 70px;
+            margin-bottom: 18px;
+            font-size: 28px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .feature-box {
+            background: white;
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid #eef2f7;
+        }
+
+        .footer {
+            margin-top: 70px;
+            padding: 24px 0 10px;
+            color: var(--muted);
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .grid,
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .topbar {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .brand {
+                justify-content: center;
+            }
+
+            .topbar-actions {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="topbar">
-            <strong>Sistema de Furação</strong>
-            <div>
+        <header class="topbar">
+            <a href="/" class="brand">
+                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo Sistema de Furação" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-title">Sistema de Furação</span>
+                    <span class="brand-subtitle">Plataforma para Diamond Drilling</span>
+                </div>
+            </a>
+
+            <div class="topbar-actions">
                 <a href="/planos/" class="btn btn-light">Ver planos</a>
                 <a href="/login/" class="btn btn-primary">Entrar</a>
             </div>
-        </div>
+        </header>
 
         <section class="hero">
-            <h1>Plataforma profissional para gestão de furação diamantada</h1>
-            <p>
-                Gere projetos, furos, empregados, materiais, medições e operação diária
-                numa plataforma preparada para crescer com IA, sensores e relatórios inteligentes.
-            </p>
-            <div class="actions">
-                <a href="/registo/" class="btn btn-primary">Criar conta</a>
-                <a href="/planos/" class="btn btn-light">Comparar planos</a>
+            <div>
+                <span class="hero-badge">Plataforma SaaS para Diamond Drilling</span>
+                <h1>Gestão profissional de operações de furação diamantada</h1>
+                <p>
+                    Centraliza projetos, furos, medições, materiais, produção e operação diária
+                    numa plataforma preparada para crescer com dashboards avançados, dispositivos
+                    de campo, IA e relatórios inteligentes.
+                </p>
+
+                <div class="actions">
+                    <a href="/registo/" class="btn btn-primary">Criar conta</a>
+                    <a href="/planos/" class="btn btn-light">Comparar planos</a>
+                </div>
+            </div>
+
+            <div class="hero-card">
+                <div class="hero-logo-wrap">
+                    <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo Sistema de Furação" class="hero-logo">
+                </div>
+
+                <h3>Visão rápida da plataforma</h3>
+
+                <div class="metric">
+                    <span>Projetos e furos</span>
+                    <strong>Centralizados</strong>
+                </div>
+                <div class="metric">
+                    <span>Controlo por empresa</span>
+                    <strong>Multiempresa</strong>
+                </div>
+                <div class="metric">
+                    <span>Produção e stock</span>
+                    <strong>Tempo real</strong>
+                </div>
+                <div class="metric">
+                    <span>Evolução futura</span>
+                    <strong>IA + sensores</strong>
+                </div>
             </div>
         </section>
 
         <section class="grid">
             <div class="card">
                 <h3>Operação centralizada</h3>
-                <p class="muted">Projetos, furos, materiais, máquinas e dashboards no mesmo sistema.</p>
+                <p class="muted">
+                    Projetos, furos, materiais, máquinas, medições e dashboards
+                    no mesmo sistema.
+                </p>
             </div>
+
             <div class="card">
                 <h3>Multiempresa</h3>
-                <p class="muted">Cada cliente vê apenas os seus dados, com isolamento total por empresa.</p>
+                <p class="muted">
+                    Cada cliente vê apenas os seus próprios dados,
+                    com isolamento total por empresa.
+                </p>
             </div>
+
             <div class="card">
                 <h3>Preparado para crescer</h3>
-                <p class="muted">Base pronta para integração com dispositivos, IA e relatórios inteligentes.</p>
+                <p class="muted">
+                    Base preparada para integração com dispositivos,
+                    IA e relatórios inteligentes.
+                </p>
             </div>
         </section>
+
+        <h2 class="section-title">O que a plataforma permite</h2>
+
+        <section class="features">
+            <div class="feature-box">
+                <h3>Gestão operacional</h3>
+                <p class="muted">
+                    Acompanha projetos, furos, equipas, máquinas e materiais
+                    com mais organização e rastreabilidade.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3>Análise e produtividade</h3>
+                <p class="muted">
+                    Consolida registos diários e apoia a análise de produtividade,
+                    desempenho e controlo operacional.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3>Visão técnica</h3>
+                <p class="muted">
+                    Inclui estrutura para medições, dados técnicos e evolução
+                    futura para integração com sensores e dispositivos.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3>Escalabilidade</h3>
+                <p class="muted">
+                    Pensado para crescer de uma operação local para uma
+                    plataforma completa por empresa ou grupo.
+                </p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            © 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling
+        </footer>
     </div>
 </body>
 </html>

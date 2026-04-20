@@ -1,0 +1,116 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+<!-- templates/dispositivos/sessao_list.html -->
+{% block title %}{% trans "Sessões de Dispositivos" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                    {% trans "Sessões de Dispositivos" %}
+                </h1>
+                <p class="text-gray-500">
+                    {% trans "Monitorização das ligações e recolha de dados dos dispositivos." %}
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <a href="{% url 'dispositivos:dashboard' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+                    ← {% trans "Dashboard" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+
+        {% if sessoes %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left">
+                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">{% trans "Dispositivo" %}</th>
+                            <th class="px-6 py-4">{% trans "Furo" %}</th>
+                            <th class="px-6 py-4">{% trans "Empregado" %}</th>
+                            <th class="px-6 py-4">{% trans "Estado" %}</th>
+                            <th class="px-6 py-4">{% trans "Início" %}</th>
+                            <th class="px-6 py-4">{% trans "Fim" %}</th>
+                            <th class="px-6 py-4 text-right">{% trans "Ações" %}</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                        {% for s in sessoes %}
+                            <tr class="hover:bg-gray-50 transition">
+
+                                <td class="px-6 py-4 font-semibold text-gray-800">
+                                    {{ s.dispositivo.nome|default:"—" }}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-700">
+                                    {% if s.furo %}
+                                        {{ s.furo.nome }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-700">
+                                    {% if s.empregado %}
+                                        {{ s.empregado.nome }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {% if s.status == "ligado" %}
+                                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            {{ s.get_status_display }}
+                                        </span>
+                                    {% elif s.status == "erro" %}
+                                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            {{ s.get_status_display }}
+                                        </span>
+                                    {% elif s.status == "ligando" %}
+                                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            {{ s.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            {{ s.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-600">
+                                    {{ s.iniciado_em|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-600">
+                                    {{ s.terminado_em|date:"d/m/Y H:i"|default:"—" }}
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{% url 'dispositivos:sessao_detail' s.pk %}" class="inline-flex px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium transition">
+                                        👁 {% trans "Ver detalhe" %}
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-10 text-center text-gray-500">
+                {% trans "Ainda não existem sessões registadas." %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

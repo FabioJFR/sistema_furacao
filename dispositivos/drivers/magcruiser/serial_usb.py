@@ -1,3 +1,4 @@
+# dispositivos/drivers/magcruiser/serial.py
 import serial
 
 
