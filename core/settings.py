@@ -5,6 +5,25 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_dotenv_file(path: Path) -> None:
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+
+        os.environ.setdefault(key, value)
+
+
+load_dotenv_file(BASE_DIR / ".env")
+
+
 def env(name, default=None):
     return os.getenv(name, default)
 
@@ -71,12 +90,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-import os
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "sistema_furacao"),
+        "NAME": os.getenv("POSTGRES_DB", "postgres_db"),
         "USER": os.getenv("POSTGRES_USER", "fabiorevez"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "fabio12345"),
         "HOST": os.getenv("POSTGRES_HOST", "db"),

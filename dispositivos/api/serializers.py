@@ -27,6 +27,12 @@ class SessaoDispositivoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SessaoDispositivo
         fields = ["dispositivo", "furo"]
+        extra_kwargs = {
+            "furo": {
+                "required": True,
+                "allow_null": False,
+            }
+        }
 
 
 class SessaoDispositivoSerializer(serializers.ModelSerializer):

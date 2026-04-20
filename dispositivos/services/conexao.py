@@ -12,7 +12,7 @@ def construir_driver(dispositivo):
 
     if dispositivo.canal == "simulador":
         try:
-            from dispositivos.drivers.magcruiser.simulator import MagCruiserSimulatorDriver
+            from dispositivos.drivers.magcruiser.simulador import MagCruiserSimulatorDriver
         except ModuleNotFoundError as exc:
             raise ValueError(
                 "O driver simulador do MagCruiser ainda não está disponível."

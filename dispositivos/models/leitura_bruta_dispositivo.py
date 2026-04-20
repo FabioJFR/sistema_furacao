@@ -39,10 +39,6 @@ class LeituraBrutaDispositivo(models.Model):
 
     recebido_em = models.DateTimeField(auto_now_add=True)
 
-    origem = models.CharField(max_length=30, default="usb")
-    payload_binario = models.BinaryField(null=True, blank=True, editable=False)
-    metadados = models.JSONField(null=True, blank=True)
-
     class Meta:
         verbose_name = "Leitura Bruta de Dispositivo"
         verbose_name_plural = "Leituras Brutas de Dispositivos"

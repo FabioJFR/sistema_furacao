@@ -1,5 +1,6 @@
 # dispositivos/services/ingestao.py
 from django.db import transaction
+from django.db.models import Max
 from dispositivos.models import LeituraBrutaDispositivo, SurveyShot
 from projetos.models import Medicao
 
@@ -43,9 +44,19 @@ from projetos.models import Medicao
 
 @transaction.atomic
 def guardar_leitura_dispositivo(*, sessao, raw_payload: str):
+    sessao = (
+        sessao.__class__.objects.select_for_update()
+        .select_related("empresa", "furo")
+        .get(pk=sessao.pk)
+    )
+
     dados = parse_magcruiser_payload(raw_payload)
 
-    ultima_seq = sessao.leituras_brutas.count() + 1
+    ultima_seq = (
+        LeituraBrutaDispositivo.objects.filter(sessao=sessao)
+        .aggregate(max_seq=Max("sequencia"))
+        .get("max_seq") or 0
+    ) + 1
 
     leitura = LeituraBrutaDispositivo.objects.create(
         sessao=sessao,

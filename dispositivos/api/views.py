@@ -142,15 +142,19 @@ class BridgeLeituraAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        sessao = (
-            SessaoDispositivo.objects.select_related("empresa", "furo", "dispositivo")
-            .filter(status="ligado", empresa_id=empregado.empresa_id)
-            .order_by("-iniciado_em")
-            .first()
-        )
+        sessao_id = request.data.get("sessao_id")
+        if not sessao_id:
+            return Response(
+                {"erro": "sessao_id em falta."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if not sessao:
-            return Response({"erro": "Sem sessão ativa."}, status=status.HTTP_400_BAD_REQUEST)
+        sessao = get_object_or_404(
+            SessaoDispositivo.objects.select_related("empresa", "furo", "dispositivo"),
+            pk=sessao_id,
+            empresa_id=empregado.empresa_id,
+            status="ligado",
+        )
 
         resultado = guardar_leitura_dispositivo(
             sessao=sessao,

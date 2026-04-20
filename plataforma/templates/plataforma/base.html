@@ -33,11 +33,12 @@
                 <div class="nav-item">
                     <button type="button" class="nav-toggle">📡 Dispositivos</button>
                     <div class="dropdown">
-                        <a href="/plataforma/dispositivos/">Dashboard de dispositivos</a>
-                        <a href="/plataforma/dispositivos/lista/">Lista de dispositivos</a>
-                        <a href="/plataforma/dispositivos/sessoes/">Sessões</a>
-                        <a href="/plataforma/dispositivos/leituras-brutas/">Leituras brutas</a>
-                        <a href="/plataforma/dispositivos/shots/">Survey shots</a>
+                        <a href="{% url 'dispositivos:dashboard' %}">Dashboard de dispositivos</a>
+                        <a href="{% url 'dispositivos:captura' %}">Captura de dispositivo</a>
+                        <a href="{% url 'dispositivos:dispositivo_list' %}">Lista de dispositivos</a>
+                        <a href="{% url 'dispositivos:sessao_list' %}">Sessões</a>
+                        <a href="{% url 'dispositivos:leitura_bruta_list' %}">Leituras brutas</a>
+                        <a href="{% url 'dispositivos:survey_shot_list' %}">Survey shots</a>
                     </div>
                 </div>
 

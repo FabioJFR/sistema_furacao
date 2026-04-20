@@ -11064,3 +11064,110 @@ django.template.exceptions.TemplateDoesNotExist: base.html
 [2026-04-20 13:30:23,053] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
 [2026-04-20 13:30:23,055] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
 [2026-04-20 13:30:23,090] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11398
+[2026-04-20 15:54:32,390] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 16:29:04,210] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 16:29:11,155] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11452
+[2026-04-20 16:29:11,179] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-20 16:29:11,179] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-20 16:29:15,966] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-20 16:29:15,973] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 16:29:16,308] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-20 16:29:16,312] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-20 16:29:16,318] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 16:29:16,318] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-20 16:29:16,318] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-20 16:29:16,319] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 16:29:18,279] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 16:29:21,199] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 16:29:21,214] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 16:29:21,214] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 16:29:21,216] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 16:29:21,243] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11452
+[2026-04-20 16:31:49,374] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 17:32:34,602] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 17:32:43,779] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 17:32:43,872] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-20 17:32:43,885] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-20 17:32:43,886] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-20 17:32:43,890] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 17:32:43,890] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-20 17:32:43,891] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 17:32:46,366] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 17:32:48,912] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 17:32:48,936] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 17:32:48,936] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 17:32:48,939] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 17:32:48,971] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 11452
+[2026-04-20 17:51:19,556] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-20 17:51:51,974] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-20 17:51:58,566] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-20 17:52:18,603] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-20 17:52:18,638] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-20 17:52:18,639] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-20 17:52:18,643] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-20 17:52:18,677] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 6899
+[2026-04-20 17:52:19,003] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 200 11582
+[2026-04-20 17:52:19,004] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 200 11869
+[2026-04-20 17:52:19,132] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 17:52:19,132] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 17:55:08,346] WARNING django.request | Forbidden (Permission denied): /app/dispositivos/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 59, in dispositivos_dashboard
+    empresa_id = _obter_empresa_id_utilizador(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 30, in _obter_empresa_id_utilizador
+    raise PermissionDenied("O utilizador autenticado não está associado a uma empresa.")
+django.core.exceptions.PermissionDenied: O utilizador autenticado não está associado a uma empresa.
+[2026-04-20 17:55:08,359] WARNING django.server | "GET /app/dispositivos/ HTTP/1.1" 403 135
+[2026-04-20 17:55:44,098] INFO django.server | "GET /plataforma/planos/ HTTP/1.1" 200 4169
+[2026-04-20 17:55:44,487] INFO django.server | "GET /static/css/plataforma/plano_list.css HTTP/1.1" 200 1711
+[2026-04-20 17:55:46,592] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 6899
+[2026-04-20 17:55:48,871] INFO django.server | "GET /plataforma/subscricoes/ HTTP/1.1" 200 4372
+[2026-04-20 17:55:49,241] WARNING django.server | "GET /static/css/plataforma/subscricoes.css HTTP/1.1" 404 1904
+[2026-04-20 17:55:50,815] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 6899
+[2026-04-20 17:55:54,493] INFO django.server | "GET /plataforma/subscricoes/ HTTP/1.1" 200 4372
+[2026-04-20 17:55:54,504] WARNING django.server | "GET /static/css/plataforma/subscricoes.css HTTP/1.1" 404 1904
+[2026-04-20 17:56:18,386] WARNING django.request | Forbidden (Permission denied): /app/dispositivos/sessoes/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 105, in sessao_dispositivo_list
+    empresa_id = _obter_empresa_id_utilizador(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 30, in _obter_empresa_id_utilizador
+    raise PermissionDenied("O utilizador autenticado não está associado a uma empresa.")
+django.core.exceptions.PermissionDenied: O utilizador autenticado não está associado a uma empresa.
+[2026-04-20 17:56:18,394] WARNING django.server | "GET /app/dispositivos/sessoes/ HTTP/1.1" 403 135
+[2026-04-20 17:56:29,181] INFO core | Entrada em onboarding_empresa. user_id=1, method=GET
+[2026-04-20 17:56:29,183] DEBUG core | Formulário onboarding_empresa aberto em GET. user_id=1
+[2026-04-20 17:56:29,225] INFO django.server | "GET /plataforma/onboarding/empresa/ HTTP/1.1" 200 15475
+[2026-04-20 17:56:29,620] WARNING django.server | "GET /static/css/plataforma/onboarding_empresa.css HTTP/1.1" 404 1925
+[2026-04-20 17:56:34,570] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 6899
+[2026-04-20 17:56:34,612] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-20 17:56:34,612] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-20 17:56:34,697] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-20 17:56:34,697] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-20 17:56:34,752] WARNING django.request | Not Found: /favicon.ico
+[2026-04-20 17:56:34,752] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-20 17:56:37,314] WARNING django.request | Forbidden (Permission denied): /app/dispositivos/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 59, in dispositivos_dashboard
+    empresa_id = _obter_empresa_id_utilizador(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/dispositivos/views.py", line 30, in _obter_empresa_id_utilizador
+    raise PermissionDenied("O utilizador autenticado não está associado a uma empresa.")
+django.core.exceptions.PermissionDenied: O utilizador autenticado não está associado a uma empresa.
+[2026-04-20 17:56:37,323] WARNING django.server | "GET /app/dispositivos/ HTTP/1.1" 403 135

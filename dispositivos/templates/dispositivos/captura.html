@@ -1,85 +1,136 @@
 {% extends "plataforma/base.html" %}
 {% load i18n %}
 
+{% block title %}{% trans "Captura de Dispositivo" %}{% endblock %}
+
 {% block content %}
 <div class="max-w-5xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">{% trans "Captura de Dispositivo" %}</h1>
+                <p class="text-gray-500">
+                    {% trans "Inicie uma sessão real com dispositivo e furo para associar corretamente as leituras." %}
+                </p>
+            </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow mb-6">
-        <h1 class="text-2xl font-bold mb-4">📡 Aquisição de Dados</h1>
+            <div class="flex gap-3 flex-wrap">
+                <a href="{% url 'dispositivos:sessao_list' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+                    {% trans "Ver sessões" %}
+                </a>
+                <a href="{% url 'dispositivos:dispositivo_list' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+                    {% trans "Ver dispositivos" %}
+                </a>
+            </div>
+        </div>
+    </div>
 
-        <form method="post" id="capturaForm">
+    <div class="bg-white p-6 rounded-2xl shadow mb-6 border border-gray-200">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">{% trans "Nova sessão de captura" %}</h2>
+
+        <form method="post" class="space-y-4">
             {% csrf_token %}
 
             <div class="mb-4">
-                <label class="block text-sm font-semibold mb-2">Dispositivo</label>
+                <label class="block text-sm font-semibold mb-2 text-gray-700">{% trans "Dispositivo" %}</label>
                 <select name="dispositivo_id" id="dispositivo_id"
                         class="w-full border rounded-lg px-3 py-2">
                     {% for d in dispositivos %}
                         <option value="{{ d.id }}">
                             {{ d.nome }} ({{ d.get_canal_display }})
                         </option>
+                    {% empty %}
+                        <option value="">{% trans "Sem dispositivos ativos disponíveis" %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">{% trans "Furo" %}</label>
+                <select name="furo_id" id="furo_id"
+                        class="w-full border rounded-lg px-3 py-2">
+                    {% for furo in furos %}
+                        <option value="{{ furo.id }}">
+                            {{ furo.nome }}{% if furo.projeto %} - {{ furo.projeto.nome }}{% endif %}
+                        </option>
+                    {% empty %}
+                        <option value="">{% trans "Sem furos disponíveis" %}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="flex gap-3 flex-wrap">
-                <button type="button" onclick="testarLigacao()" class="btn btn-warning">
-                    🔌 Testar ligação
-                </button>
-
-                <button type="button" onclick="capturarLeitura()" class="btn btn-primary">
-                    📥 Capturar leitura
-                </button>
-
-                <button type="button" onclick="capturaContinua()" class="btn btn-success">
-                    🔄 Captura contínua
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                        {% if not dispositivos or not furos %}disabled{% endif %}>
+                    {% trans "Criar sessão e abrir detalhe" %}
                 </button>
             </div>
         </form>
     </div>
 
-    <div class="bg-black text-green-400 font-mono text-sm p-4 rounded-xl h-80 overflow-y-auto"
-         id="terminal">
-        <div>> Sistema pronto...</div>
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">{% trans "Sessões ativas" %}</h2>
+            </div>
+
+            {% if sessoes_ativas %}
+                <div class="divide-y divide-gray-100">
+                    {% for sessao in sessoes_ativas %}
+                        <div class="p-5 flex items-start justify-between gap-4">
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ sessao.dispositivo.nome }}</p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    {% trans "Furo" %}: {{ sessao.furo.nome|default:"—" }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    {% trans "Estado" %}: {{ sessao.get_status_display }}
+                                </p>
+                            </div>
+                            <a href="{% url 'dispositivos:sessao_detail' sessao.pk %}" class="inline-flex px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium transition">
+                                {% trans "Abrir" %}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-8 text-center text-gray-500">
+                    {% trans "Não existem sessões ativas neste momento." %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">{% trans "Sessões recentes" %}</h2>
+            </div>
+
+            {% if sessoes_recentes %}
+                <div class="divide-y divide-gray-100">
+                    {% for sessao in sessoes_recentes %}
+                        <div class="p-5 flex items-start justify-between gap-4">
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ sessao.dispositivo.nome }}</p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    {% trans "Furo" %}: {{ sessao.furo.nome|default:"—" }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    {{ sessao.iniciado_em|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+                            <a href="{% url 'dispositivos:sessao_detail' sessao.pk %}" class="inline-flex px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition">
+                                {% trans "Ver detalhe" %}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-8 text-center text-gray-500">
+                    {% trans "Ainda não existem sessões registadas." %}
+                </div>
+            {% endif %}
+        </div>
     </div>
-
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-function log(msg) {
-    const terminal = document.getElementById("terminal");
-    const line = document.createElement("div");
-    line.innerText = "> " + msg;
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function testarLigacao() {
-    log("Testando ligação...");
-    fetch("/app/dispositivos/api/testar/")
-        .then(r => r.json())
-        .then(data => log(JSON.stringify(data)))
-        .catch(e => log("Erro: " + e));
-}
-
-function capturarLeitura() {
-    log("Capturando leitura...");
-    fetch("/app/dispositivos/api/capturar/")
-        .then(r => r.json())
-        .then(data => log(JSON.stringify(data)))
-        .catch(e => log("Erro: " + e));
-}
-
-function capturaContinua() {
-    log("Captura contínua iniciada...");
-
-    setInterval(() => {
-        fetch("/app/dispositivos/api/capturar/")
-            .then(r => r.json())
-            .then(data => log("DATA: " + JSON.stringify(data)))
-    }, 3000);
-}
-</script>
 {% endblock %}
