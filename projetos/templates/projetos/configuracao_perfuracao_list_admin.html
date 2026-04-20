@@ -16,7 +16,7 @@
                class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
                 ➕ Nova Configuração
             </a>
-            <a href="{% url 'projetos:historico_configuracao_list_admin' empregado_obj.pk %}"
+            <a href="{% url 'projetos:configuracao_perfuracao_historico_admin' empregado_obj.pk %}"
             class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
                 🕘 Ver Histórico
             </a>
@@ -54,22 +54,20 @@
                                 <td class="px-4 py-3">{{ config.atualizado_por|default:"-" }}</td>
                                 <td class="px-4 py-3">{{ config.atualizado_em|default:"-" }}</td>
                                 <td class="px-4 py-3">
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2 flex-wrap">
-                                            <a href="{% url 'projetos:configuracao_perfuracao_detail_admin' config.pk %}"
-                                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                                Ver
-                                            </a>
-                                            <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
-                                            class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                                ✏️ Editar
-                                            </a>
-                                            <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' config.pk %}"
-                                            class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                                🗑️ Apagar
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <a href="{% url 'projetos:configuracao_perfuracao_detail_admin' config.pk %}"
+                                        class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                            Ver
+                                        </a>
+                                        <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
+                                        class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                            ✏️ Editar
+                                        </a>
+                                        <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' config.pk %}"
+                                        class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                            🗑️ Apagar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

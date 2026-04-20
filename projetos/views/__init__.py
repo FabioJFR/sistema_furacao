@@ -12,4 +12,4 @@ from .historico_configuracao import *
 from .empregado_furo import *
 from .diario_tecnico import *
 from .empregado_area import *
-from .auth import *
+from .definicoes import *

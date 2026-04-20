@@ -1,0 +1,105 @@
+/* plano_list.css */
+
+.messages {
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+}
+
+.message.success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: #bbf7d0;
+}
+
+.message.error {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: #fecaca;
+}
+
+.message.warning {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    border-color: #fde68a;
+}
+
+.message.info {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-color: #bfdbfe;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.stat-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.plano-nome {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.plano-meta {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.badge-ativo {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.badge-inativo {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.badge-empresa {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.badge-individual {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.acoes form {
+    margin: 0;
+}

@@ -1,15 +1,20 @@
 import uuid
+from django.core.exceptions import ValidationError
 from django.db import models
 from .furo import Furo
-#  Utilizador: empregadoteste2 | Palavra-passe temporária: suNKEyftyN
-# Utilizador: empregadoteste21 | Palavra-passe temporária: YZv3bAnth6
 
 # ------------------------
 # Medição
 # ------------------------
 class Medicao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="medicoes"
+    )
     furo = models.ForeignKey(
         Furo,
         on_delete=models.CASCADE,
@@ -19,6 +24,10 @@ class Medicao(models.Model):
     # ------------------------
     # REGISTO VISUAL / AMOSTRA
     # ------------------------
+    # TODO futuro:
+    # - validar formato e tamanho da imagem antes do save
+    # - guardar metadados técnicos da imagem (resolução, tamanho, extensão)
+    # - suportar múltiplas imagens ou anexos por medição, se necessário
     imagem = models.ImageField(upload_to="rochas/", blank=True, null=True)
 
     # ------------------------
@@ -68,15 +77,71 @@ class Medicao(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
+        # TODO futuro:
+        # - avaliar índice por furo/profundidade para otimizar consultas
+        # - avaliar constraints adicionais para evitar medições duplicadas no mesmo contexto
         ordering = ["-criado_em", "-profundidade_medida"]
         verbose_name = "Medição"
         verbose_name_plural = "Medições"
 
     def __str__(self):
         profundidade = self.profundidade_medida if self.profundidade_medida is not None else "-"
-        return f"{self.furo.nome} - {profundidade} m"
+        nome_furo = self.nome_furo_snapshot or (self.furo.nome if self.furo_id and self.furo else "-")
+        return f"{nome_furo} - {profundidade} m"
+
+    def clean(self):
+        super().clean()
+
+        if not self.furo_id:
+            raise ValidationError({
+                "furo": "A medição deve estar associada a um furo."
+            })
+
+        if self.furo and not self.furo.empresa_id:
+            raise ValidationError({
+                "furo": "O furo deve estar associado a uma empresa."
+            })
+
+        if self.furo and self.furo.empresa_id:
+            if self.empresa_id and self.empresa_id != self.furo.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa da medição deve ser a mesma do furo."
+                })
+
+        if self.profundidade_medida is not None and self.profundidade_medida < 0:
+            raise ValidationError({
+                "profundidade_medida": "A profundidade medida não pode ser negativa."
+            })
+
+        if self.inclinacao_real_medida is not None and not (-90 <= self.inclinacao_real_medida <= 90):
+            raise ValidationError({
+                "inclinacao_real_medida": "A inclinação real medida deve estar entre -90° e 90°."
+            })
+
+        if self.azimute_real_medido is not None and not (0 <= self.azimute_real_medido <= 360):
+            raise ValidationError({
+                "azimute_real_medido": "O azimute real medido deve estar entre 0° e 360°."
+            })
+
+        if self.latitude is not None and not (-90 <= self.latitude <= 90):
+            raise ValidationError({
+                "latitude": "Latitude inválida."
+            })
+
+        if self.longitude is not None and not (-180 <= self.longitude <= 180):
+            raise ValidationError({
+                "longitude": "Longitude inválida."
+            })
+
+        if self.dureza is not None and self.dureza < 0:
+            raise ValidationError({
+                "dureza": "A dureza não pode ser negativa."
+            })
 
     def save(self, *args, **kwargs):
+        if self.furo and self.furo.empresa_id:
+            self.empresa_id = self.furo.empresa_id
+
         # Snapshot automático do nome do furo
         if self.furo and not self.nome_furo_snapshot:
             self.nome_furo_snapshot = self.furo.nome
@@ -92,4 +157,10 @@ class Medicao(models.Model):
             self.azimute_planeado_inicial_furo = self.furo.azimute_planeado_inicial
             self.azimute_planeado_atual_furo = self.furo.azimute_planeado_atual
 
+        # TODO futuro:
+        # - guardar auditoria de quem criou/editou a medição
+        # - gerar derivados automáticos para análise 3D/relatórios
+        # - comprimir/otimizar imagem antes de persistir
+
+        self.full_clean()
         super().save(*args, **kwargs)

@@ -8,7 +8,7 @@
         <div class="flex justify-between items-center flex-wrap gap-3 mb-6">
             <h1 class="text-2xl font-bold text-gray-800">{{ titulo|default:"Empregados Pendentes de Aprovação" }}</h1>
 
-            <a href="{% url 'projetos:empregado_list' %}"
+            <a href="/app/empregados/"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
                 🔙 Voltar aos Empregados
             </a>
@@ -24,6 +24,7 @@
                             <th class="text-left px-4 py-3">Função</th>
                             <th class="text-left px-4 py-3">Registo</th>
                             <th class="text-left px-4 py-3">Estado</th>
+                            <th class="text-left px-4 py-3">Data Admissão</th>
                             <th class="text-left px-4 py-3">Ações</th>
                         </tr>
                     </thead>
@@ -39,17 +40,27 @@
                                         Pendente
                                     </span>
                                 </td>
+                                <td class="px-4 py-3">{{ empregado.data_admissao|date:"d/m/Y"|default:"-" }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2 flex-wrap">
-                                        <a href="{% url 'projetos:empregado_detail' empregado.id %}"
+                                        <a href="/app/empregados/{{ empregado.id }}/"
                                            class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
                                             Ver
                                         </a>
-
-                                        <a href="{% url 'projetos:empregado_aprovar' empregado.id %}"
-                                           class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-                                            Aprovar
-                                        </a>
+                                        <form method="post" action="/app/empregados/{{ empregado.id }}/aprovar/" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                                ✔ Aprovar
+                                            </button>
+                                        </form>
+                                        <form method="post" action="/app/empregados/{{ empregado.id }}/rejeitar/" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                class="inline-block bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
+                                                ✖ Rejeitar
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -59,7 +70,7 @@
             </div>
         {% else %}
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
-                <p class="text-gray-600 font-medium">Sem registos pendentes de aprovação.</p>
+                <p class="text-gray-600 font-medium">🎉 Não existem empregados pendentes. Tudo em dia!</p>
             </div>
         {% endif %}
     </div>

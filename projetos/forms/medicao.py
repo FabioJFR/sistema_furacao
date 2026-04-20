@@ -1,12 +1,32 @@
 from django import forms
+
 from ..models.medicao import Medicao
 
 
-# ---------------- Medições ----------------
+
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+
+def _atribuir_contexto_medicao(instance, furo=None, empresa=None):
+    if furo is not None:
+        instance.furo = furo
+
+    if empresa is not None:
+        instance.empresa_id = _resolver_empresa_id(empresa)
+
+    return instance
+
+
+
 class MedicaoForm(forms.ModelForm):
-    def __init__(self, *args, furo=None, **kwargs):
+    def __init__(self, *args, furo=None, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.furo = furo
+        self.empresa = empresa
+
+        _atribuir_contexto_medicao(self.instance, furo=self.furo, empresa=self.empresa)
 
     class Meta:
         model = Medicao
@@ -77,19 +97,29 @@ class MedicaoForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        profundidade_medida = cleaned.get("profundidade_medida")
+        _atribuir_contexto_medicao(self.instance, furo=self.furo, empresa=self.empresa)
 
-        if self.furo and profundidade_medida is not None:
-            qs = self.furo.medicoes.all()
+        if self.instance and self.instance.pk and self.empresa is not None:
+            empresa_id = _resolver_empresa_id(self.empresa)
+            if self.instance.empresa_id and self.instance.empresa_id != empresa_id:
+                raise forms.ValidationError(
+                    "A medição selecionada não pertence à empresa atual."
+                )
 
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-
-            ultima = qs.order_by("-profundidade_medida").first()
-            if ultima and ultima.profundidade_medida is not None:
-                if profundidade_medida <= ultima.profundidade_medida:
-                    raise forms.ValidationError(
-                        f"A profundidade medida deve ser maior que a última medição ({ultima.profundidade_medida} m)."
-                    )
+        if self.furo and self.empresa is not None:
+            empresa_id = _resolver_empresa_id(self.empresa)
+            if self.furo.empresa_id != empresa_id:
+                raise forms.ValidationError(
+                    "O furo selecionado não pertence à empresa atual."
+                )
 
         return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        _atribuir_contexto_medicao(instance, furo=self.furo, empresa=self.empresa)
+
+        if commit:
+            instance.save()
+
+        return instance

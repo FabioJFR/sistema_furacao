@@ -16,10 +16,13 @@
                     ➕ Associar Projeto
                 </a>
                 {% if not empregado.aprovado %}
-                    <a href="{% url 'projetos:empregado_aprovar' empregado.id %}"
-                       class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                        ✅ Aprovar Registo
-                    </a>
+                    <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                            ✅ Aprovar Registo
+                        </button>
+                    </form>
                 {% endif %}
                 <a href="{% url 'projetos:empregado_update' empregado.id %}" 
                    class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">

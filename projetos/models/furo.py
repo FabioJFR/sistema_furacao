@@ -1,4 +1,5 @@
 import uuid
+from django.core.exceptions import ValidationError
 from django.db import models
 from .projeto import Projeto
 
@@ -34,7 +35,13 @@ class Furo(models.Model):
     )
 
     nome = models.CharField(max_length=200, default="Furo")
-
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="furos"
+    )
     # ------------------------
     # PROFUNDIDADES
     # ------------------------
@@ -127,11 +134,82 @@ class Furo(models.Model):
         verbose_name_plural = "Furos"
 
     def __str__(self):
-        return f"{self.nome} - {self.projeto.nome}"
+        projeto_nome = self.projeto.nome if self.projeto_id and self.projeto else "-"
+        return f"{self.nome} - {projeto_nome}"
+
+    def clean(self):
+        super().clean()
+
+        if not self.projeto_id:
+            raise ValidationError({
+                "projeto": "O furo deve estar associado a um projeto."
+            })
+
+        if self.projeto and not self.projeto.empresa_id:
+            raise ValidationError({
+                "projeto": "O projeto associado ao furo deve ter empresa definida."
+            })
+
+        if self.projeto and self.projeto.empresa_id:
+            if self.empresa_id and self.empresa_id != self.projeto.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa do furo deve ser a mesma do projeto."
+                })
+
+        if self.profundidade_inicial < 0:
+            raise ValidationError({
+                "profundidade_inicial": "A profundidade inicial não pode ser negativa."
+            })
+
+        if self.profundidade_alvo_inicial < 0:
+            raise ValidationError({
+                "profundidade_alvo_inicial": "A profundidade alvo inicial não pode ser negativa."
+            })
+
+        if self.profundidade_alvo_atual < 0:
+            raise ValidationError({
+                "profundidade_alvo_atual": "A profundidade alvo atual não pode ser negativa."
+            })
+
+        if self.profundidade_atual < 0:
+            raise ValidationError({
+                "profundidade_atual": "A profundidade atual não pode ser negativa."
+            })
+
+        if self.profundidade_maxima_atingida < 0:
+            raise ValidationError({
+                "profundidade_maxima_atingida": "A profundidade máxima atingida não pode ser negativa."
+            })
+
+        if self.profundidade_alvo_inicial < self.profundidade_inicial:
+            raise ValidationError({
+                "profundidade_alvo_inicial": "A profundidade alvo inicial não pode ser menor que a profundidade inicial."
+            })
+
+        if self.latitude is not None and not (-90 <= self.latitude <= 90):
+            raise ValidationError({
+                "latitude": "Latitude inválida."
+            })
+
+        if self.longitude is not None and not (-180 <= self.longitude <= 180):
+            raise ValidationError({
+                "longitude": "Longitude inválida."
+            })
+
+        # Bloqueio crítico: impedir mudança de empresa em furos já existentes
+        if self.pk:
+            original = Furo.objects.filter(pk=self.pk).only("empresa_id", "projeto_id").first()
+
+            if original and original.empresa_id and self.projeto and self.projeto.empresa_id:
+                if original.empresa_id != self.projeto.empresa_id:
+                    raise ValidationError({
+                        "projeto": "Não é permitido mover um furo para um projeto de outra empresa."
+                    })
 
     def save(self, *args, **kwargs):
-        # Ao criar o furo, garantir que os valores "atuais planeados"
-        # começam iguais aos valores "iniciais planeados", se ainda não tiverem sido definidos.
+        if self.projeto and self.projeto.empresa_id:
+            self.empresa_id = self.projeto.empresa_id
+
         if self.inclinacao_planeada_atual is None:
             self.inclinacao_planeada_atual = self.inclinacao_planeada_inicial
 
@@ -141,4 +219,5 @@ class Furo(models.Model):
         if self.profundidade_alvo_atual is None:
             self.profundidade_alvo_atual = self.profundidade_alvo_inicial
 
+        self.full_clean()
         super().save(*args, **kwargs)

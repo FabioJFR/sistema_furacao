@@ -1,5 +1,7 @@
 import uuid
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 # ------------------------
 # Projeto
@@ -14,19 +16,81 @@ class Projeto(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nome = models.CharField(max_length=200)
     cliente = models.CharField(max_length=200, blank=True)
-
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="projetos"
+    )
     # 🔥 localização (mantive ambos: cidade + coords)
     cidade = models.CharField(max_length=100, blank=True)
     pais = models.CharField(max_length=100, blank=True)
     localizacao_lat = models.FloatField(null=True, blank=True)
     localizacao_lon = models.FloatField(null=True, blank=True)
 
-    data_inicio = models.DateTimeField(auto_now_add=True)
-    data_fim = models.DateTimeField(null=True, blank=True)
+    data_inicio_proj = models.DateField(null=True, blank=True)
+    criado_em = models.DateTimeField(default=timezone.now, editable=False)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    data_fim_proj = models.DateTimeField(null=True, blank=True)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ativo')
     notas = models.TextField(blank=True)
 
     def __str__(self):
-        return self.nome
+        return self.nome or "Projeto sem nome"
 
+    def clean(self):
+        super().clean()
+
+        if self.nome:
+            self.nome = self.nome.strip()
+
+        if self.cidade:
+            self.cidade = self.cidade.strip().title()
+
+        if self.pais:
+            self.pais = self.pais.strip().title()
+
+        if not self.empresa_id:
+            raise ValidationError({
+                "empresa": "O projeto deve estar associado a uma empresa."
+            })
+
+        if self.nome and self.empresa_id:
+            qs = Projeto.objects.filter(
+                nome__iexact=self.nome,
+                empresa_id=self.empresa_id,
+            )
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+
+            if qs.exists():
+                raise ValidationError({
+                    "nome": "Já existe um projeto com este nome nesta empresa."
+                })
+
+        if self.data_fim_proj and self.data_inicio_proj:
+            if self.data_fim_proj.date() < self.data_inicio_proj:
+                raise ValidationError({
+                    "data_fim_proj": "A data de fim não pode ser anterior à data de início."
+                })
+
+        if self.localizacao_lat is not None and not (-90 <= self.localizacao_lat <= 90):
+            raise ValidationError({
+                "localizacao_lat": "Latitude inválida."
+            })
+
+        if self.localizacao_lon is not None and not (-180 <= self.localizacao_lon <= 180):
+            raise ValidationError({
+                "localizacao_lon": "Longitude inválida."
+            })
+
+    def save(self, *args, **kwargs):
+        # TODO futuro:
+        # - gerar slug/identificador amigável do projeto
+        # - auditoria de criação/alteração (created_by/updated_by)
+        # - soft-delete em vez de delete físico
+
+        self.full_clean()
+        super().save(*args, **kwargs)

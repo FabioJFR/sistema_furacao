@@ -1,147 +1,159 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Detalhes do Furo{% endblock %}
+{% block title %}{{ furo.nome }}{% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto p-6 space-y-6">
-
-    <div class="bg-white rounded-xl shadow p-6">
-        <div class="flex justify-between items-center flex-wrap gap-3">
+<section class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <div class="flex flex-wrap justify-between items-start gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">🕳 {{ furo.nome }}</h1>
-                <p class="text-gray-500 mt-1">Detalhes do furo em que trabalhaste.</p>
+                <h1 class="text-3xl font-bold text-gray-800">🕳 {{ furo.nome }}</h1>
+                <p class="text-gray-600 mt-2">
+                    <strong>{% trans "Projeto" %}:</strong> {{ furo.projeto.nome|default:"-" }}
+                </p>
+                <p class="text-gray-600">
+                    <strong>{% trans "Estado" %}:</strong> {{ furo.get_estado_display|default:furo.estado }}
+                </p>
             </div>
 
-            <a href="{% url 'projetos:area_empregado' %}" class="btn btn-primary">
-                🔙 Voltar
-            </a>
+            <div class="flex gap-2 flex-wrap">
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">⬅ {% trans "Meus Furos" %}</a>
+                <a href="{% url 'projetos:area_empregado' %}" class="btn btn-warning">🏠 {% trans "Painel" %}</a>
+                <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-success">🌐 {% trans "Ver 3D" %}</a>
+            </div>
         </div>
     </div>
 
-    <!-- INFORMAÇÃO GERAL -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Informação Geral do Furo</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Profundidade Atual" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ furo.profundidade_atual|default:"0" }} m</div>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-            <div><strong>Nome:</strong> {{ furo.nome|default:"-" }}</div>
-            <div><strong>Projeto:</strong> {{ furo.projeto.nome|default:"-" }}</div>
-            <div><strong>Profundidade Inicial:</strong> {{ furo.profundidade_inicial|default:"-" }} m</div>
-            <div><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
-            <div><strong>Profundidade Máxima Atingida:</strong> {{ furo.profundidade_maxima_atingida|default:"-" }} m</div>
-            <div><strong>Total Horas:</strong> {{ furo.total_horas|default:"-" }}</div>
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Profundidade Alvo" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ furo.profundidade_alvo_atual|default:"0" }} m</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Inclinação Atual" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ furo.inclinacao_real_atual|default:"-" }}</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Azimute Atual" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ furo.azimute_real_atual|default:"-" }}</div>
         </div>
     </div>
 
-    <!-- PLANEAMENTO INICIAL -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📐 Planeamento Inicial</h2>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        <div class="xl:col-span-2 bg-white rounded-2xl shadow border border-gray-200 p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">📌 {% trans "Informação Geral" %}</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-            <div><strong>Profundidade Alvo Inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
-            <div><strong>Inclinação Planeada Inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
-            <div><strong>Azimute Planeado Inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                    <p><strong>{% trans "Tipo" %}:</strong> {{ furo.tipo|default:"-" }}</p>
+                    <p><strong>{% trans "Estado" %}:</strong> {{ furo.get_estado_display|default:furo.estado }}</p>
+                    <p><strong>{% trans "Localização" %}:</strong> {{ furo.localizacao|default:"-" }}</p>
+                    <p><strong>{% trans "Local Sondagem" %}:</strong> {{ furo.local_sondagem|default:"-" }}</p>
+                </div>
+                <div>
+                    <p><strong>{% trans "Profundidade Inicial" %}:</strong> {{ furo.profundidade_inicial|default:"0" }} m</p>
+                    <p><strong>{% trans "Profundidade Máxima" %}:</strong> {{ furo.profundidade_maxima_atingida|default:"0" }} m</p>
+                    <p><strong>{% trans "Inclinação Planeada" %}:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}</p>
+                    <p><strong>{% trans "Azimute Planeado" %}:</strong> {{ furo.azimute_planeado_atual|default:"-" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">📊 {% trans "Resumo" %}</h2>
+
+            <div class="space-y-3 text-sm text-gray-700">
+                <div class="flex justify-between gap-3">
+                    <span>{% trans "Medições" %}</span>
+                    <strong>{{ medicoes|length }}</strong>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <span>{% trans "Meus Registos" %}</span>
+                    <strong>{{ registos|length }}</strong>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <span>{% trans "Projeto" %}</span>
+                    <strong>{{ furo.projeto.nome|default:"-" }}</strong>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- PLANEAMENTO ATUAL -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">🧭 Planeamento Atual</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-            <div><strong>Profundidade Alvo Atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
-            <div><strong>Inclinação Planeada Atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
-            <div><strong>Azimute Planeado Atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">📏 {% trans "Medições" %}</h2>
+            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-warning">🌐 {% trans "Abrir 3D" %}</a>
         </div>
-    </div>
 
-    <!-- ESTADO REAL -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📏 Estado Real Atual</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-            <div><strong>Inclinação Real Atual:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
-            <div><strong>Azimute Real Atual:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
-            <div><strong>Magnetismo:</strong> {{ furo.magnetismo|default:"-" }}</div>
-        </div>
-    </div>
-
-    <!-- MEDIÇÕES -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📏 Medições do Furo</h2>
-
-        {% if medicoes_furo %}
+        {% if medicoes %}
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="bg-gray-100 text-gray-700">
-                        <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Profundidade Medida</th>
-                            <th class="text-left px-4 py-3">Inclinação Real</th>
-                            <th class="text-left px-4 py-3">Azimute Real</th>
-                            <th class="text-left px-4 py-3">Imagem</th>
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Profundidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Inclinação" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Azimute" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Rocha" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Cor" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for medicao in medicoes_furo %}
-                            <tr class="border-t">
-                                <td class="px-4 py-3">{{ medicao.criado_em|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ medicao.profundidade_medida|default:"-" }} m</td>
-                                <td class="px-4 py-3">{{ medicao.inclinacao_real_medida|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ medicao.azimute_real_medido|default:"-" }}</td>
-                                <td class="px-4 py-3">
-                                    {% if medicao.imagem %}
-                                        <a href="{{ medicao.imagem.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                            Ver imagem
-                                        </a>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
+                        {% for medicao in medicoes %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ medicao.profundidade_medida|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ medicao.inclinacao_real_medida|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ medicao.azimute_real_medido|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ medicao.tipo_rocha|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ medicao.cor|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ medicao.criado_em|date:"d/m/Y H:i" }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem medições registadas para este furo.</p>
+            <p class="text-gray-500">{% trans "Sem medições registadas." %}</p>
         {% endif %}
     </div>
 
-    <!-- REGISTOS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📋 Registos Relacionados</h2>
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">📋 {% trans "Meus Registos neste Furo" %}</h2>
 
-        {% if registos_furo %}
+        {% if registos %}
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="bg-gray-100 text-gray-700">
-                        <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Empregado</th>
-                            <th class="text-left px-4 py-3">Metros</th>
-                            <th class="text-left px-4 py-3">Horas</th>
-                            <th class="text-left px-4 py-3">Prof. Antes</th>
-                            <th class="text-left px-4 py-3">Prof. Depois</th>
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Metros" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Horas" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Paragem" %}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for registo in registos_furo %}
-                            <tr class="border-t">
-                                <td class="px-4 py-3">{{ registo.data|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.empregado.nome|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.metros_furados|default:0 }}</td>
-                                <td class="px-4 py-3">{{ registo.horas_trabalhadas|default:0 }}</td>
-                                <td class="px-4 py-3">{{ registo.profundidade_furo_antes|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.profundidade_furo_depois|default:"-" }}</td>
+                        {% for registo in registos %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ registo.data|date:"d/m/Y" }}</td>
+                                <td class="py-3 pr-4">{{ registo.metros_furados|default:"0" }}</td>
+                                <td class="py-3 pr-4">{{ registo.horas_trabalhadas|default:"0" }}</td>
+                                <td class="py-3 pr-4">{{ registo.horas_paragem|default:"0" }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Sem registos para este furo.</p>
+            <p class="text-gray-500">{% trans "Ainda não tens registos neste furo." %}</p>
         {% endif %}
     </div>
-
 </section>
 {% endblock %}

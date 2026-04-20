@@ -1,4 +1,5 @@
 {% extends "projetos/base.html" %}
+{% block title %}Furo 3D{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
@@ -123,6 +124,7 @@
     </div>
 </section>
 
+{% block extra_scripts %}
 <script>
 const plot = document.querySelector('.plotly-graph-div');
 const botaoRotacao = document.getElementById('rotacionarBtn');
@@ -197,4 +199,5 @@ if (modal) {
     });
 }
 </script>
+{% endblock %}
 {% endblock %}

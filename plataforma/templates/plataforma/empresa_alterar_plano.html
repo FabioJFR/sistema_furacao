@@ -1,0 +1,42 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block page_description %}
+Alterar o plano associado à empresa.
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px;">
+    <p><strong>Empresa:</strong> {{ empresa.nome }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 16px;">
+            <label style="font-weight:600; display:block; margin-bottom:6px;">
+                Selecionar plano:
+            </label>
+
+            <select name="plano" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                {% for plano in planos %}
+                    <option value="{{ plano.id }}"
+                        {% if empresa.plano and plano.id == empresa.plano.id %}selected{% endif %}>
+                        {{ plano.nome }} - {{ plano.preco_mensal }}€/mês
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'plataforma:empresa_detail' empresa.id %}" class="btn btn-light">
+                Voltar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

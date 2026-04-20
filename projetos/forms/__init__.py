@@ -1,10 +1,22 @@
-from projetos.forms.projeto import *
-from projetos.forms.furo import *
-from projetos.forms.empregado import *
-from projetos.forms.maquina import *
-from projetos.forms.material import *
-from projetos.forms.medicao import *
-from projetos.forms.registo import *
-from projetos.forms.configuracao_perfuracao import *
-from projetos.forms.empregado_furo import *
-from projetos.forms.empregado_area import *
+# projetos/forms/__init__.py
+
+# Core
+from .preferencias import PreferenciasForm
+
+# Projetos / Furos
+from .projeto import ProjetoForm
+from .furo import FuroForm, FuroCreateForm
+
+# Empregados
+from .empregado import *
+from .empregado_area import MeusDadosEmpregadoForm
+from .empregado_furo import EmpregadoFuroForm
+
+# Operação
+from .registo import *
+from .configuracao_perfuracao import *
+
+# Recursos
+from .material import *
+from .maquina import *
+from .medicao import *

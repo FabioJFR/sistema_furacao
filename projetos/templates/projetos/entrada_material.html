@@ -1,8 +1,61 @@
-<h1>Entrada de material</h1>
-<p>Material: {{ material.nome }}</p>
+{% extends "projetos/base.html" %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Registar entrada</button>
-</form>
+{% block title %}Entrada de Material{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">📥 Entrada de Material</h1>
+            <p class="text-gray-600 mt-1">
+                <strong>Material:</strong> {{ material.nome }}
+            </p>
+        </div>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-200 text-red-700 p-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for field in form %}
+                    <div class="{% if field.name == 'observacoes' %}md:col-span-2{% endif %}">
+                        <label class="block font-semibold text-gray-700 mb-1">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="text-gray-500">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex gap-3 flex-wrap mt-4">
+                <button type="submit"
+                        class="flex-1 bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
+                    💾 Registar Entrada
+                </button>
+                <a href="{% url 'projetos:materiais_list' %}"
+                   class="flex-1 bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold text-center">
+                    🔙 Voltar
+                </a>
+            </div>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

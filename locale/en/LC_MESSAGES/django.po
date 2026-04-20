@@ -1,0 +1,140 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-14 17:58+0100\n"
+"PO-Revision-Date: 2026-04-14 18:10+0100\n"
+"Last-Translator: Fabio Revez\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: projetos/templates/projetos/base.html:7
+msgid "Sistema de Perfuração"
+msgstr "Drilling System"
+
+#: projetos/templates/projetos/base.html:213
+msgid "Sistema Furação"
+msgstr "Drilling System"
+
+#: projetos/templates/projetos/base.html:219
+msgid "Sair"
+msgstr "Logout"
+
+#: projetos/templates/projetos/base.html:230
+msgid "Administração"
+msgstr "Administration"
+
+#: projetos/templates/projetos/base.html:232
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: projetos/templates/projetos/base.html:233
+msgid "Gráficos"
+msgstr "Charts"
+
+#: projetos/templates/projetos/base.html:234
+msgid "Projetos"
+msgstr "Projects"
+
+#: projetos/templates/projetos/base.html:235
+msgid "Empregados"
+msgstr "Employees"
+
+#: projetos/templates/projetos/base.html:236
+msgid "Máquinas"
+msgstr "Machines"
+
+#: projetos/templates/projetos/base.html:237
+msgid "Furos"
+msgstr "Drill Holes"
+
+#: projetos/templates/projetos/base.html:238
+msgid "Medições"
+msgstr "Measurements"
+
+#: projetos/templates/projetos/base.html:239
+#: projetos/templates/projetos/base.html:258
+msgid "Materiais"
+msgstr "Materials"
+
+#: projetos/templates/projetos/base.html:240
+msgid "Produção"
+msgstr "Production"
+
+#: projetos/templates/projetos/base.html:241
+msgid "Levantamentos"
+msgstr "Withdrawals"
+
+#: projetos/templates/projetos/base.html:242
+msgid "Devoluções"
+msgstr "Returns"
+
+#: projetos/templates/projetos/base.html:243
+msgid "Empregados Pendentes"
+msgstr "Pending Employees"
+
+#: projetos/templates/projetos/base.html:246
+#: projetos/templates/projetos/base.html:247
+msgid "Painel"
+msgstr "Dashboard"
+
+#: projetos/templates/projetos/base.html:249
+msgid "Operação"
+msgstr "Operations"
+
+#: projetos/templates/projetos/base.html:250
+msgid "Meus Dados"
+msgstr "My Details"
+
+#: projetos/templates/projetos/base.html:251
+msgid "Minhas Configurações"
+msgstr "My Configurations"
+
+#: projetos/templates/projetos/base.html:252
+msgid "Histórico Configurações"
+msgstr "Configuration History"
+
+#: projetos/templates/projetos/base.html:254
+msgid "Registos"
+msgstr "Records"
+
+#: projetos/templates/projetos/base.html:255
+msgid "Novo Registo Diário"
+msgstr "New Daily Record"
+
+#: projetos/templates/projetos/base.html:256
+msgid "Meus Registos"
+msgstr "My Records"
+
+#: projetos/templates/projetos/base.html:259
+msgid "Meus Levantamentos"
+msgstr "My Withdrawals"
+
+#: projetos/templates/projetos/base.html:260
+msgid "Minhas Devoluções"
+msgstr "My Returns"
+
+#: projetos/templates/projetos/base.html:262
+msgid "Conta"
+msgstr "Account"
+
+#: projetos/templates/projetos/base.html:263
+msgid "Diário Técnico"
+msgstr "Technical Journal"
+
+#: projetos/templates/projetos/base.html:265
+msgid "Sistema"
+msgstr "System"
+
+#: projetos/templates/projetos/base.html:266
+msgid "Definições"
+msgstr "Settings"

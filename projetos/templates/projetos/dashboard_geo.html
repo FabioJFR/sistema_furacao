@@ -21,11 +21,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    const medicoesJsonUrl = "{% url 'projetos:furo_medicoes_json' furo.id %}";
+</script>
+
+<script>
 let chart;
 
 async function carregarDados() {
     try {
-        const res = await fetch("/furo/{{ furo.id }}/medicoes-json/");
+        const res = await fetch(medicoesJsonUrl);
         const data = await res.json();
 
         const labels = data.map(d => d.profundidade);

@@ -124,6 +124,10 @@
 
     <!-- JSON de projetos -->
     {{ projetos|json_script:"projetos-data" }}
+    <script>
+    const projetoDetailPlaceholder = "00000000-0000-0000-0000-000000000000";
+    const projetoDetailBaseUrl = "{% url 'projetos:projeto_detail' '00000000-0000-0000-0000-000000000000' %}";
+    </script>
 
     <script>
     const projetos = JSON.parse(document.getElementById('projetos-data').textContent);
@@ -160,7 +164,7 @@
             });
 
             marker.on("dblclick", function () {
-                window.location.href = `/projetos/${p.id}/`;
+                window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id));
             });
 
             marcadores.push({ index, marker });
@@ -289,7 +293,7 @@
     abrirBtn.addEventListener("click", () => {
         if (projetos.length === 0) return;
         const p = projetos[projetoIndex];
-        window.location.href = `/projetos/${p.id}/`;
+        window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id));
     });
 
     document.querySelectorAll(".projeto-card").forEach((card, index) => {
@@ -299,7 +303,7 @@
 
         card.addEventListener("dblclick", () => {
             const p = projetos[index];
-            window.location.href = `/projetos/${p.id}/`;
+            window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id));
         });
     });
 

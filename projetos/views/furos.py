@@ -1,9 +1,11 @@
+import logging
 import math
 
 import plotly.graph_objects as go
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
@@ -19,37 +21,156 @@ from projetos.selectors.furos import (
     obter_furo,
     obter_lista_furos,
 )
-from projetos.services.furos import (
-    criar_furo,
-    criar_medicao_para_furo,
-)
+from projetos.services.furos import criar_furo
+from projetos.services.medicoes import criar_medicao
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
+
+from plataforma.models import PerfilPlataforma
+
+logger = logging.getLogger("core")
+
+
+
+ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
+
+
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+# ---------------- HELPERS ----------------
+def _obter_contexto_admin_furos(request):
+    logger.debug(
+        "A resolver contexto administrativo em furos.py. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+
+    perfil = PerfilPlataforma.objects.filter(
+        user=request.user,
+        ativo=True,
+        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
+    ).select_related("empresa").first()
+    if perfil:
+        logger.info(
+            "Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
+            request.user.id,
+            perfil.empresa_id,
+            perfil.tipo_acesso,
+        )
+        return perfil
+
+    logger.warning(
+        "Falha ao resolver contexto administrativo em furos.py. user_id=%s",
+        request.user.id,
+    )
+    return None
+
+
+
+def _obter_empresa_admin_furos(request):
+    contexto_admin = _obter_contexto_admin_furos(request)
+    if not contexto_admin:
+        messages.error(request, "Não tens permissão para aceder a esta área.")
+        return None, redirect("projetos:redirect_after_login")
+
+    empresa = getattr(contexto_admin, "empresa", None)
+    empresa_id = getattr(contexto_admin, "empresa_id", None)
+
+    if not empresa_id or not empresa:
+        logger.warning(
+            "Contexto administrativo sem empresa em furos.py. user_id=%s",
+            request.user.id,
+        )
+        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
+        return None, redirect("projetos:dashboard")
+
+    return empresa, None
+
+
+
+def _obter_empregado_autenticado_furos(request):
+    logger.debug(
+        "A resolver empregado autenticado em furos.py. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+
+    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    if not empregado:
+        logger.warning(
+            "Utilizador autenticado sem registo em Empregados em furos.py. user_id=%s",
+            request.user.id,
+        )
+        messages.error(
+            request,
+            "A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        )
+        return None, redirect("projetos:redirect_after_login")
+
+    if not empregado.empresa_id:
+        logger.warning(
+            "Empregado sem empresa associada em furos.py. user_id=%s, empregado_id=%s",
+            request.user.id,
+            empregado.id,
+        )
+        messages.error(request, "A tua conta não está associada a uma empresa. Contacta o administrador.")
+        return None, redirect("projetos:redirect_after_login")
+
+    return empregado, None
+
 
 
 # ---------------- FUROS ----------------
 @login_required
 @empregado_required
 def furo_detail_empregado(request, pk):
-    empregado = get_object_or_404(Empregados, user=request.user)
-    furo = get_object_or_404(Furo, pk=pk)
+    logger.info(
+        "Entrada na view furo_detail_empregado. user_id=%s, username='%s', furo_pk=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+    )
+    empregado, resposta_erro = _obter_empregado_autenticado_furos(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_detail_empregado. user_id=%s", request.user.id)
+        return resposta_erro
 
-    trabalhou_no_furo = empregado.registos_diarios.filter(furo=furo).exists()
+    furo = get_object_or_404(Furo, pk=pk, empresa_id=empregado.empresa_id)
+
+    trabalhou_no_furo = empregado.registos_diarios.filter(
+        furo=furo,
+        empresa_id=empregado.empresa_id,
+    ).exists()
     if not trabalhou_no_furo:
-        return render(request, "projetos/sem_permissao.html", status=403)
+        logger.warning(
+            "Empregado sem permissão para furo_detail_empregado em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
+            request.user.id,
+            empregado.id,
+            furo.id,
+        )
+        messages.error(request, "Não tens permissão para ver os detalhes deste furo.")
+        return redirect("projetos:area_empregado")
 
     registos_furo = (
         RegistoDiarioEmpregado.objects
-        .filter(furo=furo)
+        .filter(furo=furo, empresa_id=empregado.empresa_id)
         .select_related("empregado", "projeto", "furo")
         .order_by("-data", "-criado_em")
     )
 
     medicoes_furo = (
         Medicao.objects
-        .filter(furo=furo)
-        .order_by("-data_modificacao", "-profundidade_medida")
+        .filter(furo=furo, empresa_id=empregado.empresa_id)
+        .order_by("-criado_em", "-profundidade_medida")
     )
 
+    logger.info(
+        "View furo_detail_empregado carregada com sucesso em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
+        request.user.id,
+        empregado.id,
+        furo.id,
+    )
     return render(request, "projetos/furo_detail_empregado.html", {
         "empregado": empregado,
         "furo": furo,
@@ -58,20 +179,43 @@ def furo_detail_empregado(request, pk):
     })
 
 
+
 @login_required
 @admin_required
 def furo_create(request):
+    logger.info(
+        "Entrada na view furo_create. user_id=%s, username='%s', method=%s",
+        request.user.id,
+        request.user.username,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_create. user_id=%s", request.user.id)
+        return resposta_erro
+
     if request.method == "POST":
-        form = FuroCreateForm(request.POST)
+        form = FuroCreateForm(request.POST, empresa=empresa_id)
         if form.is_valid():
-            furo = criar_furo(form)
-
+            furo = criar_furo(form, empresa=empresa_id)
+            logger.info(
+                "Furo criado com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
+                request.user.id,
+                empresa.id,
+                furo.pk,
+            )
             messages.success(request, "Furo criado com sucesso.")
-            return redirect("projetos:furo_detail", pk=furo.pk)
+            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
 
+        logger.warning(
+            "Erro ao criar furo. user_id=%s, erros=%s",
+            request.user.id,
+            form.errors,
+        )
         messages.error(request, "Erro ao criar o furo. Verifique os dados.")
     else:
-        form = FuroCreateForm()
+        form = FuroCreateForm(empresa=empresa_id)
 
     return render(request, "projetos/form.html", {
         "form": form,
@@ -82,42 +226,114 @@ def furo_create(request):
 @login_required
 @admin_required
 def furo_detail(request, pk):
-    context = obter_contexto_detalhe_furo(pk)
+    logger.info(
+        "Entrada na view furo_detail. user_id=%s, username='%s', furo_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_detail. user_id=%s", request.user.id)
+        return resposta_erro
+
+    context = obter_contexto_detalhe_furo(pk, empresa=empresa_id)
     furo = context["furo"]
 
     if request.method == "POST":
-        form = MedicaoForm(request.POST, request.FILES, furo=furo)
+        form = MedicaoForm(
+            request.POST,
+            request.FILES,
+            furo=furo,
+            empresa=empresa_id,
+        )
         if form.is_valid():
-            criar_medicao_para_furo(form, furo)
+            criar_medicao(form, furo=furo, empresa=empresa_id)
+            logger.info(
+                "Medição registada com sucesso em furo_detail. user_id=%s, empresa_id=%s, furo_id=%s",
+                request.user.id,
+                empresa.id,
+                furo.pk,
+            )
             messages.success(request, "Medição registrada com sucesso!")
-            return redirect("projetos:furo_detail", pk=furo.pk)
+            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
 
+        logger.warning(
+            "Erro ao registar medição em furo_detail. user_id=%s, furo_pk=%s, erros=%s",
+            request.user.id,
+            pk,
+            form.errors,
+        )
         messages.error(request, "Erro ao registrar medição. Verifique os dados.")
     else:
-        form = MedicaoForm(furo=furo)
+        form = MedicaoForm(furo=furo, empresa=empresa_id)
 
     context["form"] = form
-    context["configuracoes"] = obter_equipa_e_configuracao_por_furo(furo)
+    context["configuracoes"] = obter_equipa_e_configuracao_por_furo(
+        furo,
+        empresa=empresa_id,
+    )
 
+    logger.info(
+        "View furo_detail carregada com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
+        request.user.id,
+        empresa.id,
+        furo.pk,
+    )
     return render(request, "projetos/furo_detail.html", context)
 
-
+# Multiempresa: o administrador só pode listar e gerir furos da sua própria empresa.
 @login_required
 @admin_required
 def furo_list(request):
-    furos = obter_lista_furos()
+    logger.info(
+        "Entrada na view furo_list. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_list. user_id=%s", request.user.id)
+        return resposta_erro
+
+    furos = obter_lista_furos(empresa=empresa_id)
+    logger.info(
+        "View furo_list carregada com sucesso. user_id=%s, empresa_id=%s, total_furos=%s",
+        request.user.id,
+        empresa.id,
+        furos.count() if hasattr(furos, "count") else "n/a",
+    )
     return render(request, "projetos/furo_list.html", {"furos": furos})
+
+
 
 
 @login_required
 @admin_required
 def furo_update(request, pk):
-    furo = get_object_or_404(Furo, pk=pk)
+    logger.info(
+        "Entrada na view furo_update. user_id=%s, username='%s', furo_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_update. user_id=%s", request.user.id)
+        return resposta_erro
+
+    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
 
     if request.method == "POST":
-        form = FuroForm(request.POST, instance=furo)
+        form = FuroForm(request.POST, instance=furo, empresa=empresa_id)
         if form.is_valid():
             furo = form.save(commit=False)
+            furo.empresa_id = empresa_id
 
             if furo.profundidade_atual and furo.profundidade_maxima_atingida:
                 if furo.profundidade_atual > furo.profundidade_maxima_atingida:
@@ -133,13 +349,24 @@ def furo_update(request, pk):
 
             furo.save()
 
+            logger.info(
+                "Furo atualizado com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
+                request.user.id,
+                empresa.id,
+                furo.pk,
+            )
             messages.success(request, "Furo atualizado com sucesso.")
-            return redirect("projetos:furo_detail", pk=furo.pk)
+            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
 
+        logger.warning(
+            "Erro ao atualizar furo. user_id=%s, furo_pk=%s, erros=%s",
+            request.user.id,
+            pk,
+            form.errors,
+        )
         messages.error(request, "Erro ao atualizar o furo. Verifique os dados.")
-        print("ERROS DO FORM:", form.errors)
     else:
-        form = FuroForm(instance=furo)
+        form = FuroForm(instance=furo, empresa=empresa_id)
 
     return render(request, "projetos/furo_update.html", {
         "form": form,
@@ -147,39 +374,98 @@ def furo_update(request, pk):
     })
 
 
+
 @login_required
 @admin_required
 def furo_delete(request, pk):
-    furo = get_object_or_404(Furo, pk=pk)
+    logger.info(
+        "Entrada na view furo_delete. user_id=%s, username='%s', furo_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view furo_delete. user_id=%s", request.user.id)
+        return resposta_erro
+
+    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
     if request.method == "POST":
+        furo_id = furo.pk
         furo.delete()
-        return redirect("projetos:furo_list")
+        logger.info(
+            "Furo apagado com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
+            request.user.id,
+            empresa.id,
+            furo_id,
+        )
+        messages.success(request, "Furo apagado com sucesso.")
+        return redirect(reverse("projetos:furo_list"))
+
     return render(request, "projetos/furo_confirm_delete.html", {"furo": furo})
+
 
 
 @login_required
 def furo_3d_geologico(request, furo_id):
-    furo = obter_furo(furo_id)
+    logger.info(
+        "Entrada na view furo_3d_geologico. user_id=%s, username='%s', furo_id=%s",
+        request.user.id,
+        request.user.username,
+        furo_id,
+    )
+    furo = None
 
-    is_admin = request.user.is_superuser or request.user.groups.filter(
-        name="Administradores"
-    ).exists()
+    contexto_admin = _obter_contexto_admin_furos(request)
+    if contexto_admin:
+        empresa = getattr(contexto_admin, "empresa", None)
+        empresa_id = getattr(contexto_admin, "empresa_id", None)
 
-    if not is_admin:
-        empregado = get_object_or_404(Empregados, user=request.user)
+        if not empresa_id or not empresa:
+            logger.warning(
+                "Contexto administrativo sem empresa em furo_3d_geologico. user_id=%s",
+                request.user.id,
+            )
+            messages.error(request, "O utilizador administrador não está associado a uma empresa.")
+            return redirect("projetos:dashboard")
+
+        furo = obter_furo(furo_id, empresa=empresa_id)
+    else:
+        empregado, resposta_erro = _obter_empregado_autenticado_furos(request)
+        if resposta_erro:
+            logger.warning("Acesso bloqueado na view furo_3d_geologico. user_id=%s", request.user.id)
+            return resposta_erro
+
+        furo = obter_furo(furo_id, empresa=empregado.empresa_id)
 
         trabalhou_no_furo = RegistoDiarioEmpregado.objects.filter(
             empregado=empregado,
             furo=furo,
+            empresa_id=empregado.empresa_id,
         ).exists()
 
         if not trabalhou_no_furo:
+            logger.warning(
+                "Empregado sem permissão para furo_3d_geologico. user_id=%s, empregado_id=%s, furo_id=%s",
+                request.user.id,
+                empregado.id,
+                furo.id,
+            )
             messages.error(request, "Não tens permissão para ver o 3D deste furo.")
             return redirect("projetos:area_empregado")
 
-    medicoes = list(furo.medicoes.all().order_by("profundidade_medida"))
+    medicoes = list(
+        furo.medicoes.filter(empresa_id=furo.empresa_id).order_by("profundidade_medida")
+    )
 
     if not medicoes:
+        logger.info(
+            "Furo sem medições em furo_3d_geologico. user_id=%s, furo_id=%s",
+            request.user.id,
+            furo.id,
+        )
         messages.warning(request, "Este furo ainda não possui medições.")
         return render(request, "projetos/furo_3d.html", {
             "furo": furo,
@@ -441,6 +727,13 @@ def furo_3d_geologico(request, furo_id):
 
     graph = fig.to_html(full_html=False)
 
+    logger.info(
+        "View furo_3d_geologico carregada com sucesso. user_id=%s, furo_id=%s, numero_medicoes=%s, estado_max=%s",
+        request.user.id,
+        furo.id,
+        len(medicoes),
+        estado_max,
+    )
     return render(request, "projetos/furo_3d.html", {
         "furo": furo,
         "graph": graph,

@@ -1,0 +1,124 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+{% block title %}Planos da Plataforma{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/plano_list.css' %}">
+{% endblock %}
+
+{% block page_title %}Planos da Plataforma{% endblock %}
+
+{% block page_description %}
+Gestão central dos planos comerciais, limites e permissões da plataforma.
+{% endblock %}
+
+{% block page_actions %}
+<a href="/plataforma/planos/novo/" class="btn btn-primary">+ Novo plano</a>
+<a href="/plataforma/dashboard/" class="btn btn-light">Voltar à dashboard</a>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="stats">
+    <div class="stat-box">
+        <div class="stat-label">Total de planos</div>
+        <div class="stat-value">{{ planos|length }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Planos ativos</div>
+        <div class="stat-value">{{ planos_ativos|default:0 }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Tipo empresa</div>
+        <div class="stat-value">{{ planos_empresa|default:0 }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Tipo individual</div>
+        <div class="stat-value">{{ planos_individuais|default:0 }}</div>
+    </div>
+</div>
+
+<div class="card">
+    {% if planos %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Plano</th>
+                        <th>Tipo</th>
+                        <th>Preço mensal</th>
+                        <th>Preço anual</th>
+                        <th>Limites</th>
+                        <th>Permissões</th>
+                        <th>Estado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plano in planos %}
+                        <tr>
+                            <td>
+                                <span class="plano-nome">{{ plano.nome }}</span>
+                                {% if plano.descricao %}
+                                    <span class="plano-meta">{{ plano.descricao }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ plano.tipo }}">{{ plano.get_tipo_display }}</span>
+                            </td>
+                            <td>{{ plano.preco_mensal }} €</td>
+                            <td>{{ plano.preco_anual }} €</td>
+                            <td>
+                                Empregados: {{ plano.limite_empregados }}<br>
+                                Projetos: {{ plano.limite_projetos }}<br>
+                                Furos: {{ plano.limite_furos }}<br>
+                                Armazenamento: {{ plano.limite_armazenamento_gb }} GB
+                            </td>
+                            <td>
+                                Dashboard empresa:
+                                {% if plano.acesso_dashboard_empresa %}Sim{% else %}Não{% endif %}<br>
+                                Painel empregado:
+                                {% if plano.acesso_painel_empregado %}Sim{% else %}Não{% endif %}<br>
+                                Multiutilizador:
+                                {% if plano.permite_multiplos_utilizadores %}Sim{% else %}Não{% endif %}
+                            </td>
+                            <td>
+                                {% if plano.ativo %}
+                                    <span class="badge badge-ativo">Ativo</span>
+                                {% else %}
+                                    <span class="badge badge-inativo">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="acoes">
+                                    <a href="/plataforma/planos/{{ plano.pk }}/editar/" class="mini-btn">Editar</a>
+                                    <form method="post" action="/plataforma/planos/{{ plano.pk }}/toggle/">
+                                        {% csrf_token %}
+                                        {% if plano.ativo %}
+                                            <button type="submit" class="mini-btn">Desativar</button>
+                                        {% else %}
+                                            <button type="submit" class="mini-btn">Ativar</button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty">
+            Ainda não existem planos configurados na plataforma.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

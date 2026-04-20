@@ -9,25 +9,42 @@
 
         <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
             {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div style="background:#e74c3c; color:white; padding:10px; border-radius:6px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
             <div>
                 <label for="id_nome" class="block font-semibold mb-1">Nome</label>
                 {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div style="color:#ff6b6b; font-size:13px;">{{ form.nome.errors }}</div>
+                {% endif %}
             </div>
 
             <div>
                 <label for="id_funcao" class="block font-semibold mb-1">Função</label>
                 {{ form.funcao }}
+                {% if form.funcao.errors %}
+                    <div style="color:#ff6b6b; font-size:13px;">{{ form.funcao.errors }}</div>
+                {% endif %}
             </div>
 
             <div>
                 <label for="id_email" class="block font-semibold mb-1">Email</label>
                 {{ form.email }}
+                {% if form.email.errors %}
+                    <div style="color:#ff6b6b; font-size:13px;">{{ form.email.errors }}</div>
+                {% endif %}
             </div>
 
             <div>
                 <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
                 {{ form.data_admissao }}
+                {% if form.data_admissao.errors %}
+                    <div style="color:#ff6b6b; font-size:13px;">{{ form.data_admissao.errors }}</div>
+                {% endif %}
             </div>
 
             <button type="submit" style="
@@ -45,7 +62,7 @@
         </form>
 
         <div style="text-align:center; margin-top:15px;">
-            <a href="{% url 'projetos:empregado_list' %}" style="
+            <a href="{% url 'projetos:empregados_list' %}" style="
                 display:inline-block;
                 background:#2980b9;
                 color:white;

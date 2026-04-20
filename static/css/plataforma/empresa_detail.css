@@ -1,0 +1,70 @@
+.empresa-detail-page {}
+
+.empresa-grid-metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.empresa-card {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.empresa-card-title {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.empresa-card-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.empresa-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.empresa-section h2 {
+    margin-top: 0;
+}
+
+.empresa-row {
+    margin-bottom: 10px;
+}
+
+.empresa-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.empresa-actions .btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+.empresa-actions .btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.empresa-actions .btn-danger {
+    background: #dc2626;
+    color: white;
+    border: none;
+}
+
+.empresa-actions .btn-danger:hover {
+    background: #b91c1c;
+}

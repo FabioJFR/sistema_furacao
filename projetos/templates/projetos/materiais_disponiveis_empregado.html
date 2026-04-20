@@ -1,0 +1,116 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Materiais Disponíveis" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">📦 {% trans "Materiais Disponíveis" %}</h1>
+                <p class="text-gray-600 mt-2">
+                    {% trans "Consulta os materiais disponíveis nos teus projetos." %}
+                </p>
+            </div>
+
+            <div class="flex gap-2 flex-wrap">
+                <a href="{% url 'projetos:area_empregado' %}" class="btn btn-primary">🏠 {% trans "Painel" %}</a>
+                <a href="{% url 'projetos:meus_projetos_empregado' %}" class="btn btn-warning">📁 {% trans "Meus Projetos" %}</a>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-success">🕳 {% trans "Meus Furos" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Projeto" %}</label>
+                <select name="projeto" class="w-full p-2 border rounded">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for projeto in projetos %}
+                        <option value="{{ projeto.id }}" {% if filtros.projeto == projeto.id|stringformat:"s" %}selected{% endif %}>
+                            {{ projeto.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Furo" %}</label>
+                <select name="furo" class="w-full p-2 border rounded">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for furo in furos %}
+                        <option value="{{ furo.id }}" {% if filtros.furo == furo.id|stringformat:"s" %}selected{% endif %}>
+                            {{ furo.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Nome do Material" %}</label>
+                <input type="text"
+                       name="nome"
+                       value="{{ filtros.nome }}"
+                       placeholder="{% trans 'Ex.: tubo, broca, haste...' %}"
+                       class="w-full p-2 border rounded">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">📋 {% trans "Lista de Materiais" %}</h2>
+            <span class="text-sm text-gray-500">{{ materiais|length }} {% trans "resultado(s)" %}</span>
+        </div>
+
+        {% if materiais %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Nome" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Projeto" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Quantidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Stock Mínimo" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Estado" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Ações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materiais %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4 font-semibold text-gray-800">{{ material.nome }}</td>
+                                <td class="py-3 pr-4">{{ material.projeto.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ material.quantidade|default:"0" }}</td>
+                                <td class="py-3 pr-4">{{ material.stock_minimo|default:"0" }}</td>
+                                <td class="py-3 pr-4">
+                                    {{ material.get_estado_display|default:material.estado|default:"-" }}
+                                </td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="/app/levantamentos/meus/novo/?material={{ material.id }}" class="btn btn-primary">
+                                            📤 {% trans "Levantar" %}
+                                        </a>
+                                        <a href="/app/devolucoes/criar/?material={{ material.id }}" class="btn btn-warning">
+                                            ↩️ {% trans "Devolver" %}
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Não existem materiais disponíveis para os filtros selecionados." %}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

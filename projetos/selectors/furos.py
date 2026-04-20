@@ -3,50 +3,52 @@ from django.shortcuts import get_object_or_404
 from projetos.models import ConfiguracaoPerfuracaoEmpregado, Furo, Medicao
 
 
-def obter_equipa_e_configuracao_por_furo(furo):
-    configuracoes = (
-        ConfiguracaoPerfuracaoEmpregado.objects
-        .filter(furo=furo)
-        .select_related("empregado", "furo", "atualizado_por")
-        .order_by("empregado__nome")
+
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+# TODO futuro:
+# - centralizar filtros multiempresa num helper/base selector reutilizável
+# - adicionar paginação/otimização quando o volume de furos crescer
+# - avaliar cache em consultas de detalhe/3D muito frequentes
+
+
+
+def _filtrar_por_empresa(queryset, empresa=None, campo="empresa_id"):
+    if empresa is None:
+        return queryset
+
+    empresa_id = _resolver_empresa_id(empresa)
+    return queryset.filter(**{campo: empresa_id})
+
+
+
+def _decimal_para_float(valor):
+    return float(valor) if valor is not None else None
+
+
+
+def _obter_queryset_base_furos():
+    return Furo.objects.select_related("projeto")
+
+
+
+def _obter_queryset_base_configuracoes_perfuracao():
+    return ConfiguracaoPerfuracaoEmpregado.objects.select_related(
+        "empregado",
+        "furo",
+        "atualizado_por",
     )
-    return configuracoes
 
 
-def obter_lista_furos():
-    return Furo.objects.select_related("projeto").order_by("nome")
 
-
-def obter_furo(pk):
-    return get_object_or_404(
-        Furo.objects.select_related("projeto"),
-        pk=pk,
-    )
-
-
-def obter_contexto_detalhe_furo(pk):
-    furo = get_object_or_404(
-        Furo.objects.select_related("projeto").prefetch_related(
-            "medicoes",
-            "registos_furo",
-            "levantamentos_materiais",
-        ),
-        pk=pk,
-    )
-
-    medicoes = furo.medicoes.all().order_by("criado_em", "profundidade_medida")
-    registos = (
-        furo.registos_furo
-        .select_related("empregado", "projeto")
-        .all()
-        .order_by("-data", "-criado_em")
-    )
-
-    furo_mapa = {
+def _serializar_furo_mapa(furo):
+    return {
         "id": str(furo.id),
         "nome": furo.nome,
-        "lat": float(furo.latitude) if furo.latitude is not None else None,
-        "lon": float(furo.longitude) if furo.longitude is not None else None,
+        "lat": _decimal_para_float(furo.latitude),
+        "lon": _decimal_para_float(furo.longitude),
         "projeto": furo.projeto.nome if furo.projeto else "",
         "profundidade_atual": furo.profundidade_atual or 0,
         "profundidade_alvo_inicial": furo.profundidade_alvo_inicial or 0,
@@ -77,20 +79,92 @@ def obter_contexto_detalhe_furo(pk):
         ),
     }
 
+
+
+def obter_equipa_e_configuracao_por_furo(furo, empresa=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+
+    if empresa_id is not None and furo.empresa_id != empresa_id:
+        return ConfiguracaoPerfuracaoEmpregado.objects.none()
+
+    queryset = _obter_queryset_base_configuracoes_perfuracao().filter(furo=furo)
+
+    if empresa_id is not None:
+        queryset = queryset.filter(empresa_id=empresa_id)
+
+    return queryset.order_by("empregado__nome")
+
+
+
+def obter_lista_furos(empresa=None):
+    queryset = _obter_queryset_base_furos().order_by("nome")
+    return _filtrar_por_empresa(queryset, empresa)
+
+
+
+def obter_furo(pk, empresa=None):
+    queryset = _obter_queryset_base_furos()
+    queryset = _filtrar_por_empresa(queryset, empresa)
+    return get_object_or_404(queryset, pk=pk)
+
+
+
+def obter_contexto_detalhe_furo(pk, empresa=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+
+    queryset = _obter_queryset_base_furos().prefetch_related(
+        "medicoes",
+        "registos_furo",
+        "levantamentos_materiais",
+    )
+    queryset = _filtrar_por_empresa(queryset, empresa)
+
+    furo = get_object_or_404(queryset, pk=pk)
+
+    if empresa_id is not None and furo.empresa_id != empresa_id:
+        return {
+            "furo": furo,
+            "medicoes": furo.medicoes.none(),
+            "registos": furo.registos_furo.none(),
+            "levantamentos": furo.levantamentos_materiais.none(),
+            "furo_mapa": {},
+        }
+
+    medicoes = furo.medicoes.all().order_by("criado_em", "profundidade_medida")
+    registos = (
+        furo.registos_furo.select_related("empregado", "projeto")
+        .all()
+        .order_by("-data", "-criado_em")
+    )
     levantamentos = (
-        furo.levantamentos_materiais
-        .select_related("empregado", "material", "projeto")
+        furo.levantamentos_materiais.select_related("empregado", "material", "projeto")
         .all()
     )
+
+    if empresa_id is not None:
+        medicoes = medicoes.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
+        registos = registos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
+        levantamentos = levantamentos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
 
     return {
         "furo": furo,
         "medicoes": medicoes,
         "registos": registos,
         "levantamentos": levantamentos,
-        "furo_mapa": furo_mapa,
+        "furo_mapa": _serializar_furo_mapa(furo),
     }
 
 
-def obter_medicoes_furo(furo):
-    return Medicao.objects.filter(furo=furo).order_by("criado_em", "profundidade_medida")
+
+def obter_medicoes_furo(furo, empresa=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+
+    if empresa_id is not None and furo.empresa_id != empresa_id:
+        return Medicao.objects.none()
+
+    queryset = Medicao.objects.filter(furo=furo).order_by("criado_em", "profundidade_medida")
+
+    if empresa_id is not None:
+        queryset = queryset.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
+
+    return queryset

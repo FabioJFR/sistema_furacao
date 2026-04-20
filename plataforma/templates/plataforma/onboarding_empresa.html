@@ -1,0 +1,104 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/plataforma/onboarding_empresa.css' %}">
+{% endblock %}
+
+{% block page_title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
+
+{% block page_description %}
+Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a subscrição e o pagamento inicial.
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 32px;">
+    {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for message in messages %}
+                <div class="message {{ message.tags|default:'info' }}" style="padding: 12px 14px; border-radius: 8px; margin-bottom: 10px;{% if message.tags == 'success' %} background: #dcfce7; color: #166534;{% elif message.tags == 'error' %} background: #fee2e2; color: #991b1b;{% elif message.tags == 'warning' %} background: #fef3c7; color: #92400e;{% else %} background: #dbeafe; color: #1d4ed8;{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div style="padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; background: #fee2e2; color: #991b1b;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px;">
+        {% csrf_token %}
+
+        <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
+            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Empresa</h2>
+
+            {% for field in form %}
+                {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes" %}
+                    <div style="margin-bottom: 14px;">
+                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
+            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Administrador inicial</h2>
+
+            {% for field in form %}
+                {% if field.name in "nome_admin username_admin email_admin password_admin tipo_acesso" %}
+                    <div style="margin-bottom: 14px;">
+                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div style="grid-column: 1 / -1; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
+            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Plano e faturação inicial</h2>
+
+            {% for field in form %}
+                {% if field.name in "plano estado_empresa criar_subscricao_inicial valor_subscricao criar_pagamento_inicial valor_pagamento" %}
+                    <div style="margin-bottom: 14px;">
+                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+            <button type="submit" style="border: none; background: #2563eb; color: white; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                Criar empresa
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@
             {% csrf_token %}
             <div class="flex gap-3 mt-4">
                 <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-lg shadow">Sim, apagar</button>
-                <a href="{% url 'projetos:furo_list' %}" class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">Cancelar</a>
+                <a href="{% url 'projetos:list' %}" class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">Cancelar</a>
             </div>
         </form>
     </div>

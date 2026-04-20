@@ -3,22 +3,55 @@ from django.shortcuts import get_object_or_404
 from projetos.models import Maquina
 
 
-def obter_lista_maquinas():
-    return Maquina.objects.select_related("projeto_atual").prefetch_related("projetos", "furos").order_by("nome")
+
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
 
 
-def obter_maquina(maquina_id):
-    return get_object_or_404(
-        Maquina.objects.select_related("projeto_atual").prefetch_related("projetos", "furos"),
-        pk=maquina_id
+
+def _filtrar_por_empresa(queryset, empresa=None, campo="empresa_id"):
+    if empresa is None:
+        return queryset
+
+    empresa_id = _resolver_empresa_id(empresa)
+    return queryset.filter(**{campo: empresa_id})
+
+
+
+def _obter_queryset_base_maquinas():
+    return (
+        Maquina.objects.select_related("projeto_atual")
+        .prefetch_related("projetos", "furos")
     )
 
 
-def obter_contexto_maquina_detail(maquina_id):
-    maquina = obter_maquina(maquina_id)
+
+def obter_lista_maquinas(empresa=None):
+    queryset = _obter_queryset_base_maquinas().order_by("nome")
+    return _filtrar_por_empresa(queryset, empresa)
+
+
+
+def obter_maquina(maquina_id, empresa=None):
+    queryset = _obter_queryset_base_maquinas()
+    queryset = _filtrar_por_empresa(queryset, empresa)
+    return get_object_or_404(queryset, pk=maquina_id)
+
+
+
+def obter_contexto_maquina_detail(maquina_id, empresa=None):
+    maquina = obter_maquina(maquina_id, empresa=empresa)
+
+    projetos = maquina.projetos.all()
+    furos = maquina.furos.all()
+
+    if empresa is not None:
+        empresa_id = _resolver_empresa_id(empresa)
+        projetos = projetos.filter(empresa_id=empresa_id)
+        furos = furos.filter(empresa_id=empresa_id)
 
     return {
         "maquina": maquina,
-        "projetos": maquina.projetos.all(),
-        "furos": maquina.furos.all(),
+        "projetos": projetos,
+        "furos": furos,
     }

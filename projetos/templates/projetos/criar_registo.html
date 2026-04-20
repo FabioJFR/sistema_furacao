@@ -1,7 +1,66 @@
-<h1>Criar registo diário</h1>
+{% extends "projetos/base.html" %}
+{% load widget_tweaks %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Guardar registo</button>
-</form>
+{% block title %}Criar Registo Diário{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+
+        <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
+            📘 Criar Registo Diário
+        </h1>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for field in form %}
+                    <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' %}md:col-span-2{% endif %}">
+                        <label class="block font-semibold mb-1 text-gray-700">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field|add_class:"w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" }}
+
+                        {% if field.help_text %}
+                            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
+                <p class="text-sm">
+                    Regista aqui o trabalho diário realizado no furo, incluindo metros furados, horas e eventuais paragens.
+                </p>
+            </div>
+
+            <button type="submit"
+                    class="bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow w-full text-lg">
+                💾 Guardar Registo
+            </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'projetos:area_empregado' %}"
+               class="inline-block bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+                🔙 Voltar
+            </a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

@@ -52,22 +52,20 @@
                                 <td class="px-4 py-3">{{ config.comprimento_bit }}</td>
                                 <td class="px-4 py-3">{{ config.atualizado_em|default:"-" }}</td>
                                 <td class="px-4 py-3">
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2 flex-wrap">
-                                            <a href="{% url 'projetos:configuracao_perfuracao_detail_empregado' config.pk %}"
-                                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                                Ver
-                                            </a>
-                                            <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
-                                            class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                                ✏️ Editar
-                                            </a>
-                                            <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' config.pk %}"
-                                            class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                                🗑️ Apagar
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <a href="{% url 'projetos:configuracao_perfuracao_detail_empregado' config.pk %}"
+                                        class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                            Ver
+                                        </a>
+                                        <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
+                                        class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                            ✏️ Editar
+                                        </a>
+                                        <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' config.pk %}"
+                                        class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                            🗑️ Apagar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

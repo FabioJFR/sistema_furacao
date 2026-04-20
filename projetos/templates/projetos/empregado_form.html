@@ -13,10 +13,10 @@
 
         {% if titulo == "Novo Empregado" %}
             <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
-                <h3 class="font-bold mb-2">Acesso automático à plataforma</h3>
+                <h3 class="font-bold mb-2">Acesso definido pelo administrador</h3>
                 <p class="text-sm leading-6">
-                    Ao criar um novo empregado, o sistema gera automaticamente um nome de utilizador e uma palavra-passe temporária.
-                    Depois de guardar, essas credenciais são mostradas ao administrador para poder entregar ao empregado.
+                    Ao criar um novo empregado, o administrador define o nome de utilizador e a palavra-passe inicial.
+                    Essas credenciais ficam associadas ao empregado para acesso imediato à plataforma.
                 </p>
             </div>
         {% elif empregado and not empregado.aprovado %}
@@ -32,9 +32,21 @@
         <form method="POST" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
 
-            {% if form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
-                    {{ form.non_field_errors }}
+            {% if form.non_field_errors or form.errors %}
+                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                    <p class="font-bold mb-2">Corrige os erros abaixo antes de guardar.</p>
+
+                    {% if form.non_field_errors %}
+                        <div class="mb-2">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <div class="text-sm mt-1">
+                                <strong>{{ field.label }}:</strong> {{ field.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             {% endif %}
 
@@ -56,6 +68,7 @@
                     {% endif %}
                 </div>
 
+
                 <div>
                     <label for="id_email" class="block font-semibold mb-1">Email</label>
                     {{ form.email|add_class:"w-full p-2 border rounded" }}
@@ -63,6 +76,27 @@
                         <div class="text-red-600 text-sm mt-1">{{ form.email.errors }}</div>
                     {% endif %}
                 </div>
+
+                {% if titulo == "Novo Empregado" %}
+                <div>
+                    <label for="id_username" class="block font-semibold mb-1">Nome de utilizador</label>
+                    {{ form.username|add_class:"w-full p-2 border rounded" }}
+                    {% if form.username.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="id_password" class="block font-semibold mb-1">Palavra-passe inicial</label>
+                    {{ form.password|add_class:"w-full p-2 border rounded" }}
+                    {% if form.password.help_text %}
+                        <div class="text-gray-500 text-sm mt-1">{{ form.password.help_text }}</div>
+                    {% endif %}
+                    {% if form.password.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
 
                 {% if form.telefone %}
                 <div>

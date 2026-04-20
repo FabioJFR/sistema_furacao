@@ -7,8 +7,29 @@
 <div class="space-y-6">
 
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-2xl font-bold">👋 Bem-vindo, {{ empregado.nome }}</h2>
-        <p class="text-gray-500 mt-1">Resumo geral da tua atividade.</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold">👋 Bem-vindo, {{ empregado.nome }}</h2>
+                <p class="text-gray-500 mt-1">Resumo geral da tua atividade.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
+                   class="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                    ⚙️ Configurações de Perfuração
+                </a>
+
+                <a href="{% url 'projetos:meus_projetos_empregado' %}"
+                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                    📁 Meus Projetos
+                </a>
+
+                <a href="{% url 'projetos:meus_furos_empregado' %}"
+                   class="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                    🕳 Meus Furos
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-4">
@@ -103,9 +124,9 @@
                             <a href="{% url 'projetos:furo_detail_empregado' furo.id %}"
                                class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
                                 Ver Detalhes
-                            </>
+                            </a>
 
-                            <a href="{% url 'projetos:furo_3d' furo.id %}"
+                            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}"
                                class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
                                 Ver 3D
                             </a>
@@ -172,12 +193,13 @@
 {{ grafico_horas|json_script:"grafico-horas" }}
 {{ grafico_produtividade|json_script:"grafico-produtividade" }}
 
+{% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const labels = JSON.parse(document.getElementById('grafico-labels').textContent);
     const dadosMetros = JSON.parse(document.getElementById('grafico-metros').textContent);
     const dadosHoras = JSON.parse(document.getElementById('grafico-horas').textContent);
-    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produdividade')?.textContent || document.getElementById('grafico-produtividade').textContent);
+    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produtividade').textContent);
 
     new Chart(document.getElementById('graficoMetros'), {
         type: 'line',
@@ -220,4 +242,5 @@
         options: { responsive: true }
     });
 </script>
+{% endblock %}
 {% endblock %}

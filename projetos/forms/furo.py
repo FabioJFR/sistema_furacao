@@ -1,8 +1,82 @@
 from django import forms
+
 from ..models.furo import Furo
+from ..models.projeto import Projeto
 
 
-class FuroForm(forms.ModelForm):
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+def _atribuir_empresa_furo(instance, empresa=None):
+    if empresa is not None:
+        instance.empresa_id = _resolver_empresa_id(empresa)
+    return instance
+
+
+def _obter_queryset_projetos_empresa(empresa=None):
+    if empresa is None:
+        return Projeto.objects.none()
+    return Projeto.objects.filter(
+        empresa_id=_resolver_empresa_id(empresa)
+    ).order_by("nome")
+
+
+def _validar_inclinacao(valor, mensagem=None):
+    if valor is not None and not (-90 <= valor <= 90):
+        raise forms.ValidationError(mensagem or "A inclinação deve estar entre -90° e 90°.")
+    return valor
+
+
+def _validar_azimute(valor, mensagem=None):
+    if valor is not None and not (0 <= valor <= 360):
+        raise forms.ValidationError(mensagem or "O azimute deve estar entre 0 e 360°.")
+    return valor
+
+
+def _validar_latitude(valor):
+    if valor is not None and not (-90 <= valor <= 90):
+        raise forms.ValidationError("Latitude deve estar entre -90 e 90.")
+    return valor
+
+
+def _validar_longitude(valor):
+    if valor is not None and not (-180 <= valor <= 180):
+        raise forms.ValidationError("Longitude deve estar entre -180 e 180.")
+    return valor
+
+
+def _adicionar_erro_valor_negativo(form, campo_nome, valor, mensagem="O valor não pode ser negativo."):
+    if valor is not None and valor < 0:
+        form.add_error(campo_nome, mensagem)
+
+
+class BaseFuroForm(forms.ModelForm):
+    def __init__(self, *args, empresa=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empresa = empresa
+
+        _atribuir_empresa_furo(self.instance, empresa=self.empresa)
+        self.fields["projeto"].queryset = _obter_queryset_projetos_empresa(self.empresa)
+
+    def _validar_empresa_projeto(self, projeto):
+        empresa_id = _resolver_empresa_id(self.empresa) if self.empresa is not None else None
+
+        if self.instance and self.instance.pk and empresa_id is not None:
+            if self.instance.empresa_id and self.instance.empresa_id != empresa_id:
+                raise forms.ValidationError("Este furo não pertence à empresa atual.")
+
+        if empresa_id is not None and projeto and projeto.empresa_id != empresa_id:
+            self.add_error("projeto", "O projeto selecionado não pertence à empresa atual.")
+
+    def clean_latitude(self):
+        return _validar_latitude(self.cleaned_data.get("latitude"))
+
+    def clean_longitude(self):
+        return _validar_longitude(self.cleaned_data.get("longitude"))
+
+
+class FuroForm(BaseFuroForm):
     class Meta:
         model = Furo
         fields = [
@@ -10,30 +84,24 @@ class FuroForm(forms.ModelForm):
             "nome",
             "tipo",
             "estado",
-
             "profundidade_inicial",
             "profundidade_alvo_inicial",
             "profundidade_alvo_atual",
             "profundidade_atual",
             "profundidade_maxima_atingida",
-
             "inclinacao_planeada_inicial",
             "inclinacao_planeada_atual",
             "azimute_planeado_inicial",
             "azimute_planeado_atual",
-
             "inclinacao_real_atual",
             "azimute_real_atual",
             "magnetismo",
-
             "latitude",
             "longitude",
             "altitude",
-
             "origem_este",
             "origem_norte",
             "origem_tvd",
-
             "sistema_coordenadas",
             "localizacao",
             "local_sondagem",
@@ -44,78 +112,52 @@ class FuroForm(forms.ModelForm):
             "nome": forms.TextInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
             "tipo": forms.Select(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
             "estado": forms.Select(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
-
             "profundidade_inicial": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "profundidade_alvo_inicial": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "profundidade_alvo_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "profundidade_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "profundidade_maxima_atingida": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
-
             "inclinacao_planeada_inicial": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "inclinacao_planeada_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "azimute_planeado_inicial": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "azimute_planeado_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
-
             "inclinacao_real_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "azimute_real_atual": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "magnetismo": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
-
             "latitude": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.000001}),
             "longitude": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.000001}),
             "altitude": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
-
             "origem_este": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "origem_norte": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
             "origem_tvd": forms.NumberInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "step": 0.01}),
-
             "sistema_coordenadas": forms.Select(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
             "localizacao": forms.TextInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
             "local_sondagem": forms.TextInput(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black"}),
             "detalhes": forms.Textarea(attrs={"class": "p-2 rounded border border-gray-400 bg-white text-black", "rows": 3}),
         }
 
-    def _validar_inclinacao(self, valor):
-        if valor is not None and not (-90 <= valor <= 90):
-            raise forms.ValidationError("A inclinação deve estar entre -90° e 90°.")
-        return valor
-
-    def _validar_azimute(self, valor):
-        if valor is not None and not (0 <= valor <= 360):
-            raise forms.ValidationError("O azimute deve estar entre 0 e 360°.")
-        return valor
-
     def clean_inclinacao_planeada_inicial(self):
-        return self._validar_inclinacao(self.cleaned_data.get("inclinacao_planeada_inicial"))
+        return _validar_inclinacao(self.cleaned_data.get("inclinacao_planeada_inicial"))
 
     def clean_inclinacao_planeada_atual(self):
-        return self._validar_inclinacao(self.cleaned_data.get("inclinacao_planeada_atual"))
+        return _validar_inclinacao(self.cleaned_data.get("inclinacao_planeada_atual"))
 
     def clean_inclinacao_real_atual(self):
-        return self._validar_inclinacao(self.cleaned_data.get("inclinacao_real_atual"))
+        return _validar_inclinacao(self.cleaned_data.get("inclinacao_real_atual"))
 
     def clean_azimute_planeado_inicial(self):
-        return self._validar_azimute(self.cleaned_data.get("azimute_planeado_inicial"))
+        return _validar_azimute(self.cleaned_data.get("azimute_planeado_inicial"))
 
     def clean_azimute_planeado_atual(self):
-        return self._validar_azimute(self.cleaned_data.get("azimute_planeado_atual"))
+        return _validar_azimute(self.cleaned_data.get("azimute_planeado_atual"))
 
     def clean_azimute_real_atual(self):
-        return self._validar_azimute(self.cleaned_data.get("azimute_real_atual"))
-
-    def clean_latitude(self):
-        valor = self.cleaned_data.get("latitude")
-        if valor is not None and not (-90 <= valor <= 90):
-            raise forms.ValidationError("Latitude deve estar entre -90 e 90.")
-        return valor
-
-    def clean_longitude(self):
-        valor = self.cleaned_data.get("longitude")
-        if valor is not None and not (-180 <= valor <= 180):
-            raise forms.ValidationError("Longitude deve estar entre -180 e 180.")
-        return valor
+        return _validar_azimute(self.cleaned_data.get("azimute_real_atual"))
 
     def clean(self):
         cleaned = super().clean()
+        projeto = cleaned.get("projeto")
+        self._validar_empresa_projeto(projeto)
 
         pi = cleaned.get("profundidade_inicial")
         pai = cleaned.get("profundidade_alvo_inicial")
@@ -130,8 +172,7 @@ class FuroForm(forms.ModelForm):
             ("profundidade_atual", pat),
             ("profundidade_maxima_atingida", pma),
         ]:
-            if valor is not None and valor < 0:
-                self.add_error(campo_nome, "O valor não pode ser negativo.")
+            _adicionar_erro_valor_negativo(self, campo_nome, valor)
 
         if pi is not None and pai is not None and pai < pi:
             self.add_error("profundidade_alvo_inicial", "A profundidade alvo inicial não pode ser menor que a profundidade inicial.")
@@ -148,7 +189,7 @@ class FuroForm(forms.ModelForm):
         return cleaned
 
 
-class FuroCreateForm(forms.ModelForm):
+class FuroCreateForm(BaseFuroForm):
     class Meta:
         model = Furo
         fields = [
@@ -156,23 +197,18 @@ class FuroCreateForm(forms.ModelForm):
             "tipo",
             "nome",
             "estado",
-
             "profundidade_inicial",
             "profundidade_alvo_inicial",
-
             "inclinacao_planeada_inicial",
             "azimute_planeado_inicial",
             "magnetismo",
-
             "latitude",
             "longitude",
             "altitude",
-
             "origem_este",
             "origem_norte",
             "origem_tvd",
             "sistema_coordenadas",
-
             "localizacao",
             "local_sondagem",
             "detalhes",
@@ -182,63 +218,55 @@ class FuroCreateForm(forms.ModelForm):
             "tipo": forms.Select(attrs={"class": "form-control"}),
             "nome": forms.TextInput(attrs={"class": "form-control"}),
             "estado": forms.Select(attrs={"class": "form-control"}),
-
             "profundidade_inicial": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "profundidade_alvo_inicial": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
-
             "inclinacao_planeada_inicial": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "azimute_planeado_inicial": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "magnetismo": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
-
             "latitude": forms.NumberInput(attrs={"class": "form-control", "step": 0.000001}),
             "longitude": forms.NumberInput(attrs={"class": "form-control", "step": 0.000001}),
             "altitude": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
-
             "origem_este": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "origem_norte": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "origem_tvd": forms.NumberInput(attrs={"class": "form-control", "step": 0.01}),
             "sistema_coordenadas": forms.Select(attrs={"class": "form-control"}),
-
             "localizacao": forms.TextInput(attrs={"class": "form-control"}),
             "local_sondagem": forms.TextInput(attrs={"class": "form-control"}),
             "detalhes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
     def clean_inclinacao_planeada_inicial(self):
-        valor = self.cleaned_data.get("inclinacao_planeada_inicial")
-        if valor is not None and not (-90 <= valor <= 90):
-            raise forms.ValidationError("A inclinação planeada inicial deve estar entre -90° e 90°.")
-        return valor
+        return _validar_inclinacao(
+            self.cleaned_data.get("inclinacao_planeada_inicial"),
+            "A inclinação planeada inicial deve estar entre -90° e 90°.",
+        )
 
     def clean_azimute_planeado_inicial(self):
-        valor = self.cleaned_data.get("azimute_planeado_inicial")
-        if valor is not None and not (0 <= valor <= 360):
-            raise forms.ValidationError("O azimute planeado inicial deve estar entre 0 e 360°.")
-        return valor
-
-    def clean_latitude(self):
-        valor = self.cleaned_data.get("latitude")
-        if valor is not None and not (-90 <= valor <= 90):
-            raise forms.ValidationError("Latitude deve estar entre -90 e 90.")
-        return valor
-
-    def clean_longitude(self):
-        valor = self.cleaned_data.get("longitude")
-        if valor is not None and not (-180 <= valor <= 180):
-            raise forms.ValidationError("Longitude deve estar entre -180 e 180.")
-        return valor
+        return _validar_azimute(
+            self.cleaned_data.get("azimute_planeado_inicial"),
+            "O azimute planeado inicial deve estar entre 0 e 360°.",
+        )
 
     def clean(self):
         cleaned = super().clean()
+        projeto = cleaned.get("projeto")
+        self._validar_empresa_projeto(projeto)
 
         pi = cleaned.get("profundidade_inicial")
         pai = cleaned.get("profundidade_alvo_inicial")
 
-        if pi is not None and pi < 0:
-            self.add_error("profundidade_inicial", "A profundidade inicial não pode ser negativa.")
-
-        if pai is not None and pai < 0:
-            self.add_error("profundidade_alvo_inicial", "A profundidade alvo inicial não pode ser negativa.")
+        _adicionar_erro_valor_negativo(
+            self,
+            "profundidade_inicial",
+            pi,
+            "A profundidade inicial não pode ser negativa.",
+        )
+        _adicionar_erro_valor_negativo(
+            self,
+            "profundidade_alvo_inicial",
+            pai,
+            "A profundidade alvo inicial não pode ser negativa.",
+        )
 
         if pi is not None and pai is not None and pai < pi:
             self.add_error("profundidade_alvo_inicial", "A profundidade alvo inicial não pode ser menor que a profundidade inicial.")
@@ -247,6 +275,7 @@ class FuroCreateForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
+        _atribuir_empresa_furo(instance, empresa=self.empresa)
 
         instance.profundidade_alvo_atual = instance.profundidade_alvo_inicial
         instance.inclinacao_planeada_atual = instance.inclinacao_planeada_inicial

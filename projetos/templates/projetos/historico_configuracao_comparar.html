@@ -64,10 +64,10 @@
                 📄 Ver detalhe
             </a>
 
-            <button onclick="history.back()"
-                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
+            <a href="{% url 'projetos:furo_detail' historico.furo.id %}"
+               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
                 🔙 Voltar
-            </button>
+            </a>
         </div>
     </div>
 

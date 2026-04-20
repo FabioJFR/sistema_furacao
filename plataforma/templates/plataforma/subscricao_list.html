@@ -1,0 +1,77 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}Subscrições{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/subscricoes.css' %}">
+{% endblock %}
+
+{% block page_title %}Subscrições{% endblock %}
+
+{% block page_description %}
+Gestão de subscrições das empresas na plataforma.
+{% endblock %}
+
+{% block page_actions %}
+<a href="/plataforma/dashboard/" class="btn btn-light">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<h1>Subscrições</h1>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Total</div>
+        <div class="card-value">{{ total_subscricoes }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Ativas</div>
+        <div class="card-value">{{ subscricoes_ativas }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Pendentes</div>
+        <div class="card-value">{{ subscricoes_pendentes }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Expiradas</div>
+        <div class="card-value">{{ subscricoes_expiradas }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Canceladas</div>
+        <div class="card-value">{{ subscricoes_canceladas }}</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Empresa</th>
+            <th>Plano</th>
+            <th>Estado</th>
+            <th>Valor</th>
+            <th>Início</th>
+            <th>Fim</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in subscricoes %}
+            <tr>
+                <td>{{ s.empresa.nome }}</td>
+                <td>{{ s.plano.nome }}</td>
+                <td>
+                    <span class="badge {{ s.estado }}">
+                        {{ s.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ s.valor }}€</td>
+                <td>{{ s.data_inicio }}</td>
+                <td>{{ s.data_fim }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Sem subscrições</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

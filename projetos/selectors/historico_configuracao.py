@@ -1,60 +1,90 @@
 from projetos.models import HistoricoConfiguracaoPerfuracao
 
 
-def obter_historico_configuracao_por_empregado(empregado):
-    return (
-        HistoricoConfiguracaoPerfuracao.objects
-        .filter(empregado=empregado)
-        .select_related("furo", "alterado_por", "configuracao")
-        .order_by("-criado_em")
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+def _filtrar_por_empresa(queryset, empresa=None, incluir_furo=True, incluir_configuracao=False):
+    if empresa is None:
+        return queryset
+
+    empresa_id = _resolver_empresa_id(empresa)
+    filtros = {"empresa_id": empresa_id}
+
+    if incluir_furo:
+        filtros["furo__empresa_id"] = empresa_id
+
+    if incluir_configuracao:
+        filtros["configuracao__empresa_id"] = empresa_id
+
+    return queryset.filter(**filtros)
+
+
+def _obter_queryset_base():
+    return HistoricoConfiguracaoPerfuracao.objects.select_related(
+        "empregado",
+        "furo",
+        "alterado_por",
+        "configuracao",
     )
 
 
-def obter_historico_configuracao_por_furo(furo):
-    return (
-        HistoricoConfiguracaoPerfuracao.objects
-        .filter(furo=furo)
-        .select_related("empregado", "alterado_por", "configuracao")
-        .order_by("-criado_em")
+def obter_historico_configuracao_por_empregado(empregado, empresa=None):
+    queryset = _obter_queryset_base().filter(empregado=empregado)
+    queryset = _filtrar_por_empresa(queryset, empresa, incluir_furo=True)
+
+    return queryset.order_by("-criado_em")
+
+
+def obter_historico_configuracao_por_furo(furo, empresa=None):
+    queryset = _obter_queryset_base().filter(furo=furo)
+    queryset = _filtrar_por_empresa(queryset, empresa, incluir_furo=True)
+
+    return queryset.order_by("-criado_em")
+
+
+def obter_historico_configuracao_por_configuracao(configuracao, empresa=None):
+    queryset = _obter_queryset_base().filter(configuracao=configuracao)
+    queryset = _filtrar_por_empresa(
+        queryset,
+        empresa,
+        incluir_furo=False,
+        incluir_configuracao=True,
     )
 
-
-def obter_historico_configuracao_por_configuracao(configuracao):
-    return (
-        HistoricoConfiguracaoPerfuracao.objects
-        .filter(configuracao=configuracao)
-        .select_related("empregado", "furo", "alterado_por", "configuracao")
-        .order_by("-criado_em")
-    )
+    return queryset.order_by("-criado_em")
 
 
-def obter_historico_configuracao_por_id(pk):
-    return (
-        HistoricoConfiguracaoPerfuracao.objects
-        .select_related("empregado", "furo", "alterado_por", "configuracao")
-        .filter(pk=pk)
-        .first()
-    )
+def obter_historico_configuracao_por_id(pk, empresa=None):
+    queryset = _obter_queryset_base()
+    queryset = _filtrar_por_empresa(queryset, empresa, incluir_furo=True)
+
+    return queryset.filter(pk=pk).first()
 
 
-def obter_historico_anterior(historico):
+def obter_historico_anterior(historico, empresa=None):
     if not historico:
         return None
 
-    queryset = HistoricoConfiguracaoPerfuracao.objects.filter(
+    queryset = _obter_queryset_base().filter(
         empregado=historico.empregado,
         furo=historico.furo,
         criado_em__lt=historico.criado_em,
-    ).order_by("-criado_em")
-
-    return queryset.first()
-
-
-def obter_ultimo_historico_da_configuracao(configuracao):
-    return (
-        HistoricoConfiguracaoPerfuracao.objects
-        .filter(configuracao=configuracao)
-        .select_related("alterado_por", "empregado", "furo")
-        .order_by("-criado_em")
-        .first()
     )
+
+    queryset = _filtrar_por_empresa(queryset, empresa, incluir_furo=True)
+
+    return queryset.order_by("-criado_em").first()
+
+
+def obter_ultimo_historico_da_configuracao(configuracao, empresa=None):
+    queryset = _obter_queryset_base().filter(configuracao=configuracao)
+    queryset = _filtrar_por_empresa(
+        queryset,
+        empresa,
+        incluir_furo=False,
+        incluir_configuracao=True,
+    )
+
+    return queryset.order_by("-criado_em").first()

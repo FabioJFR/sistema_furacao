@@ -52,10 +52,17 @@
         </div>
 
         <div class="pt-2">
-            <button onclick="history.back()"
-                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                🔙 Voltar
-            </button>
+            {% if is_admin_user %}
+                <a href="{% url 'projetos:historico_empregado_admin_list' historico.empregado.pk %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
+                    🔙 Voltar
+                </a>
+            {% else %}
+                <a href="{% url 'projetos:historico_configuracao_list_empregado' %}"
+                   class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
+                    🔙 Voltar
+                </a>
+            {% endif %}
         </div>
     </div>
 

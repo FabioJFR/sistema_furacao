@@ -1,0 +1,128 @@
+/* plano_form.css */
+
+.messages {
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+}
+
+.message.success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: #bbf7d0;
+}
+
+.message.error {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: #fecaca;
+}
+
+.wrapper-form {
+    max-width: 1000px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    padding: 24px;
+}
+
+.section-title {
+    margin: 0 0 14px;
+    font-size: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-full {
+    grid-column: 1 / -1;
+}
+
+.field label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    font-size: 14px;
+}
+
+.field textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.errorlist {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--danger-text);
+    font-size: 13px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding-top: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+@media (max-width: 800px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field-full {
+        grid-column: auto;
+    }
+
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+}

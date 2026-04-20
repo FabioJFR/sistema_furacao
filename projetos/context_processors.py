@@ -1,3 +1,4 @@
+from plataforma.models import PerfilPlataforma
 from projetos.models import Empregados
 
 
@@ -8,15 +9,42 @@ def menu_context(request):
         return {
             "is_admin_user": False,
             "is_empregado_user": False,
+            "is_platform_admin": False,
+            "is_empresa_admin": False,
+            "is_platform_owner": False,
+            "perfil_plataforma": None,
             "empregado_menu_obj": None,
         }
 
-    is_admin_user = user.is_staff
+    perfil = PerfilPlataforma.objects.filter(
+        user=user,
+        ativo=True,
+    ).first()
+
+    perfil_ativo = perfil is not None
+
+    is_platform_owner = perfil_ativo and perfil.tipo_acesso == "platform_owner"
+    is_platform_admin = perfil_ativo and perfil.tipo_acesso in ["platform_owner", "platform_admin"]
+    is_empresa_admin = perfil_ativo and perfil.tipo_acesso in ["empresa_admin", "empresa_gestor"]
+
     empregado_menu_obj = Empregados.objects.filter(user=user).first()
-    is_empregado_user = empregado_menu_obj is not None and not is_admin_user
+
+    is_admin_user = user.is_staff or is_empresa_admin
+    is_empregado_user = (
+        (perfil_ativo and perfil.tipo_acesso == "empregado")
+        or (
+            empregado_menu_obj is not None
+            and not is_admin_user
+            and not is_platform_admin
+        )
+    )
 
     return {
         "is_admin_user": is_admin_user,
         "is_empregado_user": is_empregado_user,
+        "is_platform_admin": is_platform_admin,
+        "is_platform_owner": is_platform_owner,
+        "is_empresa_admin": is_empresa_admin,
+        "perfil_plataforma": perfil,
         "empregado_menu_obj": empregado_menu_obj,
     }

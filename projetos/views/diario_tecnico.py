@@ -1,12 +1,58 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+import logging
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
+
+from projetos.decorators import empregado_required
 from projetos.models import Empregados
 
+logger = logging.getLogger("core")
+
+# Multiempresa: o diário técnico deve ser mostrado apenas a empregados com empresa válida.
+
+def _obter_empregado_autenticado_diario(request):
+    logger.debug(
+        "A resolver empregado autenticado em diario_tecnico.py. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+
+    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    if not empregado:
+        logger.warning(
+            "Utilizador autenticado sem registo em Empregados em diario_tecnico.py. user_id=%s",
+            request.user.id,
+        )
+        messages.error(
+            request,
+            "A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        )
+        return None, redirect("projetos:redirect_after_login")
+
+    if not empregado.empresa_id:
+        logger.warning(
+            "Empregado sem empresa associada em diario_tecnico.py. user_id=%s, empregado_id=%s",
+            request.user.id,
+            empregado.id,
+        )
+        messages.error(request, "A tua conta não está associada a uma empresa. Contacta o administrador.")
+        return None, redirect("projetos:redirect_after_login")
+
+    return empregado, None
 
 @login_required
+@empregado_required
 def diario_tecnico(request):
-    empregado = Empregados.objects.filter(user=request.user).first()
+    logger.info(
+        "Entrada na view diario_tecnico. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+    empregado, resposta_erro = _obter_empregado_autenticado_diario(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view diario_tecnico. user_id=%s", request.user.id)
+        return resposta_erro
 
     secoes = [
         {
@@ -162,4 +208,11 @@ def diario_tecnico(request):
         "secoes": secoes,
         "referencias": referencias,
     }
+    logger.info(
+        "View diario_tecnico carregada com sucesso. user_id=%s, empregado_id=%s, total_secoes=%s, total_referencias=%s",
+        request.user.id,
+        empregado.id,
+        len(secoes),
+        len(referencias),
+    )
     return render(request, "projetos/diario_tecnico.html", context)

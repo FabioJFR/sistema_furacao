@@ -1,6 +1,6 @@
 # 🛠️ Sistema de Gestão de Diamond Drilling
 
-Sistema web desenvolvido em **Django** para gestão operacional de projetos de perfuração (diamond drilling), com foco em controlo de produção, materiais, equipamentos e análise de dados em tempo real.
+Sistema web desenvolvido em **Django** para gestão operacional de projetos de perfuração (**diamond drilling**), com foco em controlo de produção, materiais, equipamentos e análise de dados em tempo real.
 
 ---
 
@@ -9,13 +9,16 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 ### 📁 Projetos
 - Gestão completa de projetos
 - Localização geográfica
-- Visualização em mapa (Leaflet) e globo 3D (Cesium)
+- Visualização em **mapa (Leaflet)** e **globo 3D (Cesium)**
 
 ### 🕳️ Furos
 - Criação e gestão de furos
 - Associação a projetos
-- Dados técnicos (profundidade, inclinação, azimute, etc.)
-- Visualização 3D da trajetória (Plotly)
+- Dados técnicos:
+  - profundidade
+  - inclinação
+  - azimute
+- Visualização 3D da trajetória (**Plotly**)
 
 ### 📊 Produção
 - Registos diários por empregado
@@ -27,16 +30,20 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 - Área dedicada
 - Total de metros furados
 - Estatísticas acumuladas
-- Histórico de trabalho
+- Histórico completo
 
 ### ⚙️ Máquinas
 - Gestão de equipamentos
-- Estados (ativo, avariado, em reparação, parado)
+- Estados:
+  - ativo
+  - avariado
+  - em reparação
+  - parado
 - Associação a projetos
 
 ### 📦 Materiais & Stock
 - Controlo de stock
-- Stock mínimo
+- Definição de stock mínimo
 - Alertas automáticos
 
 ### 🔄 Movimentos de Material
@@ -45,8 +52,8 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 - Histórico completo
 
 ### 📈 Dashboard
-- Indicadores operacionais
-- Gráficos (Chart.js)
+- Indicadores operacionais em tempo real
+- Gráficos (**Chart.js**)
 - Produtividade por:
   - dia
   - empregado
@@ -55,8 +62,8 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 
 ### 🌍 Visualização Avançada
 - Mapa interativo
-- Globo 3D (Cesium)
-- Trajetória de furos em 3D
+- Globo 3D (**CesiumJS**)
+- Trajetória de furos em 3D (**Plotly**)
 
 ---
 
@@ -83,7 +90,7 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 - **Gráficos:** Chart.js
 - **Mapas:** Leaflet
 - **Globo 3D:** CesiumJS
-- **3D Furos:** Plotly
+- **Visualização 3D:** Plotly
 
 ---
 
@@ -91,32 +98,47 @@ Sistema web desenvolvido em **Django** para gestão operacional de projetos de p
 
 - Sistema de login
 - Registo com aprovação por administrador
-- Controlo de permissões (admin / empregado)
+- Controlo de permissões:
+  - Administrador
+  - Empregado
 
 ---
 
 ## ⚡ Objetivo
 
 Este sistema foi desenvolvido para:
-- melhorar o controlo operacional em campo
-- centralizar informação de perfuração
-- aumentar a rastreabilidade dos dados
-- facilitar análise de produtividade
-- reduzir erros e perda de informação
+
+- melhorar o controlo operacional em campo  
+- centralizar informação de perfuração  
+- aumentar a rastreabilidade dos dados  
+- facilitar análise de produtividade  
+- reduzir erros e perda de informação  
 
 ---
 
 ## 📌 Estado do Projeto
 
 🚧 Em desenvolvimento ativo  
-Versão atual: **v0.7.0-beta**
+
+👉 Versão atual: **v0.9.0-beta**
+
+---
+
+## 🧭 Roadmap
+
+Próximos passos:
+
+- Integração com dispositivos de medição (ex: sondas / sensores)
+- Melhorias nos dashboards e análise de dados
+- Sistema de notificações e alertas avançados
+- Otimização para ambiente de produção
 
 ---
 
 ## 🧑‍💻 Autor
 
 Desenvolvido por **Fabio Revez**  
-Projeto focado em integração entre tecnologia e operações de perfuração.
+Focado na integração entre **tecnologia e operações de perfuração**
 
 ---
 

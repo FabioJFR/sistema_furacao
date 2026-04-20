@@ -37,7 +37,13 @@ class RegistoDiarioEmpregado(models.Model):
         on_delete=models.CASCADE,
         related_name="registos_diarios"
     )
-
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="registos_diarios"
+    )
     projeto = models.ForeignKey(
         Projeto,
         on_delete=models.SET_NULL,
@@ -124,6 +130,55 @@ class RegistoDiarioEmpregado(models.Model):
     def clean(self):
         super().clean()
 
+        if getattr(self, "empregado_id", None):
+            empregado = getattr(self, "empregado", None)
+            if not empregado or not getattr(empregado, "empresa_id", None):
+                raise ValidationError("O empregado não está associado a uma empresa.")
+
+        if self.projeto and not self.projeto.empresa_id:
+            raise ValidationError({
+                "projeto": "O projeto tem de estar associado a uma empresa."
+            })
+
+        if self.furo and not self.furo.empresa_id:
+            raise ValidationError({
+                "furo": "O furo tem de estar associado a uma empresa."
+            })
+
+        if self.empregado and self.empregado.empresa_id:
+            if self.empresa_id and self.empresa_id != self.empregado.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa do registo deve ser a mesma do empregado."
+                })
+        if self.projeto and self.empregado and self.empregado.empresa_id:
+            if self.projeto.empresa_id != self.empregado.empresa_id:
+                raise ValidationError({
+                    "projeto": "O projeto selecionado não pertence à empresa do empregado."
+                })
+
+        if self.furo and self.empregado and self.empregado.empresa_id:
+            if self.furo.empresa_id != self.empregado.empresa_id:
+                raise ValidationError({
+                    "furo": "O furo selecionado não pertence à empresa do empregado."
+                })
+
+        if self.projeto and self.furo:
+            if self.projeto.empresa_id and self.furo.empresa_id:
+                if self.projeto.empresa_id != self.furo.empresa_id:
+                    raise ValidationError({
+                        "furo": "O furo e o projeto têm de pertencer à mesma empresa."
+                    })
+
+        if self.projeto and self.empresa_id and self.projeto.empresa_id != self.empresa_id:
+            raise ValidationError({
+                "projeto": "O projeto selecionado não pertence à empresa definida no registo."
+            })
+
+        if self.furo and self.empresa_id and self.furo.empresa_id != self.empresa_id:
+            raise ValidationError({
+                "furo": "O furo selecionado não pertence à empresa definida no registo."
+            })
+
         if self.furo and self.projeto and self.furo.projeto_id != self.projeto.id:
             raise ValidationError({
                 "furo": "O furo selecionado não pertence ao projeto escolhido."
@@ -205,6 +260,15 @@ class RegistoDiarioEmpregado(models.Model):
         return max(round(horas, 2), 0.0)
 
     def save(self, *args, **kwargs):
+        if self.empregado_id and self.empregado and self.empregado.empresa_id:
+            self.empresa_id = self.empregado.empresa_id
+        elif self.projeto_id and self.projeto and self.projeto.empresa_id:
+            self.empresa_id = self.projeto.empresa_id
+        elif self.furo_id and self.furo and self.furo.empresa_id:
+            self.empresa_id = self.furo.empresa_id
+
         self.horas_trabalhadas = self.calcular_horas_trabalhadas()
         self.horas_trabalhadas_furo = timedelta(hours=self.horas_trabalhadas or 0.0)
+
+        self.full_clean()
         super().save(*args, **kwargs)

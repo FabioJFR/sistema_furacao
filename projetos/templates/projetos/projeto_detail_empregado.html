@@ -1,0 +1,88 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ projeto.nome }}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">📁 {{ projeto.nome }}</h1>
+                <p class="text-gray-600 mt-2">
+                    <strong>{% trans "Cliente" %}:</strong> {{ projeto.cliente|default:"-" }}
+                </p>
+                <p class="text-gray-600">
+                    <strong>{% trans "Localização" %}:</strong>
+                    {{ projeto.cidade|default:"-" }}{% if projeto.pais %}, {{ projeto.pais }}{% endif %}
+                </p>
+                <p class="text-gray-600">
+                    <strong>{% trans "Estado" %}:</strong> {{ projeto.get_status_display|default:"-" }}
+                </p>
+            </div>
+
+            <div class="flex gap-2 flex-wrap">
+                <a href="{% url 'projetos:meus_projetos_empregado' %}" class="btn btn-primary">⬅ {% trans "Meus Projetos" %}</a>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-warning">🕳 {% trans "Meus Furos" %}</a>
+                <a href="{% url 'projetos:area_empregado' %}" class="btn btn-success">🏠 {% trans "Painel" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Furos no Projeto" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ furos|length }}</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Metros Registados" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ total_metros }}</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Horas Registadas" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ total_horas }}</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+            <div class="text-sm text-gray-500">{% trans "Média m/h" %}</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ media_metros_hora }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">🕳 {% trans "Furos do Projeto" %}</h2>
+        </div>
+
+        {% if furos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {% for furo in furos %}
+                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ furo.nome }}</h3>
+
+                        <div class="space-y-2 text-sm text-gray-700 mb-4">
+                            <p><strong>{% trans "Estado" %}:</strong> {{ furo.get_estado_display|default:furo.estado|default:"-" }}</p>
+                            <p><strong>{% trans "Profundidade Atual" %}:</strong> {{ furo.profundidade_atual|default:"0" }} m</p>
+                            <p><strong>{% trans "Inclinação Atual" %}:</strong> {{ furo.inclinacao_real_atual|default:"-" }}</p>
+                            <p><strong>{% trans "Azimute Atual" %}:</strong> {{ furo.azimute_real_atual|default:"-" }}</p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-primary">
+                                👁️ {% trans "Detalhes" %}
+                            </a>
+                            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-warning">
+                                🌐 {% trans "Ver 3D" %}
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Não existem furos visíveis neste projeto." %}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Furação</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #111827; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .btn { padding: 12px 18px; border-radius: 10px; text-decoration: none; font-weight: 700; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-light { background: white; color: #111827; border: 1px solid #d1d5db; }
+        .hero { padding: 60px 0 40px; }
+        .hero h1 { font-size: 48px; margin-bottom: 16px; }
+        .hero p { font-size: 18px; color: #4b5563; max-width: 760px; }
+        .actions { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+        .card { background: white; border-radius: 16px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .muted { color: #6b7280; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 34px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <strong>Sistema de Furação</strong>
+            <div>
+                <a href="/planos/" class="btn btn-light">Ver planos</a>
+                <a href="/login/" class="btn btn-primary">Entrar</a>
+            </div>
+        </div>
+
+        <section class="hero">
+            <h1>Plataforma profissional para gestão de furação diamantada</h1>
+            <p>
+                Gere projetos, furos, empregados, materiais, medições e operação diária
+                numa plataforma preparada para crescer com IA, sensores e relatórios inteligentes.
+            </p>
+            <div class="actions">
+                <a href="/registo/" class="btn btn-primary">Criar conta</a>
+                <a href="/planos/" class="btn btn-light">Comparar planos</a>
+            </div>
+        </section>
+
+        <section class="grid">
+            <div class="card">
+                <h3>Operação centralizada</h3>
+                <p class="muted">Projetos, furos, materiais, máquinas e dashboards no mesmo sistema.</p>
+            </div>
+            <div class="card">
+                <h3>Multiempresa</h3>
+                <p class="muted">Cada cliente vê apenas os seus dados, com isolamento total por empresa.</p>
+            </div>
+            <div class="card">
+                <h3>Preparado para crescer</h3>
+                <p class="muted">Base pronta para integração com dispositivos, IA e relatórios inteligentes.</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

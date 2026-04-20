@@ -1,0 +1,78 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}{{ empresa.nome }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/empresa_detail.css' %}">
+{% endblock %}
+
+{% block page_title %}{{ empresa.nome }}{% endblock %}
+
+{% block page_description %}
+Detalhe da empresa, métricas principais e ações administrativas.
+{% endblock %}
+
+{% block page_actions %}
+<a href="/plataforma/dashboard/" class="btn btn-light">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="empresa-detail-page">
+    <div class="empresa-grid-metricas">
+        <div class="empresa-card empresa-metrica-card">
+            <div class="empresa-card-title">Projetos</div>
+            <div class="empresa-card-value">{{ total_projetos }}</div>
+        </div>
+        <div class="empresa-card empresa-metrica-card">
+            <div class="empresa-card-title">Furos</div>
+            <div class="empresa-card-value">{{ total_furos }}</div>
+        </div>
+        <div class="empresa-card empresa-metrica-card">
+            <div class="empresa-card-title">Empregados</div>
+            <div class="empresa-card-value">{{ total_empregados }}</div>
+        </div>
+    </div>
+
+    <div class="empresa-section">
+        <h2>Informação da Empresa</h2>
+
+        <div class="empresa-row"><strong>Estado:</strong> {{ empresa.get_status_display }}</div>
+        <div class="empresa-row"><strong>Ativo:</strong> {% if empresa.ativo %}Sim{% else %}Não{% endif %}</div>
+        <div class="empresa-row"><strong>Email:</strong> {{ empresa.email }}</div>
+        <div class="empresa-row"><strong>Telefone:</strong> {{ empresa.telefone }}</div>
+        <div class="empresa-row"><strong>Localização:</strong> {{ empresa.cidade }}, {{ empresa.pais }}</div>
+
+        <div class="empresa-row">
+            <strong>Plano:</strong>
+            {% if empresa.plano %}
+                {{ empresa.get_plano_display }}
+            {% else %}
+                Sem plano
+            {% endif %}
+        </div>
+
+        <div class="empresa-row"><strong>Data início:</strong> {{ empresa.data_inicio }}</div>
+        <div class="empresa-row"><strong>Data fim:</strong> {{ empresa.data_fim }}</div>
+
+        <div class="empresa-actions">
+            <a href="{% url 'plataforma:empresa_alterar_plano' empresa.id %}" class="btn btn-primary">
+                Alterar plano
+            </a>
+
+            <form method="post" action="{% url 'plataforma:empresa_toggle_ativa' empresa.id %}" class="empresa-action-form">
+                {% csrf_token %}
+                {% if empresa.ativo %}
+                    <button type="submit" class="btn btn-danger">
+                        Suspender
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn btn-danger">
+                        Reativar
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

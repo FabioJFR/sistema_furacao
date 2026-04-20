@@ -1,0 +1,33 @@
+#id_nome_empresa,
+    #id_nif,
+    #id_email_empresa,
+    #id_telefone,
+    #id_morada,
+    #id_pais,
+    #id_cidade,
+    #id_observacoes,
+    #id_nome_admin,
+    #id_username_admin,
+    #id_email_admin,
+    #id_password_admin,
+    #id_tipo_acesso,
+    #id_plano,
+    #id_estado_empresa,
+    #id_criar_subscricao_inicial,
+    #id_valor_subscricao,
+    #id_criar_pagamento_inicial,
+    #id_valor_pagamento {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+    }
+
+    @media (max-width: 768px) {
+        form[method="post"] {
+            grid-template-columns: 1fr !important;
+        }
+    }

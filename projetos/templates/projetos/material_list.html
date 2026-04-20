@@ -21,6 +21,46 @@
         </a>
     </div>
 
+    <div style="
+        background:white;
+        padding:18px;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.06);
+        margin-bottom:20px;
+    ">
+        <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+            <div style="flex:1; min-width:260px;">
+                <label style="display:block; font-weight:bold; margin-bottom:6px; color:#2c3e50;">Nome do Material</label>
+                <input type="text"
+                       name="nome"
+                       value="{{ filtros.nome }}"
+                       placeholder="Ex.: tubo, broca, haste..."
+                       style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="submit" style="
+                    background-color:#2980b9;
+                    color:white;
+                    padding:10px 18px;
+                    border:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                    cursor:pointer;
+                ">Filtrar</button>
+
+                <a href="{% url 'projetos:material_list' %}" style="
+                    background-color:#f39c12;
+                    color:white;
+                    padding:10px 18px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    font-weight:bold;
+                ">Limpar</a>
+            </div>
+        </form>
+    </div>
+
     {% if materiais %}
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
         {% for material in materiais %}
@@ -38,13 +78,6 @@
 
                 <p><strong>Projeto:</strong> {{ material.projeto.nome }}</p>
 
-                <p><strong>Furo:</strong>
-                    {% if material.furo %}
-                        {{ material.furo.nome }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </p>
 
                 <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
                 <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>

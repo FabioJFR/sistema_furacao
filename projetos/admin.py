@@ -1,11 +1,13 @@
 from django.contrib import admin
 from .models import Projeto, Furo, Empregados, EmpregadoProjeto, EmpregadoFicheiro, Maquina, Material
 
+
 @admin.register(Projeto)
 class ProjetoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'cliente', 'status', 'data_inicio')
+    list_display = ('nome', 'cliente', 'empresa', 'status', 'data_inicio_proj')
     search_fields = ('nome', 'cliente', 'cidade', 'pais')
-    list_filter = ('status', 'pais')
+    list_filter = ('status', 'pais', 'empresa')
+
 
 @admin.register(Furo)
 class FuroAdmin(admin.ModelAdmin):

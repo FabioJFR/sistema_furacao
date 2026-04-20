@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.exceptions import ValidationError
 from .projeto import Projeto
 from .furo import Furo
 
@@ -40,6 +40,10 @@ class Empregados(models.Model):
         related_name="empregado",
     )
 
+    # TODO multiempresa:
+    # - idealmente migrar esta relação para usar apenas o model intermédio EmpregadoFuro
+    # - validar associações ManyToMany por empresa via signal/form/service
+    # - evitar que um empregado fique ligado diretamente a furos de outra empresa
     furos = models.ManyToManyField(
         Furo,
         blank=True,
@@ -77,6 +81,14 @@ class Empregados(models.Model):
         blank=True,
         null=True,
     )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="empregados"
+    )
+    
 
     salario = models.FloatField(default=0.0)
     horas_diarias = models.IntegerField(default=0, blank=True)
@@ -121,6 +133,35 @@ class Empregados(models.Model):
         return Projeto.objects.filter(
             empregado_projetos__empregado=self,
         ).distinct()
+    
+    def clean(self):
+        super().clean()
+
+        # TODO futuro:
+        # - tornar empresa obrigatória (remover null/blank após migração de dados antigos)
+        # - validar unicidade adicional por email/NIF se a regra de negócio exigir
+        # - avaliar auditoria de aprovação/alteração de conta
+
+        if not self.empresa_id:
+            raise ValidationError({
+                "empresa": "O empregado deve estar associado a uma empresa."
+            })
+
+        if self.user and hasattr(self.user, "empregado") and self.user.empregado.pk != self.pk:
+            raise ValidationError({
+                "user": "Este utilizador já está associado a outro empregado."
+            })
+
+        if self.pk and self.empresa_id:
+            furos_outra_empresa = self.furos.exclude(empresa_id=self.empresa_id)
+            if furos_outra_empresa.exists():
+                raise ValidationError({
+                    "furos": "Existem furos associados que não pertencem à mesma empresa do empregado."
+                })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 class EmpregadoProjeto(models.Model):
@@ -133,6 +174,13 @@ class EmpregadoProjeto(models.Model):
         Projeto,
         on_delete=models.CASCADE,
         related_name="empregado_projetos",
+    )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="empregado_projetos"
     )
 
     data_inicio = models.DateField(null=True, blank=True)
@@ -147,6 +195,55 @@ class EmpregadoProjeto(models.Model):
 
     def __str__(self):
         return f"{self.empregado.nome} - {self.projeto.nome}"
+    
+    def clean(self):
+        super().clean()
+
+        if self.empregado and not self.empregado.empresa_id:
+            raise ValidationError({
+                "empregado": "O empregado deve estar associado a uma empresa."
+            })
+
+        if self.projeto and not self.projeto.empresa_id:
+            raise ValidationError({
+                "projeto": "O projeto deve estar associado a uma empresa."
+            })
+
+        if self.empregado and self.projeto:
+            if self.empregado.empresa_id and self.projeto.empresa_id:
+                if self.empregado.empresa_id != self.projeto.empresa_id:
+                    raise ValidationError({
+                        "projeto": "O empregado e o projeto têm de pertencer à mesma empresa."
+                    })
+
+        if self.empresa_id:
+            if self.empregado and self.empregado.empresa_id and self.empresa_id != self.empregado.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa da ligação deve ser a mesma do empregado."
+                })
+
+            if self.projeto and self.projeto.empresa_id and self.empresa_id != self.projeto.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa da ligação deve ser a mesma do empregado."
+                })
+
+        if self.data_inicio and self.data_fim and self.data_fim < self.data_inicio:
+            raise ValidationError({
+                "data_fim": "A data de fim não pode ser anterior à data de início."
+            })
+
+    # TODO futuro:
+    # - guardar motivo de entrada/saída do projeto
+    # - suportar histórico mais detalhado de estados da ligação
+    # - auditar quem criou/encerrou a ligação
+    def save(self, *args, **kwargs):
+        if self.empregado and self.empregado.empresa_id:
+            self.empresa_id = self.empregado.empresa_id
+        elif self.projeto and self.projeto.empresa_id:
+            self.empresa_id = self.projeto.empresa_id
+
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 class EmpregadoFicheiro(models.Model):
@@ -164,6 +261,13 @@ class EmpregadoFicheiro(models.Model):
         on_delete=models.CASCADE,
         related_name="ficheiros",
     )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="ficheiros"
+    )
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default="outro")
     titulo = models.CharField(max_length=200, blank=True, default="")
     ficheiro = models.FileField(upload_to="empregados/ficheiros/")
@@ -177,3 +281,33 @@ class EmpregadoFicheiro(models.Model):
 
     def __str__(self):
         return f"{self.empregado.nome} - {self.get_tipo_display()}"
+    
+    def clean(self):
+        super().clean()
+
+        # TODO futuro:
+        # - validar formato/tamanho do ficheiro
+        # - categorizar documentos obrigatórios por função/tipo de empregado
+        # - guardar auditoria de upload/alteração
+
+        if not self.empregado.empresa_id:
+            raise ValidationError({
+                "empregado": "O empregado deve estar associado a uma empresa."
+            })
+
+        if self.empregado and self.empregado.empresa_id:
+            if self.empresa_id and self.empresa_id != self.empregado.empresa_id:
+                raise ValidationError({
+                    "empresa": "A empresa do ficheiro deve ser a mesma do empregado."
+                })
+
+    # TODO futuro:
+    # - gerar preview quando aplicável
+    # - impedir duplicados exatos por hash/nome se necessário
+    # - mover gestão documental para módulo próprio se crescer muito
+    def save(self, *args, **kwargs):
+        if self.empregado and self.empregado.empresa_id:
+            self.empresa_id = self.empregado.empresa_id
+
+        self.full_clean()
+        super().save(*args, **kwargs)

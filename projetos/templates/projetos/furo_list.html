@@ -2,44 +2,67 @@
 {% block title %}Dashboard de Furos{% endblock %}
 
 {% block content %}
-<div style="max-width:1000px; margin:40px auto; padding:20px;">
+<section class="max-w-7xl mx-auto p-6">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-        <h1 style="margin:0;">Dashboard de Furos</h1>
-        <a href="{% url 'projetos:furo_create' %}" style="display:flex; align-items:center; gap:5px; background:#27ae60; color:white; padding:10px 15px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
-            ➕ Criar Novo Furo
+    <!-- HEADER -->
+    <div class="flex justify-between items-center flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">🕳 Dashboard de Furos</h1>
+            <p class="text-gray-600 mt-1">Visão geral de todos os furos registados.</p>
+        </div>
+
+        <a href="{% url 'projetos:furo_create' %}" 
+            class="btn btn-success">
+                ➕ Criar Novo Furo
         </a>
     </div>
 
     {% if furos %}
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {% for furo in furos %}
-        <div style="padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2); background:#2c3e50; color:white; display:flex; flex-direction:column; justify-content:space-between; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
-            
+        <div class="bg-white rounded-xl shadow border border-gray-200 p-5 flex flex-col justify-between hover:shadow-lg transition">
+
+            <!-- INFO -->
             <div>
-                <h3 style="margin-top:0;">{{ furo.nome }}</h3>
-                <p><strong>Estado:</strong> {{ furo.get_estado_display }}</p>
-                <p><strong>Inclinação:</strong> {{ furo.inclinacao }}°</p>
-                <p><strong>Azimute:</strong> {{ furo.azimute }}°</p>
-                <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
-                <p><strong>Profundidade Alvo:</strong> {{ furo.profundidade_alvo }} m</p>
-                <p><strong>Sistema Coord.:</strong> {{ furo.get_sistema_coordenadas_display }}</p>
-                <p><strong>Latitude:</strong> {{ furo.latitude }}</p>
-                <p><strong>Longitude:</strong> {{ furo.longitude }}</p>
-                <p><strong>Altitude:</strong> {{ furo.altitude }}</p>
+                <div class="flex justify-between items-start mb-3">
+                    <h2 class="text-xl font-bold text-gray-800">{{ furo.nome }}</h2>
+
+                    <span class="text-xs px-3 py-1 rounded-full 
+                        {% if furo.estado == 'ativo' %}
+                            bg-green-100 text-green-700
+                        {% elif furo.estado == 'pausado' %}
+                            bg-yellow-100 text-yellow-700
+                        {% else %}
+                            bg-gray-200 text-gray-700
+                        {% endif %}
+                    ">
+                        {{ furo.get_estado_display }}
+                    </span>
+                </div>
+
+                <div class="space-y-1 text-sm text-gray-700">
+                    <p><strong>Inclinação:</strong> {{ furo.inclinacao }}°</p>
+                    <p><strong>Azimute:</strong> {{ furo.azimute }}°</p>
+                    <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
+                    <p><strong>Profundidade Alvo:</strong> {{ furo.profundidade_alvo }} m</p>
+                    <p><strong>Coord.:</strong> {{ furo.get_sistema_coordenadas_display }}</p>
+                </div>
+
+                <div class="mt-3 text-xs text-gray-500">
+                    <p>Lat: {{ furo.latitude }}</p>
+                    <p>Lon: {{ furo.longitude }}</p>
+                    <p>Alt: {{ furo.altitude }}</p>
+                </div>
             </div>
 
-            <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                <a href="{% url 'projetos:furo_detail' furo.id %}" 
-                   style="flex:1; min-width:110px; text-align:center; background:#2980b9; color:white; padding:8px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
-                   onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
-                   ℹ️ Detalhes
+            <!-- ACTIONS -->
+            <div class="flex gap-2 mt-4">
+                <a href="{% url 'projetos:furo_detail' furo.id %}" class="btn btn-primary flex-1 text-center">
+                    ℹ️ Detalhes
                 </a>
 
-                <a href="{% url 'projetos:medicao_create' furo.id %}" 
-                   style="flex:1; min-width:110px; text-align:center; background:#8e44ad; color:white; padding:8px 0; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
-                   onmouseover="this.style.background='#9b59b6'" onmouseout="this.style.background='#8e44ad'">
-                   ➕ Medição
+                <a href="{% url 'projetos:medicao_create' furo.id %}" class="btn btn-warning flex-1 text-center">
+                    ➕ Medição
                 </a>
             </div>
 
@@ -47,8 +70,10 @@
         {% endfor %}
     </div>
     {% else %}
-    <p style="color:#34495e; font-weight:bold; text-align:center; margin-top:50px;">Nenhum furo registrado ainda.</p>
+    <div class="bg-white rounded-xl shadow p-8 text-center text-gray-600">
+        Nenhum furo registado ainda.
+    </div>
     {% endif %}
 
-</div>
+</section>
 {% endblock %}

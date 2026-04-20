@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plataforma{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/plataforma/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <div class="nav-left">
+                <a href="/plataforma/dashboard/" class="brand">⛏ Plataforma</a>
+
+                <div class="nav-item">
+                    <button type="button" class="nav-toggle">🏢 Empresas</button>
+                    <div class="dropdown">
+                        <a href="/plataforma/onboarding/empresa/">Criar nova empresa</a>
+                        <a href="/plataforma/">Empresas recentes</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <button type="button" class="nav-toggle">💳 Comercial</button>
+                    <div class="dropdown">
+                        <a href="/plataforma/planos/">Gerir planos</a>
+                        <a href="/plataforma/subscricoes/">Gerir subscrições</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <button type="button" class="nav-toggle">📡 Dispositivos</button>
+                    <div class="dropdown">
+                        <a href="/plataforma/dispositivos/">Dashboard de dispositivos</a>
+                        <a href="/plataforma/dispositivos/lista/">Lista de dispositivos</a>
+                        <a href="/plataforma/dispositivos/sessoes/">Sessões</a>
+                        <a href="/plataforma/dispositivos/leituras-brutas/">Leituras brutas</a>
+                        <a href="/plataforma/dispositivos/shots/">Survey shots</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <button type="button" class="nav-toggle">🛠 Sistema</button>
+                    <div class="dropdown">
+                        <a href="/admin/">Admin Django</a>
+                        <a href="/logout/">Terminar sessão</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-item nav-user-item">
+                    <button type="button" class="user-box nav-toggle">
+                        <div>
+                            <span class="user-label">Utilizador online</span>
+                            <span class="user-name">{{ request.user.username|default:user.username|default:"Utilizador" }}</span>
+                        </div>
+                    </button>
+                    <div class="dropdown dropdown-right">
+                        <a href="/logout/">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+        <div class="topbar">
+            <div>
+                <h1>{% block page_title %}Plataforma{% endblock %}</h1>
+                <p>{% block page_description %}Área de gestão da plataforma.{% endblock %}</p>
+            </div>
+            <div class="topbar-actions">
+                {% block page_actions %}{% endblock %}
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

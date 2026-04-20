@@ -1,0 +1,157 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard da Plataforma{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/dashboard.css' %}">
+{% endblock %}
+
+
+{% block page_title %}Dashboard da Plataforma{% endblock %}
+
+{% block page_description %}
+    Visão global da plataforma, empresas registadas e estado atual do ecossistema.
+{% endblock %}
+
+{% block page_actions %}
+    <a href="/plataforma/onboarding/empresa/" class="btn btn-primary">Criar nova empresa</a>
+    <a href="/plataforma/planos/" class="btn btn-light">Gerir planos</a>
+    <a href="/plataforma/dispositivos/" class="btn btn-light">Dispositivos</a>
+{% endblock %}
+
+{% block content %}
+    <div class="grid-cards">
+        <div class="card">
+            <div class="metric-label">Total de empresas</div>
+            <div class="metric-value">{{ total_empresas }}</div>
+            <div class="metric-note">Base atual da plataforma.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Empresas ativas</div>
+            <div class="metric-value">{{ empresas_ativas }}</div>
+            <div class="metric-note">Clientes em operação normal.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Empresas em teste</div>
+            <div class="metric-value">{{ empresas_teste }}</div>
+            <div class="metric-note">Contas em fase de onboarding ou validação.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Empresas suspensas</div>
+            <div class="metric-value">{{ empresas_suspensas }}</div>
+            <div class="metric-note">Contas temporariamente limitadas.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Empresas canceladas</div>
+            <div class="metric-value">{{ empresas_canceladas }}</div>
+            <div class="metric-note">Histórico de contas encerradas.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Planos ativos</div>
+            <div class="metric-value">{{ planos_ativos|default:0 }}</div>
+            <div class="metric-note">Planos comerciais disponíveis para subscrição.</div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <div class="card">
+            <div class="section-title">
+                <div>
+                    <h2>Empresas recentes</h2>
+                    <p>Últimas empresas registadas na plataforma.</p>
+                </div>
+            </div>
+
+            {% if empresas %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Plano</th>
+                                <th>Estado</th>
+                                <th>Ativa</th>
+                                <th>Criada em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresas %}
+                                <tr>
+                                    <td>
+                                        <span class="empresa-nome">{{ empresa.nome }}</span>
+                                        {% if empresa.email %}
+                                            <span class="empresa-meta">{{ empresa.email }}</span>
+                                        {% elif empresa.cidade or empresa.pais %}
+                                            <span class="empresa-meta">{{ empresa.cidade }}{% if empresa.cidade and empresa.pais %}, {% endif %}{{ empresa.pais }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if empresa.plano %}
+                                            {{ empresa.plano.nome }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ empresa.status }}">{{ empresa.get_status_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if empresa.ativo %}
+                                            Sim
+                                        {% else %}
+                                            Não
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ empresa.criado_em|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <div class="acoes">
+                                            <a href="/plataforma/empresa/{{ empresa.pk }}/" class="mini-btn">Ver</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty">
+                    Ainda não existem empresas registadas na plataforma.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="section-title">
+                <div>
+                    <h2>Ações rápidas</h2>
+                    <p>Atalhos para gestão inicial da plataforma.</p>
+                </div>
+            </div>
+
+            <div class="panel-list">
+                <a href="/plataforma/onboarding/empresa/" class="quick-link">
+                    <strong>Onboarding de empresa</strong>
+                    <span>Criar nova empresa e respetivo administrador inicial.</span>
+                </a>
+                <a href="/plataforma/subscricoes/" class="quick-link">
+                    <strong>Subscrições</strong>
+                    <span>Gerir subscrições das empresas</span>
+                </a>
+                <a href="/plataforma/planos/" class="quick-link">
+                    <strong>Gerir planos</strong>
+                    <span>Criar, editar e ativar planos comerciais da plataforma.</span>
+                </a>
+                <a href="/plataforma/dispositivos/" class="quick-link">
+                    <strong>Dispositivos</strong>
+                    <span>Aceder ao centro de monitorização e testes dos aparelhos.</span>
+                </a>
+                <a href="/admin/" class="quick-link">
+                    <strong>Admin Django</strong>
+                    <span>Gerir modelos, dados internos e operações técnicas.</span>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

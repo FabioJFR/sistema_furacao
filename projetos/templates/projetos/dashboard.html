@@ -323,6 +323,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Cesium.js"></script>
+<script>
+    const projetoDetailPlaceholder = "00000000-0000-0000-0000-000000000000";
+    const projetoDetailBaseUrl = "{% url 'projetos:projeto_detail' '00000000-0000-0000-0000-000000000000' %}";
+</script>
 
 <script>
 const projetos = JSON.parse(document.getElementById('projetos-data').textContent || "[]");
@@ -437,7 +441,7 @@ projetos.forEach(p => {
     });
 
     circleMarker.on("dblclick", function () {
-        window.location.href = `/projetos/${p.id}/`;
+        window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id));
     });
 
     projetosComPino.push({
@@ -520,7 +524,7 @@ nextBtn.addEventListener("click", () => {
 abrirBtn.addEventListener("click", () => {
     if (projetosComPino.length === 0) return;
     const p = projetosComPino[projetoIndex];
-    window.location.href = `/projetos/${p.id}/`;
+    window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id));
 });
 
 alternarBtn.addEventListener("click", () => {
@@ -547,7 +551,7 @@ viewer.selectedEntityChanged.addEventListener(function(entity) {
 viewer.screenSpaceEventHandler.setInputAction(function(click) {
     const pickedObject = viewer.scene.pick(click.position);
     if (Cesium.defined(pickedObject) && pickedObject.id && pickedObject.id.projetoId) {
-        window.location.href = `/projetos/${pickedObject.id.projetoId}/`;
+        window.location.href = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(pickedObject.id.projetoId));
     }
 }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 

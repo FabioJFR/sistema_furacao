@@ -1,309 +1,231 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Sistema de Perfuração{% endblock %}</title>
+    <title>{% block title %}{% trans "Sistema de Perfuração" %}{% endblock %}</title>
 
     <link rel="shortcut icon" type="image/png" href="{% static 'img/sistema_furacao_logo.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/cesium@1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/projeto/base.css' %}">
 
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3f4f6;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: #1f2937;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            color: white;
-            z-index: 3000;
-            box-sizing: border-box;
-            position: fixed;
-        }
-        .menu-toggle {
-            display: none;
-            font-size: 22px;
-            cursor: pointer;
-        }
-
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.25rem;
-            gap: 10px;
-            text-decoration: none;
-            color: white;
-        }
-
-        .navbar-logo img {
-            width: 34px;
-            height: 34px;
-            object-fit: contain;
-        }
-
-        .layout {
-            display: flex;
-            margin-top: 60px;
-        }
-
-        .sidebar {
-            width: 240px;
-            height: calc(100vh - 60px);
-            background: #1f2937;
-            color: white;
-            padding: 20px;
-            position: fixed;
-            top: 60px;
-            left: 0;
-            box-sizing: border-box;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: #6b7280 #1f2937;
-        }
-
-        .sidebar-section-title {
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #9ca3af;
-            margin: 18px 0 10px 10px;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #d1d5db;
-            padding: 10px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            margin-bottom: 8px;
-            transition: 0.2s;
-            font-weight: 600;
-        }
-
-        .sidebar a:hover {
-            background: #374151;
-            color: white;
-        }
-
-        .sidebar::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: #1f2937;
-            border-radius: 10px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 10px;
-            border: 2px solid #1f2937;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
-
-        .content-com-sidebar {
-            margin-left: 240px;
-            padding: 20px;
-            width: calc(100% - 240px);
-            box-sizing: border-box;
-        }
-
-        .content-sem-sidebar {
-            margin-left: 0;
-            padding: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-
-        .btn-success { background: #16a34a; color: white; }
-        .btn-success:hover { background: #15803d; }
-
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover { background: #d97706; }
-
-        .btn-danger { background: #dc2626; color: white; }
-        .btn-danger:hover { background: #b91c1c; }
-
-        @media (max-width: 1024px) {
-            .menu-toggle {
-                display: block;
-                color: white;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 60px;
-                left: -260px;
-                width: 240px;
-                height: calc(100vh - 60px);
-                transition: left 0.3s ease;
-                z-index: 2000;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .layout {
-                flex-direction: column;
-            }
-
-            .content-com-sidebar {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
+        
     </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
-    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
-    <a href="
+    <div class="navbar-inner">
+        <div class="nav-left">
+            <button
+                type="button"
+                class="menu-toggle"
+                aria-label="{% trans 'Abrir menu principal' %}"
+                aria-controls="topNavMenu"
+                aria-expanded="false"
+                onclick="toggleMenu()"
+            >
+                ☰
+            </button>
+
+            <a href="{% if user.is_authenticated %}{% if is_platform_admin %}{% url 'plataforma:dashboard' %}{% elif is_admin_user %}{% url 'projetos:dashboard' %}{% elif is_empregado_user %}{% url 'projetos:area_empregado' %}{% else %}{% url 'projetos:redirect_after_login' %}{% endif %}{% else %}{% url 'login' %}{% endif %}" class="navbar-logo">
+                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo">
+                <span>{% trans "Sistema Furação" %}</span>
+            </a>
+        </div>
+
         {% if user.is_authenticated %}
-            {% if user.is_staff %}
-                {% url 'projetos:dashboard' %}
-            {% else %}
-                {% url 'projetos:area_empregado' %}
-            {% endif %}
-        {% else %}
-            {% url 'login' %}
-        {% endif %}
-    " class="navbar-logo">
-        <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo">
-        <span>Sistema Furação</span>
-    </a>
-
-    {% if user.is_authenticated %}
-        <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:14px; color:#d1d5db;">{{ user.username }}</span>
-            <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
-        </div>
-    {% endif %}
-</div>
-
-<div class="layout">
-
-    {% if user.is_authenticated %}
-        <div class="sidebar">
-
-            {% if user.is_staff %}
-                <div class="sidebar-section-title">Administração</div>
-
-                <a href="{% url 'projetos:dashboard' %}">🏠 Dashboard</a>
-                
-                <a href="{% url 'projetos:graficos_dashboard' %}">📊 Gráficos</a>
-                <a href="{% url 'projetos:projeto_list' %}">📁 Projetos</a>
-                <a href="{% url 'projetos:empregado_list' %}">👷 Empregados</a>
-                <a href="{% url 'projetos:maquina_list' %}">⚙️ Máquinas</a>
-                <a href="{% url 'projetos:furo_list' %}">🕳 Furos</a>
-                <a href="{% url 'projetos:medicao_list' %}">📊 Medições</a>
-                <a href="{% url 'projetos:material_list' %}">📦 Materiais</a>
-                <a href="{% url 'projetos:registos_admin_list' %}">📈 Produção</a>
-                <a href="{% url 'projetos:levantamento_material_admin_list' %}">📦 Levantamentos</a>
-                <a href="{% url 'projetos:devolucao_material_admin_list' %}">↩️ Devoluções</a>
-                <a href="{% url 'projetos:empregado_pendentes' %}">📝 Empregados Pendentes</a>
-
-            {% else %}
-                <div class="sidebar-section-title">Minha Área</div>
-
-                <a href="{% url 'projetos:area_empregado' %}">🏠 Painel</a>
-                <a href="{% url 'projetos:meus_dados_empregado' %}">👤 Meus Dados</a>
-                <a href="{% url 'projetos:registo_diario_create' %}">➕ Novo Registo Diário</a>
-                <a href="{% url 'projetos:registo_diario_list' %}">📋 Meus Registos</a>
-                <a href="{% url 'projetos:levantamento_material_create' %}">📦 Levantar Material</a>
-                <a href="{% url 'projetos:levantamento_material_list' %}">📋 Meus Levantamentos</a>
-                <a href="{% url 'projetos:devolucao_material_create' %}">↩️ Devolver Material</a>
-                <a href="{% url 'projetos:devolucao_material_list' %}">📋 Minhas Devoluções</a>
-                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}">⚙️ Minhas Configurações</a>
-                <a href="{% url 'projetos:historico_configuracao_list_empregado' %}">🕘 Histórico Configurações</a>
-                <a href="{% url 'projetos:diario_tecnico' %}">📘 Diário Técnico</a>
-            {% endif %}
-        </div>
-
-        <div class="content-com-sidebar">
-    {% else %}
-        <div class="content-sem-sidebar">
-    {% endif %}
-
-        {% if messages %}
-            <div style="max-width:900px; margin:0 auto 20px auto;">
-                {% for message in messages %}
-                    <div class="msg-box" style="
-                        position:relative;
-                        margin-bottom:12px;
-                        padding:12px 40px 12px 16px;
-                        border-radius:8px;
-                        font-weight:bold;
-                        transition:opacity 0.3s ease, transform 0.3s ease;
-                        {% if message.tags == 'success' %}
-                            background:#27ae60; color:white;
-                        {% elif message.tags == 'error' %}
-                            background:#e74c3c; color:white;
-                        {% elif message.tags == 'warning' %}
-                            background:#f1c40f; color:#2c3e50;
-                        {% elif message.tags == 'info' %}
-                            background:#3498db; color:white;
-                        {% else %}
-                            background:#7f8c8d; color:white;
-                        {% endif %}
-                    ">
-                        {{ message }}
-                        <span onclick="fecharMensagem(this)" style="
-                            position:absolute;
-                            right:12px;
-                            top:8px;
-                            cursor:pointer;
-                            font-size:18px;
-                            font-weight:bold;
-                            opacity:0.8;
-                        ">×</span>
+            <nav class="nav-center" id="topNavMenu" role="navigation" aria-label="{% trans 'Menu principal' %}">
+                {% if is_platform_admin %}
+                    <div class="nav-item">
+                        <a href="{% url 'plataforma:dashboard' %}" class="nav-link">🏠 {% trans "Dashboard" %}</a>
                     </div>
-                {% endfor %}
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Plataforma' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            🏢 {% trans "Plataforma" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Plataforma' %}">
+                            <a href="{% url 'plataforma:onboarding_empresa' %}" role="menuitem">🏢 {% trans "Nova Empresa" %}</a>
+                            <a href="{% url 'plataforma:plano_list' %}" role="menuitem">💳 {% trans "Planos" %}</a>
+                            <a href="{% url 'plataforma:subscricao_list' %}" role="menuitem">🧾 {% trans "Subscrições" %}</a>
+                            <a href="/app/dispositivos/" role="menuitem">📡 {% trans "Dispositivos" %}</a>
+                        </div>
+                    </div>
+
+                {% elif is_admin_user %}
+                    <div class="nav-item">
+                        <a href="{% url 'projetos:dashboard' %}" class="nav-link">🏠 {% trans "Dashboard" %}</a>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Operação' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            📁 {% trans "Operação" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
+                            <a href="/app/dashboard/graficos/" role="menuitem">📊 {% trans "Gráficos" %}</a>
+                            <a href="/app/projetos/" role="menuitem">📁 {% trans "Projetos" %}</a>
+                            <a href="/app/empregados/" role="menuitem">👷 {% trans "Empregados" %}</a>
+                            <a href="/app/maquinas/" role="menuitem">⚙️ {% trans "Máquinas" %}</a>
+                            <a href="/app/furos/" role="menuitem">🕳 {% trans "Furos" %}</a>
+                            <a href="/app/medicoes/list/" role="menuitem">📊 {% trans "Medições" %}</a>
+                            <a href="/app/materiais/" role="menuitem">📦 {% trans "Materiais" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Registos' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            📈 {% trans "Registos" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
+                            <a href="/app/registos/admin/" role="menuitem">📈 {% trans "Produção" %}</a>
+                            <a href="/app/levantamentos/admin/" role="menuitem">📦 {% trans "Levantamentos" %}</a>
+                            <a href="/app/devolucoes/admin/" role="menuitem">↩️ {% trans "Devoluções" %}</a>
+                            <a href="/app/empregados/pendentes/" role="menuitem">📝 {% trans "Empregados Pendentes" %}</a>
+                        </div>
+                    </div>
+
+                {% elif is_empregado_user %}
+                    <div class="nav-item">
+                        <a href="{% url 'projetos:area_empregado' %}" class="nav-link">🏠 {% trans "Painel" %}</a>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Operação' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            ⚙️ {% trans "Operação" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
+                            <a href="{% url 'projetos:medicao_list' %}" role="menuitem">👤 {% trans "Medições" %}</a>
+                            <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
+                            <a href="{% url 'projetos:historico_configuracao_list_empregado' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Registos' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            📋 {% trans "Registos" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
+                            <a href="{% url 'projetos:registo_diario_create' %}" role="menuitem">➕ {% trans "Novo Registo Diário" %}</a>
+                            <a href="{% url 'projetos:registo_diario_list' %}" role="menuitem">📋 {% trans "Meus Registos" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Materiais' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            📦 {% trans "Materiais" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Materiais' %}">
+                            <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" role="menuitem">📦 {% trans "Disponíveis" %}</a>
+                            <a href="/app/levantamentos/meus/" role="menuitem">📤 {% trans "Meus Levantamentos" %}</a>
+                            <a href="/app/devolucoes/minhas/" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Conta' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            👤 {% trans "Conta" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Conta' %}">
+                            <a href="{% url 'projetos:meus_dados_empregado' %}" role="menuitem">👤 {% trans "Meus Dados" %}</a>
+                            <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
+                            <a href="/app/minha-area/definicoes/" role="menuitem">🛠️ {% trans "Definições" %}</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </nav>
+
+            <div class="nav-right">
+                <div class="nav-item">
+                    <button
+                        type="button"
+                        class="user-box"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-label="{% trans 'Abrir menu do utilizador' %}"
+                        onclick="toggleDropdown(event, this)"
+                    >
+                        <div>
+                            <span class="user-label">{% trans "Utilizador online" %}</span>
+                            <span class="user-name">{{ user.username }}</span>
+                        </div>
+                    </button>
+
+                    <div class="dropdown dropdown-right" role="menu" aria-label="{% trans 'Menu do utilizador' %}">
+                        <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
+                    </div>
+                </div>
             </div>
         {% endif %}
-
-        {% block content %}{% endblock %}
     </div>
+</div>
+
+<div class="content-wrap">
+    {% if messages %}
+        <div class="messages-wrap">
+            {% for message in messages %}
+                <div class="msg-box msg-{{ message.tags }}">
+                    {{ message }}
+                    <button type="button" onclick="fecharMensagem(this)" class="msg-close" aria-label="{% trans 'Fechar mensagem' %}">×</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
 </div>
 
 {% block extra_scripts %}{% endblock %}
@@ -311,16 +233,93 @@
 <script>
 function fecharMensagem(el) {
     const box = el.parentElement;
+    if (!box) return;
+
     box.style.opacity = "0";
     box.style.transform = "translateY(-10px)";
+
     setTimeout(() => {
         box.remove();
     }, 300);
 }
+
 function toggleMenu() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('active');
+    const menu = document.getElementById('topNavMenu');
+    const toggle = document.querySelector('.menu-toggle');
+
+    if (!menu) return;
+
+    const isActive = menu.classList.toggle('active');
+
+    if (toggle) {
+        toggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    }
 }
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.nav-item.open').forEach(item => {
+        item.classList.remove('open');
+    });
+
+    document.querySelectorAll('.nav-item button[aria-expanded="true"]').forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+    });
+}
+
+function toggleDropdown(event, el) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const item = el.closest('.nav-item');
+    if (!item) return;
+
+    const isOpen = item.classList.contains('open');
+
+    closeAllDropdowns();
+
+    if (!isOpen) {
+        item.classList.add('open');
+        el.setAttribute('aria-expanded', 'true');
+    }
+}
+
+document.addEventListener('click', function () {
+    closeAllDropdowns();
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        closeAllDropdowns();
+
+        const menu = document.getElementById('topNavMenu');
+        const toggle = document.querySelector('.menu-toggle');
+
+        if (menu && menu.classList.contains('active')) {
+            menu.classList.remove('active');
+        }
+
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+});
+
+document.querySelectorAll('#topNavMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+        const menu = document.getElementById('topNavMenu');
+        const toggle = document.querySelector('.menu-toggle');
+
+        if (menu && menu.classList.contains('active')) {
+            menu.classList.remove('active');
+        }
+
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        closeAllDropdowns();
+    });
+});
 </script>
 
 </body>

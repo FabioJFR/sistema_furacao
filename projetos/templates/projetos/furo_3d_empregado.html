@@ -1,0 +1,164 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}3D - {{ furo.nome }}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">🌐 {% trans "3D do Furo" %}: {{ furo.nome }}</h1>
+                <p class="text-gray-600 mt-2">
+                    <strong>{% trans "Projeto" %}:</strong> {{ furo.projeto.nome|default:"-" }}
+                </p>
+                <p class="text-gray-600">
+                    <strong>{% trans "Estado" %}:</strong> {{ furo.get_estado_display|default:furo.estado }}
+                </p>
+            </div>
+
+            <div class="flex gap-2 flex-wrap">
+                <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-primary">👁️ {% trans "Detalhes" %}</a>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-warning">⬅ {% trans "Meus Furos" %}</a>
+                <a href="{% url 'projetos:area_empregado' %}" class="btn btn-success">🏠 {% trans "Painel" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div class="xl:col-span-3 bg-white rounded-2xl shadow border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xl font-bold text-gray-800">📊 {% trans "Visualização 3D" %}</h2>
+                <span class="text-sm text-gray-500">{% trans "Trajetória calculada com base nas medições" %}</span>
+            </div>
+
+            <div id="plot-3d" style="width:100%; height:72vh; min-height:520px;"></div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📌 {% trans "Resumo" %}</h3>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div>
+                        <div class="text-gray-500">{% trans "Profundidade Atual" %}</div>
+                        <div class="text-xl font-bold text-gray-900">{{ furo.profundidade_atual|default:"0" }} m</div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-500">{% trans "Profundidade Alvo" %}</div>
+                        <div class="text-xl font-bold text-gray-900">{{ furo.profundidade_alvo_atual|default:"0" }} m</div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-500">{% trans "Inclinação Atual" %}</div>
+                        <div class="text-lg font-semibold text-gray-900">{{ furo.inclinacao_real_atual|default:"-" }}</div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-500">{% trans "Azimute Atual" %}</div>
+                        <div class="text-lg font-semibold text-gray-900">{{ furo.azimute_real_atual|default:"-" }}</div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-500">{% trans "Nº de Medições" %}</div>
+                        <div class="text-lg font-semibold text-gray-900">{{ medicoes|length }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow border border-gray-200 p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">ℹ️ {% trans "Informação" %}</h3>
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p>{% trans "O gráfico mostra a trajetória 3D do furo com base nas medições registadas." %}</p>
+                    <p>{% trans "Cada ponto representa uma medição ao longo da profundidade." %}</p>
+                    <p>{% trans "Podes rodar, aproximar e afastar para analisar melhor a trajetória." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{ medicoes|json_script:"medicoes-data" }}
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+const medicoes = JSON.parse(document.getElementById("medicoes-data").textContent || "[]");
+
+const x = [];
+const y = [];
+const z = [];
+const text = [];
+
+medicoes.forEach((m) => {
+    const profundidade = parseFloat(m.profundidade_medida || 0);
+    const inclinacao = parseFloat(m.inclinacao_real_medida || 0);
+    const azimute = parseFloat(m.azimute_real_medido || 0);
+
+    const radInc = inclinacao * Math.PI / 180;
+    const radAzi = azimute * Math.PI / 180;
+
+    const dx = profundidade * Math.cos(radInc) * Math.sin(radAzi);
+    const dy = profundidade * Math.cos(radInc) * Math.cos(radAzi);
+    const dz = -profundidade * Math.sin(radInc);
+
+    x.push(dx);
+    y.push(dy);
+    z.push(dz);
+    text.push(`Prof: ${profundidade}m | Inc: ${inclinacao} | Azi: ${azimute}`);
+});
+
+const trace = {
+    x: x,
+    y: y,
+    z: z,
+    text: text,
+    mode: "lines+markers",
+    type: "scatter3d",
+    line: {
+        width: 6,
+        color: "#2563eb"
+    },
+    marker: {
+        size: 4,
+        color: "#16a34a"
+    },
+    hovertemplate: "%{text}<extra></extra>"
+};
+
+const layout = {
+    margin: { l: 0, r: 0, b: 0, t: 10 },
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#ffffff",
+    scene: {
+        bgcolor: "#f8fafc",
+        xaxis: {
+            title: "X",
+            backgroundcolor: "#f8fafc",
+            gridcolor: "#d1d5db",
+            zerolinecolor: "#9ca3af"
+        },
+        yaxis: {
+            title: "Y",
+            backgroundcolor: "#f8fafc",
+            gridcolor: "#d1d5db",
+            zerolinecolor: "#9ca3af"
+        },
+        zaxis: {
+            title: "Z",
+            backgroundcolor: "#f8fafc",
+            gridcolor: "#d1d5db",
+            zerolinecolor: "#9ca3af"
+        },
+        camera: {
+            eye: { x: 1.5, y: 1.5, z: 1.2 }
+        }
+    }
+};
+
+Plotly.newPlot("plot-3d", [trace], layout, {
+    responsive: true,
+    displaylogo: false
+});
+</script>
+{% endblock %}

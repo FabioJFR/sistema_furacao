@@ -1,37 +1,36 @@
-from projetos.models import Projeto
+from django.core.exceptions import ValidationError
+
 from core.utils.coordenadas import obter_coordenadas_por_cidade_pais
+from projetos.models import Projeto
 
 
-def preencher_coordenadas_projeto(projeto):
-    if projeto.cidade and projeto.pais:
-        lat, lon = obter_coordenadas_por_cidade_pais(projeto.cidade, projeto.pais)
-        projeto.localizacao_lat = lat
-        projeto.localizacao_lon = lon
+# ==============================
+# HELPERS
+# ==============================
+
+
+def _resolver_empresa_id(empresa):
+    return getattr(empresa, "pk", empresa)
+
+
+
+def _atribuir_empresa_projeto(projeto, empresa=None):
+    if empresa is None:
+        return projeto
+
+    projeto.empresa_id = _resolver_empresa_id(empresa)
     return projeto
 
-
-def criar_projeto(form):
-    projeto = form.save(commit=False)
-    preencher_coordenadas_projeto(projeto)
-    projeto.save()
-    form.save_m2m()
-    return projeto
-
-
-def atualizar_projeto(form):
-
-    projeto = form.save(commit=False)
-    preencher_coordenadas_projeto(projeto)
-    projeto.save()
-    form.save_m2m()
-    return projeto
 
 
 def preparar_localizacao_projeto(projeto):
+    """
+    Preenche latitude e longitude com base em cidade e país.
+    """
     if projeto.cidade and projeto.pais:
         lat, lon = obter_coordenadas_por_cidade_pais(
             projeto.cidade,
-            projeto.pais
+            projeto.pais,
         )
         projeto.localizacao_lat = lat
         projeto.localizacao_lon = lon
@@ -39,10 +38,32 @@ def preparar_localizacao_projeto(projeto):
     return projeto
 
 
-def criar_projeto(form):
-    projeto = form.save(commit=False)
 
+def _validar_projeto_empresa(projeto, empresa=None):
+    if empresa is None:
+        return
+
+    empresa_id = _resolver_empresa_id(empresa)
+    if projeto.empresa_id and projeto.empresa_id != empresa_id:
+        raise ValidationError("O projeto não pertence à empresa atual.")
+
+
+
+def _preparar_projeto_para_guardar(projeto, empresa=None):
+    _atribuir_empresa_projeto(projeto, empresa=empresa)
+    _validar_projeto_empresa(projeto, empresa=empresa)
     preparar_localizacao_projeto(projeto)
+    return projeto
+
+
+# ==============================
+# SERVICES
+# ==============================
+
+
+def criar_projeto(form, empresa=None):
+    projeto = form.save(commit=False)
+    projeto = _preparar_projeto_para_guardar(projeto, empresa=empresa)
 
     projeto.save()
     form.save_m2m()
@@ -50,13 +71,12 @@ def criar_projeto(form):
     return projeto
 
 
-def atualizar_projeto(form):
-    projeto = form.save(commit=False)
 
-    preparar_localizacao_projeto(projeto)
+def atualizar_projeto(form, empresa=None):
+    projeto = form.save(commit=False)
+    projeto = _preparar_projeto_para_guardar(projeto, empresa=empresa)
 
     projeto.save()
     form.save_m2m()
 
     return projeto
-
