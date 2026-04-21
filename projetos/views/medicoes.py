@@ -58,7 +58,7 @@ def _obter_empresa_admin_medicoes(request):
     contexto_admin = _obter_contexto_admin_medicoes(request)
     if not contexto_admin:
         messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:dashboard_projetos:redirect_after_login")
+        return None, redirect("projetos:redirect_after_login")
 
     empresa = getattr(contexto_admin, "empresa", None)
     empresa_id = getattr(contexto_admin, "empresa_id", None)
@@ -69,7 +69,7 @@ def _obter_empresa_admin_medicoes(request):
             request.user.id,
         )
         messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard_projetos:dashboard")
+        return None, redirect("projetos:dashboard")
 
     return empresa, None
 
@@ -137,7 +137,7 @@ def medicao_create(request, furo_id):
                     furo.pk,
                 )
                 messages.success(request, "Medição criada com sucesso.")
-                return redirect("projetos:furos:detail", pk=furo.pk)
+                return redirect("projetos:furo_detail", pk=furo.pk)
 
             except ValidationError as e:
                 form.add_error(None, e)
@@ -204,7 +204,7 @@ def medicao_update(request, pk):
                     medicao.pk,
                 )
                 messages.success(request, "Medição atualizada com sucesso.")
-                return redirect("projetos:medicao:medicao_list")
+                return redirect("projetos:medicao_list")
 
             except ValidationError as e:
                 form.add_error(None, e)

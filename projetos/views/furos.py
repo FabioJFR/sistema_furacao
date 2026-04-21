@@ -9,7 +9,6 @@ from django.urls import reverse
 
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
-from ..forms.medicao import MedicaoForm
 from ..models.empregado import Empregados
 from ..models.furo import Furo
 from ..models.medicao import Medicao
@@ -22,7 +21,6 @@ from projetos.selectors.furos import (
     obter_lista_furos,
 )
 from projetos.services.furos import criar_furo
-from projetos.services.medicoes import criar_medicao
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
 from plataforma.models import PerfilPlataforma
@@ -227,11 +225,10 @@ def furo_create(request):
 @admin_required
 def furo_detail(request, pk):
     logger.info(
-        "Entrada na view furo_detail. user_id=%s, username='%s', furo_pk=%s, method=%s",
+        "Entrada na view furo_detail. user_id=%s, username='%s', furo_pk=%s",
         request.user.id,
         request.user.username,
         pk,
-        request.method,
     )
     empresa, resposta_erro = _obter_empresa_admin_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
@@ -241,36 +238,6 @@ def furo_detail(request, pk):
 
     context = obter_contexto_detalhe_furo(pk, empresa=empresa_id)
     furo = context["furo"]
-
-    if request.method == "POST":
-        form = MedicaoForm(
-            request.POST,
-            request.FILES,
-            furo=furo,
-            empresa=empresa_id,
-        )
-        if form.is_valid():
-            criar_medicao(form, furo=furo, empresa=empresa_id)
-            logger.info(
-                "Medição registada com sucesso em furo_detail. user_id=%s, empresa_id=%s, furo_id=%s",
-                request.user.id,
-                empresa.id,
-                furo.pk,
-            )
-            messages.success(request, "Medição registrada com sucesso!")
-            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
-
-        logger.warning(
-            "Erro ao registar medição em furo_detail. user_id=%s, furo_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
-        )
-        messages.error(request, "Erro ao registrar medição. Verifique os dados.")
-    else:
-        form = MedicaoForm(furo=furo, empresa=empresa_id)
-
-    context["form"] = form
     context["configuracoes"] = obter_equipa_e_configuracao_por_furo(
         furo,
         empresa=empresa_id,

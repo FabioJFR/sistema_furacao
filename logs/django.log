@@ -14691,3 +14691,117 @@ ValueError: Cannot assign "UUID('505daad6-7855-4b1a-b9b0-d062ef5edec9')": "Empre
 [2026-04-21 12:31:40,391] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
 [2026-04-21 12:31:40,410] INFO core | View area_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, empresa_id=505daad6-7855-4b1a-b9b0-d062ef5edec9
 [2026-04-21 12:31:40,475] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 18248
+[2026-04-21 12:42:43,735] INFO core | Entrada na view furo_detail_empregado. user_id=9, username='empregado1Empresa2', furo_pk=ddfec24a-ce3b-456a-99c7-0f675be5c91e
+[2026-04-21 12:42:43,735] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:42:43,747] INFO core | View furo_detail_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, furo_id=ddfec24a-ce3b-456a-99c7-0f675be5c91e
+[2026-04-21 12:42:43,783] INFO django.server | "GET /app/minha-area/furos/ddfec24a-ce3b-456a-99c7-0f675be5c91e/ HTTP/1.1" 200 13147
+[2026-04-21 12:42:51,093] INFO core | Entrada na view furo_3d_empregado. user_id=9, username='empregado1Empresa2', furo_pk=ddfec24a-ce3b-456a-99c7-0f675be5c91e
+[2026-04-21 12:42:51,093] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:42:51,108] INFO core | View furo_3d_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, furo_id=ddfec24a-ce3b-456a-99c7-0f675be5c91e, total_medicoes=0
+[2026-04-21 12:42:51,141] INFO django.server | "GET /app/minha-area/furos/ddfec24a-ce3b-456a-99c7-0f675be5c91e/3d/ HTTP/1.1" 200 14160
+[2026-04-21 12:43:52,075] INFO core | Entrada na view furo_detail_empregado. user_id=9, username='empregado1Empresa2', furo_pk=ddfec24a-ce3b-456a-99c7-0f675be5c91e
+[2026-04-21 12:43:52,076] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:43:52,094] INFO core | View furo_detail_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, furo_id=ddfec24a-ce3b-456a-99c7-0f675be5c91e
+[2026-04-21 12:43:52,146] INFO django.server | "GET /app/minha-area/furos/ddfec24a-ce3b-456a-99c7-0f675be5c91e/ HTTP/1.1" 200 13147
+[2026-04-21 12:44:00,331] INFO core | Entrada na view area_empregado. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:00,333] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:00,353] INFO core | View area_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, empresa_id=505daad6-7855-4b1a-b9b0-d062ef5edec9
+[2026-04-21 12:44:00,413] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 18248
+[2026-04-21 12:44:07,036] INFO core | Entrada na view meus_projetos_empregado. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:07,037] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:07,061] INFO core | View meus_projetos_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, empresa_id=505daad6-7855-4b1a-b9b0-d062ef5edec9, total_projetos=1
+[2026-04-21 12:44:07,104] INFO django.server | "GET /app/minha-area/meus-projetos/ HTTP/1.1" 200 11349
+[2026-04-21 12:44:10,572] INFO core | Entrada na view projeto_detail_empregado. user_id=9, username='empregado1Empresa2', projeto_pk=9bb86a2e-9ceb-490c-af58-51f86a3df758
+[2026-04-21 12:44:10,573] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:10,605] INFO core | View projeto_detail_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, projeto_id=9bb86a2e-9ceb-490c-af58-51f86a3df758
+[2026-04-21 12:44:10,672] INFO django.server | "GET /app/minha-area/projetos/9bb86a2e-9ceb-490c-af58-51f86a3df758/ HTTP/1.1" 200 13238
+[2026-04-21 12:44:37,284] INFO core | Entrada na view materiais_disponiveis_empregado. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:37,284] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:37,308] INFO core | View materiais_disponiveis_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, empresa_id=505daad6-7855-4b1a-b9b0-d062ef5edec9, total_materiais=3, filtro_nome=''
+[2026-04-21 12:44:37,377] INFO django.server | "GET /app/minha-area/materiais-disponiveis/ HTTP/1.1" 200 16188
+[2026-04-21 12:44:50,065] INFO core | Entrada na view levantamento_material_create. user_id=9, username='empregado1Empresa2', method=GET
+[2026-04-21 12:44:50,066] DEBUG core | A resolver empregado autenticado em materiais.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:44:50,143] INFO django.server | "GET /app/levantamentos/meus/novo/?material=16ec8ec0-c39f-4973-9c25-03736f8ef287 HTTP/1.1" 200 11814
+[2026-04-21 12:45:04,932] INFO core | Entrada na view levantamento_material_list. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:04,933] DEBUG core | A resolver empregado autenticado em materiais.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:04,944] INFO core | View levantamento_material_list carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, total_levantamentos=0
+[2026-04-21 12:45:04,985] INFO django.server | "GET /app/levantamentos/meus/ HTTP/1.1" 200 9312
+[2026-04-21 12:45:12,932] INFO core | Entrada na view devolucao_material_list. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:12,932] DEBUG core | A resolver empregado autenticado em materiais.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:12,942] INFO core | View devolucao_material_list carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, total_devolucoes=0
+[2026-04-21 12:45:12,984] INFO django.server | "GET /app/devolucoes/minhas/ HTTP/1.1" 200 9305
+[2026-04-21 12:45:18,834] INFO core | Entrada na view diario_tecnico. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:18,835] DEBUG core | A resolver empregado autenticado em diario_tecnico.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 12:45:18,841] INFO core | View diario_tecnico carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, total_secoes=10, total_referencias=6
+[2026-04-21 12:45:18,877] INFO django.server | "GET /app/minha-area/diario-tecnico/ HTTP/1.1" 200 26360
+[2026-04-21 13:10:07,997] INFO core | Entrada na view area_empregado. user_id=9, username='empregado1Empresa2'
+[2026-04-21 13:10:08,002] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=9, username='empregado1Empresa2'
+[2026-04-21 13:10:08,028] INFO core | View area_empregado carregada com sucesso. user_id=9, empregado_id=4cb4311e-77a1-4e98-bcda-3fcdf434230f, empresa_id=505daad6-7855-4b1a-b9b0-d062ef5edec9
+[2026-04-21 13:10:08,080] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 18248
+[2026-04-21 13:10:08,180] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-21 13:12:33,978] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-21 13:12:33,986] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-21 13:51:38,498] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-21 13:51:48,543] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-21 13:51:48,570] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=4
+[2026-04-21 13:51:48,572] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=4, tipo_acesso=empresa_admin, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb
+[2026-04-21 13:51:48,574] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-21 13:51:48,595] INFO core | Entrada na view dashboard. user_id=4, username='empresa3'
+[2026-04-21 13:51:48,595] DEBUG core | A verificar acesso ao dashboard: user_id=4, username='empresa3'
+[2026-04-21 13:51:48,600] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=4, perfil_id=3, tipo_acesso='empresa_admin', empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb
+[2026-04-21 13:51:48,617] INFO core | Contexto do dashboard montado com sucesso. user_id=4, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-21 13:51:48,633] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 29065
+[2026-04-21 13:51:58,072] INFO core | Entrada na view medicao_list. user_id=4, username='empresa3'
+[2026-04-21 13:51:58,072] DEBUG core | A resolver contexto administrativo em medicoes.py. user_id=4, username='empresa3'
+[2026-04-21 13:51:58,078] INFO core | Contexto administrativo resolvido via PerfilPlataforma em medicoes.py. user_id=4, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb, tipo_acesso=empresa_admin
+[2026-04-21 13:51:58,082] INFO core | View medicao_list carregada com sucesso. user_id=4, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb, total_medicoes=0
+[2026-04-21 13:51:58,126] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 9498
+[2026-04-21 13:51:59,911] INFO core | Entrada na view furo_list. user_id=4, username='empresa3'
+[2026-04-21 13:51:59,912] DEBUG core | A resolver contexto administrativo em furos.py. user_id=4, username='empresa3'
+[2026-04-21 13:51:59,916] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=4, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb, tipo_acesso=empresa_admin
+[2026-04-21 13:51:59,918] INFO core | View furo_list carregada com sucesso. user_id=4, empresa_id=049eedc8-e50e-46fd-a473-0936d4e4b0bb, total_furos=0
+[2026-04-21 13:51:59,951] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 9243
+[2026-04-21 13:52:05,196] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-21 13:52:05,216] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-21 13:52:05,536] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-21 13:52:05,541] WARNING django.request | Not Found: /favicon.ico
+[2026-04-21 13:52:05,546] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-21 13:52:05,546] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5237
+[2026-04-21 13:52:05,546] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5174
+[2026-04-21 13:52:05,546] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5201
+[2026-04-21 13:52:07,949] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-21 13:52:20,387] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-21 13:52:20,410] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=2
+[2026-04-21 13:52:20,411] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=2, tipo_acesso=empresa_admin, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-21 13:52:20,414] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-21 13:52:20,434] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-21 13:52:20,434] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-21 13:52:20,438] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-21 13:52:20,455] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-21 13:52:20,469] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 30361
+[2026-04-21 13:52:43,009] INFO core | Entrada na view furo_list. user_id=2, username='empresa1'
+[2026-04-21 13:52:43,009] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-21 13:52:43,015] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 13:52:43,019] INFO core | View furo_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=3
+[2026-04-21 13:52:43,063] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 14317
+[2026-04-21 13:52:45,454] INFO core | Entrada na view furo_detail. user_id=2, username='empresa1', furo_pk=f4416276-b79c-4dfa-b72e-4c5918cc0f5e, method=GET
+[2026-04-21 13:52:45,454] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-21 13:52:45,459] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 13:52:45,481] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 13:52:45,571] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 23232
+[2026-04-21 13:59:49,120] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-21 13:59:49,719] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 14:04:49,421] INFO core | Entrada na view furo_detail. user_id=2, username='empresa1', furo_pk=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:04:49,422] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-21 14:04:49,426] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 14:04:49,435] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:04:49,501] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 19866
+[2026-04-21 14:05:03,150] INFO core | Entrada na view medicao_create. user_id=2, username='empresa1', furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e, method=GET
+[2026-04-21 14:05:03,150] DEBUG core | A resolver contexto administrativo em medicoes.py. user_id=2, username='empresa1'
+[2026-04-21 14:05:03,154] INFO core | Contexto administrativo resolvido via PerfilPlataforma em medicoes.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 14:05:03,192] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/medicoes/nova/ HTTP/1.1" 200 12320
+[2026-04-21 14:05:07,081] INFO core | Entrada na view furo_detail. user_id=2, username='empresa1', furo_pk=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:05:07,082] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-21 14:05:07,088] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 14:05:07,109] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:05:07,172] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 19866

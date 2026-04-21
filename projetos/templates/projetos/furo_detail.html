@@ -1,301 +1,247 @@
 {% extends "projetos/base.html" %}
 
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/furo_detail.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
-<div style="max-width:1200px; margin:30px auto; padding:30px; background:#34495e; color:#ecf0f1; border-radius:10px; box-shadow:0 6px 15px rgba(0,0,0,0.3); line-height:1.6;">
-
-    <h1 style="text-align:center; margin-bottom:30px;">Furo: {{ furo.nome }}</h1>
-
+<section class="furo-detail-page">
+<div class="furo-shell">
     {{ furo_mapa|json_script:"furo-data" }}
 
-    <!-- DADOS GERAIS -->
-    <h2 style="margin-top:20px; margin-bottom:15px;">Dados Gerais do Furo</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:30px;">
-        <div><strong>Projeto:</strong> {{ furo.projeto.nome }}</div>
-        <div><strong>Tipo:</strong> {{ furo.get_tipo_display }}</div>
-        <div><strong>Estado:</strong> {{ furo.get_estado_display }}</div>
-        <div><strong>Profundidade Inicial:</strong> {{ furo.profundidade_inicial }} m</div>
-        <div><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</div>
-        <div><strong>Profundidade Máxima Atingida:</strong> {{ furo.profundidade_maxima_atingida }} m</div>
-        <div><strong>Total de Horas:</strong> {{ furo.total_horas|default:"-" }}</div>
-        <div><strong>Magnetismo:</strong> {{ furo.magnetismo|default:"-" }}</div>
-        <div><strong>Latitude:</strong> {{ furo.latitude|default:"-" }}</div>
-        <div><strong>Longitude:</strong> {{ furo.longitude|default:"-" }}</div>
-        <div><strong>Altitude:</strong> {{ furo.altitude|default:"-" }}</div>
-        <div><strong>Sistema de Coordenadas:</strong> {{ furo.get_sistema_coordenadas_display }}</div>
-        <div><strong>Data de Criação:</strong> {{ furo.data }}</div>
+    <div class="furo-header">
+        <div class="furo-title-wrap">
+            <h1>Furo {{ furo.nome }}</h1>
+            <p class="furo-subtitle">Projeto {{ furo.projeto.nome }} · acompanhamento técnico, equipa e produção do furo.</p>
+        </div>
+        <div class="furo-status-badge">
+            <span>Estado</span>
+            <strong>{{ furo.get_estado_display }}</strong>
+        </div>
     </div>
 
-    <!-- PLANEAMENTO INICIAL -->
-    <h2 style="margin-top:20px; margin-bottom:15px;">Planeamento Inicial</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:30px;">
-        <div><strong>Profundidade Alvo Inicial:</strong> {{ furo.profundidade_alvo_inicial }} m</div>
-        <div><strong>Inclinação Planeada Inicial:</strong> {{ furo.inclinacao_planeada_inicial }}°</div>
-        <div><strong>Azimute Planeado Inicial:</strong> {{ furo.azimute_planeado_inicial }}°</div>
-    </div>
+    <section class="furo-section">
+        <h2 class="furo-section-title">Dados Gerais do Furo</h2>
+        <div class="furo-grid">
+            <div class="furo-stat-card"><span class="furo-stat-label">Projeto</span><span class="furo-stat-value">{{ furo.projeto.nome }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Tipo</span><span class="furo-stat-value">{{ furo.get_tipo_display }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade inicial</span><span class="furo-stat-value">{{ furo.profundidade_inicial }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade atual</span><span class="furo-stat-value">{{ furo.profundidade_atual }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade máxima</span><span class="furo-stat-value">{{ furo.profundidade_maxima_atingida }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Total de horas</span><span class="furo-stat-value">{{ furo.total_horas|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Magnetismo</span><span class="furo-stat-value">{{ furo.magnetismo|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Latitude</span><span class="furo-stat-value">{{ furo.latitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Longitude</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Altitude</span><span class="furo-stat-value">{{ furo.altitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Sistema de coordenadas</span><span class="furo-stat-value">{{ furo.get_sistema_coordenadas_display }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Data de criação</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
+        </div>
+    </section>
 
-    <!-- PLANEAMENTO ATUAL -->
-    <h2 style="margin-top:20px; margin-bottom:15px;">Planeamento Atual</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:30px;">
-        <div><strong>Profundidade Alvo Atual:</strong> {{ furo.profundidade_alvo_atual }} m</div>
-        <div><strong>Inclinação Planeada Atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
-        <div><strong>Azimute Planeado Atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
-    </div>
+    <section class="furo-section">
+        <h2 class="furo-section-title">Planeamento Inicial</h2>
+        <div class="furo-grid">
+            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade alvo inicial</span><span class="furo-stat-value">{{ furo.profundidade_alvo_inicial }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação planeada inicial</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_inicial }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Azimute planeado inicial</span><span class="furo-stat-value">{{ furo.azimute_planeado_inicial }}°</span></div>
+        </div>
+    </section>
 
-    <!-- ESTADO REAL -->
-    <h2 style="margin-top:20px; margin-bottom:15px;">Estado Real Atual</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:30px;">
-        <div><strong>Inclinação Real Atual:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
-        <div><strong>Azimute Real Atual:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
-    </div>
+    <section class="furo-section">
+        <h2 class="furo-section-title">Planeamento Atual</h2>
+        <div class="furo-grid">
+            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade alvo atual</span><span class="furo-stat-value">{{ furo.profundidade_alvo_atual }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação planeada atual</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Azimute planeado atual</span><span class="furo-stat-value">{{ furo.azimute_planeado_atual|default:"-" }}°</span></div>
+        </div>
+    </section>
 
-    <!-- MAPA -->
-    <h2 style="margin-bottom:15px;">Mapa do Furo</h2>
-    <div id="map" style="height:50vh; margin-bottom:15px; border-radius:10px; border:1px solid #7f8c8d;"></div>
+    <section class="furo-section">
+        <h2 class="furo-section-title">Estado Real Atual</h2>
+        <div class="furo-grid">
+            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação real atual</span><span class="furo-stat-value">{{ furo.inclinacao_real_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Azimute real atual</span><span class="furo-stat-value">{{ furo.azimute_real_atual|default:"-" }}°</span></div>
+        </div>
+    </section>
 
-    <!-- BOTÕES DE AÇÃO -->
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:30px;">
-        <a href="{% url 'projetos:furo_3d' furo.id %}"
-           style="display:inline-block; background:#8e44ad; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none;">
-           Ver Trajetória 3D
-        </a>
+    <section class="furo-map-wrap">
+        <h2 class="furo-section-title">Mapa do Furo</h2>
+        <div class="furo-map-card">
+            <div id="map"></div>
+        </div>
+        <div class="furo-actions">
+            <a href="{% url 'projetos:furo_3d' furo.id %}" class="furo-action-btn btn-3d">Ver Trajetória 3D</a>
+            <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ Adicionar Trabalhador ao Furo</a>
+            <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 Histórico de Configurações</a>
+            <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 Adicionar Medição</a>
+        </div>
+    </section>
 
-        <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}"
-           style="display:inline-block; background:#16a34a; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none;">
-           ➕ Adicionar Trabalhador ao Furo
-        </a>
-
-        <a href="{% url 'projetos:historico_furo_list' furo.id %}"
-           style="display:inline-block; background:#7c3aed; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none;">
-           🕘 Histórico de Configurações
-        </a>
-    </div>
-
-    <!-- CARDS -->
-    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px;">
-
-        <!-- CARD MATERIAIS / MÁQUINAS / EQUIPA -->
-        <div style="flex:1; min-width:300px; background:#2c3e50; padding:20px; border-radius:10px;">
-            <h3 style="margin-bottom:15px;">Materiais usados</h3>
-            <ul style="padding-left:20px; margin-bottom:20px;">
+    <div class="furo-panels">
+        <div class="furo-panel">
+            <h3>Materiais usados</h3>
+            <ul class="furo-list">
                 {% for material in furo.materiais.all %}
-                    <li style="margin-bottom:8px;">{{ material.nome }} — Qtde: {{ material.quantidade }} — Valor: {{ material.valor }}€</li>
+                    <li class="furo-list-item">
+                        <div class="furo-list-main">{{ material.nome }}</div>
+                        <div class="furo-list-sub">Quantidade: {{ material.quantidade }} · Valor: {{ material.valor }} €</div>
+                    </li>
                 {% empty %}
-                    <li>Nenhum material registrado.</li>
+                    <li class="furo-empty">Nenhum material registado.</li>
                 {% endfor %}
             </ul>
+        </div>
 
-            <h3 style="margin-bottom:15px;">Máquinas usadas</h3>
-            <ul style="padding-left:20px; margin-bottom:20px;">
+        <div class="furo-panel">
+            <h3>Máquinas usadas</h3>
+            <ul class="furo-list">
                 {% for maquina in furo.maquinas.all %}
-                    <li style="margin-bottom:8px;">{{ maquina.nome }} — Modelo: {{ maquina.modelo }} — Estado: {{ maquina.estado }}</li>
+                    <li class="furo-list-item">
+                        <div class="furo-list-main">{{ maquina.nome }}</div>
+                        <div class="furo-list-sub">{{ maquina.modelo|default:"Sem modelo" }} · {{ maquina.get_estado_display|default:maquina.estado }}</div>
+                    </li>
                 {% empty %}
-                    <li>Nenhuma máquina registrada.</li>
+                    <li class="furo-empty">Nenhuma máquina registada.</li>
                 {% endfor %}
             </ul>
+        </div>
 
-            <h3 style="margin-bottom:15px;">Empregados envolvidos</h3>
-            <ul style="padding-left:20px;">
+        <div class="furo-panel">
+            <h3>Empregados envolvidos</h3>
+            <ul class="furo-list">
                 {% for ligacao in furo.ligacoes_empregados.all %}
-                    <li style="margin-bottom:10px;">
-                        <strong>{{ ligacao.empregado.nome }}</strong> — {{ ligacao.get_funcao_display }}
-
-                        <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
-                            <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}"
-                               style="display:inline-block; background:#f59e0b; color:white; padding:6px 10px; border-radius:5px; text-decoration:none; font-size:12px; font-weight:bold;">
-                                Editar
-                            </a>
-
-                            <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}"
-                               style="display:inline-block; background:#ef4444; color:white; padding:6px 10px; border-radius:5px; text-decoration:none; font-size:12px; font-weight:bold;">
-                                Remover
-                            </a>
+                    <li class="furo-list-item">
+                        <div class="furo-list-main">{{ ligacao.empregado.nome }}</div>
+                        <div class="furo-list-sub">{{ ligacao.get_funcao_display }}</div>
+                        <div class="furo-mini-actions">
+                            <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}" class="furo-mini-btn btn-edit">Editar</a>
+                            <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}" class="furo-mini-btn btn-delete">Remover</a>
                         </div>
                     </li>
                 {% empty %}
-                    <li>Nenhum empregado registrado neste furo.</li>
+                    <li class="furo-empty">Nenhum empregado registado neste furo.</li>
                 {% endfor %}
             </ul>
         </div>
-
-        <!-- CARD FORM MEDIÇÃO -->
-        <div style="flex:1; min-width:300px; background:#2c3e50; padding:20px; border-radius:10px;">
-            <h3 style="margin-bottom:15px;">Adicionar Nova Medição</h3>
-
-            <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:15px;" onsubmit="return confirmarMedicao()">
-                {% csrf_token %}
-
-                <label style="font-weight:bold; color:white;">Profundidade Medida (m)</label>
-                {{ form.profundidade_medida }}
-
-                <label style="font-weight:bold; color:white;">Inclinação Real Medida (°)</label>
-                {{ form.inclinacao_real_medida }}
-
-                <label style="font-weight:bold; color:white;">Azimute Real Medido (°)</label>
-                {{ form.azimute_real_medido }}
-
-                <label style="font-weight:bold; color:white;">Magnetismo</label>
-                {{ form.magnetismo }}
-
-                <label style="font-weight:bold; color:white;">Imagem</label>
-                {{ form.imagem }}
-
-                <label style="font-weight:bold; color:white;">Latitude</label>
-                {{ form.latitude }}
-
-                <label style="font-weight:bold; color:white;">Longitude</label>
-                {{ form.longitude }}
-
-                <label style="font-weight:bold; color:white;">Altitude</label>
-                {{ form.altitude }}
-
-                <label style="font-weight:bold; color:white;">Tipo de Rocha</label>
-                {{ form.tipo_rocha }}
-
-                <label style="font-weight:bold; color:white;">Cor</label>
-                {{ form.cor }}
-
-                <label style="font-weight:bold; color:white;">Dureza</label>
-                {{ form.dureza }}
-
-                <label style="font-weight:bold; color:white;">Observações</label>
-                {{ form.observacoes }}
-
-                {% if form.errors %}
-                    <div style="background:#c0392b; color:white; padding:10px; border-radius:6px;">
-                        {{ form.errors }}
-                    </div>
-                {% endif %}
-
-                <button type="submit"
-                        style="background:#27ae60; color:white; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;"
-                        onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
-                    💾 Registar Medição
-                </button>
-            </form>
-        </div>
     </div>
 
-    <!-- MEDIÇÕES -->
-    <h2 style="margin-bottom:15px;">Medições</h2>
-    <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
-        <thead style="background:#2c3e50; color:white;">
-            <tr>
-                <th style="padding:8px; text-align:left;">Data</th>
-                <th style="padding:8px; text-align:left;">Profundidade Medida (m)</th>
-                <th style="padding:8px; text-align:left;">Inclinação Real (°)</th>
-                <th style="padding:8px; text-align:left;">Azimute Real (°)</th>
-                <th style="padding:8px; text-align:left;">Magnetismo</th>
-                <th style="padding:8px; text-align:left;">Latitude</th>
-                <th style="padding:8px; text-align:left;">Longitude</th>
-                <th style="padding:8px; text-align:left;">Altitude</th>
-                <th style="padding:8px; text-align:left;">Imagem</th>
-            </tr>
-        </thead>
-        <tbody>
+    <section class="furo-table-card">
+        <div class="furo-table-header">
+            <div>
+                <h2>Medições</h2>
+                <p>Histórico técnico das medições registadas para este furo.</p>
+            </div>
+        </div>
+        <div class="furo-table-wrap">
+            <table class="furo-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Profundidade</th>
+                        <th>Inclinação real</th>
+                        <th>Azimute real</th>
+                        <th>Magnetismo</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Altitude</th>
+                        <th>Imagem</th>
+                    </tr>
+                </thead>
+                <tbody>
             {% for medicao in medicoes %}
-                <tr style="border-bottom:1px solid #7f8c8d;">
-                    <td style="padding:6px;">{{ medicao.criado_em }}</td>
-                    <td style="padding:6px;">{{ medicao.profundidade_medida }}</td>
-                    <td style="padding:6px;">{{ medicao.inclinacao_real_medida }}</td>
-                    <td style="padding:6px;">{{ medicao.azimute_real_medido }}</td>
-                    <td style="padding:6px;">{{ medicao.magnetismo }}</td>
-                    <td style="padding:6px;">{{ medicao.latitude }}</td>
-                    <td style="padding:6px;">{{ medicao.longitude }}</td>
-                    <td style="padding:6px;">{{ medicao.altitude }}</td>
-                    <td style="padding:6px;">
+                <tr>
+                    <td>{{ medicao.criado_em|date:"d/m/Y H:i" }}</td>
+                    <td>{{ medicao.profundidade_medida|default:"-" }} m</td>
+                    <td>{{ medicao.inclinacao_real_medida|default:"-" }}°</td>
+                    <td>{{ medicao.azimute_real_medido|default:"-" }}°</td>
+                    <td>{{ medicao.magnetismo|default:"-" }}</td>
+                    <td>{{ medicao.latitude|default:"-" }}</td>
+                    <td>{{ medicao.longitude|default:"-" }}</td>
+                    <td>{{ medicao.altitude|default:"-" }}</td>
+                    <td>
                         {% if medicao.imagem %}
-                            <img src="{{ medicao.imagem.url }}" width="50" style="cursor:pointer; border-radius:5px;" onclick="abrirModal('{{ medicao.imagem.url }}')">
+                            <img src="{{ medicao.imagem.url }}" class="furo-thumb" onclick="abrirModal('{{ medicao.imagem.url }}')">
                         {% else %}
                             -
                         {% endif %}
                     </td>
-                </tr>
+                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9" style="text-align:center; padding:10px;">Nenhuma medição registrada.</td>
+                    <td colspan="9" class="furo-empty">Nenhuma medição registada.</td>
                 </tr>
             {% endfor %}
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    <!-- LEVANTAMENTOS DE MATERIAL -->
-    <div style="margin-bottom:30px;">
-        <h2 style="margin-bottom:15px; color:#ecf0f1;">Levantamentos de Material</h2>
+    <section class="furo-table-card">
+        <div class="furo-table-header">
+            <div>
+                <h2>Levantamentos de Material</h2>
+                <p>Movimentos de material associados a este furo.</p>
+            </div>
+        </div>
 
         {% if levantamentos %}
-            <div style="overflow-x:auto; background:#2c3e50; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-                <table style="width:100%; border-collapse:collapse; color:#ecf0f1;">
-                    <thead style="background:#22313f;">
+            <div class="furo-table-wrap">
+                <table class="furo-table">
+                    <thead>
                         <tr>
-                            <th style="padding:10px; text-align:left;">Data</th>
-                            <th style="padding:10px; text-align:left;">Empregado</th>
-                            <th style="padding:10px; text-align:left;">Material</th>
-                            <th style="padding:10px; text-align:left;">Quantidade</th>
-                            <th style="padding:10px; text-align:left;">Projeto</th>
-                            <th style="padding:10px; text-align:left;">Observações</th>
+                            <th>Data</th>
+                            <th>Empregado</th>
+                            <th>Material</th>
+                            <th>Quantidade</th>
+                            <th>Projeto</th>
+                            <th>Observações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for levantamento in levantamentos %}
-                            <tr style="border-top:1px solid #3d566e;">
-                                <td style="padding:10px;">{{ levantamento.data }}</td>
-                                <td style="padding:10px;">{{ levantamento.empregado.nome }}</td>
-                                <td style="padding:10px;">
-                                    <a href="{% url 'projetos:material_detail' levantamento.material.id %}"
-                                       style="color:#5dade2; font-weight:bold; text-decoration:none;">
+                            <tr>
+                                <td>{{ levantamento.data|date:"d/m/Y" }}</td>
+                                <td>{{ levantamento.empregado.nome }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:material_detail' levantamento.material.id %}" class="furo-link">
                                         {{ levantamento.material.nome }}
                                     </a>
                                 </td>
-                                <td style="padding:10px;">{{ levantamento.quantidade }}</td>
-                                <td style="padding:10px;">
+                                <td>{{ levantamento.quantidade }}</td>
+                                <td>
                                     {% if levantamento.projeto %}
-                                        <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}"
-                                           style="color:#5dade2; text-decoration:none;">
+                                        <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}" class="furo-link">
                                             {{ levantamento.projeto.nome }}
                                         </a>
                                     {% else %}
                                         Stock
                                     {% endif %}
                                 </td>
-                                <td style="padding:10px;">{{ levantamento.observacoes|default:"-" }}</td>
+                                <td>{{ levantamento.observacoes|default:"-" }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p style="color:#bdc3c7;">Ainda não existem levantamentos de material neste furo.</p>
+            <div class="furo-empty" style="margin: 0 20px 20px;">Ainda não existem levantamentos de material neste furo.</div>
         {% endif %}
-    </div>
+    </section>
 
-    <!-- BOTÕES FINAIS -->
-    <div style="display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
-        <a href="{% url 'projetos:furo_update' furo.id %}"
-           style="flex:1; min-width:150px; text-align:center; background:#27ae60; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none;">
-            ✏️ Editar Furo
-        </a>
-
-        <a href="{% url 'projetos:furo_delete' furo.id %}"
-           style="flex:1; min-width:150px; text-align:center; background:#e74c3c; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none;">
-            🗑️ Apagar Furo
-        </a>
-
-        <a href="{% url 'projetos:furo_list' %}"
-           style="flex:1; min-width:150px; text-align:center; background:#2980b9; color:white; padding:12px 0; border-radius:5px; font-weight:bold; text-decoration:none;">
-            🔙 Voltar
-        </a>
+    <div class="furo-footer-actions">
+        <a href="{% url 'projetos:furo_update' furo.id %}" class="furo-action-btn btn-edit">✏️ Editar Furo</a>
+        <a href="{% url 'projetos:furo_delete' furo.id %}" class="furo-action-btn btn-delete">🗑️ Apagar Furo</a>
+        <a href="{% url 'projetos:furo_list' %}" class="furo-action-btn btn-back">🔙 Voltar</a>
     </div>
 
 </div>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</section>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-function confirmarMedicao() {
-    return confirm("Tem certeza que deseja salvar esta medição?");
-}
-
 function abrirModal(src) {
     document.getElementById("modal_img").src = src;
     document.getElementById("modal").style.display = "block";
@@ -342,13 +288,12 @@ if (Number.isFinite(lat) && Number.isFinite(lon)) {
 </script>
 
 <!-- Modal imagem -->
-<div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
-<div id="modal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:8px; z-index:1000;">
-    <img id="modal_img" style="max-width:100%; height:auto; border-radius:5px;">
-    <br><br>
-    <button onclick="fecharModal()" style="background:#e74c3c; color:white; padding:8px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">
-        Fechar
-    </button>
+<div id="overlay" class="furo-modal-overlay"></div>
+<div id="modal" class="furo-modal">
+    <img id="modal_img">
+    <div class="furo-modal-actions">
+        <button onclick="fecharModal()" class="furo-modal-close">Fechar</button>
+    </div>
 </div>
 
 {% endblock %}

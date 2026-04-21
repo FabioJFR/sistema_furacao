@@ -68,19 +68,19 @@
                         </td>
 
                         <td class="px-4 py-3">
-                            <div class="flex gap-2 flex-wrap">
+                            <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 min-w-[220px]">
                                 <a href="{% url 'projetos:empregado_detail' empregado.id %}"
-                                   class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                   class="inline-flex items-center justify-center min-w-[92px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
                                     Detalhes
                                 </a>
 
                                 <a href="{% url 'projetos:empregado_update' empregado.id %}"
-                                   class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                   class="inline-flex items-center justify-center min-w-[92px] bg-amber-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-amber-600 transition shadow-sm">
                                     Editar
                                 </a>
 
                                 <a href="{% url 'projetos:empregado_delete' empregado.id %}"
-                                   class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                   class="inline-flex items-center justify-center min-w-[92px] bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition shadow-sm">
                                     Apagar
                                 </a>
                             </div>
