@@ -20,7 +20,7 @@
             {% endif %}
 
             {% for field in form %}
-                <div>
+                <div {% if field.name == 'empresa_nome' %}id="empresaNomeWrap"{% endif %}{% if field.name == 'funcao' %} id="funcaoWrap"{% endif %}{% if field.name == 'especialidade' %} id="especialidadeWrap"{% endif %}>
                     <label class="block font-semibold mb-1">{{ field.label }}</label>
                     {{ field|add_class:"w-full p-2 border rounded" }}
 
@@ -48,4 +48,24 @@
         </div>
     </div>
 </section>
+<script>
+    (function() {
+        const tipoConta = document.getElementById("id_tipo_conta");
+        const empresaWrap = document.getElementById("empresaNomeWrap");
+        const funcaoWrap = document.getElementById("funcaoWrap");
+        const especialidadeWrap = document.getElementById("especialidadeWrap");
+
+        function atualizarCampos() {
+            const isIndividual = tipoConta && tipoConta.value === "individual";
+            if (empresaWrap) empresaWrap.style.display = isIndividual ? "none" : "";
+            if (funcaoWrap) funcaoWrap.style.display = isIndividual ? "none" : "";
+            if (especialidadeWrap) especialidadeWrap.style.display = isIndividual ? "" : "none";
+        }
+
+        if (tipoConta) {
+            tipoConta.addEventListener("change", atualizarCampos);
+            atualizarCampos();
+        }
+    })();
+</script>
 {% endblock %}

@@ -3,8 +3,11 @@ import json
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.utils import timezone
 
+from plataforma.models import Empresa
+from ..models.individual import Individual
 from ..models.empregado import Empregados, EmpregadoFicheiro, EmpregadoProjeto
 from ..models.furo import Furo
 from ..models.projeto import Projeto
@@ -77,6 +80,24 @@ def _atribuir_empresa_instance(instance, empresa=None):
 # ---------------- Empregados ----------------
 
 class EmpregadoRegistroForm(UserCreationForm):
+    TIPO_CONTA_CHOICES = [
+        ("empregado", "Pertence a uma empresa"),
+        ("individual", "Conta individual"),
+    ]
+
+    tipo_conta = forms.ChoiceField(
+        label="Tipo de conta",
+        choices=TIPO_CONTA_CHOICES,
+        initial="empregado",
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    empresa_nome = forms.CharField(
+        label="Nome da empresa",
+        max_length=200,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        help_text="Introduza exatamente o nome da empresa que te foi indicado.",
+        required=False,
+    )
     username = forms.CharField(
         label="Nome de utilizador",
         widget=forms.TextInput(attrs={"class": "form-control"}),
@@ -102,6 +123,13 @@ class EmpregadoRegistroForm(UserCreationForm):
         choices=Empregados._meta.get_field("funcao").choices,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
+    especialidade = forms.CharField(
+        label="Especialidade",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        help_text="Opcional para contas individuais.",
+    )
     password1 = forms.CharField(
         label="Palavra-passe",
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
@@ -115,7 +143,53 @@ class EmpregadoRegistroForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ["username", "nome", "email", "telefone", "funcao", "password1", "password2"]
+        fields = [
+            "tipo_conta",
+            "empresa_nome",
+            "username",
+            "nome",
+            "email",
+            "telefone",
+            "funcao",
+            "especialidade",
+            "password1",
+            "password2",
+        ]
+
+    def clean_empresa_nome(self):
+        tipo_conta = self.cleaned_data.get("tipo_conta")
+        valor = self.cleaned_data.get("empresa_nome", "").strip()
+        if tipo_conta != "empregado":
+            self.empresa_resolvida = None
+            return valor
+        if len(valor) < 2:
+            raise forms.ValidationError("Indica o nome da empresa.")
+
+        empresas = Empresa.objects.filter(
+            Q(nome__iexact=valor) | Q(nome_comercial__iexact=valor)
+        ).order_by("nome")
+
+        if not empresas.exists():
+            raise forms.ValidationError(
+                "Não foi encontrada nenhuma empresa com esse nome. Confirma o nome exato com a tua empresa."
+            )
+
+        if empresas.count() > 1:
+            raise forms.ValidationError(
+                "Existem várias empresas com esse nome. Pede à empresa o nome exato que deves usar."
+            )
+
+        self.empresa_resolvida = empresas.first()
+        return valor
+
+    def clean(self):
+        cleaned = super().clean()
+        tipo_conta = cleaned.get("tipo_conta")
+        if tipo_conta == "empregado" and not cleaned.get("empresa_nome"):
+            self.add_error("empresa_nome", "Indica o nome da empresa.")
+        if tipo_conta == "individual":
+            cleaned["funcao"] = ""
+        return cleaned
 
     def clean_nome(self):
         valor = self.cleaned_data.get("nome", "").strip()
@@ -313,8 +387,6 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
             "horas_trabalhadas_mes",
             "horas_total",
             "alertas",
-            "aprovado",
-            "data_aprovacao",
         ]
         widgets = {
             "user": forms.Select(attrs={"class": "form-control"}),
@@ -341,8 +413,6 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
             "horas_extra": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_trabalhadas_mes": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_total": forms.NumberInput(attrs={"class": "form-control"}),
-            "aprovado": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "data_aprovacao": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
         }
 
     def __init__(self, *args, empresa=None, **kwargs):
@@ -368,12 +438,6 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
 
     def clean(self):
         cleaned_data = super().clean()
-
-        aprovado = cleaned_data.get("aprovado")
-        data_aprovacao = cleaned_data.get("data_aprovacao")
-
-        if aprovado and not data_aprovacao:
-            cleaned_data["data_aprovacao"] = timezone.now()
 
         self._validar_empresa_instancia("Este empregado não pertence à empresa atual.")
         self._validar_furos_empresa_clean(cleaned_data)
@@ -423,6 +487,41 @@ class EmpregadoProjetoForm(forms.ModelForm):
 
         if ativo and data_fim:
             self.add_error("ativo", "Se a ligação está ativa, a data de fim deve ficar vazia.")
+
+        return cleaned
+
+
+class ProjetoEmpregadoForm(forms.Form):
+    empregado = forms.ModelChoiceField(
+        queryset=Empregados.objects.none(),
+        label="Empregado",
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    data_inicio = forms.DateField(
+        required=False,
+        label="Data de início",
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+    )
+
+    def __init__(self, *args, empresa=None, projeto=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empresa = empresa
+        self.projeto = projeto
+        self.fields["empregado"].queryset = (
+            Empregados.objects.filter(empresa_id=_resolver_empresa_id(empresa)).order_by("nome")
+            if empresa is not None else Empregados.objects.none()
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        empregado = cleaned.get("empregado")
+
+        if self.empresa is not None and empregado and empregado.empresa_id != _resolver_empresa_id(self.empresa):
+            self.add_error("empregado", "O empregado selecionado não pertence à empresa atual.")
+
+        if self.projeto is not None and self.empresa is not None:
+            if self.projeto.empresa_id != _resolver_empresa_id(self.empresa):
+                raise forms.ValidationError("O projeto selecionado não pertence à empresa atual.")
 
         return cleaned
 

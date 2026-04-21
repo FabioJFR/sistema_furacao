@@ -1,11 +1,11 @@
-{% extends "plataforma/base.html" %}
+{% extends "dispositivos/base.html" %}
 {% load i18n %}
 <!-- templates/dispositivos/leitura_bruta_detail.html -->
 {% block title %}{% trans "Detalhe da Leitura Bruta" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+<div class="device-shell max-w-6xl mx-auto">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">
@@ -16,35 +16,35 @@
                 </p>
             </div>
 
-            <div class="flex gap-3 flex-wrap">
-                <a href="{% url 'dispositivos:sessao_detail' leitura.sessao.pk %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+            <div class="flex gap-3 flex-wrap device-header-actions">
+                <a href="{% url 'dispositivos:sessao_detail' leitura.sessao.pk %}" class="device-btn device-btn--secondary inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
                     ← {% trans "Voltar à sessão" %}
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 device-metric-grid">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Sessão" %}</p>
             <h2 class="text-lg font-bold text-gray-800 mt-2 break-all">{{ leitura.sessao_id }}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Sequência" %}</p>
             <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ leitura.sequencia }}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Recebido em" %}</p>
             <h2 class="text-lg font-bold text-gray-800 mt-2">{{ leitura.recebido_em|date:"d/m/Y H:i:s" }}</h2>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Informação Geral" %}</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm device-info-grid">
             <div>
                 <p class="text-gray-500">{% trans "Empresa" %}</p>
                 <p class="font-semibold text-gray-800 mt-1">
@@ -92,31 +92,31 @@
     </div>
 
     <div class="space-y-6">
-        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+        <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload Texto" %}</h2>
 
             {% if leitura.payload_texto %}
-                <pre class="bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap">{{ leitura.payload_texto }}</pre>
+                <pre class="device-code device-code--text bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap">{{ leitura.payload_texto }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo em texto." %}</p>
             {% endif %}
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+        <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload Hex" %}</h2>
 
             {% if leitura.payload_hex %}
-                <pre class="bg-slate-900 text-emerald-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_hex }}</pre>
+                <pre class="device-code device-code--hex bg-slate-900 text-emerald-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_hex }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo hexadecimal." %}</p>
             {% endif %}
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+        <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload JSON" %}</h2>
 
             {% if leitura.payload_json %}
-                <pre class="bg-slate-900 text-sky-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_json|pprint }}</pre>
+                <pre class="device-code device-code--json bg-slate-900 text-sky-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_json|pprint }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo JSON." %}</p>
             {% endif %}

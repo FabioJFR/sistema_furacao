@@ -297,12 +297,19 @@ def historico_configuracao_comparar(request, pk):
     campos = [
         ("comprimento_tubo", "Tubo"),
         ("comprimento_karoutier", "Karoutier"),
+        ("quantidade_karoutier", "Qtd. Karoutier"),
         ("comprimento_acrescento", "Acrescento"),
+        ("quantidade_acrescento", "Qtd. Acrescento"),
         ("comprimento_calibrador", "Calibrador"),
+        ("quantidade_calibrador", "Qtd. Calibrador"),
         ("comprimento_record", "Record"),
+        ("quantidade_record", "Qtd. Record"),
         ("comprimento_bit", "Bit"),
         ("comprimento_caixa_mola", "Caixa de mola"),
         ("comprimento_tubo_interior", "Tubo interior"),
+        ("quantidade_tubo_interior", "Qtd. Tubo interior"),
+        ("comprimento_acrescento_tubo_interior", "Acrescento do tubo interior"),
+        ("quantidade_acrescento_tubo_interior", "Qtd. Acrescento do tubo interior"),
         ("comprimento_cabeca_interior", "Cabeça de interior"),
     ]
 
@@ -369,12 +376,19 @@ def historico_configuracao_restaurar(request, pk):
                 furo=historico.furo,
                 comprimento_tubo=historico.comprimento_tubo,
                 comprimento_karoutier=historico.comprimento_karoutier,
+                quantidade_karoutier=historico.quantidade_karoutier or 1,
                 comprimento_acrescento=historico.comprimento_acrescento,
+                quantidade_acrescento=historico.quantidade_acrescento or 1,
                 comprimento_calibrador=historico.comprimento_calibrador,
+                quantidade_calibrador=historico.quantidade_calibrador or 1,
                 comprimento_record=historico.comprimento_record,
+                quantidade_record=historico.quantidade_record or 1,
                 comprimento_bit=historico.comprimento_bit,
                 comprimento_caixa_mola=historico.comprimento_caixa_mola,
                 comprimento_tubo_interior=historico.comprimento_tubo_interior,
+                quantidade_tubo_interior=historico.quantidade_tubo_interior or 1,
+                comprimento_acrescento_tubo_interior=historico.comprimento_acrescento_tubo_interior,
+                quantidade_acrescento_tubo_interior=historico.quantidade_acrescento_tubo_interior or 1,
                 comprimento_cabeca_interior=historico.comprimento_cabeca_interior,
                 atualizado_por=request.user,
             )
@@ -384,12 +398,19 @@ def historico_configuracao_restaurar(request, pk):
             configuracao.furo = historico.furo
             configuracao.comprimento_tubo = historico.comprimento_tubo
             configuracao.comprimento_karoutier = historico.comprimento_karoutier
+            configuracao.quantidade_karoutier = historico.quantidade_karoutier or 1
             configuracao.comprimento_acrescento = historico.comprimento_acrescento
+            configuracao.quantidade_acrescento = historico.quantidade_acrescento or 1
             configuracao.comprimento_calibrador = historico.comprimento_calibrador
+            configuracao.quantidade_calibrador = historico.quantidade_calibrador or 1
             configuracao.comprimento_record = historico.comprimento_record
+            configuracao.quantidade_record = historico.quantidade_record or 1
             configuracao.comprimento_bit = historico.comprimento_bit
             configuracao.comprimento_caixa_mola = historico.comprimento_caixa_mola
             configuracao.comprimento_tubo_interior = historico.comprimento_tubo_interior
+            configuracao.quantidade_tubo_interior = historico.quantidade_tubo_interior or 1
+            configuracao.comprimento_acrescento_tubo_interior = historico.comprimento_acrescento_tubo_interior
+            configuracao.quantidade_acrescento_tubo_interior = historico.quantidade_acrescento_tubo_interior or 1
             configuracao.comprimento_cabeca_interior = historico.comprimento_cabeca_interior
             configuracao.atualizado_por = request.user
             configuracao.save()

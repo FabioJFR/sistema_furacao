@@ -152,6 +152,31 @@
                     <span>Gerir modelos, dados internos e operações técnicas.</span>
                 </a>
             </div>
+
+            <div class="section-title" style="margin-top: 26px;">
+                <div>
+                    <h2>Alertas de renovação</h2>
+                    <p>Empresas com renovação próxima ou vencida.</p>
+                </div>
+            </div>
+
+            {% if alertas_renovacao %}
+                <div class="panel-list">
+                    {% for subscricao in alertas_renovacao %}
+                        <a href="{% url 'plataforma:empresa_detail' subscricao.empresa.pk %}" class="quick-link">
+                            <strong>{{ subscricao.empresa.nome }}</strong>
+                            <span>
+                                {{ subscricao.plano.nome }} · {{ subscricao.periodo_cobranca_label }} ·
+                                renovação {{ subscricao.proxima_renovacao|date:"d/m/Y" }}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    Não existem alertas de renovação neste momento.
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

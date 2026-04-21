@@ -17,12 +17,48 @@
         .actions { display: flex; gap: 10px; margin-top: 8px; }
         .btn-secondary { background: #e5e7eb; color: #111827; text-align: center; }
         .helper { margin-top: -8px; margin-bottom: 16px; color: #6b7280; font-size: 14px; }
+        .field-readonly {
+            background: #f3f4f6;
+            color: #111827;
+            font-weight: 700;
+            cursor: not-allowed;
+        }
         .top-link { display: inline-block; margin-bottom: 18px; color: #6b7280; text-decoration: none; font-weight: 600; }
         .top-link:hover { color: #111827; }
-        .messages { margin-bottom: 18px; }
-        .message { padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .error { background: #fee2e2; color: #991b1b; }
-        .success { background: #dcfce7; color: #166534; }
+        .messages { margin-bottom: 18px; display: grid; gap: 10px; }
+        .message {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-weight: 600;
+            line-height: 1.5;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+        .message__content { flex: 1; }
+        .message__close {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: 22px;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+            opacity: 0.72;
+            padding: 0;
+            margin: -2px 0 0;
+        }
+        .message__close:hover { opacity: 1; }
+        .error { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .success { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .warning { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .info { background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe; }
+        .debug { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
     </style>
 </head>
 <body>
@@ -33,7 +69,10 @@
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
+                    <div class="message {{ message.tags }}" data-message>
+                        <div class="message__content">{{ message }}</div>
+                        <button type="button" class="message__close" aria-label="Fechar aviso" data-message-close>×</button>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -72,7 +111,7 @@
 
                 <div class="row">
                     <label>Plano</label>
-                    <select name="plano">
+                    <select name="plano" id="id_plano">
                         {% for plano in planos %}
                             <option value="{{ plano.id }}" {% if dados.plano == plano.id|stringformat:"s" %}selected{% endif %}>
                                 {{ plano.nome }} - {{ plano.preco_mensal }} €/mês
@@ -80,8 +119,30 @@
                         {% endfor %}
                     </select>
                 </div>
+
+                <div class="row">
+                    <label>Período de pagamento</label>
+                    <select name="ciclo_subscricao" id="id_ciclo_subscricao">
+                        <option value="1" {% if dados.ciclo_subscricao == '1' or not dados.ciclo_subscricao %}selected{% endif %}>1 mês</option>
+                        <option value="3" {% if dados.ciclo_subscricao == '3' %}selected{% endif %}>3 meses</option>
+                        <option value="6" {% if dados.ciclo_subscricao == '6' %}selected{% endif %}>6 meses</option>
+                        <option value="12" {% if dados.ciclo_subscricao == '12' %}selected{% endif %}>12 meses</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <label>Valor da subscrição</label>
+                    <input
+                        type="number"
+                        id="id_valor_subscricao"
+                        value="{{ dados.valor_subscricao|default:'' }}"
+                        step="0.01"
+                        readonly
+                        class="field-readonly"
+                    >
+                </div>
                 <p class="helper">
-                    O tipo de conta deve corresponder ao plano selecionado.
+                    O tipo de conta deve corresponder ao plano selecionado. O valor é calculado automaticamente e fica registado para faturação e relatórios futuros.
                 </p>
 
                 <div class="row">
@@ -101,11 +162,25 @@
             </form>
         </div>
     </div>
+    {{ planos_contexto|json_script:"planos-contexto-data" }}
     <script>
         (function () {
+            document.querySelectorAll('[data-message-close]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const message = button.closest('[data-message]');
+                    if (message) {
+                        message.remove();
+                    }
+                });
+            });
+
             const tipoContaSelect = document.getElementById('id_tipo_conta');
             const empresaRow = document.getElementById('empresa_row');
             const nomeEmpresaInput = document.getElementById('id_nome_empresa');
+            const planoSelect = document.getElementById('id_plano');
+            const periodoSelect = document.getElementById('id_ciclo_subscricao');
+            const valorSubscricaoInput = document.getElementById('id_valor_subscricao');
+            const planosContexto = JSON.parse(document.getElementById('planos-contexto-data')?.textContent || '{}');
 
             function atualizarFormulario() {
                 if (!tipoContaSelect || !empresaRow || !nomeEmpresaInput) return;
@@ -119,8 +194,52 @@
                 }
             }
 
+            function formatarValor(valor) {
+                return Number(valor || 0).toFixed(2);
+            }
+
+            function atualizarPeriodosDisponiveis() {
+                if (!planoSelect || !periodoSelect) return;
+
+                const plano = planosContexto[planoSelect.value];
+                const periodos = (plano?.periodos || [1, 12]).map(String);
+
+                Array.from(periodoSelect.options).forEach((option) => {
+                    const permitido = periodos.includes(option.value);
+                    option.hidden = !permitido;
+                    option.disabled = !permitido;
+                });
+
+                if (!periodos.includes(periodoSelect.value) && periodos.length) {
+                    periodoSelect.value = periodos[0];
+                }
+            }
+
+            function atualizarValorSubscricao() {
+                if (!planoSelect || !periodoSelect || !valorSubscricaoInput) return;
+
+                const plano = planosContexto[planoSelect.value];
+                if (!plano) {
+                    valorSubscricaoInput.value = '';
+                    return;
+                }
+
+                const periodo = Number(periodoSelect.value || 1);
+                const precoMensal = Number(plano.preco_mensal || 0);
+                const precoAnual = Number(plano.preco_anual || 0);
+                const valor = periodo === 12 ? (precoAnual || (precoMensal * 12)) : (precoMensal * periodo);
+                valorSubscricaoInput.value = formatarValor(valor);
+            }
+
             tipoContaSelect.addEventListener('change', atualizarFormulario);
+            planoSelect?.addEventListener('change', () => {
+                atualizarPeriodosDisponiveis();
+                atualizarValorSubscricao();
+            });
+            periodoSelect?.addEventListener('change', atualizarValorSubscricao);
             atualizarFormulario();
+            atualizarPeriodosDisponiveis();
+            atualizarValorSubscricao();
         })();
     </script>
 </body>

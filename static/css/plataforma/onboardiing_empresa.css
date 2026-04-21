@@ -14,16 +14,41 @@
     #id_plano,
     #id_estado_empresa,
     #id_criar_subscricao_inicial,
-    #id_valor_subscricao,
-    #id_criar_pagamento_inicial,
-    #id_valor_pagamento {
+    #id_valor_subscricao {
         width: 100%;
         box-sizing: border-box;
-        padding: 10px 12px;
+        min-height: 48px;
+        padding: 12px 14px;
         border: 1px solid #d1d5db;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 16px;
+        line-height: 1.5;
         background: white;
+    }
+
+    #id_valor_subscricao[readonly] {
+        background: #f3f4f6;
+        color: #111827;
+        font-weight: 600;
+        cursor: not-allowed;
+    }
+
+    #id_valor_subscricao[aria-disabled="true"] {
+        opacity: 0.7;
+    }
+
+    form[method="post"] label {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    form[method="post"] h2 {
+        font-size: 20px !important;
+    }
+
+    form[method="post"] span {
+        font-size: 13px;
+        line-height: 1.5;
     }
 
     @media (max-width: 768px) {

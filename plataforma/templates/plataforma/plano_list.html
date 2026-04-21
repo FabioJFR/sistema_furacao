@@ -17,16 +17,6 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="message {{ message.tags|default:'info' }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
 <div class="stats">
     <div class="stat-box">
         <div class="stat-label">Total de planos</div>
@@ -56,6 +46,7 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
                         <th>Tipo</th>
                         <th>Preço mensal</th>
                         <th>Preço anual</th>
+                        <th>Cobrança</th>
                         <th>Limites</th>
                         <th>Permissões</th>
                         <th>Estado</th>
@@ -76,6 +67,7 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
                             </td>
                             <td>{{ plano.preco_mensal }} €</td>
                             <td>{{ plano.preco_anual }} €</td>
+                            <td>{{ plano.periodos_cobranca_label }}</td>
                             <td>
                                 Empregados: {{ plano.limite_empregados }}<br>
                                 Projetos: {{ plano.limite_projetos }}<br>

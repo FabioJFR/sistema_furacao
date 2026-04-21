@@ -1,0 +1,52 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Meus Dados{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">👤 Meus Dados</h1>
+            <p class="text-gray-500 mt-1">Consulta dos teus dados pessoais na conta individual.</p>
+        </div>
+        <a href="{% url 'projetos:meus_dados_empregado_editar' %}"
+           class="bg-yellow-500 text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition shadow font-semibold">
+            ✏️ Editar Dados
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Dados Pessoais</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+            <div><strong>Nome:</strong> {{ individual.nome|default:"-" }}</div>
+            <div><strong>Email:</strong> {{ individual.email|default:"-" }}</div>
+            <div><strong>Telefone:</strong> {{ individual.telefone|default:"-" }}</div>
+            <div><strong>Especialidade:</strong> {{ individual.especialidade|default:"-" }}</div>
+            <div><strong>Data de nascimento:</strong> {{ individual.data_nascimento|default:"-" }}</div>
+            <div><strong>Início de atividade:</strong> {{ individual.data_inicio_atividade|default:"-" }}</div>
+            <div><strong>Nacionalidade:</strong> {{ individual.nacionalidade|default:"-" }}</div>
+            <div><strong>NIF:</strong> {{ individual.nif|default:"-" }}</div>
+            <div class="md:col-span-2"><strong>Morada:</strong> {{ individual.morada|default:"-" }}</div>
+            <div class="md:col-span-2"><strong>Biografia:</strong> {{ individual.biografia|default:"-" }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="text-gray-500 text-sm">Total Registos</div>
+                <div class="text-2xl font-bold">{{ total_registos|default:0 }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="text-gray-500 text-sm">Total Horas</div>
+                <div class="text-2xl font-bold">{{ total_horas|default:0|floatformat:2 }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="text-gray-500 text-sm">Total Metros</div>
+                <div class="text-2xl font-bold">{{ total_metros|default:0|floatformat:2 }} m</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

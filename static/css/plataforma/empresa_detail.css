@@ -43,6 +43,48 @@
     margin-bottom: 10px;
 }
 
+.empresa-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.empresa-badge--manual {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.empresa-badge--auto {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.empresa-renovacao-form {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.empresa-renovacao-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.empresa-renovacao-row input[type="date"] {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+}
+
 .empresa-actions {
     display: flex;
     gap: 10px;

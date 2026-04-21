@@ -13,6 +13,7 @@ from .empregado import (
     EmpregadoProjeto,
     EmpregadoFicheiro,
 )
+from .individual import Individual
 from .empregado_furo import EmpregadoFuro
 
 # ===============================
@@ -43,6 +44,7 @@ from .despesa import Despesa
 from .configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregado
 from .historico_configuracao import HistoricoConfiguracaoPerfuracao
 from .preferencias import PreferenciasUser
+from .evento_analytics import EventoAnalytics
 
 # ===============================
 # TODO FUTURO:

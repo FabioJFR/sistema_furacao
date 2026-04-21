@@ -33,26 +33,6 @@ def _obter_admin_empregado_graficos(request):
         getattr(request.user, "username", None),
     )
 
-    admin_empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-
-    if admin_empregado:
-        if not admin_empregado.empresa_id:
-            logger.warning(
-                "Acesso aos gráficos bloqueado: Empregados sem empresa associada. user_id=%s, empregado_id=%s",
-                request.user.id,
-                admin_empregado.pk,
-            )
-            messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-            return None
-
-        logger.info(
-            "Acesso aos gráficos concedido via Empregados. user_id=%s, empregado_id=%s, empresa_id=%s",
-            request.user.id,
-            admin_empregado.pk,
-            admin_empregado.empresa_id,
-        )
-        return admin_empregado
-
     perfil = PerfilPlataforma.objects.filter(
         user=request.user,
         ativo=True,

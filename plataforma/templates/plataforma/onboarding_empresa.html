@@ -3,13 +3,13 @@
 
 {% block title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/plataforma/onboarding_empresa.css' %}">
+    <link rel="stylesheet" href="{% static 'css/plataforma/onboardiing_empresa.css' %}">
 {% endblock %}
 
 {% block page_title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
 
 {% block page_description %}
-Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a subscrição e o pagamento inicial.
+Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a subscrição inicial.
 {% endblock %}
 
 {% block page_actions %}
@@ -18,16 +18,6 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
 
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 32px;">
-    {% if messages %}
-        <div style="margin-bottom: 20px;">
-            {% for message in messages %}
-                <div class="message {{ message.tags|default:'info' }}" style="padding: 12px 14px; border-radius: 8px; margin-bottom: 10px;{% if message.tags == 'success' %} background: #dcfce7; color: #166534;{% elif message.tags == 'error' %} background: #fee2e2; color: #991b1b;{% elif message.tags == 'warning' %} background: #fef3c7; color: #92400e;{% else %} background: #dbeafe; color: #1d4ed8;{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
     {% if form.non_field_errors %}
         <div style="padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; background: #fee2e2; color: #991b1b;">
             {{ form.non_field_errors }}
@@ -79,7 +69,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
             <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Plano e faturação inicial</h2>
 
             {% for field in form %}
-                {% if field.name in "plano estado_empresa criar_subscricao_inicial valor_subscricao criar_pagamento_inicial valor_pagamento" %}
+                {% if field.name in "plano ciclo_subscricao estado_empresa criar_subscricao_inicial valor_subscricao" %}
                     <div style="margin-bottom: 14px;">
                         <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
                         {{ field }}
@@ -101,4 +91,84 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ planos_periodos|json_script:"planos-periodos-data" }}
+{{ planos_precos|json_script:"planos-precos-data" }}
+<script>
+(() => {
+    const planoSelect = document.getElementById("id_plano");
+    const periodoSelect = document.getElementById("id_ciclo_subscricao");
+    const valorSubscricaoInput = document.getElementById("id_valor_subscricao");
+    const criarSubscricaoCheckbox = document.getElementById("id_criar_subscricao_inicial");
+
+    if (!planoSelect || !periodoSelect || !valorSubscricaoInput) {
+        return;
+    }
+
+    const planosPeriodos = JSON.parse(document.getElementById("planos-periodos-data")?.textContent || "{}");
+    const planosPrecos = JSON.parse(document.getElementById("planos-precos-data")?.textContent || "{}");
+
+    function formatarValor(valor) {
+        return Number(valor || 0).toFixed(2);
+    }
+
+    function obterValorCalculado() {
+        const planoId = planoSelect.value;
+        const periodo = Number(periodoSelect.value || 1);
+        const precos = planosPrecos[planoId];
+
+        if (!planoId || !precos) {
+            return "";
+        }
+
+        const precoMensal = Number(precos.preco_mensal || 0);
+        const precoAnual = Number(precos.preco_anual || 0);
+
+        if (periodo === 12) {
+            return formatarValor(precoAnual || (precoMensal * 12));
+        }
+
+        return formatarValor(precoMensal * periodo);
+    }
+
+    function atualizarValorSubscricao() {
+        if (criarSubscricaoCheckbox && !criarSubscricaoCheckbox.checked) {
+            valorSubscricaoInput.value = "";
+            valorSubscricaoInput.setAttribute("aria-disabled", "true");
+            return;
+        }
+
+        valorSubscricaoInput.value = obterValorCalculado();
+        valorSubscricaoInput.removeAttribute("aria-disabled");
+    }
+
+    function atualizarPeriodosDisponiveis() {
+        const option = planoSelect.selectedOptions?.[0];
+        const periodos = (planosPeriodos[option?.value] || [1, 12]).map(String);
+
+        Array.from(periodoSelect.options).forEach((periodoOption) => {
+            const permitido = periodos.includes(periodoOption.value);
+            periodoOption.hidden = !permitido;
+            periodoOption.disabled = !permitido;
+        });
+
+        if (!periodos.includes(periodoSelect.value) && periodos.length) {
+            periodoSelect.value = periodos[0];
+        }
+
+        atualizarValorSubscricao();
+    }
+
+    planoSelect.addEventListener("change", atualizarPeriodosDisponiveis);
+    periodoSelect.addEventListener("change", atualizarValorSubscricao);
+
+    if (criarSubscricaoCheckbox) {
+        criarSubscricaoCheckbox.addEventListener("change", atualizarValorSubscricao);
+    }
+
+    atualizarPeriodosDisponiveis();
+})();
+</script>
 {% endblock %}

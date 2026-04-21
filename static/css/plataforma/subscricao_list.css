@@ -3,7 +3,7 @@
 /* GRID DE MÉTRICAS */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 15px;
     margin-bottom: 25px;
 }
@@ -94,4 +94,16 @@ td {
     text-align: center;
     color: var(--muted);
     background: #fafafa;
+}
+
+@media (max-width: 1200px) {
+    .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }

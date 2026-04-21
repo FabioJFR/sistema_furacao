@@ -19,24 +19,38 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
             "furo",
             "comprimento_tubo",
             "comprimento_karoutier",
+            "quantidade_karoutier",
             "comprimento_acrescento",
+            "quantidade_acrescento",
             "comprimento_calibrador",
+            "quantidade_calibrador",
             "comprimento_record",
+            "quantidade_record",
             "comprimento_bit",
             "comprimento_caixa_mola",
             "comprimento_tubo_interior",
+            "quantidade_tubo_interior",
+            "comprimento_acrescento_tubo_interior",
+            "quantidade_acrescento_tubo_interior",
             "comprimento_cabeca_interior",
         ]
         widgets = {
             "furo": forms.Select(attrs={"class": "form-control"}),
             "comprimento_tubo": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "comprimento_karoutier": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_karoutier": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
             "comprimento_acrescento": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_acrescento": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
             "comprimento_calibrador": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_calibrador": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
             "comprimento_record": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_record": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
             "comprimento_bit": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "comprimento_caixa_mola": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "comprimento_tubo_interior": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_tubo_interior": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
+            "comprimento_acrescento_tubo_interior": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantidade_acrescento_tubo_interior": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
             "comprimento_cabeca_interior": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
         }
 
@@ -84,6 +98,9 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
             if field_name == "furo":
                 continue
             if value is not None and value < 0:
-                self.add_error(field_name, "O comprimento não pode ser negativo.")
+                if field_name.startswith("quantidade_"):
+                    self.add_error(field_name, "A quantidade não pode ser negativa.")
+                else:
+                    self.add_error(field_name, "O comprimento não pode ser negativo.")
 
         return cleaned_data

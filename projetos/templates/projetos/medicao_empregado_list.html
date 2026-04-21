@@ -1,0 +1,72 @@
+{% extends 'projetos/base.html' %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📊 Minhas Medições</h1>
+            <p class="text-gray-500 mt-2">Medições dos furos aos quais estás associado ou onde já tens registos.</p>
+        </div>
+        <a href="{% url 'projetos:meus_furos_empregado' %}"
+           class="flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow w-48">
+            🕳️ Ver Meus Furos
+        </a>
+    </div>
+
+    {% if medicoes %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for medicao in medicoes %}
+                <div class="rounded-xl shadow-md hover:shadow-xl transition duration-200 overflow-hidden border-l-4 bg-white
+                    {% if medicao.magnetismo and medicao.magnetismo > 50 %}
+                        border-red-500
+                    {% elif medicao.magnetismo and medicao.magnetismo > 20 %}
+                        border-yellow-400
+                    {% else %}
+                        border-green-500
+                    {% endif %}
+                ">
+                    <div class="p-5 flex flex-col justify-between h-full">
+                        <div class="mb-4">
+                            <h2 class="text-lg font-bold text-gray-800">
+                                {{ medicao.nome_furo_snapshot|default:medicao.furo.nome }}
+                            </h2>
+                            <p class="text-sm text-gray-500">
+                                {{ medicao.furo.projeto.nome }}
+                            </p>
+                        </div>
+
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <p><strong>Profundidade:</strong> {{ medicao.profundidade_medida|default:"-" }} m</p>
+                            <p><strong>Inclinação:</strong> {{ medicao.inclinacao_real_medida|default:"-" }}°</p>
+                            <p><strong>Azimute:</strong> {{ medicao.azimute_real_medido|default:"-" }}°</p>
+                            <p><strong>Magnetismo:</strong> {{ medicao.magnetismo|default:"-" }}</p>
+                            <p><strong>Criada em:</strong> {{ medicao.criado_em|date:"d/m/Y H:i" }}</p>
+                        </div>
+
+                        <div class="mt-5 space-y-2">
+                            <a href="{% url 'projetos:medicao_detail_empregado' medicao.id %}"
+                               class="block text-center bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition text-sm font-semibold">
+                                🔍 Ver Medição
+                            </a>
+                            <a href="{% url 'projetos:furo_detail_empregado' medicao.furo.id %}"
+                               class="block text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
+                                🕳️ Ver Furo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center mt-10 bg-white rounded-xl shadow-sm p-8">
+            <p class="text-gray-500 text-lg">Ainda não tens medições disponíveis.</p>
+            <div class="mt-4">
+                <a href="{% url 'projetos:meus_furos_empregado' %}"
+                   class="inline-flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                    🕳️ Ver Meus Furos
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

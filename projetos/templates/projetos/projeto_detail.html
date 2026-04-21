@@ -37,78 +37,63 @@
             {% endif %}
         </div>
 
-        <!-- PAINEL DE NAVEGAÇÃO DOS FUROS -->
-        <div style="
-            display:flex;
-            align-items:center;
-            gap:12px;
-            flex-wrap:wrap;
-            background:#f8fafc;
-            border:1px solid #e5e7eb;
-            border-radius:12px;
-            padding:14px 16px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.06);
-            margin-top:10px;
-            margin-bottom:14px;
-        ">
-            <button id="prevFuroBtn" type="button" style="
-                width:44px;
-                height:44px;
-                border:none;
-                border-radius:10px;
-                background:#2563eb;
-                color:white;
-                font-size:20px;
-                font-weight:bold;
-                cursor:pointer;
-                box-shadow:0 4px 10px rgba(37,99,235,0.25);
-                transition:0.2s;
-            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
-                ◀
-            </button>
-
-            <button id="nextFuroBtn" type="button" style="
-                width:44px;
-                height:44px;
-                border:none;
-                border-radius:10px;
-                background:#2563eb;
-                color:white;
-                font-size:20px;
-                font-weight:bold;
-                cursor:pointer;
-                box-shadow:0 4px 10px rgba(37,99,235,0.25);
-                transition:0.2s;
-            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
-                ▶
-            </button>
-
-            <div id="furoInfo" style="
-                flex:1;
-                min-width:220px;
-                color:#1f2937;
-                font-size:14px;
-                line-height:1.5;
-                font-weight:600;
-                padding:4px 8px;
-            ">
-                Nenhum furo selecionado
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+            <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
+                <h2 class="text-xl font-bold text-gray-800">👷 Trabalhadores Envolvidos</h2>
+                <span class="text-sm text-gray-500">{{ trabalhadores_envolvidos|length }} trabalhador(es)</span>
             </div>
 
-            <button id="abrirFuroBtn" type="button" style="
-                border:none;
-                border-radius:10px;
-                background:#16a34a;
-                color:white;
-                padding:10px 16px;
-                font-size:14px;
-                font-weight:bold;
-                cursor:pointer;
-                box-shadow:0 4px 10px rgba(22,163,74,0.25);
-                transition:0.2s;
-            " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
-                Abrir Furo
-            </button>
+            <form method="post" action="{% url 'projetos:projeto_adicionar_empregado' projeto.pk %}" class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_220px_auto] gap-3 mb-5">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Empregado</label>
+                    {{ trabalhador_form.empregado }}
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Data de início</label>
+                    {{ trabalhador_form.data_inicio }}
+                </div>
+                <div class="flex items-end">
+                    <button type="submit"
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow w-full">
+                        ➕ Associar
+                    </button>
+                </div>
+            </form>
+
+            {% if trabalhadores_envolvidos %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for ligacao in trabalhadores_envolvidos %}
+                        <div class="bg-white border border-gray-200 rounded-xl p-4">
+                            <div class="font-bold text-gray-800">{{ ligacao.empregado.nome }}</div>
+                            <div class="text-sm text-gray-600 mt-1">
+                                Função: {{ ligacao.empregado.get_funcao_display|default:ligacao.empregado.funcao|default:"-" }}
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                Início: {{ ligacao.data_inicio|date:"d/m/Y"|default:"-" }}
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                Estado: {% if ligacao.ativo %}Ativo{% else %}Inativo{% endif %}
+                            </div>
+                            <div class="mt-3 flex gap-3 flex-wrap items-center">
+                                <a href="{% url 'projetos:empregado_detail' ligacao.empregado.pk %}"
+                                   class="text-blue-600 hover:underline font-semibold">
+                                    Ver empregado
+                                </a>
+                                <form method="post" action="{% url 'projetos:projeto_remover_empregado' projeto.pk ligacao.pk %}" onsubmit="return confirm('Remover este trabalhador da equipa ativa do projeto?');">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="text-red-600 hover:underline font-semibold">
+                                        Terminar associação
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">Ainda não existem trabalhadores envolvidos neste projeto.</p>
+            {% endif %}
         </div>
 
         <!-- MAPA -->
@@ -116,7 +101,86 @@
         {{ furos_mapa|json_script:"furos-data" }}
 
         {% if furos_mapa %}
-        <div id="map" class="w-full h-96 rounded-lg shadow-md mt-4"></div>
+        <div style="position:relative; margin-top:16px;">
+            <div style="
+                position:absolute;
+                top:14px;
+                left:14px;
+                right:14px;
+                z-index:1000;
+                display:flex;
+                align-items:center;
+                gap:12px;
+                flex-wrap:wrap;
+                background:rgba(248,250,252,0.96);
+                border:1px solid #e5e7eb;
+                border-radius:12px;
+                padding:14px 16px;
+                box-shadow:0 8px 18px rgba(0,0,0,0.12);
+                backdrop-filter:blur(4px);
+            ">
+                <button id="prevFuroBtn" type="button" style="
+                    width:44px;
+                    height:44px;
+                    border:none;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:white;
+                    font-size:20px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                    transition:0.2s;
+                " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    ◀
+                </button>
+
+                <button id="nextFuroBtn" type="button" style="
+                    width:44px;
+                    height:44px;
+                    border:none;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:white;
+                    font-size:20px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                    transition:0.2s;
+                " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    ▶
+                </button>
+
+                <div id="furoInfo" style="
+                    flex:1;
+                    min-width:220px;
+                    color:#1f2937;
+                    font-size:14px;
+                    line-height:1.5;
+                    font-weight:600;
+                    padding:4px 8px;
+                ">
+                    Nenhum furo selecionado
+                </div>
+
+                <button id="abrirFuroBtn" type="button" style="
+                    border:none;
+                    border-radius:10px;
+                    background:#16a34a;
+                    color:white;
+                    padding:10px 16px;
+                    font-size:14px;
+                    font-weight:bold;
+                    cursor:pointer;
+                    box-shadow:0 4px 10px rgba(22,163,74,0.25);
+                    transition:0.2s;
+                " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+                    Abrir Furo
+                </button>
+            </div>
+
+            <div id="map" class="w-full h-96 rounded-lg shadow-md"></div>
+        </div>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>

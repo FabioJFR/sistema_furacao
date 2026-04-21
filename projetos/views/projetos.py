@@ -16,10 +16,12 @@ from projetos.selectors.projetos import (
     obter_projeto,
 )
 from projetos.services.projetos import atualizar_projeto, criar_projeto
+from projetos.services.empregados import terminar_ligacao_projeto_empregado
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
+from ..forms.empregado import ProjetoEmpregadoForm
 from ..forms.projeto import ProjetoForm
-from ..models.empregado import Empregados
+from ..models.empregado import EmpregadoProjeto, Empregados
 from ..models.projeto import Projeto
 from plataforma.models import PerfilPlataforma
 
@@ -35,15 +37,6 @@ def _obter_contexto_admin_projetos(request):
         request.user.id,
         request.user.username,
     )
-
-    admin_empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-    if admin_empregado:
-        logger.info(
-            "Contexto administrativo resolvido via Empregados em projetos.py. user_id=%s, empresa_id=%s",
-            request.user.id,
-            admin_empregado.empresa_id,
-        )
-        return admin_empregado
 
     perfil = PerfilPlataforma.objects.filter(
         user=request.user,
@@ -300,6 +293,7 @@ def projeto_detail(request, pk):
         return resposta_erro
 
     context = obter_contexto_projeto_detail(pk, empresa=empresa)
+    context["trabalhador_form"] = ProjetoEmpregadoForm(empresa=empresa, projeto=context["projeto"])
     logger.info(
         "View projeto_detail carregada com sucesso. user_id=%s, empresa_id=%s, projeto_pk=%s",
         request.user.id,
@@ -307,6 +301,83 @@ def projeto_detail(request, pk):
         pk,
     )
     return render(request, "projetos/projeto_detail.html", context)
+
+
+@login_required
+@admin_required
+def projeto_adicionar_empregado(request, pk):
+    logger.info(
+        "Entrada na view projeto_adicionar_empregado. user_id=%s, username='%s', projeto_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view projeto_adicionar_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=getattr(empresa, "pk", empresa))
+    form = ProjetoEmpregadoForm(request.POST or None, empresa=empresa, projeto=projeto)
+
+    if request.method == "POST":
+        if form.is_valid():
+            empregado = form.cleaned_data["empregado"]
+            ligacao = EmpregadoProjeto.objects.filter(
+                empregado=empregado,
+                projeto=projeto,
+                empresa=empresa,
+                ativo=True,
+            ).first()
+            if ligacao:
+                messages.warning(request, "Este empregado já está associado a este projeto.")
+            else:
+                EmpregadoProjeto.objects.create(
+                    empregado=empregado,
+                    projeto=projeto,
+                    empresa=empresa,
+                    data_inicio=form.cleaned_data.get("data_inicio"),
+                    ativo=True,
+                )
+                messages.success(request, "Empregado associado ao projeto com sucesso.")
+        else:
+            messages.error(request, "Erro ao associar empregado ao projeto. Verifique os dados.")
+
+    return redirect("projetos:projeto_detail", pk=projeto.pk)
+
+
+@login_required
+@admin_required
+def projeto_remover_empregado(request, pk, ligacao_id):
+    logger.info(
+        "Entrada na view projeto_remover_empregado. user_id=%s, username='%s', projeto_pk=%s, ligacao_id=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        ligacao_id,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view projeto_remover_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=getattr(empresa, "pk", empresa))
+    ligacao = get_object_or_404(
+        EmpregadoProjeto.objects.select_related("empregado", "projeto"),
+        pk=ligacao_id,
+        projeto=projeto,
+        empresa=empresa,
+    )
+
+    if request.method == "POST":
+        terminar_ligacao_projeto_empregado(ligacao, empresa=empresa)
+        messages.success(request, f"{ligacao.empregado.nome} foi removido da equipa ativa do projeto.")
+    else:
+        messages.error(request, "Método inválido para remover trabalhador do projeto.")
+
+    return redirect("projetos:projeto_detail", pk=projeto.pk)
 
 
 # ---------------- 3D ----------------

@@ -125,6 +125,9 @@ def criar_utilizador_para_empregado(empregado, empresa=None):
         username=username,
         password=password,
         email=empregado.email,
+        is_staff=False,
+        is_superuser=False,
+        is_active=True,
     )
 
     empregado.user = user
@@ -195,3 +198,51 @@ def empregado_ja_tem_projeto_ativo(empregado, projeto, excluir_ligacao_id=None, 
         qs = qs.exclude(id=excluir_ligacao_id)
 
     return qs.exists()
+
+
+def garantir_ligacao_projeto_por_furo(empregado, furo, empresa=None, data_inicio=None):
+    validar_empregado_empresa(empregado, empresa=empresa)
+
+    if not furo:
+        raise ValidationError("Furo inválido.")
+
+    projeto = getattr(furo, "projeto", None)
+    if not projeto:
+        raise ValidationError("O furo selecionado não está associado a um projeto.")
+
+    if empresa is not None and projeto.empresa_id != _resolver_empresa_id(empresa):
+        raise ValidationError("O projeto do furo não pertence à empresa atual.")
+
+    ligacoes_ativas = EmpregadoProjeto.objects.filter(
+        empregado=empregado,
+        projeto=projeto,
+        ativo=True,
+    )
+
+    if empresa is not None:
+        ligacoes_ativas = ligacoes_ativas.filter(empresa_id=_resolver_empresa_id(empresa))
+
+    ligacao_existente = ligacoes_ativas.order_by("-data_inicio", "-id").first()
+    if ligacao_existente:
+        return ligacao_existente, False
+
+    nova_data_inicio = data_inicio
+    if nova_data_inicio:
+        conflito_mesma_data = EmpregadoProjeto.objects.filter(
+            empregado=empregado,
+            projeto=projeto,
+            data_inicio=nova_data_inicio,
+        )
+        if empresa is not None:
+            conflito_mesma_data = conflito_mesma_data.filter(empresa_id=_resolver_empresa_id(empresa))
+        if conflito_mesma_data.exists():
+            nova_data_inicio = None
+
+    ligacao = EmpregadoProjeto.objects.create(
+        empregado=empregado,
+        projeto=projeto,
+        empresa=_resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id,
+        data_inicio=nova_data_inicio,
+        ativo=True,
+    )
+    return ligacao, True

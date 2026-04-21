@@ -13,3 +13,5 @@ from .empregado_furo import *
 from .diario_tecnico import *
 from .empregado_area import *
 from .definicoes import *
+from .analytics import *
+from .opcoes import *

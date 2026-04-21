@@ -3,7 +3,7 @@
 
 {% block title %}Subscrições{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/plataforma/subscricoes.css' %}">
+<link rel="stylesheet" href="{% static 'css/plataforma/subscricao_list.css' %}">
 {% endblock %}
 
 {% block page_title %}Subscrições{% endblock %}
@@ -47,10 +47,12 @@ Gestão de subscrições das empresas na plataforma.
         <tr>
             <th>Empresa</th>
             <th>Plano</th>
+            <th>Período</th>
             <th>Estado</th>
             <th>Valor</th>
             <th>Início</th>
-            <th>Fim</th>
+            <th>Próxima renovação</th>
+            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
@@ -58,6 +60,7 @@ Gestão de subscrições das empresas na plataforma.
             <tr>
                 <td>{{ s.empresa.nome }}</td>
                 <td>{{ s.plano.nome }}</td>
+                <td>{{ s.periodo_cobranca_label }}</td>
                 <td>
                     <span class="badge {{ s.estado }}">
                         {{ s.get_estado_display }}
@@ -65,11 +68,16 @@ Gestão de subscrições das empresas na plataforma.
                 </td>
                 <td>{{ s.valor }}€</td>
                 <td>{{ s.data_inicio }}</td>
-                <td>{{ s.data_fim }}</td>
+                <td>{{ s.proxima_renovacao|default:s.data_fim }}</td>
+                <td>
+                    <a href="{% url 'plataforma:empresa_detail' s.empresa.pk %}">Ver empresa</a>
+                    |
+                    <a href="{% url 'plataforma:empresa_alterar_plano' s.empresa.pk %}">Editar subscrição</a>
+                </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">Sem subscrições</td>
+                <td colspan="8">Sem subscrições</td>
             </tr>
         {% endfor %}
     </tbody>

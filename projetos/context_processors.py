@@ -1,3 +1,4 @@
+from core.permissions import user_is_empresa_admin, user_is_empregado, user_is_platform_admin
 from plataforma.models import PerfilPlataforma
 from projetos.models import Empregados
 
@@ -24,20 +25,13 @@ def menu_context(request):
     perfil_ativo = perfil is not None
 
     is_platform_owner = perfil_ativo and perfil.tipo_acesso == "platform_owner"
-    is_platform_admin = perfil_ativo and perfil.tipo_acesso in ["platform_owner", "platform_admin"]
-    is_empresa_admin = perfil_ativo and perfil.tipo_acesso in ["empresa_admin", "empresa_gestor"]
+    is_platform_admin = user_is_platform_admin(user)
+    is_empresa_admin = user_is_empresa_admin(user) and not is_platform_admin
 
     empregado_menu_obj = Empregados.objects.filter(user=user).first()
 
-    is_admin_user = user.is_staff or is_empresa_admin
-    is_empregado_user = (
-        (perfil_ativo and perfil.tipo_acesso == "empregado")
-        or (
-            empregado_menu_obj is not None
-            and not is_admin_user
-            and not is_platform_admin
-        )
-    )
+    is_admin_user = is_empresa_admin
+    is_empregado_user = user_is_empregado(user)
 
     return {
         "is_admin_user": is_admin_user,

@@ -1,12 +1,12 @@
-{% extends "plataforma/base.html" %}
+{% extends "dispositivos/base.html" %}
 {% load i18n %}
 <!--  templates/dispositivos/sessao_detail.html -->
 
 {% block title %}{% trans "Detalhe da Sessão" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+<div class="device-shell max-w-7xl mx-auto">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">
@@ -17,16 +17,16 @@
                 </p>
             </div>
 
-            <div class="flex gap-3 flex-wrap">
-                <a href="{% url 'dispositivos:sessao_list' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
+            <div class="flex gap-3 flex-wrap device-header-actions">
+                <a href="{% url 'dispositivos:sessao_list' %}" class="device-btn device-btn--secondary inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
                     ← {% trans "Voltar à lista" %}
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 device-split-grid">
+        <div class="device-panel bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Dispositivo" %}</p>
             <h2 class="text-xl font-bold text-gray-800 mt-2">
                 {{ sessao.dispositivo.nome|default:"—" }}
@@ -36,15 +36,15 @@
             </p>
         </div>
 
-        <form method="post" action="{% url 'dispositivos:capturar_leitura_serial' sessao.pk %}">
+        <form method="post" action="{% url 'dispositivos:capturar_leitura_serial' sessao.pk %}" class="device-panel device-action-panel">
             {% csrf_token %}
             <button type="submit"
-                    class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+                    class="device-btn device-btn--primary inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
                 📥 {% trans "Capturar leitura USB/Serial" %}
             </button>
         </form>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Furo" %}</p>
             <h2 class="text-xl font-bold text-gray-800 mt-2">
                 {% if sessao.furo %}
@@ -58,7 +58,7 @@
             </p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Estado da Sessão" %}</p>
             <div class="mt-2">
                 {% if sessao.status == "ligado" %}
@@ -89,37 +89,37 @@
     </div>
 
     {% if sessao.mensagem_erro %}
-        <div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-5 mb-6">
+        <div class="device-panel bg-red-50 border border-red-200 text-red-700 rounded-2xl p-5 mb-6">
             <h3 class="font-bold mb-2">{% trans "Mensagem de erro" %}</h3>
             <p class="whitespace-pre-line">{{ sessao.mensagem_erro }}</p>
         </div>
     {% endif %}
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 device-metric-grid">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Leituras brutas" %}</p>
             <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ leituras_brutas|length }}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Leituras processadas" %}</p>
             <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ leituras|length }}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Survey shots" %}</p>
             <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ shots|length }}</h2>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-6">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-800">{% trans "Leituras Brutas da Sessão" %}</h2>
         </div>
 
         {% if leituras_brutas %}
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-left">
+                <table class="device-table min-w-full text-sm text-left">
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                         <tr>
                             <th class="px-6 py-4">{% trans "Sequência" %}</th>
@@ -149,7 +149,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{% url 'dispositivos:leitura_bruta_detail' leitura.pk %}" class="inline-flex px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium transition">
+                                    <a href="{% url 'dispositivos:leitura_bruta_detail' leitura.pk %}" class="device-btn device-btn--info inline-flex px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium transition">
                                         👁 {% trans "Ver detalhe" %}
                                     </a>
                                 </td>
@@ -159,20 +159,20 @@
                 </table>
             </div>
         {% else %}
-            <div class="p-8 text-center text-gray-500">
+            <div class="p-8 text-center text-gray-500 device-empty-state">
                 {% trans "Ainda não existem leituras brutas associadas a esta sessão." %}
             </div>
         {% endif %}
     </div>
 
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-6">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-800">{% trans "Leituras Processadas" %}</h2>
         </div>
 
         {% if leituras %}
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-left">
+                <table class="device-table min-w-full text-sm text-left">
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                         <tr>
                             <th class="px-6 py-4">{% trans "Timestamp Device" %}</th>
@@ -198,20 +198,20 @@
                 </table>
             </div>
         {% else %}
-            <div class="p-8 text-center text-gray-500">
+            <div class="p-8 text-center text-gray-500 device-empty-state">
                 {% trans "Ainda não existem leituras processadas nesta sessão." %}
             </div>
         {% endif %}
     </div>
 
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-800">{% trans "Survey Shots" %}</h2>
         </div>
 
         {% if shots %}
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-left">
+                <table class="device-table min-w-full text-sm text-left">
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                         <tr>
                             <th class="px-6 py-4">{% trans "Profundidade" %}</th>
@@ -247,7 +247,7 @@
                 </table>
             </div>
         {% else %}
-            <div class="p-8 text-center text-gray-500">
+            <div class="p-8 text-center text-gray-500 device-empty-state">
                 {% trans "Ainda não existem survey shots nesta sessão." %}
             </div>
         {% endif %}

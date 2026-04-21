@@ -217,6 +217,7 @@ def obter_cards_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id=N
         "total_projetos": projetos_qs.count(),
         "total_furos": furos_qs.count(),
         "total_empregados": empregados_qs.count(),
+        "total_empregados_pendentes": empregados_qs.filter(aprovado=False).count(),
         "total_maquinas": maquinas_qs.count(),
         "total_materiais": materiais_qs.count(),
         "total_metros": round(float(total_metros), 2),

@@ -1,12 +1,19 @@
 import logging
-from datetime import timedelta
+import calendar
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from plataforma.models import Empresa, PagamentoEmpresa, PerfilPlataforma, Plano, SubscricaoEmpresa
+from plataforma.models import (
+    Empresa,
+    MovimentoFinanceiroPlataforma,
+    PagamentoEmpresa,
+    PerfilPlataforma,
+    Plano,
+    SubscricaoEmpresa,
+)
 
 logger = logging.getLogger("core")
 
@@ -101,13 +108,9 @@ def _obter_datas_subscricao_inicial(data_inicio_subscricao=None, data_fim_subscr
     hoje = timezone.now().date()
     data_inicio = data_inicio_subscricao or hoje
 
-    # TODO futuro:
-    # - diferenciar automaticamente ciclo mensal vs anual conforme a subscrição/plano escolhido
-    # - suportar período experimental (trial)
-    # - alinhar vencimento com billing real da plataforma
-    data_fim = data_fim_subscricao or (data_inicio + timedelta(days=30))
+    data_fim = data_fim_subscricao
 
-    if data_fim < data_inicio:
+    if data_fim and data_fim < data_inicio:
         logger.warning(
             "Validação falhou no onboarding: data_fim_subscricao (%s) anterior a data_inicio_subscricao (%s).",
             data_fim,
@@ -118,6 +121,46 @@ def _obter_datas_subscricao_inicial(data_inicio_subscricao=None, data_fim_subscr
         })
 
     return data_inicio, data_fim
+
+
+def _adicionar_meses(data_base, meses):
+    mes = data_base.month - 1 + meses
+    ano = data_base.year + mes // 12
+    mes = mes % 12 + 1
+    dia = min(data_base.day, calendar.monthrange(ano, mes)[1])
+    return data_base.replace(year=ano, month=mes, day=dia)
+
+
+def _normalizar_periodo_cobranca(ciclo_subscricao):
+    valor = str(ciclo_subscricao or "").strip()
+    if valor == "mensal":
+        return 1
+    if valor == "anual":
+        return 12
+    try:
+        inteiro = int(valor)
+    except (TypeError, ValueError):
+        return 1
+    return inteiro if inteiro in [1, 3, 6, 12] else 1
+
+
+def _calcular_datas_ciclo(data_inicio, ciclo_subscricao, data_fim_subscricao=None):
+    periodo_meses = _normalizar_periodo_cobranca(ciclo_subscricao)
+    if data_fim_subscricao:
+        data_fim = data_fim_subscricao
+    else:
+        data_fim = _adicionar_meses(data_inicio, periodo_meses)
+
+    return data_fim, data_fim
+
+
+def _obter_valor_plano_por_ciclo(plano, ciclo_subscricao):
+    if not plano:
+        return 0
+    periodo_meses = _normalizar_periodo_cobranca(ciclo_subscricao)
+    if periodo_meses == 12 and plano.preco_anual:
+        return plano.preco_anual or 0
+    return (plano.preco_mensal or 0) * periodo_meses
 
 
 @transaction.atomic
@@ -135,6 +178,7 @@ def criar_empresa_com_admin(
     cidade=None,
     observacoes=None,
     plano=None,
+    ciclo_subscricao="mensal",
     tipo_acesso="empresa_admin",
     estado_empresa="teste",
     ativa=True,
@@ -167,10 +211,11 @@ def criar_empresa_com_admin(
     )
 
     hoje = timezone.now().date()
-    data_inicio, data_fim = _obter_datas_subscricao_inicial(
+    data_inicio, data_fim_base = _obter_datas_subscricao_inicial(
         data_inicio_subscricao=data_inicio_subscricao,
         data_fim_subscricao=data_fim_subscricao,
     )
+    data_fim, proxima_renovacao = _calcular_datas_ciclo(data_inicio, ciclo_subscricao, data_fim_base)
 
     empresa = Empresa.objects.create(
         nome=str(nome_empresa).strip(),
@@ -224,15 +269,18 @@ def criar_empresa_com_admin(
 
         valor_final_subscricao = valor_subscricao
         if valor_final_subscricao is None:
-            valor_final_subscricao = plano.preco_mensal or 0
+            valor_final_subscricao = _obter_valor_plano_por_ciclo(plano, ciclo_subscricao)
 
         subscricao = SubscricaoEmpresa.objects.create(
             empresa=empresa,
             plano=plano,
             estado="ativa" if ativa else "pendente",
+            ciclo_cobranca=ciclo_subscricao,
             valor=valor_final_subscricao,
             data_inicio=data_inicio,
             data_fim=data_fim,
+            proxima_renovacao=proxima_renovacao,
+            renovacao_definida_manualmente=False,
             renovacao_automatica=False,
         )
         logger.info(
@@ -250,7 +298,7 @@ def criar_empresa_com_admin(
             if subscricao is not None:
                 valor_pagamento = subscricao.valor
             elif plano is not None:
-                valor_pagamento = plano.preco_mensal or 0
+                valor_pagamento = _obter_valor_plano_por_ciclo(plano, ciclo_subscricao)
             else:
                 logger.warning("Onboarding com criar_pagamento_inicial=True mas sem valor_pagamento determinável.")
                 raise ValidationError({
@@ -262,6 +310,20 @@ def criar_empresa_com_admin(
             subscricao=subscricao,
             descricao="Pagamento inicial de onboarding",
             valor=valor_pagamento,
+            data_vencimento=data_vencimento_pagamento or data_inicio,
+            estado="pendente",
+            referencia=(referencia_pagamento or "").strip(),
+            observacoes=(observacoes_pagamento or "").strip(),
+        )
+        MovimentoFinanceiroPlataforma.objects.create(
+            empresa=empresa,
+            plano=plano,
+            subscricao=subscricao,
+            tipo_movimento="pagamento",
+            ciclo_cobranca=ciclo_subscricao if criar_subscricao_inicial else "unico",
+            valor=valor_pagamento,
+            descricao="Pagamento inicial de onboarding",
+            data_competencia=data_inicio,
             data_vencimento=data_vencimento_pagamento or data_inicio,
             estado="pendente",
             referencia=(referencia_pagamento or "").strip(),

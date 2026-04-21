@@ -5,6 +5,22 @@ from plataforma.models import Plano
 
 
 class PlanoForm(forms.ModelForm):
+    periodos_cobranca_disponiveis = forms.MultipleChoiceField(
+        label="Períodos de cobrança disponíveis",
+        choices=Plano.PERIODO_COBRANCA_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["periodos_cobranca_disponiveis"].initial = [
+                str(valor) for valor in self.instance.periodos_cobranca_disponiveis_normalizados
+            ]
+        else:
+            self.fields["periodos_cobranca_disponiveis"].initial = ["1", "12"]
+
     class Meta:
         model = Plano
         fields = [
@@ -61,6 +77,10 @@ class PlanoForm(forms.ModelForm):
 
         tipo = cleaned.get("tipo")
         permite_multiplos = cleaned.get("permite_multiplos_utilizadores")
+        preco_mensal = cleaned.get("preco_mensal")
+        preco_anual = cleaned.get("preco_anual")
+        periodos_raw = cleaned.get("periodos_cobranca_disponiveis") or []
+        periodos = sorted({int(valor) for valor in periodos_raw})
 
         # TODO futuro:
         # - validar limites com base no plano (ex: plano individual não pode ter muitos utilizadores)
@@ -72,4 +92,40 @@ class PlanoForm(forms.ModelForm):
                 "Planos individuais não devem permitir múltiplos utilizadores."
             )
 
+        if not periodos:
+            raise forms.ValidationError(
+                "O plano deve permitir pelo menos um período de cobrança."
+            )
+
+        if any(periodo in [1, 3, 6] for periodo in periodos) and (preco_mensal is None or preco_mensal <= 0):
+            self.add_error(
+                "preco_mensal",
+                "Indique um preço mensal válido para planos com cobrança de 1, 3 ou 6 meses.",
+            )
+
+        if 12 in periodos and (preco_anual is None or preco_anual <= 0) and (preco_mensal is None or preco_mensal <= 0):
+            self.add_error(
+                "preco_anual",
+                "Indique um preço anual válido para planos de 12 meses, ou pelo menos um preço mensal para calcular o valor.",
+            )
+
+        if tipo == "individual":
+            cleaned["limite_empregados"] = 0
+            cleaned["limite_projetos"] = 0
+            cleaned["permite_multiplos_utilizadores"] = False
+            cleaned["acesso_dashboard_empresa"] = False
+
+        cleaned["periodos_cobranca_disponiveis"] = periodos
+        cleaned["permite_cobranca_mensal"] = 1 in periodos
+        cleaned["permite_cobranca_anual"] = 12 in periodos
+
         return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.periodos_cobranca_disponiveis = self.cleaned_data["periodos_cobranca_disponiveis"]
+        instance.permite_cobranca_mensal = 1 in instance.periodos_cobranca_disponiveis
+        instance.permite_cobranca_anual = 12 in instance.periodos_cobranca_disponiveis
+        if commit:
+            instance.save()
+        return instance

@@ -1,1 +1,7 @@
 {% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/dispositivos/base.css' %}">
+{% endblock %}

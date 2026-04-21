@@ -1,6 +1,6 @@
 from django import forms
 
-from projetos.models import Empregados
+from projetos.models import Empregados, Individual
 
 
 
@@ -62,3 +62,43 @@ class MeusDadosEmpregadoForm(forms.ModelForm):
                 raise forms.ValidationError("Este empregado não pertence à empresa atual.")
 
         return cleaned
+
+
+class MeusDadosIndividualForm(forms.ModelForm):
+    class Meta:
+        model = Individual
+        fields = [
+            "nome",
+            "especialidade",
+            "email",
+            "telefone",
+            "data_nascimento",
+            "data_inicio_atividade",
+            "idade",
+            "morada",
+            "nacionalidade",
+            "nif",
+            "curriculo",
+            "contrato",
+            "biografia",
+            "observacoes",
+        ]
+        widgets = {
+            "nome": forms.TextInput(attrs={"class": "form-control"}),
+            "especialidade": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "telefone": forms.TextInput(attrs={"class": "form-control"}),
+            "data_nascimento": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "data_inicio_atividade": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "idade": forms.NumberInput(attrs={"class": "form-control"}),
+            "morada": forms.TextInput(attrs={"class": "form-control"}),
+            "nacionalidade": forms.TextInput(attrs={"class": "form-control"}),
+            "nif": forms.NumberInput(attrs={"class": "form-control"}),
+            "curriculo": forms.FileInput(attrs={"class": "form-control"}),
+            "contrato": forms.FileInput(attrs={"class": "form-control"}),
+            "biografia": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            "observacoes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+
+    def clean_telefone(self):
+        return _normalizar_telefone(self.cleaned_data.get("telefone"))

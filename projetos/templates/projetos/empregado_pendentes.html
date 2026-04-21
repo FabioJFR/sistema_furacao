@@ -3,8 +3,8 @@
 {% block title %}Empregados Pendentes{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-6">
+<section class="w-full px-4 py-6 sm:px-6 lg:px-8">
+    <div class="max-w-screen-2xl mx-auto bg-white rounded-xl shadow-lg p-6">
         <div class="flex justify-between items-center flex-wrap gap-3 mb-6">
             <h1 class="text-2xl font-bold text-gray-800">{{ titulo|default:"Empregados Pendentes de Aprovação" }}</h1>
 
@@ -16,7 +16,7 @@
 
         {% if empregados %}
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                <table class="min-w-[1180px] w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="text-left px-4 py-3">Nome</th>
@@ -25,7 +25,7 @@
                             <th class="text-left px-4 py-3">Registo</th>
                             <th class="text-left px-4 py-3">Estado</th>
                             <th class="text-left px-4 py-3">Data Admissão</th>
-                            <th class="text-left px-4 py-3">Ações</th>
+                            <th class="text-left px-4 py-3 w-[340px]">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,23 +41,23 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ empregado.data_admissao|date:"d/m/Y"|default:"-" }}</td>
-                                <td class="px-4 py-3">
-                                    <div class="flex gap-2 flex-wrap">
+                                <td class="px-4 py-3 align-top">
+                                    <div class="flex gap-2 items-start min-w-[300px] whitespace-nowrap">
                                         <a href="/app/empregados/{{ empregado.id }}/"
-                                           class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                           class="inline-flex items-center justify-center bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition whitespace-nowrap">
                                             Ver
                                         </a>
                                         <form method="post" action="/app/empregados/{{ empregado.id }}/aprovar/" style="display:inline;">
                                             {% csrf_token %}
                                             <button type="submit"
-                                                class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                                class="inline-flex items-center justify-center bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition whitespace-nowrap">
                                                 ✔ Aprovar
                                             </button>
                                         </form>
                                         <form method="post" action="/app/empregados/{{ empregado.id }}/rejeitar/" style="display:inline;">
                                             {% csrf_token %}
                                             <button type="submit"
-                                                class="inline-block bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
+                                                class="inline-flex items-center justify-center bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition whitespace-nowrap">
                                                 ✖ Rejeitar
                                             </button>
                                         </form>

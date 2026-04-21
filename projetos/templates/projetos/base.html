@@ -110,11 +110,47 @@
                         </div>
                     </div>
 
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Analytics' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            📊 {% trans "Analytics" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Analytics' %}">
+                            <a href="{% url 'projetos:graficos_dashboard' %}" role="menuitem">📈 {% trans "Gráficos" %}</a>
+                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Opções' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            🛠️ {% trans "Opções" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Opções' %}">
+                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
+                        </div>
+                    </div>
+
                 {% elif is_empregado_user %}
+                    {% with perfil_tipo=perfil_plataforma.tipo_acesso|default:'' %}
                     <div class="nav-item">
                         <a href="{% url 'projetos:area_empregado' %}" class="nav-link">🏠 {% trans "Painel" %}</a>
                     </div>
 
+                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -127,12 +163,14 @@
                             ⚙️ {% trans "Operação" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
-                            <a href="{% url 'projetos:medicao_list' %}" role="menuitem">👤 {% trans "Medições" %}</a>
+                            <a href="{% url 'projetos:medicao_list_empregado' %}" role="menuitem">📊 {% trans "Medições" %}</a>
                             <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
                             <a href="{% url 'projetos:historico_configuracao_list_empregado' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
+                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -149,7 +187,9 @@
                             <a href="{% url 'projetos:registo_diario_list' %}" role="menuitem">📋 {% trans "Meus Registos" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
+                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -167,6 +207,7 @@
                             <a href="/app/devolucoes/minhas/" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -181,10 +222,13 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Conta' %}">
                             <a href="{% url 'projetos:meus_dados_empregado' %}" role="menuitem">👤 {% trans "Meus Dados" %}</a>
+                            {% if perfil_tipo != "individual" %}
                             <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
+                            {% endif %}
                             <a href="/app/minha-area/definicoes/" role="menuitem">🛠️ {% trans "Definições" %}</a>
                         </div>
                     </div>
+                    {% endwith %}
                 {% endif %}
             </nav>
 
@@ -218,7 +262,7 @@
         <div class="messages-wrap">
             {% for message in messages %}
                 <div class="msg-box msg-{{ message.tags }}">
-                    {{ message }}
+                    <div class="msg-content">{{ message }}</div>
                     <button type="button" onclick="fecharMensagem(this)" class="msg-close" aria-label="{% trans 'Fechar mensagem' %}">×</button>
                 </div>
             {% endfor %}

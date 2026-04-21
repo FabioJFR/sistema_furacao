@@ -11,6 +11,7 @@ from django.urls import reverse
 
 from projetos.models import (
     Empregados,
+    Individual,
     Projeto,
     Furo,
     Material,
@@ -58,15 +59,6 @@ def _obter_contexto_admin_empregados(request):
         request.user.id,
         request.user.username,
     )
-
-    admin_empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-    if admin_empregado:
-        logger.info(
-            "Contexto administrativo resolvido via Empregados em empregados.py. user_id=%s, empresa_id=%s",
-            request.user.id,
-            admin_empregado.empresa_id,
-        )
-        return admin_empregado
 
     perfil = PerfilPlataforma.objects.filter(
         user=request.user,
@@ -179,6 +171,10 @@ def _resolver_empregado_por_user_ou_email(user):
     )
     return empregado
 
+
+def _resolver_individual_por_user(user):
+    return Individual.objects.filter(user=user).first()
+
 # ---------------- EMPREGADOS ----------------
 # TODO futuro:
 # - quando o fluxo multiempresa estiver fechado, associar o registo inicial a uma empresa/contexto controlado
@@ -195,22 +191,42 @@ def registo_empregado(request):
             logger.info("Formulário de registo de empregado válido. email='%s'", form.cleaned_data.get("email"))
             user = form.save(commit=False)
             user.email = form.cleaned_data["email"]
-            user.is_active = False
+            tipo_conta = form.cleaned_data["tipo_conta"]
+            user.is_active = tipo_conta == "individual"
             user.save()
 
-            Empregados.objects.create(
-                user=user,
-                nome=form.cleaned_data["nome"],
-                email=form.cleaned_data["email"],
-                telefone=form.cleaned_data.get("telefone"),
-                funcao=form.cleaned_data.get("funcao"),
-                aprovado=False,
-            )
-
-            messages.success(
-                request,
-                "Registo enviado com sucesso. Aguarde aprovação do administrador para receber acesso à plataforma.",
-            )
+            if tipo_conta == "individual":
+                Individual.objects.create(
+                    user=user,
+                    nome=form.cleaned_data["nome"],
+                    email=form.cleaned_data["email"],
+                    telefone=form.cleaned_data.get("telefone"),
+                    especialidade=form.cleaned_data.get("especialidade"),
+                )
+                PerfilPlataforma.objects.create(
+                    user=user,
+                    tipo_acesso="individual",
+                    empresa=None,
+                    ativo=True,
+                )
+                messages.success(
+                    request,
+                    "Conta individual criada com sucesso. Já podes entrar na área de trabalhador.",
+                )
+            else:
+                Empregados.objects.create(
+                    user=user,
+                    nome=form.cleaned_data["nome"],
+                    email=form.cleaned_data["email"],
+                    telefone=form.cleaned_data.get("telefone"),
+                    funcao=form.cleaned_data.get("funcao"),
+                    empresa=getattr(form, "empresa_resolvida", None),
+                    aprovado=False,
+                )
+                messages.success(
+                    request,
+                    "Registo enviado com sucesso. Aguarde aprovação da empresa para receber acesso à plataforma.",
+                )
             return redirect("login")
         else:
             messages.error(request, "Existem erros no formulário. Corrija os campos assinalados.")
@@ -281,15 +297,16 @@ def empregado_create(request):
                     email=form.cleaned_data.get("email") or "",
                     password=password,
                     first_name=(form.cleaned_data.get("nome") or "").split(" ")[0],
-                    is_active=True,
+                    is_staff=False,
+                    is_superuser=False,
+                    is_active=False,
                 )
 
                 empregado = form.save(commit=False)
                 empregado.user = user
                 empregado.empresa = empresa
-                empregado.aprovado = True
-                if not empregado.data_aprovacao:
-                    empregado.data_aprovacao = timezone.now()
+                empregado.aprovado = False
+                empregado.data_aprovacao = None
                 empregado.save()
                 form.save_m2m()
                 logger.info(
@@ -310,6 +327,10 @@ def empregado_create(request):
             messages.success(
                 request,
                 f"Empregado criado com sucesso. Utilizador: {user.username}",
+            )
+            messages.info(
+                request,
+                "O novo empregado ficou pendente. Aprova o registo para lhe dar acesso à plataforma.",
             )
             return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
         except Exception as e:
@@ -960,6 +981,106 @@ def furo_3d_empregado(request, pk):
         "medicoes": medicoes,
     })
 
+
+@login_required
+@empregado_required
+def medicao_list_empregado(request):
+    logger.info(
+        "Entrada na view medicao_list_empregado. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+    empregado, resposta_erro = _obter_empregado_autenticado(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view medicao_list_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    furos_associados_ids = empregado.ligacoes_furos.filter(
+        empresa=empregado.empresa,
+        ativo=True,
+    ).values_list("furo_id", flat=True)
+
+    furos_com_registos_ids = empregado.registos_diarios.filter(
+        empresa=empregado.empresa,
+    ).exclude(furo__isnull=True).values_list("furo_id", flat=True)
+
+    medicoes = (
+        Medicao.objects.filter(
+            empresa=empregado.empresa,
+            furo_id__in=set(furos_associados_ids).union(set(furos_com_registos_ids)),
+        )
+        .select_related("furo", "furo__projeto")
+        .order_by("-criado_em", "-profundidade_medida")
+    )
+
+    logger.info(
+        "View medicao_list_empregado carregada com sucesso. user_id=%s, empregado_id=%s, total_medicoes=%s",
+        request.user.id,
+        empregado.id,
+        medicoes.count(),
+    )
+    return render(request, "projetos/medicao_empregado_list.html", {
+        "empregado": empregado,
+        "medicoes": medicoes,
+        "titulo": "Minhas Medições",
+    })
+
+
+@login_required
+@empregado_required
+def medicao_detail_empregado(request, pk):
+    logger.info(
+        "Entrada na view medicao_detail_empregado. user_id=%s, username='%s', medicao_pk=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+    )
+    empregado, resposta_erro = _obter_empregado_autenticado(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view medicao_detail_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    medicao = get_object_or_404(
+        Medicao.objects.select_related("furo", "furo__projeto"),
+        pk=pk,
+        empresa=empregado.empresa,
+    )
+
+    associado = EmpregadoFuro.objects.filter(
+        empregado=empregado,
+        furo=medicao.furo,
+        empresa=empregado.empresa,
+    ).exists()
+    com_registos = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo=medicao.furo,
+        empresa=empregado.empresa,
+    ).exists()
+
+    if not associado and not com_registos:
+        logger.warning(
+            "Empregado sem permissão para medicao_detail_empregado. user_id=%s, empregado_id=%s, medicao_id=%s, furo_id=%s",
+            request.user.id,
+            empregado.id,
+            medicao.id,
+            medicao.furo_id,
+        )
+        messages.error(request, "Não tens permissão para ver esta medição.")
+        return redirect("projetos:medicao_list_empregado")
+
+    logger.info(
+        "View medicao_detail_empregado carregada com sucesso. user_id=%s, empregado_id=%s, medicao_id=%s",
+        request.user.id,
+        empregado.id,
+        medicao.id,
+    )
+    return render(request, "projetos/medicao_empregado_detail.html", {
+        "empregado": empregado,
+        "medicao": medicao,
+        "furo": medicao.furo,
+        "titulo": "Detalhe da Medição",
+    })
+
 # -------  MEUS PROJETOS ------------- #
 @login_required
 @empregado_required
@@ -1071,6 +1192,10 @@ def projeto_detail_empregado(request, pk):
         projeto=projeto,
         id__in=list(furo_ids_associados) + list(furo_ids_registos)
     ).distinct().order_by("nome")
+    trabalhadores_envolvidos = projeto.empregado_projetos.select_related("empregado").filter(
+        empresa=empregado.empresa,
+        ativo=True,
+    ).order_by("empregado__nome")
 
     registos = empregado.registos_diarios.filter(projeto=projeto, empresa=empregado.empresa)
 
@@ -1089,6 +1214,7 @@ def projeto_detail_empregado(request, pk):
         "empregado": empregado,
         "projeto": projeto,
         "furos": furos,
+        "trabalhadores_envolvidos": trabalhadores_envolvidos,
         "total_metros": round(total_metros, 2),
         "total_horas": round(total_horas, 2),
         "total_registos": total_registos,
@@ -1103,6 +1229,20 @@ def area_empregado(request):
         request.user.id,
         request.user.username,
     )
+    perfil = PerfilPlataforma.objects.filter(user=request.user, ativo=True).first()
+    if perfil and perfil.tipo_acesso == "individual":
+        individual = _resolver_individual_por_user(request.user)
+        if not individual:
+            messages.error(request, "A tua conta individual não está configurada corretamente.")
+            return redirect("projetos:redirect_after_login")
+
+        return render(request, "projetos/area_individual.html", {
+            "individual": individual,
+            "horas_total": individual.total_horas or 0,
+            "metros_total": individual.total_metros or 0,
+            "total_registos": individual.total_registos or 0,
+        })
+
     empregado, resposta_erro = _obter_empregado_autenticado(request)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view area_empregado. user_id=%s", request.user.id)
@@ -1279,6 +1419,15 @@ def redirect_after_login(request):
             request.user.id,
             empregado.id,
             empregado.empresa_id,
+        )
+        return redirect(reverse("projetos:area_empregado"))
+
+    individual = _resolver_individual_por_user(request.user)
+    if individual:
+        logger.info(
+            "Fallback via Individual em redirect_after_login. user_id=%s, individual_id=%s",
+            request.user.id,
+            individual.id,
         )
         return redirect(reverse("projetos:area_empregado"))
 

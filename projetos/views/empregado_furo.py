@@ -9,6 +9,7 @@ from core.permissions import admin_required
 from plataforma.models import PerfilPlataforma
 from projetos.forms.empregado_furo import EmpregadoFuroForm
 from projetos.models import EmpregadoFuro, Empregados, Furo
+from projetos.services.empregados import garantir_ligacao_projeto_por_furo
 
 logger = logging.getLogger("core")
 
@@ -23,15 +24,6 @@ def _obter_contexto_admin_empregado_furo(request):
         request.user.id,
         request.user.username,
     )
-
-    admin_empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-    if admin_empregado:
-        logger.info(
-            "Contexto administrativo resolvido via Empregados em empregado_furo.py. user_id=%s, empresa_id=%s",
-            request.user.id,
-            admin_empregado.empresa_id,
-        )
-        return admin_empregado
 
     perfil = PerfilPlataforma.objects.filter(
         user=request.user,
@@ -101,8 +93,9 @@ def furo_adicionar_empregado(request, furo_id):
         if empregado_id:
             form.instance.empregado_id = empregado_id
         if form.is_valid():
+            empregado = form.cleaned_data["empregado"]
             ligacao = EmpregadoFuro.objects.create(
-                empregado=form.cleaned_data["empregado"],
+                empregado=empregado,
                 furo=furo,
                 funcao=form.cleaned_data["funcao"],
                 data_inicio=form.cleaned_data.get("data_inicio"),
@@ -111,15 +104,26 @@ def furo_adicionar_empregado(request, furo_id):
                 observacoes=form.cleaned_data.get("observacoes"),
                 empresa=empresa,
             )
+            ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
+                empregado=empregado,
+                furo=furo,
+                empresa=empresa,
+                data_inicio=form.cleaned_data.get("data_inicio"),
+            )
 
             logger.info(
-                "Trabalhador associado ao furo com sucesso. user_id=%s, empresa_id=%s, furo_id=%s, ligacao_id=%s",
+                "Trabalhador associado ao furo com sucesso. user_id=%s, empresa_id=%s, furo_id=%s, ligacao_id=%s, ligacao_projeto_id=%s, ligacao_projeto_criada=%s",
                 request.user.id,
                 empresa.id,
                 furo.id,
                 ligacao.id,
+                ligacao_projeto.id,
+                projeto_criado,
             )
-            messages.success(request, "Trabalhador associado ao furo com sucesso.")
+            if projeto_criado:
+                messages.success(request, "Trabalhador associado ao furo e automaticamente ligado ao projeto.")
+            else:
+                messages.success(request, "Trabalhador associado ao furo com sucesso.")
             return redirect(reverse("projetos:furo_detail", args=[furo.pk]))
 
         logger.warning(
@@ -173,7 +177,8 @@ def furo_editar_empregado(request, pk):
         if empregado_id:
             form.instance.empregado_id = empregado_id
         if form.is_valid():
-            ligacao.empregado = form.cleaned_data["empregado"]
+            empregado = form.cleaned_data["empregado"]
+            ligacao.empregado = empregado
             ligacao.funcao = form.cleaned_data["funcao"]
             ligacao.data_inicio = form.cleaned_data.get("data_inicio")
             ligacao.data_fim = form.cleaned_data.get("data_fim")
@@ -181,14 +186,25 @@ def furo_editar_empregado(request, pk):
             ligacao.observacoes = form.cleaned_data.get("observacoes")
             ligacao.empresa = empresa
             ligacao.save()
+            ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
+                empregado=empregado,
+                furo=ligacao.furo,
+                empresa=empresa,
+                data_inicio=form.cleaned_data.get("data_inicio"),
+            )
             logger.info(
-                "Ligação trabalhador/furo atualizada com sucesso. user_id=%s, empresa_id=%s, ligacao_id=%s, furo_id=%s",
+                "Ligação trabalhador/furo atualizada com sucesso. user_id=%s, empresa_id=%s, ligacao_id=%s, furo_id=%s, ligacao_projeto_id=%s, ligacao_projeto_criada=%s",
                 request.user.id,
                 empresa.id,
                 ligacao.id,
                 ligacao.furo.pk,
+                ligacao_projeto.id,
+                projeto_criado,
             )
-            messages.success(request, "Ligação trabalhador/furo atualizada com sucesso.")
+            if projeto_criado:
+                messages.success(request, "Ligação trabalhador/furo atualizada e projeto associado automaticamente.")
+            else:
+                messages.success(request, "Ligação trabalhador/furo atualizada com sucesso.")
             return redirect(reverse("projetos:furo_detail", args=[ligacao.furo.pk]))
 
         logger.warning(

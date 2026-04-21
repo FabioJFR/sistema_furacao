@@ -6,7 +6,7 @@
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block page_description %}
-Alterar o plano associado à empresa.
+Alterar o plano, o período de pagamento e o estado da empresa.
 {% endblock %}
 
 {% block content %}
@@ -24,12 +24,60 @@ Alterar o plano associado à empresa.
             <select name="plano" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
                 {% for plano in planos %}
                     <option value="{{ plano.id }}"
+                        data-periodos="{{ plano.periodos_cobranca_disponiveis_normalizados|join:',' }}"
                         {% if empresa.plano and plano.id == empresa.plano.id %}selected{% endif %}>
-                        {{ plano.nome }} - {{ plano.preco_mensal }}€/mês
+                        {{ plano.nome }} - {{ plano.preco_mensal }}€/mês{% if plano.preco_anual %} - {{ plano.preco_anual }}€/ano{% endif %}
                     </option>
                 {% endfor %}
             </select>
         </div>
+
+        <div style="margin-bottom: 16px;">
+            <label for="ciclo_subscricao" style="font-weight:600; display:block; margin-bottom:6px;">
+                Período de pagamento:
+            </label>
+
+            <select name="ciclo_subscricao" id="ciclo_subscricao" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <option value="1" {% if not subscricao_atual or subscricao_atual.periodo_cobranca_meses == 1 %}selected{% endif %}>
+                    1 mês
+                </option>
+                <option value="3" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 3 %}selected{% endif %}>
+                    3 meses
+                </option>
+                <option value="6" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 6 %}selected{% endif %}>
+                    6 meses
+                </option>
+                <option value="12" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 12 %}selected{% endif %}>
+                    12 meses
+                </option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label for="estado_empresa" style="font-weight:600; display:block; margin-bottom:6px;">
+                Estado da empresa:
+            </label>
+
+            <select name="estado_empresa" id="estado_empresa" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                {% for valor, label in estados_empresa %}
+                    <option value="{{ valor }}" {% if empresa.status == valor %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if subscricao_atual %}
+            <div style="margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 6px;"><strong>Subscrição atual:</strong> {{ subscricao_atual.plano.nome }}</div>
+                <div style="margin-bottom: 6px;"><strong>Período atual:</strong> {{ subscricao_atual.periodo_cobranca_label }}</div>
+                <div style="margin-bottom: 6px;"><strong>Estado atual da empresa:</strong> {{ empresa.get_status_display }}</div>
+                <div style="margin-bottom: 6px;"><strong>Próxima renovação:</strong> {{ subscricao_atual.proxima_renovacao|default:"—" }}</div>
+                {% if subscricao_atual.renovacao_definida_manualmente %}
+                    <div style="color:#92400e;"><strong>Nota:</strong> a próxima renovação foi definida manualmente e não será recalculada automaticamente ao mudar o ciclo.</div>
+                {% endif %}
+            </div>
+        {% endif %}
 
         <div style="display:flex; gap:10px;">
             <button type="submit" class="btn btn-primary">Guardar</button>
@@ -39,4 +87,33 @@ Alterar o plano associado à empresa.
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const planoSelect = document.querySelector("select[name='plano']");
+    const periodoSelect = document.getElementById("ciclo_subscricao");
+
+    function atualizarPeriodosDisponiveis() {
+        const option = planoSelect?.selectedOptions?.[0];
+        const periodos = (option?.dataset.periodos || "1,12").split(",").filter(Boolean);
+
+        Array.from(periodoSelect.options).forEach((periodoOption) => {
+            const permitido = periodos.includes(periodoOption.value);
+            periodoOption.hidden = !permitido;
+            periodoOption.disabled = !permitido;
+        });
+
+        const atual = periodoSelect.value;
+        const atualPermitido = periodos.includes(atual);
+        if (!atualPermitido && periodos.length) {
+            periodoSelect.value = periodos[0];
+        }
+    }
+
+    planoSelect?.addEventListener("change", atualizarPeriodosDisponiveis);
+    atualizarPeriodosDisponiveis();
+})();
+</script>
 {% endblock %}

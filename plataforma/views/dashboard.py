@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.utils import timezone
 
 from plataforma.decorators import platform_admin_required
-from plataforma.models import Empresa, Plano
+from plataforma.models import Empresa, Plano, SubscricaoEmpresa
 
 # TODO futuro:
 # - substituir este padrão por selector/service dedicado para dashboard da plataforma
@@ -21,6 +24,17 @@ def dashboard_plataforma(request):
     empresas_teste = empresas_qs.filter(status="teste").count()
     empresas_suspensas = empresas_qs.filter(status="suspensa").count()
     empresas_canceladas = empresas_qs.filter(status="cancelada").count()
+    hoje = timezone.now().date()
+    alertas_renovacao = (
+        SubscricaoEmpresa.objects
+        .select_related("empresa", "plano")
+        .filter(
+            estado__in=["ativa", "pendente"],
+            proxima_renovacao__isnull=False,
+            proxima_renovacao__lte=hoje + timedelta(days=7),
+        )
+        .order_by("proxima_renovacao", "empresa__nome")[:8]
+    )
 
 
     context = {
@@ -32,6 +46,7 @@ def dashboard_plataforma(request):
         "empresas_canceladas": empresas_canceladas,
         "empresas": empresas_qs[:12],
         "planos_ativos": Plano.objects.filter(ativo=True).count(),
+        "alertas_renovacao": alertas_renovacao,
     }
 
     return render(request, "plataforma/dashboard.html", context)

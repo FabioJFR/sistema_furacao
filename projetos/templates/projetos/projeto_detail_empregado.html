@@ -51,6 +51,31 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">👷 {% trans "Trabalhadores Envolvidos" %}</h2>
+            <span class="text-sm text-gray-500">{{ trabalhadores_envolvidos|length }} {% trans "trabalhador(es)" %}</span>
+        </div>
+
+        {% if trabalhadores_envolvidos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {% for ligacao in trabalhadores_envolvidos %}
+                    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <div class="font-bold text-gray-800">{{ ligacao.empregado.nome }}</div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            {% trans "Função" %}: {{ ligacao.empregado.get_funcao_display|default:ligacao.empregado.funcao|default:"-" }}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            {% trans "Início" %}: {{ ligacao.data_inicio|date:"d/m/Y"|default:"-" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem trabalhadores envolvidos visíveis neste projeto." %}</p>
+        {% endif %}
+    </div>
+
     <div class="bg-white rounded-2xl shadow border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-gray-800">🕳 {% trans "Furos do Projeto" %}</h2>

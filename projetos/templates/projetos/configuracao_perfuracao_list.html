@@ -29,11 +29,8 @@
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
                         <th class="text-left px-4 py-3">Furo</th>
-                        <th class="text-left px-4 py-3">Tubo</th>
-                        <th class="text-left px-4 py-3">Karoutier</th>
-                        <th class="text-left px-4 py-3">Acrescento</th>
-                        <th class="text-left px-4 py-3">Record</th>
-                        <th class="text-left px-4 py-3">Bit</th>
+                        <th class="text-left px-4 py-3">Conjunto de Fundo</th>
+                        <th class="text-left px-4 py-3">Tubo Interior</th>
                         <th class="text-left px-4 py-3">Atualizado em</th>
                         <th class="text-left px-4 py-3">Ações</th>
                     </tr>
@@ -42,11 +39,8 @@
                     {% for config in configuracoes %}
                     <tr class="border-t border-gray-200">
                         <td class="px-4 py-3">{{ config.furo.nome }}</td>
-                        <td class="px-4 py-3">{{ config.comprimento_tubo }} m</td>
-                        <td class="px-4 py-3">{{ config.comprimento_karoutier }} m</td>
-                        <td class="px-4 py-3">{{ config.comprimento_acrescento }} m</td>
-                        <td class="px-4 py-3">{{ config.comprimento_record }} m</td>
-                        <td class="px-4 py-3">{{ config.comprimento_bit }} m</td>
+                        <td class="px-4 py-3">{{ config.comprimento_total_conjunto_fundo|floatformat:2 }} m</td>
+                        <td class="px-4 py-3">{{ config.comprimento_total_tubo_interior|floatformat:2 }} m</td>
                         <td class="px-4 py-3">{{ config.atualizado_em }}</td>
                         <td class="px-4 py-3">
                             {% if modo_admin %}

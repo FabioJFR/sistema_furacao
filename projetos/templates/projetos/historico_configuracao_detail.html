@@ -40,14 +40,17 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
                 <div><strong>Tubo:</strong> {{ historico.comprimento_tubo }} m</div>
-                <div><strong>Karoutier:</strong> {{ historico.comprimento_karoutier }} m</div>
-                <div><strong>Acrescento:</strong> {{ historico.comprimento_acrescento }} m</div>
-                <div><strong>Calibrador:</strong> {{ historico.comprimento_calibrador }} m</div>
-                <div><strong>Record:</strong> {{ historico.comprimento_record }} m</div>
+                <div><strong>Karoutier:</strong> {{ historico.comprimento_karoutier }} m × {{ historico.quantidade_karoutier|default:1 }}</div>
+                <div><strong>Acrescento:</strong> {{ historico.comprimento_acrescento }} m × {{ historico.quantidade_acrescento|default:1 }}</div>
+                <div><strong>Calibrador:</strong> {{ historico.comprimento_calibrador }} m × {{ historico.quantidade_calibrador|default:1 }}</div>
+                <div><strong>Record:</strong> {{ historico.comprimento_record }} m × {{ historico.quantidade_record|default:1 }}</div>
                 <div><strong>Bit:</strong> {{ historico.comprimento_bit }} m</div>
                 <div><strong>Caixa de mola:</strong> {{ historico.comprimento_caixa_mola }} m</div>
-                <div><strong>Tubo interior:</strong> {{ historico.comprimento_tubo_interior }} m</div>
+                <div><strong>Tubo interior:</strong> {{ historico.comprimento_tubo_interior }} m × {{ historico.quantidade_tubo_interior|default:1 }}</div>
+                <div><strong>Acrescento do tubo interior:</strong> {{ historico.comprimento_acrescento_tubo_interior }} m × {{ historico.quantidade_acrescento_tubo_interior|default:1 }}</div>
                 <div><strong>Cabeça de interior:</strong> {{ historico.comprimento_cabeca_interior }} m</div>
+                <div><strong>Total do Conjunto de Fundo:</strong> {{ historico.comprimento_total_conjunto_fundo|floatformat:2 }} m</div>
+                <div><strong>Total do Tubo Interior:</strong> {{ historico.comprimento_total_tubo_interior|floatformat:2 }} m</div>
             </div>
         </div>
 

@@ -4,6 +4,13 @@ from plataforma.models import Plano
 
 
 class OnboardingEmpresaForm(forms.Form):
+    PERIODOS_COBRANCA_CHOICES = [
+        ("1", "1 mês"),
+        ("3", "3 meses"),
+        ("6", "6 meses"),
+        ("12", "12 meses"),
+    ]
+
     nome_empresa = forms.CharField(
         label="Nome da empresa",
         max_length=200,
@@ -78,6 +85,14 @@ class OnboardingEmpresaForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
+    ciclo_subscricao = forms.ChoiceField(
+        label="Período de pagamento do plano",
+        choices=PERIODOS_COBRANCA_CHOICES,
+        initial="1",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"}),
+        help_text="Define quantos meses ficam cobertos por cada pagamento e como será calculada a próxima renovação.",
+    )
     tipo_acesso = forms.ChoiceField(
         label="Tipo de acesso inicial",
         choices=[
@@ -109,22 +124,32 @@ class OnboardingEmpresaForm(forms.Form):
         min_value=0,
         decimal_places=2,
         max_digits=10,
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "step": "0.01",
+                "readonly": "readonly",
+            }
+        ),
+        help_text="Calculado automaticamente a partir do plano e do período de pagamento.",
     )
-    criar_pagamento_inicial = forms.BooleanField(
-        label="Criar pagamento inicial",
-        required=False,
-        initial=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
-    valor_pagamento = forms.DecimalField(
-        label="Valor do pagamento",
-        required=False,
-        min_value=0,
-        decimal_places=2,
-        max_digits=10,
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-    )
+
+    @staticmethod
+    def _calcular_valor_plano(plano, ciclo_subscricao):
+        if not plano:
+            return None
+
+        try:
+            periodo_meses = int(ciclo_subscricao or 1)
+        except (TypeError, ValueError):
+            periodo_meses = 1
+
+        if periodo_meses == 12:
+            if plano.preco_anual:
+                return plano.preco_anual
+            return (plano.preco_mensal or 0) * 12
+
+        return (plano.preco_mensal or 0) * periodo_meses
 
     def clean_nome_empresa(self):
         valor = self.cleaned_data.get("nome_empresa", "").strip()
@@ -152,24 +177,37 @@ class OnboardingEmpresaForm(forms.Form):
         cleaned = super().clean()
 
         plano = cleaned.get("plano")
+        ciclo_subscricao = cleaned.get("ciclo_subscricao") or "1"
         criar_subscricao_inicial = cleaned.get("criar_subscricao_inicial")
-        criar_pagamento_inicial = cleaned.get("criar_pagamento_inicial")
-        valor_subscricao = cleaned.get("valor_subscricao")
-        valor_pagamento = cleaned.get("valor_pagamento")
 
         if criar_subscricao_inicial and not plano:
             self.add_error("plano", "Selecione um plano para criar a subscrição inicial.")
 
-        if not criar_subscricao_inicial and valor_subscricao:
+        if criar_subscricao_inicial and plano and int(ciclo_subscricao) not in plano.periodos_cobranca_disponiveis_normalizados:
             self.add_error(
-                "valor_subscricao",
-                "Não pode indicar valor de subscrição sem criar subscrição inicial.",
+                "ciclo_subscricao",
+                "O plano selecionado não permite esse período de cobrança.",
             )
 
-        if criar_pagamento_inicial and not criar_subscricao_inicial and not valor_pagamento:
+        if criar_subscricao_inicial and plano and int(ciclo_subscricao) in [1, 3, 6] and not plano.preco_mensal:
             self.add_error(
-                "valor_pagamento",
-                "Indique o valor do pagamento ou ative a subscrição inicial para o valor ser inferido.",
+                "ciclo_subscricao",
+                "O plano selecionado precisa de preço mensal para períodos de 1, 3 ou 6 meses.",
             )
+
+        if criar_subscricao_inicial and plano and int(ciclo_subscricao) == 12 and not plano.preco_anual and not plano.preco_mensal:
+            self.add_error(
+                "ciclo_subscricao",
+                "O plano selecionado precisa de preço anual ou mensal para 12 meses.",
+            )
+
+        valor_calculado = self._calcular_valor_plano(plano, ciclo_subscricao)
+
+        if criar_subscricao_inicial:
+            cleaned["valor_subscricao"] = valor_calculado
+        else:
+            cleaned["valor_subscricao"] = None
+
+        cleaned["valor_pagamento"] = None
 
         return cleaned

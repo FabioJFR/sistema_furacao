@@ -11,6 +11,7 @@ from projetos.models import (
     ConfiguracaoPerfuracaoEmpregado,
     DevolucaoMaterial,
     Empregados,
+    Individual,
     LevantamentoMaterial,
     RegistoDiarioEmpregado,
 )
@@ -50,6 +51,25 @@ def _obter_empregado_autenticado_area(request):
     return empregado, None
 
 
+def _obter_individual_autenticado_area(request):
+    logger.debug(
+        "A resolver individual autenticado em empregado_area.py. user_id=%s, username='%s'",
+        request.user.id,
+        request.user.username,
+    )
+
+    individual = Individual.objects.filter(user=request.user).select_related("user").first()
+    if not individual:
+        logger.warning(
+            "Utilizador autenticado sem registo em Individual em empregado_area.py. user_id=%s",
+            request.user.id,
+        )
+        messages.error(request, "A tua conta individual não está configurada corretamente.")
+        return None, redirect("projetos:redirect_after_login")
+
+    return individual, None
+
+
 # Multiempresa: a área pessoal do empregado só pode mostrar e editar dados da sua própria empresa.
 @login_required
 @empregado_required
@@ -59,6 +79,20 @@ def meus_dados_empregado(request):
         request.user.id,
         request.user.username,
     )
+    perfil = getattr(request.user, "perfil_plataforma", None)
+    if perfil and perfil.tipo_acesso == "individual":
+        individual, resposta_erro = _obter_individual_autenticado_area(request)
+        if resposta_erro:
+            return resposta_erro
+
+        context = {
+            "individual": individual,
+            "total_registos": individual.total_registos or 0,
+            "total_horas": individual.total_horas or 0,
+            "total_metros": individual.total_metros or 0,
+        }
+        return render(request, "projetos/meus_dados_individual.html", context)
+
     empregado, resposta_erro = _obter_empregado_autenticado_area(request)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view meus_dados_empregado. user_id=%s", request.user.id)
@@ -126,6 +160,32 @@ def meus_dados_empregado_editar(request):
         request.user.username,
         request.method,
     )
+    perfil = getattr(request.user, "perfil_plataforma", None)
+    if perfil and perfil.tipo_acesso == "individual":
+        from projetos.forms.empregado_area import MeusDadosIndividualForm
+
+        individual, resposta_erro = _obter_individual_autenticado_area(request)
+        if resposta_erro:
+            return resposta_erro
+
+        if request.method == "POST":
+            form = MeusDadosIndividualForm(request.POST, request.FILES, instance=individual)
+            if form.is_valid():
+                individual = form.save(commit=False)
+                individual.user = request.user
+                individual.save()
+                messages.success(request, "Os teus dados foram atualizados com sucesso.")
+                return redirect("projetos:meus_dados_empregado")
+
+            messages.error(request, "Erro ao atualizar os teus dados.")
+        else:
+            form = MeusDadosIndividualForm(instance=individual)
+
+        return render(request, "projetos/meus_dados_individual_editar.html", {
+            "individual": individual,
+            "form": form,
+        })
+
     empregado, resposta_erro = _obter_empregado_autenticado_area(request)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view meus_dados_empregado_editar. user_id=%s", request.user.id)

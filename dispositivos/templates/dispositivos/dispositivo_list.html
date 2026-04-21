@@ -1,11 +1,11 @@
-{% extends "plataforma/base.html" %}
+{% extends "dispositivos/base.html" %}
 {% load i18n %}
 
 {% block title %}{% trans "Dispositivos" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+<div class="device-shell max-w-7xl mx-auto">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">{% trans "Dispositivos" %}</h1>
@@ -13,48 +13,41 @@
                     {% trans "Gestão e monitorização dos dispositivos ligados ao sistema." %}
                 </p>
             </div>
-
-            <div class="flex gap-3 flex-wrap">
-                <a href="/app/dispositivos/novo/" class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
-                    ➕ {% trans "Novo Dispositivo" %}
-                </a>
-            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 device-metric-grid">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Total de dispositivos" %}</p>
             <h2 class="text-3xl font-bold text-gray-800 mt-2">{{ total_dispositivos }}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Ligação suportada" %}</p>
-            <h2 class="text-lg font-semibold text-gray-800 mt-2">{% trans "Cabo / Bluetooth" %}</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mt-2">{% trans "USB / Serial, Bluetooth, Arquivo, Simulador" %}</h2>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="device-panel device-metric bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <p class="text-sm text-gray-500">{% trans "Integração futura" %}</p>
             <h2 class="text-lg font-semibold text-gray-800 mt-2">SPT MagCruiser 1.7.7</h2>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+    <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-800">{% trans "Lista de Dispositivos" %}</h2>
         </div>
 
         {% if dispositivos %}
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-left">
+                <table class="device-table min-w-full text-sm text-left">
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                         <tr>
                             <th class="px-6 py-4">{% trans "Nome" %}</th>
                             <th class="px-6 py-4">{% trans "Tipo" %}</th>
-                            <th class="px-6 py-4">{% trans "Modelo" %}</th>
-                            <th class="px-6 py-4">{% trans "Ligação" %}</th>
+                            <th class="px-6 py-4">{% trans "Canal" %}</th>
+                            <th class="px-6 py-4">{% trans "Identificador" %}</th>
                             <th class="px-6 py-4">{% trans "Estado" %}</th>
-                            <th class="px-6 py-4 text-right">{% trans "Ações" %}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -64,13 +57,21 @@
                                     {{ dispositivo.nome }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-600">
-                                    {{ dispositivo.tipo|default:"—" }}
+                                    {{ dispositivo.get_tipo_display|default:"—" }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-600">
-                                    {{ dispositivo.modelo|default:"—" }}
+                                    {{ dispositivo.get_canal_display|default:"—" }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-600">
-                                    {{ dispositivo.tipo_ligacao|default:"—" }}
+                                    {% if dispositivo.porta %}
+                                        {{ dispositivo.porta }}
+                                    {% elif dispositivo.mac_address %}
+                                        <span class="device-break">{{ dispositivo.mac_address }}</span>
+                                    {% elif dispositivo.identificador_fisico %}
+                                        <span class="device-break">{{ dispositivo.identificador_fisico }}</span>
+                                    {% else %}
+                                        —
+                                    {% endif %}
                                 </td>
                                 <td class="px-6 py-4">
                                     {% if dispositivo.ativo %}
@@ -83,31 +84,18 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex justify-end gap-2 flex-wrap">
-                                        <a href="/app/dispositivos/{{ dispositivo.id }}/" class="inline-flex px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition">
-                                            👁 {% trans "Ver" %}
-                                        </a>
-                                        <a href="/app/dispositivos/{{ dispositivo.id }}/editar/" class="inline-flex px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 font-medium transition">
-                                            ✏️ {% trans "Editar" %}
-                                        </a>
-                                    </div>
-                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <div class="p-10 text-center">
+            <div class="p-10 text-center device-empty-state">
                 <div class="text-5xl mb-4">📡</div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">{% trans "Ainda não existem dispositivos registados" %}</h3>
                 <p class="text-gray-500 mb-5">
-                    {% trans "Adicione o primeiro dispositivo para começar a gerir integrações com equipamento de campo." %}
+                    {% trans "Os dispositivos registados aparecerão aqui para suporte às sessões e capturas do sistema." %}
                 </p>
-                <a href="/app/dispositivos/novo/" class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
-                    ➕ {% trans "Criar primeiro dispositivo" %}
-                </a>
             </div>
         {% endif %}
     </div>

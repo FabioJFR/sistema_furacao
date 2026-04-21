@@ -14,81 +14,6 @@
         </a>
     </div>
 
-    <!-- PAINEL DE NAVEGAÇÃO -->
-    <div style="
-        display:flex;
-        align-items:center;
-        gap:12px;
-        flex-wrap:wrap;
-        background:#f8fafc;
-        border:1px solid #e5e7eb;
-        border-radius:12px;
-        padding:14px 16px;
-        box-shadow:0 4px 10px rgba(0,0,0,0.06);
-        margin-bottom:20px;
-    ">
-
-        <button id="prevProjetoBtn" type="button" style="
-            width:44px;
-            height:44px;
-            border:none;
-            border-radius:10px;
-            background:#2563eb;
-            color:white;
-            font-size:20px;
-            font-weight:bold;
-            cursor:pointer;
-            box-shadow:0 4px 10px rgba(37,99,235,0.25);
-            transition:0.2s;
-        " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
-            ◀
-        </button>
-
-        <button id="nextProjetoBtn" type="button" style="
-            width:44px;
-            height:44px;
-            border:none;
-            border-radius:10px;
-            background:#2563eb;
-            color:white;
-            font-size:20px;
-            font-weight:bold;
-            cursor:pointer;
-            box-shadow:0 4px 10px rgba(37,99,235,0.25);
-            transition:0.2s;
-        " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
-            ▶
-        </button>
-
-        <div id="projetoInfo" style="
-            flex:1;
-            min-width:220px;
-            color:#1f2937;
-            font-size:14px;
-            line-height:1.5;
-            font-weight:600;
-            padding:4px 8px;
-        ">
-            Nenhum projeto selecionado
-        </div>
-
-        <button id="abrirProjetoBtn" type="button" style="
-            border:none;
-            border-radius:10px;
-            background:#16a34a;
-            color:white;
-            padding:10px 16px;
-            font-size:14px;
-            font-weight:bold;
-            cursor:pointer;
-            box-shadow:0 4px 10px rgba(22,163,74,0.25);
-            transition:0.2s;
-        " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
-            Abrir Projeto
-        </button>
-
-    </div>
-
     <!-- LISTA DE PROJETOS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for projeto in projetos %}
@@ -117,7 +42,89 @@
 
     <!-- MAPA DE PROJETOS -->
     <h2 class="mt-12 mb-4 text-2xl font-bold text-gray-800">🗺️ Mapa de Projetos</h2>
-    <div id="map" class="w-full h-96 rounded-xl shadow-md mb-6"></div>
+    <div style="position:relative; margin-bottom:24px;">
+        <div style="
+            position:absolute;
+            top:14px;
+            left:14px;
+            right:14px;
+            z-index:1000;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            background:rgba(248,250,252,0.96);
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            padding:14px 16px;
+            box-shadow:0 8px 18px rgba(0,0,0,0.12);
+            backdrop-filter:blur(4px);
+        ">
+
+            <button id="prevProjetoBtn" type="button" style="
+                width:44px;
+                height:44px;
+                border:none;
+                border-radius:10px;
+                background:#2563eb;
+                color:white;
+                font-size:20px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                ◀
+            </button>
+
+            <button id="nextProjetoBtn" type="button" style="
+                width:44px;
+                height:44px;
+                border:none;
+                border-radius:10px;
+                background:#2563eb;
+                color:white;
+                font-size:20px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(37,99,235,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                ▶
+            </button>
+
+            <div id="projetoInfo" style="
+                flex:1;
+                min-width:220px;
+                color:#1f2937;
+                font-size:14px;
+                line-height:1.5;
+                font-weight:600;
+                padding:4px 8px;
+            ">
+                Nenhum projeto selecionado
+            </div>
+
+            <button id="abrirProjetoBtn" type="button" style="
+                width:44px;
+                height:44px;
+                border:none;
+                border-radius:10px;
+                background:#16a34a;
+                color:white;
+                font-size:18px;
+                font-weight:bold;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(22,163,74,0.25);
+                transition:0.2s;
+            " onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+                ↗
+            </button>
+
+        </div>
+
+        <div id="map" class="w-full h-96 rounded-xl shadow-md"></div>
+    </div>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -229,7 +236,9 @@
 
         const p = projetos[projetoIndex];
         info.innerHTML = `
-            <strong>${p.nome}</strong><br>
+            <a href="${projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(p.id))}" style="color:#1d4ed8; font-weight:800; text-decoration:none;">
+                ${p.nome}
+            </a><br>
             Cliente: ${p.cliente || '-'} |
             Cidade: ${p.cidade || '-'} |
             País: ${p.pais || '-'}
@@ -243,14 +252,6 @@
         destacarCardAtual();
         destacarMarcadorAtual();
         atualizarInfo();
-
-        const el = document.getElementById(`projeto-${projetoIndex}`);
-        if (el) {
-            el.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-        }
 
         if (p.localizacao_lat !== null && p.localizacao_lon !== null) {
             map.flyTo([p.localizacao_lat, p.localizacao_lon], 7, { duration: 1.2 });

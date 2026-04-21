@@ -43,15 +43,6 @@ def _obter_contexto_admin_registos(request):
         request.user.username,
     )
 
-    admin_empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-    if admin_empregado:
-        logger.info(
-            "Contexto administrativo resolvido via Empregados em registos.py. user_id=%s, empresa_id=%s",
-            request.user.id,
-            admin_empregado.empresa_id,
-        )
-        return admin_empregado
-
     perfil = PerfilPlataforma.objects.filter(
         user=request.user,
         ativo=True,

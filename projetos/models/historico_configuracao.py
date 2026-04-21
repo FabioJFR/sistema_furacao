@@ -68,11 +68,21 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
         null=True,
         blank=True,
     )
+    quantidade_karoutier = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
+    )
     comprimento_acrescento = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
+    )
+    quantidade_acrescento = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
     )
     comprimento_calibrador = models.DecimalField(
         max_digits=10,
@@ -80,11 +90,21 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
         null=True,
         blank=True,
     )
+    quantidade_calibrador = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
+    )
     comprimento_record = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
+    )
+    quantidade_record = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
     )
     comprimento_bit = models.DecimalField(
         max_digits=10,
@@ -103,6 +123,22 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
+    )
+    quantidade_tubo_interior = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
+    )
+    comprimento_acrescento_tubo_interior = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    quantidade_acrescento_tubo_interior = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=1,
     )
     comprimento_cabeca_interior = models.DecimalField(
         max_digits=10,
@@ -137,6 +173,25 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
         nome_furo = self.furo.nome if self.furo else "-"
         return f"{nome_empregado} - {nome_furo} - {self.get_acao_display()} - {self.criado_em:%d/%m/%Y %H:%M}"
 
+    @property
+    def comprimento_total_conjunto_fundo(self):
+        return (
+            (float(self.comprimento_karoutier or 0) * int(self.quantidade_karoutier or 0))
+            + (float(self.comprimento_acrescento or 0) * int(self.quantidade_acrescento or 0))
+            + (float(self.comprimento_calibrador or 0) * int(self.quantidade_calibrador or 0))
+            + (float(self.comprimento_record or 0) * int(self.quantidade_record or 0))
+            + float(self.comprimento_bit or 0)
+        )
+
+    @property
+    def comprimento_total_tubo_interior(self):
+        return (
+            + float(self.comprimento_caixa_mola or 0)
+            + (float(self.comprimento_tubo_interior or 0) * int(self.quantidade_tubo_interior or 0))
+            + (float(self.comprimento_acrescento_tubo_interior or 0) * int(self.quantidade_acrescento_tubo_interior or 0))
+            + float(self.comprimento_cabeca_interior or 0)
+        )
+
     @staticmethod
     def _normalizar_decimal_historico(valor):
         if valor is None:
@@ -156,12 +211,19 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
             acao=acao,
             comprimento_tubo=cls._normalizar_decimal_historico(configuracao.comprimento_tubo),
             comprimento_karoutier=cls._normalizar_decimal_historico(configuracao.comprimento_karoutier),
+            quantidade_karoutier=getattr(configuracao, "quantidade_karoutier", 1),
             comprimento_acrescento=cls._normalizar_decimal_historico(configuracao.comprimento_acrescento),
+            quantidade_acrescento=getattr(configuracao, "quantidade_acrescento", 1),
             comprimento_calibrador=cls._normalizar_decimal_historico(configuracao.comprimento_calibrador),
+            quantidade_calibrador=getattr(configuracao, "quantidade_calibrador", 1),
             comprimento_record=cls._normalizar_decimal_historico(configuracao.comprimento_record),
+            quantidade_record=getattr(configuracao, "quantidade_record", 1),
             comprimento_bit=cls._normalizar_decimal_historico(configuracao.comprimento_bit),
             comprimento_caixa_mola=cls._normalizar_decimal_historico(configuracao.comprimento_caixa_mola),
             comprimento_tubo_interior=cls._normalizar_decimal_historico(configuracao.comprimento_tubo_interior),
+            quantidade_tubo_interior=getattr(configuracao, "quantidade_tubo_interior", 1),
+            comprimento_acrescento_tubo_interior=cls._normalizar_decimal_historico(configuracao.comprimento_acrescento_tubo_interior),
+            quantidade_acrescento_tubo_interior=getattr(configuracao, "quantidade_acrescento_tubo_interior", 1),
             comprimento_cabeca_interior=cls._normalizar_decimal_historico(configuracao.comprimento_cabeca_interior),
             alterado_por=utilizador,
             observacoes=observacoes,

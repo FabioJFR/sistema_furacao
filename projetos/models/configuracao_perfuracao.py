@@ -33,14 +33,21 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
     # String de perfuração
     comprimento_tubo = models.FloatField(default=3.0)
     comprimento_karoutier = models.FloatField(default=0.0)
+    quantidade_karoutier = models.PositiveIntegerField(default=1)
     comprimento_acrescento = models.FloatField(default=0.0)
+    quantidade_acrescento = models.PositiveIntegerField(default=1)
     comprimento_calibrador = models.FloatField(default=0.0)
+    quantidade_calibrador = models.PositiveIntegerField(default=1)
     comprimento_record = models.FloatField(default=0.0)
+    quantidade_record = models.PositiveIntegerField(default=1)
     comprimento_bit = models.FloatField(default=0.0)
 
     # Conjunto interior
     comprimento_caixa_mola = models.FloatField(default=0.0)
     comprimento_tubo_interior = models.FloatField(default=0.0)
+    quantidade_tubo_interior = models.PositiveIntegerField(default=1)
+    comprimento_acrescento_tubo_interior = models.FloatField(default=0.0)
+    quantidade_acrescento_tubo_interior = models.PositiveIntegerField(default=1)
     comprimento_cabeca_interior = models.FloatField(default=0.0)
 
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -65,6 +72,25 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
         nome_empregado = self.empregado.nome if self.empregado_id and self.empregado else "-"
         nome_furo = self.furo.nome if self.furo_id and self.furo else "-"
         return f"{nome_empregado} - {nome_furo}"
+
+    @property
+    def comprimento_total_conjunto_fundo(self):
+        return (
+            (float(self.comprimento_karoutier or 0) * int(self.quantidade_karoutier or 0))
+            + (float(self.comprimento_acrescento or 0) * int(self.quantidade_acrescento or 0))
+            + (float(self.comprimento_calibrador or 0) * int(self.quantidade_calibrador or 0))
+            + (float(self.comprimento_record or 0) * int(self.quantidade_record or 0))
+            + float(self.comprimento_bit or 0)
+        )
+
+    @property
+    def comprimento_total_tubo_interior(self):
+        return (
+            + float(self.comprimento_caixa_mola or 0)
+            + (float(self.comprimento_tubo_interior or 0) * int(self.quantidade_tubo_interior or 0))
+            + (float(self.comprimento_acrescento_tubo_interior or 0) * int(self.quantidade_acrescento_tubo_interior or 0))
+            + float(self.comprimento_cabeca_interior or 0)
+        )
 
     def clean(self):
         super().clean()
@@ -110,12 +136,27 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
             "comprimento_bit",
             "comprimento_caixa_mola",
             "comprimento_tubo_interior",
+            "comprimento_acrescento_tubo_interior",
             "comprimento_cabeca_interior",
         ]:
             valor = getattr(self, field_name, None)
             if valor is not None and valor < 0:
                 raise ValidationError({
                     field_name: "O comprimento não pode ser negativo."
+                })
+
+        for field_name in [
+            "quantidade_karoutier",
+            "quantidade_acrescento",
+            "quantidade_calibrador",
+            "quantidade_record",
+            "quantidade_tubo_interior",
+            "quantidade_acrescento_tubo_interior",
+        ]:
+            valor = getattr(self, field_name, None)
+            if valor is not None and valor < 0:
+                raise ValidationError({
+                    field_name: "A quantidade não pode ser negativa."
                 })
 
     def save(self, *args, **kwargs):

@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 
 from plataforma.decorators import platform_admin_required
 from plataforma.forms.onboarding import OnboardingEmpresaForm
+from plataforma.models import Plano
 from plataforma.services.onboarding import criar_empresa_com_admin
 
 
@@ -31,12 +32,11 @@ def onboarding_empresa(request):
         form = OnboardingEmpresaForm(request.POST)
 
         logger.info(
-            "POST recebido em onboarding_empresa. nome_empresa=%r, email_admin=%r, tipo_acesso=%r, criar_subscricao_inicial=%r, criar_pagamento_inicial=%r",
+            "POST recebido em onboarding_empresa. nome_empresa=%r, email_admin=%r, tipo_acesso=%r, criar_subscricao_inicial=%r",
             request.POST.get("nome_empresa"),
             request.POST.get("email_admin"),
             request.POST.get("tipo_acesso"),
             request.POST.get("criar_subscricao_inicial"),
-            request.POST.get("criar_pagamento_inicial"),
         )
 
         if form.is_valid():
@@ -61,13 +61,14 @@ def onboarding_empresa(request):
                     cidade=form.cleaned_data.get("cidade"),
                     observacoes=form.cleaned_data.get("observacoes"),
                     plano=form.cleaned_data.get("plano"),
+                    ciclo_subscricao=form.cleaned_data.get("ciclo_subscricao") or "mensal",
                     tipo_acesso=form.cleaned_data.get("tipo_acesso") or "empresa_admin",
                     estado_empresa=form.cleaned_data.get("estado_empresa") or "teste",
                     ativa=True,
                     criar_subscricao_inicial=form.cleaned_data.get("criar_subscricao_inicial") or False,
                     valor_subscricao=form.cleaned_data.get("valor_subscricao"),
-                    criar_pagamento_inicial=form.cleaned_data.get("criar_pagamento_inicial") or False,
-                    valor_pagamento=form.cleaned_data.get("valor_pagamento"),
+                    criar_pagamento_inicial=False,
+                    valor_pagamento=None,
                 )
 
                 empresa = resultado["empresa"]
@@ -109,7 +110,21 @@ def onboarding_empresa(request):
             getattr(request.user, "id", None),
         )
 
+    planos_periodos = {
+        str(plano.pk): plano.periodos_cobranca_disponiveis_normalizados
+        for plano in Plano.objects.filter(ativo=True)
+    }
+    planos_precos = {
+        str(plano.pk): {
+            "preco_mensal": str(plano.preco_mensal or 0),
+            "preco_anual": str(plano.preco_anual or 0),
+        }
+        for plano in Plano.objects.filter(ativo=True)
+    }
+
     return render(request, "plataforma/onboarding_empresa.html", {
         "form": form,
         "titulo": "Onboarding de Empresa",
+        "planos_periodos": planos_periodos,
+        "planos_precos": planos_precos,
     })

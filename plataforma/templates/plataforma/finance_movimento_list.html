@@ -1,0 +1,123 @@
+{% extends "plataforma/base.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block page_description %}
+{{ descricao }}
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
+{% endblock %}
+
+{% block content %}
+{% if tipo_pagina == "saida" %}
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+            <div>
+                <h2>Adicionar despesa</h2>
+                <p>Regista custos de alojamento, publicidade, domínio, HTTPS e outras despesas da plataforma.</p>
+            </div>
+        </div>
+
+        <form method="post" class="finance-form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="finance-form-field {% if field.name == 'observacoes' %}finance-form-field--full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="finance-help">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="finance-error">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="finance-form-actions">
+                <button type="submit" class="btn btn-primary">Guardar despesa</button>
+            </div>
+        </form>
+    </div>
+{% endif %}
+
+<div class="grid-cards" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <div class="card">
+        <div class="metric-label">Total de movimentos</div>
+        <div class="metric-value">{{ total_movimentos }}</div>
+    </div>
+    <div class="card">
+        <div class="metric-label">Valor total</div>
+        <div class="metric-value">{{ total_valor }}€</div>
+    </div>
+    <div class="card">
+        <div class="metric-label">Pagos</div>
+        <div class="metric-value">{{ total_pagos }}</div>
+    </div>
+    <div class="card">
+        <div class="metric-label">Pendentes</div>
+        <div class="metric-value">{{ total_pendentes }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="section-title">
+        <div>
+            <h2>{{ titulo }}</h2>
+            <p>Consulta os registos financeiros mais recentes desta categoria.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Destino</th>
+                    <th>Categoria</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Plano</th>
+                    <th>Valor</th>
+                    <th>Competência</th>
+                    <th>Vencimento</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movimento in movimentos %}
+                    <tr>
+                        <td>
+                            {% if movimento.empresa_id %}
+                                <span class="empresa-nome">{{ movimento.empresa.nome }}</span>
+                                <span class="empresa-meta">Empresa</span>
+                            {% elif movimento.perfil_plataforma_id %}
+                                <span class="empresa-nome">{{ movimento.perfil_plataforma.user.username }}</span>
+                                <span class="empresa-meta">Individual</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ movimento.get_categoria_display }}</td>
+                        <td>{{ movimento.get_tipo_movimento_display }}</td>
+                        <td>
+                            <span class="badge badge-{{ movimento.estado }}">
+                                {{ movimento.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>{{ movimento.plano.nome|default:"—" }}</td>
+                        <td>{{ movimento.valor }} {{ movimento.moeda }}</td>
+                        <td>{{ movimento.data_competencia|default:"—" }}</td>
+                        <td>{{ movimento.data_vencimento|default:"—" }}</td>
+                        <td>{{ movimento.descricao|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9">Ainda não existem movimentos registados nesta área.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

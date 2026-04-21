@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from projetos.models import Medicao, Projeto
+from projetos.models import EmpregadoProjeto, Medicao, Projeto
 
 
 # TODO futuro:
@@ -139,12 +139,14 @@ def obter_contexto_projeto_detail(pk, empresa=None):
     registos = projeto.registos_projeto.select_related("empregado", "furo").all()
     materiais = projeto.materiais.all()
     maquinas = projeto.maquinas.all()
+    trabalhadores_envolvidos = projeto.empregado_projetos.select_related("empregado").filter(ativo=True)
 
     if empresa_id is not None:
         levantamentos = levantamentos.filter(empresa_id=empresa_id)
         registos = registos.filter(empresa_id=empresa_id)
         materiais = materiais.filter(empresa_id=empresa_id)
         maquinas = maquinas.filter(empresa_id=empresa_id)
+        trabalhadores_envolvidos = trabalhadores_envolvidos.filter(empresa_id=empresa_id)
 
     return {
         "projeto": projeto,
@@ -154,6 +156,7 @@ def obter_contexto_projeto_detail(pk, empresa=None):
         "materiais": materiais,
         "maquinas": maquinas,
         "registos": registos,
+        "trabalhadores_envolvidos": trabalhadores_envolvidos.order_by("empregado__nome"),
         "projeto_mapa": {
             "nome": projeto.nome,
             "cidade": projeto.cidade,

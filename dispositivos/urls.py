@@ -22,5 +22,11 @@ urlpatterns = [
     
     path("api/testar/", views.api_testar),
     path("api/capturar/", views.api_capturar),
+    path("api/portas-usb/", views.api_procurar_portas_usb, name="api_procurar_portas_usb"),
+    path("api/bluetooth/", views.api_procurar_dispositivos_bluetooth, name="api_procurar_dispositivos_bluetooth"),
+    path("api/bluetooth/inspecionar/", views.api_inspecionar_dispositivo_bluetooth, name="api_inspecionar_dispositivo_bluetooth"),
+    path("api/dispositivos/guardar/", views.api_guardar_dispositivo_detectado, name="api_guardar_dispositivo_detectado"),
+    path("api/dispositivos/escutar/", views.api_escutar_dispositivo_detectado, name="api_escutar_dispositivo_detectado"),
+    path("api/testar-leitura-usb/", views.api_testar_leitura_usb, name="api_testar_leitura_usb"),
     
 ]

@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .projeto import Projeto
 from .furo import Furo
 
@@ -160,6 +161,9 @@ class Empregados(models.Model):
                 })
 
     def save(self, *args, **kwargs):
+        if not self.data_admissao:
+            self.data_admissao = timezone.now().date()
+
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -237,6 +241,12 @@ class EmpregadoProjeto(models.Model):
     # - suportar histórico mais detalhado de estados da ligação
     # - auditar quem criou/encerrou a ligação
     def save(self, *args, **kwargs):
+        if not self.data_inicio:
+            self.data_inicio = timezone.now().date()
+
+        if not self.ativo and not self.data_fim:
+            self.data_fim = timezone.now().date()
+
         if self.empregado and self.empregado.empresa_id:
             self.empresa_id = self.empregado.empresa_id
         elif self.projeto and self.projeto.empresa_id:

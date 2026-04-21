@@ -25,6 +25,11 @@
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_empregados }}</div>
         </div>
 
+        <div style="background:#fff7ed; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border-left:5px solid #f97316;">
+            <div style="font-size:13px; color:#9a3412; font-weight:600;">Empregados pendentes</div>
+            <div style="font-size:26px; font-weight:bold; color:#c2410c;">{{ total_empregados_pendentes }}</div>
+        </div>
+
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Máquinas totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_maquinas }}</div>
@@ -40,6 +45,39 @@
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_registos }}</div>
         </div>
     </div>
+
+    {% if total_empregados_pendentes %}
+    <div style="
+        background:#fff7ed;
+        border:1px solid #fdba74;
+        color:#9a3412;
+        padding:14px 16px;
+        border-radius:12px;
+        margin-bottom:20px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:16px;
+        flex-wrap:wrap;
+        box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    ">
+        <div>
+            <strong>Existem {{ total_empregados_pendentes }} empregado(s) pendente(s) de aprovação.</strong>
+            <div style="margin-top:4px; font-size:14px;">
+                Isto inclui registos criados pela empresa e contas criadas pelos próprios trabalhadores no site.
+            </div>
+        </div>
+        <a href="{% url 'projetos:empregado_pendentes' %}" style="
+            background:#ea580c;
+            color:white;
+            text-decoration:none;
+            padding:10px 14px;
+            border-radius:8px;
+            font-weight:bold;
+            white-space:nowrap;
+        ">Ver pendentes</a>
+    </div>
+    {% endif %}
 
     <!-- MAPA / GLOBO -->
     <div style="
