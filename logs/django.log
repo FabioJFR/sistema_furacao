@@ -14805,3 +14805,12 @@ ValueError: Cannot assign "UUID('505daad6-7855-4b1a-b9b0-d062ef5edec9')": "Empre
 [2026-04-21 14:05:07,088] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
 [2026-04-21 14:05:07,109] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
 [2026-04-21 14:05:07,172] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 19866
+[2026-04-21 14:26:25,022] INFO core | Entrada na view furo_detail. user_id=2, username='empresa1', furo_pk=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:26:25,023] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-21 14:26:25,028] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 14:26:25,049] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
+[2026-04-21 14:26:25,114] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 19282
+[2026-04-21 14:26:25,175] INFO django.server | "GET /static/css/projeto/furo_detail.css HTTP/1.1" 200 6953
+[2026-04-21 14:27:11,927] DEBUG core | A resolver contexto administrativo em projetos.py. user_id=2, username='empresa1'
+[2026-04-21 14:27:11,929] INFO core | Contexto administrativo resolvido via PerfilPlataforma em projetos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-21 14:27:11,982] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 13576
