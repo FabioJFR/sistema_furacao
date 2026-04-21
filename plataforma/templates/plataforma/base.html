@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Plataforma{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/plataforma/base.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -36,6 +37,14 @@
                         <a href="{% url 'plataforma:financas_entrada_list' %}">Entrada de valores</a>
                         <a href="{% url 'plataforma:financas_saida_list' %}">Saída de valores</a>
                         <a href="{% url 'plataforma:financas_analytics' %}">Analytics</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <button type="button" class="nav-toggle">Geologia</button>
+                    <div class="dropdown">
+                        <a href="{% url 'geologia:hub' %}">Interface de geologia</a>
+                        <a href="{% url 'geologia:drone_hub' %}">Interface DJI Mini 4 Pro</a>
                     </div>
                 </div>
 

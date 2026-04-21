@@ -64,6 +64,7 @@ urlpatterns = [
     # WEBSITE / APP
     path("", include("website.urls")),
     path("app/", include("projetos.urls")),
+    path("app/geologia/", include("geologia.urls")),
     path("app/dispositivos/", include("dispositivos.urls")),
     path("plataforma/", include("plataforma.urls")),
 

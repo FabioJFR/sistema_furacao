@@ -77,6 +77,7 @@
             <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ Adicionar Trabalhador ao Furo</a>
             <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 Histórico de Configurações</a>
             <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 Adicionar Medição</a>
+            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="furo-action-btn btn-team">Geologia e Drone</a>
         </div>
     </section>
 
@@ -177,6 +178,63 @@
                 </tbody>
             </table>
         </div>
+    </section>
+
+    <section class="furo-table-card">
+        <div class="furo-table-header">
+            <div>
+                <h2>Logging Geológico</h2>
+                <p>Resumo recente do fluxo geológico do furo e integração com missões DJI Mini 4 Pro.</p>
+            </div>
+            <div>
+                <a href="{% url 'geologia:log_create' furo.id %}" class="furo-action-btn btn-measure">Novo Log</a>
+            </div>
+        </div>
+        <div class="furo-table-wrap">
+            <table class="furo-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Intervalo</th>
+                        <th>Litologia</th>
+                        <th>RQD</th>
+                        <th>Recuperação</th>
+                        <th>Drone</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for log in logs_geologicos_recentes %}
+                    <tr>
+                        <td>{{ log.data_registo|date:"d/m/Y" }}</td>
+                        <td>{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</td>
+                        <td>{{ log.litologia_principal }}</td>
+                        <td>{{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</td>
+                        <td>{{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</td>
+                        <td>{{ log.missao_drone.titulo|default:"-" }}</td>
+                        <td><a href="{% url 'geologia:log_detail' log.id %}" class="furo-link">Abrir</a></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="furo-empty">Ainda não existem logs geológicos para este furo.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if missoes_drone_recentes %}
+            <div style="padding: 0 20px 20px;">
+                <h3 style="margin: 18px 0 10px;">Missões Drone Recentes</h3>
+                <ul class="furo-list">
+                    {% for missao in missoes_drone_recentes %}
+                        <li class="furo-list-item">
+                            <div class="furo-list-main">{{ missao.titulo }}</div>
+                            <div class="furo-list-sub">{{ missao.data_voo|date:"d/m/Y" }} · {{ missao.get_status_display }} · {{ missao.equipamento }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </section>
 
     <section class="furo-table-card">

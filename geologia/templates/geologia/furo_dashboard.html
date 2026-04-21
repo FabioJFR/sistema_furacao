@@ -1,0 +1,101 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}Geologia do Furo {{ furo.nome }}{% endblock %}
+{% block page_title %}Geologia do Furo {{ furo.nome }}{% endblock %}
+{% block page_description %}Projeto {{ furo.projeto.nome }}. Logging geologico, anexos e missoes do DJI Mini 4 Pro.{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:log_create' furo.id %}" class="btn btn-primary">Novo log geologico</a>
+    <a href="{% url 'geologia:missao_create' furo.id %}" class="btn btn-light">Nova missao drone</a>
+    <a href="{% url 'projetos:furo_detail' furo.id %}" class="btn btn-light">Voltar ao furo</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm" data-geologia-card>
+            <div class="text-sm text-gray-500">Profundidade atual</div>
+            <div class="text-3xl font-bold text-gray-900 mt-2">{{ furo.profundidade_atual|default:"0" }} m</div>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm" data-geologia-card>
+            <div class="text-sm text-gray-500">Logs geologicos</div>
+            <div class="text-3xl font-bold text-gray-900 mt-2">{{ logs|length }}</div>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm" data-geologia-card>
+            <div class="text-sm text-gray-500">Missoes drone</div>
+            <div class="text-3xl font-bold text-gray-900 mt-2">{{ missoes|length }}</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <section class="xl:col-span-2 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-900">Fluxo A: Logging geologico do furo</h2>
+                <p class="text-sm text-gray-500 mt-1">Registo por intervalos, com litologia, recuperacao, RQD e ligacao opcional a medicao e missao de drone.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-600">
+                        <tr>
+                            <th class="text-left px-4 py-3">Intervalo</th>
+                            <th class="text-left px-4 py-3">Litologia</th>
+                            <th class="text-left px-4 py-3">RQD</th>
+                            <th class="text-left px-4 py-3">Recuperacao</th>
+                            <th class="text-left px-4 py-3">Drone</th>
+                            <th class="text-left px-4 py-3">Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr class="border-t border-gray-100">
+                            <td class="px-4 py-3 font-medium text-gray-800">{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</td>
+                            <td class="px-4 py-3 text-gray-700">
+                                {{ log.litologia_principal }}
+                                {% if log.litologia_secundaria %}<div class="text-xs text-gray-500">{{ log.litologia_secundaria }}</div>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-gray-700">{{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ log.missao_drone.titulo|default:"-" }}</td>
+                            <td class="px-4 py-3">
+                                <a href="{% url 'geologia:log_detail' log.id %}" class="text-sky-700 font-semibold">Abrir</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">Ainda nao existem logs geologicos neste furo.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-900">Integracao DJI Mini 4 Pro</h2>
+                <p class="text-sm text-gray-500 mt-1">Missoes, ortomosaicos, modelos 3D e logs de voo associados ao furo.</p>
+            </div>
+            <div class="p-6 space-y-4">
+                {% for missao in missoes %}
+                <article class="rounded-lg border border-gray-200 p-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="font-semibold text-gray-900"><a href="{% url 'geologia:missao_detail' missao.id %}" class="hover:text-sky-700">{{ missao.titulo }}</a></h3>
+                        <span class="text-xs uppercase tracking-wide rounded-full bg-sky-100 text-sky-800 px-3 py-1">{{ missao.get_status_display }}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">{{ missao.data_voo|date:"d/m/Y" }} · {{ missao.equipamento }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Piloto: {{ missao.piloto_nome|default:"-" }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Area coberta: {{ missao.area_coberta_m2|default:"-" }} m2</p>
+                    <p class="text-sm text-gray-600 mt-1">Captura: {{ missao.resumo_captura }}</p>
+                </article>
+                {% empty %}
+                <p class="text-gray-500">Ainda nao existem missoes registadas para este furo.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/geologia/furo_dashboard.js' %}"></script>
+{% endblock %}

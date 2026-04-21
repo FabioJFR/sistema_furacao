@@ -1,0 +1,74 @@
+{% extends "plataforma/base.html" %}
+
+{% block title %}{{ missao.titulo }}{% endblock %}
+{% block page_title %}{{ missao.titulo }}{% endblock %}
+{% block page_description %}Furo {{ furo.nome }} · Projeto {{ furo.projeto.nome }} · {{ missao.equipamento }}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:missao_update' missao.id %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Resumo operacional</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><strong>Status:</strong> {{ missao.get_status_display }}</div>
+                <div><strong>Data:</strong> {{ missao.data_voo|date:"d/m/Y" }}</div>
+                <div><strong>Piloto:</strong> {{ missao.piloto_nome|default:"-" }}</div>
+                <div><strong>Tipo de missao:</strong> {{ missao.tipo_missao|default:"-" }}</div>
+                <div><strong>Modo de captura:</strong> {{ missao.modo_captura|default:"-" }}</div>
+                <div><strong>Duracao:</strong> {{ missao.duracao_minutos|default:"0" }} min</div>
+                <div><strong>Altitude maxima:</strong> {{ missao.altitude_maxima_m|default:"-" }} m</div>
+                <div><strong>Altitude RTH:</strong> {{ missao.altitude_rth_m|default:"-" }} m</div>
+                <div><strong>Velocidade maxima:</strong> {{ missao.velocidade_max_ms|default:"-" }} m/s</div>
+                <div><strong>Area coberta:</strong> {{ missao.area_coberta_m2|default:"-" }} m2</div>
+                <div><strong>Fotos:</strong> {{ missao.numero_fotos }}</div>
+                <div><strong>Videos:</strong> {{ missao.numero_videos }}</div>
+                <div><strong>Bateria inicio:</strong> {{ missao.bateria_inicio_percent|default:"-" }}{% if missao.bateria_inicio_percent != None %}%{% endif %}</div>
+                <div><strong>Bateria fim:</strong> {{ missao.bateria_fim_percent|default:"-" }}{% if missao.bateria_fim_percent != None %}%{% endif %}</div>
+                <div><strong>Firmware:</strong> {{ missao.firmware|default:"-" }}</div>
+                <div><strong>App:</strong> {{ missao.app_origem|default:"-" }}</div>
+                <div><strong>Centro:</strong> {{ missao.latitude_centro|default:"-" }}, {{ missao.longitude_centro|default:"-" }}</div>
+                <div><strong>Descolagem:</strong> {{ missao.ponto_descolagem_lat|default:"-" }}, {{ missao.ponto_descolagem_lon|default:"-" }}</div>
+            </div>
+            <div class="mt-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Objetivo</h3>
+                <p class="text-gray-700 whitespace-pre-line">{{ missao.objetivo|default:"Sem objetivo definido." }}</p>
+            </div>
+            <div class="mt-4">
+                <h3 class="font-semibold text-gray-900 mb-2">Observacoes</h3>
+                <p class="text-gray-700 whitespace-pre-line">{{ missao.observacoes|default:"Sem observacoes." }}</p>
+            </div>
+        </section>
+
+        <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Produtos e logs</h2>
+            <div class="space-y-3 text-sm">
+                {% if missao.ortomosaico %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.ortomosaico.url }}">Abrir ortomosaico</a>{% endif %}
+                {% if missao.modelo_3d %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.modelo_3d.url }}">Abrir modelo 3D</a>{% endif %}
+                {% if missao.log_voo %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.log_voo.url }}">Abrir log de voo</a>{% endif %}
+                {% if missao.relatorio_processamento %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.relatorio_processamento.url }}">Abrir relatorio de processamento</a>{% endif %}
+                {% if not missao.tem_produtos_processados and not missao.log_voo %}
+                <p class="text-gray-500">Ainda nao existem ficheiros anexados a esta missao.</p>
+                {% endif %}
+            </div>
+
+            <div class="mt-8">
+                <h3 class="font-semibold text-gray-900 mb-3">Logs geologicos relacionados</h3>
+                <div class="space-y-2">
+                    {% for log in logs_relacionados %}
+                    <a href="{% url 'geologia:log_detail' log.id %}" class="block rounded-lg border border-gray-200 p-3 hover:border-emerald-300 hover:bg-emerald-50">
+                        <div class="font-semibold text-gray-900">{{ log.titulo }}</div>
+                        <div class="text-sm text-gray-500">{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m · {{ log.litologia_principal }}</div>
+                    </a>
+                    {% empty %}
+                    <p class="text-gray-500">Ainda nao existem logs geologicos associados a esta missao.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
