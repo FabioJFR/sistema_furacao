@@ -23,6 +23,7 @@ from projetos.selectors.furos import (
 from projetos.services.furos import criar_furo
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
+from geologia.models import LogGeologicoFuro, MissaoDroneFuro
 from plataforma.models import PerfilPlataforma
 
 logger = logging.getLogger("core")
@@ -241,6 +242,15 @@ def furo_detail(request, pk):
     context["configuracoes"] = obter_equipa_e_configuracao_por_furo(
         furo,
         empresa=empresa_id,
+    )
+    context["logs_geologicos_recentes"] = (
+        LogGeologicoFuro.objects.filter(furo=furo, empresa_id=empresa_id)
+        .select_related("missao_drone", "medicao")
+        .order_by("-data_registo", "-criado_em")[:5]
+    )
+    context["missoes_drone_recentes"] = (
+        MissaoDroneFuro.objects.filter(furo=furo, empresa_id=empresa_id)
+        .order_by("-data_voo", "-criado_em")[:3]
     )
 
     logger.info(

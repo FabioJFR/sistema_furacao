@@ -1,0 +1,112 @@
+{% extends "plataforma/base.html" %}
+{% load static %}
+
+{% block title %}Centro Drone DJI{% endblock %}
+{% block page_title %}Centro Drone DJI Mini 4 Pro{% endblock %}
+{% block page_description %}Importacao operacional de voos, acesso rapido aos furos e acompanhamento das missoes da geologia.{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:hub' %}" class="btn btn-light">Voltar a geologia</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="rounded-xl border border-sky-100 bg-sky-50 px-5 py-4 shadow-sm max-w-md mb-8">
+        <div class="text-sm font-semibold text-sky-900">Acesso rapido</div>
+        <div class="text-sm text-sky-800 mt-2 space-y-1">
+            <p>Total de furos com geologia: <strong>{{ total_furos }}</strong></p>
+            <p>Missoes registadas: <strong>{{ total_missoes }}</strong></p>
+            <p>Missoes importadas: <strong>{{ total_importadas }}</strong></p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <section class="xl:col-span-1 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-900">Importar voo DJI</h2>
+                <p class="text-sm text-gray-500 mt-1">Cria uma missao automaticamente a partir de um ficheiro de metadados exportado do drone.</p>
+            </div>
+            <form method="post" enctype="multipart/form-data" class="p-6 space-y-5" data-geologia-drone-import-form>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-700">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <strong>Resumo da importacao:</strong>
+                    <span data-drone-import-summary>Aguardando selecao de furo e ficheiro.</span>
+                </div>
+
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>{% endif %}
+                        {% if field.errors %}<div class="text-sm text-red-600 mt-1">{{ field.errors }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="w-full px-4 py-2 rounded bg-sky-700 text-white font-semibold">Importar missao</button>
+            </form>
+        </section>
+
+        <section class="xl:col-span-2 space-y-6">
+            <article class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Furos para operacao</h2>
+                        <p class="text-sm text-gray-500 mt-1">Entrada direta na geologia e na criacao de missoes por furo.</p>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% for furo in furos %}
+                    <div class="px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ furo.nome }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">{{ furo.projeto.nome }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Profundidade atual: {{ furo.profundidade_atual|default:"0" }} m</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">Abrir geologia</a>
+                            <a href="{% url 'geologia:missao_create' furo.id %}" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">Nova missao</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="px-6 py-8 text-center text-gray-500">Nao existem furos disponiveis para esta empresa.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-xl font-semibold text-gray-900">Missoes recentes</h2>
+                    <p class="text-sm text-gray-500 mt-1">Acompanhamento rapido das ultimas operacoes importadas ou executadas.</p>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for missao in missoes_recentes %}
+                    <article class="rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">
+                                    <a href="{% url 'geologia:missao_detail' missao.id %}" class="hover:text-sky-700">{{ missao.titulo }}</a>
+                                </h3>
+                                <p class="text-sm text-gray-600 mt-1">{{ missao.furo.nome }} · {{ missao.furo.projeto.nome }}</p>
+                            </div>
+                            <span class="text-xs uppercase tracking-wide rounded-full bg-sky-100 text-sky-800 px-3 py-1">{{ missao.get_status_display }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-3">Data: {{ missao.data_voo|date:"d/m/Y" }}</p>
+                        <p class="text-sm text-gray-600 mt-1">Captura: {{ missao.resumo_captura }}</p>
+                        <p class="text-sm text-gray-600 mt-1">Piloto: {{ missao.piloto_nome|default:"-" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-gray-500">Ainda nao existem missoes registadas.</p>
+                    {% endfor %}
+                </div>
+            </article>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/geologia/drone_hub.js' %}"></script>
+{% endblock %}

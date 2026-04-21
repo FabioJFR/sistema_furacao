@@ -14805,3 +14805,69 @@ ValueError: Cannot assign "UUID('505daad6-7855-4b1a-b9b0-d062ef5edec9')": "Empre
 [2026-04-21 14:05:07,088] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
 [2026-04-21 14:05:07,109] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=f4416276-b79c-4dfa-b72e-4c5918cc0f5e
 [2026-04-21 14:05:07,172] INFO django.server | "GET /app/furos/f4416276-b79c-4dfa-b72e-4c5918cc0f5e/ HTTP/1.1" 200 19866
+[2026-04-21 17:47:28,134] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 21:57:39,309] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 21:58:23,687] INFO django.server | "GET / HTTP/1.1" 200 11377
+[2026-04-21 21:58:23,817] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 200 1268999
+[2026-04-21 21:58:23,886] WARNING django.request | Not Found: /favicon.ico
+[2026-04-21 21:58:23,888] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5330
+[2026-04-21 22:02:11,848] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:02:20,697] INFO django.server | "GET /login/ HTTP/1.1" 200 4748
+[2026-04-21 22:02:41,090] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-21 22:02:41,160] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-21 22:02:41,160] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-21 22:02:41,173] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-21 22:02:41,293] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:02:41,481] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 200 12371
+[2026-04-21 22:02:41,481] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 200 15592
+[2026-04-21 22:03:21,079] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\models.py changed, reloading.
+[2026-04-21 22:03:23,024] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:03:51,087] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\forms.py changed, reloading.
+[2026-04-21 22:03:52,756] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:04:04,482] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\views.py changed, reloading.
+[2026-04-21 22:04:06,189] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:04:10,440] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\urls.py changed, reloading.
+[2026-04-21 22:04:12,285] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:04:15,502] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\admin.py changed, reloading.
+[2026-04-21 22:04:18,127] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:11:49,856] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:11:51,949] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:11:54,417] INFO django.server | "GET /plataforma/planos/ HTTP/1.1" 200 5105
+[2026-04-21 22:11:54,559] INFO django.server | "GET /static/css/plataforma/plano_list.css HTTP/1.1" 200 1815
+[2026-04-21 22:11:56,265] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:11:59,722] INFO django.server | "GET /plataforma/financas/entradas/ HTTP/1.1" 200 5825
+[2026-04-21 22:12:01,814] INFO django.server | "GET /plataforma/financas/saidas/ HTTP/1.1" 200 12481
+[2026-04-21 22:12:36,372] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:48:32,781] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\urls.py changed, reloading.
+[2026-04-21 22:48:34,871] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:48:47,000] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\forms\importacao.py changed, reloading.
+[2026-04-21 22:48:48,653] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:49:34,089] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:49:34,116] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-21 22:49:34,123] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-21 22:49:36,312] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:49:40,825] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:50:43,229] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 22:50:49,726] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8250
+[2026-04-21 22:53:20,392] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8495
+[2026-04-21 22:53:23,077] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8495
+[2026-04-21 23:01:28,215] INFO django.utils.autoreload | C:\Users\fabio\OneDrive\Documentos\sistema_furacao\geologia\views\common.py changed, reloading.
+[2026-04-21 23:01:30,267] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-21 23:02:02,680] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:03,919] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:04,541] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:04,813] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:05,019] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:05,229] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:02:05,460] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 8703
+[2026-04-21 23:06:46,023] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 9074
+[2026-04-21 23:06:50,627] INFO django.server | "GET /app/geologia/ HTTP/1.1" 200 7448
+[2026-04-21 23:06:50,663] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 304 0
+[2026-04-21 23:06:50,802] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 11299
+[2026-04-21 23:06:50,804] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 200 2216
+[2026-04-21 23:07:24,014] INFO django.server | "GET /app/geologia/drone/ HTTP/1.1" 200 9494
+[2026-04-21 23:07:24,067] INFO django.server | "GET /static/js/geologia/drone_hub.js HTTP/1.1" 200 1336
+[2026-04-21 23:20:39,911] INFO django.server | "GET /app/geologia/drone/ HTTP/1.1" 200 9879
+[2026-04-21 23:20:39,969] INFO django.server | "GET /static/js/geologia/drone_hub.js HTTP/1.1" 304 0
+[2026-04-21 23:20:47,776] INFO django.server | "GET /app/geologia/ HTTP/1.1" 200 7836
+[2026-04-21 23:20:56,510] INFO django.server | "GET /app/geologia/drone/ HTTP/1.1" 200 9879

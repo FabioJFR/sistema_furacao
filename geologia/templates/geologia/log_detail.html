@@ -1,0 +1,59 @@
+{% extends "plataforma/base.html" %}
+
+{% block title %}{{ log.titulo }}{% endblock %}
+{% block page_title %}{{ log.titulo }}{% endblock %}
+{% block page_description %}Furo {{ furo.nome }} · Intervalo {{ log.intervalo_de }} m a {{ log.intervalo_ate }} m{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:log_update' log.id %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'geologia:anexo_create' log.id %}" class="btn btn-light">Adicionar anexo</a>
+    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Descricao geologica</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><strong>Litologia principal:</strong> {{ log.litologia_principal }}</div>
+                <div><strong>Litologia secundaria:</strong> {{ log.litologia_secundaria|default:"-" }}</div>
+                <div><strong>Cor:</strong> {{ log.cor|default:"-" }}</div>
+                <div><strong>Granulometria:</strong> {{ log.granulometria|default:"-" }}</div>
+                <div><strong>Alteracao:</strong> {{ log.alteracao|default:"-" }}</div>
+                <div><strong>Mineralizacao:</strong> {{ log.mineralizacao|default:"-" }}</div>
+                <div><strong>Estrutura:</strong> {{ log.estrutura|default:"-" }}</div>
+                <div><strong>Densidade de fraturas:</strong> {{ log.densidade_fraturas|default:"-" }}</div>
+                <div><strong>RQD:</strong> {{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</div>
+                <div><strong>Recuperacao:</strong> {{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</div>
+                <div><strong>Nivel de agua:</strong> {{ log.nivel_agua_m|default:"-" }}{% if log.nivel_agua_m %} m{% endif %}</div>
+                <div><strong>Medicao tecnica:</strong> {{ log.medicao|default:"-" }}</div>
+                <div class="md:col-span-2"><strong>Missao drone:</strong> {{ log.missao_drone|default:"-" }}</div>
+            </div>
+            <div class="mt-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Observacoes</h3>
+                <p class="text-gray-700 whitespace-pre-line">{{ log.observacoes|default:"Sem observacoes." }}</p>
+            </div>
+        </section>
+
+        <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Anexos e referencia</h2>
+            {% if log.imagem_referencia %}
+                <div class="mb-4">
+                    <img src="{{ log.imagem_referencia.url }}" alt="Imagem de referencia" class="w-full rounded-lg border border-gray-200">
+                </div>
+            {% endif %}
+
+            <div class="space-y-3">
+                {% for anexo in anexos %}
+                    <a href="{{ anexo.ficheiro.url }}" class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50">
+                        <div class="font-semibold text-gray-900">{{ anexo.titulo }}</div>
+                        <div class="text-sm text-gray-500">{{ anexo.get_tipo_display }} · {{ anexo.criado_em|date:"d/m/Y H:i" }}</div>
+                    </a>
+                {% empty %}
+                    <p class="text-gray-500">Ainda nao existem anexos para este log.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
