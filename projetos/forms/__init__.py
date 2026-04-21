@@ -1,7 +1,7 @@
 # projetos/forms/__init__.py
 
 # Core
-from .preferencias import PreferenciasForm
+from .preferencias import EmpresaFinanceiraForm, PreferenciasForm
 
 # Projetos / Furos
 from .projeto import ProjetoForm

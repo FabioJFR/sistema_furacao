@@ -381,8 +381,9 @@
                 <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
                     <h3 class="font-semibold text-gray-800">Furo {{ forloop.counter }}: {{ furo.nome }}</h3>
                     <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
-                    <p><strong>Inclinação:</strong> {{ furo.inclinacao|default:"-" }}°</p>
-                    <p><strong>Azimute:</strong> {{ furo.azimute|default:"-" }}°</p>
+                    <p><strong>Profundidade Alvo:</strong> {{ furo.profundidade_alvo_atual|default:furo.profundidade_alvo_inicial|default:"-" }} m</p>
+                    <p><strong>Inclinação atual/planeada:</strong> {{ furo.inclinacao_real_atual|default:furo.inclinacao_planeada_atual|default:furo.inclinacao_planeada_inicial|default:"-" }}°</p>
+                    <p><strong>Azimute atual/planeado:</strong> {{ furo.azimute_real_atual|default:furo.azimute_planeado_atual|default:furo.azimute_planeado_inicial|default:"-" }}°</p>
                     <p><strong>Sistema Coord.:</strong> {{ furo.get_sistema_coordenadas_display }}</p>
 
                     <div class="flex gap-2 flex-wrap pt-2">

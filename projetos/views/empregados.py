@@ -43,6 +43,7 @@ from projetos.services.empregados import (
     empregado_ja_tem_projeto_ativo,
     terminar_ligacao_projeto_empregado,
 )
+from projetos.utils.tragetoria import calcular_linha_planeada
 
 from plataforma.models import PerfilPlataforma
 
@@ -968,6 +969,42 @@ def furo_3d_empregado(request, pk):
         )
     )
 
+    origem = (
+        float(furo.origem_este or 0.0),
+        float(furo.origem_norte or 0.0),
+        float(furo.origem_tvd or 0.0),
+    )
+    profundidade_planeada_final = float(
+        furo.profundidade_alvo_atual
+        or furo.profundidade_alvo_inicial
+        or furo.profundidade_maxima_atingida
+        or furo.profundidade_atual
+        or 0.0
+    )
+    inclinacao_planeada = float(
+        furo.inclinacao_planeada_atual
+        or furo.inclinacao_planeada_inicial
+        or 0.0
+    )
+    azimute_planeado = float(
+        furo.azimute_planeado_atual
+        or furo.azimute_planeado_inicial
+        or 0.0
+    )
+
+    linha_planeada = calcular_linha_planeada(
+        origem=origem,
+        inclinacao=inclinacao_planeada,
+        azimute=azimute_planeado,
+        comprimento=profundidade_planeada_final,
+    )
+    configuracao_visual = (
+        ConfiguracaoPerfuracaoEmpregado.objects
+        .filter(furo=furo, empresa=empregado.empresa)
+        .order_by("-atualizado_em", "-pk")
+        .first()
+    )
+
     logger.info(
         "View furo_3d_empregado carregada com sucesso. user_id=%s, empregado_id=%s, furo_id=%s, total_medicoes=%s",
         request.user.id,
@@ -979,6 +1016,11 @@ def furo_3d_empregado(request, pk):
         "empregado": empregado,
         "furo": furo,
         "medicoes": medicoes,
+        "trajetoria_planeada": linha_planeada,
+        "configuracao_visual": {
+            "comprimento_tubo": float(getattr(configuracao_visual, "comprimento_tubo", 3.0) or 3.0),
+            "comprimento_frontal": float(getattr(configuracao_visual, "comprimento_total_conjunto_fundo", 0.0) or 0.0),
+        },
     })
 
 

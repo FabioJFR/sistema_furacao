@@ -1,0 +1,180 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}Importar Trajetória 3D{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 md:p-8 space-y-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">📥 Importar Trajetória 3D</h1>
+                <p class="mt-2 text-sm text-gray-600">
+                    Carrega ficheiros externos em `CSV`, `JSON` ou `GeoJSON` para desenhar a trajetória de um furo em 3D,
+                    mesmo quando os dados vêm de outra plataforma.
+                </p>
+            </div>
+            <a href="{% url 'projetos:furo_list' %}" class="inline-flex items-center justify-center rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition">
+                🔙 Voltar a Furos
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6">
+            <aside class="bg-slate-50 rounded-2xl border border-slate-200 p-5 space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">Ficheiro externo</h2>
+                    <p class="text-sm text-gray-600">
+                        O ficheiro deve conter coordenadas `x`, `y`, `z` ou uma `LineString` 3D.
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Selecionar ficheiro</label>
+                        <input
+                            type="file"
+                            name="ficheiro_3d"
+                            accept=".csv,.json,.geojson"
+                            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Origem da aplicação</label>
+                        <input
+                            type="text"
+                            name="origem_aplicacao"
+                            value="{{ origem_aplicacao }}"
+                            placeholder="Ex.: Software X, Plataforma Cliente, Survey Tool"
+                            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Associar ao furo da empresa</label>
+                        <select
+                            name="furo_destino"
+                            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"
+                        >
+                            <option value="">Sem associação direta</option>
+                            {% for furo in furos_empresa %}
+                                <option value="{{ furo.pk }}" {% if furo_destino_id == furo.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ furo.nome }}{% if furo.projeto %} · {{ furo.projeto.nome }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Observações</label>
+                        <textarea
+                            name="observacoes"
+                            rows="4"
+                            placeholder="Notas sobre a origem, qualidade dos dados ou referência do carregamento."
+                            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"
+                        >{{ observacoes }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition">
+                            Ler e desenhar em 3D
+                        </button>
+                        <button
+                            type="submit"
+                            name="guardar_importacao"
+                            value="1"
+                            class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                        >
+                            Guardar nas bases de dados como carregamento externo
+                        </button>
+                    </div>
+                </form>
+
+                <div class="rounded-xl border border-dashed border-gray-300 bg-white p-4 text-sm text-gray-600 space-y-2">
+                    <div><strong>Formatos suportados:</strong> CSV, JSON, GeoJSON</div>
+                    <div><strong>CSV:</strong> colunas `x`, `y`, `z`</div>
+                    <div><strong>JSON:</strong> objeto com `points` ou `FeatureCollection`</div>
+                    <div><strong>GeoJSON:</strong> `LineString` com coordenadas 3D</div>
+                    <div><strong>Origem do registo:</strong> ao guardar, fica marcado como importação vinda de outra aplicação.</div>
+                </div>
+
+                {% if imported_trace %}
+                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                        <div><strong>Trajetória:</strong> {{ trace_name|default:"Importada" }}</div>
+                        <div><strong>Pontos:</strong> {{ total_pontos }}</div>
+                    </div>
+                {% endif %}
+            </aside>
+
+            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4">
+                {% if imported_trace %}
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">🌐 Visualização 3D</h2>
+                            <p class="text-sm text-gray-600">{{ trace_name|default:"Trajetória importada" }}</p>
+                        </div>
+                        <button type="button" id="exportPngBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition">
+                            🖼️ PNG
+                        </button>
+                    </div>
+                    <div id="plot-3d" style="width:100%; min-height:72vh;"></div>
+                {% else %}
+                    <div class="flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500">
+                        Carrega um ficheiro externo para desenhar aqui a trajetória em 3D.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if imported_trace %}
+{{ imported_trace|json_script:"imported-trace-data" }}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+const importedTrace = JSON.parse(document.getElementById("imported-trace-data").textContent || "{}");
+const exportPngBtn = document.getElementById("exportPngBtn");
+
+if (importedTrace.x && importedTrace.x.length) {
+    const trace = {
+        x: importedTrace.x,
+        y: importedTrace.y,
+        z: importedTrace.z,
+        mode: "lines+markers",
+        type: "scatter3d",
+        name: importedTrace.name || "Trajetória importada",
+        line: { width: 7, color: "#7c3aed" },
+        marker: { size: 4, color: "#a855f7" },
+        hovertemplate: "X: %{x:.2f}<br>Y: %{y:.2f}<br>Z: %{z:.2f}<extra></extra>",
+    };
+
+    Plotly.newPlot("plot-3d", [trace], {
+        margin: { l: 0, r: 0, b: 0, t: 10 },
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        scene: {
+            bgcolor: "#f8fafc",
+            xaxis: { title: "X", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
+            yaxis: { title: "Y", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
+            zaxis: { title: "Z", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
+            camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } }
+        }
+    }, {
+        responsive: true,
+        displaylogo: false,
+    }).then((plot) => {
+        exportPngBtn?.addEventListener("click", () => {
+            Plotly.downloadImage(plot, {
+                format: "png",
+                filename: "trajetoria-importada-3d",
+                width: 1600,
+                height: 900,
+                scale: 2
+            });
+        });
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

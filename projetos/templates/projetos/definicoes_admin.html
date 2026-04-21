@@ -47,9 +47,161 @@
             </ul>
         </div>
 
-        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-            Guardar Definições
+        <button type="submit" name="guardar_preferencias" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+            Guardar Preferências
         </button>
     </form>
 </section>
+
+<section class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow mt-6"
+    data-financeiro-preview
+    data-total-metros="{{ financeiro_preview.total_metros|default:0 }}"
+    data-total-despesas="{{ financeiro_preview.total_despesas|default:0 }}"
+    data-total-materiais="{{ financeiro_preview.valor_total_gasto_materias|default:0 }}"
+    data-gasto-furo-base="{{ empresa.valor_total_gasto_furo|default:0 }}"
+    data-gasto-maquinas-base="{{ empresa.valor_total_gasto_maquinas|default:0 }}"
+    data-custo-empresa-base="{{ empresa.custo_por_metro_empresa|default:0 }}"
+    data-cobrado-base="{{ empresa.valor_total_cobrado_cliente|default:0 }}"
+    data-ganho-furo-base="{{ empresa.valor_total_ganho_furo|default:0 }}"
+    data-custo-cliente-inicial="{{ empresa.custo_por_metro_cliente|default:0 }}"
+    data-outros-iniciais="{{ empresa.outros_valores_gastos_associados|default:0 }}">
+    <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-gray-800">💶 Definições Financeiras</h2>
+        <p class="text-sm text-gray-600 mt-2">
+            Define os valores manuais da empresa. Os totais operacionais são calculados automaticamente.
+        </p>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <label class="block font-semibold mb-2 text-gray-800">Custo por metro cliente</label>
+                {{ financeiro_form.custo_por_metro_cliente|add_class:"w-full p-2 border rounded bg-white" }}
+                {% if financeiro_form.custo_por_metro_cliente.errors %}
+                    <div class="text-red-600 text-sm mt-2">{{ financeiro_form.custo_por_metro_cliente.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <label class="block font-semibold mb-2 text-gray-800">Outros valores gastos associados</label>
+                {{ financeiro_form.outros_valores_gastos_associados|add_class:"w-full p-2 border rounded bg-white" }}
+                {% if financeiro_form.outros_valores_gastos_associados.errors %}
+                    <div class="text-red-600 text-sm mt-2">{{ financeiro_form.outros_valores_gastos_associados.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Custo por metro empresa</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-custo-empresa>{{ empresa.custo_por_metro_empresa }} €</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Valor total cobrado ao cliente</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-cobrado>{{ empresa.valor_total_cobrado_cliente }} €</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Valor total ganho em furos</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-ganho-furo>{{ empresa.valor_total_ganho_furo }} €</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em furos</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-furo>{{ empresa.valor_total_gasto_furo }} €</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em materiais</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-materiais>{{ empresa.valor_total_gasto_materias }} €</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em máquinas</div>
+                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-maquinas>{{ empresa.valor_total_gasto_maquinas }} €</div>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <div class="text-sm text-emerald-700 font-semibold">Margem total estimada</div>
+                <div class="text-2xl font-bold text-emerald-900 mt-2" data-financeiro-margem-total>0.00 €</div>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <div class="text-sm text-emerald-700 font-semibold">Margem por metro estimada</div>
+                <div class="text-2xl font-bold text-emerald-900 mt-2" data-financeiro-margem-metro>0.00 €</div>
+            </div>
+        </div>
+
+        <button type="submit" name="guardar_financeiro" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+            Guardar Definições Financeiras
+        </button>
+    </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const wrapper = document.querySelector("[data-financeiro-preview]");
+    if (!wrapper) return;
+
+    const custoClienteInput = document.getElementById("id_financeiro-custo_por_metro_cliente");
+    const outrosInput = document.getElementById("id_financeiro-outros_valores_gastos_associados");
+    if (!custoClienteInput || !outrosInput) return;
+
+    const totalMetros = Number(wrapper.dataset.totalMetros || 0);
+    const totalDespesas = Number(wrapper.dataset.totalDespesas || 0);
+    const totalMateriais = Number(wrapper.dataset.totalMateriais || 0);
+    const gastoFuroBase = Number(wrapper.dataset.gastoFuroBase || 0);
+    const gastoMaquinasBase = Number(wrapper.dataset.gastoMaquinasBase || 0);
+    const custoEmpresaBase = Number(wrapper.dataset.custoEmpresaBase || 0);
+    const cobradoBase = Number(wrapper.dataset.cobradoBase || 0);
+    const ganhoFuroBase = Number(wrapper.dataset.ganhoFuroBase || 0);
+    const outrosIniciais = Number(wrapper.dataset.outrosIniciais || 0);
+
+    const custoEmpresaEl = wrapper.querySelector("[data-financeiro-custo-empresa]");
+    const cobradoEl = wrapper.querySelector("[data-financeiro-cobrado]");
+    const ganhoFuroEl = wrapper.querySelector("[data-financeiro-ganho-furo]");
+    const gastoFuroEl = wrapper.querySelector("[data-financeiro-gasto-furo]");
+    const gastoMateriaisEl = wrapper.querySelector("[data-financeiro-gasto-materiais]");
+    const gastoMaquinasEl = wrapper.querySelector("[data-financeiro-gasto-maquinas]");
+    const margemTotalEl = wrapper.querySelector("[data-financeiro-margem-total]");
+    const margemMetroEl = wrapper.querySelector("[data-financeiro-margem-metro]");
+
+    const formatEuro = (value) => `${Number(value || 0).toFixed(2)} €`;
+    const parseInputNumber = (value) => {
+        if (value === null || value === undefined || value === "") return 0;
+        const normalized = String(value).replace(",", ".");
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const atualizarPreview = () => {
+        const custoCliente = parseInputNumber(custoClienteInput.value);
+        const outros = parseInputNumber(outrosInput.value);
+
+        const valorCobrado = totalMetros * custoCliente;
+        const valorGanhoFuro = valorCobrado;
+        const custoEmpresa = totalMetros ? ((totalDespesas + totalMateriais + outros) / totalMetros) : 0;
+        const gastoFuro = gastoFuroBase + (outros - outrosIniciais);
+        const margemTotal = valorCobrado - gastoFuro;
+        const margemMetro = totalMetros ? (margemTotal / totalMetros) : 0;
+
+        if (custoEmpresaEl) custoEmpresaEl.textContent = formatEuro(totalMetros ? custoEmpresa : custoEmpresaBase);
+        if (cobradoEl) cobradoEl.textContent = formatEuro(totalMetros ? valorCobrado : cobradoBase);
+        if (ganhoFuroEl) ganhoFuroEl.textContent = formatEuro(totalMetros ? valorGanhoFuro : ganhoFuroBase);
+        if (gastoFuroEl) gastoFuroEl.textContent = formatEuro(gastoFuro);
+        if (gastoMateriaisEl) gastoMateriaisEl.textContent = formatEuro(totalMateriais);
+        if (gastoMaquinasEl) gastoMaquinasEl.textContent = formatEuro(gastoMaquinasBase);
+        if (margemTotalEl) {
+            margemTotalEl.textContent = formatEuro(margemTotal);
+            margemTotalEl.style.color = margemTotal < 0 ? "#b91c1c" : "#065f46";
+        }
+        if (margemMetroEl) {
+            margemMetroEl.textContent = formatEuro(margemMetro);
+            margemMetroEl.style.color = margemMetro < 0 ? "#b91c1c" : "#065f46";
+        }
+    };
+
+    custoClienteInput.addEventListener("input", atualizarPreview);
+    outrosInput.addEventListener("input", atualizarPreview);
+    atualizarPreview();
+})();
+</script>
 {% endblock %}

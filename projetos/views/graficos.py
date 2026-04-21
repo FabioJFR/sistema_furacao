@@ -62,6 +62,7 @@ def _obter_admin_empregado_graficos(request):
 
 
 def _obter_empresa_graficos(admin_empregado):
+    empresa = getattr(admin_empregado, "empresa", None)
     empresa_id = getattr(admin_empregado, "empresa_id", None)
 
     if not empresa_id:
@@ -72,7 +73,7 @@ def _obter_empresa_graficos(admin_empregado):
         )
         return None
 
-    return empresa_id
+    return empresa or empresa_id
 
 
 @login_required
@@ -148,7 +149,7 @@ def graficos_dashboard(request):
         logger.info(
             "Contexto dos gráficos montado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s, empregado_id=%s",
             request.user.id,
-            empresa,
+            getattr(empresa, "pk", empresa),
             projeto_id,
             empregado_id,
         )
@@ -158,7 +159,7 @@ def graficos_dashboard(request):
         logger.error(
             "Erro ao carregar gráficos. user_id=%s, empresa_id=%s",
             request.user.id,
-            empresa,
+            getattr(empresa, "pk", empresa),
             exc_info=True,
         )
         messages.error(request, "Ocorreu um erro ao carregar os gráficos.")

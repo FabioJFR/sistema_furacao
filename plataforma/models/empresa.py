@@ -1,5 +1,9 @@
 import uuid
+from collections import defaultdict
+
+from django.apps import apps
 from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 from django.db import models
 
@@ -43,6 +47,16 @@ class Empresa(models.Model):
 
     limite_utilizadores = models.PositiveIntegerField(default=5)
     observacoes = models.TextField(blank=True)
+
+    custo_por_metro_cliente = models.FloatField(default=0.0)
+    custo_por_metro_empresa = models.FloatField(default=0.0)
+    valor_total_cobrado_cliente = models.FloatField(default=0.0)
+    valor_total_gasto_projeto = models.FloatField(default=0.0)
+    valor_total_gasto_furo = models.FloatField(default=0.0)
+    valor_total_ganho_furo = models.FloatField(default=0.0)
+    valor_total_gasto_materias = models.FloatField(default=0.0)
+    valor_total_gasto_maquinas = models.FloatField(default=0.0)
+    outros_valores_gastos_associados = models.FloatField(default=0.0)
 
     ativo = models.BooleanField(default=True)
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -103,6 +117,79 @@ class Empresa(models.Model):
         if not self.plano:
             return 0
         return int(getattr(self.plano, "limite_furos", 0) or 0)
+
+    def recalcular_indicadores_financeiros(self, guardar=True):
+        Despesa = apps.get_model("projetos", "Despesa")
+        Furo = apps.get_model("projetos", "Furo")
+        Material = apps.get_model("projetos", "Material")
+        LevantamentoMaterial = apps.get_model("projetos", "LevantamentoMaterial")
+        DevolucaoMaterial = apps.get_model("projetos", "DevolucaoMaterial")
+
+        total_metros = float(
+            Furo.objects.filter(empresa_id=self.pk).aggregate(total=Sum("metros_furados"))["total"] or 0
+        )
+
+        despesas = Despesa.objects.filter(empresa_id=self.pk)
+        total_despesas = float(despesas.aggregate(total=Sum("valor"))["total"] or 0)
+        self.valor_total_gasto_projeto = float(
+            despesas.filter(projeto__isnull=False).aggregate(total=Sum("valor"))["total"] or 0
+        )
+        self.valor_total_gasto_furo = float(
+            despesas.filter(furo__isnull=False).aggregate(total=Sum("valor"))["total"] or 0
+        )
+        self.valor_total_gasto_maquinas = float(
+            despesas.filter(maquina__isnull=False).aggregate(total=Sum("valor"))["total"] or 0
+        )
+
+        custo_materiais = defaultdict(float)
+        materiais_valor = {
+            str(material_id): float(valor or 0)
+            for material_id, valor in Material.objects.filter(empresa_id=self.pk).values_list("id", "valor")
+        }
+
+        for material_id, quantidade in LevantamentoMaterial.objects.filter(empresa_id=self.pk).values_list(
+            "material_id", "quantidade"
+        ):
+            custo_materiais[str(material_id)] += float(quantidade or 0)
+
+        for material_id, quantidade in DevolucaoMaterial.objects.filter(empresa_id=self.pk).values_list(
+            "material_id", "quantidade"
+        ):
+            custo_materiais[str(material_id)] -= float(quantidade or 0)
+
+        self.valor_total_gasto_materias = round(
+            sum(max(quantidade, 0) * materiais_valor.get(material_id, 0.0) for material_id, quantidade in custo_materiais.items()),
+            2,
+        )
+
+        total_gastos_empresa = total_despesas + self.valor_total_gasto_materias + float(
+            self.outros_valores_gastos_associados or 0
+        )
+        self.custo_por_metro_empresa = round(total_gastos_empresa / total_metros, 2) if total_metros else 0.0
+        self.valor_total_cobrado_cliente = round(total_metros * float(self.custo_por_metro_cliente or 0), 2)
+        self.valor_total_ganho_furo = self.valor_total_cobrado_cliente
+
+        if guardar:
+            self.save(
+                update_fields=[
+                    "custo_por_metro_empresa",
+                    "valor_total_cobrado_cliente",
+                    "valor_total_gasto_projeto",
+                    "valor_total_gasto_furo",
+                    "valor_total_ganho_furo",
+                    "valor_total_gasto_materias",
+                    "valor_total_gasto_maquinas",
+                    "atualizado_em",
+                ]
+            )
+        return {
+            "total_metros": total_metros,
+            "total_despesas": round(total_despesas, 2),
+            "valor_total_gasto_materias": self.valor_total_gasto_materias,
+            "custo_por_metro_empresa": self.custo_por_metro_empresa,
+            "valor_total_cobrado_cliente": self.valor_total_cobrado_cliente,
+            "valor_total_ganho_furo": self.valor_total_ganho_furo,
+        }
 
     def __str__(self):
         return self.nome_comercial or self.nome

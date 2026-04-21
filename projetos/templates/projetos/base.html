@@ -134,6 +134,22 @@
                             class="nav-link"
                             aria-haspopup="true"
                             aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu 3D' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            🧭 {% trans "3D" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu 3D' %}">
+                            <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Opções' %}"
                             onclick="toggleDropdown(event, this)"
                         >
@@ -141,6 +157,7 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Opções' %}">
                             <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
                             <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
                         </div>
                     </div>

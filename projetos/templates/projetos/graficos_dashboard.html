@@ -3,27 +3,12 @@
 
 {% block content %}
 <section class="p-0 m-0 space-y-6">
-
-    <!-- TÍTULO -->
     <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:10px;">
         <h1 style="font-size:30px; font-weight:bold; color:#1f2937; margin:0;">📊 Gráficos e Indicadores</h1>
     </div>
 
-    <!-- FILTROS -->
-    <div style="
-        background:white;
-        border-radius:12px;
-        padding:20px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.08);
-        margin-bottom:25px;
-    ">
-        <form method="get" style="
-            display:grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap:15px;
-            align-items:end;
-        ">
-
+    <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:25px;">
+        <form method="get" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px; align-items:end;">
             <div>
                 <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:6px;">Período</label>
                 <select name="periodo" class="w-full p-2 border rounded">
@@ -50,9 +35,7 @@
                 <select name="projeto" class="w-full p-2 border rounded">
                     <option value="">Todos</option>
                     {% for p in projetos_filtro %}
-                        <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
-                            {{ p.nome }}
-                        </option>
+                        <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -62,9 +45,7 @@
                 <select name="empregado" class="w-full p-2 border rounded">
                     <option value="">Todos</option>
                     {% for e in empregados_filtro %}
-                        <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
-                            {{ e.nome }}
-                        </option>
+                        <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>{{ e.nome }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -73,20 +54,10 @@
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">Limpar</a>
             </div>
-
         </form>
     </div>
 
-    <!-- RESUMO DO FILTRO -->
-    <div style="
-        background:#eff6ff;
-        border:1px solid #bfdbfe;
-        color:#1e3a8a;
-        padding:12px 16px;
-        border-radius:10px;
-        margin-bottom:20px;
-        font-weight:600;
-    ">
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; padding:12px 16px; border-radius:10px; margin-bottom:20px; font-weight:600;">
         {% if filtros.periodo == "hoje" %}
             A mostrar dados de: Hoje
         {% elif filtros.periodo == "7_dias" %}
@@ -100,99 +71,75 @@
         {% endif %}
     </div>
 
-    <!-- CARDS OPERACIONAIS -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
+    <div style="background:linear-gradient(135deg, #eff6ff, #f8fafc); border:1px solid #dbeafe; border-radius:14px; padding:18px 20px;">
+        <h2 style="margin:0; font-size:24px; color:#0f172a;">Operação</h2>
+        <p style="margin:8px 0 0 0; color:#475569; line-height:1.6;">
+            Acompanha produção, atividade da equipa, alertas e estrutura da operação. Os gráficos operacionais aparecem logo abaixo desta secção para facilitar a leitura.
+        </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:25px;">
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #2563eb;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Metros no período</div>
             <div style="font-size:30px; font-weight:bold; color:#2563eb;">{{ total_metros }}</div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #16a34a;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Horas no período</div>
             <div style="font-size:30px; font-weight:bold; color:#16a34a;">{{ total_horas }}</div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #f59e0b;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Produtividade média</div>
             <div style="font-size:30px; font-weight:bold; color:#f59e0b;">{{ produtividade_media }}</div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #7c3aed;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Empregados ativos</div>
             <div style="font-size:30px; font-weight:bold; color:#7c3aed;">{{ empregados_ativos }}</div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #dc2626;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Furos ativos</div>
             <div style="font-size:30px; font-weight:bold; color:#dc2626;">{{ furos_ativos }}</div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #0891b2;">
             <div style="font-size:14px; color:#6b7280; font-weight:600;">Projetos ativos</div>
             <div style="font-size:30px; font-weight:bold; color:#0891b2;">{{ projetos_ativos }}</div>
         </div>
     </div>
 
-    <!-- CARDS ESTRUTURA -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:25px;">
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Projetos totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_projetos }}</div>
         </div>
-
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Furos totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_furos }}</div>
         </div>
-
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Empregados totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_empregados }}</div>
         </div>
-
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Máquinas totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_maquinas }}</div>
         </div>
-
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Materiais totais</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_materiais }}</div>
         </div>
-
         <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
             <div style="font-size:13px; color:#6b7280; font-weight:600;">Registos no período</div>
             <div style="font-size:26px; font-weight:bold; color:#111827;">{{ total_registos }}</div>
         </div>
     </div>
 
-    <!-- ALERTAS -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:25px;">
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
             <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#dc2626;">⚠️ Stock Baixo</h3>
-
             {% if materiais_stock_baixo %}
                 <ul style="margin:0; padding-left:18px; color:#374151;">
                     {% for m in materiais_stock_baixo|slice:":5" %}
                         <li style="margin-bottom:8px;">
-                            <a href="{% url 'projetos:material_detail' m.id %}" style="color:#dc2626; font-weight:bold; text-decoration:none;">
-                                {{ m.nome }}
-                            </a>
+                            <a href="{% url 'projetos:material_detail' m.id %}" style="color:#dc2626; font-weight:bold; text-decoration:none;">{{ m.nome }}</a>
                             — {{ m.quantidade }} / {{ m.stock_minimo }}
                         </li>
                     {% endfor %}
@@ -204,14 +151,11 @@
 
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
             <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#f59e0b;">⚙️ Máquinas em Alerta</h3>
-
             {% if maquinas_alerta %}
                 <ul style="margin:0; padding-left:18px; color:#374151;">
                     {% for maq in maquinas_alerta|slice:":5" %}
                         <li style="margin-bottom:8px;">
-                            <a href="{% url 'projetos:maquina_detail' maq.id %}" style="color:#1f2937; text-decoration:none; font-weight:bold;">
-                                {{ maq.nome }}
-                            </a>
+                            <a href="{% url 'projetos:maquina_detail' maq.id %}" style="color:#1f2937; text-decoration:none; font-weight:bold;">{{ maq.nome }}</a>
                             — {{ maq.get_estado_display }}
                         </li>
                     {% endfor %}
@@ -223,13 +167,10 @@
 
         <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
             <h3 style="font-size:18px; font-weight:bold; margin:0 0 14px 0; color:#111827;">🐢 Furos com baixa produção</h3>
-
             {% if furos_baixa_producao %}
                 <ul style="margin:0; padding-left:18px; color:#374151;">
                     {% for furo in furos_baixa_producao %}
-                        <li style="margin-bottom:8px;">
-                            {{ furo.furo__nome }} — {{ furo.total_metros|default:0 }} m / {{ furo.total_horas|default:0 }} h
-                        </li>
+                        <li style="margin-bottom:8px;">{{ furo.furo__nome }} — {{ furo.total_metros|default:0 }} m / {{ furo.total_horas|default:0 }} h</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -238,42 +179,226 @@
         </div>
     </div>
 
-    <!-- GRÁFICOS -->
-    <div style="
-        display:grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap:20px;
-        margin-bottom:25px;
-    ">
+    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px;">
+        <h3 style="margin:0; font-size:20px; color:#0f172a;">Gráficos Operacionais</h3>
+        <p style="margin:8px 0 0 0; color:#475569; line-height:1.6;">
+            Estes gráficos ajudam a perceber ritmo, distribuição de produção e concentração de metros ao longo do período filtrado.
+        </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:25px;">
         <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
             <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">📈 Produção por Dia</h3>
-            <div style="position:relative; height:260px;">
-                <canvas id="graficoDia"></canvas>
-            </div>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Compara a evolução diária de metros e horas.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoDia"></canvas></div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
             <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">👷 Produção por Empregado</h3>
-            <div style="position:relative; height:260px;">
-                <canvas id="graficoEmpregados"></canvas>
-            </div>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Mostra quem mais produziu no período.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoEmpregados"></canvas></div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
             <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">🕳 Produção por Furo</h3>
-            <div style="position:relative; height:260px;">
-                <canvas id="graficoFuros"></canvas>
-            </div>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Ajuda a identificar os furos com maior avanço.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoFuros"></canvas></div>
         </div>
-
         <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
             <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">📁 Produção por Projeto</h3>
-            <div style="position:relative; height:260px;">
-                <canvas id="graficoProjetos"></canvas>
-            </div>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Resume a distribuição de metros entre projetos.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoProjetos"></canvas></div>
         </div>
     </div>
 
+    <div style="background:linear-gradient(135deg, #fff7ed, #f8fafc); border:1px solid #fed7aa; border-radius:14px; padding:18px 20px;">
+        <h2 style="margin:0; font-size:24px; color:#0f172a;">Financeiro</h2>
+        <p style="margin:8px 0 0 0; color:#475569; line-height:1.6;">
+            Esta secção ajuda a controlar custos, ganhos e margens. Primeiro aparecem os indicadores de topo, depois os quadros financeiros e finalmente os gráficos de despesas.
+        </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:25px;">
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #b91c1c;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Despesas no período</div>
+            <div style="font-size:30px; font-weight:bold; color:#b91c1c;">{{ total_despesas }} €</div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #ea580c;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Média diária de despesas</div>
+            <div style="font-size:30px; font-weight:bold; color:#ea580c;">{{ media_despesa_diaria }} €</div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #0f766e;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Custo por metro cliente</div>
+            <div style="font-size:30px; font-weight:bold; color:#0f766e;">{{ custo_por_metro_cliente }} €</div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #7c2d12;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Custo por metro empresa</div>
+            <div style="font-size:30px; font-weight:bold; color:#7c2d12;">{{ custo_por_metro_empresa }} €</div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #1d4ed8;">
+            <div style="font-size:14px; color:#6b7280; font-weight:600;">Valor total cobrado ao cliente</div>
+            <div style="font-size:30px; font-weight:bold; color:#1d4ed8;">{{ valor_total_cobrado_cliente }} €</div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:25px;">
+        <div style="background:#fff7ed; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#9a3412; font-weight:600;">Gasto associado a projetos</div>
+            <div style="font-size:26px; font-weight:bold; color:#9a3412;">{{ valor_total_gasto_projeto }} €</div>
+        </div>
+        <div style="background:#fef2f2; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#991b1b; font-weight:600;">Gasto associado a furos</div>
+            <div style="font-size:26px; font-weight:bold; color:#991b1b;">{{ valor_total_gasto_furo }} €</div>
+        </div>
+        <div style="background:#ecfeff; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#155e75; font-weight:600;">Ganho total associado a furos</div>
+            <div style="font-size:26px; font-weight:bold; color:#155e75;">{{ valor_total_ganho_furo }} €</div>
+        </div>
+        <div style="background:#f0fdf4; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#166534; font-weight:600;">Gasto total em materiais</div>
+            <div style="font-size:26px; font-weight:bold; color:#166534;">{{ valor_total_gasto_materias }} €</div>
+        </div>
+        <div style="background:#eff6ff; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#1d4ed8; font-weight:600;">Gasto total em máquinas</div>
+            <div style="font-size:26px; font-weight:bold; color:#1d4ed8;">{{ valor_total_gasto_maquinas }} €</div>
+        </div>
+        <div style="background:#f8fafc; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:13px; color:#334155; font-weight:600;">Outros valores gastos associados</div>
+            <div style="font-size:26px; font-weight:bold; color:#334155;">{{ outros_valores_gastos_associados }} €</div>
+        </div>
+    </div>
+
+    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px;">
+        <h3 style="margin:0; font-size:20px; color:#0f172a;">Quadros Financeiros</h3>
+        <p style="margin:8px 0 0 0; color:#475569; line-height:1.6;">
+            Os quadros abaixo mostram custo, ganho e margem por projeto e por furo. Usa os botões para ver só linhas negativas, margens baixas ou resultados saudáveis.
+        </p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:20px; margin-bottom:25px;">
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:auto; width:100%; max-height:520px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                <div>
+                    <h3 style="margin:0; font-size:18px; color:#111827;">📁 Quadro Financeiro por Projeto</h3>
+                    <p style="margin:6px 0 0 0; color:#64748b; font-size:13px;">Compara custo, ganho e margem entre projetos.</p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-warning" data-table-filter="projetos" data-filter="todos">Todos</button>
+                    <button type="button" class="btn btn-danger" data-table-filter="projetos" data-filter="negativos">Negativos</button>
+                    <button type="button" class="btn btn-secondary" data-table-filter="projetos" data-filter="baixos">Margem baixa</button>
+                    <button type="button" class="btn btn-success" data-table-filter="projetos" data-filter="positivos">Saudáveis</button>
+                </div>
+            </div>
+            <table data-sortable-table="projetos" style="width:100%; border-collapse:collapse; min-width:980px;">
+                <thead>
+                    <tr style="background:#f8fafc; color:#334155; text-align:left;">
+                        <th style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2;">Projeto</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Metros ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Gasto ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Materiais ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Máquinas ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Ganho ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem total ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem % ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem/metro ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Custo/metro ↕</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in resumos_projeto_financeiro %}
+                        <tr data-margin-total="{{ item.margem_total }}" data-margin-percent="{{ item.margem_percentual }}" style="background:{% if item.margem_total < 0 %}#fef2f2{% elif item.margem_percentual < 15 %}#fffbeb{% else %}#f0fdf4{% endif %};">
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-weight:600;">{{ item.nome }}</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.metros }}</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto_materiais }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto_maquinas }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.ganho }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; color:{% if item.margem_total < 0 %}#b91c1c{% else %}#166534{% endif %}; font-weight:600;">{{ item.margem_total }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; color:{% if item.margem_total < 0 %}#b91c1c{% elif item.margem_percentual < 15 %}#a16207{% else %}#166534{% endif %}; font-weight:600;">{{ item.margem_percentual }}%</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.margem_metro }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.custo_metro }} €</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="10" style="padding:12px; color:#64748b;">Sem dados financeiros por projeto neste filtro.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:auto; width:100%; max-height:520px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                <div>
+                    <h3 style="margin:0; font-size:18px; color:#111827;">🕳 Quadro Financeiro por Furo</h3>
+                    <p style="margin:6px 0 0 0; color:#64748b; font-size:13px;">Detalha a rentabilidade furo a furo.</p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-warning" data-table-filter="furos" data-filter="todos">Todos</button>
+                    <button type="button" class="btn btn-danger" data-table-filter="furos" data-filter="negativos">Negativos</button>
+                    <button type="button" class="btn btn-secondary" data-table-filter="furos" data-filter="baixos">Margem baixa</button>
+                    <button type="button" class="btn btn-success" data-table-filter="furos" data-filter="positivos">Saudáveis</button>
+                </div>
+            </div>
+            <table data-sortable-table="furos" style="width:100%; border-collapse:collapse; min-width:1080px;">
+                <thead>
+                    <tr style="background:#f8fafc; color:#334155; text-align:left;">
+                        <th style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2;">Furo</th>
+                        <th style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2;">Projeto</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Metros ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Gasto ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Materiais ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Máquinas ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Ganho ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem total ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem % ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Margem/metro ↕</th>
+                        <th data-sort-type="number" style="padding:10px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#f8fafc; z-index:2; cursor:pointer;">Custo/metro ↕</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in resumos_furo_financeiro %}
+                        <tr data-margin-total="{{ item.margem_total }}" data-margin-percent="{{ item.margem_percentual }}" style="background:{% if item.margem_total < 0 %}#fef2f2{% elif item.margem_percentual < 15 %}#fffbeb{% else %}#f0fdf4{% endif %};">
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-weight:600;">{{ item.nome }}</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.projeto_nome }}</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.metros }}</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto_materiais }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.gasto_maquinas }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.ganho }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; color:{% if item.margem_total < 0 %}#b91c1c{% else %}#166534{% endif %}; font-weight:600;">{{ item.margem_total }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9; color:{% if item.margem_total < 0 %}#b91c1c{% elif item.margem_percentual < 15 %}#a16207{% else %}#166534{% endif %}; font-weight:600;">{{ item.margem_percentual }}%</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.margem_metro }} €</td>
+                            <td style="padding:10px; border-bottom:1px solid #f1f5f9;">{{ item.custo_metro }} €</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="11" style="padding:12px; color:#64748b;">Sem dados financeiros por furo neste filtro.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px;">
+        <h3 style="margin:0; font-size:20px; color:#0f172a;">Gráficos Financeiros</h3>
+        <p style="margin:8px 0 0 0; color:#475569; line-height:1.6;">
+            Estes gráficos mostram a evolução das despesas, o peso por categoria e a concentração de custos por projeto.
+        </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:25px;">
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">💸 Despesas por Dia</h3>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Mostra o ritmo de saída de dinheiro ao longo do período selecionado.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoDespesasDia"></canvas></div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">🧾 Despesas por Categoria</h3>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Ajuda a perceber em que tipos de despesa estás a gastar mais.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoDespesasCategoria"></canvas></div>
+        </div>
+        <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:340px;">
+            <h3 style="margin:0 0 14px 0; font-size:18px; color:#111827;">📁 Despesas por Projeto</h3>
+            <p style="margin:0 0 12px 0; color:#64748b; font-size:13px;">Mostra quais os projetos com maior peso financeiro.</p>
+            <div style="position:relative; height:260px;"><canvas id="graficoDespesasProjeto"></canvas></div>
+        </div>
+    </div>
 </section>
 
 {{ labels_dia|json_script:"labels-dia-data" }}
@@ -285,6 +410,12 @@
 {{ metros_furos|json_script:"metros-furos-data" }}
 {{ labels_projetos|json_script:"labels-projetos-data" }}
 {{ metros_projetos|json_script:"metros-projetos-data" }}
+{{ labels_despesas_dia|json_script:"labels-despesas-dia-data" }}
+{{ valores_despesas_dia|json_script:"valores-despesas-dia-data" }}
+{{ labels_despesas_categoria|json_script:"labels-despesas-categoria-data" }}
+{{ valores_despesas_categoria|json_script:"valores-despesas-categoria-data" }}
+{{ labels_despesas_projeto|json_script:"labels-despesas-projeto-data" }}
+{{ valores_despesas_projeto|json_script:"valores-despesas-projeto-data" }}
 {% endblock %}
 
 {% block extra_scripts %}
@@ -299,78 +430,133 @@ const labelsFuros = JSON.parse(document.getElementById('labels-furos-data').text
 const metrosFuros = JSON.parse(document.getElementById('metros-furos-data').textContent || "[]");
 const labelsProjetos = JSON.parse(document.getElementById('labels-projetos-data').textContent || "[]");
 const metrosProjetos = JSON.parse(document.getElementById('metros-projetos-data').textContent || "[]");
+const labelsDespesasDia = JSON.parse(document.getElementById('labels-despesas-dia-data').textContent || "[]");
+const valoresDespesasDia = JSON.parse(document.getElementById('valores-despesas-dia-data').textContent || "[]");
+const labelsDespesasCategoria = JSON.parse(document.getElementById('labels-despesas-categoria-data').textContent || "[]");
+const valoresDespesasCategoria = JSON.parse(document.getElementById('valores-despesas-categoria-data').textContent || "[]");
+const labelsDespesasProjeto = JSON.parse(document.getElementById('labels-despesas-projeto-data').textContent || "[]");
+const valoresDespesasProjeto = JSON.parse(document.getElementById('valores-despesas-projeto-data').textContent || "[]");
 
 new Chart(document.getElementById("graficoDia"), {
     type: "line",
     data: {
         labels: labelsDia,
         datasets: [
-            {
-                label: "Metros",
-                data: metrosDia,
-                borderWidth: 2,
-                tension: 0.3
-            },
-            {
-                label: "Horas",
-                data: horasDia,
-                borderWidth: 2,
-                tension: 0.3
-            }
+            {label: "Metros", data: metrosDia, borderWidth: 2, tension: 0.3},
+            {label: "Horas", data: horasDia, borderWidth: 2, tension: 0.3}
         ]
     },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    options: {responsive: true, maintainAspectRatio: false}
 });
 
 new Chart(document.getElementById("graficoEmpregados"), {
     type: "bar",
-    data: {
-        labels: labelsEmpregados,
-        datasets: [{
-            label: "Metros",
-            data: metrosEmpregados,
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    data: {labels: labelsEmpregados, datasets: [{label: "Metros", data: metrosEmpregados, borderWidth: 1}]},
+    options: {responsive: true, maintainAspectRatio: false}
 });
 
 new Chart(document.getElementById("graficoFuros"), {
     type: "bar",
-    data: {
-        labels: labelsFuros,
-        datasets: [{
-            label: "Metros",
-            data: metrosFuros,
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    data: {labels: labelsFuros, datasets: [{label: "Metros", data: metrosFuros, borderWidth: 1}]},
+    options: {responsive: true, maintainAspectRatio: false}
 });
 
 new Chart(document.getElementById("graficoProjetos"), {
     type: "bar",
+    data: {labels: labelsProjetos, datasets: [{label: "Metros", data: metrosProjetos, borderWidth: 1}]},
+    options: {responsive: true, maintainAspectRatio: false}
+});
+
+new Chart(document.getElementById("graficoDespesasDia"), {
+    type: "line",
     data: {
-        labels: labelsProjetos,
+        labels: labelsDespesasDia,
         datasets: [{
-            label: "Metros",
-            data: metrosProjetos,
-            borderWidth: 1
+            label: "Despesas (€)",
+            data: valoresDespesasDia,
+            borderColor: "#dc2626",
+            backgroundColor: "rgba(220, 38, 38, 0.12)",
+            fill: true,
+            borderWidth: 2,
+            tension: 0.3
         }]
     },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    options: {responsive: true, maintainAspectRatio: false}
+});
+
+new Chart(document.getElementById("graficoDespesasCategoria"), {
+    type: "doughnut",
+    data: {
+        labels: labelsDespesasCategoria,
+        datasets: [{
+            label: "Despesas (€)",
+            data: valoresDespesasCategoria,
+            backgroundColor: ["#dc2626", "#ea580c", "#d97706", "#0891b2", "#7c3aed", "#475569"]
+        }]
+    },
+    options: {responsive: true, maintainAspectRatio: false}
+});
+
+new Chart(document.getElementById("graficoDespesasProjeto"), {
+    type: "bar",
+    data: {labels: labelsDespesasProjeto, datasets: [{label: "Despesas (€)", data: valoresDespesasProjeto, backgroundColor: "#b91c1c", borderWidth: 1}]},
+    options: {responsive: true, maintainAspectRatio: false}
+});
+
+document.querySelectorAll("[data-sortable-table]").forEach((table) => {
+    const headers = table.querySelectorAll("th[data-sort-type]");
+    headers.forEach((header, columnIndex) => {
+        header.addEventListener("click", () => {
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr")).filter((row) => row.children.length > 1);
+            const currentDirection = header.dataset.sortDirection === "asc" ? "desc" : "asc";
+            headers.forEach((item) => delete item.dataset.sortDirection);
+            header.dataset.sortDirection = currentDirection;
+
+            rows.sort((rowA, rowB) => {
+                const getValue = (row) => {
+                    const cell = row.children[columnIndex];
+                    if (!cell) return 0;
+                    const raw = (cell.textContent || "").replace(/[€%\s]/g, "").replace(",", ".");
+                    const value = Number(raw);
+                    return Number.isNaN(value) ? raw.toLowerCase() : value;
+                };
+                const a = getValue(rowA);
+                const b = getValue(rowB);
+                if (typeof a === "number" && typeof b === "number") {
+                    return currentDirection === "asc" ? a - b : b - a;
+                }
+                return currentDirection === "asc" ? String(a).localeCompare(String(b)) : String(b).localeCompare(String(a));
+            });
+
+            rows.forEach((row) => tbody.appendChild(row));
+        });
+    });
+});
+
+document.querySelectorAll("[data-table-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const tableName = button.dataset.tableFilter;
+        const filter = button.dataset.filter;
+        const table = document.querySelector(`[data-sortable-table="${tableName}"]`);
+        if (!table) return;
+
+        const buttons = document.querySelectorAll(`[data-table-filter="${tableName}"]`);
+        buttons.forEach((item) => item.style.opacity = item === button ? "1" : "0.7");
+
+        table.querySelectorAll("tbody tr").forEach((row) => {
+            if (row.children.length <= 1) return;
+            const margemTotal = Number(row.dataset.marginTotal || 0);
+            const margemPercent = Number(row.dataset.marginPercent || 0);
+            let visible = true;
+
+            if (filter === "negativos") visible = margemTotal < 0;
+            if (filter === "baixos") visible = margemTotal >= 0 && margemPercent < 15;
+            if (filter === "positivos") visible = margemPercent >= 15;
+
+            row.style.display = visible ? "" : "none";
+        });
+    });
 });
 </script>
 {% endblock %}

@@ -14,6 +14,8 @@ urlpatterns = [
     path("<uuid:pk>/editar/", views.furo_update, name="furo_update"),
     path("<uuid:pk>/apagar/", views.furo_delete, name="furo_delete"),
     path("<uuid:furo_id>/3d/", views.furo_3d_geologico, name="furo_3d"),
+    path("<uuid:furo_id>/3d/export/<str:formato>/", views.furo_3d_export, name="furo_3d_export"),
+    path("3d/importar/", views.furo_3d_importar_externo, name="furo_3d_importar_externo"),
 
     # ---------------- MEDIÇÕES DO FURO ----------------
     path("<uuid:furo_id>/medicoes/nova/", views.medicao_create, name="medicao_create"),

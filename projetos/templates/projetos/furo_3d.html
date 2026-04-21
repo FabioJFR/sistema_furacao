@@ -1,124 +1,421 @@
 {% extends "projetos/base.html" %}
 {% block title %}Furo 3D{% endblock %}
 
+{% block extra_head %}
+<style>
+    .furo-3d-shell {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    .furo-3d-card {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        color: #e2e8f0;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    }
+    .furo-3d-grid {
+        display: grid;
+        grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+        gap: 1.25rem;
+        align-items: start;
+    }
+    .furo-3d-panel,
+    .furo-3d-main {
+        background: rgba(15, 23, 42, 0.48);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+    .furo-3d-panel {
+        padding: 1rem;
+        position: sticky;
+        top: 90px;
+    }
+    .furo-3d-main {
+        padding: 1rem;
+    }
+    .furo-3d-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.25rem;
+    }
+    .furo-3d-stat {
+        background: rgba(30, 41, 59, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
+    }
+    .furo-3d-stat span {
+        display: block;
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .furo-3d-stat strong {
+        font-size: 1.1rem;
+        color: #f8fafc;
+    }
+    .furo-3d-section + .furo-3d-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .furo-3d-section h3 {
+        margin: 0 0 0.8rem;
+        font-size: 0.95rem;
+        color: #f8fafc;
+    }
+    .furo-3d-control {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.7rem;
+        font-size: 0.92rem;
+        color: #cbd5e1;
+    }
+    .furo-3d-control input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #22c55e;
+    }
+    .furo-3d-control input[type="range"] {
+        width: 100%;
+        accent-color: #38bdf8;
+    }
+    .furo-3d-control select {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 23, 42, 0.7);
+        color: #f8fafc;
+        padding: 0.7rem 0.8rem;
+    }
+    .furo-3d-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+    .furo-3d-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 0.8rem 0.95rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .furo-3d-btn:hover {
+        transform: translateY(-1px);
+        opacity: 0.94;
+    }
+    .furo-3d-btn-blue { background: #2563eb; }
+    .furo-3d-btn-green { background: #16a34a; }
+    .furo-3d-btn-slate { background: #475569; }
+    .furo-3d-btn-purple { background: #7c3aed; }
+    .furo-3d-note {
+        font-size: 0.84rem;
+        color: #94a3b8;
+        line-height: 1.45;
+    }
+    .furo-3d-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem 1rem;
+        margin-top: 1rem;
+        font-size: 0.88rem;
+        color: #cbd5e1;
+    }
+    .furo-3d-legend span::before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        margin-right: 0.45rem;
+        vertical-align: middle;
+    }
+    .legend-ok::before { background: #22c55e; }
+    .legend-warn::before { background: #facc15; }
+    .legend-critical::before { background: #ef4444; }
+    .legend-plan::before { background: #f97316; }
+    .legend-final::before { background: #94a3b8; }
+    .furo-3d-plot {
+        min-height: 780px;
+    }
+    .furo-3d-plot-wrap {
+        position: relative;
+    }
+    .furo-3d-camera-overlay {
+        position: absolute;
+        top: 0.9rem;
+        left: 0.9rem;
+        z-index: 20;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        max-width: min(100%, 420px);
+    }
+    .furo-3d-camera-btn {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 999px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        line-height: 1;
+        background: rgba(15, 23, 42, 0.78);
+        color: #e2e8f0;
+        backdrop-filter: blur(8px);
+    }
+    .furo-3d-alert {
+        display: none;
+        margin-top: 0.9rem;
+        border-radius: 14px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+    }
+    .furo-3d-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    .furo-3d-info-box {
+        background: rgba(30, 41, 59, 0.72);
+        border-radius: 16px;
+        padding: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .furo-3d-info-box h4 {
+        margin: 0 0 0.55rem;
+        font-size: 0.92rem;
+        color: #f8fafc;
+    }
+    .furo-3d-info-box div {
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        margin-bottom: 0.32rem;
+    }
+    @media (max-width: 1100px) {
+        .furo-3d-grid {
+            grid-template-columns: 1fr;
+        }
+        .furo-3d-panel {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
-    <div style="max-width:1200px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
-        <h1 style="text-align:center; margin-bottom:20px;">Furo 3D Geológico: {{ furo.nome }}</h1>
-
-        <!-- Resumo -->
-        <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; margin-bottom:20px;">
-            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Medições:</strong> {{ numero_medicoes }}
+<section class="furo-3d-shell">
+    <div class="furo-3d-card">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-50">Furo 3D Geológico: {{ furo.nome }}</h1>
+                <p class="mt-2 text-sm text-slate-300">
+                    Explora a trajetória real e planeada do furo com filtros visuais, camadas e destaque de dogleg.
+                </p>
             </div>
-            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Profundidade Atual Medida:</strong> {{ profundidade_final|floatformat:2 }} m
-            </div>
-            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Profundidade Alvo Atual:</strong> {{ furo.profundidade_alvo_atual|default:0|floatformat:2 }} m
-            </div>
-            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Dogleg máx:</strong> {{ dogleg_max|floatformat:2 }} °/30m
-            </div>
-            <div style="background:#2c3e50; padding:10px 15px; border-radius:8px;">
-                <strong>Estado:</strong> {{ estado_max }}
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:furo_detail' furo.id %}" class="furo-3d-btn furo-3d-btn-green">🔙 Voltar ao Furo</a>
+                <button type="button" id="rotacionarBtn" class="furo-3d-btn furo-3d-btn-blue">▶️ Rotação</button>
+                <button type="button" onclick="window.print()" class="furo-3d-btn furo-3d-btn-purple">📄 Exportar</button>
             </div>
         </div>
 
-        <!-- Planeamento e Estado -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:15px; margin-bottom:20px;">
-            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
-                <h3 style="margin-bottom:10px;">Planeamento Inicial</h3>
-                <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
-                <div><strong>Inclinação planeada inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
-                <div><strong>Azimute planeado inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
-            </div>
-
-            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
-                <h3 style="margin-bottom:10px;">Planeamento Atual</h3>
-                <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
-                <div><strong>Inclinação planeada atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
-                <div><strong>Azimute planeado atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
-            </div>
-
-            <div style="background:#2c3e50; padding:15px; border-radius:8px;">
-                <h3 style="margin-bottom:10px;">Estado Real Atual</h3>
-                <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
-                <div><strong>Inclinação real atual:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
-                <div><strong>Azimute real atual:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
-            </div>
+        <div class="furo-3d-stats">
+            <div class="furo-3d-stat"><span>Medições</span><strong>{{ numero_medicoes }}</strong></div>
+            <div class="furo-3d-stat"><span>Profundidade Atual</span><strong>{{ profundidade_final|floatformat:2 }} m</strong></div>
+            <div class="furo-3d-stat"><span>Profundidade Alvo</span><strong>{{ furo.profundidade_alvo_atual|default:0|floatformat:2 }} m</strong></div>
+            <div class="furo-3d-stat"><span>Dogleg Máx.</span><strong>{{ dogleg_max|floatformat:2 }} °/30m</strong></div>
+            <div class="furo-3d-stat"><span>Estado Máximo</span><strong>{{ estado_max }}</strong></div>
         </div>
 
-        <!-- Legenda -->
-        <div style="display:flex; gap:20px; justify-content:center; margin-bottom:20px; flex-wrap:wrap;">
-            <div><span style="display:inline-block; width:14px; height:14px; background:green; border-radius:50%; margin-right:6px;"></span>OK</div>
-            <div><span style="display:inline-block; width:14px; height:14px; background:yellow; border-radius:50%; margin-right:6px;"></span>ATENÇÃO</div>
-            <div><span style="display:inline-block; width:14px; height:14px; background:red; border-radius:50%; margin-right:6px;"></span>CRÍTICO</div>
-        </div>
-
-        <!-- Referência espacial -->
-        <div style="text-align:center; margin-bottom:15px; opacity:0.9;">
-            Referência espacial: X = Este, Y = Norte, Z = TVD / Profundidade Vertical
-        </div>
-
-        <!-- Gráfico 3D -->
-        <div id="grafico" style="width:100%; height:800px; margin-bottom:20px;">
-            {% if graph %}
-                {{ graph|safe }}
-            {% else %}
-                <div style="text-align:center; padding:40px;">
-                    <h3>⚠️ Sem dados suficientes</h3>
-                    <p>Adicione medições para visualizar o furo em 3D.</p>
+        <div class="furo-3d-grid">
+            <aside class="furo-3d-panel">
+                <div class="furo-3d-section">
+                    <h3>Modo de visualização</h3>
+                    <div class="furo-3d-control" style="display:block;">
+                        <select id="viewMode">
+                            <option value="comparacao">Comparação</option>
+                            <option value="real">Só trajetória real</option>
+                            <option value="planeado">Só trajetória planeada</option>
+                        </select>
+                    </div>
+                    <p class="furo-3d-note">
+                        Alterna rapidamente entre a execução real, o planeamento e a comparação entre ambos.
+                    </p>
                 </div>
-            {% endif %}
+
+                <div class="furo-3d-section">
+                    <h3>Camadas do gráfico</h3>
+                    <label class="furo-3d-control"><span>Trajetória real</span><input type="checkbox" data-trace-name="Trajetória real" checked></label>
+                    <label class="furo-3d-control"><span>Tubo do furo</span><input type="checkbox" data-trace-name="Tubo do furo" checked></label>
+                    <label class="furo-3d-control"><span>Origem</span><input type="checkbox" data-trace-name="Origem" checked></label>
+                    <label class="furo-3d-control"><span>Vetores de direção</span><input type="checkbox" data-trace-name="Vetores de direção" checked></label>
+                    <p class="furo-3d-note">
+                        As linhas tracejadas do planeamento ficam sempre visíveis como referência do trajeto esperado do furo.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Dogleg e alertas</h3>
+                    <label class="furo-3d-control">
+                        <span>Destacar dogleg</span>
+                        <input type="checkbox" id="toggleDogleg" {% if numero_medicoes %}checked{% endif %} {% if not numero_medicoes %}disabled{% endif %}>
+                    </label>
+                    <div class="furo-3d-control" style="display:block;">
+                        <span style="display:block; margin-bottom:0.5rem;">Filtro mínimo de dogleg: <strong id="doglegThresholdValue">0.00</strong> °/30m</span>
+                        <input type="range" id="doglegThreshold" min="0" max="{{ dogleg_max|floatformat:2|default:'0' }}" step="0.1" value="0" {% if not numero_medicoes %}disabled{% endif %}>
+                    </div>
+                    <div class="furo-3d-control" style="display:block;">
+                        <span style="display:block; margin-bottom:0.5rem;">Mostrar pontos por estado</span>
+                        <select id="alertFilter" {% if not numero_medicoes %}disabled{% endif %}>
+                            <option value="todos">Todos</option>
+                            <option value="atencao">Atenção + Crítico</option>
+                            <option value="critico">Só Crítico</option>
+                        </select>
+                    </div>
+                    <p class="furo-3d-note">
+                        Usa estes controlos para reduzir ruído visual e focar apenas os segmentos mais críticos do furo.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Intervalo de profundidade</h3>
+                    <div class="furo-3d-control" style="display:block;">
+                        <span style="display:block; margin-bottom:0.5rem;">Profundidade mínima visível: <strong id="depthMinValue">0.00</strong> m</span>
+                        <input type="range" id="depthMin" min="0" max="{{ profundidade_visual_max|default:0|floatformat:2 }}" step="1" value="0" {% if not numero_medicoes %}disabled{% endif %}>
+                    </div>
+                    <div class="furo-3d-control" style="display:block;">
+                        <span style="display:block; margin-bottom:0.5rem;">Profundidade máxima visível: <strong id="depthMaxValue">{{ profundidade_visual_max|default:0|floatformat:2 }}</strong> m</span>
+                        <input type="range" id="depthMax" min="0" max="{{ profundidade_visual_max|default:0|floatformat:2 }}" step="1" value="{{ profundidade_visual_max|default:0|floatformat:2 }}" {% if not numero_medicoes %}disabled{% endif %}>
+                    </div>
+                    <p class="furo-3d-note">
+                        Limita a visualização a um troço específico da profundidade real e planeada do furo.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Exportação rápida</h3>
+                    <div class="furo-3d-control" style="display:block;">
+                        <select id="quickExportSelect">
+                            <option value="png">🖼️ Imagem PNG do gráfico</option>
+                            <option value="pdf">📄 Relatório PDF do furo</option>
+                        </select>
+                    </div>
+                    <div class="furo-3d-actions" style="grid-template-columns: 1fr;">
+                        <button type="button" id="quickExportBtn" class="furo-3d-btn furo-3d-btn-blue">Descarregar seleção</button>
+                    </div>
+                    <p class="furo-3d-note">
+                        Exporta rapidamente a vista do gráfico ou um resumo do furo em PDF.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Interoperabilidade 3D</h3>
+                    <div class="furo-3d-control" style="display:block;">
+                        <select id="interopSelect">
+                            <option value="zip">📦 Pacote completo do furo</option>
+                            <option value="csv">CSV 3D</option>
+                            <option value="json">JSON 3D</option>
+                            <option value="geojson">GeoJSON 3D</option>
+                            <option value="importar">📥 Página de importação externa</option>
+                        </select>
+                    </div>
+                    <div class="furo-3d-actions" style="grid-template-columns: 1fr;">
+                        <button type="button" id="interopActionBtn" class="furo-3d-btn furo-3d-btn-green">Abrir / descarregar seleção</button>
+                    </div>
+                    <p class="furo-3d-note">
+                        Aqui retiras todos os dados 3D e os restantes dados do furo. A leitura de dados externos ficou numa página própria do menu 3D.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Comparação final</h3>
+                    <div class="furo-3d-info-box" style="background: rgba(30, 41, 59, 0.72);">
+                        <div><strong>Desvio final:</strong> <span id="finalOffsetValue">-</span></div>
+                        <div><strong>Dif. inclinação:</strong> <span id="finalIncDiffValue">-</span></div>
+                        <div><strong>Dif. azimute:</strong> <span id="finalAziDiffValue">-</span></div>
+                    </div>
+                    <p class="furo-3d-note">
+                        Resume a distância e a diferença angular entre a trajetória real e a planeada no ponto mais fundo visível.
+                    </p>
+                </div>
+
+                <div class="furo-3d-alert" id="estadoAviso"></div>
+            </aside>
+
+            <div class="furo-3d-main">
+                <div class="furo-3d-plot-wrap">
+                    <div class="furo-3d-camera-overlay">
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="iso">Isométrica</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="top">Topo</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="side">Lateral</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="front">Frontal</button>
+                    </div>
+                    <div id="grafico" class="furo-3d-plot">
+                        {% if graph %}
+                            {{ graph|safe }}
+                        {% else %}
+                            <div class="text-center py-16">
+                                <h3 class="text-2xl font-bold text-slate-100">Sem dados suficientes</h3>
+                                <p class="mt-3 text-slate-300">Adiciona medições para visualizar o furo em 3D.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="furo-3d-legend">
+                    <span class="legend-ok">OK</span>
+                    <span class="legend-warn">Atenção</span>
+                    <span class="legend-critical">Crítico</span>
+                    <span class="legend-plan">Planeado até última medição</span>
+                    <span class="legend-final">Planeado final</span>
+                </div>
+
+                <div class="furo-3d-info-grid">
+                    <div class="furo-3d-info-box">
+                        <h4>Top 5 doglegs</h4>
+                        <div id="topDoglegsList" class="text-sm text-slate-300">
+                            <div class="text-sm text-slate-300">Sem dados suficientes.</div>
+                        </div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Planeamento Inicial</h4>
+                        <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
+                        <div><strong>Inclinação inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
+                        <div><strong>Azimute inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Planeamento Atual</h4>
+                        <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
+                        <div><strong>Inclinação atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
+                        <div><strong>Azimute atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Estado Real Atual</h4>
+                        <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
+                        <div><strong>Inclinação real:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
+                        <div><strong>Azimute real:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
+                    </div>
+                </div>
+                <p class="furo-3d-note" style="margin-top:0.9rem;">
+                    O quadro de doglegs mostra os pontos mais críticos do furo dentro do intervalo atualmente visível.
+                </p>
+            </div>
         </div>
 
-        <!-- Botões principais -->
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
-            <a href="{% url 'projetos:furo_detail' furo.id %}"
-               style="background:#27ae60; color:white; padding:12px 20px; border-radius:5px; font-weight:bold; text-decoration:none; transition:background 0.2s;"
-               onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
-               🔙 Voltar para Detalhes do Furo
-            </a>
-
-            <button id="rotacionarBtn" style="
-                background:#2980b9; color:white; padding:10px 15px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; transition:background 0.2s;"
-                onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
-                ▶️ Ativar/Desativar Rotação
-            </button>
-
-            <button onclick="window.print()" style="
-                background:#8e44ad;
-                color:white;
-                padding:10px 15px;
-                border:none;
-                border-radius:5px;
-                font-weight:bold;
-                cursor:pointer;">
-                📄 Exportar / Imprimir
-            </button>
-        </div>
-
-        <!-- Aviso visual -->
-        <div id="estadoAviso" style="display:none; text-align:center; margin-bottom:20px; padding:10px 15px; border-radius:8px; font-weight:bold;"></div>
-
-        <!-- Modal para imagem -->
-        <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-            <div id="modalBox" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#ecf0f1; padding:20px; border-radius:8px; text-align:center;">
+        <div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000;">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#ecf0f1; padding:20px; border-radius:16px; text-align:center; max-width:90vw;">
                 <img id="imagem_rocha" width="400" style="max-width:100%; height:auto;">
                 <br><br>
-                <button onclick="fechar()" style="
-                    background:#c0392b;
-                    color:white;
-                    padding:10px 15px;
-                    border:none;
-                    border-radius:5px;
-                    font-weight:bold;
-                    cursor:pointer;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
-                    Fechar
-                </button>
+                <button onclick="fechar()" class="furo-3d-btn" style="background:#dc2626;">Fechar</button>
             </div>
         </div>
     </div>
@@ -126,57 +423,539 @@
 
 {% block extra_scripts %}
 <script>
-const plot = document.querySelector('.plotly-graph-div');
-const botaoRotacao = document.getElementById('rotacionarBtn');
-const aviso = document.getElementById('estadoAviso');
-const modal = document.getElementById('modal');
+let plot = null;
+const botaoRotacao = document.getElementById("rotacionarBtn");
+const aviso = document.getElementById("estadoAviso");
+const modal = document.getElementById("modal");
+const toggleDogleg = document.getElementById("toggleDogleg");
+const doglegThreshold = document.getElementById("doglegThreshold");
+const doglegThresholdValue = document.getElementById("doglegThresholdValue");
+const alertFilter = document.getElementById("alertFilter");
+const depthMin = document.getElementById("depthMin");
+const depthMax = document.getElementById("depthMax");
+const depthMinValue = document.getElementById("depthMinValue");
+const depthMaxValue = document.getElementById("depthMaxValue");
+const viewMode = document.getElementById("viewMode");
+const finalOffsetValue = document.getElementById("finalOffsetValue");
+const finalIncDiffValue = document.getElementById("finalIncDiffValue");
+const finalAziDiffValue = document.getElementById("finalAziDiffValue");
+const topDoglegsList = document.getElementById("topDoglegsList");
+const quickExportSelect = document.getElementById("quickExportSelect");
+const quickExportBtn = document.getElementById("quickExportBtn");
+const interopSelect = document.getElementById("interopSelect");
+const interopActionBtn = document.getElementById("interopActionBtn");
+const plannedIncReference = parseFloat("{{ furo.inclinacao_planeada_atual|default:furo.inclinacao_planeada_inicial|default:0 }}") || 0;
+const plannedAziReference = parseFloat("{{ furo.azimute_planeado_atual|default:furo.azimute_planeado_inicial|default:0 }}") || 0;
 
 let rotacionando = false;
 let angulo = 0;
 let rotacaoInterval = null;
+let realTraceIndex = null;
+let originalDoglegColors = [];
+let originalCustomdata = [];
+let originalRealTrace = null;
+let originalTubeTrace = null;
+let plotInitialized = false;
+const originalTraceStore = {};
+const cameraToggleState = {
+    side: 1,
+    front: 1,
+    top: 1,
+};
 
-if (plot) {
-    plot.on('plotly_click', function(data) {
+function toPlainArray(value) {
+    if (Array.isArray(value)) return [...value];
+    if (value && typeof value.length === "number") {
+        try {
+            return Array.from(value);
+        } catch (error) {
+            return [];
+        }
+    }
+    return [];
+}
+
+function refreshPlotReference() {
+    plot = document.querySelector("#grafico .js-plotly-plot, #grafico .plotly-graph-div");
+    return !!(plot && Array.isArray(plot.data));
+}
+
+function findTraceIndexesByName(name) {
+    if (!refreshPlotReference()) return [];
+    const indexes = [];
+    plot.data.forEach((trace, index) => {
+        if (trace.name === name) {
+            indexes.push(index);
+        }
+    });
+    return indexes;
+}
+
+function toggleTrace(name, visible) {
+    const indexes = findTraceIndexesByName(name);
+    indexes.forEach((index) => {
+        Plotly.restyle(plot, { visible: [visible] }, [index]);
+    });
+}
+
+function setCheckboxValueByTrace(name, checked) {
+    const input = document.querySelector(`input[data-trace-name="${name}"]`);
+    if (input) {
+        input.checked = checked;
+    }
+}
+
+function getCheckboxValueByTrace(name) {
+    const input = document.querySelector(`input[data-trace-name="${name}"]`);
+    return input ? !!input.checked : true;
+}
+
+function syncTraceVisibilityFromControls() {
+    if (!refreshPlotReference()) return;
+    document.querySelectorAll("input[data-trace-name]").forEach((input) => {
+        toggleTrace(input.dataset.traceName, !!input.checked);
+    });
+    toggleTrace("Planeado até última medição", true);
+    toggleTrace("Planeado final", true);
+}
+
+function getDepthFromCustomdata(item) {
+    if (!item) return 0;
+    if (Array.isArray(item)) {
+        return parseFloat(item[0] || 0);
+    }
+    return 0;
+}
+
+function filterStoredTraceByDepth(name, minDepth, maxDepth) {
+    const trace = originalTraceStore[name];
+    if (!trace) return null;
+
+    const filtered = {
+        x: [],
+        y: [],
+        z: [],
+        text: [],
+        customdata: [],
+    };
+
+    (trace.x || []).forEach((_, idx) => {
+        const depth = getDepthFromCustomdata((trace.customdata || [])[idx]);
+        if (depth >= minDepth && depth <= maxDepth) {
+            filtered.x.push(trace.x[idx]);
+            filtered.y.push(trace.y[idx]);
+            filtered.z.push(trace.z[idx]);
+            if (trace.text) filtered.text.push(trace.text[idx]);
+            if (trace.customdata) filtered.customdata.push(trace.customdata[idx]);
+        }
+    });
+
+    return filtered;
+}
+
+function applyViewMode(mode) {
+    const isReal = mode === "real";
+    const isPlaneado = mode === "planeado";
+    const isComparacao = mode === "comparacao";
+
+    const visibilityMap = {
+        "Trajetória real": isReal || isComparacao,
+        "Tubo do furo": isReal || isComparacao,
+        "Planeado até última medição": true,
+        "Planeado final": true,
+        "Origem": true,
+        "Vetores de direção": isReal || isComparacao,
+    };
+
+    Object.entries(visibilityMap).forEach(([name, visible]) => {
+        setCheckboxValueByTrace(name, visible);
+    });
+    syncTraceVisibilityFromControls();
+}
+
+function applyCamera(view) {
+    if (!refreshPlotReference()) return;
+    let camera = { eye: { x: 1.8, y: 1.8, z: 1.2 } };
+
+    if (view === "top") {
+        cameraToggleState.top = cameraToggleState.top * -1;
+        camera = { eye: { x: 0.01, y: 0.01, z: 2.8 * cameraToggleState.top } };
+    } else if (view === "side") {
+        cameraToggleState.side = cameraToggleState.side * -1;
+        camera = { eye: { x: 2.6 * cameraToggleState.side, y: 0.1, z: 0.5 } };
+    } else if (view === "front") {
+        cameraToggleState.front = cameraToggleState.front * -1;
+        camera = { eye: { x: 0.1, y: 2.6 * cameraToggleState.front, z: 0.5 } };
+    }
+
+    Plotly.relayout(plot, { "scene.camera": camera });
+}
+
+function getRealFilteredData() {
+    const threshold = parseFloat(doglegThreshold?.value || "0");
+    const mode = alertFilter?.value || "todos";
+    const minDepth = parseFloat(depthMin?.value || "0");
+    const maxDepth = parseFloat(depthMax?.value || "0");
+
+    const filteredX = [];
+    const filteredY = [];
+    const filteredZ = [];
+    const filteredCustomdata = [];
+    const filteredText = [];
+    const filteredColors = [];
+    const filteredOpacities = [];
+    const filteredSizes = [];
+
+    originalDoglegColors.forEach((dogleg, idx) => {
+        const state = (originalCustomdata[idx] && originalCustomdata[idx][5]) || "OK";
+        const depth = parseFloat((originalCustomdata[idx] && originalCustomdata[idx][0]) || 0);
+        let visible = dogleg >= threshold && depth >= minDepth && depth <= maxDepth;
+        if (mode === "atencao") visible = visible && (state === "ATENÇÃO" || state === "CRÍTICO");
+        if (mode === "critico") visible = visible && state === "CRÍTICO";
+
+        if (visible && originalRealTrace) {
+            filteredX.push(originalRealTrace.x[idx]);
+            filteredY.push(originalRealTrace.y[idx]);
+            filteredZ.push(originalRealTrace.z[idx]);
+            filteredCustomdata.push(originalCustomdata[idx]);
+            filteredText.push(originalRealTrace.text[idx]);
+            filteredColors.push(originalDoglegColors[idx]);
+            filteredOpacities.push(1);
+            filteredSizes.push(8);
+        }
+    });
+
+    return {
+        threshold,
+        minDepth,
+        maxDepth,
+        x: filteredX,
+        y: filteredY,
+        z: filteredZ,
+        customdata: filteredCustomdata,
+        text: filteredText,
+        colors: filteredColors,
+        opacities: filteredOpacities,
+        sizes: filteredSizes,
+        lineMode: filteredX.length > 1 ? "lines+markers" : "markers",
+    };
+}
+
+function applyDepthAndDataFilters() {
+    if (!refreshPlotReference() || realTraceIndex === null) return null;
+
+    const filtered = getRealFilteredData();
+
+    Plotly.restyle(plot, {
+        x: [filtered.x],
+        y: [filtered.y],
+        z: [filtered.z],
+        text: [filtered.text],
+        customdata: [filtered.customdata],
+        mode: filtered.lineMode,
+        "marker.opacity": [filtered.opacities],
+        "marker.size": [filtered.sizes]
+    }, [realTraceIndex]);
+
+    const tubeIndexes = findTraceIndexesByName("Tubo do furo");
+    if (tubeIndexes.length) {
+        Plotly.restyle(plot, {
+            x: [filtered.x],
+            y: [filtered.y],
+            z: [filtered.z],
+            customdata: [filtered.customdata],
+        }, tubeIndexes);
+    }
+
+    toggleTrace("Planeado até última medição", true);
+    toggleTrace("Planeado final", true);
+    toggleTrace("Origem", getCheckboxValueByTrace("Origem"));
+
+    if (doglegThresholdValue) {
+        doglegThresholdValue.textContent = filtered.threshold.toFixed(2);
+    }
+    if (depthMinValue) {
+        depthMinValue.textContent = filtered.minDepth.toFixed(2);
+    }
+    if (depthMaxValue) {
+        depthMaxValue.textContent = filtered.maxDepth.toFixed(2);
+    }
+
+    updateComparisonSummary(filtered.x, filtered.y, filtered.z, filtered.customdata);
+    updateTopDoglegs(filtered.customdata);
+    return filtered;
+}
+
+function applyDoglegAppearance(filtered = null) {
+    if (!refreshPlotReference() || realTraceIndex === null) return;
+    const enabled = !!toggleDogleg?.checked;
+    const resolved = filtered || getRealFilteredData();
+
+    if (enabled) {
+        Plotly.restyle(plot, {
+            "marker.color": [resolved.colors],
+            "marker.colorscale": [[[0, "green"], [0.5, "yellow"], [1, "red"]]],
+            "marker.showscale": true,
+        }, [realTraceIndex]);
+    } else {
+        Plotly.restyle(plot, {
+            "marker.color": ["#22c55e"],
+            "marker.colorscale": [null],
+            "marker.showscale": false,
+        }, [realTraceIndex]);
+    }
+}
+
+function applyDoglegStyles() {
+    const filtered = applyDepthAndDataFilters();
+    if (filtered) {
+        applyDoglegAppearance(filtered);
+    }
+}
+
+function updateComparisonSummary(filteredX, filteredY, filteredZ, filteredCustomdata) {
+    if (!finalOffsetValue || !finalIncDiffValue || !finalAziDiffValue) return;
+    if (!filteredX.length) {
+        finalOffsetValue.textContent = "-";
+        finalIncDiffValue.textContent = "-";
+        finalAziDiffValue.textContent = "-";
+        return;
+    }
+
+    const lastIndex = filteredX.length - 1;
+    const realX = filteredX[lastIndex];
+    const realY = filteredY[lastIndex];
+    const realZ = filteredZ[lastIndex];
+    const realData = filteredCustomdata[lastIndex] || [];
+    const realMd = parseFloat(realData[0] || 0);
+    const realInc = parseFloat(realData[1] || 0);
+    const realAzi = parseFloat(realData[2] || 0);
+
+    const plannedIndexes = findTraceIndexesByName("Planeado até última medição");
+    const plannedFinalIndexes = findTraceIndexesByName("Planeado final");
+    let plannedTrace = plannedIndexes.length ? plot.data[plannedIndexes[0]] : null;
+    if (!plannedTrace || !plannedTrace.x || !plannedTrace.x.length) {
+        plannedTrace = plannedFinalIndexes.length ? plot.data[plannedFinalIndexes[0]] : null;
+    }
+
+    if (!plannedTrace || !plannedTrace.x || !plannedTrace.x.length) {
+        finalOffsetValue.textContent = "-";
+        finalIncDiffValue.textContent = `${Math.abs(realInc - plannedIncReference).toFixed(2)}°`;
+        finalAziDiffValue.textContent = `${Math.abs(realAzi - plannedAziReference).toFixed(2)}°`;
+        return;
+    }
+
+    let bestIndex = 0;
+    let bestDistanceMd = Infinity;
+    plannedTrace.x.forEach((_, idx) => {
+        const mdEstimate = idx * (realMd / Math.max(plannedTrace.x.length - 1, 1));
+        const distanceMd = Math.abs(mdEstimate - realMd);
+        if (distanceMd < bestDistanceMd) {
+            bestDistanceMd = distanceMd;
+            bestIndex = idx;
+        }
+    });
+
+    const planX = plannedTrace.x[bestIndex];
+    const planY = plannedTrace.y[bestIndex];
+    const planZ = plannedTrace.z[bestIndex];
+    const offset = Math.sqrt(((realX - planX) ** 2) + ((realY - planY) ** 2) + ((realZ - planZ) ** 2));
+    finalOffsetValue.textContent = `${offset.toFixed(2)} m`;
+    finalIncDiffValue.textContent = `${Math.abs(realInc - plannedIncReference).toFixed(2)}°`;
+    finalAziDiffValue.textContent = `${Math.abs(realAzi - plannedAziReference).toFixed(2)}°`;
+}
+
+function updateTopDoglegs(filteredCustomdata) {
+    if (!topDoglegsList) return;
+    if (!filteredCustomdata.length) {
+        topDoglegsList.innerHTML = '<div class="text-sm text-slate-300">Sem pontos visíveis no intervalo atual.</div>';
+        return;
+    }
+
+    const topItems = filteredCustomdata
+        .map((item) => ({
+            md: parseFloat(item[0] || 0),
+            inc: parseFloat(item[1] || 0),
+            azi: parseFloat(item[2] || 0),
+            dogleg: parseFloat(item[3] || 0),
+            estado: item[5] || "OK",
+        }))
+        .sort((a, b) => b.dogleg - a.dogleg)
+        .slice(0, 5);
+
+    topDoglegsList.innerHTML = topItems.map((item, index) => `
+        <div style="padding:${index ? "0.75rem 0 0" : "0"}; ${index ? "border-top:1px solid rgba(148,163,184,0.14);" : ""}">
+            <div style="font-weight:700; color:#f8fafc;">#${index + 1} · MD ${item.md.toFixed(2)} m</div>
+            <div style="font-size:0.86rem; color:#cbd5e1;">Dogleg ${item.dogleg.toFixed(2)} °/30m · ${item.estado}</div>
+            <div style="font-size:0.8rem; color:#94a3b8;">Inc ${item.inc.toFixed(2)}° · Azi ${item.azi.toFixed(2)}°</div>
+        </div>
+    `).join("");
+}
+
+function initializePlotState() {
+    if (plotInitialized) {
+        return true;
+    }
+    if (!refreshPlotReference()) {
+        return false;
+    }
+
+    realTraceIndex = plot.data.findIndex((trace) => trace.name === "Trajetória real");
+    if (realTraceIndex >= 0) {
+        originalRealTrace = {
+            x: toPlainArray(plot.data[realTraceIndex].x),
+            y: toPlainArray(plot.data[realTraceIndex].y),
+            z: toPlainArray(plot.data[realTraceIndex].z),
+            text: toPlainArray(plot.data[realTraceIndex].text)
+        };
+        originalDoglegColors = toPlainArray(plot.data[realTraceIndex].marker?.color);
+        originalCustomdata = toPlainArray(plot.data[realTraceIndex].customdata);
+        const tubeIndex = plot.data.findIndex((trace) => trace.name === "Tubo do furo");
+        if (tubeIndex >= 0) {
+            originalTubeTrace = {
+                x: toPlainArray(plot.data[tubeIndex].x),
+                y: toPlainArray(plot.data[tubeIndex].y),
+                z: toPlainArray(plot.data[tubeIndex].z)
+            };
+        }
+        ["Origem", "Planeado até última medição", "Planeado final", "Trajetória real", "Tubo do furo"].forEach((traceName) => {
+            const traceIndex = plot.data.findIndex((trace) => trace.name === traceName);
+            if (traceIndex >= 0) {
+                const trace = plot.data[traceIndex];
+                originalTraceStore[traceName] = {
+                    x: toPlainArray(trace.x),
+                    y: toPlainArray(trace.y),
+                    z: toPlainArray(trace.z),
+                    text: toPlainArray(trace.text),
+                    customdata: toPlainArray(trace.customdata),
+                };
+            }
+        });
+        applyDoglegStyles();
+    }
+
+    plot.on("plotly_click", function(data) {
         const ponto = data.points[0];
-        const imagem = ponto.customdata[4];
-        const estado = ponto.customdata[5];
+        const customdata = ponto.customdata || [];
+        const imagem = customdata[4];
+        const estado = customdata[5];
 
         if (imagem) {
             document.getElementById("imagem_rocha").src = imagem;
             modal.style.display = "block";
         }
 
+        if (!estado || !aviso) return;
+
+        aviso.style.display = "block";
         if (estado === "CRÍTICO") {
-            aviso.style.display = "block";
-            aviso.style.background = "#e74c3c";
+            aviso.style.background = "#ef4444";
             aviso.style.color = "white";
-            aviso.innerText = "⚠️ Dogleg CRÍTICO neste ponto!";
+            aviso.innerText = "⚠️ Dogleg crítico neste ponto.";
         } else if (estado === "ATENÇÃO") {
-            aviso.style.display = "block";
-            aviso.style.background = "#f1c40f";
-            aviso.style.color = "#2c3e50";
-            aviso.innerText = "⚠️ Dogleg em ATENÇÃO neste ponto.";
+            aviso.style.background = "#facc15";
+            aviso.style.color = "#1e293b";
+            aviso.innerText = "⚠️ Dogleg em atenção neste ponto.";
         } else {
-            aviso.style.display = "block";
-            aviso.style.background = "#27ae60";
+            aviso.style.background = "#22c55e";
             aviso.style.color = "white";
-            aviso.innerText = "✅ Ponto em estado OK.";
+            aviso.innerText = "✅ Ponto dentro dos limites esperados.";
         }
+    });
+    plotInitialized = true;
+    syncTraceVisibilityFromControls();
+    return true;
+}
+
+function bootPlotInteractions(attempt = 0) {
+    if (initializePlotState()) {
+        applyViewMode(viewMode?.value || "comparacao");
+        return;
+    }
+    if (attempt < 60) {
+        window.setTimeout(() => bootPlotInteractions(attempt + 1), 150);
+    }
+}
+
+document.querySelectorAll("input[data-trace-name]").forEach((input) => {
+    input.addEventListener("change", (event) => {
+        toggleTrace(event.target.dataset.traceName, event.target.checked);
+    });
+});
+
+document.querySelectorAll("button[data-camera]").forEach((button) => {
+    button.addEventListener("click", () => applyCamera(button.dataset.camera));
+});
+
+function downloadPlotPng() {
+    if (!refreshPlotReference()) return;
+    Plotly.downloadImage(plot, {
+        format: "png",
+        filename: "furo-{{ furo.pk }}-3d",
+        width: 1600,
+        height: 900,
+        scale: 2
     });
 }
 
-if (plot && botaoRotacao) {
-    botaoRotacao.addEventListener('click', () => {
+quickExportBtn?.addEventListener("click", () => {
+    const selected = quickExportSelect?.value || "png";
+    if (selected === "png") {
+        downloadPlotPng();
+        return;
+    }
+    if (selected === "pdf") {
+        window.location.href = "{% url 'projetos:relatorios_download' 'furos' 'pdf' %}?furo={{ furo.pk }}";
+    }
+});
+
+interopActionBtn?.addEventListener("click", () => {
+    const selected = interopSelect?.value || "zip";
+    if (selected === "importar") {
+        window.location.href = "{% url 'projetos:furo_3d_importar_externo' %}";
+        return;
+    }
+    window.location.href = "{% url 'projetos:furo_3d_export' furo.pk 'zip' %}".replace("/zip/", `/${selected}/`);
+});
+
+viewMode?.addEventListener("change", (event) => {
+    applyViewMode(event.target.value);
+});
+
+toggleDogleg?.addEventListener("change", applyDoglegStyles);
+doglegThreshold?.addEventListener("input", applyDoglegStyles);
+alertFilter?.addEventListener("change", applyDoglegStyles);
+depthMin?.addEventListener("input", () => {
+    if (parseFloat(depthMin.value) > parseFloat(depthMax.value)) {
+        depthMax.value = depthMin.value;
+    }
+    applyDoglegStyles();
+});
+depthMax?.addEventListener("input", () => {
+    if (parseFloat(depthMax.value) < parseFloat(depthMin.value)) {
+        depthMin.value = depthMax.value;
+    }
+    applyDoglegStyles();
+});
+
+bootPlotInteractions();
+
+if (botaoRotacao) {
+    botaoRotacao.addEventListener("click", () => {
+        if (!refreshPlotReference()) return;
         rotacionando = !rotacionando;
+        botaoRotacao.textContent = rotacionando ? "⏸️ Parar rotação" : "▶️ Rotação";
 
         if (rotacionando) {
             rotacaoInterval = setInterval(() => {
                 angulo += 1;
-                Plotly.relayout(plot, 'scene.camera', {
-                    eye: {
-                        x: Math.cos(angulo * Math.PI / 180) * 2,
-                        y: Math.sin(angulo * Math.PI / 180) * 2,
-                        z: 1.25
+                Plotly.relayout(plot, {
+                    "scene.camera": {
+                        eye: {
+                            x: Math.cos(angulo * Math.PI / 180) * 2,
+                            y: Math.sin(angulo * Math.PI / 180) * 2,
+                            z: 1.25
+                        }
                     }
                 });
             }, 50);
@@ -188,11 +967,13 @@ if (plot && botaoRotacao) {
 }
 
 function fechar() {
-    modal.style.display = "none";
+    if (modal) {
+        modal.style.display = "none";
+    }
 }
 
 if (modal) {
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener("click", function(e) {
         if (e.target === modal) {
             fechar();
         }

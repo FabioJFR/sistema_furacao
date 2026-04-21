@@ -1,7 +1,8 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from uuid import UUID
 
+from django.core.files.base import File
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
@@ -40,12 +41,14 @@ TRACKED_MODELS = (
 def _coerce(value):
     if isinstance(value, (datetime, date, time)):
         return value.isoformat()
+    if isinstance(value, timedelta):
+        return value.total_seconds()
     if isinstance(value, Decimal):
         return float(value)
     if isinstance(value, UUID):
         return str(value)
-    if hasattr(value, "url"):
-        return str(value)
+    if isinstance(value, File):
+        return str(value) if getattr(value, "name", "") else None
     return value
 
 

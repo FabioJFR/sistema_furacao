@@ -241,7 +241,7 @@ def garantir_ligacao_projeto_por_furo(empregado, furo, empresa=None, data_inicio
     ligacao = EmpregadoProjeto.objects.create(
         empregado=empregado,
         projeto=projeto,
-        empresa=_resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id,
+        empresa_id=_resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id,
         data_inicio=nova_data_inicio,
         ativo=True,
     )

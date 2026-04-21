@@ -120,7 +120,7 @@ Este sistema foi desenvolvido para:
 
 🚧 Em desenvolvimento ativo  
 
-👉 Versão atual: **v0.9.0-beta**
+👉 Versão atual: **v0.9.2-beta**
 
 ---
 
