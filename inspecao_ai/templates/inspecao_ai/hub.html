@@ -1,0 +1,78 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}AI Visual{% endblock %}
+
+{% block content %}
+<div class="page-header mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">AI Visual</h1>
+        <p class="text-slate-600 mt-2">
+            Espaço para analisar fotografias de telemóvel, localizar texto a marcador em caixas cilíndricas
+            e preparar a base para OCR de relatórios manuscritos.
+        </p>
+    </div>
+    <div class="mt-4 flex gap-3 flex-wrap">
+        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">Abrir Chatbox</a>
+        <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">Nova análise</a>
+        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">Ver histórico</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="text-sm uppercase tracking-wide text-slate-500">Total</div>
+        <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_analises }}</div>
+        <div class="text-slate-600 mt-2">Análises guardadas na empresa.</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="text-sm uppercase tracking-wide text-emerald-600">Concluídas</div>
+        <div class="text-3xl font-bold text-emerald-700 mt-2">{{ total_concluidas }}</div>
+        <div class="text-slate-600 mt-2">Deteções visuais concluídas automaticamente.</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 bg-amber-50/40">
+        <div class="text-sm uppercase tracking-wide text-amber-700">Revisão manual</div>
+        <div class="text-3xl font-bold text-amber-700 mt-2">{{ total_revisao }}</div>
+        <div class="text-slate-600 mt-2">Casos a confirmar antes de integrar OCR completo.</div>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <h2 class="text-xl font-semibold text-slate-900">Análises recentes</h2>
+        <a href="{% url 'inspecao_ai:analise_list' %}" class="text-sky-700 hover:text-sky-900 font-medium">Abrir histórico completo</a>
+    </div>
+
+    {% if analises_recentes %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {% for analise in analises_recentes %}
+                <a href="{% url 'inspecao_ai:analise_detail' analise.pk %}" class="block border border-slate-200 rounded-2xl p-4 hover:border-sky-300 hover:shadow-sm transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <div class="font-semibold text-slate-900">{{ analise.nome }}</div>
+                            <div class="text-sm text-slate-500 mt-1">{{ analise.get_tipo_documento_display }}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                            {% if analise.estado == 'concluida' %}bg-emerald-100 text-emerald-700
+                            {% elif analise.estado == 'revisao_manual' %}bg-amber-100 text-amber-700
+                            {% elif analise.estado == 'erro' %}bg-rose-100 text-rose-700
+                            {% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ analise.get_estado_display }}
+                        </span>
+                    </div>
+                    <div class="mt-3 text-sm text-slate-600">
+                        Marcador: <strong>{{ analise.get_marcador_predominante_display }}</strong>
+                        {% if analise.confianca_media %}
+                            · Confiança: <strong>{{ analise.confianca_media|floatformat:2 }}</strong>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-slate-600">
+            Ainda não existem análises AI nesta empresa. Começa por enviar uma fotografia de uma caixa cilíndrica.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

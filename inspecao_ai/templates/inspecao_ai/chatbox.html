@@ -1,0 +1,111 @@
+{% extends "projetos/base.html" %}
+{% load inspecao_ai_extras %}
+
+{% block title %}Chatbox AI{% endblock %}
+
+{% block content %}
+<div class="flex items-start justify-between gap-4 flex-wrap mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Chatbox AI</h1>
+        <p class="text-slate-600 mt-2">
+            Assistente contextual da empresa. Responde com base nos dados de furos, despesas, máquinas,
+            materiais, empregados, eventos e também faz cálculo matemático.
+        </p>
+    </div>
+    <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">Voltar à AI</a>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)] gap-6">
+    <aside class="space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <h2 class="text-lg font-semibold text-slate-900 mb-3">Resumo atual</h2>
+            <div class="space-y-2 text-sm text-slate-700">
+                <div><strong>Projetos:</strong> {{ resumo_chat.total_projetos }}</div>
+                <div><strong>Furos ativos:</strong> {{ resumo_chat.furos_ativos }}</div>
+                <div><strong>Furos concluídos:</strong> {{ resumo_chat.furos_concluidos }}</div>
+                <div><strong>Empregados:</strong> {{ resumo_chat.total_empregados }}</div>
+                <div><strong>Máquinas:</strong> {{ resumo_chat.total_maquinas }}</div>
+                <div><strong>Materiais:</strong> {{ resumo_chat.total_materiais }}</div>
+                <div><strong>Despesas:</strong> {{ resumo_chat.total_despesas|floatformat:2 }} €</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <h2 class="text-lg font-semibold text-slate-900 mb-3">Conversas</h2>
+            <div class="space-y-2">
+                {% for item in sessoes %}
+                    <a href="?sessao={{ item.pk }}" class="block rounded-xl border px-3 py-2 {% if sessao and item.pk == sessao.pk %}border-sky-300 bg-sky-50 text-sky-900{% else %}border-slate-200 text-slate-700 hover:border-slate-300{% endif %}">
+                        <div class="font-medium">{{ item.titulo }}</div>
+                        <div class="text-xs text-slate-500 mt-1">{{ item.atualizado_em|date:"d/m/Y H:i" }}</div>
+                    </a>
+                {% empty %}
+                    <div class="text-sm text-slate-500">Ainda não tens conversas guardadas.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-200">
+            <h2 class="text-xl font-semibold text-slate-900">
+                {% if sessao %}{{ sessao.titulo }}{% else %}Nova conversa{% endif %}
+            </h2>
+            <p class="text-sm text-slate-600 mt-1">
+                Exemplos: "quais são os alertas atuais?", "quanto já gastámos?", "que furos estão em curso?",
+                "calcula sqrt(144) + 3^2".
+            </p>
+        </div>
+
+        <div class="p-5 space-y-4 min-h-[420px] max-h-[620px] overflow-y-auto bg-slate-50">
+            {% if mensagens %}
+                {% for mensagem in mensagens %}
+                    <div class="{% if mensagem.papel == 'user' %}flex justify-end{% else %}flex justify-start{% endif %}">
+                        <div class="max-w-4xl rounded-2xl px-4 py-3 shadow-sm {% if mensagem.papel == 'user' %}bg-sky-600 text-white{% else %}bg-white border border-slate-200 text-slate-800{% endif %}">
+                            <div class="text-[11px] uppercase tracking-wide font-semibold mb-3 {% if mensagem.papel == 'user' %}text-sky-100{% else %}text-slate-500{% endif %}">
+                                {% if mensagem.papel == 'user' %}Pergunta{% else %}Resposta AI{% endif %}
+                            </div>
+                            {% if mensagem.papel == 'assistant' %}
+                                <div class="space-y-2">
+                                    {% for linha in mensagem.conteudo|split_lines %}
+                                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-800">
+                                            {{ linha }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-sm whitespace-pre-line leading-7">{{ mensagem.conteudo }}</div>
+                            {% endif %}
+                            <div class="text-[11px] mt-2 {% if mensagem.papel == 'user' %}text-sky-100{% else %}text-slate-400{% endif %}">
+                                {{ mensagem.criado_em|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-slate-600">
+                    A conversa ainda está vazia. Pergunta sobre furos, despesas, alertas, stock, eventos, máquinas,
+                    empregados ou faz um cálculo.
+                </div>
+            {% endif %}
+        </div>
+
+        <form method="post" class="p-5 border-t border-slate-200 bg-white">
+            {% csrf_token %}
+            {% if sessao %}
+                <input type="hidden" name="sessao_id" value="{{ sessao.pk }}">
+            {% endif %}
+            <label for="id_pergunta" class="sr-only">Pergunta</label>
+            <textarea
+                id="id_pergunta"
+                name="pergunta"
+                rows="5"
+                class="form-control w-full min-h-[150px] resize-y"
+                placeholder="Escreve aqui a tua pergunta sobre a operação, despesas, alertas, furos, materiais, máquinas ou cálculo..."
+            ></textarea>
+            <div class="flex flex-wrap gap-3 mt-4">
+                <button type="submit" class="btn btn-primary">Enviar para a Chatbox</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

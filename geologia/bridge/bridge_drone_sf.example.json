@@ -1,0 +1,14 @@
+{
+  "host": "127.0.0.1",
+  "port": 8890,
+  "platform_ingest_url": "http://127.0.0.1:8000/app/geologia/drone-sf/api/bridge/ingest/",
+  "bridge_key": "bridge-drone-sf-local-001",
+  "push_interval": 8,
+  "equipment_name": "Drone S_F",
+  "ui_title": "Bridge Drone S_F",
+  "service_name": "bridge_drone_sf",
+  "source_mode": "mock",
+  "source_description": "Bridge local pronta para o Drone S_F",
+  "webhook_path": "/webhook",
+  "webhook_token": ""
+}

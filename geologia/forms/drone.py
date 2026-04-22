@@ -2,7 +2,7 @@ import json
 
 from django import forms
 
-from geologia.models import MissaoDroneFuro
+from geologia.models import DroneComandoOperacao, DroneOperacaoTempoReal, MissaoDroneFuro
 
 
 def _resolver_empresa_id(empresa):
@@ -147,3 +147,93 @@ class MissaoDroneFuroForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class DroneOperacaoTempoRealForm(forms.ModelForm):
+    class Meta:
+        model = DroneOperacaoTempoReal
+        fields = [
+            "nome_operacao",
+            "furo",
+            "estado_conexao",
+            "bridge_ativa",
+            "bridge_nome",
+            "bridge_base_url",
+            "bridge_api_key",
+            "live_view_url",
+            "frame_snapshot_url",
+            "latitude_atual",
+            "longitude_atual",
+            "altitude_atual_m",
+            "velocidade_atual_ms",
+            "heading_graus",
+            "bateria_percent",
+            "sinal_percent",
+            "satelites_gps",
+            "gravacao_ativa",
+            "alvo_latitude",
+            "alvo_longitude",
+            "alvo_altitude_m",
+            "observacoes",
+        ]
+        widgets = {
+            "nome_operacao": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "furo": forms.Select(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "estado_conexao": forms.Select(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "bridge_ativa": forms.CheckboxInput(attrs={"class": "h-4 w-4"}),
+            "bridge_nome": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "bridge_base_url": forms.URLInput(attrs={"class": "border rounded px-3 py-2 w-full", "placeholder": "http://127.0.0.1:8787" }),
+            "bridge_api_key": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full", "placeholder": "chave-secreta-da-bridge" }),
+            "live_view_url": forms.URLInput(attrs={"class": "border rounded px-3 py-2 w-full", "placeholder": "https://..." }),
+            "frame_snapshot_url": forms.URLInput(attrs={"class": "border rounded px-3 py-2 w-full", "placeholder": "https://..." }),
+            "latitude_atual": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "longitude_atual": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "altitude_atual_m": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
+            "velocidade_atual_ms": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
+            "heading_graus": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
+            "bateria_percent": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "sinal_percent": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "satelites_gps": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "gravacao_ativa": forms.CheckboxInput(attrs={"class": "h-4 w-4"}),
+            "alvo_latitude": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "alvo_longitude": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "alvo_altitude_m": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
+            "observacoes": forms.Textarea(attrs={"class": "border rounded px-3 py-2 w-full", "rows": 3}),
+        }
+
+    def __init__(self, *args, empresa=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empresa = empresa
+        if empresa is not None:
+            empresa_id = _resolver_empresa_id(empresa)
+            self.instance.empresa_id = empresa_id
+            self.fields["furo"].queryset = self.fields["furo"].queryset.filter(empresa_id=empresa_id).order_by("projeto__nome", "nome")
+        self.fields["bridge_ativa"].help_text = "Ativa a bridge externa para DJI RC 2 e permite receber heartbeat, vídeo e telemetria."
+        self.fields["bridge_base_url"].help_text = "Endpoint base da bridge local, por exemplo http://127.0.0.1:8787."
+        self.fields["bridge_api_key"].help_text = "Chave usada pela bridge para enviar estado para a plataforma."
+
+
+class DroneComandoOperacaoForm(forms.ModelForm):
+    def __init__(self, *args, operacao=None, empresa=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.operacao = operacao
+        self.empresa = empresa
+        if operacao is not None:
+            self.instance.operacao = operacao
+        if empresa is not None:
+            self.instance.empresa = empresa
+
+    class Meta:
+        model = DroneComandoOperacao
+        fields = [
+            "tipo_comando",
+            "latitude_alvo",
+            "longitude_alvo",
+            "altitude_alvo_m",
+        ]
+        widgets = {
+            "tipo_comando": forms.Select(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "latitude_alvo": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "longitude_alvo": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
+            "altitude_alvo_m": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
+        }

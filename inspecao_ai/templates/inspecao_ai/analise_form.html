@@ -1,0 +1,91 @@
+{% extends "projetos/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Nova análise AI{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-slate-900">{{ titulo_pagina }}</h1>
+        <p class="text-slate-600 mt-2">
+            Envia uma fotografia de telemóvel. Para caixas, a análise procura marcações de metros nas pontas, divisórias e tacos de madeira das filas.
+            Para relatórios, a AI separa cabeçalho impresso, campos manuscritos superiores, zona central manuscrita e rodapé impresso.
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="rounded-xl bg-rose-50 text-rose-700 border border-rose-200 p-4">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="form-label">Nome da análise</label>
+                {{ form.nome }}
+                <div class="text-rose-600 text-sm mt-1">{{ form.nome.errors }}</div>
+            </div>
+            <div>
+                <label class="form-label">Tipo de documento</label>
+                {{ form.tipo_documento }}
+                <div class="text-rose-600 text-sm mt-1">{{ form.tipo_documento.errors }}</div>
+            </div>
+            <div>
+                <label class="form-label">Projeto</label>
+                {{ form.projeto }}
+                <div class="text-rose-600 text-sm mt-1">{{ form.projeto.errors }}</div>
+            </div>
+            <div>
+                <label class="form-label">Furo</label>
+                {{ form.furo }}
+                <div class="text-rose-600 text-sm mt-1">{{ form.furo.errors }}</div>
+            </div>
+            <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                {{ form.auto_corrigir_inclinacao }}
+                <div>
+                    <label for="{{ form.auto_corrigir_inclinacao.id_for_label }}" class="font-medium text-slate-900">
+                        Corrigir inclinação automaticamente
+                    </label>
+                    <div class="text-sm text-slate-500">
+                        Útil quando a foto da caixa vem um pouco torta.
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Rotação manual</label>
+                {{ form.rotacao_manual }}
+                <div class="text-slate-500 text-sm mt-2">
+                    Se souberes que a foto está rodada, podes forçar a correção antes da análise.
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label class="form-label">Imagem original</label>
+            {{ form.imagem_original }}
+            <div class="text-sm text-slate-500 mt-2">
+                Usa uma fotografia frontal e bem iluminada. No caso dos relatórios, tenta apanhar a folha completa para a AI distinguir as zonas.
+            </div>
+            <div class="text-rose-600 text-sm mt-1">{{ form.imagem_original.errors }}</div>
+        </div>
+
+        <div>
+            <label class="form-label">Observações</label>
+            {{ form.observacoes }}
+            <div class="text-rose-600 text-sm mt-1">{{ form.observacoes.errors }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-900 text-sm">
+            Nesta fase a app já destaca zonas-chave da imagem e guarda imagem processada.
+            Nas caixas, também avalia os tacos de madeira onde os metros podem estar escritos. Nos relatórios, a AI segmenta campos impressos e manuscritos por zonas para preparar a extração de valores.
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <button type="submit" class="btn btn-primary">Analisar fotografia</button>
+            <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

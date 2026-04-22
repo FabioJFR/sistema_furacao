@@ -995,7 +995,7 @@ def furo_3d_geologico(request, furo_id):
                 "responsive": True,
                 "displaylogo": False,
                 "scrollZoom": True,
-                "plotGlPixelRatio": 2,
+                "plotGlPixelRatio": 1.5,
             },
         )
 
@@ -1160,7 +1160,7 @@ def furo_3d_geologico(request, furo_id):
         mode="lines+markers",
         line=dict(width=5, color="blue"),
         marker=dict(
-            size=8,
+            size=12,
             color=cores_pontos,
             colorscale=[
                 [0, "green"],
@@ -1329,7 +1329,7 @@ def furo_3d_geologico(request, furo_id):
             "responsive": True,
             "displaylogo": False,
             "scrollZoom": True,
-            "plotGlPixelRatio": 2,
+            "plotGlPixelRatio": 1.5,
         },
     )
 

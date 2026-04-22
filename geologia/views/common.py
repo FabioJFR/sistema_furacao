@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
+from plataforma.models import Empresa
 from plataforma.models import PerfilPlataforma
 
 
@@ -50,7 +51,18 @@ def obter_empresa_admin_geologia(request):
     empresa_id = contexto_admin.get("empresa_id")
 
     if contexto_admin.get("is_global"):
-        return None, contexto_admin, None
+        empresa_param = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
+        empresas_disponiveis = Empresa.objects.filter(ativo=True).order_by("nome")
+        empresa_selecionada = None
+        if empresa_param:
+            empresa_selecionada = empresas_disponiveis.filter(pk=empresa_param).first()
+            if empresa_selecionada is None:
+                messages.error(request, "A empresa selecionada para geologia nao existe ou nao esta disponivel.")
+        contexto_admin["empresas_disponiveis"] = empresas_disponiveis
+        contexto_admin["empresa_selecionada"] = empresa_selecionada
+        contexto_admin["empresa_id"] = getattr(empresa_selecionada, "pk", None)
+        contexto_admin["empresa"] = empresa_selecionada
+        return empresa_selecionada, contexto_admin, None
 
     if not empresa or not empresa_id:
         messages.error(request, "O utilizador administrador nao esta associado a uma empresa.")

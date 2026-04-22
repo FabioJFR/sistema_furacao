@@ -79,6 +79,7 @@
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
                             <a href="{% url 'geologia:hub' %}" role="menuitem">Geologia</a>
                             <a href="{% url 'geologia:drone_hub' %}" role="menuitem">DJI Mini 4 Pro</a>
+                            <a href="{% url 'geologia:drone_sf_hub' %}" role="menuitem">Interface Drone S_F</a>
                         </div>
                     </div>
 
@@ -142,6 +143,25 @@
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Analytics' %}">
                             <a href="{% url 'projetos:graficos_dashboard' %}" role="menuitem">📈 {% trans "Gráficos" %}</a>
                             <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu AI' %}"
+                            onclick="toggleDropdown(event, this)"
+                        >
+                            🤖 {% trans "AI" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu AI' %}">
+                            <a href="{% url 'inspecao_ai:hub' %}" role="menuitem">🧠 {% trans "AI Visual" %}</a>
+                            <a href="{% url 'inspecao_ai:chatbox' %}" role="menuitem">💬 {% trans "Chatbox" %}</a>
+                            <a href="{% url 'inspecao_ai:analise_create' %}" role="menuitem">📸 {% trans "Nova análise" %}</a>
+                            <a href="{% url 'inspecao_ai:analise_list' %}" role="menuitem">🗂️ {% trans "Histórico AI" %}</a>
                         </div>
                     </div>
 

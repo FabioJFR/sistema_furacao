@@ -1,0 +1,12 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "platform_ingest_url": "http://127.0.0.1:8000/app/geologia/drone/api/bridge/ingest/",
+  "bridge_key": "bridge-dji-local-001",
+  "push_interval": 8,
+  "equipment_name": "DJI Mini 4 Pro + DJI RC 2",
+  "source_mode": "mock",
+  "source_description": "Bridge local pronta para futura integração com DJI RC 2",
+  "webhook_path": "/webhook",
+  "webhook_token": ""
+}

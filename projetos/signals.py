@@ -6,6 +6,7 @@ from django.core.files.base import File
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
+from inspecao_ai.models import AnaliseImagemAI, ChatMensagemAI, ChatSessaoAI, DeteccaoImagemAI
 from projetos.models import (
     DevolucaoMaterial,
     Despesa,
@@ -35,6 +36,10 @@ TRACKED_MODELS = (
     DevolucaoMaterial,
     Maquina,
     Despesa,
+    AnaliseImagemAI,
+    DeteccaoImagemAI,
+    ChatSessaoAI,
+    ChatMensagemAI,
 )
 
 
@@ -106,6 +111,7 @@ def _contexto_relacional(instance):
     empregado_id = getattr(instance, "empregado_id", None)
     material_id = getattr(instance, "material_id", None)
     maquina_id = getattr(instance, "maquina_id", None)
+    sessao = getattr(instance, "sessao", None)
 
     furo = getattr(instance, "furo", None)
     projeto = getattr(instance, "projeto", None)
@@ -120,6 +126,7 @@ def _contexto_relacional(instance):
             or getattr(empregado, "empresa_id", None)
             or getattr(material, "empresa_id", None)
             or getattr(maquina, "empresa_id", None)
+            or getattr(sessao, "empresa_id", None)
         )
 
     if projeto_id is None:

@@ -41,6 +41,15 @@
                 <h3 class="font-semibold text-gray-900 mb-2">Observacoes</h3>
                 <p class="text-gray-700 whitespace-pre-line">{{ missao.observacoes|default:"Sem observacoes." }}</p>
             </div>
+            <div class="mt-4 rounded-xl border border-sky-100 bg-sky-50 px-4 py-4">
+                <h3 class="font-semibold text-sky-950 mb-2">Contexto de importação pós-voo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-sky-900">
+                    <div><strong>Origem:</strong> {{ missao.app_origem|default:"DJI RC 2 / Pos-voo" }}</div>
+                    <div><strong>Status:</strong> {{ missao.get_status_display }}</div>
+                    <div><strong>Metadados importados:</strong> {{ missao.metadados_voo|length }}</div>
+                    <div><strong>Produtos anexados:</strong> {% if missao.tem_produtos_processados or missao.log_voo %}Sim{% else %}Nao{% endif %}</div>
+                </div>
+            </div>
         </section>
 
         <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

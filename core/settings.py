@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'dispositivos',
     'rest_framework',
     'geologia',
+    'inspecao_ai',
     
 ]
 

@@ -255,6 +255,7 @@
                 <div class="furo-3d-section">
                     <h3>Camadas do gráfico</h3>
                     <label class="furo-3d-control"><span>Trajetória real</span><input type="checkbox" data-trace-name="Trajetória real" checked></label>
+                    <label class="furo-3d-control"><span>Pontos de medição</span><input type="checkbox" id="toggleMarkers" checked></label>
                     <label class="furo-3d-control"><span>Tubo do furo</span><input type="checkbox" data-trace-name="Tubo do furo" checked></label>
                     <label class="furo-3d-control"><span>Origem</span><input type="checkbox" data-trace-name="Origem" checked></label>
                     <label class="furo-3d-control"><span>Vetores de direção</span><input type="checkbox" data-trace-name="Vetores de direção" checked></label>
@@ -428,6 +429,7 @@ const botaoRotacao = document.getElementById("rotacionarBtn");
 const aviso = document.getElementById("estadoAviso");
 const modal = document.getElementById("modal");
 const toggleDogleg = document.getElementById("toggleDogleg");
+const toggleMarkers = document.getElementById("toggleMarkers");
 const doglegThreshold = document.getElementById("doglegThreshold");
 const doglegThresholdValue = document.getElementById("doglegThresholdValue");
 const alertFilter = document.getElementById("alertFilter");
@@ -454,9 +456,9 @@ let realTraceIndex = null;
 let originalDoglegColors = [];
 let originalCustomdata = [];
 let originalRealTrace = null;
-let originalTubeTrace = null;
 let plotInitialized = false;
 const originalTraceStore = {};
+const originalTraceStoreByIndex = {};
 const cameraToggleState = {
     side: 1,
     front: 1,
@@ -527,8 +529,7 @@ function getDepthFromCustomdata(item) {
     return 0;
 }
 
-function filterStoredTraceByDepth(name, minDepth, maxDepth) {
-    const trace = originalTraceStore[name];
+function filterStoredTraceByDepth(trace, minDepth, maxDepth) {
     if (!trace) return null;
 
     const filtered = {
@@ -596,6 +597,7 @@ function getRealFilteredData() {
     const mode = alertFilter?.value || "todos";
     const minDepth = parseFloat(depthMin?.value || "0");
     const maxDepth = parseFloat(depthMax?.value || "0");
+    const markersVisible = toggleMarkers ? !!toggleMarkers.checked : true;
 
     const filteredX = [];
     const filteredY = [];
@@ -620,8 +622,8 @@ function getRealFilteredData() {
             filteredCustomdata.push(originalCustomdata[idx]);
             filteredText.push(originalRealTrace.text[idx]);
             filteredColors.push(originalDoglegColors[idx]);
-            filteredOpacities.push(1);
-            filteredSizes.push(8);
+            filteredOpacities.push(markersVisible ? 1 : 0);
+            filteredSizes.push(markersVisible ? 12 : 0.1);
         }
     });
 
@@ -659,12 +661,18 @@ function applyDepthAndDataFilters() {
 
     const tubeIndexes = findTraceIndexesByName("Tubo do furo");
     if (tubeIndexes.length) {
-        Plotly.restyle(plot, {
-            x: [filtered.x],
-            y: [filtered.y],
-            z: [filtered.z],
-            customdata: [filtered.customdata],
-        }, tubeIndexes);
+        tubeIndexes.forEach((tubeIndex) => {
+            const tubeTrace = originalTraceStoreByIndex[tubeIndex];
+            const filteredTube = filterStoredTraceByDepth(tubeTrace, filtered.minDepth, filtered.maxDepth);
+            if (!filteredTube) return;
+            Plotly.restyle(plot, {
+                x: [filteredTube.x],
+                y: [filteredTube.y],
+                z: [filteredTube.z],
+                customdata: [filteredTube.customdata],
+                text: [filteredTube.text],
+            }, [tubeIndex]);
+        });
     }
 
     toggleTrace("Planeado até última medição", true);
@@ -810,17 +818,9 @@ function initializePlotState() {
         };
         originalDoglegColors = toPlainArray(plot.data[realTraceIndex].marker?.color);
         originalCustomdata = toPlainArray(plot.data[realTraceIndex].customdata);
-        const tubeIndex = plot.data.findIndex((trace) => trace.name === "Tubo do furo");
-        if (tubeIndex >= 0) {
-            originalTubeTrace = {
-                x: toPlainArray(plot.data[tubeIndex].x),
-                y: toPlainArray(plot.data[tubeIndex].y),
-                z: toPlainArray(plot.data[tubeIndex].z)
-            };
-        }
         ["Origem", "Planeado até última medição", "Planeado final", "Trajetória real", "Tubo do furo"].forEach((traceName) => {
             const traceIndex = plot.data.findIndex((trace) => trace.name === traceName);
-            if (traceIndex >= 0) {
+            if (traceIndex >= 0 && !originalTraceStore[traceName]) {
                 const trace = plot.data[traceIndex];
                 originalTraceStore[traceName] = {
                     x: toPlainArray(trace.x),
@@ -830,6 +830,15 @@ function initializePlotState() {
                     customdata: toPlainArray(trace.customdata),
                 };
             }
+        });
+        plot.data.forEach((trace, traceIndex) => {
+            originalTraceStoreByIndex[traceIndex] = {
+                x: toPlainArray(trace.x),
+                y: toPlainArray(trace.y),
+                z: toPlainArray(trace.z),
+                text: toPlainArray(trace.text),
+                customdata: toPlainArray(trace.customdata),
+            };
         });
         applyDoglegStyles();
     }
@@ -923,6 +932,7 @@ viewMode?.addEventListener("change", (event) => {
 });
 
 toggleDogleg?.addEventListener("change", applyDoglegStyles);
+toggleMarkers?.addEventListener("change", applyDoglegStyles);
 doglegThreshold?.addEventListener("input", applyDoglegStyles);
 alertFilter?.addEventListener("change", applyDoglegStyles);
 depthMin?.addEventListener("input", () => {

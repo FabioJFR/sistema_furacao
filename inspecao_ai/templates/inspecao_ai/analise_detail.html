@@ -1,0 +1,124 @@
+{% extends "projetos/base.html" %}
+
+{% block title %}{{ analise.nome }}{% endblock %}
+
+{% block content %}
+<div class="flex items-start justify-between gap-4 flex-wrap mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">{{ analise.nome }}</h1>
+        <p class="text-slate-600 mt-2">
+            {{ analise.get_tipo_documento_display }} · {{ analise.criado_em|date:"d/m/Y H:i" }}
+        </p>
+    </div>
+    <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Reprocessar</button>
+    </form>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="text-sm text-slate-500 uppercase tracking-wide">Estado</div>
+        <div class="text-2xl font-bold text-slate-900 mt-2">{{ analise.get_estado_display }}</div>
+        <div class="mt-3 text-slate-600">Marcador predominante: <strong>{{ analise.get_marcador_predominante_display }}</strong></div>
+        <div class="mt-2 text-slate-600">Texto detetado: <strong>{% if analise.texto_detectado %}Sim{% else %}Não{% endif %}</strong></div>
+        <div class="mt-2 text-slate-600">Confiança média: <strong>{% if analise.confianca_media %}{{ analise.confianca_media|floatformat:2 }}{% else %}-{% endif %}</strong></div>
+        <div class="mt-2 text-slate-600">Rotação aplicada: <strong>{{ analise.metadados.rotacao_aplicada_graus|default:0 }}°</strong></div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="text-sm text-slate-500 uppercase tracking-wide">Contexto</div>
+        <div class="mt-3 text-slate-700">
+            <div><strong>Projeto:</strong> {% if analise.projeto %}{{ analise.projeto.nome }}{% else %}-{% endif %}</div>
+            <div class="mt-2"><strong>Furo:</strong> {% if analise.furo %}{{ analise.furo.nome }}{% else %}-{% endif %}</div>
+            <div class="mt-2"><strong>Criado por:</strong> {% if analise.criado_por %}{{ analise.criado_por.username }}{% else %}-{% endif %}</div>
+            <div class="mt-2"><strong>Motor:</strong> {{ analise.motor_analise }}</div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="text-sm text-slate-500 uppercase tracking-wide">Texto extraído</div>
+        <div class="mt-3 text-slate-700 whitespace-pre-line">
+            {% if analise.texto_extraido_bruto %}
+                {{ analise.texto_extraido_bruto }}
+            {% else %}
+                Ainda sem OCR literal final. A análise atual já separa as zonas estruturais e prepara a imagem processada.
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+    <h2 class="text-xl font-semibold text-slate-900 mb-4">Campos extraídos pela AI</h2>
+    {% if analise.campos_extraidos.campos %}
+        <div class="space-y-3">
+            {% for campo in analise.campos_extraidos.campos %}
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <div class="font-semibold text-slate-900">{{ campo.campo }}</div>
+                    <div class="text-slate-700 mt-2">{{ campo.valor_lido|default:"-" }}</div>
+                    <div class="text-sm text-slate-500 mt-2">
+                        {% if campo.tipo_conteudo %}Tipo: {{ campo.tipo_conteudo }} · {% endif %}
+                        {% if campo.tipo_zona %}Zona: {{ campo.tipo_zona }} · {% endif %}
+                        Confiança: {{ campo.confianca|floatformat:2 }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-slate-500">
+            Ainda não existem campos extraídos estruturados nesta análise.
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Imagem original</h2>
+        <img src="{{ analise.imagem_original.url }}" alt="{{ analise.nome }}" class="w-full rounded-xl border border-slate-200">
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Imagem processada</h2>
+        {% if analise.imagem_processada %}
+            <img src="{{ analise.imagem_processada.url }}" alt="Imagem processada" class="w-full rounded-xl border border-slate-200">
+        {% else %}
+            <div class="rounded-xl border border-dashed border-slate-300 p-8 text-slate-500">
+                Ainda não existe imagem processada para esta análise.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Deteções guardadas</h2>
+        {% if analise.deteccoes.all %}
+            <div class="space-y-3">
+                {% for deteccao in analise.deteccoes.all %}
+                    <div class="rounded-xl border border-slate-200 p-4">
+                        <div class="font-semibold text-slate-900">{{ deteccao.get_tipo_deteccao_display }}</div>
+                        <div class="text-slate-600 mt-2">
+                            Cor: <strong>{{ deteccao.get_marcador_cor_display }}</strong>
+                            {% if deteccao.confianca %} · Confiança: <strong>{{ deteccao.confianca|floatformat:2 }}</strong>{% endif %}
+                        </div>
+                        <div class="text-slate-600 mt-2">Zona sugerida: {{ deteccao.texto_sugerido|default:"-" }}</div>
+                        <div class="text-slate-500 mt-2 text-sm">BBox: {{ deteccao.caixa_delimitadora }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-slate-500">Sem deteções persistidas nesta análise.</div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Metadados</h2>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">{{ analise.metadados }}</div>
+        {% if analise.observacoes %}
+            <h3 class="text-lg font-semibold text-slate-900 mt-5 mb-3">Observações</h3>
+            <div class="text-slate-700 whitespace-pre-line">{{ analise.observacoes }}</div>
+        {% endif %}
+        {% if analise.erro_analise %}
+            <h3 class="text-lg font-semibold text-rose-700 mt-5 mb-3">Erro de análise</h3>
+            <div class="text-rose-700 whitespace-pre-line">{{ analise.erro_analise }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

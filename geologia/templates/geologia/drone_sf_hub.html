@@ -1,0 +1,264 @@
+{% extends "plataforma/base.html" %}
+
+{% block title %}Interface Drone S_F{% endblock %}
+{% block page_title %}Interface Drone S_F{% endblock %}
+{% block page_description %}
+    {% if contexto_geologia.is_global %}
+    Área nova para o drone próprio S_F, separada da integração DJI e preparada para arquitetura aberta, sensores e software embarcado.
+    {% else %}
+    Centro operacional do Drone S_F da empresa, pensado para hardware próprio, sensores modulares e integração nativa com a plataforma.
+    {% endif %}
+{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar a geologia</a>
+    <a href="{% url 'geologia:drone_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Abrir interface DJI</a>
+    {% if empresa_geologia %}
+    <form method="post" action="{% url 'geologia:drone_sf_demo_create' %}?empresa={{ empresa_geologia.id }}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Criar drone demo</button>
+    </form>
+    {% endif %}
+    <a href="{% url 'geologia:drone_sf_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Novo Drone S_F</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if contexto_geologia.is_global %}
+    <form method="get" class="rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 shadow-sm mb-8 flex flex-col md:flex-row md:items-end gap-4">
+        <div class="flex-1">
+            <label for="id_empresa_drone_sf" class="block text-sm font-semibold text-orange-900 mb-1">Empresa para operar o Drone S_F</label>
+            <select id="id_empresa_drone_sf" name="empresa" class="border rounded px-3 py-2 w-full bg-white">
+                <option value="">Seleciona uma empresa</option>
+                {% for empresa_item in contexto_geologia.empresas_disponiveis %}
+                    <option value="{{ empresa_item.id }}" {% if empresa_geologia and empresa_item.id == empresa_geologia.id %}selected{% endif %}>{{ empresa_item }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="px-4 py-2 rounded bg-orange-600 text-white font-semibold">Usar empresa</button>
+    </form>
+    {% endif %}
+
+    <div class="rounded-3xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 text-white shadow-xl mb-8">
+        <div class="px-8 py-8 md:px-10 md:py-10">
+            <div class="max-w-4xl">
+                <div class="text-xs uppercase tracking-[0.24em] text-cyan-300">S_F Platform</div>
+                <h2 class="mt-3 text-3xl md:text-4xl font-bold">Arquitetura aberta para o drone próprio da plataforma</h2>
+                <p class="mt-4 text-sm md:text-base text-slate-300">
+                    Esta área é exclusiva para o Drone S_F e não interfere com a secção DJI. Aqui vamos preparar hardware, sensores,
+                    software embarcado, missões futuras e integração nativa com geologia, AI e base documental.
+                </p>
+                <div class="mt-6 flex flex-wrap gap-3 text-sm">
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Telemetria aberta</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Sensores modulares</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Software embarcado</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Integração nativa com a plataforma</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Furos disponíveis</div>
+            <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_furos }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Missões de geologia</div>
+            <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_missoes }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Documentos técnicos</div>
+            <div class="text-3xl font-bold text-slate-900 mt-2">{{ documentos_drone|length }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Drones S_F</div>
+            <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_drones_sf }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Estado desta área</div>
+            <div class="text-xl font-bold text-cyan-700 mt-2">Em preparação</div>
+        </div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {% if empresa_geologia %}
+        <form method="post" action="{% url 'geologia:drone_sf_demo_create' %}?empresa={{ empresa_geologia.id }}" class="rounded-2xl border border-violet-200 bg-violet-50 p-5 shadow-sm hover:border-violet-300 hover:bg-violet-100">
+            {% csrf_token %}
+            <button type="submit" class="w-full text-left">
+                <div class="text-sm font-semibold text-violet-950">Atalho: criar drone demo</div>
+                <p class="mt-2 text-sm text-violet-900">Gera automaticamente um Drone S_F com módulos, sensores, configuração, operação e fila de comandos base.</p>
+            </button>
+        </form>
+        {% endif %}
+        <a href="{% url 'geologia:drone_sf_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm hover:border-cyan-300 hover:bg-cyan-100">
+            <div class="text-sm font-semibold text-cyan-950">Atalho: novo Drone S_F</div>
+            <p class="mt-2 text-sm text-cyan-900">Criar a base do hardware próprio, com frame, controlador, autonomia e computação embarcada.</p>
+        </a>
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+            <div class="text-sm font-semibold text-emerald-950">Atalho: módulos</div>
+            <p class="mt-2 text-sm text-emerald-900">Os módulos representam blocos do drone, como propulsão, estrutura, energia, controlo de voo e comunicação.</p>
+        </div>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="text-sm font-semibold text-amber-950">Atalho: sensores</div>
+            <p class="mt-2 text-sm text-amber-900">Os sensores representam leitura e perceção, como proximidade, som, RGB, térmico e sensores geológicos futuros.</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+            <div class="text-sm font-semibold text-slate-950">Atalho: telemetria S_F</div>
+            <p class="mt-2 text-sm text-slate-700">A operação em tempo real do Drone S_F vai viver numa área própria, separada da bridge e telemetria DJI.</p>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
+        <section class="space-y-6">
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 class="text-xl font-semibold text-slate-900">Objetivos da Interface Drone S_F</h3>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="rounded-xl border border-cyan-100 bg-cyan-50 p-4">
+                        <div class="font-semibold text-cyan-950">Hardware próprio</div>
+                        <p class="mt-2 text-cyan-900">Estrutura modular, sensores de proximidade, som, computação embarcada e crescimento controlado.</p>
+                    </div>
+                    <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+                        <div class="font-semibold text-emerald-950">Integração com a plataforma</div>
+                        <p class="mt-2 text-emerald-900">Geologia, IA, base de conhecimento, telemetria, missões e processamento pós-voo.</p>
+                    </div>
+                    <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                        <div class="font-semibold text-amber-950">Software embarcado</div>
+                        <p class="mt-2 text-amber-900">Instalação de serviços próprios, automação, leitura de sensores e ligação futura à bridge S_F.</p>
+                    </div>
+                    <div class="rounded-xl border border-rose-100 bg-rose-50 p-4">
+                        <div class="font-semibold text-rose-950">Fases seguintes</div>
+                        <p class="mt-2 text-rose-900">Modelos Django do drone S_F, sensores, missões, telemetria e painéis de operação próprios.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900">Drones S_F registados</h3>
+                        <p class="text-sm text-slate-500 mt-1">Base de hardware, sensores e configuração modular do drone próprio.</p>
+                    </div>
+                </div>
+                <div class="mt-5 space-y-3">
+                    {% for drone in drones_sf %}
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-300 hover:bg-cyan-50">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <div class="font-semibold text-slate-900">{{ drone.nome }}</div>
+                                <div class="text-sm text-slate-600 mt-1">{{ drone.frame_modelo|default:"Sem frame definido" }}</div>
+                                <div class="text-xs text-slate-500 mt-2">
+                                    Módulos: {{ drone.modulos.count }} · Sensores: {{ drone.sensores.count }} · Telemetria: {{ drone.protocolo_telemetria|default:"-" }}
+                                </div>
+                            </div>
+                            <span class="text-xs uppercase tracking-wide rounded-full bg-cyan-100 text-cyan-800 px-3 py-1">{{ drone.get_status_display }}</span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Abrir detalhe técnico</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Gerir módulos</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Gerir sensores</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Operação em tempo real S_F</span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">Abrir detalhe</a>
+                            <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-800">Abrir operação</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-slate-500">Ainda não existem drones S_F registados.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900">Furos e contexto geológico</h3>
+                        <p class="text-sm text-slate-500 mt-1">Base operacional onde o Drone S_F deverá atuar no futuro.</p>
+                    </div>
+                </div>
+                <div class="mt-5 divide-y divide-slate-100">
+                    {% for furo in furos %}
+                    <div class="py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        <div>
+                            <div class="font-semibold text-slate-900">{{ furo.nome }}</div>
+                            <div class="text-sm text-slate-600 mt-1">{{ furo.projeto.nome }}</div>
+                            <div class="text-xs text-slate-500 mt-1">Profundidade atual: {{ furo.profundidade_atual|default:"0" }} m</div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-slate-300 text-slate-700 font-semibold">Abrir geologia</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="py-8 text-center text-slate-500">Ainda não existem furos disponíveis para ligar ao Drone S_F.</div>
+                    {% endfor %}
+                </div>
+            </article>
+        </section>
+
+        <section class="space-y-6">
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 class="text-xl font-semibold text-slate-900">Base documental S_F</h3>
+                <p class="text-sm text-slate-500 mt-1">Documentos técnicos guardados na raiz do projeto para consulta futura pela AI.</p>
+                <div class="mt-4 space-y-3">
+                    {% for doc in documentos_drone %}
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                        <div class="font-semibold text-slate-900">{{ doc.nome }}</div>
+                        <div class="text-xs text-slate-500 mt-1">{{ doc.relativo }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem documentos técnicos guardados para o Drone S_F.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 class="text-xl font-semibold text-slate-900">Roadmap imediato</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-700">
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 1.</strong> Modelos do Drone S_F, sensores e configuração modular.</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 2.</strong> Missões e telemetria próprias, sem mexer na secção DJI.</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 3.</strong> Ligação a AI e documentos técnicos da base de conhecimento.</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 4.</strong> Interface operacional do Drone S_F com sensores, estado e comandos próprios.</div>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                <h3 class="text-xl font-semibold text-amber-950">Estado Atual e Continuação</h3>
+                <p class="text-sm text-amber-900 mt-2">
+                    Esta frente fica preparada para continuar mais tarde. Como ainda não temos o drone físico, o foco imediato da plataforma passa para
+                    <strong>Projetos</strong> e <strong>IA</strong>.
+                </p>
+                <div class="mt-4 space-y-3 text-sm text-amber-950">
+                    <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
+                        <strong>Já feito:</strong> interface própria, bridge S_F, operação S_F, mapa, comandos, missões programadas e motor automático base.
+                    </div>
+                    <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
+                        <strong>Fica para retoma futura:</strong> telemetria real, sensores reais, vídeo real, testes com hardware e segurança operacional.
+                    </div>
+                    <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
+                        <strong>Documento de referência:</strong><br>
+                        <span class="text-xs text-amber-800">knowledge_base/drone/drone_sf_roadmap.md</span>
+                    </div>
+                    <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
+                        <strong>Ponto de retoma:</strong> `Interface Drone S_F` → `Operação S_F` → `bridge S_F` → telemetria e sensores reais.
+                    </div>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 class="text-xl font-semibold text-slate-900">Missões recentes ligadas à geologia</h3>
+                <div class="mt-4 space-y-3">
+                    {% for missao in missoes_recentes %}
+                    <div class="rounded-xl border border-slate-200 px-4 py-3">
+                        <div class="font-semibold text-slate-900">{{ missao.titulo }}</div>
+                        <div class="text-sm text-slate-600 mt-1">{{ missao.furo.nome }} · {{ missao.data_voo|date:"d/m/Y" }}</div>
+                        <div class="text-xs text-slate-500 mt-1">{{ missao.resumo_captura }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem missões recentes para usar como referência do Drone S_F.</div>
+                    {% endfor %}
+                </div>
+            </article>
+        </section>
+    </div>
+</div>
+{% endblock %}
