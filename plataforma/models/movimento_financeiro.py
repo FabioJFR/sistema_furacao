@@ -148,7 +148,13 @@ class MovimentoFinanceiroPlataforma(models.Model):
     def clean(self):
         super().clean()
 
-        if not self.empresa_id and not self.perfil_plataforma_id:
+        movimento_global_plataforma = (
+            self.tipo_movimento == "despesa"
+            or self.natureza_fluxo == "saida"
+            or str(self.categoria or "").startswith("despesa_")
+        )
+
+        if not self.empresa_id and not self.perfil_plataforma_id and not movimento_global_plataforma:
             raise ValidationError(
                 "O movimento financeiro deve estar associado a uma empresa ou a um perfil individual."
             )
@@ -180,5 +186,10 @@ class MovimentoFinanceiroPlataforma(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        destino = self.empresa.nome if self.empresa_id else getattr(self.perfil_plataforma.user, "username", "Individual")
+        if self.empresa_id:
+            destino = self.empresa.nome
+        elif self.perfil_plataforma_id:
+            destino = getattr(self.perfil_plataforma.user, "username", "Individual")
+        else:
+            destino = "Plataforma"
         return f"{destino} - {self.valor} {self.moeda}"

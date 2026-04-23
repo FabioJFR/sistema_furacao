@@ -38,7 +38,7 @@
                                 <td class="px-4 py-3">{{ h.get_acao_display }}</td>
                                 <td class="px-4 py-3">{{ h.alterado_por|default:"-" }}</td>
                                 <td class="px-4 py-3">
-                                    <a href="{% url 'projetos:historico_configuracao_detail' h.pk %}"
+                                    <a href="{% url 'projetos:historico_detail' h.pk %}"
                                        class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
                                         Ver detalhe
                                     </a>

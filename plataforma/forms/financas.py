@@ -107,6 +107,8 @@ class SaidaValorForm(BaseMovimentoFinanceiroForm):
         movimento.ciclo_cobranca = "unico"
         movimento.valor = self.cleaned_data["valor"]
         movimento.valor_liquido = self.cleaned_data["valor_liquido"]
+        if not movimento.entidade_nome:
+            movimento.entidade_nome = "Plataforma"
         if commit:
             movimento.save()
         return movimento

@@ -13,6 +13,24 @@
             </div>
         {% endif %}
 
+        {% if memoria_zona_alerta %}
+            <div style="background:#fff7ed; color:#9a3412; padding:14px 16px; border-radius:10px; margin-bottom:20px; border:1px solid #fdba74;">
+                <div style="font-weight:bold; margin-bottom:8px;">Memória operacional da zona</div>
+                <div style="font-size:0.95rem; margin-bottom:8px;">
+                    Já existem furos registados perto desta localização ou com a mesma referência textual. Convém rever o histórico antes de avançar.
+                </div>
+                <ul style="margin:0; padding-left:18px;">
+                    {% for item in memoria_zona_alerta %}
+                        <li style="margin-bottom:6px;">
+                            <strong>{{ item.nome }}</strong> · {{ item.projeto }} · {{ item.estado }}
+                            {% if item.distancia_km is not None %} · {{ item.distancia_km }} km{% endif %}
+                            {% if item.mesma_localizacao_textual %} · mesma localização textual{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
         <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:18px;">
             {% csrf_token %}
 

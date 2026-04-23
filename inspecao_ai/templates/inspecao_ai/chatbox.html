@@ -1,4 +1,4 @@
-{% extends "projetos/base.html" %}
+{% extends base_template %}
 {% load inspecao_ai_extras %}
 
 {% block title %}Chatbox AI{% endblock %}
@@ -29,6 +29,26 @@
                 <div><strong>Despesas:</strong> {{ resumo_chat.total_despesas|floatformat:2 }} €</div>
             </div>
         </div>
+
+        {% if memoria_furo_contexto and memoria_furo_contexto.furo_referencia %}
+            <div class="bg-amber-50 rounded-2xl shadow-sm border border-amber-200 p-5">
+                <h2 class="text-lg font-semibold text-amber-900 mb-3">Memória da zona em foco</h2>
+                <div class="space-y-2 text-sm text-amber-900">
+                    <div><strong>Furo:</strong> {{ memoria_furo_contexto.furo_referencia.nome }}</div>
+                    <div><strong>Projeto:</strong> {{ memoria_furo_contexto.furo_referencia.projeto }}</div>
+                    <div><strong>Estado:</strong> {{ memoria_furo_contexto.furo_referencia.estado }}</div>
+                </div>
+                {% if memoria_furo_contexto.relacionados %}
+                    <div class="mt-4 space-y-2">
+                        {% for item in memoria_furo_contexto.relacionados %}
+                            <div class="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-amber-900">
+                                {{ item }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
             <h2 class="text-lg font-semibold text-slate-900 mb-3">Conversas</h2>
@@ -93,6 +113,9 @@
             {% csrf_token %}
             {% if sessao %}
                 <input type="hidden" name="sessao_id" value="{{ sessao.pk }}">
+            {% endif %}
+            {% if memoria_furo_contexto and memoria_furo_contexto.furo_referencia %}
+                <input type="hidden" name="furo_contexto_id" value="{{ memoria_furo_contexto.furo_referencia.id }}">
             {% endif %}
             <label for="id_pergunta" class="sr-only">Pergunta</label>
             <textarea

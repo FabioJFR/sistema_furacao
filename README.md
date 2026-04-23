@@ -29,6 +29,8 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - área administrativa por empresa
 - área de trabalhador
 - fluxo de aprovação de utilizadores ligados a empresa
+- gestão de features por empresa e conta individual
+- área `Úteis` para exportação, limpeza controlada e scripts operacionais de apoio
 
 ### Operação
 
@@ -68,6 +70,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - estrutura para caixas de amostras e relatórios manuscritos
 - chatbox com contexto real da empresa
 - base documental para apoiar respostas futuras
+- biblioteca documental com ficheiros textuais e PDFs com apoio por `.txt`
 
 ---
 
@@ -145,6 +148,17 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - consultas a furos, eventos, despesas, máquinas, materiais e alertas
 - cálculo matemático seguro
 - uso de base documental para contexto adicional
+- apoio à memória operacional de zonas e furos relacionados
+
+### Plataforma e utilitários
+
+- submenu `AI` completo disponível para `superuser` na plataforma
+- submenu `Úteis` disponível para `superuser`
+- exportação de datasets AI e operacionais em `JSON`
+- pacote completo em `ZIP`
+- limpeza controlada de grupos de dados
+- scripts operacionais executáveis pela interface
+- catálogo visível de datasets configurados para exportação
 
 ---
 
@@ -205,12 +219,15 @@ Foi criada uma base documental na raiz do projeto:
 - [knowledge_base/drone](/Users/fabiorevez/Desktop/sistema_furacao/knowledge_base/drone:1)
 - [knowledge_base/geologia](/Users/fabiorevez/Desktop/sistema_furacao/knowledge_base/geologia:1)
 - [knowledge_base/ia](/Users/fabiorevez/Desktop/sistema_furacao/knowledge_base/ia:1)
+- [knowledge_base/plataforma](/Users/fabiorevez/Desktop/sistema_furacao/knowledge_base/plataforma:1)
+- [knowledge_base/pdf](/Users/fabiorevez/Desktop/sistema_furacao/knowledge_base/pdf:1)
 
 Objetivo:
 
 - guardar documentos técnicos e funcionais
 - permitir retoma futura sem perda de contexto
 - servir de apoio à camada de IA
+- permitir consulta documental futura na plataforma online
 
 ---
 
@@ -223,9 +240,17 @@ python3 manage.py gerar_dados_demo_operacao
 python3 manage.py gerar_furos_demo_inclinacao_negativa
 python3 manage.py reforcar_cenario_demo_multiempresa
 python3 manage.py criar_drone_sf_demo
+python3 manage.py preencher_furos_e_materiais_base
 ```
 
 Também existem ferramentas de bridge e simulação em `geologia/management/commands/` para testes de `DJI` e `Drone S_F`.
+
+O comando `preencher_furos_e_materiais_base` permite:
+
+- preencher latitude/longitude dos furos com base na localização do projeto
+- espalhar os furos com coordenadas próximas para testes mais realistas
+- reforçar a base de materiais das empresas com itens de drilling, mecânica, serralharia, segurança e escritório
+- correr em modo de simulação antes de gravar alterações
 
 ---
 

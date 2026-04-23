@@ -1,4 +1,4 @@
-{% extends "projetos/base.html" %}
+{% extends base_template %}
 {% load widget_tweaks %}
 
 {% block title %}Nova análise AI{% endblock %}
@@ -60,15 +60,170 @@
                     Se souberes que a foto está rodada, podes forçar a correção antes da análise.
                 </div>
             </div>
+            <div class="md:col-span-2">
+                <label class="form-label">Campo prioritário do relatório</label>
+                {{ form.relatorio_focus }}
+                <div class="text-slate-500 text-sm mt-2">
+                    Nos relatórios, podes orientar a AI para procurar primeiro uma zona específica como data, turno, equipa ou observações.
+                </div>
+            </div>
         </div>
 
         <div>
             <label class="form-label">Imagem original</label>
             {{ form.imagem_original }}
+            {{ form.report_zone_json }}
+            {{ form.custom_text_zones_json }}
             <div class="text-sm text-slate-500 mt-2">
                 Usa uma fotografia frontal e bem iluminada. No caso dos relatórios, tenta apanhar a folha completa para a AI distinguir as zonas.
             </div>
             <div class="text-rose-600 text-sm mt-1">{{ form.imagem_original.errors }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 p-5 space-y-4">
+            <div>
+                <div class="text-base font-semibold text-slate-900">Seleção guiada da área</div>
+                <div class="text-sm text-slate-500 mt-1">
+                    Primeiro marca a zona total do relatório. Depois passa para a fase seguinte e cria as zonas nomeadas onde queres que a AI tente interpretar texto.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div class="text-sm font-semibold text-slate-900">Fase 1</div>
+                    <div class="text-sm text-slate-600 mt-1">Selecionar a moldura geral do relatório na foto.</div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div class="text-sm font-semibold text-slate-900">Fase 2</div>
+                    <div class="text-sm text-slate-600 mt-1">Criar várias zonas nomeadas para leitura orientada da AI.</div>
+                </div>
+            </div>
+
+            <div id="ai-area-preview-shell" class="hidden">
+                <div id="ai-area-preview-stage" class="relative inline-block max-w-full border border-slate-200 rounded-xl overflow-hidden bg-slate-50 select-none">
+                    <img id="ai-area-preview-image" alt="Pré-visualização da imagem" class="block max-w-full h-auto">
+                    <div id="ai-report-preview-rect" class="absolute border-[3px] border-sky-500 bg-sky-400/15 hidden">
+                        <button type="button" data-rect-target="report" data-handle="nw" class="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-sky-500 border-2 border-white"></button>
+                        <button type="button" data-rect-target="report" data-handle="se" class="absolute -right-2 -bottom-2 h-4 w-4 rounded-full bg-sky-500 border-2 border-white"></button>
+                    </div>
+                    <div id="ai-priority-preview-rect" class="absolute border-[3px] border-emerald-500 bg-emerald-400/15 pointer-events-none hidden"></div>
+                    <div id="ai-draft-zone-rect" class="absolute border-[3px] border-amber-500 bg-amber-300/15 hidden">
+                        <button type="button" data-rect-target="draft" data-handle="nw" class="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-amber-500 border-2 border-white"></button>
+                        <button type="button" data-rect-target="draft" data-handle="se" class="absolute -right-2 -bottom-2 h-4 w-4 rounded-full bg-amber-500 border-2 border-white"></button>
+                    </div>
+                    <div id="ai-custom-zones-layer" class="absolute inset-0 pointer-events-none"></div>
+                </div>
+                <div class="text-xs text-slate-500 mt-2">
+                    Clica e arrasta na imagem. A ação depende da fase ativa.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="rounded-2xl border border-slate-200 p-4 space-y-4">
+                    <div class="flex flex-wrap gap-3">
+                        <button type="button" id="ai-step-report" class="btn btn-secondary">Fase 1: zona do relatório</button>
+                        <button type="button" id="ai-step-zones" class="btn btn-secondary">Fase 2: zonas AI</button>
+                        <button type="button" id="ai-area-full-image" class="btn btn-secondary">Usar imagem completa</button>
+                        <button type="button" id="ai-step-next" class="btn btn-primary">Passar para zonas AI</button>
+                    </div>
+
+                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                        <div class="text-sm font-semibold text-slate-900">Área prioritária global da AI</div>
+                        <div class="text-sm text-slate-500 mt-1">
+                            Mantém estes campos para dizer à AI onde deve procurar primeiro, além das zonas nomeadas.
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                            <div>
+                                <label class="form-label">X (%)</label>
+                                {{ form.area_x_percent }}
+                            </div>
+                            <div>
+                                <label class="form-label">Y (%)</label>
+                                {{ form.area_y_percent }}
+                            </div>
+                            <div>
+                                <label class="form-label">Largura (%)</label>
+                                {{ form.area_w_percent }}
+                            </div>
+                            <div>
+                                <label class="form-label">Altura (%)</label>
+                                {{ form.area_h_percent }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 p-4 space-y-4">
+                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-3">
+                        <div class="text-sm font-semibold text-slate-900">Memória de zonas guardadas</div>
+                        <div class="text-sm text-slate-500">Guarda um conjunto de retângulos para reutilizar noutras análises do mesmo tipo.</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="form-label">Preset guardado</label>
+                                <select id="ai-preset-select" class="form-control">
+                                    <option value="">Sem preset</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Nome do novo preset</label>
+                                <input type="text" id="ai-preset-name" class="form-control" placeholder="Ex.: Relatório turno noite padrão">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="button" id="ai-apply-preset" class="btn btn-secondary">Aplicar preset</button>
+                            <button type="button" id="ai-save-preset" class="btn btn-primary">Guardar na memória</button>
+                        </div>
+                        <div id="ai-preset-feedback" class="text-sm text-slate-500"></div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-semibold text-slate-900">Zona do relatório guardada</div>
+                        <div id="ai-report-zone-summary" class="text-sm text-slate-500 mt-1">
+                            Ainda não definiste a moldura total do relatório.
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 space-y-3">
+                        <div class="text-sm font-semibold text-amber-900">Nova zona nomeada da AI</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="md:col-span-2">
+                                <label class="form-label">Nome da zona</label>
+                                <input type="text" id="ai-zone-name" class="form-control" placeholder="Ex.: Data, Turno, Furação linha 1, assinatura">
+                            </div>
+                            <div>
+                                <label class="form-label">X (%)</label>
+                                <input type="number" id="ai-zone-x" class="form-control" step="0.1" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="form-label">Y (%)</label>
+                                <input type="number" id="ai-zone-y" class="form-control" step="0.1" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="form-label">Largura (%)</label>
+                                <input type="number" id="ai-zone-w" class="form-control" step="0.1" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="form-label">Altura (%)</label>
+                                <input type="number" id="ai-zone-h" class="form-control" step="0.1" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="button" id="ai-save-zone" class="btn btn-primary">Guardar retângulo</button>
+                            <button type="button" id="ai-clear-draft-zone" class="btn btn-secondary">Limpar retângulo atual</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4">
+                <div class="text-sm font-semibold text-slate-900">Retângulos guardados para leitura da AI</div>
+                <div class="text-sm text-slate-500 mt-1">
+                    Estes retângulos são usados para orientar a AI e ficam guardados com a análise.
+                </div>
+                <div id="ai-custom-zones-list" class="mt-4 space-y-2 text-sm text-slate-600">
+                    <div class="text-slate-400">Ainda não existem zonas nomeadas guardadas.</div>
+                </div>
+            </div>
         </div>
 
         <div>
@@ -88,4 +243,469 @@
         </div>
     </form>
 </div>
+{{ zona_presets|json_script:"ai-zone-presets-data" }}
+<script>
+(() => {
+    const fileInput = document.getElementById("{{ form.imagem_original.id_for_label }}");
+    const shell = document.getElementById("ai-area-preview-shell");
+    const stage = document.getElementById("ai-area-preview-stage");
+    const image = document.getElementById("ai-area-preview-image");
+    const reportRect = document.getElementById("ai-report-preview-rect");
+    const priorityRect = document.getElementById("ai-priority-preview-rect");
+    const draftRect = document.getElementById("ai-draft-zone-rect");
+    const customLayer = document.getElementById("ai-custom-zones-layer");
+    const xInput = document.getElementById("{{ form.area_x_percent.id_for_label }}");
+    const yInput = document.getElementById("{{ form.area_y_percent.id_for_label }}");
+    const wInput = document.getElementById("{{ form.area_w_percent.id_for_label }}");
+    const hInput = document.getElementById("{{ form.area_h_percent.id_for_label }}");
+    const fullButton = document.getElementById("ai-area-full-image");
+    const reportJsonInput = document.getElementById("{{ form.report_zone_json.id_for_label }}");
+    const customZonesJsonInput = document.getElementById("{{ form.custom_text_zones_json.id_for_label }}");
+    const stepReportButton = document.getElementById("ai-step-report");
+    const stepZonesButton = document.getElementById("ai-step-zones");
+    const nextStepButton = document.getElementById("ai-step-next");
+    const zoneNameInput = document.getElementById("ai-zone-name");
+    const zoneXInput = document.getElementById("ai-zone-x");
+    const zoneYInput = document.getElementById("ai-zone-y");
+    const zoneWInput = document.getElementById("ai-zone-w");
+    const zoneHInput = document.getElementById("ai-zone-h");
+    const saveZoneButton = document.getElementById("ai-save-zone");
+    const clearDraftButton = document.getElementById("ai-clear-draft-zone");
+    const zonesList = document.getElementById("ai-custom-zones-list");
+    const reportSummary = document.getElementById("ai-report-zone-summary");
+    const presetDataNode = document.getElementById("ai-zone-presets-data");
+    const presetSelect = document.getElementById("ai-preset-select");
+    const applyPresetButton = document.getElementById("ai-apply-preset");
+    const savePresetButton = document.getElementById("ai-save-preset");
+    const presetNameInput = document.getElementById("ai-preset-name");
+    const presetFeedback = document.getElementById("ai-preset-feedback");
+
+    if (!fileInput || !shell || !stage || !image || !reportRect || !priorityRect || !draftRect || !xInput || !yInput || !wInput || !hInput) {
+        return;
+    }
+
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let activeStep = "report";
+    let reportZone = null;
+    let customZones = [];
+    let editingZoneIndex = null;
+    let resizeState = null;
+    let zonePresets = [];
+
+    function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+    }
+
+    function parseJsonInput(input, fallback) {
+        if (!input || !input.value) {
+            return fallback;
+        }
+        try {
+            return JSON.parse(input.value);
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    function writeJsonInput(input, value) {
+        if (input) {
+            input.value = value === "" || value === null ? "" : JSON.stringify(value);
+        }
+    }
+
+    function setFullImage() {
+        xInput.value = "0";
+        yInput.value = "0";
+        wInput.value = "100";
+        hInput.value = "100";
+        renderPriorityRectFromInputs();
+    }
+
+    function zoneToStyle(zone, width, height) {
+        return {
+            left: `${(zone.x_percent / 100) * width}px`,
+            top: `${(zone.y_percent / 100) * height}px`,
+            width: `${(zone.w_percent / 100) * width}px`,
+            height: `${(zone.h_percent / 100) * height}px`,
+        };
+    }
+
+    function renderPriorityRectFromInputs() {
+        if (!image.src) {
+            priorityRect.classList.add("hidden");
+            return;
+        }
+        const width = image.clientWidth || stage.clientWidth;
+        const height = image.clientHeight || stage.clientHeight;
+        const x = clamp(parseFloat(xInput.value || 0), 0, 100);
+        const y = clamp(parseFloat(yInput.value || 0), 0, 100);
+        const w = clamp(parseFloat(wInput.value || 0), 0, 100);
+        const h = clamp(parseFloat(hInput.value || 0), 0, 100);
+
+        Object.assign(priorityRect.style, zoneToStyle({ x_percent: x, y_percent: y, w_percent: w, h_percent: h }, width, height));
+        priorityRect.classList.remove("hidden");
+    }
+
+    function renderReportRect() {
+        if (!image.src || !reportZone) {
+            reportRect.classList.add("hidden");
+            reportSummary.textContent = "Ainda não definiste a moldura total do relatório.";
+            writeJsonInput(reportJsonInput, "");
+            return;
+        }
+        const width = image.clientWidth || stage.clientWidth;
+        const height = image.clientHeight || stage.clientHeight;
+        Object.assign(reportRect.style, zoneToStyle(reportZone, width, height));
+        reportRect.classList.remove("hidden");
+        reportSummary.textContent = `Relatório: X ${reportZone.x_percent.toFixed(1)}%, Y ${reportZone.y_percent.toFixed(1)}%, L ${reportZone.w_percent.toFixed(1)}%, A ${reportZone.h_percent.toFixed(1)}%.`;
+        writeJsonInput(reportJsonInput, reportZone);
+    }
+
+    function renderDraftZone() {
+        const width = image.clientWidth || stage.clientWidth;
+        const height = image.clientHeight || stage.clientHeight;
+        const x = parseFloat(zoneXInput.value || 0);
+        const y = parseFloat(zoneYInput.value || 0);
+        const w = parseFloat(zoneWInput.value || 0);
+        const h = parseFloat(zoneHInput.value || 0);
+        if (!w || !h) {
+            draftRect.classList.add("hidden");
+            return;
+        }
+        Object.assign(draftRect.style, zoneToStyle({ x_percent: x, y_percent: y, w_percent: w, h_percent: h }, width, height));
+        draftRect.classList.remove("hidden");
+    }
+
+    function renderCustomZones() {
+        customLayer.innerHTML = "";
+        if (!customZones.length) {
+            zonesList.innerHTML = '<div class="text-slate-400">Ainda não existem zonas nomeadas guardadas.</div>';
+            writeJsonInput(customZonesJsonInput, []);
+            return;
+        }
+        const width = image.clientWidth || stage.clientWidth;
+        const height = image.clientHeight || stage.clientHeight;
+        zonesList.innerHTML = "";
+        customZones.forEach((zone, index) => {
+            const item = document.createElement("div");
+            item.className = "rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 flex flex-wrap items-center justify-between gap-3";
+            item.innerHTML = `
+                <div>
+                    <div class="font-medium text-slate-900">${zone.name || `Zona ${index + 1}`}</div>
+                    <div class="text-slate-500">X ${zone.x_percent.toFixed(1)}%, Y ${zone.y_percent.toFixed(1)}%, L ${zone.w_percent.toFixed(1)}%, A ${zone.h_percent.toFixed(1)}%</div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" data-zone-index="${index}" class="btn btn-secondary ai-edit-zone">Editar</button>
+                    <button type="button" data-zone-index="${index}" class="btn btn-secondary ai-remove-zone">Remover</button>
+                </div>
+            `;
+            zonesList.appendChild(item);
+
+            const zoneEl = document.createElement("div");
+            zoneEl.className = "absolute border-[3px] border-amber-500 bg-amber-300/15";
+            Object.assign(zoneEl.style, zoneToStyle(zone, width, height));
+            const label = document.createElement("div");
+            label.className = "absolute -top-6 left-0 rounded bg-amber-500 px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap";
+            label.textContent = zone.name || `Zona ${index + 1}`;
+            zoneEl.appendChild(label);
+            customLayer.appendChild(zoneEl);
+        });
+        writeJsonInput(customZonesJsonInput, customZones);
+        customLayer.querySelectorAll(".ai-remove-zone");
+    }
+
+    function setStep(step) {
+        activeStep = step;
+        stepReportButton.classList.toggle("btn-primary", step === "report");
+        stepReportButton.classList.toggle("btn-secondary", step !== "report");
+        stepZonesButton.classList.toggle("btn-primary", step === "zones");
+        stepZonesButton.classList.toggle("btn-secondary", step !== "zones");
+    }
+
+    function startResize(event, target, handle) {
+        event.preventDefault();
+        event.stopPropagation();
+        const bounds = image.getBoundingClientRect();
+        const zone = target === "report"
+            ? (reportZone || { x_percent: 0, y_percent: 0, w_percent: 0, h_percent: 0 })
+            : {
+                x_percent: parseFloat(zoneXInput.value || 0),
+                y_percent: parseFloat(zoneYInput.value || 0),
+                w_percent: parseFloat(zoneWInput.value || 0),
+                h_percent: parseFloat(zoneHInput.value || 0),
+            };
+        resizeState = { target, handle, bounds, zone };
+    }
+
+    function updateResize(clientX, clientY) {
+        if (!resizeState) {
+            return;
+        }
+        const { target, handle, bounds, zone } = resizeState;
+        const currentX = clamp(((clientX - bounds.left) / bounds.width) * 100, 0, 100);
+        const currentY = clamp(((clientY - bounds.top) / bounds.height) * 100, 0, 100);
+        const x1 = zone.x_percent;
+        const y1 = zone.y_percent;
+        const x2 = zone.x_percent + zone.w_percent;
+        const y2 = zone.y_percent + zone.h_percent;
+        const newZone = handle === "nw"
+            ? {
+                x_percent: Math.min(currentX, x2 - 0.5),
+                y_percent: Math.min(currentY, y2 - 0.5),
+                w_percent: Math.max(0.5, x2 - currentX),
+                h_percent: Math.max(0.5, y2 - currentY),
+            }
+            : {
+                x_percent: x1,
+                y_percent: y1,
+                w_percent: Math.max(0.5, currentX - x1),
+                h_percent: Math.max(0.5, currentY - y1),
+            };
+        if (target === "report") {
+            reportZone = {
+                x_percent: parseFloat(newZone.x_percent.toFixed(1)),
+                y_percent: parseFloat(newZone.y_percent.toFixed(1)),
+                w_percent: parseFloat(newZone.w_percent.toFixed(1)),
+                h_percent: parseFloat(newZone.h_percent.toFixed(1)),
+            };
+            renderReportRect();
+        } else {
+            zoneXInput.value = newZone.x_percent.toFixed(1);
+            zoneYInput.value = newZone.y_percent.toFixed(1);
+            zoneWInput.value = newZone.w_percent.toFixed(1);
+            zoneHInput.value = newZone.h_percent.toFixed(1);
+            renderDraftZone();
+        }
+    }
+
+    function updateFromPointer(clientX, clientY) {
+        const bounds = image.getBoundingClientRect();
+        const currentX = clamp(clientX - bounds.left, 0, bounds.width);
+        const currentY = clamp(clientY - bounds.top, 0, bounds.height);
+        const left = Math.min(startX, currentX);
+        const top = Math.min(startY, currentY);
+        const width = Math.abs(currentX - startX);
+        const height = Math.abs(currentY - startY);
+
+        const zone = {
+            x_percent: parseFloat(((left / bounds.width) * 100).toFixed(1)),
+            y_percent: parseFloat(((top / bounds.height) * 100).toFixed(1)),
+            w_percent: parseFloat(((width / bounds.width) * 100).toFixed(1)),
+            h_percent: parseFloat(((height / bounds.height) * 100).toFixed(1)),
+        };
+        if (activeStep === "report") {
+            reportZone = zone;
+            renderReportRect();
+            if (zone.w_percent > 0 && zone.h_percent > 0) {
+                xInput.value = zone.x_percent.toFixed(1);
+                yInput.value = zone.y_percent.toFixed(1);
+                wInput.value = zone.w_percent.toFixed(1);
+                hInput.value = zone.h_percent.toFixed(1);
+                renderPriorityRectFromInputs();
+            }
+            return;
+        }
+        zoneXInput.value = zone.x_percent.toFixed(1);
+        zoneYInput.value = zone.y_percent.toFixed(1);
+        zoneWInput.value = zone.w_percent.toFixed(1);
+        zoneHInput.value = zone.h_percent.toFixed(1);
+        renderDraftZone();
+    }
+
+    function clearDraftZone() {
+        zoneNameInput.value = "";
+        zoneXInput.value = "";
+        zoneYInput.value = "";
+        zoneWInput.value = "";
+        zoneHInput.value = "";
+        editingZoneIndex = null;
+        draftRect.classList.add("hidden");
+    }
+
+    function saveDraftZone() {
+        const name = (zoneNameInput.value || "").trim();
+        const x = parseFloat(zoneXInput.value || 0);
+        const y = parseFloat(zoneYInput.value || 0);
+        const w = parseFloat(zoneWInput.value || 0);
+        const h = parseFloat(zoneHInput.value || 0);
+        if (!name || !w || !h) {
+            return;
+        }
+        const payload = { name, x_percent: x, y_percent: y, w_percent: w, h_percent: h };
+        if (editingZoneIndex !== null) {
+            customZones.splice(editingZoneIndex, 1, payload);
+        } else {
+            customZones.push(payload);
+        }
+        renderCustomZones();
+        clearDraftZone();
+    }
+
+    function populatePresetSelect() {
+        if (!presetSelect) {
+            return;
+        }
+        presetSelect.innerHTML = '<option value="">Sem preset</option>';
+        zonePresets.forEach((preset) => {
+            const option = document.createElement("option");
+            option.value = preset.id;
+            option.textContent = `${preset.nome} · ${preset.tipo_documento}`;
+            presetSelect.appendChild(option);
+        });
+    }
+
+    function applyPreset() {
+        const selected = zonePresets.find((item) => item.id === presetSelect.value);
+        if (!selected) {
+            presetFeedback.textContent = "Seleciona um preset para aplicar.";
+            return;
+        }
+        reportZone = selected.zona_relatorio || null;
+        customZones = Array.isArray(selected.zonas_texto) ? selected.zonas_texto.slice() : [];
+        renderReportRect();
+        renderCustomZones();
+        presetFeedback.textContent = `Preset aplicado: ${selected.nome}`;
+    }
+
+    async function savePreset() {
+        const nome = (presetNameInput.value || "").trim();
+        if (!nome) {
+            presetFeedback.textContent = "Indica um nome para guardar o preset.";
+            return;
+        }
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+        const payload = new URLSearchParams();
+        payload.set("nome", nome);
+        payload.set("tipo_documento", document.getElementById("{{ form.tipo_documento.id_for_label }}")?.value || "relatorio_trabalhador");
+        payload.set("report_zone_json", reportZone ? JSON.stringify(reportZone) : "");
+        payload.set("custom_text_zones_json", JSON.stringify(customZones || []));
+
+        const response = await fetch("{% url 'inspecao_ai:zona_preset_guardar' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken || "",
+            },
+            body: payload.toString(),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            presetFeedback.textContent = data.error || "Não foi possível guardar o preset.";
+            return;
+        }
+        const existingIndex = zonePresets.findIndex((item) => item.id === data.preset.id);
+        if (existingIndex >= 0) {
+            zonePresets.splice(existingIndex, 1, data.preset);
+        } else {
+            zonePresets.push(data.preset);
+        }
+        zonePresets.sort((a, b) => `${a.tipo_documento}-${a.nome}`.localeCompare(`${b.tipo_documento}-${b.nome}`, "pt"));
+        populatePresetSelect();
+        presetSelect.value = data.preset.id;
+        presetFeedback.textContent = `Preset guardado: ${data.preset.nome}`;
+    }
+
+    fileInput.addEventListener("change", (event) => {
+        const [file] = event.target.files || [];
+        if (!file) {
+            shell.classList.add("hidden");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+            image.src = loadEvent.target.result;
+            shell.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+    });
+
+    image.addEventListener("load", () => {
+        renderPriorityRectFromInputs();
+        renderReportRect();
+        renderDraftZone();
+        renderCustomZones();
+    });
+
+    image.addEventListener("pointerdown", (event) => {
+        const bounds = image.getBoundingClientRect();
+        dragging = true;
+        startX = clamp(event.clientX - bounds.left, 0, bounds.width);
+        startY = clamp(event.clientY - bounds.top, 0, bounds.height);
+        updateFromPointer(event.clientX, event.clientY);
+    });
+
+    window.addEventListener("pointermove", (event) => {
+        if (resizeState) {
+            updateResize(event.clientX, event.clientY);
+            return;
+        }
+        if (!dragging) {
+            return;
+        }
+        updateFromPointer(event.clientX, event.clientY);
+    });
+
+    window.addEventListener("pointerup", () => {
+        dragging = false;
+        resizeState = null;
+    });
+
+    [xInput, yInput, wInput, hInput].forEach((input) => {
+        input.addEventListener("input", renderPriorityRectFromInputs);
+    });
+    [zoneXInput, zoneYInput, zoneWInput, zoneHInput].forEach((input) => {
+        input.addEventListener("input", renderDraftZone);
+    });
+
+    fullButton.addEventListener("click", setFullImage);
+    stepReportButton.addEventListener("click", () => setStep("report"));
+    stepZonesButton.addEventListener("click", () => setStep("zones"));
+    nextStepButton.addEventListener("click", () => setStep("zones"));
+    saveZoneButton.addEventListener("click", saveDraftZone);
+    clearDraftButton.addEventListener("click", clearDraftZone);
+    applyPresetButton.addEventListener("click", applyPreset);
+    savePresetButton.addEventListener("click", savePreset);
+    zonesList.addEventListener("click", (event) => {
+        const editButton = event.target.closest(".ai-edit-zone");
+        if (editButton) {
+            const index = parseInt(editButton.dataset.zoneIndex || "-1", 10);
+            const zone = customZones[index];
+            if (zone) {
+                editingZoneIndex = index;
+                zoneNameInput.value = zone.name || "";
+                zoneXInput.value = zone.x_percent.toFixed(1);
+                zoneYInput.value = zone.y_percent.toFixed(1);
+                zoneWInput.value = zone.w_percent.toFixed(1);
+                zoneHInput.value = zone.h_percent.toFixed(1);
+                setStep("zones");
+                renderDraftZone();
+            }
+            return;
+        }
+        const button = event.target.closest(".ai-remove-zone");
+        if (!button) {
+            return;
+        }
+        const index = parseInt(button.dataset.zoneIndex || "-1", 10);
+        if (index >= 0) {
+            customZones.splice(index, 1);
+            renderCustomZones();
+        }
+    });
+
+    reportZone = parseJsonInput(reportJsonInput, null);
+    customZones = parseJsonInput(customZonesJsonInput, []);
+    zonePresets = presetDataNode ? parseJsonInput({ value: presetDataNode.textContent }, []) : [];
+    stage.querySelectorAll("[data-handle]").forEach((handle) => {
+        handle.addEventListener("pointerdown", (event) => startResize(event, handle.dataset.rectTarget, handle.dataset.handle));
+    });
+    populatePresetSelect();
+    setStep("report");
+    renderPriorityRectFromInputs();
+    renderReportRect();
+    renderCustomZones();
+})();
+</script>
 {% endblock %}

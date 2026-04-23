@@ -1,0 +1,157 @@
+{% extends "plataforma/base.html" %}
+
+{% block title %}Features{% endblock %}
+{% block page_title %}Gestão de Features{% endblock %}
+{% block page_description %}
+    Controla as funcionalidades ativas por empresa ou conta individual. O superuser mantém acesso global, independentemente destas flags.
+{% endblock %}
+
+{% block content %}
+    <style>
+        .features-layout { display:grid; grid-template-columns: 340px 1fr; gap: 24px; }
+        .features-card { background:#fff; border:1px solid #e5e7eb; border-radius:18px; padding:20px; box-shadow:0 12px 30px rgba(15, 23, 42, .06); }
+        .features-card h2 { font-size:1.05rem; font-weight:700; color:#0f172a; margin:0 0 6px; }
+        .features-note { color:#64748b; font-size:.94rem; margin:0 0 16px; }
+        .entity-list { display:flex; flex-direction:column; gap:10px; }
+        .entity-link { display:block; border:1px solid #e5e7eb; border-radius:14px; padding:12px 14px; text-decoration:none; color:inherit; }
+        .entity-link.active { border-color:#0f766e; background:#f0fdfa; }
+        .entity-meta { display:block; color:#64748b; font-size:.85rem; margin-top:4px; }
+        .entity-count { display:inline-block; margin-top:8px; font-size:.8rem; font-weight:700; color:#0f766e; background:#ccfbf1; padding:4px 8px; border-radius:999px; }
+        .group-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+        .feature-group { border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
+        .feature-group h3 { margin:0 0 12px; font-size:1rem; color:#0f172a; }
+        .feature-row { border-top:1px solid #f1f5f9; padding:12px 0; }
+        .feature-row:first-child { border-top:0; padding-top:0; }
+        .feature-head { display:flex; align-items:flex-start; gap:12px; }
+        .feature-head input { margin-top:4px; width:18px; height:18px; }
+        .feature-label { font-weight:700; color:#0f172a; }
+        .feature-desc { color:#64748b; font-size:.88rem; margin-top:3px; }
+        .feature-badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+        .badge-mini { font-size:.76rem; padding:4px 8px; border-radius:999px; font-weight:700; }
+        .badge-mini.base { background:#e2e8f0; color:#334155; }
+        .badge-mini.override { background:#fef3c7; color:#92400e; }
+        .badge-mini.active { background:#dcfce7; color:#166534; }
+        .badge-mini.inactive { background:#fee2e2; color:#991b1b; }
+        .features-actions { display:flex; gap:12px; align-items:center; margin-top:20px; }
+        .btn-save { background:#0f766e; color:#fff; border:0; border-radius:12px; padding:10px 16px; font-weight:700; cursor:pointer; }
+        .btn-muted { color:#475569; text-decoration:none; }
+        @media (max-width: 980px) { .features-layout { grid-template-columns:1fr; } }
+    </style>
+
+    <div class="grid-cards" style="margin-bottom:24px;">
+        <div class="card">
+            <div class="metric-label">Empresas configuráveis</div>
+            <div class="metric-value">{{ entidades_empresa|length }}</div>
+            <div class="metric-note">Entidades com plano empresarial ou gestão manual.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Contas individuais</div>
+            <div class="metric-value">{{ entidades_individuais|length }}</div>
+            <div class="metric-note">Perfis individuais com features controláveis.</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">Features no catálogo</div>
+            <div class="metric-value">{{ total_features_catalogo }}</div>
+            <div class="metric-note">Conjunto atual de funcionalidades configuráveis.</div>
+        </div>
+    </div>
+
+    <div class="features-layout">
+        <div class="features-card">
+            <h2>Empresas</h2>
+            <p class="features-note">Escolhe uma empresa para ver a base do plano e os overrides aplicados.</p>
+            <div class="entity-list">
+                {% for item in entidades_empresa %}
+                    <a href="?tipo=empresa&alvo={{ item.pk }}" class="entity-link {% if tipo_alvo == 'empresa' and alvo and alvo.pk == item.pk %}active{% endif %}">
+                        <strong>{{ item.label }}</strong>
+                        <span class="entity-meta">{{ item.subtitulo }}</span>
+                        <span class="entity-count">{{ item.features_ativas }} features ativas</span>
+                    </a>
+                {% empty %}
+                    <div class="entity-meta">Ainda não existem empresas para configurar.</div>
+                {% endfor %}
+            </div>
+
+            <h2 style="margin-top:22px;">Contas individuais</h2>
+            <p class="features-note">Aqui podes ativar features para perfis individuais sem empresa associada.</p>
+            <div class="entity-list">
+                {% for item in entidades_individuais %}
+                    <a href="?tipo=individual&alvo={{ item.pk }}" class="entity-link {% if tipo_alvo == 'individual' and alvo and alvo.pk == item.pk %}active{% endif %}">
+                        <strong>{{ item.label }}</strong>
+                        <span class="entity-meta">{{ item.subtitulo }}</span>
+                        <span class="entity-count">{{ item.features_ativas }} features ativas</span>
+                    </a>
+                {% empty %}
+                    <div class="entity-meta">Ainda não existem contas individuais para configurar.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="features-card">
+            {% if alvo %}
+                <h2>
+                    Features de
+                    {% if tipo_alvo == "empresa" %}
+                        {{ alvo.nome }}
+                    {% else %}
+                        {{ alvo.user.get_full_name|default:alvo.user.username }}
+                    {% endif %}
+                </h2>
+                <p class="features-note">
+                    Cada checkbox define o estado final da feature para esta entidade. Sem override, vale a base do plano ou o valor default do sistema.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo" value="{{ tipo_alvo }}">
+                    <input type="hidden" name="alvo" value="{{ alvo.pk }}">
+
+                    <div class="group-grid">
+                        {% for grupo, items in features_por_grupo.items %}
+                            <section class="feature-group">
+                                <h3>{{ grupo }}</h3>
+                                {% for item in items %}
+                                    <div class="feature-row">
+                                        <label class="feature-head">
+                                            <input type="checkbox" name="features" value="{{ item.key }}" {% if item.ativa_final %}checked{% endif %}>
+                                            <div>
+                                                <div class="feature-label">{{ item.label }}</div>
+                                                <div class="feature-desc">{{ item.description }}</div>
+                                                <div class="feature-badges">
+                                                    <span class="badge-mini base">
+                                                        Base:
+                                                        {% if item.base_ativa %}Ligada{% else %}Desligada{% endif %}
+                                                    </span>
+                                                    {% if item.tem_override %}
+                                                        <span class="badge-mini override">
+                                                            Override:
+                                                            {% if item.override_ativa %}Ligado{% else %}Desligado{% endif %}
+                                                        </span>
+                                                    {% endif %}
+                                                    <span class="badge-mini {% if item.ativa_final %}active{% else %}inactive{% endif %}">
+                                                        Final:
+                                                        {% if item.ativa_final %}Ativa{% else %}Inativa{% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </section>
+                        {% endfor %}
+                    </div>
+
+                    <div class="features-actions">
+                        <button type="submit" class="btn-save">Guardar features</button>
+                        <a href="?tipo={{ tipo_alvo }}&alvo={{ alvo.pk }}" class="btn-muted">Repor vista</a>
+                    </div>
+                </form>
+            {% else %}
+                <h2>Seleciona uma entidade</h2>
+                <p class="features-note">
+                    Escolhe uma empresa ou conta individual no painel lateral para ver as features atuais e ajustar os checkboxes.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -16,13 +16,22 @@
     <div class="card" style="margin-bottom: 24px;">
         <div class="section-title">
             <div>
-                <h2>Adicionar despesa</h2>
-                <p>Regista custos de alojamento, publicidade, domínio, HTTPS e outras despesas da plataforma.</p>
+                <h2>{% if movimento_edicao %}Editar despesa{% else %}Adicionar despesa{% endif %}</h2>
+                <p>
+                    {% if movimento_edicao %}
+                        Estás a editar uma despesa já registada da plataforma.
+                    {% else %}
+                        Regista custos de alojamento, publicidade, domínio, HTTPS e outras despesas da plataforma.
+                    {% endif %}
+                </p>
             </div>
         </div>
 
         <form method="post" class="finance-form-grid">
             {% csrf_token %}
+            {% if movimento_edicao %}
+                <input type="hidden" name="movimento_id" value="{{ movimento_edicao.pk }}">
+            {% endif %}
             {% for field in form %}
                 <div class="finance-form-field {% if field.name == 'observacoes' %}finance-form-field--full{% endif %}">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -36,7 +45,10 @@
                 </div>
             {% endfor %}
             <div class="finance-form-actions">
-                <button type="submit" class="btn btn-primary">Guardar despesa</button>
+                <button type="submit" class="btn btn-primary">{% if movimento_edicao %}Guardar alterações{% else %}Guardar despesa{% endif %}</button>
+                {% if movimento_edicao %}
+                    <a href="{% url 'plataforma:financas_saida_list' %}" class="btn btn-light">Cancelar edição</a>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -82,6 +94,7 @@
                     <th>Competência</th>
                     <th>Vencimento</th>
                     <th>Descrição</th>
+                    {% if tipo_pagina == "saida" %}<th>Ações</th>{% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -110,10 +123,13 @@
                         <td>{{ movimento.data_competencia|default:"—" }}</td>
                         <td>{{ movimento.data_vencimento|default:"—" }}</td>
                         <td>{{ movimento.descricao|default:"—" }}</td>
+                        {% if tipo_pagina == "saida" %}
+                            <td><a href="{% url 'plataforma:financas_saida_list' %}?editar={{ movimento.pk }}" class="btn btn-light">Editar</a></td>
+                        {% endif %}
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="9">Ainda não existem movimentos registados nesta área.</td>
+                        <td colspan="{% if tipo_pagina == "saida" %}10{% else %}9{% endif %}">Ainda não existem movimentos registados nesta área.</td>
                     </tr>
                 {% endfor %}
             </tbody>

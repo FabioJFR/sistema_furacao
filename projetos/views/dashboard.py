@@ -152,7 +152,7 @@ def _montar_contexto_dashboard(request, contexto_admin, incluir_mapa=False):
         messages.error(request, "Não foi possível determinar a empresa associada a esta conta.")
         return {"filtros": {}}
 
-    if not empresa.pode_aceder_dashboard_empresa():
+    if not user_is_global_admin(request.user) and not empresa.pode_aceder_dashboard_empresa():
         logger.warning(
             "Acesso ao dashboard bloqueado por restrição do plano. user_id=%s, empresa_id=%s, plano_id=%s",
             request.user.id,

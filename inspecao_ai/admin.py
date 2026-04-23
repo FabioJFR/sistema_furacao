@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AnaliseImagemAI, ChatMensagemAI, ChatSessaoAI, DeteccaoImagemAI
+from .models import AnaliseImagemAI, AnaliseZonaPresetAI, ChatMensagemAI, ChatSessaoAI, DeteccaoImagemAI, MemoriaTrabalhoAI
 
 
 @admin.register(AnaliseImagemAI)
@@ -37,3 +37,17 @@ class ChatMensagemAIAdmin(admin.ModelAdmin):
     list_display = ("sessao", "papel", "criado_em")
     list_filter = ("papel",)
     search_fields = ("sessao__titulo", "conteudo")
+
+
+@admin.register(AnaliseZonaPresetAI)
+class AnaliseZonaPresetAIAdmin(admin.ModelAdmin):
+    list_display = ("nome", "empresa", "tipo_documento", "criado_por", "atualizado_em")
+    list_filter = ("empresa", "tipo_documento")
+    search_fields = ("nome",)
+
+
+@admin.register(MemoriaTrabalhoAI)
+class MemoriaTrabalhoAIAdmin(admin.ModelAdmin):
+    list_display = ("titulo", "area", "estado", "empresa", "criado_por", "atualizado_em")
+    list_filter = ("area", "estado", "empresa")
+    search_fields = ("titulo", "resumo")

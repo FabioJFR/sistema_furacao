@@ -155,6 +155,32 @@
                     <strong>DJI Mini 4 Pro</strong>
                     <span>Aceder a interface DJI dentro da app geologia.</span>
                 </a>
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'inspecao_ai:hub' %}" class="quick-link">
+                        <strong>AI Visual</strong>
+                        <span>Aceder ao centro principal da AI visual.</span>
+                    </a>
+                    <a href="{% url 'inspecao_ai:chatbox' %}" class="quick-link">
+                        <strong>Chatbox AI</strong>
+                        <span>Usar a interface conversacional da AI.</span>
+                    </a>
+                    <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="quick-link">
+                        <strong>Memória Operacional AI</strong>
+                        <span>Consultar o histórico operacional ligado a furos e zonas.</span>
+                    </a>
+                    <a href="{% url 'inspecao_ai:analise_create' %}" class="quick-link">
+                        <strong>Nova análise AI</strong>
+                        <span>Criar uma nova análise visual de relatório ou caixa.</span>
+                    </a>
+                    <a href="{% url 'inspecao_ai:analise_list' %}" class="quick-link">
+                        <strong>Histórico AI</strong>
+                        <span>Rever análises anteriores e reprocessar com o motor atual.</span>
+                    </a>
+                    <a href="{% url 'plataforma:features_dashboard' %}" class="quick-link">
+                        <strong>Gestão de features</strong>
+                        <span>Controlar funcionalidades ativas por empresa e por conta individual.</span>
+                    </a>
+                {% endif %}
                 <a href="/admin/" class="quick-link">
                     <strong>Admin Django</strong>
                     <span>Gerir modelos, dados internos e operações técnicas.</span>

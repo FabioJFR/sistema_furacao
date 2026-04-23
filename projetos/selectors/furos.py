@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.shortcuts import get_object_or_404
 
 from projetos.models import ConfiguracaoPerfuracaoEmpregado, Furo, Medicao
@@ -26,6 +28,18 @@ def _filtrar_por_empresa(queryset, empresa=None, campo="empresa_id"):
 
 def _decimal_para_float(valor):
     return float(valor) if valor is not None else None
+
+
+def _formatar_horas_furo(total_horas_float):
+    if not total_horas_float:
+        return "-"
+    return f"{float(total_horas_float):.2f} h"
+
+
+def _total_horas_float_from_duration(duration_value):
+    if not duration_value:
+        return 0.0
+    return round(duration_value.total_seconds() / 3600, 2)
 
 
 
@@ -146,12 +160,24 @@ def obter_contexto_detalhe_furo(pk, empresa=None):
         registos = registos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
         levantamentos = levantamentos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
 
+    total_horas_registos = round(
+        sum(float(registo.horas_trabalhadas or 0) for registo in registos),
+        2,
+    )
+    total_horas_persistidas = _total_horas_float_from_duration(furo.total_horas)
+
+    if total_horas_registos != total_horas_persistidas:
+        furo.total_horas = timedelta(hours=total_horas_registos)
+        furo.save(update_fields=["total_horas"])
+
     return {
         "furo": furo,
         "medicoes": medicoes,
         "registos": registos,
         "levantamentos": levantamentos,
         "furo_mapa": _serializar_furo_mapa(furo),
+        "total_horas_registos": round(total_horas_registos, 2),
+        "total_horas_registos_display": _formatar_horas_furo(total_horas_registos),
     }
 
 

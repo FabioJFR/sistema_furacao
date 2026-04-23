@@ -51,6 +51,18 @@
 
                 {% if request.user.is_superuser %}
                     <div class="nav-item">
+                        <button type="button" class="nav-toggle">🤖 AI</button>
+                        <div class="dropdown">
+                            <a href="{% url 'inspecao_ai:hub' %}">AI Visual</a>
+                            <a href="{% url 'inspecao_ai:chatbox' %}">Chatbox</a>
+                            <a href="{% url 'inspecao_ai:biblioteca_pdf' %}">Biblioteca PDF</a>
+                            <a href="{% url 'inspecao_ai:memoria_operacional' %}">Memória Operacional</a>
+                            <a href="{% url 'inspecao_ai:analise_create' %}">Nova análise</a>
+                            <a href="{% url 'inspecao_ai:analise_list' %}">Histórico AI</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
                         <button type="button" class="nav-toggle">📡 Dispositivos</button>
                         <div class="dropdown">
                             <a href="{% url 'dispositivos:dashboard' %}">Dashboard de dispositivos</a>
@@ -59,6 +71,15 @@
                             <a href="{% url 'dispositivos:sessao_list' %}">Sessões</a>
                             <a href="{% url 'dispositivos:leitura_bruta_list' %}">Leituras brutas</a>
                             <a href="{% url 'dispositivos:survey_shot_list' %}">Survey shots</a>
+                        </div>
+                    </div>
+
+
+                    <div class="nav-item">
+                        <button type="button" class="nav-toggle">🧰 Úteis</button>
+                        <div class="dropdown">
+                            <a href="{% url 'plataforma:uteis_dashboard' %}">Scripts e dados AI</a>
+                            <a href="{% url 'plataforma:features_dashboard' %}">Gestão de features</a>
                         </div>
                     </div>
                 {% endif %}

@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -42,10 +43,85 @@ logger = logging.getLogger("core")
 
 
 ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
+FURO_MEMORY_RADIUS_KM = 0.35
 
 
 def _resolver_empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
+
+
+def _parse_float_or_none(value):
+    if value in {None, ""}:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _distancia_km(lat1, lon1, lat2, lon2):
+    if None in {lat1, lon1, lat2, lon2}:
+        return None
+    raio = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return 2 * raio * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _obter_memoria_zona_furos(*, empresa_id, latitude=None, longitude=None, localizacao=None, excluir_furo_id=None, limite=6):
+    candidatos = (
+        Furo.objects.filter(empresa_id=empresa_id)
+        .select_related("projeto")
+        .prefetch_related("medicoes", "registos_furo")
+    )
+    if excluir_furo_id:
+        candidatos = candidatos.exclude(pk=excluir_furo_id)
+
+    localizacao_ref = (localizacao or "").strip().lower()
+    encontrados = []
+
+    for candidato in candidatos:
+        distancia = _distancia_km(latitude, longitude, candidato.latitude, candidato.longitude)
+        correspondencia_local = False
+        if localizacao_ref:
+            candidato_local = (candidato.localizacao or candidato.local_sondagem or "").strip().lower()
+            correspondencia_local = bool(candidato_local and candidato_local == localizacao_ref)
+
+        if distancia is None and not correspondencia_local:
+            continue
+        if distancia is not None and distancia > FURO_MEMORY_RADIUS_KM and not correspondencia_local:
+            continue
+
+        total_medicoes = candidato.medicoes.count()
+        total_registos = candidato.registos_furo.count()
+        total_despesas = float(Despesa.objects.filter(furo=candidato).aggregate(total=Sum("valor")).get("total") or 0)
+        encontrados.append(
+            {
+                "id": str(candidato.pk),
+                "nome": candidato.nome,
+                "projeto": candidato.projeto.nome if candidato.projeto_id else "-",
+                "estado": candidato.get_estado_display(),
+                "localizacao": candidato.localizacao or candidato.local_sondagem or "-",
+                "distancia_km": round(distancia, 3) if distancia is not None else None,
+                "mesma_localizacao_textual": correspondencia_local,
+                "profundidade_maxima_atingida": float(candidato.profundidade_maxima_atingida or 0),
+                "metros_furados": float(candidato.metros_furados or 0),
+                "total_medicoes": total_medicoes,
+                "total_registos": total_registos,
+                "total_despesas": round(total_despesas, 2),
+            }
+        )
+
+    encontrados.sort(
+        key=lambda item: (
+            0 if item["mesma_localizacao_textual"] else 1,
+            item["distancia_km"] if item["distancia_km"] is not None else 999999,
+        )
+    )
+    return encontrados[:limite]
 
 
 def _medicoes_ordenadas_furo(furo):
@@ -668,8 +744,15 @@ def furo_create(request):
         logger.warning("Acesso bloqueado na view furo_create. user_id=%s", request.user.id)
         return resposta_erro
 
+    memoria_zona_alerta = []
     if request.method == "POST":
         form = FuroCreateForm(request.POST, empresa=empresa_id)
+        memoria_zona_alerta = _obter_memoria_zona_furos(
+            empresa_id=empresa_id,
+            latitude=_parse_float_or_none(request.POST.get("latitude")),
+            longitude=_parse_float_or_none(request.POST.get("longitude")),
+            localizacao=request.POST.get("localizacao") or request.POST.get("local_sondagem"),
+        )
         if form.is_valid():
             furo = criar_furo(form, empresa=empresa_id)
             logger.info(
@@ -693,6 +776,7 @@ def furo_create(request):
     return render(request, "projetos/form.html", {
         "form": form,
         "titulo": "Criar Novo Furo",
+        "memoria_zona_alerta": memoria_zona_alerta,
     })
 
 
@@ -725,6 +809,13 @@ def furo_detail(request, pk):
     context["missoes_drone_recentes"] = (
         MissaoDroneFuro.objects.filter(furo=furo, empresa_id=empresa_id)
         .order_by("-data_voo", "-criado_em")[:3]
+    )
+    context["memoria_zona_alerta"] = _obter_memoria_zona_furos(
+        empresa_id=empresa_id,
+        latitude=furo.latitude,
+        longitude=furo.longitude,
+        localizacao=furo.localizacao or furo.local_sondagem,
+        excluir_furo_id=furo.pk,
     )
 
     logger.info(

@@ -7,6 +7,8 @@ from django.db.models import Sum
 
 from django.db import models
 
+from plataforma.feature_flags import feature_ativa_para_contexto
+
 
 class Empresa(models.Model):
     STATUS_CHOICES = [
@@ -89,19 +91,22 @@ class Empresa(models.Model):
         return bool(self.plano_id and self.ativo and self.status in ["ativa", "teste"])
 
     def pode_aceder_dashboard_empresa(self):
-        if not self.tem_plano_ativo() or not self.plano:
-            return False
-        return bool(getattr(self.plano, "acesso_dashboard_empresa", False))
+        return feature_ativa_para_contexto(
+            chave_feature="dashboard_empresa",
+            empresa=self,
+        )
 
     def pode_aceder_painel_empregado(self):
-        if not self.tem_plano_ativo() or not self.plano:
-            return False
-        return bool(getattr(self.plano, "acesso_painel_empregado", False))
+        return feature_ativa_para_contexto(
+            chave_feature="painel_empregado",
+            empresa=self,
+        )
 
     def permite_multiplos_utilizadores(self):
-        if not self.tem_plano_ativo() or not self.plano:
-            return False
-        return bool(getattr(self.plano, "permite_multiplos_utilizadores", False))
+        return feature_ativa_para_contexto(
+            chave_feature="multiplos_utilizadores",
+            empresa=self,
+        )
 
     def limite_empregados_plano(self):
         if not self.plano:

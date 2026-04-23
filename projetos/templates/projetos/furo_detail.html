@@ -31,7 +31,7 @@
             <div class="furo-stat-card"><span class="furo-stat-label">Profundidade inicial</span><span class="furo-stat-value">{{ furo.profundidade_inicial }} m</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">Profundidade atual</span><span class="furo-stat-value">{{ furo.profundidade_atual }} m</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">Profundidade máxima</span><span class="furo-stat-value">{{ furo.profundidade_maxima_atingida }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Total de horas</span><span class="furo-stat-value">{{ furo.total_horas|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">Total de horas</span><span class="furo-stat-value">{{ total_horas_registos_display }}</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">Magnetismo</span><span class="furo-stat-value">{{ furo.magnetismo|default:"-" }}</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">Latitude</span><span class="furo-stat-value">{{ furo.latitude|default:"-" }}</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">Longitude</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
@@ -40,6 +40,35 @@
             <div class="furo-stat-card"><span class="furo-stat-label">Data de criação</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
         </div>
     </section>
+
+    {% if memoria_zona_alerta %}
+    <section class="furo-section">
+        <h2 class="furo-section-title">Memória Operacional da Zona</h2>
+        <div style="background:#fff7ed; border:1px solid #fdba74; border-radius:16px; padding:18px 20px;">
+            <p style="margin:0 0 14px; color:#9a3412; font-weight:600;">
+                A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto.
+            </p>
+            <div class="furo-grid">
+                {% for item in memoria_zona_alerta %}
+                    <div class="furo-stat-card" style="border-color:#fdba74; background:#fffbeb;">
+                        <span class="furo-stat-label">{{ item.nome }}</span>
+                        <span class="furo-stat-value">{{ item.projeto }}</span>
+                        <div style="margin-top:8px; color:#7c2d12; font-size:0.95rem;">
+                            Estado: <strong>{{ item.estado }}</strong><br>
+                            Profundidade máxima: <strong>{{ item.profundidade_maxima_atingida }} m</strong><br>
+                            Metros furados: <strong>{{ item.metros_furados }} m</strong><br>
+                            Medições: <strong>{{ item.total_medicoes }}</strong> · Registos: <strong>{{ item.total_registos }}</strong><br>
+                            Despesa direta: <strong>{{ item.total_despesas }} €</strong><br>
+                            {% if item.distancia_km is not None %}Distância: <strong>{{ item.distancia_km }} km</strong><br>{% endif %}
+                            {% if item.mesma_localizacao_textual %}<strong>Mesma localização textual</strong><br>{% endif %}
+                            Localização: <strong>{{ item.localizacao }}</strong>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <section class="furo-section">
         <h2 class="furo-section-title">Planeamento Inicial</h2>
@@ -317,17 +346,19 @@ const lat = Number(furoMapa.lat);
 const lon = Number(furoMapa.lon);
 
 if (Number.isFinite(lat) && Number.isFinite(lon)) {
-    const map = L.map("map").setView([lat, lon], 15);
+    const holeLatLng = [lat, lon];
+    const map = L.map("map", { zoomControl: true }).setView(holeLatLng, 16);
 
     setTimeout(() => {
         map.invalidateSize();
+        map.setView(holeLatLng, Math.max(map.getZoom(), 16), { animate: false });
     }, 200);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
 
-    L.marker([lat, lon])
+    const marker = L.marker(holeLatLng)
         .addTo(map)
         .bindPopup(`
             <strong>${furoMapa.nome}</strong><br>
@@ -339,6 +370,11 @@ if (Number.isFinite(lat) && Number.isFinite(lon)) {
             Azimute planeado inicial: ${furoMapa.azimute_planeado_inicial}°
         `)
         .openPopup();
+
+    map.whenReady(() => {
+        map.setView(holeLatLng, 16, { animate: false });
+        marker.openPopup();
+    });
 } else {
     document.getElementById("map").innerHTML =
         "<div style='display:flex; align-items:center; justify-content:center; height:100%; color:#ecf0f1;'>Sem coordenadas para mostrar o mapa.</div>";

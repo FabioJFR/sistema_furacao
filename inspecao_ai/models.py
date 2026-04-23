@@ -63,6 +63,7 @@ class AnaliseImagemAI(models.Model):
         choices=ESTADO_CHOICES,
         default="pendente",
     )
+    guardada = models.BooleanField(default=False)
     imagem_original = models.ImageField(upload_to="inspecao_ai/originais/")
     imagem_processada = models.ImageField(
         upload_to="inspecao_ai/processadas/",
@@ -143,7 +144,7 @@ class DeteccaoImagemAI(models.Model):
         default="indefinido",
     )
     confianca = models.FloatField(null=True, blank=True)
-    texto_sugerido = models.CharField(max_length=255, blank=True)
+    texto_sugerido = models.TextField(blank=True)
     caixa_delimitadora = models.JSONField(default=dict, blank=True)
     metadados = models.JSONField(default=dict, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -155,6 +156,94 @@ class DeteccaoImagemAI(models.Model):
 
     def __str__(self):
         return f"{self.analise.nome} - deteção {self.ordem}"
+
+
+class AnaliseZonaPresetAI(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        related_name="analise_zona_presets_ai",
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analise_zona_presets_ai_criados",
+    )
+    nome = models.CharField(max_length=120)
+    tipo_documento = models.CharField(
+        max_length=40,
+        choices=AnaliseImagemAI.TIPO_DOCUMENTO_CHOICES,
+        default="relatorio_trabalhador",
+    )
+    zona_relatorio = models.JSONField(default=dict, blank=True)
+    zonas_texto = models.JSONField(default=list, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nome", "-atualizado_em"]
+        verbose_name = "Preset de zonas AI"
+        verbose_name_plural = "Presets de zonas AI"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["empresa", "tipo_documento", "nome"],
+                name="unique_preset_zonas_ai_empresa_tipo_nome",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.nome} ({self.get_tipo_documento_display()})"
+
+
+class MemoriaTrabalhoAI(models.Model):
+    ESTADO_CHOICES = [
+        ("ativo", "Ativo"),
+        ("standby", "Standby"),
+        ("concluido", "Concluído"),
+    ]
+
+    AREA_CHOICES = [
+        ("ocr_relatorios", "OCR relatórios"),
+        ("ocr_caixas", "OCR caixas"),
+        ("chatbox", "Chatbox"),
+        ("memoria_operacional", "Memória operacional"),
+        ("plataforma", "Plataforma"),
+        ("geral", "Geral"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        related_name="memorias_trabalho_ai",
+        null=True,
+        blank=True,
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="memorias_trabalho_ai_criadas",
+    )
+    titulo = models.CharField(max_length=180)
+    area = models.CharField(max_length=40, choices=AREA_CHOICES, default="geral")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="ativo")
+    resumo = models.TextField()
+    detalhes = models.JSONField(default=dict, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-atualizado_em", "-criado_em"]
+        verbose_name = "Memória de trabalho AI"
+        verbose_name_plural = "Memórias de trabalho AI"
+
+    def __str__(self):
+        return self.titulo
 
 
 class ChatSessaoAI(models.Model):

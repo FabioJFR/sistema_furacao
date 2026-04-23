@@ -28,7 +28,7 @@
                         🗑️ Apagar
                     </a>
 
-                    <a href="{% url 'projetos:configuracao_perfuracao_historico_admin' empregado_obj.pk %}"
+                    <a href="{% url 'projetos:historico_empregado_admin_list' empregado_obj.pk %}"
                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
                         🕘 Ver Histórico
                     </a>
@@ -43,7 +43,7 @@
                         🗑️ Apagar
                     </a>
 
-                    <a href="{% url 'projetos:historico_configuracao_list_empregado' %}"
+                    <a href="{% url 'projetos:historico_empregado_list' %}"
                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
                         🕘 Ver Histórico
                     </a>
@@ -102,7 +102,7 @@
                                     <td class="px-4 py-3">{{ h.get_acao_display }}</td>
                                     <td class="px-4 py-3">{{ h.alterado_por|default:"-" }}</td>
                                     <td class="px-4 py-3">
-                                        <a href="{% url 'projetos:historico_configuracao_detail' h.pk %}"
+                                        <a href="{% url 'projetos:historico_detail' h.pk %}"
                                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
                                             Ver detalhe
                                         </a>

@@ -41,6 +41,21 @@ SAFE_FUNCTIONS = {
 }
 
 KNOWLEDGE_BASE_ROOT = Path(__file__).resolve().parent.parent / "knowledge_base"
+FURO_MEMORY_RADIUS_KM = 0.35
+EXTENSOES_TEXTO_DIRETO = {
+    ".md",
+    ".txt",
+    ".json",
+    ".csv",
+    ".log",
+    ".ini",
+    ".cfg",
+    ".yaml",
+    ".yml",
+    ".xml",
+    ".html",
+    ".htm",
+}
 
 
 def gerar_resposta_chat(*, empresa, pergunta):
@@ -65,6 +80,24 @@ def gerar_resposta_chat(*, empresa, pergunta):
     if any(
         palavra in texto_lower
         for palavra in [
+            "já houve um furo",
+            "ja houve um furo",
+            "nesta zona",
+            "nessa zona",
+            "neste local",
+            "nesse local",
+            "perto daqui",
+            "perto desta zona",
+            "histórico da zona",
+            "historico da zona",
+            "zona do furo",
+        ]
+    ):
+        return _resposta_memoria_zona(empresa=empresa, texto=texto), {"tipo": "memoria_zona", "resumo": resumo}
+
+    if any(
+        palavra in texto_lower
+        for palavra in [
             "documento",
             "documentos",
             "pdf",
@@ -76,6 +109,13 @@ def gerar_resposta_chat(*, empresa, pergunta):
             "drone proprio",
             "especificações do drone",
             "especificacoes do drone",
+            "plataforma",
+            "features",
+            "permissoes",
+            "permissões",
+            "go live",
+            "online",
+            "deploy",
         ]
     ):
         return _resposta_base_conhecimento(texto_lower), {"tipo": "base_conhecimento"}
@@ -161,6 +201,7 @@ def construir_resumo_empresa(empresa):
         "maquinas_estados": list(
             maquinas_qs.values("estado").annotate(total=Count("id")).order_by("estado")
         ),
+        "memoria_furos": _construir_memoria_furos_empresa(empresa, limite=12),
     }
 
 
@@ -200,9 +241,25 @@ def _ler_documento_texto(relativo):
     path = KNOWLEDGE_BASE_ROOT / relativo
     if not path.exists() or not path.is_file():
         return ""
-    if path.suffix.lower() not in {".md", ".txt", ".json"}:
+    if path.suffix.lower() not in EXTENSOES_TEXTO_DIRETO:
         return ""
     return path.read_text(encoding="utf-8", errors="ignore")
+
+
+def _ler_conteudo_consultavel_documento(relativo):
+    path = KNOWLEDGE_BASE_ROOT / relativo
+    if not path.exists() or not path.is_file():
+        return ""
+
+    extensao = path.suffix.lower()
+    if extensao in EXTENSOES_TEXTO_DIRETO:
+        return path.read_text(encoding="utf-8", errors="ignore")
+
+    sidecar_txt = path.with_suffix(".txt")
+    if sidecar_txt.exists() and sidecar_txt.is_file():
+        return sidecar_txt.read_text(encoding="utf-8", errors="ignore")
+
+    return ""
 
 
 def _resposta_base_conhecimento(texto):
@@ -217,8 +274,31 @@ def _resposta_base_conhecimento(texto):
     for doc in documentos[:12]:
         linhas.append(f"- {doc['relativo']}")
 
+    docs_pdf = [doc for doc in documentos if doc["extensao"] == ".pdf"]
+    docs_biblioteca = [doc for doc in documentos if doc["relativo"].startswith("pdf/")]
+    if docs_pdf:
+        linhas.extend(
+            [
+                "",
+                "PDFs encontrados na base documental:",
+                *[f"- {doc['relativo']}" for doc in docs_pdf[:12]],
+            ]
+        )
+    if docs_biblioteca:
+        linhas.extend(
+            [
+                "",
+                "Outros documentos encontrados na biblioteca documental:",
+                *[
+                    f"- {doc['relativo']}"
+                    for doc in docs_biblioteca[:12]
+                    if doc["extensao"] != ".pdf"
+                ],
+            ]
+        )
+
     if any(palavra in texto for palavra in ["drone", "componentes", "especificações", "especificacoes"]):
-        conteudo = _ler_documento_texto("drone/drone_proprio_componentes.md")
+        conteudo = _ler_conteudo_consultavel_documento("drone/drone_proprio_componentes.md")
         if conteudo:
             resumo = []
             for raw_line in conteudo.splitlines():
@@ -237,11 +317,75 @@ def _resposta_base_conhecimento(texto):
                     ]
                 )
 
+    if any(
+        palavra in texto
+        for palavra in [
+            "plataforma",
+            "features",
+            "permissoes",
+            "permissões",
+            "go live",
+            "online",
+            "deploy",
+        ]
+    ):
+        conteudo_plataforma = _ler_conteudo_consultavel_documento("plataforma/plataforma_base_funcional.md")
+        conteudo_go_live = _ler_conteudo_consultavel_documento("plataforma/plataforma_go_live_checklist.md")
+        if conteudo_plataforma:
+            resumo_plataforma = []
+            for raw_line in conteudo_plataforma.splitlines():
+                line = raw_line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                resumo_plataforma.append(line)
+                if len(resumo_plataforma) >= 10:
+                    break
+            if resumo_plataforma:
+                linhas.extend(
+                    [
+                        "",
+                        "Resumo rápido da base funcional da plataforma:",
+                        *[f"- {item}" for item in resumo_plataforma],
+                    ]
+                )
+        if conteudo_go_live:
+            resumo_go_live = []
+            for raw_line in conteudo_go_live.splitlines():
+                line = raw_line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                resumo_go_live.append(line)
+                if len(resumo_go_live) >= 8:
+                    break
+            if resumo_go_live:
+                linhas.extend(
+                    [
+                        "",
+                        "Checklist base para colocar a plataforma online:",
+                        *[f"- {item}" for item in resumo_go_live],
+                    ]
+                )
+
+    if any(palavra in texto for palavra in ["pdf", "ficheiro", "arquivo", "documento"]):
+        linhas.extend(
+            [
+                "",
+                "Como a AI consulta documentos nesta base:",
+                "- formatos textuais como `.md`, `.txt`, `.json`, `.csv`, `.log`, `.yaml`, `.yml`, `.xml`, `.html`, `.ini` e `.cfg` podem ser lidos diretamente",
+                "- PDFs e outros formatos não textuais podem ser usados com um `.txt` auxiliar com o mesmo nome",
+                "- exemplo: `manual_operacao.pdf` + `manual_operacao.txt`",
+                "- para leitura profunda de formatos não textuais, este é o fluxo recomendado neste ambiente",
+            ]
+        )
+
     linhas.extend(
         [
             "",
             "Podes pedir, por exemplo:",
             "- 'resume o documento do drone próprio'",
+            "- 'resume a base funcional da plataforma'",
+            "- 'o que falta para colocar a plataforma online?'",
+            "- 'que PDFs existem na base de conhecimento?'",
             "- 'que sensores deve ter o drone?'",
             "- 'que documentos existem na base de conhecimento?'",
         ]
@@ -255,11 +399,13 @@ def _resposta_capacidades(resumo):
         f"1. Operação: ler projetos, furos, medições, registos e eventos da empresa. Hoje tens {resumo['furos_ativos']} furos ativos e {resumo['furos_concluidos']} concluídos.\n"
         f"2. Recursos: consultar empregados, máquinas, materiais e alertas. Tens {resumo['total_empregados']} empregados e {resumo['total_maquinas']} máquinas registadas.\n"
         "3. Financeiro: resumir despesas, custos e margens com base no que está na base de dados.\n"
-        "4. Cálculo: resolver expressões matemáticas e apoiar contas técnicas.\n\n"
+        "4. Cálculo: resolver expressões matemáticas e apoiar contas técnicas.\n"
+        "5. Memória operacional: lembrar furos anteriores da mesma zona e resumir o que aconteceu nesses trabalhos.\n\n"
         "Exemplos:\n"
         "- 'quais são os alertas atuais?'\n"
         "- 'quanto já gastámos em despesas?'\n"
         "- 'que furos estão em curso?'\n"
+        "- 'já houve um furo nesta zona?'\n"
         "- 'calcula (125.4 * 3.8) / 12'"
     )
 
@@ -316,6 +462,16 @@ def _resposta_furos(*, empresa, resumo, texto):
             resposta.append(
                 f"Detalhe de {furo.nome}: profundidade atual {furo.profundidade_atual:.2f} m, alvo atual {furo.profundidade_alvo_atual:.2f} m, estado {furo.get_estado_display()}."
             )
+            memoria = _resumir_memoria_furo(furo)
+            if memoria:
+                resposta.append("")
+                resposta.append("Memória operacional deste furo:")
+                resposta.extend(f"- {linha}" for linha in memoria)
+            proximos = _obter_furos_relacionados(empresa, furo)
+            if proximos:
+                resposta.append("")
+                resposta.append("Furos relacionados na mesma zona:")
+                resposta.extend(f"- {linha}" for linha in proximos[:5])
     elif resumo["furos_ativos_lista"]:
         resposta.append(
             "Furos em curso: "
@@ -377,7 +533,7 @@ def _resposta_geral(resumo):
         f"Resumo rápido da empresa: {resumo['total_projetos']} projetos, {resumo['total_furos']} furos, "
         f"{resumo['total_empregados']} empregados, {resumo['total_maquinas']} máquinas, {resumo['total_materiais']} materiais e "
         f"{resumo['total_despesas']:.2f} € em despesas registadas.\n\n"
-        "Posso aprofundar um tema específico se perguntares por furos, despesas, alertas, materiais, máquinas, empregados ou eventos."
+        "Posso aprofundar um tema específico se perguntares por furos, despesas, alertas, materiais, máquinas, empregados, eventos ou histórico de furos por zona."
     )
 
 
@@ -421,3 +577,149 @@ def _detetar_nome_entidade(texto, nomes):
         if nome.lower() in texto_norm:
             return nome
     return None
+
+
+def _distancia_km(lat1, lon1, lat2, lon2):
+    if None in {lat1, lon1, lat2, lon2}:
+        return None
+    raio = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return 2 * raio * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _resumir_memoria_furo(furo):
+    memoria = []
+    total_medicoes = furo.medicoes.count()
+    total_registos = furo.registos_furo.count()
+    total_despesas = float(Despesa.objects.filter(furo=furo).aggregate(total=Sum("valor")).get("total") or 0)
+
+    memoria.append(
+        f"Estado final conhecido: {furo.get_estado_display()} · profundidade máxima atingida {float(furo.profundidade_maxima_atingida or 0):.2f} m."
+    )
+    if total_medicoes:
+        ultima_medicao = furo.medicoes.order_by("-profundidade_medida", "-criado_em").first()
+        profundidade_ultima = float(ultima_medicao.profundidade_medida or 0)
+        memoria.append(f"Foram registadas {total_medicoes} medições. A medição mais profunda ficou em {profundidade_ultima:.2f} m.")
+    if total_registos:
+        metros_registados = round(sum(furo.registos_furo.values_list("metros_furados", flat=True)), 2)
+        memoria.append(f"Foram guardados {total_registos} registos diários com {metros_registados:.2f} m registados.")
+    if total_despesas:
+        memoria.append(f"Despesa direta registada neste furo: {total_despesas:.2f} €.")
+    if furo.localizacao or furo.local_sondagem:
+        memoria.append(f"Referência de localização: {furo.localizacao or furo.local_sondagem}.")
+    return memoria
+
+
+def _obter_furos_relacionados(empresa, furo_base, limite=5):
+    relacionados = []
+    candidatos = Furo.objects.filter(empresa=empresa).exclude(pk=furo_base.pk).select_related("projeto")
+    referencia_local = (furo_base.localizacao or furo_base.local_sondagem or "").strip().lower()
+
+    for candidato in candidatos:
+        distancia = _distancia_km(furo_base.latitude, furo_base.longitude, candidato.latitude, candidato.longitude)
+        if distancia is not None and distancia <= FURO_MEMORY_RADIUS_KM:
+            relacionados.append(
+                (distancia, f"{candidato.nome} · {candidato.projeto.nome} · {distancia:.3f} km · {candidato.get_estado_display()}")
+            )
+            continue
+
+        candidato_local = (candidato.localizacao or candidato.local_sondagem or "").strip().lower()
+        if referencia_local and candidato_local and referencia_local == candidato_local:
+            relacionados.append(
+                (0.0, f"{candidato.nome} · {candidato.projeto.nome} · mesma localização textual · {candidato.get_estado_display()}")
+            )
+
+    relacionados.sort(key=lambda item: item[0])
+    return [linha for _, linha in relacionados[:limite]]
+
+
+def _construir_memoria_furos_empresa(empresa, limite=12):
+    memoria = []
+    furos = (
+        Furo.objects.filter(empresa=empresa)
+        .select_related("projeto")
+        .order_by("-data")[:limite]
+    )
+    for furo in furos:
+        memoria.append(
+            {
+                "nome": furo.nome,
+                "projeto": furo.projeto.nome if furo.projeto_id else "",
+                "estado": furo.get_estado_display(),
+                "latitude": furo.latitude,
+                "longitude": furo.longitude,
+                "localizacao": furo.localizacao or furo.local_sondagem,
+                "profundidade_maxima_atingida": float(furo.profundidade_maxima_atingida or 0),
+                "metros_furados": float(furo.metros_furados or 0),
+            }
+        )
+    return memoria
+
+
+def _resposta_memoria_zona(*, empresa, texto):
+    nome_furo = _detetar_nome_entidade(texto.lower(), [nome.lower() for nome in Furo.objects.filter(empresa=empresa).values_list("nome", flat=True)])
+    if nome_furo:
+        furo = Furo.objects.filter(empresa=empresa, nome__iexact=nome_furo).select_related("projeto").first()
+        if furo:
+            relacionados = _obter_furos_relacionados(empresa, furo, limite=8)
+            if relacionados:
+                linhas = [
+                    f"Já existe memória operacional para a zona do furo {furo.nome}.",
+                    "Furos relacionados encontrados:",
+                    *[f"- {item}" for item in relacionados],
+                    "",
+                    "Resumo do furo de referência:",
+                    *[f"- {item}" for item in _resumir_memoria_furo(furo)],
+                ]
+                return "\n".join(linhas)
+            return "\n".join(
+                [
+                    f"Encontrei o furo {furo.nome}, mas não encontrei outros furos próximos com memória comparável nesta zona.",
+                    *[f"- {item}" for item in _resumir_memoria_furo(furo)],
+                ]
+            )
+
+    memoria = _construir_memoria_furos_empresa(empresa, limite=8)
+    if not memoria:
+        return "Ainda não existem furos suficientes registados para construir memória operacional por zona."
+
+    linhas = [
+        "A AI já consegue consultar a memória operacional dos furos da empresa.",
+        "Neste momento tenho estes furos disponíveis como base de memória:",
+    ]
+    for item in memoria:
+        referencia = item["localizacao"] or "sem localização textual"
+        linhas.append(
+            f"- {item['nome']} · {item['projeto']} · {item['estado']} · {item['profundidade_maxima_atingida']:.2f} m · {referencia}"
+        )
+    linhas.extend(
+        [
+            "",
+            "Para eu cruzar melhor a zona, podes perguntar por exemplo:",
+            "- 'já houve um furo perto do furo Furo-12?'",
+            "- 'o que aconteceu na zona deste furo?'",
+            "- 'há memória operacional nesta localização?'",
+        ]
+    )
+    return "\n".join(linhas)
+
+
+def construir_memoria_operacional_furo(furo):
+    if not furo:
+        return {"furo_referencia": None, "relacionados": []}
+
+    relacionados = _obter_furos_relacionados(furo.empresa, furo, limite=6)
+    return {
+        "furo_referencia": {
+            "id": str(furo.pk),
+            "nome": furo.nome,
+            "projeto": furo.projeto.nome if furo.projeto_id else "",
+            "estado": furo.get_estado_display(),
+            "resumo": _resumir_memoria_furo(furo),
+        },
+        "relacionados": relacionados,
+    }

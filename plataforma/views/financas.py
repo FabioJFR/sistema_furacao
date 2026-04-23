@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from plataforma.decorators import platform_admin_required
 from plataforma.models import MovimentoFinanceiroPlataforma
@@ -27,7 +27,7 @@ def _destino_movimento(movimento):
         return movimento.empresa.nome
     if movimento.perfil_plataforma_id:
         return getattr(movimento.perfil_plataforma.user, "username", "Individual")
-    return "—"
+    return "Plataforma"
 
 
 @login_required
@@ -57,15 +57,34 @@ def financas_entrada_list(request):
 @login_required
 @platform_admin_required
 def financas_saida_list(request):
+    edicao_id = (request.GET.get("editar") or "").strip()
+    movimento_edicao = None
+    if edicao_id:
+        movimento_edicao = get_object_or_404(
+            MovimentoFinanceiroPlataforma.objects.filter(natureza_fluxo=NATUREZA_SAIDA),
+            pk=edicao_id,
+        )
+
     if request.method == "POST":
-        form = SaidaValorForm(request.POST)
+        edicao_id_post = (request.POST.get("movimento_id") or "").strip()
+        movimento_edicao = None
+        if edicao_id_post:
+            movimento_edicao = get_object_or_404(
+                MovimentoFinanceiroPlataforma.objects.filter(natureza_fluxo=NATUREZA_SAIDA),
+                pk=edicao_id_post,
+            )
+
+        form = SaidaValorForm(request.POST, instance=movimento_edicao)
         if form.is_valid():
             form.save()
-            messages.success(request, "Despesa registada com sucesso.")
+            if movimento_edicao:
+                messages.success(request, "Despesa atualizada com sucesso.")
+            else:
+                messages.success(request, "Despesa registada com sucesso.")
             return redirect("plataforma:financas_saida_list")
         messages.error(request, "Erro ao registar despesa. Verifique os dados.")
     else:
-        form = SaidaValorForm()
+        form = SaidaValorForm(instance=movimento_edicao)
 
     movimentos = (
         MovimentoFinanceiroPlataforma.objects
@@ -84,6 +103,7 @@ def financas_saida_list(request):
         "total_pendentes": movimentos.filter(estado="pendente").count(),
         "tipo_pagina": "saida",
         "form": form,
+        "movimento_edicao": movimento_edicao,
     }
     return render(request, "plataforma/finance_movimento_list.html", context)
 
