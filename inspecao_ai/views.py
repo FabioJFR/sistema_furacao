@@ -1,51 +1,32 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 import json
 import re
-from pathlib import Path
 
 from core.permissions import admin_required
-from plataforma.models import Empresa, PerfilPlataforma
 from projetos.models import Furo
 
 from . import domain_logic as dl
 from . import workflows as wf
 from .chat_services import construir_resumo_empresa, gerar_resposta_chat, normalizar_json_chat
 from .forms import AnaliseImagemAIForm
-from .models import AnaliseImagemAI, AnaliseZonaPresetAI, ChatMensagemAI, ChatSessaoAI
-
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-KNOWLEDGE_BASE_ROOT = Path(__file__).resolve().parent.parent / "knowledge_base"
-EXTENSOES_TEXTO_DIRETO = {
-    ".md",
-    ".txt",
-    ".json",
-    ".csv",
-    ".log",
-    ".ini",
-    ".cfg",
-    ".yaml",
-    ".yml",
-    ".xml",
-    ".html",
-    ".htm",
-}
-EXTENSOES_BIBLIOTECA_PERMITIDAS = EXTENSOES_TEXTO_DIRETO | {
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".ppt",
-    ".pptx",
-    ".odt",
-    ".ods",
-}
-
+from .models import AnaliseImagemAI
+from .selectors.analises import (
+    listar_analises_empresa_qs,
+    listar_analises_recentes_hub_qs,
+    listar_presets_zona_empresa,
+    obter_analise_detail_empresa,
+    obter_analise_empresa,
+    obter_analise_reprocessar_empresa,
+)
+from .selectors.chat import (
+    listar_sessoes_chat_ativas_empresa,
+    obter_furo_contexto_chat,
+    obter_sessao_chat_empresa,
+)
+from .services.chat import criar_mensagem_chat, criar_sessao_chat
 
 def _base_template_inspecao(request):
     return "plataforma/base.html" if request.user.is_superuser else "projetos/base.html"
@@ -112,11 +93,7 @@ def hub(request):
     if resposta_erro:
         return resposta_erro
 
-    analises_qs = (
-        AnaliseImagemAI.objects.filter(empresa=empresa)
-        .select_related("projeto", "furo")
-        .order_by("-criado_em")
-    )
+    analises_qs = listar_analises_recentes_hub_qs(empresa)
     analises = dl.filtrar_analises_visiveis(list(analises_qs))
     dashboard_aprendizagem = dl.construir_dashboard_aprendizagem_ai(analises)
     return _render_inspecao(
@@ -275,11 +252,7 @@ def analise_list(request):
 
     estado = (request.GET.get("estado") or "").strip()
     tipo_documento = (request.GET.get("tipo_documento") or "").strip()
-    analises_qs = (
-        AnaliseImagemAI.objects.filter(empresa=empresa)
-        .select_related("projeto", "furo", "criado_por")
-        .prefetch_related("deteccoes")
-    )
+    analises_qs = listar_analises_empresa_qs(empresa)
     if estado:
         analises_qs = analises_qs.filter(estado=estado)
     if tipo_documento:
@@ -307,11 +280,7 @@ def analise_create(request):
         return resposta_erro
 
     form = AnaliseImagemAIForm(request.POST or None, request.FILES or None, empresa=empresa)
-    presets = list(
-        AnaliseZonaPresetAI.objects.filter(empresa=empresa)
-        .order_by("tipo_documento", "nome")
-        .values("id", "nome", "tipo_documento", "zona_relatorio", "zonas_texto")
-    )
+    presets = listar_presets_zona_empresa(empresa)
     if request.method == "POST" and form.is_valid():
         analise = wf.criar_analise_preview(form=form, empresa=empresa, user=request.user)
         messages.success(
@@ -381,11 +350,7 @@ def analise_detail(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    analise = get_object_or_404(
-        AnaliseImagemAI.objects.select_related("projeto", "furo", "criado_por").prefetch_related("deteccoes"),
-        pk=pk,
-        empresa=empresa,
-    )
+    analise = obter_analise_detail_empresa(pk=pk, empresa=empresa)
     resumo_validacao = dl.construir_resumo_validacao_analise(analise)
     sugestoes_reprocessamento = dl.construir_sugestoes_reprocessamento(analise, resumo_validacao)
     resumo_ai_relatorio = dl.construir_resumo_ai_relatorio(analise)
@@ -408,7 +373,7 @@ def analise_corrigir_campos(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    analise = get_object_or_404(AnaliseImagemAI, pk=pk, empresa=empresa)
+    analise = obter_analise_empresa(pk=pk, empresa=empresa)
     wf.guardar_correcoes_campos(analise, request.POST)
     messages.success(request, "As correções manuais da análise foram guardadas.")
     return redirect("inspecao_ai:analise_detail", pk=analise.pk)
@@ -421,7 +386,7 @@ def analise_guardar(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    analise = get_object_or_404(AnaliseImagemAI, pk=pk, empresa=empresa)
+    analise = obter_analise_empresa(pk=pk, empresa=empresa)
     wf.guardar_analise_no_historico(analise)
     messages.success(request, "A análise foi guardada no histórico.")
     return redirect("inspecao_ai:analise_detail", pk=analise.pk)
@@ -434,11 +399,7 @@ def analise_reprocessar(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    analise_origem = get_object_or_404(
-        AnaliseImagemAI.objects.select_related("projeto", "furo", "criado_por"),
-        pk=pk,
-        empresa=empresa,
-    )
+    analise_origem = obter_analise_reprocessar_empresa(pk=pk, empresa=empresa)
     relatorio_focus = (request.POST.get("relatorio_focus") or "").strip()
     nova_analise, foco_labels = wf.reprocessar_analise(
         analise_origem=analise_origem,
@@ -466,29 +427,23 @@ def chatbox(request):
         return resposta_erro
 
     sessao_id = request.GET.get("sessao") or request.POST.get("sessao_id")
-    sessoes = ChatSessaoAI.objects.filter(empresa=empresa, ativa=True).prefetch_related("mensagens")[:12]
+    sessoes = listar_sessoes_chat_ativas_empresa(empresa=empresa, limit=12)
     sessao = None
     if sessao_id:
-        sessao = get_object_or_404(ChatSessaoAI, pk=sessao_id, empresa=empresa)
+        sessao = obter_sessao_chat_empresa(sessao_id=sessao_id, empresa=empresa)
     else:
         sessao = sessoes[0] if sessoes else None
 
     if request.method == "POST":
         pergunta = (request.POST.get("pergunta") or "").strip()
         furo_contexto_id = request.POST.get("furo_contexto_id")
-        furo_contexto = None
-        if furo_contexto_id:
-            furo_contexto = Furo.objects.filter(empresa=empresa, pk=furo_contexto_id).select_related("projeto").first()
+        furo_contexto = obter_furo_contexto_chat(empresa=empresa, furo_contexto_id=furo_contexto_id)
         if not sessao:
-            sessao = ChatSessaoAI.objects.create(
-                empresa=empresa,
-                utilizador=request.user,
-                titulo=(pergunta[:80] or "Nova conversa AI"),
-            )
+            sessao = criar_sessao_chat(empresa=empresa, utilizador=request.user, pergunta=pergunta)
         if pergunta:
-            ChatMensagemAI.objects.create(sessao=sessao, papel="user", conteudo=pergunta)
+            criar_mensagem_chat(sessao=sessao, papel="user", conteudo=pergunta)
             resposta, metadados = gerar_resposta_chat(empresa=empresa, pergunta=pergunta)
-            ChatMensagemAI.objects.create(
+            criar_mensagem_chat(
                 sessao=sessao,
                 papel="assistant",
                 conteudo=resposta,

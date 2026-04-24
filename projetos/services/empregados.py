@@ -1,9 +1,11 @@
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from projetos.models import EmpregadoProjeto
+from plataforma.models import PerfilPlataforma
+from projetos.models import EmpregadoProjeto, Empregados, Individual
 
 
 # TODO futuro:
@@ -246,3 +248,81 @@ def garantir_ligacao_projeto_por_furo(empregado, furo, empresa=None, data_inicio
         ativo=True,
     )
     return ligacao, True
+
+
+def registar_conta_publica(*, tipo_conta, nome, email, telefone=None, funcao=None, especialidade=None):
+    if tipo_conta == "individual":
+        Individual.objects.create(
+            user=None,
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            especialidade=especialidade,
+        )
+        return "individual"
+
+    Empregados.objects.create(
+        user=None,
+        nome=nome,
+        email=email,
+        telefone=telefone,
+        funcao=funcao,
+        empresa=None,
+        aprovado=False,
+    )
+    return "empregado"
+
+
+@transaction.atomic
+def criar_empregado_com_user_form(*, form, empresa):
+    username = form.cleaned_data["username"]
+    password = form.cleaned_data["password"]
+
+    user = User.objects.create_user(
+        username=username,
+        email=form.cleaned_data.get("email") or "",
+        password=password,
+        first_name=(form.cleaned_data.get("nome") or "").split(" ")[0],
+        is_staff=False,
+        is_superuser=False,
+        is_active=False,
+    )
+
+    empregado = form.save(commit=False)
+    empregado.user = user
+    empregado.empresa = empresa
+    empregado.aprovado = False
+    empregado.data_aprovacao = None
+    empregado.save()
+    form.save_m2m()
+    return user, empregado
+
+
+@transaction.atomic
+def registar_utilizador_e_perfil(*, user, tipo_conta, nome, email, telefone=None, funcao=None, especialidade=None, empresa=None):
+    if tipo_conta == "individual":
+        Individual.objects.create(
+            user=user,
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            especialidade=especialidade,
+        )
+        PerfilPlataforma.objects.create(
+            user=user,
+            tipo_acesso="individual",
+            empresa=None,
+            ativo=True,
+        )
+        return "individual"
+
+    Empregados.objects.create(
+        user=user,
+        nome=nome,
+        email=email,
+        telefone=telefone,
+        funcao=funcao,
+        empresa=empresa,
+        aprovado=False,
+    )
+    return "empregado"

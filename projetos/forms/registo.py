@@ -2,13 +2,21 @@ from datetime import datetime, timedelta
 
 from django import forms
 
-from projetos.models import Empregados, Furo, Projeto, RegistoDiarioEmpregado
+from projetos.models import RegistoDiarioEmpregado
+from projetos.selectors.forms import (
+    listar_empregados_empresa_qs,
+    listar_furos_empresa_qs,
+    listar_furos_empregado_qs,
+    listar_projetos_empresa_qs,
+    listar_projetos_empregado_qs,
+    resolver_empresa_id,
+)
 
 
 # Helper to resolve empresa id from either an object or pk directly
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -152,15 +160,15 @@ class RegistoDiarioValidacoesMixin:
 
 class RegistoDiarioForm(RegistoDiarioValidacoesMixin, forms.Form):
     empregado = forms.ModelChoiceField(
-        queryset=Empregados.objects.all().order_by("nome"),
+        queryset=listar_empregados_empresa_qs(None),
         label="Empregado",
     )
     projeto = forms.ModelChoiceField(
-        queryset=Projeto.objects.all().order_by("nome"),
+        queryset=listar_projetos_empresa_qs(None),
         label="Projeto",
     )
     furo = forms.ModelChoiceField(
-        queryset=Furo.objects.all().order_by("nome"),
+        queryset=listar_furos_empresa_qs(None),
         label="Furo",
     )
     data = forms.DateField(
@@ -222,15 +230,9 @@ class RegistoDiarioForm(RegistoDiarioValidacoesMixin, forms.Form):
 
         if empresa is not None:
             empresa_id = _resolver_empresa_id(empresa)
-            self.fields["empregado"].queryset = Empregados.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
-            self.fields["projeto"].queryset = Projeto.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
-            self.fields["furo"].queryset = Furo.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
+            self.fields["empregado"].queryset = listar_empregados_empresa_qs(empresa_id)
+            self.fields["projeto"].queryset = listar_projetos_empresa_qs(empresa_id)
+            self.fields["furo"].queryset = listar_furos_empresa_qs(empresa_id)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -303,24 +305,15 @@ class RegistoDiarioEmpregadoForm(BaseRegistoDiarioModelForm):
         empresa_id = _resolver_empresa_id(self.empresa) if self.empresa is not None else None
 
         if self.empresa is not None:
-            self.fields["projeto"].queryset = Projeto.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
-            self.fields["furo"].queryset = Furo.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
+            self.fields["projeto"].queryset = listar_projetos_empresa_qs(empresa_id)
+            self.fields["furo"].queryset = listar_furos_empresa_qs(empresa_id)
 
         if empregado:
-            projetos_atuais = empregado.projetos_atuais
-
-            if self.empresa is not None:
-                projetos_atuais = projetos_atuais.filter(empresa_id=empresa_id)
-
+            projetos_atuais = listar_projetos_empregado_qs(empregado, empresa=empresa_id if self.empresa is not None else None)
             self.fields["projeto"].queryset = projetos_atuais
-            self.fields["furo"].queryset = (
-                Furo.objects.filter(empresa_id=empresa_id, projeto__in=projetos_atuais).distinct()
-                if self.empresa is not None
-                else Furo.objects.filter(projeto__in=projetos_atuais).distinct()
+            self.fields["furo"].queryset = listar_furos_empregado_qs(
+                empregado,
+                empresa=empresa_id if self.empresa is not None else None,
             )
 
 
@@ -353,12 +346,6 @@ class RegistoDiarioEmpregadoAdminForm(BaseRegistoDiarioModelForm):
 
         if empresa is not None:
             empresa_id = _resolver_empresa_id(empresa)
-            self.fields["empregado"].queryset = Empregados.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
-            self.fields["projeto"].queryset = Projeto.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
-            self.fields["furo"].queryset = Furo.objects.filter(
-                empresa_id=empresa_id
-            ).order_by("nome")
+            self.fields["empregado"].queryset = listar_empregados_empresa_qs(empresa_id)
+            self.fields["projeto"].queryset = listar_projetos_empresa_qs(empresa_id)
+            self.fields["furo"].queryset = listar_furos_empresa_qs(empresa_id)

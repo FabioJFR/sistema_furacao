@@ -1,9 +1,8 @@
 from django import forms
 import json
 
-from projetos.models import Furo, Projeto
-
 from .models import AnaliseImagemAI
+from .selectors.forms import obter_querysets_analise_form
 
 
 class AnaliseImagemAIForm(forms.ModelForm):
@@ -120,13 +119,7 @@ class AnaliseImagemAIForm(forms.ModelForm):
         if empresa is not None and not self.instance.empresa_id:
             self.instance.empresa = empresa
 
-        projetos_qs = Projeto.objects.none()
-        furos_qs = Furo.objects.none()
-        if empresa is not None:
-            projetos_qs = Projeto.objects.filter(empresa=empresa).order_by("nome")
-            furos_qs = Furo.objects.filter(empresa=empresa).select_related("projeto").order_by(
-                "projeto__nome", "nome"
-            )
+        projetos_qs, furos_qs = obter_querysets_analise_form(empresa)
 
         self.fields["projeto"].queryset = projetos_qs
         self.fields["furo"].queryset = furos_qs

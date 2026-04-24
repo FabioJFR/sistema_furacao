@@ -240,3 +240,10 @@ def obter_dados_3d_projeto(projeto, empresa=None):
         furos = furos.filter(empresa_id=empresa_id)
 
     return [_serializar_furo_3d(furo) for furo in furos]
+
+
+def obter_ligacao_empregado_projeto(ligacao_id, projeto, empresa=None):
+    queryset = EmpregadoProjeto.objects.select_related("empregado", "projeto").filter(projeto=projeto)
+    if empresa is not None:
+        queryset = queryset.filter(empresa_id=_resolver_empresa_id(empresa))
+    return get_object_or_404(queryset, pk=ligacao_id)

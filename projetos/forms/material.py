@@ -1,12 +1,20 @@
 from django import forms
 
-from ..models.furo import Furo
 from ..models.material import DevolucaoMaterial, LevantamentoMaterial, Material
-from ..models.projeto import Projeto
+from ..selectors.forms import (
+    listar_furos_empregado_qs,
+    listar_furos_empresa_qs,
+    listar_furos_por_projeto_qs,
+    listar_materiais_ativos_com_stock_qs,
+    listar_materiais_ativos_qs,
+    listar_projetos_empresa_qs,
+    listar_projetos_empregado_qs,
+    resolver_empresa_id,
+)
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 def _validar_empresa_objeto(form, campo, objeto, empresa_id):
@@ -20,48 +28,19 @@ def _validar_relacao_furo_projeto(form, projeto, furo):
 
 
 def _obter_queryset_projetos_empresa(empresa):
-    if empresa is None:
-        return Projeto.objects.none()
-
-    empresa_id = _resolver_empresa_id(empresa)
-    return Projeto.objects.filter(empresa_id=empresa_id).order_by("nome")
+    return listar_projetos_empresa_qs(empresa)
 
 
 def _obter_queryset_furos_por_projeto(projeto_id, empresa=None):
-    queryset = Furo.objects.filter(projeto_id=projeto_id)
-
-    if empresa is not None:
-        queryset = queryset.filter(empresa_id=_resolver_empresa_id(empresa))
-
-    return queryset.order_by("nome")
+    return listar_furos_por_projeto_qs(projeto_id, empresa=empresa)
 
 
 def _obter_queryset_furos_empregado(empregado, empresa=None):
-    if not empregado:
-        return Furo.objects.none()
-
-    projetos_atuais = empregado.projetos_atuais
-    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
-
-    if empresa_id is not None:
-        projetos_atuais = projetos_atuais.filter(empresa_id=empresa_id)
-        return Furo.objects.filter(
-            empresa_id=empresa_id,
-            projeto__in=projetos_atuais,
-        ).distinct().order_by("nome")
-
-    return Furo.objects.filter(projeto__in=projetos_atuais).distinct().order_by("nome")
+    return listar_furos_empregado_qs(empregado, empresa=empresa)
 
 
 def _obter_queryset_projetos_empregado(empregado, empresa=None):
-    if not empregado:
-        return Projeto.objects.none()
-
-    projetos_atuais = empregado.projetos_atuais
-    if empresa is not None:
-        projetos_atuais = projetos_atuais.filter(empresa_id=_resolver_empresa_id(empresa))
-
-    return projetos_atuais
+    return listar_projetos_empregado_qs(empregado, empresa=empresa)
 
 
 class SaidaMaterialForm(forms.Form):
@@ -125,7 +104,7 @@ class MaterialForm(forms.ModelForm):
                 empresa=self.empresa,
             )
         else:
-            self.fields["furo"].queryset = Furo.objects.none()
+            self.fields["furo"].queryset = listar_furos_empresa_qs(None)
 
     def clean_quantidade(self):
         valor = self.cleaned_data.get("quantidade")
@@ -194,7 +173,7 @@ class BaseMovimentoMaterialForm(forms.ModelForm):
         return quantidade
 
     def _get_material_queryset(self):
-        return Material.objects.none()
+        return listar_materiais_ativos_qs(None)
 
     def _validar_quantidade_material(self, quantidade, material):
         return quantidade
@@ -231,12 +210,7 @@ class LevantamentoMaterialForm(BaseMovimentoMaterialForm):
         self.fields["material"].queryset = self._get_material_queryset()
 
     def _get_material_queryset(self):
-        materiais_qs = Material.objects.filter(ativo=True, quantidade__gt=0)
-        if self.empresa is not None:
-            materiais_qs = materiais_qs.filter(empresa_id=_resolver_empresa_id(self.empresa))
-        else:
-            materiais_qs = materiais_qs.none()
-        return materiais_qs.order_by("nome")
+        return listar_materiais_ativos_com_stock_qs(self.empresa)
 
     def clean_quantidade(self):
         quantidade = super().clean_quantidade()
@@ -258,9 +232,4 @@ class DevolucaoMaterialForm(BaseMovimentoMaterialForm):
         self.fields["material"].queryset = self._get_material_queryset()
 
     def _get_material_queryset(self):
-        materiais_qs = Material.objects.filter(ativo=True)
-        if self.empresa is not None:
-            materiais_qs = materiais_qs.filter(empresa_id=_resolver_empresa_id(self.empresa))
-        else:
-            materiais_qs = materiais_qs.none()
-        return materiais_qs.order_by("nome")
+        return listar_materiais_ativos_qs(self.empresa)

@@ -2,11 +2,7 @@ from pathlib import Path
 
 from django.contrib import messages
 from django.core.files.base import ContentFile
-from django.db.models import Count, Q, Sum
 from django.shortcuts import redirect
-
-from plataforma.models import Empresa, PerfilPlataforma
-from projetos.models import Furo
 
 from .domain_logic import (
     construir_memoria_operacional_furo,
@@ -15,11 +11,17 @@ from .domain_logic import (
     parse_zone_payload,
     resolver_path_unico,
 )
-from .models import AnaliseImagemAI, AnaliseZonaPresetAI
+from .models import AnaliseImagemAI
+from .selectors.access import (
+    obter_empresa_inspecao_por_id,
+    obter_perfil_admin_inspecao,
+    obter_primeira_empresa_inspecao,
+)
+from .selectors.memoria import aplicar_filtros_memoria_qs, listar_furos_memoria_operacional_qs
+from .services.presets import guardar_preset_zonas_service
 from .services import executar_analise_imagem
 
 
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
 KNOWLEDGE_BASE_ROOT = Path(__file__).resolve().parent.parent / "knowledge_base"
 EXTENSOES_TEXTO_DIRETO = {
     ".md",
@@ -51,26 +53,17 @@ EXTENSOES_BIBLIOTECA_PERMITIDAS = EXTENSOES_TEXTO_DIRETO | {
 def obter_empresa_admin_inspecao(request):
     if request.user.is_superuser:
         empresa_id = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
-        empresa_qs = Empresa.objects.all().order_by("nome")
         if empresa_id:
-            empresa = empresa_qs.filter(pk=empresa_id).first()
+            empresa = obter_empresa_inspecao_por_id(empresa_id)
             if empresa:
                 return empresa, None
-        empresa = empresa_qs.first()
+        empresa = obter_primeira_empresa_inspecao()
         if empresa:
             return empresa, None
         messages.error(request, "Ainda não existe nenhuma empresa disponível para abrir a área de inspeção AI.")
         return None, redirect("plataforma:dashboard")
 
-    perfil = (
-        PerfilPlataforma.objects.filter(
-            user=request.user,
-            ativo=True,
-            tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-        )
-        .select_related("empresa")
-        .first()
-    )
+    perfil = obter_perfil_admin_inspecao(request.user)
     if not perfil or not perfil.empresa_id:
         messages.error(request, "Não tens permissão para aceder à área de inspeção AI.")
         return None, redirect("projetos:redirect_after_login")
@@ -134,27 +127,13 @@ def guardar_documento_biblioteca(ficheiro):
 
 
 def aplicar_filtros_memoria_operacional(empresa, termo, estado, com_coordenadas, despesas_altas, ordenar):
-    furos_qs = (
-        Furo.objects.filter(empresa=empresa)
-        .select_related("projeto")
-        .annotate(
-            total_despesas_diretas=Sum("despesas__valor"),
-            total_medicoes_registadas=Count("medicoes", distinct=True),
-        )
+    furos_qs = aplicar_filtros_memoria_qs(
+        listar_furos_memoria_operacional_qs(empresa),
+        termo=termo,
+        estado=estado,
+        com_coordenadas=com_coordenadas,
+        despesas_altas=despesas_altas,
     )
-    if termo:
-        furos_qs = furos_qs.filter(
-            Q(nome__icontains=termo)
-            | Q(localizacao__icontains=termo)
-            | Q(local_sondagem__icontains=termo)
-            | Q(projeto__nome__icontains=termo)
-        )
-    if estado:
-        furos_qs = furos_qs.filter(estado=estado)
-    if com_coordenadas:
-        furos_qs = furos_qs.filter(latitude__isnull=False, longitude__isnull=False)
-    if despesas_altas:
-        furos_qs = furos_qs.filter(total_despesas_diretas__gte=1000)
 
     ordenacao_map = {
         "recentes": ("-data",),
@@ -196,15 +175,13 @@ def criar_analise_preview(form, empresa, user):
 def guardar_preset_zonas(*, empresa, user, nome, tipo_documento, report_zone_raw, custom_zones_raw):
     zona_relatorio = parse_zone_payload(report_zone_raw, single=True)
     zonas_texto = parse_zone_payload(custom_zones_raw, single=False)
-    preset, _created = AnaliseZonaPresetAI.objects.update_or_create(
+    preset = guardar_preset_zonas_service(
         empresa=empresa,
-        tipo_documento=tipo_documento,
+        user=user,
         nome=nome,
-        defaults={
-            "zona_relatorio": zona_relatorio or {},
-            "zonas_texto": zonas_texto or [],
-            "criado_por": user,
-        },
+        tipo_documento=tipo_documento,
+        zona_relatorio=zona_relatorio,
+        zonas_texto=zonas_texto,
     )
     return preset
 
@@ -285,4 +262,3 @@ def reprocessar_analise(analise_origem, user, relatorio_focus):
     nova_analise.save()
     executar_analise_imagem(nova_analise)
     return nova_analise, foco_labels
-

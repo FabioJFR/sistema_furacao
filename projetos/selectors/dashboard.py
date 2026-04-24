@@ -31,6 +31,12 @@ def resolver_empresa_contexto_global_dashboard(empresa_id=None):
     return empresas_qs.first(), "fallback_primeira"
 
 
+def obter_empresa_dashboard_por_id(empresa_id):
+    if not empresa_id:
+        return None
+    return Empresa.objects.select_related("plano").filter(pk=empresa_id).first()
+
+
 def _resolver_empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
 

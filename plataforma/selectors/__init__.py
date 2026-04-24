@@ -16,6 +16,10 @@ def listar_planos_para_admin():
     return Plano.objects.filter(ativo=True).order_by("tipo", "preco_mensal", "nome")
 
 
+def obter_plano_ativo(pk):
+    return get_object_or_404(Plano, pk=pk, ativo=True)
+
+
 def construir_planos_periodos_precos(planos):
     planos_periodos = {
         str(plano.pk): plano.periodos_cobranca_disponiveis_normalizados

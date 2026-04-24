@@ -2,12 +2,13 @@
 # plataforma/views/planos.py
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 
 from plataforma.decorators import platform_admin_required
-from plataforma.models import Plano
 from plataforma.forms.plano import PlanoForm
+from plataforma.selectors.planos import listar_planos_dashboard, obter_plano_por_pk
+from plataforma.services.planos import alternar_plano_ativo
 
 # TODO futuro:
 # - aplicar services layer para gestão de planos
@@ -19,7 +20,7 @@ from plataforma.forms.plano import PlanoForm
 @login_required
 @platform_admin_required
 def plano_list(request):
-    planos = Plano.objects.all().order_by("preco_mensal")
+    planos = listar_planos_dashboard()
 
     context = {
         "planos": planos,
@@ -57,7 +58,7 @@ def plano_create(request):
 @login_required
 @platform_admin_required
 def plano_update(request, pk):
-    plano = get_object_or_404(Plano, pk=pk)
+    plano = obter_plano_por_pk(pk)
 
     if request.method == "POST":
         form = PlanoForm(request.POST, instance=plano)
@@ -82,10 +83,8 @@ def plano_update(request, pk):
 @login_required
 @platform_admin_required
 def plano_toggle_ativo(request, pk):
-    plano = get_object_or_404(Plano, pk=pk)
-
-    plano.ativo = not plano.ativo
-    plano.save()
+    plano = obter_plano_por_pk(pk)
+    plano = alternar_plano_ativo(plano)
 
     messages.success(request, f"Plano '{plano.nome}' atualizado.")
     return redirect("plataforma:plano_list")

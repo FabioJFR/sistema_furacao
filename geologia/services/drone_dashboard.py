@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from geologia.models import DroneComandoOperacao
-from geologia.selectors_drone import obter_comandos_pendentes_ou_enviados_operacao
+from geologia.selectors.drone import obter_comandos_pendentes_ou_enviados_operacao
 from geologia.services.drone_bridge import (
     append_bridge_log,
     bridge_logs_context,

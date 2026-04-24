@@ -1,46 +1,27 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from plataforma.models import Empresa, PerfilPlataforma
 from projetos.api.serializers import FuroSerializer, FuroVersaoSerializer
-from projetos.models import Empregados, Furo, FuroVersao
-
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
+from projetos.api.selectors import (
+    listar_furos_api_qs,
+    listar_versoes_furo_api_qs,
+    obter_furo_api,
+    resolver_empresa_api as resolver_empresa_api_selector,
+)
 
 
 def _resolver_empresa_api(request):
-    if request.user.is_superuser:
-        empresa_id = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
-        empresas = Empresa.objects.all().order_by("nome")
-        if empresa_id:
-            empresa = empresas.filter(pk=empresa_id).first()
-            if empresa:
-                return empresa, None
-            return None, Response({"erro": "Empresa inválida."}, status=status.HTTP_404_NOT_FOUND)
-        empresa = empresas.first()
-        if empresa:
-            return empresa, None
+    empresa_id = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
+    empresa, erro = resolver_empresa_api_selector(request.user, empresa_id=empresa_id)
+    if not erro:
+        return empresa, None
+
+    if erro == "empresa_invalida":
+        return None, Response({"erro": "Empresa inválida."}, status=status.HTTP_404_NOT_FOUND)
+    if erro == "sem_empresas":
         return None, Response({"erro": "Sem empresas disponíveis."}, status=status.HTTP_400_BAD_REQUEST)
-
-    perfil = (
-        PerfilPlataforma.objects.filter(
-            user=request.user,
-            ativo=True,
-            tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-        )
-        .select_related("empresa")
-        .first()
-    )
-    if perfil and perfil.empresa_id:
-        return perfil.empresa, None
-
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
-    if empregado and empregado.empresa_id:
-        return empregado.empresa, None
 
     return None, Response(
         {"erro": "Conta sem empresa associada para acesso API."},
@@ -61,7 +42,7 @@ class FuroListAPIView(APIView):
         nome = (request.GET.get("q") or "").strip()
         limit = min(max(int(request.GET.get("limit", 100) or 100), 1), 500)
 
-        queryset = Furo.objects.filter(empresa=empresa).select_related("projeto").order_by("-data", "nome")
+        queryset = listar_furos_api_qs(empresa)
         if estado:
             queryset = queryset.filter(estado=estado)
         if projeto_id:
@@ -81,11 +62,7 @@ class FuroDetailAPIView(APIView):
         if erro:
             return erro
 
-        furo = get_object_or_404(
-            Furo.objects.select_related("projeto"),
-            pk=pk,
-            empresa=empresa,
-        )
+        furo = obter_furo_api(pk=pk, empresa=empresa)
         return Response(FuroSerializer(furo).data, status=status.HTTP_200_OK)
 
 
@@ -97,15 +74,11 @@ class FuroVersaoListAPIView(APIView):
         if erro:
             return erro
 
-        furo = get_object_or_404(Furo, pk=pk, empresa=empresa)
+        furo = obter_furo_api(pk=pk, empresa=empresa)
         origem = (request.GET.get("origem") or "").strip()
         limit = min(max(int(request.GET.get("limit", 50) or 50), 1), 200)
 
-        queryset = (
-            FuroVersao.objects.filter(furo=furo, empresa=empresa)
-            .select_related("projeto", "furo", "criado_por")
-            .order_by("-versao_numero")
-        )
+        queryset = listar_versoes_furo_api_qs(furo=furo, empresa=empresa)
         if origem:
             queryset = queryset.filter(origem=origem)
 
@@ -129,13 +102,8 @@ class FuroUltimaVersaoAPIView(APIView):
         if erro:
             return erro
 
-        furo = get_object_or_404(Furo, pk=pk, empresa=empresa)
-        versao = (
-            FuroVersao.objects.filter(furo=furo, empresa=empresa)
-            .select_related("projeto", "furo", "criado_por")
-            .order_by("-versao_numero")
-            .first()
-        )
+        furo = obter_furo_api(pk=pk, empresa=empresa)
+        versao = listar_versoes_furo_api_qs(furo=furo, empresa=empresa).first()
         if not versao:
             return Response(
                 {"furo_id": str(furo.pk), "furo_nome": furo.nome, "item": None},
@@ -145,4 +113,3 @@ class FuroUltimaVersaoAPIView(APIView):
             {"furo_id": str(furo.pk), "furo_nome": furo.nome, "item": FuroVersaoSerializer(versao).data},
             status=status.HTTP_200_OK,
         )
-

@@ -10,6 +10,7 @@ from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.dashboard import (
     obter_alertas_dashboard,
     obter_cards_dashboard,
+    obter_empresa_dashboard_por_id,
     obter_empresas_contexto_dashboard,
     obter_graficos_dashboard,
     obter_intervalo_filtros,
@@ -116,7 +117,7 @@ def _obter_empresa_dashboard(contexto_admin):
         )
         return None
 
-    empresa = Empresa.objects.select_related("plano").filter(pk=empresa_id).first()
+    empresa = obter_empresa_dashboard_por_id(empresa_id)
     if not empresa:
         logger.warning(
             "Empresa do dashboard não encontrada. objeto_tipo='%s', objeto_id=%s, empresa_id=%s",

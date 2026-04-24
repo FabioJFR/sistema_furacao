@@ -2,13 +2,20 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from core.permissions import admin_required
-from plataforma.models import PerfilPlataforma
 from projetos.forms.empregado_furo import EmpregadoFuroForm
-from projetos.models import EmpregadoFuro, Empregados, Furo
+from projetos.selectors.acesso import obter_contexto_admin_projetos
+from projetos.selectors.empregados import (
+    obter_furo_admin_por_pk_empresa,
+    obter_ligacao_empregado_furo_admin_por_pk,
+)
+from projetos.services.empregado_furo import (
+    criar_ligacao_empregado_furo,
+    atualizar_ligacao_empregado_furo,
+)
 from projetos.services.empregados import garantir_ligacao_projeto_por_furo
 
 logger = logging.getLogger("core")
@@ -25,11 +32,7 @@ def _obter_contexto_admin_empregado_furo(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em empregado_furo.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -83,7 +86,7 @@ def furo_adicionar_empregado(request, furo_id):
         logger.warning("Acesso bloqueado na view furo_adicionar_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=furo_id, empresa=empresa)
+    furo = obter_furo_admin_por_pk_empresa(furo_id, empresa)
 
     if request.method == "POST":
         form = EmpregadoFuroForm(request.POST, empresa=empresa, furo=furo)
@@ -94,15 +97,15 @@ def furo_adicionar_empregado(request, furo_id):
             form.instance.empregado_id = empregado_id
         if form.is_valid():
             empregado = form.cleaned_data["empregado"]
-            ligacao = EmpregadoFuro.objects.create(
+            ligacao = criar_ligacao_empregado_furo(
                 empregado=empregado,
                 furo=furo,
+                empresa=empresa,
                 funcao=form.cleaned_data["funcao"],
                 data_inicio=form.cleaned_data.get("data_inicio"),
                 data_fim=form.cleaned_data.get("data_fim"),
                 ativo=form.cleaned_data.get("ativo", True),
                 observacoes=form.cleaned_data.get("observacoes"),
-                empresa=empresa,
             )
             ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
                 empregado=empregado,
@@ -158,11 +161,7 @@ def furo_editar_empregado(request, pk):
         logger.warning("Acesso bloqueado na view furo_editar_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    ligacao = get_object_or_404(
-        EmpregadoFuro.objects.select_related("furo", "empregado"),
-        pk=pk,
-        empresa=empresa,
-    )
+    ligacao = obter_ligacao_empregado_furo_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         form = EmpregadoFuroForm(
@@ -178,14 +177,16 @@ def furo_editar_empregado(request, pk):
             form.instance.empregado_id = empregado_id
         if form.is_valid():
             empregado = form.cleaned_data["empregado"]
-            ligacao.empregado = empregado
-            ligacao.funcao = form.cleaned_data["funcao"]
-            ligacao.data_inicio = form.cleaned_data.get("data_inicio")
-            ligacao.data_fim = form.cleaned_data.get("data_fim")
-            ligacao.ativo = form.cleaned_data.get("ativo", ligacao.ativo)
-            ligacao.observacoes = form.cleaned_data.get("observacoes")
-            ligacao.empresa = empresa
-            ligacao.save()
+            ligacao = atualizar_ligacao_empregado_furo(
+                ligacao=ligacao,
+                empregado=empregado,
+                empresa=empresa,
+                funcao=form.cleaned_data["funcao"],
+                data_inicio=form.cleaned_data.get("data_inicio"),
+                data_fim=form.cleaned_data.get("data_fim"),
+                ativo=form.cleaned_data.get("ativo", ligacao.ativo),
+                observacoes=form.cleaned_data.get("observacoes"),
+            )
             ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
                 empregado=empregado,
                 furo=ligacao.furo,
@@ -244,11 +245,7 @@ def furo_remover_empregado(request, pk):
         logger.warning("Acesso bloqueado na view furo_remover_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    ligacao = get_object_or_404(
-        EmpregadoFuro.objects.select_related("furo", "empregado"),
-        pk=pk,
-        empresa=empresa,
-    )
+    ligacao = obter_ligacao_empregado_furo_admin_por_pk(pk, empresa)
     furo = ligacao.furo
 
     if request.method == "POST":

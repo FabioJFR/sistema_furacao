@@ -8,27 +8,28 @@ import plotly.graph_objects as go
 from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
-from ..models.furo import Furo
-from ..models.importacao_furo_3d import ImportacaoFuro3DExterna
-from ..models.medicao import Medicao
-from ..models.registo import RegistoDiarioEmpregado
-from ..models.configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregado
 from ..utils.tragetoria import calcular_linha_planeada, construir_segmentos_tubos
 from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
 from projetos.selectors.furos import (
+    empregado_trabalhou_no_furo,
     obter_contexto_detalhe_furo,
     obter_equipa_e_configuracao_por_furo,
     obter_furo,
+    obter_furo_opcional,
+    obter_medicoes_furo_para_empregado,
+    obter_registos_furo_para_empregado,
+    obter_configuracao_visual_furo,
     obter_lista_furos,
 )
 from projetos.services.furo_3d_io import (
     dados_completos_furo as dados_completos_furo_service,
     dados_exportacao_furo_3d as dados_exportacao_furo_3d_service,
+    guardar_importacao_externa_3d as guardar_importacao_externa_3d_service,
     parse_imported_3d_file as parse_imported_3d_file_service,
     renderizar_furo_3d_csv as renderizar_furo_3d_csv_service,
     renderizar_furo_3d_geojson as renderizar_furo_3d_geojson_service,
@@ -40,7 +41,8 @@ from projetos.services.furo_memoria import (
 from projetos.services.furos import atualizar_furo, criar_furo
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
-from geologia.models import LogGeologicoFuro, MissaoDroneFuro
+from geologia.selectors.logs import obter_logs_geologicos_recentes_furo
+from geologia.selectors.drone import obter_missoes_drone_recentes_furo
 
 logger = logging.getLogger("core")
 
@@ -94,12 +96,7 @@ def _orientacao_planeada_furo(furo):
 
 
 def _obter_configuracao_visual_furo(furo):
-    return (
-        ConfiguracaoPerfuracaoEmpregado.objects
-        .filter(furo=furo, empresa_id=furo.empresa_id)
-        .order_by("-atualizado_em", "-pk")
-        .first()
-    )
+    return obter_configuracao_visual_furo(furo, empresa=furo.empresa_id)
 
 
 def _linha_tracejada_3d(linha, dash_size=1, gap_size=24):
@@ -397,12 +394,8 @@ def furo_detail_empregado(request, pk):
         logger.warning("Acesso bloqueado na view furo_detail_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=pk, empresa_id=empregado.empresa_id)
-
-    trabalhou_no_furo = empregado.registos_diarios.filter(
-        furo=furo,
-        empresa_id=empregado.empresa_id,
-    ).exists()
+    furo = obter_furo(pk, empresa=empregado.empresa_id)
+    trabalhou_no_furo = empregado_trabalhou_no_furo(empregado, furo)
     if not trabalhou_no_furo:
         logger.warning(
             "Empregado sem permissão para furo_detail_empregado em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -413,18 +406,8 @@ def furo_detail_empregado(request, pk):
         messages.error(request, "Não tens permissão para ver os detalhes deste furo.")
         return redirect("projetos:area_empregado")
 
-    registos_furo = (
-        RegistoDiarioEmpregado.objects
-        .filter(furo=furo, empresa_id=empregado.empresa_id)
-        .select_related("empregado", "projeto", "furo")
-        .order_by("-data", "-criado_em")
-    )
-
-    medicoes_furo = (
-        Medicao.objects
-        .filter(furo=furo, empresa_id=empregado.empresa_id)
-        .order_by("-criado_em", "-profundidade_medida")
-    )
+    registos_furo = obter_registos_furo_para_empregado(empregado, furo)
+    medicoes_furo = obter_medicoes_furo_para_empregado(empregado, furo)
 
     logger.info(
         "View furo_detail_empregado carregada com sucesso em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -500,7 +483,7 @@ def furo_detail_legacy(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
+    furo = obter_furo(pk, empresa=empresa_id)
     return redirect(furo)
 
 
@@ -528,14 +511,15 @@ def furo_detail(request, pk, slug):
         furo,
         empresa=empresa_id,
     )
-    context["logs_geologicos_recentes"] = (
-        LogGeologicoFuro.objects.filter(furo=furo, empresa_id=empresa_id)
-        .select_related("missao_drone", "medicao")
-        .order_by("-data_registo", "-criado_em")[:5]
+    context["logs_geologicos_recentes"] = obter_logs_geologicos_recentes_furo(
+        furo,
+        empresa=empresa_id,
+        limit=5,
     )
-    context["missoes_drone_recentes"] = (
-        MissaoDroneFuro.objects.filter(furo=furo, empresa_id=empresa_id)
-        .order_by("-data_voo", "-criado_em")[:3]
+    context["missoes_drone_recentes"] = obter_missoes_drone_recentes_furo(
+        furo,
+        empresa=empresa_id,
+        limit=3,
     )
     context["memoria_zona_alerta"] = _obter_memoria_zona_furos(
         empresa_id=empresa_id,
@@ -597,7 +581,7 @@ def furo_update(request, pk):
         logger.warning("Acesso bloqueado na view furo_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
+    furo = obter_furo(pk, empresa=empresa_id)
 
     if request.method == "POST":
         form = FuroForm(request.POST, instance=furo, empresa=empresa_id)
@@ -646,7 +630,7 @@ def furo_delete(request, pk):
         logger.warning("Acesso bloqueado na view furo_delete. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
+    furo = obter_furo(pk, empresa=empresa_id)
     if request.method == "POST":
         furo_id = furo.pk
         furo.delete()
@@ -695,11 +679,7 @@ def furo_3d_geologico(request, furo_id):
 
         furo = obter_furo(furo_id, empresa=empregado.empresa_id)
 
-        trabalhou_no_furo = RegistoDiarioEmpregado.objects.filter(
-            empregado=empregado,
-            furo=furo,
-            empresa_id=empregado.empresa_id,
-        ).exists()
+        trabalhou_no_furo = empregado_trabalhou_no_furo(empregado, furo)
 
         if not trabalhou_no_furo:
             logger.warning(
@@ -1181,16 +1161,15 @@ def furo_3d_importar_externo(request):
             if "guardar_importacao" in request.POST:
                 furo_destino = None
                 if furo_destino_id:
-                    furo_destino = Furo.objects.filter(pk=furo_destino_id, empresa=empresa).first()
+                    furo_destino = obter_furo_opcional(empresa, furo_destino_id)
 
-                ImportacaoFuro3DExterna.objects.create(
+                guardar_importacao_externa_3d_service(
                     empresa=empresa,
-                    furo=furo_destino,
-                    nome=trace_name,
+                    uploaded_filename=request.FILES["ficheiro_3d"].name or "",
+                    imported_trace=imported_trace,
+                    trace_name=trace_name,
                     origem_aplicacao=origem_aplicacao,
-                    origem_registo="externa",
-                    formato_arquivo=(request.FILES["ficheiro_3d"].name.rsplit(".", 1)[-1] or "").lower(),
-                    payload_json=imported_trace,
+                    furo_destino=furo_destino,
                     observacoes=observacoes,
                 )
                 messages.success(
@@ -1210,7 +1189,7 @@ def furo_3d_importar_externo(request):
             "imported_trace": imported_trace,
             "trace_name": trace_name,
             "total_pontos": total_pontos,
-            "furos_empresa": Furo.objects.filter(empresa=empresa).order_by("nome"),
+            "furos_empresa": obter_lista_furos(empresa=empresa),
             "origem_aplicacao": origem_aplicacao,
             "furo_destino_id": furo_destino_id,
             "observacoes": observacoes,
@@ -1226,7 +1205,7 @@ def furo_3d_export(request, furo_id, formato):
     if resposta_erro:
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=furo_id, empresa_id=empresa_id)
+    furo = obter_furo(furo_id, empresa=empresa_id)
     payload = _dados_exportacao_furo_3d(furo)
     nome_base = f"furo-{furo.pk}-3d"
 

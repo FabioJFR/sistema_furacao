@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 from geologia.forms import AnexoLogGeologicoForm, LogGeologicoFuroForm
-from geologia.selectors_logs import (
+from geologia.selectors.logs import (
     obter_anexos_log,
     obter_furo_log_geologico,
     obter_log_geologico,

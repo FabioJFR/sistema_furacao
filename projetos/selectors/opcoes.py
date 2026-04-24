@@ -17,6 +17,139 @@ def _empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
 
 
+def obter_projeto_furo_filtros_exportacao(*, empresa, projeto_id=None, furo_id=None):
+    projeto = None
+    furo = None
+
+    if projeto_id:
+        projeto = Projeto.objects.filter(empresa=empresa, pk=projeto_id).first()
+
+    if furo_id:
+        furo_queryset = Furo.objects.filter(empresa=empresa, pk=furo_id)
+        if projeto:
+            furo_queryset = furo_queryset.filter(projeto=projeto)
+        furo = furo_queryset.first()
+
+    return projeto, furo
+
+
+def _filtrar_periodo_queryset(queryset, campo, *, data_inicio=None, data_fim=None):
+    if data_inicio:
+        queryset = queryset.filter(**{f"{campo}__gte": data_inicio})
+    if data_fim:
+        queryset = queryset.filter(**{f"{campo}__lte": data_fim})
+    return queryset
+
+
+def qs_projetos_exportacao(*, empresa, projeto=None, data_inicio=None, data_fim=None):
+    queryset = Projeto.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(pk=projeto.pk)
+    return _filtrar_periodo_queryset(queryset, "data_inicio_proj", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_furos_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = Furo.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(projeto=projeto)
+    if furo:
+        queryset = queryset.filter(pk=furo.pk)
+    return _filtrar_periodo_queryset(queryset, "data__date", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_maquinas_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = Maquina.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(Q(projeto_atual=projeto) | Q(projetos=projeto)).distinct()
+    if furo:
+        queryset = queryset.filter(furos=furo).distinct()
+    return _filtrar_periodo_queryset(queryset, "data_registo", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_materiais_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = Material.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto)).distinct()
+    if furo:
+        queryset = queryset.filter(furo=furo)
+    return _filtrar_periodo_queryset(queryset, "data_compra", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_empregados_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = Empregados.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(ligacoes_projetos__projeto=projeto).distinct()
+    if furo:
+        queryset = queryset.filter(Q(furos=furo) | Q(ligacoes_furos__furo=furo)).distinct()
+    return _filtrar_periodo_queryset(queryset, "data_admissao", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_registos_exportacao(
+    *,
+    empresa,
+    projeto=None,
+    furo=None,
+    tipo_registo="",
+    data_inicio=None,
+    data_fim=None,
+):
+    queryset = RegistoDiarioEmpregado.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(projeto=projeto)
+    if furo:
+        queryset = queryset.filter(furo=furo)
+    if tipo_registo == "sem_paragem":
+        queryset = queryset.filter(tipo_paragem="")
+    elif tipo_registo:
+        queryset = queryset.filter(tipo_paragem=tipo_registo)
+    return _filtrar_periodo_queryset(queryset, "data", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_medicoes_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = Medicao.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(furo__projeto=projeto)
+    if furo:
+        queryset = queryset.filter(furo=furo)
+    return _filtrar_periodo_queryset(queryset, "criado_em__date", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_despesas_exportacao(
+    *,
+    empresa,
+    projeto=None,
+    furo=None,
+    categoria_despesa="",
+    data_inicio=None,
+    data_fim=None,
+):
+    queryset = Despesa.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto) | Q(maquina__projetos=projeto)).distinct()
+    if furo:
+        queryset = queryset.filter(Q(furo=furo) | Q(projeto=furo.projeto) | Q(maquina__furos=furo)).distinct()
+    if categoria_despesa:
+        queryset = queryset.filter(categoria=categoria_despesa)
+    return _filtrar_periodo_queryset(queryset, "data", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def qs_eventos_exportacao(*, empresa, projeto=None, furo=None, data_inicio=None, data_fim=None):
+    queryset = EventoAnalytics.objects.filter(empresa=empresa)
+    if projeto:
+        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto)).distinct()
+    if furo:
+        queryset = queryset.filter(furo=furo)
+    return _filtrar_periodo_queryset(queryset, "criado_em__date", data_inicio=data_inicio, data_fim=data_fim)
+
+
+def listar_projetos_filtro_exportacao(empresa):
+    return Projeto.objects.filter(empresa=empresa).order_by("nome")
+
+
+def listar_furos_filtro_exportacao(*, empresa, projeto=None):
+    return qs_furos_exportacao(empresa=empresa, projeto=projeto).order_by("nome")
+
+
 def obter_resultados_procurar_dashboard(empresa, termo):
     empresa_id = _empresa_id(empresa)
     resultados = {

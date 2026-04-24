@@ -2,11 +2,17 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 
 from plataforma.decorators import platform_admin_required
-from plataforma.models import Empresa, Plano
-from plataforma import selectors
+from plataforma.models import Empresa
+from plataforma.selectors.empresas import (
+    listar_movimentos_financeiros_empresa,
+    obter_empresa,
+    obter_empresa_com_plano,
+    obter_subscricao_atual_empresa,
+)
+from plataforma.selectors.planos import listar_planos_para_admin, obter_plano_ativo
 from plataforma.services import empresas as empresas_service
 
 # TODO futuro:
@@ -27,9 +33,9 @@ from plataforma.services import empresas as empresas_service
 def empresa_detail_plataforma(request, pk):
     perfil = request.perfil_plataforma
 
-    empresa = selectors.obter_empresa_com_plano(pk)
-    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
-    movimentos_financeiros = selectors.listar_movimentos_financeiros_empresa(empresa, limit=5)
+    empresa = obter_empresa_com_plano(pk)
+    subscricao_atual = obter_subscricao_atual_empresa(empresa)
+    movimentos_financeiros = listar_movimentos_financeiros_empresa(empresa, limit=5)
     alerta_renovacao = empresas_service.calcular_alerta_renovacao(subscricao_atual)
 
     # =========================
@@ -64,12 +70,12 @@ def empresa_detail_plataforma(request, pk):
 @login_required
 @platform_admin_required
 def atualizar_renovacao_subscricao_empresa(request, pk):
-    empresa = selectors.obter_empresa(pk)
+    empresa = obter_empresa(pk)
 
     if request.method != "POST":
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
+    subscricao_atual = obter_subscricao_atual_empresa(empresa)
 
     nova_data_raw = (request.POST.get("proxima_renovacao") or "").strip()
     if not nova_data_raw:
@@ -100,15 +106,15 @@ def atualizar_renovacao_subscricao_empresa(request, pk):
 def alterar_plano_empresa(request, pk):
     perfil = request.perfil_plataforma
 
-    empresa = selectors.obter_empresa_com_plano(pk)
-    planos = selectors.listar_planos_para_admin()
-    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
+    empresa = obter_empresa_com_plano(pk)
+    planos = listar_planos_para_admin()
+    subscricao_atual = obter_subscricao_atual_empresa(empresa)
 
     if request.method == "POST":
         plano_id = request.POST.get("plano")
         ciclo_subscricao = (request.POST.get("ciclo_subscricao") or "1").strip()
         estado_empresa = (request.POST.get("estado_empresa") or empresa.status or "teste").strip()
-        novo_plano = get_object_or_404(Plano, pk=plano_id, ativo=True)
+        novo_plano = obter_plano_ativo(plano_id)
 
         resultado = empresas_service.alterar_plano_empresa(
             empresa=empresa,
@@ -142,7 +148,7 @@ def alterar_plano_empresa(request, pk):
 @login_required
 @platform_admin_required
 def toggle_empresa_ativa(request, pk):
-    empresa = selectors.obter_empresa(pk)
+    empresa = obter_empresa(pk)
 
     if request.method != "POST":
         return redirect("plataforma:empresa_detail", pk=empresa.pk)

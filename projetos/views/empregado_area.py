@@ -2,18 +2,18 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 from django.shortcuts import redirect, render
 
 from projetos.decorators import empregado_required
 from projetos.forms.empregado_area import MeusDadosEmpregadoForm
-from projetos.models import (
-    ConfiguracaoPerfuracaoEmpregado,
-    DevolucaoMaterial,
-    Empregados,
-    Individual,
-    LevantamentoMaterial,
-    RegistoDiarioEmpregado,
+from projetos.selectors.acesso import (
+    obter_empregado_por_user,
+    obter_individual_por_user,
+)
+from projetos.selectors.empregados import (
+    obter_historico_projetos_empregado_area,
+    obter_resumo_furos_empregado_area,
+    obter_totais_empregado_area,
 )
 
 logger = logging.getLogger("core")
@@ -27,7 +27,7 @@ def _obter_empregado_autenticado_area(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa", "user").first()
+    empregado = obter_empregado_por_user(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em empregado_area.py. user_id=%s",
@@ -58,7 +58,7 @@ def _obter_individual_autenticado_area(request):
         request.user.username,
     )
 
-    individual = Individual.objects.filter(user=request.user).select_related("user").first()
+    individual = obter_individual_por_user(request.user)
     if not individual:
         logger.warning(
             "Utilizador autenticado sem registo em Individual em empregado_area.py. user_id=%s",
@@ -98,48 +98,15 @@ def meus_dados_empregado(request):
         logger.warning("Acesso bloqueado na view meus_dados_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projetos_historico = (
-        empregado.ligacoes_projetos
-        .select_related("projeto")
-        .filter(empresa=empregado.empresa)
-        .order_by("-ativo", "-data_inicio")
-    )
-
-    furos_resumo = (
-        RegistoDiarioEmpregado.objects
-        .filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-            furo__isnull=False,
-        )
-        .values("furo__id", "furo__nome", "projeto__nome")
-        .annotate(
-            total_metros=Sum("metros_furados"),
-            total_horas=Sum("horas_trabalhadas"),
-        )
-        .order_by("-total_metros", "furo__nome")
-    )
+    projetos_historico = obter_historico_projetos_empregado_area(empregado)
+    furos_resumo = obter_resumo_furos_empregado_area(empregado)
+    totais_area = obter_totais_empregado_area(empregado)
 
     context = {
         "empregado": empregado,
         "projetos_historico": projetos_historico,
         "furos_resumo": furos_resumo,
-        "total_registos": RegistoDiarioEmpregado.objects.filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-        ).count(),
-        "total_levantamentos": LevantamentoMaterial.objects.filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-        ).count(),
-        "total_devolucoes": DevolucaoMaterial.objects.filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-        ).count(),
-        "total_configuracoes": ConfiguracaoPerfuracaoEmpregado.objects.filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-        ).count(),
+        **totais_area,
     }
 
     logger.info(

@@ -76,6 +76,18 @@ def obter_material(material_id, empresa=None):
     return get_object_or_404(queryset, pk=material_id)
 
 
+def obter_material_por_id_empresa(material_id, empresa):
+    return get_object_or_404(_obter_queryset_base_materiais(), id=material_id, empresa_id=_resolver_empresa_id(empresa))
+
+
+def obter_material_por_id_empresa_select_for_update(material_id, empresa):
+    return get_object_or_404(
+        Material.objects.select_for_update(),
+        id=material_id,
+        empresa_id=_resolver_empresa_id(empresa),
+    )
+
+
 
 def obter_contexto_material_detail(material_id, empresa=None):
     material = obter_material(material_id, empresa=empresa)

@@ -5,6 +5,7 @@ import json
 from projetos.models import (
     Despesa,
     EmpregadoFuro,
+    ImportacaoFuro3DExterna,
     Maquina,
     Material,
     RegistoDiarioEmpregado,
@@ -288,3 +289,26 @@ def parse_imported_3d_file(uploaded_file):
         }
 
     raise ValueError("Formato não suportado. Usa CSV, JSON ou GeoJSON.")
+
+
+def guardar_importacao_externa_3d(
+    *,
+    empresa,
+    uploaded_filename,
+    imported_trace,
+    trace_name,
+    origem_aplicacao="",
+    furo_destino=None,
+    observacoes="",
+):
+    formato = (uploaded_filename.rsplit(".", 1)[-1] if "." in uploaded_filename else "").lower()
+    return ImportacaoFuro3DExterna.objects.create(
+        empresa=empresa,
+        furo=furo_destino,
+        nome=trace_name,
+        origem_aplicacao=(origem_aplicacao or "").strip(),
+        origem_registo="externa",
+        formato_arquivo=formato,
+        payload_json=imported_trace,
+        observacoes=(observacoes or "").strip(),
+    )

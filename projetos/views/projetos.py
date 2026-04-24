@@ -4,7 +4,7 @@ import math
 import plotly.graph_objects as go
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 
@@ -13,6 +13,7 @@ from projetos.selectors.projetos import (
     obter_contexto_projeto_detail,
     obter_dados_3d_projeto,
     obter_furos_projeto,
+    obter_ligacao_empregado_projeto,
     obter_lista_projetos_serializaveis,
     obter_projeto,
     obter_projetos_globo,
@@ -23,9 +24,6 @@ from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
 from ..forms.empregado import ProjetoEmpregadoForm
 from ..forms.projeto import ProjetoForm
-from ..models.empregado import EmpregadoProjeto
-from ..models.projeto import Projeto
-
 logger = logging.getLogger("core")
 
 
@@ -157,7 +155,7 @@ def projeto_update(request, pk):
         logger.warning("Acesso bloqueado na view projeto_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=empresa_id)
+    projeto = obter_projeto(pk, empresa=empresa_id)
     form = ProjetoForm(request.POST or None, instance=projeto, empresa=empresa_id)
 
     if request.method == "POST":
@@ -242,7 +240,7 @@ def projeto_delete(request, pk):
         logger.warning("Acesso bloqueado na view projeto_delete. user_id=%s", request.user.id)
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=empresa_id)
+    projeto = obter_projeto(pk, empresa=empresa_id)
 
     if request.method == "POST":
         projeto_id = projeto.pk
@@ -268,7 +266,7 @@ def projeto_detail_legacy(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=getattr(empresa, "pk", empresa))
+    projeto = obter_projeto(pk, empresa=empresa)
     return redirect(projeto)
 
 
@@ -318,7 +316,7 @@ def projeto_adicionar_empregado(request, pk):
         logger.warning("Acesso bloqueado na view projeto_adicionar_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=getattr(empresa, "pk", empresa))
+    projeto = obter_projeto(pk, empresa=empresa)
     form = ProjetoEmpregadoForm(request.POST or None, empresa=empresa, projeto=projeto)
 
     if request.method == "POST":
@@ -356,10 +354,9 @@ def projeto_remover_empregado(request, pk, ligacao_id):
         logger.warning("Acesso bloqueado na view projeto_remover_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa_id=getattr(empresa, "pk", empresa))
-    ligacao = get_object_or_404(
-        EmpregadoProjeto.objects.select_related("empregado", "projeto"),
-        pk=ligacao_id,
+    projeto = obter_projeto(pk, empresa=empresa)
+    ligacao = obter_ligacao_empregado_projeto(
+        ligacao_id=ligacao_id,
         projeto=projeto,
         empresa=empresa,
     )

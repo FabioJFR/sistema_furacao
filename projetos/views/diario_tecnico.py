@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from projetos.decorators import empregado_required
-from projetos.models import Empregados
+from projetos.selectors.acesso import obter_empregado_por_user
 
 logger = logging.getLogger("core")
 
@@ -18,7 +18,7 @@ def _obter_empregado_autenticado_diario(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado = obter_empregado_por_user(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em diario_tecnico.py. user_id=%s",

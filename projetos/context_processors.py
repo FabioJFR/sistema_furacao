@@ -1,6 +1,5 @@
 from core.permissions import user_is_empresa_admin, user_is_empregado, user_is_platform_admin
-from plataforma.models import PerfilPlataforma
-from projetos.models import Empregados
+from projetos.selectors.acesso import obter_empregado_por_user, obter_perfil_ativo_por_user
 
 
 def menu_context(request):
@@ -17,10 +16,7 @@ def menu_context(request):
             "empregado_menu_obj": None,
         }
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=user,
-        ativo=True,
-    ).first()
+    perfil = obter_perfil_ativo_por_user(user)
 
     perfil_ativo = perfil is not None
 
@@ -28,7 +24,7 @@ def menu_context(request):
     is_platform_admin = user_is_platform_admin(user)
     is_empresa_admin = user_is_empresa_admin(user) and not is_platform_admin
 
-    empregado_menu_obj = Empregados.objects.filter(user=user).first()
+    empregado_menu_obj = obter_empregado_por_user(user)
 
     is_admin_user = is_empresa_admin
     is_empregado_user = user_is_empregado(user)

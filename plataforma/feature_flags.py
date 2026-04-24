@@ -118,28 +118,17 @@ def feature_ativa_para_contexto(*, chave_feature, user=None, empresa=None, perfi
     if user is not None and getattr(user, "is_superuser", False):
         return True
 
-    from plataforma.models import ConfiguracaoFeatureAcesso
+    from plataforma.selectors.features import (
+        obter_override_feature_empresa,
+        obter_override_feature_individual,
+    )
 
     override = None
     if perfil_plataforma is not None:
-        override = (
-            ConfiguracaoFeatureAcesso.objects.filter(
-                perfil_plataforma=perfil_plataforma,
-                chave_feature=chave_feature,
-            )
-            .only("ativa")
-            .first()
-        )
+        override = obter_override_feature_individual(chave_feature=chave_feature, perfil_plataforma=perfil_plataforma)
 
     if override is None and empresa is not None:
-        override = (
-            ConfiguracaoFeatureAcesso.objects.filter(
-                empresa=empresa,
-                chave_feature=chave_feature,
-            )
-            .only("ativa")
-            .first()
-        )
+        override = obter_override_feature_empresa(chave_feature=chave_feature, empresa=empresa)
 
     if override is not None:
         return bool(override.ativa)

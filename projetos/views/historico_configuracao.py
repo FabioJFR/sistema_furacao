@@ -1,22 +1,21 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
-from plataforma.models import PerfilPlataforma
 from projetos.decorators import empregado_required
-from projetos.models import (
-    ConfiguracaoPerfuracaoEmpregado,
-    Empregados,
-    Furo,
-    HistoricoConfiguracaoPerfuracao,
-)
+from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
 from projetos.selectors.historico_configuracao import (
+    obter_empregado_historico_por_pk_empresa,
+    obter_furo_historico_por_pk_empresa,
     obter_historico_anterior,
+    obter_historico_configuracao_por_configuracao,
     obter_historico_configuracao_por_empregado,
     obter_historico_configuracao_por_furo,
+    obter_historico_configuracao_por_pk,
 )
+from projetos.services.historico_configuracao_perfuracao import restaurar_configuracao_a_partir_historico
 
 logger = logging.getLogger("core")
 
@@ -35,11 +34,7 @@ def _obter_contexto_admin_historico(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
 
     if perfil:
         logger.info(
@@ -86,7 +81,7 @@ def _obter_empregado_autenticado_historico(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado = obter_empregado_por_user(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em historico_configuracao.py. user_id=%s",
@@ -183,7 +178,7 @@ def historico_configuracao_list_admin(request, pk):
         logger.warning("Acesso bloqueado na view historico_configuracao_list_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_historico_por_pk_empresa(pk, empresa)
     historicos = obter_historico_configuracao_por_empregado(empregado, empresa=empresa)
 
     logger.info(
@@ -213,7 +208,7 @@ def historico_configuracao_list_furo_admin(request, furo_id):
         logger.warning("Acesso bloqueado na view historico_configuracao_list_furo_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=furo_id, empresa=empresa)
+    furo = obter_furo_historico_por_pk_empresa(furo_id, empresa)
     historicos = obter_historico_configuracao_por_furo(furo, empresa=empresa)
 
     logger.info(
@@ -237,12 +232,7 @@ def historico_configuracao_detail(request, pk):
         request.user.username,
         pk,
     )
-    historico = get_object_or_404(
-        HistoricoConfiguracaoPerfuracao.objects.select_related(
-            "empregado", "furo", "alterado_por", "configuracao", "empresa"
-        ),
-        pk=pk
-    )
+    historico = obter_historico_configuracao_por_pk(pk)
 
     permitido, _is_admin = _utilizador_pode_ver_historico(request, historico)
     if not permitido:
@@ -275,12 +265,7 @@ def historico_configuracao_comparar(request, pk):
         request.user.username,
         pk,
     )
-    historico = get_object_or_404(
-        HistoricoConfiguracaoPerfuracao.objects.select_related(
-            "empregado", "furo", "alterado_por", "configuracao", "empresa"
-        ),
-        pk=pk
-    )
+    historico = obter_historico_configuracao_por_pk(pk)
 
     permitido, _is_admin = _utilizador_pode_ver_historico(request, historico)
     if not permitido:
@@ -349,12 +334,7 @@ def historico_configuracao_restaurar(request, pk):
         pk,
         request.method,
     )
-    historico = get_object_or_404(
-        HistoricoConfiguracaoPerfuracao.objects.select_related(
-            "empregado", "furo", "configuracao", "empresa"
-        ),
-        pk=pk
-    )
+    historico = obter_historico_configuracao_por_pk(pk)
 
     permitido, is_admin = _utilizador_pode_ver_historico(request, historico)
     if not permitido:
@@ -367,59 +347,9 @@ def historico_configuracao_restaurar(request, pk):
         return redirect("projetos:redirect_after_login")
 
     if request.method == "POST":
-        configuracao = historico.configuracao
-
-        if configuracao is None:
-            configuracao = ConfiguracaoPerfuracaoEmpregado.objects.create(
-                empregado=historico.empregado,
-                empresa=historico.empresa,
-                furo=historico.furo,
-                comprimento_tubo=historico.comprimento_tubo,
-                comprimento_karoutier=historico.comprimento_karoutier,
-                quantidade_karoutier=historico.quantidade_karoutier or 1,
-                comprimento_acrescento=historico.comprimento_acrescento,
-                quantidade_acrescento=historico.quantidade_acrescento or 1,
-                comprimento_calibrador=historico.comprimento_calibrador,
-                quantidade_calibrador=historico.quantidade_calibrador or 1,
-                comprimento_record=historico.comprimento_record,
-                quantidade_record=historico.quantidade_record or 1,
-                comprimento_bit=historico.comprimento_bit,
-                comprimento_caixa_mola=historico.comprimento_caixa_mola,
-                comprimento_tubo_interior=historico.comprimento_tubo_interior,
-                quantidade_tubo_interior=historico.quantidade_tubo_interior or 1,
-                comprimento_acrescento_tubo_interior=historico.comprimento_acrescento_tubo_interior,
-                quantidade_acrescento_tubo_interior=historico.quantidade_acrescento_tubo_interior or 1,
-                comprimento_cabeca_interior=historico.comprimento_cabeca_interior,
-                atualizado_por=request.user,
-            )
-        else:
-            configuracao.empregado = historico.empregado
-            configuracao.empresa = historico.empresa
-            configuracao.furo = historico.furo
-            configuracao.comprimento_tubo = historico.comprimento_tubo
-            configuracao.comprimento_karoutier = historico.comprimento_karoutier
-            configuracao.quantidade_karoutier = historico.quantidade_karoutier or 1
-            configuracao.comprimento_acrescento = historico.comprimento_acrescento
-            configuracao.quantidade_acrescento = historico.quantidade_acrescento or 1
-            configuracao.comprimento_calibrador = historico.comprimento_calibrador
-            configuracao.quantidade_calibrador = historico.quantidade_calibrador or 1
-            configuracao.comprimento_record = historico.comprimento_record
-            configuracao.quantidade_record = historico.quantidade_record or 1
-            configuracao.comprimento_bit = historico.comprimento_bit
-            configuracao.comprimento_caixa_mola = historico.comprimento_caixa_mola
-            configuracao.comprimento_tubo_interior = historico.comprimento_tubo_interior
-            configuracao.quantidade_tubo_interior = historico.quantidade_tubo_interior or 1
-            configuracao.comprimento_acrescento_tubo_interior = historico.comprimento_acrescento_tubo_interior
-            configuracao.quantidade_acrescento_tubo_interior = historico.quantidade_acrescento_tubo_interior or 1
-            configuracao.comprimento_cabeca_interior = historico.comprimento_cabeca_interior
-            configuracao.atualizado_por = request.user
-            configuracao.save()
-
-        HistoricoConfiguracaoPerfuracao.registar_historico(
-            configuracao=configuracao,
-            acao="editado",
+        configuracao = restaurar_configuracao_a_partir_historico(
+            historico=historico,
             utilizador=request.user,
-            observacoes=f"Configuração restaurada a partir do histórico #{historico.pk}."
         )
 
         logger.info(

@@ -3,12 +3,11 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 from ..decorators import empregado_required
 
-from ..models.material import Material
 from ..forms.material import (
     MaterialForm,
     EntradaMaterialForm,
@@ -24,6 +23,8 @@ from projetos.selectors.acesso import (
 from projetos.selectors.material import (
     obter_contexto_filtros_levantamentos_admin,
     obter_lista_materiais_filtrada_nome,
+    obter_material_por_id_empresa,
+    obter_material_por_id_empresa_select_for_update,
     obter_contexto_material_detail,
     obter_levantamentos_empregado,
     obter_devolucoes_empregado,
@@ -144,8 +145,7 @@ def entrada_material_view(request, material_id):
         logger.warning("Acesso bloqueado na view entrada_material_view. user_id=%s", request.user.id)
         return resposta_erro
 
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
-    material = get_object_or_404(Material, id=material_id, empresa_id=empresa_id)
+    material = obter_material_por_id_empresa(material_id, empresa)
 
     if request.method == "POST":
         form = EntradaMaterialForm(request.POST)
@@ -198,8 +198,7 @@ def saida_material_view(request, material_id):
         logger.warning("Acesso bloqueado na view saida_material_view. user_id=%s", request.user.id)
         return resposta_erro
 
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
-    material = get_object_or_404(Material, id=material_id, empresa_id=empresa_id)
+    material = obter_material_por_id_empresa(material_id, empresa)
 
     if request.method == "POST":
         form = SaidaMaterialForm(request.POST)
@@ -352,8 +351,7 @@ def material_update(request, material_id):
         logger.warning("Acesso bloqueado na view material_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
-    material = get_object_or_404(Material, id=material_id, empresa_id=empresa_id)
+    material = obter_material_por_id_empresa(material_id, empresa)
 
     if request.method == "POST":
         form = MaterialForm(request.POST, instance=material, empresa=empresa)
@@ -402,8 +400,7 @@ def material_delete(request, material_id):
         logger.warning("Acesso bloqueado na view material_delete. user_id=%s", request.user.id)
         return resposta_erro
 
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
-    material = get_object_or_404(Material, id=material_id, empresa_id=empresa_id)
+    material = obter_material_por_id_empresa(material_id, empresa)
 
     if request.method == "POST":
         material_id_removido = material.id
@@ -440,11 +437,7 @@ def levantamento_material_create(request):
     material_selecionado = None
 
     if material_id:
-        material_selecionado = get_object_or_404(
-            Material,
-            id=material_id,
-            empresa_id=empregado.empresa_id,
-        )
+        material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
 
     if request.method == "POST":
         form = LevantamentoMaterialForm(request.POST, empregado=empregado)
@@ -462,10 +455,9 @@ def levantamento_material_create(request):
                 form.add_error("quantidade", "A quantidade deve ser superior a zero.")
             else:
                 with transaction.atomic():
-                    material_levantamento = get_object_or_404(
-                        Material.objects.select_for_update(),
-                        id=levantamento.material_id,
-                        empresa_id=empregado.empresa_id,
+                    material_levantamento = obter_material_por_id_empresa_select_for_update(
+                        levantamento.material_id,
+                        empregado.empresa,
                     )
 
                     if quantidade_levantada > (material_levantamento.quantidade or 0):
@@ -622,11 +614,7 @@ def devolucao_material_create(request):
     material_selecionado = None
 
     if material_id:
-        material_selecionado = get_object_or_404(
-            Material,
-            id=material_id,
-            empresa_id=empregado.empresa_id,
-        )
+        material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
 
     if request.method == "POST":
         form = DevolucaoMaterialForm(request.POST, empregado=empregado)
@@ -644,10 +632,9 @@ def devolucao_material_create(request):
                 form.add_error("quantidade", "A quantidade deve ser superior a zero.")
             else:
                 with transaction.atomic():
-                    material_devolucao = get_object_or_404(
-                        Material.objects.select_for_update(),
-                        id=devolucao.material_id,
-                        empresa_id=empregado.empresa_id,
+                    material_devolucao = obter_material_por_id_empresa_select_for_update(
+                        devolucao.material_id,
+                        empregado.empresa,
                     )
 
                     furo_escolhido = form.cleaned_data.get("furo")

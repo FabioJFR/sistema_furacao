@@ -1,8 +1,8 @@
 from projetos.models import PreferenciasUser
 
 
-def obter_ou_criar_preferencias_user(user):
-    return PreferenciasUser.objects.get_or_create(user=user)
+def obter_ou_criar_preferencias_user(user, defaults=None):
+    return PreferenciasUser.objects.get_or_create(user=user, defaults=defaults or {})
 
 
 def garantir_preferencias_empresa(preferencias, empresa):

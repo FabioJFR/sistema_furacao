@@ -1,15 +1,13 @@
 from django import forms
 from projetos.models import (
     ConfiguracaoPerfuracaoEmpregado,
-    Furo,
-    EmpregadoFuro,
-    RegistoDiarioEmpregado,
 )
+from projetos.selectors.forms import listar_furos_configuracao_perfuracao_qs, resolver_empresa_id
 
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
@@ -60,26 +58,12 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
         self.empresa = empresa or getattr(empregado, "empresa", None)
 
         if empregado is not None:
-            furo_ids_associados = EmpregadoFuro.objects.filter(
-                empregado=empregado
-            ).values_list("furo_id", flat=True)
-
-            furo_ids_registos = RegistoDiarioEmpregado.objects.filter(
+            self.fields["furo"].queryset = listar_furos_configuracao_perfuracao_qs(
                 empregado=empregado,
-                furo__isnull=False,
-            ).values_list("furo_id", flat=True)
-
-            furo_ids = list(furo_ids_associados) + list(furo_ids_registos)
-
-            queryset = Furo.objects.filter(id__in=furo_ids)
-
-            if self.empresa is not None:
-                empresa_id = _resolver_empresa_id(self.empresa)
-                queryset = queryset.filter(empresa_id=empresa_id)
-
-            self.fields["furo"].queryset = queryset.distinct().order_by("nome")
+                empresa=self.empresa,
+            )
         else:
-            self.fields["furo"].queryset = Furo.objects.none()
+            self.fields["furo"].queryset = listar_furos_configuracao_perfuracao_qs(empregado=None, empresa=self.empresa)
 
     def clean(self):
         cleaned_data = super().clean()

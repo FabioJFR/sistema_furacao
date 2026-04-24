@@ -13,7 +13,7 @@ from geologia.forms import (
     ImportarMissaoDroneForm,
     MissaoDroneFuroForm,
 )
-from geologia.selectors_drone import (
+from geologia.selectors.drone import (
     obter_comando_operacao_drone,
     obter_comandos_recentes_operacao_drone,
     obter_furo_drone,

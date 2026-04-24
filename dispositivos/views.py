@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET, require_POST
 from dispositivos.services.serial_service import (
     capturar_leitura_serial_para_sessao,
@@ -13,14 +13,20 @@ from dispositivos.services.serial_service import (
     listar_dispositivos_bluetooth,
     listar_portas_seriais,
 )
-from projetos.models import Empregados, Furo
-from plataforma.models import Empresa
-from dispositivos.models import (
-    Dispositivo,
-    SessaoDispositivo,
-    LeituraBrutaDispositivo,
-    SurveyShot,
+from dispositivos.selectors.dashboard import (
+    obter_dispositivo_ativo,
+    obter_dispositivos_qs,
+    obter_empregado_por_user_empresa,
+    obter_furo,
+    obter_furos_qs,
+    obter_leitura_detail,
+    obter_leituras_qs,
+    obter_sessao_detail,
+    obter_sessoes_qs,
+    obter_shots_qs,
+    resolver_empresa_para_registo_por_furo,
 )
+from dispositivos.services.dashboard import criar_sessao_dispositivo, guardar_dispositivo_detectado
 
 
 from django.http import JsonResponse
@@ -43,17 +49,7 @@ def _garantir_admin_api(request):
 
 def _resolver_empresa_para_registo(request):
     furo_id = (request.POST.get("furo_id") or "").strip()
-    if furo_id:
-        furo = get_object_or_404(Furo.objects.select_related("empresa", "projeto__empresa"), pk=furo_id)
-        empresa = furo.empresa or getattr(furo.projeto, "empresa", None)
-        if empresa:
-            return empresa
-
-    empresas = Empresa.objects.filter(ativo=True).order_by("nome")
-    if empresas.count() == 1:
-        return empresas.first()
-
-    raise ValueError("Selecione um furo com empresa associada para guardar o dispositivo.")
+    return resolver_empresa_para_registo_por_furo(furo_id)
 
 
 @login_required
@@ -164,7 +160,7 @@ def api_testar_leitura_usb(request):
             status=400,
         )
 
-    dispositivo = get_object_or_404(Dispositivo.objects.filter(ativo=True), pk=dispositivo_id)
+    dispositivo = obter_dispositivo_ativo(dispositivo_id)
 
     eventos = [
         {"tipo": "info", "mensagem": f"Dispositivo selecionado: {dispositivo.nome}."},
@@ -312,37 +308,14 @@ def api_guardar_dispositivo_detectado(request):
 
     try:
         empresa = _resolver_empresa_para_registo(request)
-        defaults = {
-            "empresa": empresa,
-            "nome": nome[:120],
-            "tipo": "magcruiser",
-            "canal": canal,
-            "numero_serie": "",
-            "identificador_fisico": identificador[:120],
-            "ativo": True,
-        }
-        if canal == "usb_serial":
-            defaults["porta"] = identificador[:120]
-            defaults["baudrate"] = baudrate
-            dispositivo, created = Dispositivo.objects.update_or_create(
-                empresa=empresa,
-                porta=identificador[:120],
-                defaults=defaults,
-            )
-        else:
-            defaults["mac_address"] = identificador[:120]
-            dispositivo, created = Dispositivo.objects.update_or_create(
-                empresa=empresa,
-                mac_address=identificador[:120],
-                defaults=defaults,
-            )
-
-        eventos = [
-            {"tipo": "sucesso", "mensagem": f"Dispositivo {'criado' if created else 'atualizado'} com sucesso."},
-            {"tipo": "info", "mensagem": f"Empresa associada: {empresa}."},
-        ]
-        if descricao:
-            eventos.append({"tipo": "info", "mensagem": f"Descrição detetada: {descricao}."})
+        dispositivo, _created, eventos = guardar_dispositivo_detectado(
+            empresa=empresa,
+            canal=canal,
+            nome=nome,
+            identificador=identificador,
+            descricao=descricao,
+            baudrate=baudrate,
+        )
 
         return JsonResponse(
             {
@@ -469,16 +442,10 @@ def api_escutar_dispositivo_detectado(request):
 def dispositivos_dashboard(request):
     empresa_id = _obter_empresa_id_utilizador(request)
 
-    dispositivos_qs = Dispositivo.objects.all()
-    sessoes_qs = SessaoDispositivo.objects.all()
-    leituras_qs = LeituraBrutaDispositivo.objects.all()
-    shots_qs = SurveyShot.objects.all()
-
-    if empresa_id:
-        dispositivos_qs = dispositivos_qs.filter(empresa_id=empresa_id)
-        sessoes_qs = sessoes_qs.filter(empresa_id=empresa_id)
-        leituras_qs = leituras_qs.filter(empresa_id=empresa_id)
-        shots_qs = shots_qs.filter(empresa_id=empresa_id)
+    dispositivos_qs = obter_dispositivos_qs(empresa_id)
+    sessoes_qs = obter_sessoes_qs(empresa_id)
+    leituras_qs = obter_leituras_qs(empresa_id)
+    shots_qs = obter_shots_qs(empresa_id)
 
     total_dispositivos = dispositivos_qs.count()
     total_ativos = dispositivos_qs.filter(ativo=True).count()
@@ -520,10 +487,7 @@ def dispositivos_dashboard(request):
 @login_required
 def sessao_dispositivo_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    sessoes = SessaoDispositivo.objects.all()
-    if empresa_id:
-        sessoes = sessoes.filter(empresa_id=empresa_id)
-    sessoes = sessoes.select_related("dispositivo", "empresa", "empregado", "furo").order_by("-iniciado_em")
+    sessoes = obter_sessoes_qs(empresa_id).select_related("dispositivo", "empresa", "empregado", "furo").order_by("-iniciado_em")
     return render(request, "dispositivos/sessao_list.html", {
         "sessoes": sessoes,
     })
@@ -532,10 +496,7 @@ def sessao_dispositivo_list(request):
 @login_required
 def leitura_bruta_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    leituras = LeituraBrutaDispositivo.objects.all()
-    if empresa_id:
-        leituras = leituras.filter(empresa_id=empresa_id)
-    leituras = leituras.select_related("sessao", "empresa").order_by("-recebido_em")
+    leituras = obter_leituras_qs(empresa_id).select_related("sessao", "empresa").order_by("-recebido_em")
     return render(request, "dispositivos/leitura_bruta_list.html", {
         "leituras": leituras,
     })
@@ -544,10 +505,7 @@ def leitura_bruta_list(request):
 @login_required
 def survey_shot_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    shots = SurveyShot.objects.all()
-    if empresa_id:
-        shots = shots.filter(empresa_id=empresa_id)
-    shots = shots.select_related("sessao", "empresa", "furo").order_by("-criado_em")
+    shots = obter_shots_qs(empresa_id).select_related("sessao", "empresa", "furo").order_by("-criado_em")
     return render(request, "dispositivos/survey_shot_list.html", {
         "shots": shots,
     })
@@ -560,10 +518,7 @@ def dispositivo_list(request):
     Futuramente pode ser filtrado por empresa, projeto, estado, tipo, etc.
     """
     empresa_id = _obter_empresa_id_utilizador(request)
-    dispositivos = Dispositivo.objects.all()
-    if empresa_id:
-        dispositivos = dispositivos.filter(empresa_id=empresa_id)
-    dispositivos = dispositivos.order_by("nome")
+    dispositivos = obter_dispositivos_qs(empresa_id).order_by("nome")
 
     context = {
         "dispositivos": dispositivos,
@@ -575,15 +530,7 @@ def dispositivo_list(request):
 @login_required
 def sessao_dispositivo_detail(request, pk):
     empresa_id = _obter_empresa_id_utilizador(request)
-    sessao_qs = SessaoDispositivo.objects.all()
-    if empresa_id:
-        sessao_qs = sessao_qs.filter(empresa_id=empresa_id)
-    sessao = get_object_or_404(
-        sessao_qs.select_related(
-            "dispositivo", "empresa", "empregado", "furo"
-        ),
-        pk=pk,
-    )
+    sessao = obter_sessao_detail(pk=pk, empresa_id=empresa_id)
 
     leituras_brutas = sessao.leituras_brutas.all().order_by("sequencia")
     leituras = sessao.leituras.all().order_by("timestamp_device", "criado_em")
@@ -601,15 +548,7 @@ def sessao_dispositivo_detail(request, pk):
 @login_required
 def leitura_bruta_detail(request, pk):
     empresa_id = _obter_empresa_id_utilizador(request)
-    leituras_qs = LeituraBrutaDispositivo.objects.all()
-    if empresa_id:
-        leituras_qs = leituras_qs.filter(empresa_id=empresa_id)
-    leitura = get_object_or_404(
-        leituras_qs.select_related(
-            "sessao", "empresa", "sessao__dispositivo", "sessao__furo", "sessao__empregado"
-        ),
-        pk=pk,
-    )
+    leitura = obter_leitura_detail(pk=pk, empresa_id=empresa_id)
 
     context = {
         "leitura": leitura,
@@ -621,13 +560,7 @@ def leitura_bruta_detail(request, pk):
 @require_POST
 def capturar_leitura_serial_view(request, pk):
     empresa_id = _obter_empresa_id_utilizador(request)
-    sessao_qs = SessaoDispositivo.objects.all()
-    if empresa_id:
-        sessao_qs = sessao_qs.filter(empresa_id=empresa_id)
-    sessao = get_object_or_404(
-        sessao_qs.select_related("dispositivo", "empresa"),
-        pk=pk,
-    )
+    sessao = obter_sessao_detail(pk=pk, empresa_id=empresa_id)
 
     try:
         leitura = capturar_leitura_serial_para_sessao(sessao)
@@ -643,24 +576,12 @@ def capturar_leitura_serial_view(request, pk):
 @login_required
 def captura_dispositivo(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    empregado = None
-    if empresa_id:
-        empregado = (
-            Empregados.objects.filter(user=request.user, empresa_id=empresa_id)
-            .select_related("empresa")
-            .first()
-        )
+    empregado = obter_empregado_por_user_empresa(request.user, empresa_id=empresa_id)
 
-    dispositivos = Dispositivo.objects.filter(ativo=True)
-    furos = Furo.objects.all().select_related("projeto")
-    sessoes_ativas = SessaoDispositivo.objects.filter(status__in=["criada", "ligando", "ligado"])
-    sessoes_recentes = SessaoDispositivo.objects.all()
-
-    if empresa_id:
-        dispositivos = dispositivos.filter(empresa_id=empresa_id)
-        furos = furos.filter(empresa_id=empresa_id)
-        sessoes_ativas = sessoes_ativas.filter(empresa_id=empresa_id)
-        sessoes_recentes = sessoes_recentes.filter(empresa_id=empresa_id)
+    dispositivos = obter_dispositivos_qs(empresa_id).filter(ativo=True)
+    furos = obter_furos_qs(empresa_id).select_related("projeto")
+    sessoes_ativas = obter_sessoes_qs(empresa_id).filter(status__in=["criada", "ligando", "ligado"])
+    sessoes_recentes = obter_sessoes_qs(empresa_id)
 
     dispositivos = dispositivos.order_by("nome")
     furos = furos.order_by("nome")
@@ -675,26 +596,14 @@ def captura_dispositivo(request):
             messages.error(request, "Selecione um dispositivo e um furo para iniciar a sessão.")
             return redirect("dispositivos:captura")
 
-        dispositivo_qs = Dispositivo.objects.filter(ativo=True)
-        furo_qs = Furo.objects.all()
-        if empresa_id:
-            dispositivo_qs = dispositivo_qs.filter(empresa_id=empresa_id)
-            furo_qs = furo_qs.filter(empresa_id=empresa_id)
-
-        dispositivo = get_object_or_404(dispositivo_qs, pk=dispositivo_id)
-        furo = get_object_or_404(furo_qs, pk=furo_id)
+        dispositivo = obter_dispositivo_ativo(dispositivo_id, empresa_id=empresa_id)
+        furo = obter_furo(furo_id, empresa_id=empresa_id)
 
         if dispositivo.empresa_id != furo.empresa_id:
             messages.error(request, "O dispositivo e o furo têm de pertencer à mesma empresa.")
             return redirect("dispositivos:captura")
 
-        sessao = SessaoDispositivo.objects.create(
-            dispositivo=dispositivo,
-            empresa=dispositivo.empresa,
-            empregado=empregado,
-            furo=furo,
-            status="criada",
-        )
+        sessao = criar_sessao_dispositivo(dispositivo=dispositivo, furo=furo, empregado=empregado)
 
         messages.success(request, "Sessão criada com sucesso.")
         return redirect("dispositivos:sessao_detail", pk=sessao.pk)

@@ -3,8 +3,10 @@ from functools import wraps
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from plataforma.models import PerfilPlataforma
-from projetos.models import Empregados
+from projetos.selectors.acesso import (
+    obter_empregado_por_user,
+    obter_perfil_ativo_por_user,
+)
 
 
 ADMIN_TIPOS_ACESSO_PLATAFORMA = ["platform_owner", "platform_admin"]
@@ -13,20 +15,13 @@ TIPOS_ACESSO_AREA_EMPREGADO = ["empregado", "individual"]
 
 
 def _obter_perfil_plataforma(user):
-    if not user.is_authenticated:
-        return None
-
-    return PerfilPlataforma.objects.filter(
-        user=user,
-        ativo=True,
-    ).first()
+    return obter_perfil_ativo_por_user(user)
 
 
 def _obter_empregado(user):
     if not user.is_authenticated:
         return None
-
-    return Empregados.objects.filter(user=user).first()
+    return obter_empregado_por_user(user)
 
 
 def user_is_global_admin(user):

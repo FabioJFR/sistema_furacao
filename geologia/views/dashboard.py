@@ -31,7 +31,7 @@ from geologia.services.drone_sf_dashboard import (
     processar_log_event_bridge_sf,
     serializar_estado_operacao_sf,
 )
-from geologia.selectors_dashboard import (
+from geologia.selectors.dashboard import (
     listar_documentos_knowledge_base_drone,
     obter_comando_sf_operacao,
     obter_comandos_recentes_operacao_sf,

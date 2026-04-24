@@ -2,18 +2,26 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.core.exceptions import ValidationError
 
 from core.permissions import admin_required
-from plataforma.models import PerfilPlataforma
 from projetos.decorators import empregado_required
 from projetos.forms.configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregadoForm
-from projetos.models import ConfiguracaoPerfuracaoEmpregado, Empregados
-from projetos.models import HistoricoConfiguracaoPerfuracao
+from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
+from projetos.selectors.configuracao_perfuracao import (
+    obter_configuracao_perfuracao_admin,
+    obter_configuracao_perfuracao_empregado,
+    obter_empregado_por_pk_empresa,
+    obter_lista_configuracoes_perfuracao_empregado,
+)
 from projetos.selectors.historico_configuracao import (
     obter_historico_configuracao_por_configuracao,
     obter_ultimo_historico_da_configuracao,
+)
+from projetos.services.configuracao_perfuracao import (
+    apagar_configuracao_perfuracao,
+    guardar_configuracao_perfuracao,
 )
 
 logger = logging.getLogger("core")
@@ -30,11 +38,7 @@ def _obter_contexto_admin_configuracao(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em configuracao_perfuracao.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -80,7 +84,7 @@ def _obter_empregado_autenticado_configuracao(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado = obter_empregado_por_user(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em configuracao_perfuracao.py. user_id=%s",
@@ -122,11 +126,9 @@ def configuracao_perfuracao_list_empregado(request):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_list_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracoes = (
-        ConfiguracaoPerfuracaoEmpregado.objects
-        .filter(empregado=empregado, empresa=empregado.empresa)
-        .select_related("furo", "atualizado_por")
-        .order_by("furo__nome")
+    configuracoes = obter_lista_configuracoes_perfuracao_empregado(
+        empregado,
+        empresa=empregado.empresa,
     )
 
     logger.info(
@@ -162,12 +164,15 @@ def configuracao_perfuracao_create_empregado(request):
         form.instance.atualizado_por = request.user
 
         if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.empresa = empregado.empresa
-            configuracao.atualizado_por = request.user
             try:
-                configuracao.save()
+                configuracao = guardar_configuracao_perfuracao(
+                    form=form,
+                    empregado=empregado,
+                    empresa=empregado.empresa,
+                    atualizado_por=request.user,
+                    acao_historico="criado",
+                    observacoes_historico="Configuração criada.",
+                )
             except ValidationError as e:
                 if hasattr(e, "message_dict"):
                     for campo, erros in e.message_dict.items():
@@ -176,13 +181,6 @@ def configuracao_perfuracao_create_empregado(request):
                 else:
                     form.add_error(None, e)
             else:
-                HistoricoConfiguracaoPerfuracao.registar_historico(
-                    configuracao=configuracao,
-                    acao="criado",
-                    utilizador=request.user,
-                    observacoes="Configuração criada."
-                )
-
                 logger.info(
                     "Configuração de perfuração criada com sucesso por empregado. user_id=%s, empregado_id=%s, configuracao_id=%s",
                     request.user.id,
@@ -225,12 +223,7 @@ def configuracao_perfuracao_update_empregado(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado,
-        pk=pk,
-        empregado=empregado,
-        empresa=empregado.empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
     if request.method == "POST":
         form = ConfiguracaoPerfuracaoEmpregadoForm(
@@ -243,12 +236,15 @@ def configuracao_perfuracao_update_empregado(request, pk):
         form.instance.atualizado_por = request.user
 
         if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.empresa = empregado.empresa
-            configuracao.atualizado_por = request.user
             try:
-                configuracao.save()
+                configuracao = guardar_configuracao_perfuracao(
+                    form=form,
+                    empregado=empregado,
+                    empresa=empregado.empresa,
+                    atualizado_por=request.user,
+                    acao_historico="editado",
+                    observacoes_historico="Configuração editada.",
+                )
             except ValidationError as e:
                 if hasattr(e, "message_dict"):
                     for campo, erros in e.message_dict.items():
@@ -257,13 +253,6 @@ def configuracao_perfuracao_update_empregado(request, pk):
                 else:
                     form.add_error(None, e)
             else:
-                HistoricoConfiguracaoPerfuracao.registar_historico(
-                    configuracao=configuracao,
-                    acao="editado",
-                    utilizador=request.user,
-                    observacoes="Configuração editada."
-                )
-
                 logger.info(
                     "Configuração de perfuração atualizada com sucesso por empregado. user_id=%s, empregado_id=%s, configuracao_id=%s",
                     request.user.id,
@@ -310,22 +299,14 @@ def configuracao_perfuracao_delete_empregado(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_delete_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado,
-        pk=pk,
-        empregado=empregado,
-        empresa=empregado.empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
     if request.method == "POST":
-        HistoricoConfiguracaoPerfuracao.registar_historico(
+        configuracao_id = apagar_configuracao_perfuracao(
             configuracao=configuracao,
-            acao="apagado",
             utilizador=request.user,
-            observacoes="Configuração apagada."
+            observacoes_historico="Configuração apagada.",
         )
-        configuracao_id = configuracao.id
-        configuracao.delete()
         logger.info(
             "Configuração de perfuração apagada com sucesso por empregado. user_id=%s, empregado_id=%s, configuracao_id=%s",
             request.user.id,
@@ -360,13 +341,10 @@ def configuracao_perfuracao_list_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_list_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
-
-    configuracoes = (
-        ConfiguracaoPerfuracaoEmpregado.objects
-        .filter(empregado=empregado, empresa=empresa)
-        .select_related("furo", "atualizado_por")
-        .order_by("furo__nome")
+    empregado = obter_empregado_por_pk_empresa(pk, empresa)
+    configuracoes = obter_lista_configuracoes_perfuracao_empregado(
+        empregado,
+        empresa=empresa,
     )
 
     logger.info(
@@ -397,7 +375,7 @@ def configuracao_perfuracao_create_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_por_pk_empresa(pk, empresa)
 
     if request.method == "POST":
         form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
@@ -406,12 +384,15 @@ def configuracao_perfuracao_create_admin(request, pk):
         form.instance.atualizado_por = request.user
 
         if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.empresa = empresa
-            configuracao.atualizado_por = request.user
             try:
-                configuracao.save()
+                configuracao = guardar_configuracao_perfuracao(
+                    form=form,
+                    empregado=empregado,
+                    empresa=empresa,
+                    atualizado_por=request.user,
+                    acao_historico="criado",
+                    observacoes_historico="Configuração criada pelo administrador.",
+                )
             except ValidationError as e:
                 if hasattr(e, "message_dict"):
                     for campo, erros in e.message_dict.items():
@@ -420,13 +401,6 @@ def configuracao_perfuracao_create_admin(request, pk):
                 else:
                     form.add_error(None, e)
             else:
-                HistoricoConfiguracaoPerfuracao.registar_historico(
-                    configuracao=configuracao,
-                    acao="criado",
-                    utilizador=request.user,
-                    observacoes="Configuração criada pelo administrador."
-                )
-
                 logger.info(
                     "Configuração de perfuração criada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
                     request.user.id,
@@ -470,11 +444,7 @@ def configuracao_perfuracao_update_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado.objects.select_related("empregado"),
-        pk=pk,
-        empresa=empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
     empregado = configuracao.empregado
 
     if request.method == "POST":
@@ -488,12 +458,15 @@ def configuracao_perfuracao_update_admin(request, pk):
         form.instance.atualizado_por = request.user
 
         if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.empresa = empresa
-            configuracao.atualizado_por = request.user
             try:
-                configuracao.save()
+                configuracao = guardar_configuracao_perfuracao(
+                    form=form,
+                    empregado=empregado,
+                    empresa=empresa,
+                    atualizado_por=request.user,
+                    acao_historico="editado",
+                    observacoes_historico="Configuração editada pelo administrador.",
+                )
             except ValidationError as e:
                 if hasattr(e, "message_dict"):
                     for campo, erros in e.message_dict.items():
@@ -502,13 +475,6 @@ def configuracao_perfuracao_update_admin(request, pk):
                 else:
                     form.add_error(None, e)
             else:
-                HistoricoConfiguracaoPerfuracao.registar_historico(
-                    configuracao=configuracao,
-                    acao="editado",
-                    utilizador=request.user,
-                    observacoes="Configuração editada pelo administrador."
-                )
-
                 logger.info(
                     "Configuração de perfuração atualizada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
                     request.user.id,
@@ -556,22 +522,15 @@ def configuracao_perfuracao_delete_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_delete_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado.objects.select_related("empregado", "furo"),
-        pk=pk,
-        empresa=empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
     empregado = configuracao.empregado
 
     if request.method == "POST":
-        HistoricoConfiguracaoPerfuracao.registar_historico(
+        configuracao_id = apagar_configuracao_perfuracao(
             configuracao=configuracao,
-            acao="apagado",
             utilizador=request.user,
-            observacoes="Configuração apagada pelo administrador."
+            observacoes_historico="Configuração apagada pelo administrador.",
         )
-        configuracao_id = configuracao.id
-        configuracao.delete()
         logger.info(
             "Configuração de perfuração apagada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
             request.user.id,
@@ -602,14 +561,7 @@ def configuracao_perfuracao_detail_empregado(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_detail_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado.objects.select_related(
-            "empregado", "furo", "atualizado_por"
-        ),
-        pk=pk,
-        empregado=empregado,
-        empresa=empregado.empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
     historicos = obter_historico_configuracao_por_configuracao(configuracao, empresa=empregado.empresa)
     ultimo_historico = obter_ultimo_historico_da_configuracao(configuracao, empresa=empregado.empresa)
@@ -643,13 +595,7 @@ def configuracao_perfuracao_detail_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_detail_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado.objects.select_related(
-            "empregado", "furo", "atualizado_por"
-        ),
-        pk=pk,
-        empresa=empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
 
     historicos = obter_historico_configuracao_por_configuracao(configuracao, empresa=empresa)
     ultimo_historico = obter_ultimo_historico_da_configuracao(configuracao, empresa=empresa)

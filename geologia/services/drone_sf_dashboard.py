@@ -13,7 +13,7 @@ from geologia.models import (
     OperacaoDroneSFTempoReal,
     SensorDroneSF,
 )
-from geologia.selectors_dashboard import obter_comandos_pendentes_ou_enviados_operacao_sf
+from geologia.selectors.dashboard import obter_comandos_pendentes_ou_enviados_operacao_sf
 
 
 def append_bridge_log_sf(operacao, mensagem, tipo="info"):

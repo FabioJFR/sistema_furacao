@@ -3,19 +3,25 @@ import json
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.db.models import Q
-from django.utils import timezone
 
-from plataforma.models import Empresa
 from ..models.individual import Individual
 from ..models.empregado import Empregados, EmpregadoFicheiro, EmpregadoProjeto
-from ..models.furo import Furo
-from ..models.projeto import Projeto
+from ..selectors.forms import (
+    existe_empregado_por_email,
+    existe_user_por_email,
+    existe_user_por_username,
+    listar_empregados_empresa_qs,
+    listar_empresas_por_nome,
+    listar_furos_empresa_qs,
+    listar_projetos_empresa_qs,
+    listar_users_disponiveis_para_empregado,
+    resolver_empresa_id,
+)
 
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 
@@ -52,22 +58,12 @@ def _clean_json_field(data, field_name):
 
 
 def _obter_queryset_furos_empresa(empresa=None):
-    if empresa is None:
-        return Furo.objects.none()
-
-    return Furo.objects.filter(
-        empresa_id=_resolver_empresa_id(empresa)
-    ).order_by("nome")
+    return listar_furos_empresa_qs(empresa)
 
 
 
 def _obter_queryset_projetos_empresa(empresa=None):
-    if empresa is None:
-        return Projeto.objects.none()
-
-    return Projeto.objects.filter(
-        empresa_id=_resolver_empresa_id(empresa)
-    ).order_by("nome")
+    return listar_projetos_empresa_qs(empresa)
 
 
 
@@ -165,9 +161,7 @@ class EmpregadoRegistroForm(UserCreationForm):
         if len(valor) < 2:
             raise forms.ValidationError("Indica o nome da empresa.")
 
-        empresas = Empresa.objects.filter(
-            Q(nome__iexact=valor) | Q(nome_comercial__iexact=valor)
-        ).order_by("nome")
+        empresas = listar_empresas_por_nome(valor)
 
         if not empresas.exists():
             raise forms.ValidationError(
@@ -202,7 +196,7 @@ class EmpregadoRegistroForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
-        if User.objects.filter(email__iexact=email).exists():
+        if existe_user_por_email(email):
             raise forms.ValidationError("Já existe uma conta com este email.")
         return email
 
@@ -327,10 +321,10 @@ class EmpregadoCreateForm(forms.ModelForm):
         if not email:
             return email
 
-        if Empregados.objects.filter(email__iexact=email).exists():
+        if existe_empregado_por_email(email):
             raise forms.ValidationError("Já existe um empregado com este email.")
 
-        if User.objects.filter(email__iexact=email).exists():
+        if existe_user_por_email(email):
             raise forms.ValidationError("Já existe um utilizador com este email.")
 
         return email
@@ -341,7 +335,7 @@ class EmpregadoCreateForm(forms.ModelForm):
         if not username:
             raise forms.ValidationError("O nome de utilizador é obrigatório.")
 
-        if User.objects.filter(username__iexact=username).exists():
+        if existe_user_por_username(username):
             raise forms.ValidationError("Já existe um utilizador com esse nome de utilizador.")
 
         return username
@@ -423,16 +417,13 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
         self.fields["alertas"].initial = json.dumps(alertas_valor, ensure_ascii=False, indent=2)
 
         if "user" in self.fields:
-            users_ocupados = (
-                Empregados.objects.exclude(pk=self.instance.pk if self.instance.pk else None)
-                .exclude(user__isnull=True)
-                .values_list("user_id", flat=True)
+            self.fields["user"].queryset = listar_users_disponiveis_para_empregado(
+                empregado_pk=self.instance.pk if self.instance.pk else None
             )
-            self.fields["user"].queryset = User.objects.exclude(id__in=users_ocupados).order_by("username")
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
-        if email and Empregados.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+        if email and existe_empregado_por_email(email, exclude_pk=self.instance.pk):
             raise forms.ValidationError("Já existe outro empregado com este email.")
         return email
 
@@ -493,7 +484,7 @@ class EmpregadoProjetoForm(forms.ModelForm):
 
 class ProjetoEmpregadoForm(forms.Form):
     empregado = forms.ModelChoiceField(
-        queryset=Empregados.objects.none(),
+        queryset=listar_empregados_empresa_qs(None),
         label="Empregado",
         widget=forms.Select(attrs={"class": "form-control"}),
     )
@@ -507,10 +498,7 @@ class ProjetoEmpregadoForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.empresa = empresa
         self.projeto = projeto
-        self.fields["empregado"].queryset = (
-            Empregados.objects.filter(empresa_id=_resolver_empresa_id(empresa)).order_by("nome")
-            if empresa is not None else Empregados.objects.none()
-        )
+        self.fields["empregado"].queryset = listar_empregados_empresa_qs(empresa)
 
     def clean(self):
         cleaned = super().clean()

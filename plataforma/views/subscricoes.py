@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from plataforma.decorators import platform_admin_required
-from plataforma.models import SubscricaoEmpresa
+from plataforma.selectors.subscricoes import listar_subscricoes, obter_metricas_subscricoes
 
 
 # TODO futuro:
@@ -18,29 +18,17 @@ from plataforma.models import SubscricaoEmpresa
 @login_required
 @platform_admin_required
 def subscricao_list(request):
-    subscricoes = (
-        SubscricaoEmpresa.objects
-        .select_related("empresa", "plano")
-        .order_by("estado", "-data_inicio", "-criado_em")
-    )
+    subscricoes = listar_subscricoes()
 
     # TODO futuro:
     # - adicionar filtros por estado, plano e intervalo de datas
     # - adicionar pesquisa por empresa
-    total_subscricoes = subscricoes.count()
-    subscricoes_ativas = subscricoes.filter(estado="ativa").count()
-    subscricoes_pendentes = subscricoes.filter(estado="pendente").count()
-    subscricoes_expiradas = subscricoes.filter(estado="expirada").count()
-    subscricoes_canceladas = subscricoes.filter(estado="cancelada").count()
+    metricas = obter_metricas_subscricoes(subscricoes)
 
     context = {
         "perfil": request.perfil_plataforma,
         "subscricoes": subscricoes,
-        "total_subscricoes": total_subscricoes,
-        "subscricoes_ativas": subscricoes_ativas,
-        "subscricoes_pendentes": subscricoes_pendentes,
-        "subscricoes_expiradas": subscricoes_expiradas,
-        "subscricoes_canceladas": subscricoes_canceladas,
+        **metricas,
     }
 
     return render(request, "plataforma/subscricao_list.html", context)

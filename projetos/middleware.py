@@ -1,7 +1,7 @@
 from django.utils import translation
 
-from projetos.models import PreferenciasUser
 from projetos.request_context import clear_current_user, set_current_user
+from projetos.selectors.preferencias import obter_ou_criar_preferencias_user
 
 
 class UserLanguageMiddleware:
@@ -10,7 +10,7 @@ class UserLanguageMiddleware:
 
     def __call__(self, request):
         if request.user.is_authenticated:
-            preferencias, _ = PreferenciasUser.objects.get_or_create(
+            preferencias, _ = obter_ou_criar_preferencias_user(
                 user=request.user,
                 defaults={
                     "idioma": "pt-pt",

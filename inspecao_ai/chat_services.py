@@ -6,9 +6,28 @@ from pathlib import Path
 from datetime import date, datetime, time
 from decimal import Decimal
 
-from django.db.models import Count, Sum
-
-from projetos.models import Despesa, Empregados, EventoAnalytics, Furo, Maquina, Material, Medicao, Projeto, RegistoDiarioEmpregado
+from inspecao_ai.selectors.chat import (
+    contar_medicoes_empresa,
+    contar_registos_empresa,
+    listar_candidatos_furos_relacionados,
+    listar_despesas_top_categorias,
+    listar_eventos_empresa,
+    listar_eventos_recentes_values,
+    listar_furos_memoria_empresa,
+    listar_maquinas_alerta,
+    listar_maquinas_estados,
+    listar_materiais_baixo_stock,
+    listar_nomes_furos_empresa,
+    obter_despesas_empresa_qs,
+    obter_empregados_empresa_qs,
+    obter_furo_empresa_por_nome,
+    obter_furos_empresa_qs,
+    obter_maquinas_empresa_qs,
+    obter_materiais_empresa_qs,
+    obter_projetos_empresa_qs,
+    obter_total_despesas_empresa,
+    obter_total_despesas_furo,
+)
 
 
 SAFE_BIN_OPS = {
@@ -145,35 +164,21 @@ def gerar_resposta_chat(*, empresa, pergunta):
 
 
 def construir_resumo_empresa(empresa):
-    projetos_qs = Projeto.objects.filter(empresa=empresa)
-    furos_qs = Furo.objects.filter(empresa=empresa)
-    empregados_qs = Empregados.objects.filter(empresa=empresa)
-    maquinas_qs = Maquina.objects.filter(empresa=empresa)
-    materiais_qs = Material.objects.filter(empresa=empresa)
-    despesas_qs = Despesa.objects.filter(empresa=empresa)
+    projetos_qs = obter_projetos_empresa_qs(empresa)
+    furos_qs = obter_furos_empresa_qs(empresa)
+    empregados_qs = obter_empregados_empresa_qs(empresa)
+    maquinas_qs = obter_maquinas_empresa_qs(empresa)
+    materiais_qs = obter_materiais_empresa_qs(empresa)
+    despesas_qs = obter_despesas_empresa_qs(empresa)
 
-    materiais_baixo_stock = list(
-        materiais_qs.filter(quantidade__lte=0).values_list("nome", flat=True)[:5]
-    ) + list(
-        materiais_qs.extra(where=["quantidade <= stock_minimo"]).values_list("nome", flat=True)[:5]
-    )
-    materiais_baixo_stock = list(dict.fromkeys(materiais_baixo_stock))
-
-    maquinas_alerta = list(
-        maquinas_qs.exclude(estado="operacional").values("nome", "estado")[:8]
-    )
+    materiais_baixo_stock = listar_materiais_baixo_stock(materiais_qs, limit=5)
+    maquinas_alerta = listar_maquinas_alerta(maquinas_qs, limit=8)
     furos_ativos = furos_qs.filter(estado="ativo")
     furos_concluidos = furos_qs.filter(estado="concluido")
 
-    total_despesas = despesas_qs.aggregate(total=Sum("valor")).get("total") or 0
-    categorias = list(
-        despesas_qs.values("categoria").annotate(total=Sum("valor")).order_by("-total")[:5]
-    )
-    eventos_recentes = list(
-        EventoAnalytics.objects.filter(empresa=empresa)
-        .values("entidade_tipo", "tipo_evento", "entidade_label", "criado_em")
-        .order_by("-criado_em")[:5]
-    )
+    total_despesas = obter_total_despesas_empresa(despesas_qs)
+    categorias = listar_despesas_top_categorias(despesas_qs, limit=5)
+    eventos_recentes = listar_eventos_recentes_values(empresa, limit=5)
 
     return {
         "total_projetos": projetos_qs.count(),
@@ -181,8 +186,8 @@ def construir_resumo_empresa(empresa):
         "furos_ativos": furos_ativos.count(),
         "furos_concluidos": furos_concluidos.count(),
         "total_metros_furados": round(sum(furos_qs.values_list("metros_furados", flat=True)), 2),
-        "total_medicoes": Medicao.objects.filter(empresa=empresa).count(),
-        "total_registos": RegistoDiarioEmpregado.objects.filter(empresa=empresa).count(),
+        "total_medicoes": contar_medicoes_empresa(empresa),
+        "total_registos": contar_registos_empresa(empresa),
         "total_empregados": empregados_qs.count(),
         "empregados_pendentes": empregados_qs.filter(aprovado=False).count(),
         "total_maquinas": maquinas_qs.count(),
@@ -198,9 +203,7 @@ def construir_resumo_empresa(empresa):
         "furos_concluidos_lista": list(
             furos_concluidos.values("nome", "projeto__nome", "profundidade_maxima_atingida")[:8]
         ),
-        "maquinas_estados": list(
-            maquinas_qs.values("estado").annotate(total=Count("id")).order_by("estado")
-        ),
+        "maquinas_estados": listar_maquinas_estados(maquinas_qs),
         "memoria_furos": _construir_memoria_furos_empresa(empresa, limite=12),
     }
 
@@ -438,11 +441,11 @@ def _resposta_financeira(*, empresa, resumo, texto):
             + "."
         )
 
-    nome_furo = _detetar_nome_entidade(texto, Furo.objects.filter(empresa=empresa).values_list("nome", flat=True))
+    nome_furo = _detetar_nome_entidade(texto, listar_nomes_furos_empresa(empresa))
     if nome_furo:
-        furo = Furo.objects.filter(empresa=empresa, nome__iexact=nome_furo).first()
+        furo = obter_furo_empresa_por_nome(empresa, nome_furo)
         if furo:
-            total_furo = float(Despesa.objects.filter(empresa=empresa, furo=furo).aggregate(total=Sum("valor")).get("total") or 0)
+            total_furo = obter_total_despesas_furo(furo)
             resposta.append(f"No furo {furo.nome}, a despesa direta registada é {total_furo:.2f} €.")
 
     return "\n".join(resposta)
@@ -455,9 +458,10 @@ def _resposta_furos(*, empresa, resumo, texto):
         f"Metros furados acumulados: {resumo['total_metros_furados']:.2f} m.",
         f"Medições registadas: {resumo['total_medicoes']}.",
     ]
-    nome_furo = _detetar_nome_entidade(texto.lower(), [nome.lower() for nome in Furo.objects.filter(empresa=empresa).values_list("nome", flat=True)])
+    nomes_furos = listar_nomes_furos_empresa(empresa)
+    nome_furo = _detetar_nome_entidade(texto.lower(), [nome.lower() for nome in nomes_furos])
     if nome_furo:
-        furo = Furo.objects.filter(empresa=empresa, nome__iexact=nome_furo).first()
+        furo = obter_furo_empresa_por_nome(empresa, nome_furo)
         if furo:
             resposta.append(
                 f"Detalhe de {furo.nome}: profundidade atual {furo.profundidade_atual:.2f} m, alvo atual {furo.profundidade_alvo_atual:.2f} m, estado {furo.get_estado_display()}."
@@ -519,7 +523,7 @@ def _resposta_materiais(resumo):
 
 
 def _resposta_eventos(empresa):
-    eventos = EventoAnalytics.objects.filter(empresa=empresa).order_by("-criado_em")[:8]
+    eventos = listar_eventos_empresa(empresa, limit=8)
     if not eventos:
         return "Ainda não existem eventos analytics registados para esta empresa."
     return "Eventos recentes:\n" + "\n".join(
@@ -595,7 +599,7 @@ def _resumir_memoria_furo(furo):
     memoria = []
     total_medicoes = furo.medicoes.count()
     total_registos = furo.registos_furo.count()
-    total_despesas = float(Despesa.objects.filter(furo=furo).aggregate(total=Sum("valor")).get("total") or 0)
+    total_despesas = obter_total_despesas_furo(furo)
 
     memoria.append(
         f"Estado final conhecido: {furo.get_estado_display()} · profundidade máxima atingida {float(furo.profundidade_maxima_atingida or 0):.2f} m."
@@ -616,7 +620,7 @@ def _resumir_memoria_furo(furo):
 
 def _obter_furos_relacionados(empresa, furo_base, limite=5):
     relacionados = []
-    candidatos = Furo.objects.filter(empresa=empresa).exclude(pk=furo_base.pk).select_related("projeto")
+    candidatos = listar_candidatos_furos_relacionados(empresa, furo_base)
     referencia_local = (furo_base.localizacao or furo_base.local_sondagem or "").strip().lower()
 
     for candidato in candidatos:
@@ -639,11 +643,7 @@ def _obter_furos_relacionados(empresa, furo_base, limite=5):
 
 def _construir_memoria_furos_empresa(empresa, limite=12):
     memoria = []
-    furos = (
-        Furo.objects.filter(empresa=empresa)
-        .select_related("projeto")
-        .order_by("-data")[:limite]
-    )
+    furos = listar_furos_memoria_empresa(empresa, limite=limite)
     for furo in furos:
         memoria.append(
             {
@@ -661,9 +661,10 @@ def _construir_memoria_furos_empresa(empresa, limite=12):
 
 
 def _resposta_memoria_zona(*, empresa, texto):
-    nome_furo = _detetar_nome_entidade(texto.lower(), [nome.lower() for nome in Furo.objects.filter(empresa=empresa).values_list("nome", flat=True)])
+    nomes_furos = listar_nomes_furos_empresa(empresa)
+    nome_furo = _detetar_nome_entidade(texto.lower(), [nome.lower() for nome in nomes_furos])
     if nome_furo:
-        furo = Furo.objects.filter(empresa=empresa, nome__iexact=nome_furo).select_related("projeto").first()
+        furo = obter_furo_empresa_por_nome(empresa, nome_furo, include_projeto=True)
         if furo:
             relacionados = _obter_furos_relacionados(empresa, furo, limite=8)
             if relacionados:

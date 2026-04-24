@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.shortcuts import get_object_or_404
 
 from projetos.models import ConfiguracaoPerfuracaoEmpregado, Furo, Medicao
+from projetos.models import RegistoDiarioEmpregado
 
 
 
@@ -194,3 +195,38 @@ def obter_medicoes_furo(furo, empresa=None):
         queryset = queryset.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
 
     return queryset
+
+
+def obter_configuracao_visual_furo(furo, empresa=None):
+    queryset = ConfiguracaoPerfuracaoEmpregado.objects.filter(furo=furo)
+    if empresa is not None:
+        queryset = queryset.filter(empresa_id=_resolver_empresa_id(empresa))
+    return queryset.order_by("-atualizado_em", "-pk").first()
+
+
+def empregado_trabalhou_no_furo(empregado, furo):
+    return empregado.registos_diarios.filter(
+        furo=furo,
+        empresa_id=empregado.empresa_id,
+    ).exists()
+
+
+def obter_registos_furo_para_empregado(empregado, furo):
+    return (
+        RegistoDiarioEmpregado.objects
+        .filter(furo=furo, empresa_id=empregado.empresa_id)
+        .select_related("empregado", "projeto", "furo")
+        .order_by("-data", "-criado_em")
+    )
+
+
+def obter_medicoes_furo_para_empregado(empregado, furo):
+    return (
+        Medicao.objects
+        .filter(furo=furo, empresa_id=empregado.empresa_id)
+        .order_by("-criado_em", "-profundidade_medida")
+    )
+
+
+def obter_furo_opcional(empresa, pk):
+    return Furo.objects.filter(pk=pk, empresa=empresa).first()

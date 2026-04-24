@@ -1,17 +1,14 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db import transaction
-from django.db.models import Q, Count, Sum
+from django.db.models import Q
 
 from django.urls import reverse
 
 from projetos.models import (
     Empregados,
-    Individual,
     Projeto,
     Furo,
     Material,
@@ -32,8 +29,11 @@ from ..forms.empregado import (
 from projetos.forms.configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregadoForm
 from projetos.models import ConfiguracaoPerfuracaoEmpregado
 from projetos.selectors.configuracao_perfuracao import (
+    obter_configuracao_perfuracao_admin,
+    obter_configuracao_perfuracao_empregado,
     obter_lista_configuracoes_perfuracao_empregado,
 )
+from projetos.selectors.furos import obter_configuracao_visual_furo
 from projetos.selectors.acesso import (
     obter_contexto_admin_projetos,
     obter_individual_por_user,
@@ -41,18 +41,37 @@ from projetos.selectors.acesso import (
     resolver_empregado_por_user_ou_email,
 )
 from projetos.selectors.empregados import (
+    empregado_tem_acesso_furo,
+    empregado_tem_acesso_projeto,
     obter_contexto_area_empregado,
+    obter_furo_empregado,
+    obter_furos_projeto_empregado,
+    obter_lista_furos_empregado,
+    obter_lista_medicoes_empregado,
+    obter_lista_projetos_empregado,
+    obter_medicao_empregado,
+    obter_medicoes_furo_empregado,
     obter_empregados_pendentes,
+    obter_empregado_admin_por_pk,
+    obter_empregado_pendente_admin_por_pk,
+    obter_ficheiro_empregado_admin,
+    obter_ligacao_projeto_empregado_admin,
     obter_lista_empregados,
+    obter_projeto_empregado,
+    obter_registos_furo_empregado,
+    obter_registos_projeto_empregado,
+    obter_resumo_registos_projetos_empregado,
+    obter_trabalhadores_envolvidos_projeto_empregado,
+    obter_contexto_materiais_disponiveis_empregado,
 )
 from projetos.services.empregados import (
     aprovar_empregado,
+    criar_empregado_com_user_form,
     empregado_ja_tem_projeto_ativo,
+    registar_utilizador_e_perfil,
     terminar_ligacao_projeto_empregado,
 )
 from projetos.utils.tragetoria import calcular_linha_planeada
-
-from plataforma.models import PerfilPlataforma
 
 logger = logging.getLogger("core")
 
@@ -170,35 +189,23 @@ def registo_empregado(request):
             tipo_conta = form.cleaned_data["tipo_conta"]
             user.is_active = tipo_conta == "individual"
             user.save()
+            resultado_registo = registar_utilizador_e_perfil(
+                user=user,
+                tipo_conta=tipo_conta,
+                nome=form.cleaned_data["nome"],
+                email=form.cleaned_data["email"],
+                telefone=form.cleaned_data.get("telefone"),
+                funcao=form.cleaned_data.get("funcao"),
+                especialidade=form.cleaned_data.get("especialidade"),
+                empresa=getattr(form, "empresa_resolvida", None),
+            )
 
-            if tipo_conta == "individual":
-                Individual.objects.create(
-                    user=user,
-                    nome=form.cleaned_data["nome"],
-                    email=form.cleaned_data["email"],
-                    telefone=form.cleaned_data.get("telefone"),
-                    especialidade=form.cleaned_data.get("especialidade"),
-                )
-                PerfilPlataforma.objects.create(
-                    user=user,
-                    tipo_acesso="individual",
-                    empresa=None,
-                    ativo=True,
-                )
+            if resultado_registo == "individual":
                 messages.success(
                     request,
                     "Conta individual criada com sucesso. Já podes entrar na área de trabalhador.",
                 )
             else:
-                Empregados.objects.create(
-                    user=user,
-                    nome=form.cleaned_data["nome"],
-                    email=form.cleaned_data["email"],
-                    telefone=form.cleaned_data.get("telefone"),
-                    funcao=form.cleaned_data.get("funcao"),
-                    empresa=getattr(form, "empresa_resolvida", None),
-                    aprovado=False,
-                )
                 messages.success(
                     request,
                     "Registo enviado com sucesso. Aguarde aprovação da empresa para receber acesso à plataforma.",
@@ -264,34 +271,14 @@ def empregado_create(request):
 
     if request.method == "POST" and form.is_valid():
         try:
-            with transaction.atomic():
-                username = form.cleaned_data["username"]
-                password = form.cleaned_data["password"]
-
-                user = User.objects.create_user(
-                    username=username,
-                    email=form.cleaned_data.get("email") or "",
-                    password=password,
-                    first_name=(form.cleaned_data.get("nome") or "").split(" ")[0],
-                    is_staff=False,
-                    is_superuser=False,
-                    is_active=False,
-                )
-
-                empregado = form.save(commit=False)
-                empregado.user = user
-                empregado.empresa = empresa
-                empregado.aprovado = False
-                empregado.data_aprovacao = None
-                empregado.save()
-                form.save_m2m()
-                logger.info(
-                    "Ligação criada em empregado_create. user_id=%s, empregado_id=%s, empregado_user_id=%s, empresa_id=%s",
-                    user.id,
-                    empregado.id,
-                    empregado.user_id,
-                    empregado.empresa_id,
-                )
+            user, empregado = criar_empregado_com_user_form(form=form, empresa=empresa)
+            logger.info(
+                "Ligação criada em empregado_create. user_id=%s, empregado_id=%s, empregado_user_id=%s, empresa_id=%s",
+                user.id,
+                empregado.id,
+                empregado.user_id,
+                empregado.empresa_id,
+            )
 
             logger.info(
                 "Empregado criado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, novo_username='%s'",
@@ -335,7 +322,7 @@ def empregado_detail_legacy(request, pk):
         logger.warning("Acesso bloqueado na view empregado_detail_legacy. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
     return redirect(empregado)
 
 
@@ -353,7 +340,7 @@ def empregado_detail(request, pk, slug):
         logger.warning("Acesso bloqueado na view empregado_detail. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
     if slug != empregado.slug_url:
         return redirect(empregado)
 
@@ -384,7 +371,7 @@ def empregado_update(request, pk):
         logger.warning("Acesso bloqueado na view empregado_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         form = EmpregadoUpdateForm(
@@ -434,7 +421,7 @@ def empregado_delete(request, pk):
         logger.warning("Acesso bloqueado na view empregado_delete. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         empregado_id = empregado.id
@@ -468,7 +455,7 @@ def empregado_adicionar_projeto(request, pk):
         logger.warning("Acesso bloqueado na view empregado_adicionar_projeto. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         form = EmpregadoProjetoForm(request.POST, empresa=empresa, empregado=empregado)
@@ -477,12 +464,11 @@ def empregado_adicionar_projeto(request, pk):
             ligacao.empregado = empregado
             ligacao.empresa = empresa
 
-            existe_ativa = EmpregadoProjeto.objects.filter(
+            existe_ativa = empregado_ja_tem_projeto_ativo(
                 empregado=empregado,
                 projeto=ligacao.projeto,
-                ativo=True,
                 empresa=empresa,
-            ).exists()
+            )
 
             if ligacao.ativo and existe_ativa:
                 logger.warning(
@@ -537,13 +523,8 @@ def empregado_editar_projeto(request, pk, ligacao_id):
         logger.warning("Acesso bloqueado na view empregado_editar_projeto. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
-    ligacao = get_object_or_404(
-        EmpregadoProjeto,
-        id=ligacao_id,
-        empregado=empregado,
-        empresa=empresa,
-    )
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
+    ligacao = obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa)
 
     if request.method == "POST":
         form = EmpregadoProjetoForm(
@@ -622,13 +603,8 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
         logger.warning("Acesso bloqueado na view empregado_terminar_projeto. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
-    ligacao = get_object_or_404(
-        EmpregadoProjeto,
-        id=ligacao_id,
-        empregado=empregado,
-        empresa=empresa,
-    )
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
+    ligacao = obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa)
 
     if request.method == "POST":
         terminar_ligacao_projeto_empregado(ligacao, empresa=empresa)
@@ -663,7 +639,7 @@ def empregado_adicionar_ficheiro(request, pk):
         logger.warning("Acesso bloqueado na view empregado_adicionar_ficheiro. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         form = EmpregadoFicheiroForm(request.POST, request.FILES)
@@ -715,13 +691,8 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
         logger.warning("Acesso bloqueado na view empregado_apagar_ficheiro. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
-    ficheiro = get_object_or_404(
-        EmpregadoFicheiro,
-        id=ficheiro_id,
-        empregado=empregado,
-        empresa=empresa,
-    )
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
+    ficheiro = obter_ficheiro_empregado_admin(ficheiro_id, empregado, empresa)
 
     if request.method == "POST":
         ficheiro_id_removido = ficheiro.id
@@ -785,7 +756,7 @@ def empregado_aprovar(request, pk):
         logger.warning("Acesso bloqueado na view empregado_aprovar. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         aprovar_empregado(empregado, empresa=empresa)
@@ -818,7 +789,7 @@ def empregado_rejeitar(request, pk):
         logger.warning("Acesso bloqueado na view empregado_rejeitar. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa, aprovado=False)
+    empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         user = empregado.user
@@ -856,20 +827,7 @@ def meus_furos_empregado(request):
         logger.warning("Acesso bloqueado na view meus_furos_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo_ids_associados = EmpregadoFuro.objects.filter(
-        empregado=empregado,
-        empresa=empregado.empresa,
-    ).values_list("furo_id", flat=True)
-
-    furo_ids_registos = empregado.registos_diarios.filter(
-        furo__isnull=False,
-        empresa=empregado.empresa,
-    ).values_list("furo_id", flat=True)
-
-    furos = Furo.objects.select_related("projeto").filter(
-        empresa=empregado.empresa,
-        id__in=list(furo_ids_associados) + list(furo_ids_registos)
-    ).distinct().order_by("nome")
+    furos = obter_lista_furos_empregado(empregado)
 
     logger.info(
         "View meus_furos_empregado carregada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, total_furos=%s",
@@ -898,25 +856,8 @@ def furo_detail_empregado(request, pk):
         logger.warning("Acesso bloqueado na view furo_detail_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(
-        Furo.objects.select_related("projeto"),
-        pk=pk,
-        empresa=empregado.empresa,
-    )
-
-    associado = EmpregadoFuro.objects.filter(
-        empregado=empregado,
-        furo=furo,
-        empresa=empregado.empresa,
-    ).exists()
-
-    com_registos = RegistoDiarioEmpregado.objects.filter(
-        empregado=empregado,
-        furo=furo,
-        empresa=empregado.empresa,
-    ).exists()
-
-    if not associado and not com_registos:
+    furo = obter_furo_empregado(pk=pk, empregado=empregado)
+    if not furo or not empregado_tem_acesso_furo(empregado, furo):
         logger.warning(
             "Empregado sem permissão para furo_detail_empregado. user_id=%s, empregado_id=%s, furo_id=%s",
             request.user.id,
@@ -926,15 +867,8 @@ def furo_detail_empregado(request, pk):
         messages.error(request, "Não tens permissão para ver os detalhes deste furo.")
         return redirect("projetos:meus_furos_empregado")
 
-    medicoes = Medicao.objects.filter(
-        furo=furo,
-        empresa=empregado.empresa,
-    ).order_by("criado_em", "profundidade_medida")
-    registos = RegistoDiarioEmpregado.objects.filter(
-        empregado=empregado,
-        furo=furo,
-        empresa=empregado.empresa,
-    ).select_related("projeto", "furo").order_by("-data", "-criado_em")
+    medicoes = obter_medicoes_furo_empregado(empregado, furo)
+    registos = obter_registos_furo_empregado(empregado, furo)
 
     logger.info(
         "View furo_detail_empregado carregada com sucesso. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -963,25 +897,8 @@ def furo_3d_empregado(request, pk):
         logger.warning("Acesso bloqueado na view furo_3d_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(
-        Furo.objects.select_related("projeto"),
-        pk=pk,
-        empresa=empregado.empresa,
-    )
-
-    associado = EmpregadoFuro.objects.filter(
-        empregado=empregado,
-        furo=furo,
-        empresa=empregado.empresa,
-    ).exists()
-
-    com_registos = RegistoDiarioEmpregado.objects.filter(
-        empregado=empregado,
-        furo=furo,
-        empresa=empregado.empresa,
-    ).exists()
-
-    if not associado and not com_registos:
+    furo = obter_furo_empregado(pk=pk, empregado=empregado)
+    if not furo or not empregado_tem_acesso_furo(empregado, furo):
         logger.warning(
             "Empregado sem permissão para furo_3d_empregado. user_id=%s, empregado_id=%s, furo_id=%s",
             request.user.id,
@@ -992,9 +909,7 @@ def furo_3d_empregado(request, pk):
         return redirect("projetos:meus_furos_empregado")
 
     medicoes = list(
-        Medicao.objects.filter(furo=furo, empresa=empregado.empresa)
-        .order_by("criado_em", "profundidade_medida")
-        .values(
+        obter_medicoes_furo_empregado(empregado, furo).values(
             "profundidade_medida",
             "inclinacao_real_medida",
             "azimute_real_medido",
@@ -1030,12 +945,7 @@ def furo_3d_empregado(request, pk):
         azimute=azimute_planeado,
         comprimento=profundidade_planeada_final,
     )
-    configuracao_visual = (
-        ConfiguracaoPerfuracaoEmpregado.objects
-        .filter(furo=furo, empresa=empregado.empresa)
-        .order_by("-atualizado_em", "-pk")
-        .first()
-    )
+    configuracao_visual = obter_configuracao_visual_furo(furo, empresa=empregado.empresa)
 
     logger.info(
         "View furo_3d_empregado carregada com sucesso. user_id=%s, empregado_id=%s, furo_id=%s, total_medicoes=%s",
@@ -1069,23 +979,7 @@ def medicao_list_empregado(request):
         logger.warning("Acesso bloqueado na view medicao_list_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furos_associados_ids = empregado.ligacoes_furos.filter(
-        empresa=empregado.empresa,
-        ativo=True,
-    ).values_list("furo_id", flat=True)
-
-    furos_com_registos_ids = empregado.registos_diarios.filter(
-        empresa=empregado.empresa,
-    ).exclude(furo__isnull=True).values_list("furo_id", flat=True)
-
-    medicoes = (
-        Medicao.objects.filter(
-            empresa=empregado.empresa,
-            furo_id__in=set(furos_associados_ids).union(set(furos_com_registos_ids)),
-        )
-        .select_related("furo", "furo__projeto")
-        .order_by("-criado_em", "-profundidade_medida")
-    )
+    medicoes = obter_lista_medicoes_empregado(empregado)
 
     logger.info(
         "View medicao_list_empregado carregada com sucesso. user_id=%s, empregado_id=%s, total_medicoes=%s",
@@ -1114,24 +1008,8 @@ def medicao_detail_empregado(request, pk):
         logger.warning("Acesso bloqueado na view medicao_detail_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    medicao = get_object_or_404(
-        Medicao.objects.select_related("furo", "furo__projeto"),
-        pk=pk,
-        empresa=empregado.empresa,
-    )
-
-    associado = EmpregadoFuro.objects.filter(
-        empregado=empregado,
-        furo=medicao.furo,
-        empresa=empregado.empresa,
-    ).exists()
-    com_registos = RegistoDiarioEmpregado.objects.filter(
-        empregado=empregado,
-        furo=medicao.furo,
-        empresa=empregado.empresa,
-    ).exists()
-
-    if not associado and not com_registos:
+    medicao = obter_medicao_empregado(pk=pk, empregado=empregado)
+    if not medicao or not empregado_tem_acesso_furo(empregado, medicao.furo):
         logger.warning(
             "Empregado sem permissão para medicao_detail_empregado. user_id=%s, empregado_id=%s, medicao_id=%s, furo_id=%s",
             request.user.id,
@@ -1169,36 +1047,8 @@ def meus_projetos_empregado(request):
         logger.warning("Acesso bloqueado na view meus_projetos_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projetos_associados_ids = empregado.ligacoes_projetos.filter(
-        empresa=empregado.empresa,
-    ).values_list("projeto_id", flat=True)
-
-    projetos_registos_ids = empregado.registos_diarios.filter(
-        projeto__isnull=False,
-        empresa=empregado.empresa,
-    ).values_list("projeto_id", flat=True)
-
-    projetos = Projeto.objects.filter(
-        empresa=empregado.empresa,
-        id__in=list(projetos_associados_ids) + list(projetos_registos_ids)
-    ).distinct().annotate(
-        total_furos_projeto=Count("furos", distinct=True)
-    ).order_by("nome")
-
-    resumo_registos = (
-        empregado.registos_diarios
-        .filter(projeto__in=projetos, empresa=empregado.empresa)
-        .values("projeto_id")
-        .annotate(
-            total_metros=Sum("metros_furados"),
-            total_horas=Sum("horas_trabalhadas"),
-        )
-    )
-
-    resumo_por_projeto = {
-        item["projeto_id"]: item
-        for item in resumo_registos
-    }
+    projetos = obter_lista_projetos_empregado(empregado)
+    resumo_por_projeto = obter_resumo_registos_projetos_empregado(empregado, projetos)
 
     logger.info(
         "View meus_projetos_empregado carregada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, total_projetos=%s",
@@ -1228,18 +1078,8 @@ def projeto_detail_empregado(request, pk):
         logger.warning("Acesso bloqueado na view projeto_detail_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projeto = get_object_or_404(Projeto, pk=pk, empresa=empregado.empresa)
-
-    associado_ao_projeto = empregado.ligacoes_projetos.filter(
-        projeto=projeto,
-        empresa=empregado.empresa,
-    ).exists()
-    com_registos_no_projeto = empregado.registos_diarios.filter(
-        projeto=projeto,
-        empresa=empregado.empresa,
-    ).exists()
-
-    if not associado_ao_projeto and not com_registos_no_projeto:
+    projeto = obter_projeto_empregado(pk=pk, empregado=empregado)
+    if not projeto or not empregado_tem_acesso_projeto(empregado, projeto):
         logger.warning(
             "Empregado sem permissão para projeto_detail_empregado. user_id=%s, empregado_id=%s, projeto_id=%s",
             request.user.id,
@@ -1249,29 +1089,10 @@ def projeto_detail_empregado(request, pk):
         messages.error(request, "Não tens permissão para ver este projeto.")
         return redirect("projetos:meus_projetos_empregado")
 
-    furo_ids_associados = EmpregadoFuro.objects.filter(
-        empregado=empregado,
-        empresa=empregado.empresa,
-        furo__projeto=projeto
-    ).values_list("furo_id", flat=True)
+    furos = obter_furos_projeto_empregado(empregado, projeto)
+    trabalhadores_envolvidos = obter_trabalhadores_envolvidos_projeto_empregado(empregado, projeto)
 
-    furo_ids_registos = empregado.registos_diarios.filter(
-        projeto=projeto,
-        furo__isnull=False,
-        empresa=empregado.empresa,
-    ).values_list("furo_id", flat=True)
-
-    furos = Furo.objects.filter(
-        empresa=empregado.empresa,
-        projeto=projeto,
-        id__in=list(furo_ids_associados) + list(furo_ids_registos)
-    ).distinct().order_by("nome")
-    trabalhadores_envolvidos = projeto.empregado_projetos.select_related("empregado").filter(
-        empresa=empregado.empresa,
-        ativo=True,
-    ).order_by("empregado__nome")
-
-    registos = empregado.registos_diarios.filter(projeto=projeto, empresa=empregado.empresa)
+    registos = obter_registos_projeto_empregado(empregado, projeto)
 
     total_metros = sum(r.metros_furados or 0 for r in registos)
     total_horas = sum(r.horas_trabalhadas or 0 for r in registos)
@@ -1539,12 +1360,7 @@ def configuracao_perfuracao_update_empregado(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(
-        ConfiguracaoPerfuracaoEmpregado,
-        pk=pk,
-        empregado=empregado,
-        empresa=empregado.empresa,
-    )
+    configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
     if request.method == "POST":
         form = ConfiguracaoPerfuracaoEmpregadoForm(
@@ -1604,7 +1420,7 @@ def configuracao_perfuracao_list_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_list_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
     configuracoes = obter_lista_configuracoes_perfuracao_empregado(
         empregado,
         empresa=empresa,
@@ -1638,7 +1454,7 @@ def configuracao_perfuracao_create_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
         form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
@@ -1687,7 +1503,7 @@ def configuracao_perfuracao_update_admin(request, pk):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_admin. user_id=%s", request.user.id)
         return resposta_erro
 
-    configuracao = get_object_or_404(ConfiguracaoPerfuracaoEmpregado, pk=pk, empresa=empresa)
+    configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
     empregado = configuracao.empregado
 
     if request.method == "POST":
@@ -1743,59 +1559,19 @@ def materiais_disponiveis_empregado(request):
         logger.warning("Acesso bloqueado na view materiais_disponiveis_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    projetos_ids = list(
-        empregado.ligacoes_projetos.filter(empresa=empregado.empresa).values_list("projeto_id", flat=True)
-    )
-
-    furos_ids_associados = list(
-        EmpregadoFuro.objects.filter(
-            empregado=empregado,
-            empresa=empregado.empresa,
-        ).values_list("furo_id", flat=True)
-    )
-
-    furos_ids_registos = list(
-        empregado.registos_diarios.filter(
-            furo__isnull=False,
-            empresa=empregado.empresa,
-        ).values_list("furo_id", flat=True)
-    )
-
-    furos_ids = list(set(furos_ids_associados + furos_ids_registos))
-
     projeto_id = request.GET.get("projeto")
     furo_id = request.GET.get("furo")
     nome = (request.GET.get("nome") or "").strip()
 
-    materiais = Material.objects.filter(ativo=True)
-
-    if empregado.empresa_id:
-        materiais = materiais.filter(empresa=empregado.empresa)
-
-    materiais = materiais.filter(
-        Q(projeto_id__in=projetos_ids) | Q(furo_id__in=furos_ids)
-    ).distinct()
-
-    if projeto_id:
-        materiais = materiais.filter(projeto_id=projeto_id)
-
-    if furo_id:
-        materiais = materiais.filter(furo_id=furo_id)
-
-    if nome:
-        materiais = materiais.filter(nome__icontains=nome)
-
-    materiais = materiais.select_related("projeto", "furo").order_by("nome")
-
-    projetos = Projeto.objects.filter(
-        empresa=empregado.empresa,
-        id__in=projetos_ids
-    ).distinct().order_by("nome")
-
-    furos = Furo.objects.filter(
-        empresa=empregado.empresa,
-        id__in=furos_ids
-    ).distinct().order_by("nome")
+    contexto_materiais = obter_contexto_materiais_disponiveis_empregado(
+        empregado,
+        projeto_id=projeto_id or "",
+        furo_id=furo_id or "",
+        nome=nome,
+    )
+    materiais = contexto_materiais["materiais"]
+    projetos = contexto_materiais["projetos"]
+    furos = contexto_materiais["furos"]
 
     logger.info(
         "View materiais_disponiveis_empregado carregada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, total_materiais=%s, filtro_nome='%s'",

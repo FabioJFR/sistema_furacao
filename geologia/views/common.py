@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from geologia.selectors_access import (
+from geologia.selectors.access import (
     obter_contexto_admin_geologia_user,
     resolver_empresa_global_geologia,
 )

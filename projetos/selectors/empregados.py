@@ -1,4 +1,18 @@
-from projetos.models import Empregados, Furo
+from django.db.models import Count, Q, Sum
+from django.shortcuts import get_object_or_404
+
+from projetos.models import (
+    ConfiguracaoPerfuracaoEmpregado,
+    DevolucaoMaterial,
+    EmpregadoFuro,
+    Empregados,
+    Furo,
+    Material,
+    LevantamentoMaterial,
+    Medicao,
+    Projeto,
+    RegistoDiarioEmpregado,
+)
 
 
 
@@ -126,3 +140,300 @@ def obter_contexto_area_empregado(empregado, empresa=None):
         "furos_trabalhados": furos_trabalhados,
         **dados_grafico,
     }
+
+
+def obter_furo_empregado(pk, empregado):
+    return Furo.objects.select_related("projeto").filter(pk=pk, empresa=empregado.empresa).first()
+
+
+def empregado_tem_acesso_furo(empregado, furo):
+    associado = EmpregadoFuro.objects.filter(
+        empregado=empregado,
+        furo=furo,
+        empresa=empregado.empresa,
+    ).exists()
+    com_registos = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo=furo,
+        empresa=empregado.empresa,
+    ).exists()
+    return associado or com_registos
+
+
+def obter_medicoes_furo_empregado(empregado, furo):
+    return Medicao.objects.filter(
+        furo=furo,
+        empresa=empregado.empresa,
+    ).order_by("criado_em", "profundidade_medida")
+
+
+def obter_registos_furo_empregado(empregado, furo):
+    return RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo=furo,
+        empresa=empregado.empresa,
+    ).select_related("projeto", "furo").order_by("-data", "-criado_em")
+
+
+def obter_lista_furos_empregado(empregado):
+    furo_ids_associados = EmpregadoFuro.objects.filter(
+        empregado=empregado,
+        empresa=empregado.empresa,
+    ).values_list("furo_id", flat=True)
+
+    furo_ids_registos = empregado.registos_diarios.filter(
+        furo__isnull=False,
+        empresa=empregado.empresa,
+    ).values_list("furo_id", flat=True)
+
+    return Furo.objects.select_related("projeto").filter(
+        empresa=empregado.empresa,
+        id__in=list(furo_ids_associados) + list(furo_ids_registos),
+    ).distinct().order_by("nome")
+
+
+def obter_lista_medicoes_empregado(empregado):
+    furos_associados_ids = empregado.ligacoes_furos.filter(
+        empresa=empregado.empresa,
+        ativo=True,
+    ).values_list("furo_id", flat=True)
+
+    furos_com_registos_ids = empregado.registos_diarios.filter(
+        empresa=empregado.empresa,
+    ).exclude(furo__isnull=True).values_list("furo_id", flat=True)
+
+    return (
+        Medicao.objects.filter(
+            empresa=empregado.empresa,
+            furo_id__in=set(furos_associados_ids).union(set(furos_com_registos_ids)),
+        )
+        .select_related("furo", "furo__projeto")
+        .order_by("-criado_em", "-profundidade_medida")
+    )
+
+
+def obter_medicao_empregado(pk, empregado):
+    return Medicao.objects.select_related("furo", "furo__projeto").filter(
+        pk=pk,
+        empresa=empregado.empresa,
+    ).first()
+
+
+def obter_lista_projetos_empregado(empregado):
+    projetos_associados_ids = empregado.ligacoes_projetos.filter(
+        empresa=empregado.empresa,
+    ).values_list("projeto_id", flat=True)
+
+    projetos_registos_ids = empregado.registos_diarios.filter(
+        projeto__isnull=False,
+        empresa=empregado.empresa,
+    ).values_list("projeto_id", flat=True)
+
+    return Projeto.objects.filter(
+        empresa=empregado.empresa,
+        id__in=list(projetos_associados_ids) + list(projetos_registos_ids),
+    ).distinct().annotate(
+        total_furos_projeto=Count("furos", distinct=True)
+    ).order_by("nome")
+
+
+def obter_resumo_registos_projetos_empregado(empregado, projetos):
+    resumo_registos = (
+        empregado.registos_diarios
+        .filter(projeto__in=projetos, empresa=empregado.empresa)
+        .values("projeto_id")
+        .annotate(
+            total_metros=Sum("metros_furados"),
+            total_horas=Sum("horas_trabalhadas"),
+        )
+    )
+    return {item["projeto_id"]: item for item in resumo_registos}
+
+
+def obter_projeto_empregado(pk, empregado):
+    return Projeto.objects.filter(pk=pk, empresa=empregado.empresa).first()
+
+
+def empregado_tem_acesso_projeto(empregado, projeto):
+    associado = empregado.ligacoes_projetos.filter(
+        projeto=projeto,
+        empresa=empregado.empresa,
+    ).exists()
+    com_registos = empregado.registos_diarios.filter(
+        projeto=projeto,
+        empresa=empregado.empresa,
+    ).exists()
+    return associado or com_registos
+
+
+def obter_furos_projeto_empregado(empregado, projeto):
+    furo_ids_associados = EmpregadoFuro.objects.filter(
+        empregado=empregado,
+        empresa=empregado.empresa,
+        furo__projeto=projeto,
+    ).values_list("furo_id", flat=True)
+
+    furo_ids_registos = empregado.registos_diarios.filter(
+        projeto=projeto,
+        furo__isnull=False,
+        empresa=empregado.empresa,
+    ).values_list("furo_id", flat=True)
+
+    return Furo.objects.filter(
+        empresa=empregado.empresa,
+        projeto=projeto,
+        id__in=list(furo_ids_associados) + list(furo_ids_registos),
+    ).distinct().order_by("nome")
+
+
+def obter_trabalhadores_envolvidos_projeto_empregado(empregado, projeto):
+    return projeto.empregado_projetos.select_related("empregado").filter(
+        empresa=empregado.empresa,
+        ativo=True,
+    ).order_by("empregado__nome")
+
+
+def obter_registos_projeto_empregado(empregado, projeto):
+    return empregado.registos_diarios.filter(projeto=projeto, empresa=empregado.empresa)
+
+
+def obter_historico_projetos_empregado_area(empregado):
+    return (
+        empregado.ligacoes_projetos
+        .select_related("projeto")
+        .filter(empresa=empregado.empresa)
+        .order_by("-ativo", "-data_inicio")
+    )
+
+
+def obter_resumo_furos_empregado_area(empregado):
+    return (
+        RegistoDiarioEmpregado.objects
+        .filter(
+            empregado=empregado,
+            empresa=empregado.empresa,
+            furo__isnull=False,
+        )
+        .values("furo__id", "furo__nome", "projeto__nome")
+        .annotate(
+            total_metros=Sum("metros_furados"),
+            total_horas=Sum("horas_trabalhadas"),
+        )
+        .order_by("-total_metros", "furo__nome")
+    )
+
+
+def obter_totais_empregado_area(empregado):
+    return {
+        "total_registos": RegistoDiarioEmpregado.objects.filter(
+            empregado=empregado,
+            empresa=empregado.empresa,
+        ).count(),
+        "total_levantamentos": LevantamentoMaterial.objects.filter(
+            empregado=empregado,
+            empresa=empregado.empresa,
+        ).count(),
+        "total_devolucoes": DevolucaoMaterial.objects.filter(
+            empregado=empregado,
+            empresa=empregado.empresa,
+        ).count(),
+        "total_configuracoes": ConfiguracaoPerfuracaoEmpregado.objects.filter(
+            empregado=empregado,
+            empresa=empregado.empresa,
+        ).count(),
+    }
+
+
+def obter_empregado_admin_por_pk(pk, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(Empregados, pk=pk, empresa_id=empresa_id)
+
+
+def obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(
+        empregado.ligacoes_projetos,
+        id=ligacao_id,
+        empregado=empregado,
+        empresa_id=empresa_id,
+    )
+
+
+def obter_ficheiro_empregado_admin(ficheiro_id, empregado, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(
+        empregado.ficheiros,
+        id=ficheiro_id,
+        empregado=empregado,
+        empresa_id=empresa_id,
+    )
+
+
+def obter_empregado_pendente_admin_por_pk(pk, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(Empregados, pk=pk, empresa_id=empresa_id, aprovado=False)
+
+
+def obter_contexto_materiais_disponiveis_empregado(empregado, *, projeto_id="", furo_id="", nome=""):
+    projetos_ids = list(
+        empregado.ligacoes_projetos.filter(empresa=empregado.empresa).values_list("projeto_id", flat=True)
+    )
+
+    furos_ids_associados = list(
+        empregado.ligacoes_furos.filter(
+            empresa=empregado.empresa,
+        ).values_list("furo_id", flat=True)
+    )
+
+    furos_ids_registos = list(
+        empregado.registos_diarios.filter(
+            furo__isnull=False,
+            empresa=empregado.empresa,
+        ).values_list("furo_id", flat=True)
+    )
+    furos_ids = list(set(furos_ids_associados + furos_ids_registos))
+
+    materiais = Material.objects.filter(ativo=True)
+    if empregado.empresa_id:
+        materiais = materiais.filter(empresa=empregado.empresa)
+
+    materiais = materiais.filter(
+        Q(projeto_id__in=projetos_ids) | Q(furo_id__in=furos_ids)
+    ).distinct()
+
+    if projeto_id:
+        materiais = materiais.filter(projeto_id=projeto_id)
+    if furo_id:
+        materiais = materiais.filter(furo_id=furo_id)
+    if nome:
+        materiais = materiais.filter(nome__icontains=nome)
+    materiais = materiais.select_related("projeto", "furo").order_by("nome")
+
+    projetos = Projeto.objects.filter(
+        empresa=empregado.empresa,
+        id__in=projetos_ids,
+    ).distinct().order_by("nome")
+    furos = Furo.objects.filter(
+        empresa=empregado.empresa,
+        id__in=furos_ids,
+    ).distinct().order_by("nome")
+
+    return {
+        "materiais": materiais,
+        "projetos": projetos,
+        "furos": furos,
+    }
+
+
+def obter_furo_admin_por_pk_empresa(pk, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
+
+
+def obter_ligacao_empregado_furo_admin_por_pk(pk, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(
+        EmpregadoFuro.objects.select_related("furo", "empregado"),
+        pk=pk,
+        empresa_id=empresa_id,
+    )

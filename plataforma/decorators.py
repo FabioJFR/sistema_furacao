@@ -3,7 +3,7 @@ from functools import wraps
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from plataforma.models import PerfilPlataforma
+from plataforma.selectors.access import obter_perfil_plataforma_ativo
 
 
 # TODO futuro:
@@ -13,11 +13,7 @@ from plataforma.models import PerfilPlataforma
 
 
 def obter_perfil_plataforma(user):
-    if not user.is_authenticated:
-        return None
-
-    perfil = PerfilPlataforma.objects.filter(user=user, ativo=True).first()
-    return perfil
+    return obter_perfil_plataforma_ativo(user)
 
 
 def user_is_platform_admin(user):

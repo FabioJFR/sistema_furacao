@@ -32651,3 +32651,5 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'configuracao_perfuracao_hist
 [2026-04-24 15:09:25,890] INFO django.utils.autoreload | Watching for file changes with StatReloader
 [2026-04-24 15:09:39,667] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/geologia/views/dashboard.py changed, reloading.
 [2026-04-24 15:09:40,039] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-24 18:27:13,744] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/plataforma/views/empresas.py changed, reloading.
+[2026-04-24 18:27:14,531] INFO django.utils.autoreload | Watching for file changes with StatReloader

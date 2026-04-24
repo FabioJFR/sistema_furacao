@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from projetos.models import ConfiguracaoPerfuracaoEmpregado
+from projetos.models import ConfiguracaoPerfuracaoEmpregado, Empregados
 
 
 # TODO futuro:
@@ -48,4 +48,24 @@ def obter_configuracao_perfuracao(pk, empresa=None):
     queryset = _obter_queryset_base_configuracoes()
     queryset = _filtrar_configuracoes_por_empresa(queryset, empresa)
 
+    return get_object_or_404(queryset, pk=pk)
+
+
+def obter_empregado_por_pk_empresa(pk, empresa):
+    empresa_id = _resolver_empresa_id(empresa)
+    return get_object_or_404(Empregados, pk=pk, empresa_id=empresa_id)
+
+
+def obter_configuracao_perfuracao_empregado(pk, empregado):
+    return get_object_or_404(
+        _obter_queryset_base_configuracoes(),
+        pk=pk,
+        empregado=empregado,
+        empresa=empregado.empresa,
+    )
+
+
+def obter_configuracao_perfuracao_admin(pk, empresa):
+    queryset = _obter_queryset_base_configuracoes()
+    queryset = _filtrar_configuracoes_por_empresa(queryset, empresa)
     return get_object_or_404(queryset, pk=pk)

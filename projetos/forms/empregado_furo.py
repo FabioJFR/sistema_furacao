@@ -1,11 +1,12 @@
 from django import forms
 
-from projetos.models import EmpregadoFuro, Empregados
+from projetos.models import EmpregadoFuro
+from projetos.selectors.forms import listar_empregados_furo_form_qs, resolver_empresa_id
 
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 
@@ -48,21 +49,11 @@ class EmpregadoFuroForm(forms.ModelForm):
 
         _atribuir_contexto_empregado_furo(self.instance, empresa=self.empresa, furo=self.furo)
 
-        queryset = Empregados.objects.all()
-
-        if self.empresa is not None:
-            queryset = queryset.filter(empresa_id=_resolver_empresa_id(self.empresa))
-
-        queryset = queryset.filter(ativo=True) if hasattr(Empregados, "ativo") else queryset
-        queryset = queryset.order_by("nome")
-
-        if self.furo and not self.instance.pk:
-            empregados_ja_ligados = EmpregadoFuro.objects.filter(
-                furo=self.furo
-            ).values_list("empregado_id", flat=True)
-            queryset = queryset.exclude(id__in=empregados_ja_ligados)
-
-        self.fields["empregado"].queryset = queryset
+        self.fields["empregado"].queryset = listar_empregados_furo_form_qs(
+            empresa=self.empresa,
+            furo=self.furo,
+            is_edicao=bool(self.instance.pk),
+        )
 
     def clean(self):
         cleaned = super().clean()

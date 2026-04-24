@@ -1,11 +1,11 @@
 from django import forms
 
 from ..models.furo import Furo
-from ..models.projeto import Projeto
+from ..selectors.forms import listar_projetos_empresa_qs, resolver_empresa_id
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 def _atribuir_empresa_furo(instance, empresa=None):
@@ -15,11 +15,7 @@ def _atribuir_empresa_furo(instance, empresa=None):
 
 
 def _obter_queryset_projetos_empresa(empresa=None):
-    if empresa is None:
-        return Projeto.objects.none()
-    return Projeto.objects.filter(
-        empresa_id=_resolver_empresa_id(empresa)
-    ).order_by("nome")
+    return listar_projetos_empresa_qs(empresa)
 
 
 def _validar_inclinacao(valor, mensagem=None):

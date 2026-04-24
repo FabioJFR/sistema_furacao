@@ -10,7 +10,6 @@ from uuid import UUID
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import translation
@@ -20,23 +19,26 @@ from core.permissions import admin_required
 
 from projetos.forms import EmpresaFinanceiraForm, PreferenciasForm
 from projetos.selectors.acesso import obter_contexto_admin_projetos
-from projetos.selectors.opcoes import obter_resultados_procurar_dashboard
-from projetos.models import (
-    Despesa,
-    Empregados,
-    EventoAnalytics,
-    Furo,
-    Maquina,
-    Material,
-    Medicao,
-    PreferenciasUser,
-    Projeto,
-    RegistoDiarioEmpregado,
+from projetos.selectors.opcoes import (
+    listar_furos_filtro_exportacao,
+    listar_projetos_filtro_exportacao,
+    obter_projeto_furo_filtros_exportacao,
+    obter_resultados_procurar_dashboard,
+    qs_despesas_exportacao,
+    qs_empregados_exportacao,
+    qs_eventos_exportacao,
+    qs_furos_exportacao,
+    qs_maquinas_exportacao,
+    qs_materiais_exportacao,
+    qs_medicoes_exportacao,
+    qs_projetos_exportacao,
+    qs_registos_exportacao,
 )
-
-
-def _empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+from projetos.selectors.preferencias import (
+    garantir_preferencias_empresa,
+    obter_ou_criar_preferencias_user,
+)
+from projetos.models import Despesa
 
 
 def _obter_empresa_admin_opcoes(request):
@@ -70,15 +72,11 @@ def _obter_filtros_exportacao(request, empresa):
     categoria_despesa = (request.GET.get("categoria_despesa") or "").strip()
     data_inicio = _parse_data(request.GET.get("data_inicio"))
     data_fim = _parse_data(request.GET.get("data_fim"))
-    projeto = None
-    furo = None
-    if projeto_id:
-        projeto = Projeto.objects.filter(empresa=empresa, pk=projeto_id).first()
-    if furo_id:
-        furo_queryset = Furo.objects.filter(empresa=empresa, pk=furo_id)
-        if projeto:
-            furo_queryset = furo_queryset.filter(projeto=projeto)
-        furo = furo_queryset.first()
+    projeto, furo = obter_projeto_furo_filtros_exportacao(
+        empresa=empresa,
+        projeto_id=projeto_id,
+        furo_id=furo_id,
+    )
     return {
         "projeto": projeto,
         "furo": furo,
@@ -93,116 +91,95 @@ def _obter_filtros_exportacao(request, empresa):
     }
 
 
-def _filtrar_periodo_queryset(queryset, campo, filtros):
-    if filtros.get("data_inicio"):
-        queryset = queryset.filter(**{f"{campo}__gte": filtros["data_inicio"]})
-    if filtros.get("data_fim"):
-        queryset = queryset.filter(**{f"{campo}__lte": filtros["data_fim"]})
-    return queryset
-
-
 def _qs_projetos(empresa, filtros):
-    queryset = Projeto.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(pk=projeto.pk)
-    return _filtrar_periodo_queryset(queryset, "data_inicio_proj", filtros)
+    return qs_projetos_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_furos(empresa, filtros):
-    queryset = Furo.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(projeto=projeto)
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(pk=furo.pk)
-    return _filtrar_periodo_queryset(queryset, "data__date", filtros)
+    return qs_furos_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_maquinas(empresa, filtros):
-    queryset = Maquina.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(Q(projeto_atual=projeto) | Q(projetos=projeto)).distinct()
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(furos=furo).distinct()
-    return _filtrar_periodo_queryset(queryset, "data_registo", filtros)
+    return qs_maquinas_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_materiais(empresa, filtros):
-    queryset = Material.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto)).distinct()
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(furo=furo)
-    return _filtrar_periodo_queryset(queryset, "data_compra", filtros)
+    return qs_materiais_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_empregados(empresa, filtros):
-    queryset = Empregados.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(ligacoes_projetos__projeto=projeto).distinct()
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(Q(furos=furo) | Q(ligacoes_furos__furo=furo)).distinct()
-    return _filtrar_periodo_queryset(queryset, "data_admissao", filtros)
+    return qs_empregados_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_registos(empresa, filtros):
-    queryset = RegistoDiarioEmpregado.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(projeto=projeto)
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(furo=furo)
-    tipo_registo = filtros.get("tipo_registo")
-    if tipo_registo == "sem_paragem":
-        queryset = queryset.filter(tipo_paragem="")
-    elif tipo_registo:
-        queryset = queryset.filter(tipo_paragem=tipo_registo)
-    return _filtrar_periodo_queryset(queryset, "data", filtros)
+    return qs_registos_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        tipo_registo=filtros.get("tipo_registo") or "",
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_medicoes(empresa, filtros):
-    queryset = Medicao.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(furo__projeto=projeto)
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(furo=furo)
-    return _filtrar_periodo_queryset(queryset, "criado_em__date", filtros)
+    return qs_medicoes_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_despesas(empresa, filtros):
-    queryset = Despesa.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto) | Q(maquina__projetos=projeto)).distinct()
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(Q(furo=furo) | Q(projeto=furo.projeto) | Q(maquina__furos=furo)).distinct()
-    categoria_despesa = filtros.get("categoria_despesa")
-    if categoria_despesa:
-        queryset = queryset.filter(categoria=categoria_despesa)
-    return _filtrar_periodo_queryset(queryset, "data", filtros)
+    return qs_despesas_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        categoria_despesa=filtros.get("categoria_despesa") or "",
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _qs_eventos(empresa, filtros):
-    queryset = EventoAnalytics.objects.filter(empresa=empresa)
-    projeto = filtros.get("projeto")
-    if projeto:
-        queryset = queryset.filter(Q(projeto=projeto) | Q(furo__projeto=projeto)).distinct()
-    furo = filtros.get("furo")
-    if furo:
-        queryset = queryset.filter(furo=furo)
-    return _filtrar_periodo_queryset(queryset, "criado_em__date", filtros)
+    return qs_eventos_exportacao(
+        empresa=empresa,
+        projeto=filtros.get("projeto"),
+        furo=filtros.get("furo"),
+        data_inicio=filtros.get("data_inicio"),
+        data_fim=filtros.get("data_fim"),
+    )
 
 
 def _coerce_export_value(value):
@@ -851,9 +828,8 @@ def definicoes_admin(request):
     if resposta_erro:
         return resposta_erro
 
-    preferencias, _ = PreferenciasUser.objects.get_or_create(user=request.user)
-    preferencias.empresa = empresa
-    preferencias.save(update_fields=["empresa"])
+    preferencias, _ = obter_ou_criar_preferencias_user(request.user)
+    preferencias = garantir_preferencias_empresa(preferencias, empresa)
 
     if request.method == "POST":
         form = PreferenciasForm(instance=preferencias, user=request.user, prefix="prefs")
@@ -952,8 +928,8 @@ def relatorios_exportacao(request):
         {
             "empresa": empresa,
             "datasets": datasets,
-            "projetos_filtro": Projeto.objects.filter(empresa=empresa).order_by("nome"),
-            "furos_filtro": _qs_furos(empresa, {"projeto": filtros.get("projeto"), "furo": None, "data_inicio": None, "data_fim": None, "tipo_registo": "", "categoria_despesa": ""}).order_by("nome"),
+            "projetos_filtro": listar_projetos_filtro_exportacao(empresa),
+            "furos_filtro": listar_furos_filtro_exportacao(empresa=empresa, projeto=filtros.get("projeto")),
             "tipos_registo": [
                 ("", "Todos os registos"),
                 ("sem_paragem", "Sem paragem"),
