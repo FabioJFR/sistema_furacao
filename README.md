@@ -6,9 +6,9 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.3.1-beta**
+- Versão atual: **v0.9.3.1**
 - Estado: **desenvolvimento ativo**
-- Foco imediato: **Projetos** e **IA**
+- Foco imediato: **Projetos**, **IA** e **estabilização para produção**
 
 ### Stack principal
 
@@ -18,6 +18,24 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - **Gráficos:** Chart.js
 - **Visualização 3D de furos:** Plotly
 - **Base de dados:** PostgreSQL
+
+---
+
+## Release 0.9.3.1 (resumo)
+
+Principais evoluções consolidadas nesta versão:
+
+- reorganização da operação `Drone S_F` para ficar alinhada com o padrão visual da área `DJI`
+- motor de missões programadas com repetição contínua por checkbox (ativar/desativar)
+- quadro de estado com últimas missões disparadas e últimos comandos gerados
+- evolução da página de detalhe da análise IA (layout, contexto, estado, leitura estimada e scroll por painel)
+- `reprocessar` no histórico de análises para gerar nova análise com as melhorias mais recentes
+- fluxo de análise em pré-visualização com botão explícito para `Guardar análise`
+- ferramentas de seleção de área e zonas de análise com criação/nomeação de retângulos reutilizáveis
+- melhoria de permissões para `superuser` no menu `Plataforma` e submenu `AI`
+- secção `Úteis` com exportação/limpeza de dados AI e operacionais
+- reforço de higiene técnica: redução de URLs hardcoded, migração contínua de CSS/JS para `static/`, e avanço na separação de `selectors/` e `services/`
+- melhorias de prontidão para deploy: hardening de `settings` por variáveis de ambiente, `STATIC_ROOT`, e limpeza de configuração de static em URL de app
 
 ---
 
@@ -137,9 +155,14 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - upload de fotografia e análise visual
 - deteção por zonas em caixas de amostra
 - deteção por zonas em relatórios retangulares
+- seleção inicial da área do relatório antes da análise
+- seleção avançada de zonas com retângulos nomeáveis e guardáveis
+- redimensionamento de retângulos de análise
 - correção automática/manual de inclinação da imagem
 - campo estruturado `campos_extraidos`
 - histórico de análises por empresa
+- reprocessamento de análises históricas
+- modo pré-visualização e gravação manual da análise
 
 ### Chatbox AI
 
@@ -159,6 +182,16 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - limpeza controlada de grupos de dados
 - scripts operacionais executáveis pela interface
 - catálogo visível de datasets configurados para exportação
+- gestão de features por plano/conta com controlo por checkboxes
+- maior consistência de acesso entre perfis empresa, empregado e superuser
+
+### Arquitetura e qualidade de código
+
+- padronização progressiva por app com pastas `selectors/` e `services/`
+- redução de lógica dispersa em views/forms, com extração gradual para camadas próprias
+- migração progressiva de CSS inline e blocos `<style>` para `static/css/`
+- migração progressiva de JavaScript inline para `static/js/`
+- reforço da política de URLs nomeadas e validação por gate de higiene
 
 ---
 
@@ -299,6 +332,42 @@ docker compose up -d
 python3 manage.py migrate
 python3 manage.py runserver
 ```
+
+---
+
+## Preparação para servidor (Oracle Cloud)
+
+Checklist recomendado antes do deploy:
+
+```bash
+cp .env.example .env
+```
+
+Definir no `.env` de produção (obrigatório):
+
+- `DJANGO_SECRET_KEY` forte e única
+- `DJANGO_DEBUG=False`
+- `DJANGO_ALLOWED_HOSTS` com domínio/IP real
+- `DJANGO_SECURE_SSL_REDIRECT=True`
+- `DJANGO_SESSION_COOKIE_SECURE=True`
+- `DJANGO_CSRF_COOKIE_SECURE=True`
+- `DJANGO_SECURE_HSTS_SECONDS=31536000`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+
+Comandos de validação e preparação:
+
+```bash
+./.venv/bin/python manage.py check
+./.venv/bin/python manage.py check --deploy
+./.venv/bin/python manage.py migrate
+./.venv/bin/python manage.py collectstatic --noinput
+```
+
+Notas importantes:
+
+- em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`
+- validar uploads, login e páginas críticas após deploy
+- manter backup da base de dados antes de cada atualização
 
 ---
 
