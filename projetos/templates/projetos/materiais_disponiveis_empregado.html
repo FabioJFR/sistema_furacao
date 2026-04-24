@@ -95,10 +95,10 @@
                                 </td>
                                 <td class="py-3 pr-4">
                                     <div class="flex flex-wrap gap-2">
-                                        <a href="/app/levantamentos/meus/novo/?material={{ material.id }}" class="btn btn-primary">
+                                        <a href="{% url 'projetos:levantamento_create' %}?material={{ material.id }}" class="btn btn-primary">
                                             📤 {% trans "Levantar" %}
                                         </a>
-                                        <a href="/app/devolucoes/criar/?material={{ material.id }}" class="btn btn-warning">
+                                        <a href="{% url 'projetos:devolucao_material_create' %}?material={{ material.id }}" class="btn btn-warning">
                                             ↩️ {% trans "Devolver" %}
                                         </a>
                                     </div>

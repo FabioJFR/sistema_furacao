@@ -20,7 +20,7 @@
             class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
                 🕘 Ver Histórico
             </a>
-            <a href="{% url 'projetos:empregado_detail' empregado_obj.pk %}"
+            <a href="{{ empregado_obj.get_absolute_url }}"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
                 🔙 Voltar ao Empregado
             </a>

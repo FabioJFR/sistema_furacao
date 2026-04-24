@@ -1,5 +1,6 @@
 {% extends "projetos/base.html" %}
 {% load widget_tweaks %}
+{% load static %}
 <!-- registo_empregado.html-->
 {% block title %}Registo{% endblock %}
 
@@ -48,24 +49,8 @@
         </div>
     </div>
 </section>
-<script>
-    (function() {
-        const tipoConta = document.getElementById("id_tipo_conta");
-        const empresaWrap = document.getElementById("empresaNomeWrap");
-        const funcaoWrap = document.getElementById("funcaoWrap");
-        const especialidadeWrap = document.getElementById("especialidadeWrap");
+{% endblock %}
 
-        function atualizarCampos() {
-            const isIndividual = tipoConta && tipoConta.value === "individual";
-            if (empresaWrap) empresaWrap.style.display = isIndividual ? "none" : "";
-            if (funcaoWrap) funcaoWrap.style.display = isIndividual ? "none" : "";
-            if (especialidadeWrap) especialidadeWrap.style.display = isIndividual ? "" : "none";
-        }
-
-        if (tipoConta) {
-            tipoConta.addEventListener("change", atualizarCampos);
-            atualizarCampos();
-        }
-    })();
-</script>
+{% block extra_scripts %}
+<script src="{% static 'js/projetos/registo_empregado.js' %}"></script>
 {% endblock %}

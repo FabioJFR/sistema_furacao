@@ -2,16 +2,15 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from ..decorators import admin_required
 from ..forms.maquina import MaquinaForm
-from ..models.empregado import Empregados
-from ..models.maquina import Maquina
-from plataforma.models import PerfilPlataforma
+from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.maquinas import (
     obter_contexto_maquina_detail,
     obter_lista_maquinas,
+    obter_maquina,
 )
 from projetos.services.maquinas import (
     atualizar_maquina,
@@ -19,9 +18,6 @@ from projetos.services.maquinas import (
 )
 
 logger = logging.getLogger("core")
-
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
 
 
 # ---------------- HELPERS ----------------
@@ -32,11 +28,7 @@ def _obter_contexto_admin_maquinas(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em maquinas.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -181,7 +173,7 @@ def maquina_update(request, maquina_id):
         logger.warning("Acesso bloqueado na view maquina_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    maquina = get_object_or_404(Maquina, id=maquina_id, empresa=empresa)
+    maquina = obter_maquina(maquina_id, empresa=empresa)
 
     if request.method == "POST":
         form = MaquinaForm(request.POST, instance=maquina, empresa=empresa)
@@ -228,7 +220,7 @@ def maquina_delete(request, maquina_id):
         logger.warning("Acesso bloqueado na view maquina_delete. user_id=%s", request.user.id)
         return resposta_erro
 
-    maquina = get_object_or_404(Maquina, id=maquina_id, empresa=empresa)
+    maquina = obter_maquina(maquina_id, empresa=empresa)
 
     if request.method == "POST":
         maquina_id_removida = maquina.id

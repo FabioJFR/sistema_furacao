@@ -36,7 +36,7 @@
             </button>
 
             <!-- Cancelar -->
-            <a href="{% url 'projetos:projeto_detail' projeto.pk %}" 
+            <a href="{{ projeto.get_absolute_url }}" 
                class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
                 ❌ Cancelar
             </a>

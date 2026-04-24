@@ -1,0 +1,49 @@
+.fd-wrap {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #e74c3c;
+    padding: 30px;
+    border-radius: 10px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.fd-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.fd-form-inline {
+    display: inline;
+}
+
+.fd-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.fd-btn-delete {
+    background: #fff;
+    color: #e74c3c;
+    border: none;
+    cursor: pointer;
+}
+
+.fd-btn-delete:hover {
+    background: #f2f2f2;
+}
+
+.fd-btn-cancel {
+    background: #2980b9;
+    color: #fff;
+    text-decoration: none;
+}
+
+.fd-btn-cancel:hover {
+    background: #3498db;
+}

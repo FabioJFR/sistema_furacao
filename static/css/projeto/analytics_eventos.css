@@ -1,0 +1,215 @@
+.aev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.aev-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.aev-subtitle {
+    margin: 8px 0 0;
+    color: #6b7280;
+}
+
+.aev-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.aev-metric-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid;
+}
+
+.aev-metric-blue {
+    border-left-color: #2563eb;
+}
+
+.aev-metric-green {
+    border-left-color: #16a34a;
+}
+
+.aev-metric-amber {
+    border-left-color: #f59e0b;
+}
+
+.aev-metric-red {
+    border-left-color: #dc2626;
+}
+
+.aev-metric-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.aev-metric-value {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.aev-value-blue {
+    color: #2563eb;
+}
+
+.aev-value-green {
+    color: #16a34a;
+}
+
+.aev-value-amber {
+    color: #f59e0b;
+}
+
+.aev-value-red {
+    color: #dc2626;
+}
+
+.aev-filter-card,
+.aev-table-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.aev-filter-card {
+    padding: 20px;
+}
+
+.aev-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.aev-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.aev-filter-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.aev-table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.aev-table-wrap {
+    overflow: auto;
+}
+
+.aev-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+}
+
+.aev-table thead {
+    background: #f8fafc;
+}
+
+.aev-table th {
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.aev-table tbody tr {
+    border-top: 1px solid #e5e7eb;
+}
+
+.aev-table td {
+    padding: 16px;
+    vertical-align: top;
+}
+
+.aev-text-strong {
+    color: #111827;
+}
+
+.aev-entity-title {
+    font-weight: 700;
+    color: #111827;
+}
+
+.aev-entity-sub,
+.aev-user-sub {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.aev-user-title {
+    font-weight: 600;
+    color: #111827;
+}
+
+.aev-context {
+    color: #374151;
+}
+
+.aev-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.aev-badge-create {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.aev-badge-update {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.aev-badge-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.aev-metric-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.aev-metric-tag {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.aev-empty-metric {
+    color: #9ca3af;
+}
+
+.aev-empty {
+    padding: 28px;
+    color: #6b7280;
+}

@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 from core.utils.coordenadas import obter_coordenadas_por_cidade_pais
-from projetos.models import Projeto
+from projetos.models import EmpregadoProjeto, Projeto
 
 
 # ==============================
@@ -80,3 +80,30 @@ def atualizar_projeto(form, empresa=None):
     form.save_m2m()
 
     return projeto
+
+
+def associar_empregado_projeto(*, empregado, projeto, empresa=None, data_inicio=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id
+
+    if empregado.empresa_id != empresa_id:
+        raise ValidationError("O empregado não pertence à empresa atual.")
+    if projeto.empresa_id != empresa_id:
+        raise ValidationError("O projeto não pertence à empresa atual.")
+
+    ligacao = EmpregadoProjeto.objects.filter(
+        empregado=empregado,
+        projeto=projeto,
+        empresa_id=empresa_id,
+        ativo=True,
+    ).first()
+    if ligacao:
+        return ligacao, False
+
+    ligacao = EmpregadoProjeto.objects.create(
+        empregado=empregado,
+        projeto=projeto,
+        empresa_id=empresa_id,
+        data_inicio=data_inicio,
+        ativo=True,
+    )
+    return ligacao, True

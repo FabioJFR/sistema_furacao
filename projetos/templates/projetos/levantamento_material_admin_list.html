@@ -90,7 +90,7 @@
                                 <td class="px-4 py-3">{{ levantamento.quantidade }}</td>
                                 <td class="px-4 py-3">
                                     {% if levantamento.projeto %}
-                                        <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}" class="text-blue-600 hover:underline">
+                                        <a href="{{ levantamento.projeto.get_absolute_url }}" class="text-blue-600 hover:underline">
                                             {{ levantamento.projeto.nome }}
                                         </a>
                                     {% else %}
@@ -99,7 +99,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     {% if levantamento.furo %}
-                                        <a href="{% url 'projetos:furo_detail' levantamento.furo.id %}" class="text-blue-600 hover:underline">
+                                        <a href="{{ levantamento.furo.get_absolute_url }}" class="text-blue-600 hover:underline">
                                             {{ levantamento.furo.nome }}
                                         </a>
                                     {% else %}

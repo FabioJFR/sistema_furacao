@@ -124,7 +124,7 @@ def furo_adicionar_empregado(request, furo_id):
                 messages.success(request, "Trabalhador associado ao furo e automaticamente ligado ao projeto.")
             else:
                 messages.success(request, "Trabalhador associado ao furo com sucesso.")
-            return redirect(reverse("projetos:furo_detail", args=[furo.pk]))
+            return redirect(furo)
 
         logger.warning(
             "Erro ao associar trabalhador ao furo. user_id=%s, furo_id=%s, erros=%s",
@@ -205,7 +205,7 @@ def furo_editar_empregado(request, pk):
                 messages.success(request, "Ligação trabalhador/furo atualizada e projeto associado automaticamente.")
             else:
                 messages.success(request, "Ligação trabalhador/furo atualizada com sucesso.")
-            return redirect(reverse("projetos:furo_detail", args=[ligacao.furo.pk]))
+            return redirect(ligacao.furo)
 
         logger.warning(
             "Erro ao atualizar ligação trabalhador/furo. user_id=%s, ligacao_pk=%s, erros=%s",
@@ -262,7 +262,7 @@ def furo_remover_empregado(request, pk):
             furo.pk,
         )
         messages.success(request, "Trabalhador removido do furo com sucesso.")
-        return redirect(reverse("projetos:furo_detail", args=[furo.pk]))
+        return redirect(furo)
 
     return render(request, "projetos/furo_remover_empregado.html", {
         "ligacao": ligacao,

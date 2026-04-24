@@ -102,6 +102,29 @@ def obter_lista_projetos(empresa=None):
     return _filtrar_queryset_por_empresa(queryset, empresa=empresa)
 
 
+def obter_lista_projetos_serializaveis(empresa=None):
+    return list(
+        obter_lista_projetos(empresa=empresa).values(
+            "id",
+            "pk",
+            "nome",
+            "cliente",
+            "cidade",
+            "pais",
+            "localizacao_lat",
+            "localizacao_lon",
+        )
+    )
+
+
+def obter_projetos_globo(empresa=None):
+    queryset = _filtrar_queryset_por_empresa(
+        Projeto.objects.exclude(localizacao_lat__isnull=True).exclude(localizacao_lon__isnull=True),
+        empresa=empresa,
+    )
+    return queryset.order_by("nome")
+
+
 
 def obter_projeto(pk, empresa=None):
     queryset = _filtrar_queryset_por_empresa(Projeto.objects.all(), empresa=empresa)

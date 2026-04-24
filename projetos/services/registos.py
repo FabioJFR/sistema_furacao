@@ -2,8 +2,9 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
-from projetos.models import Furo
+from projetos.models import Furo, RegistoDiarioFotoAmostra
 from projetos.services.empregados import recalcular_resumo_empregado
 from projetos.services.furos import recalcular_resumo_furo
 
@@ -141,3 +142,21 @@ def atualizar_registo_diario(registo, form):
     )
 
     return registo_atualizado
+
+
+@transaction.atomic
+def anexar_fotos_amostra(registo, empresa, fotos):
+    empresa_id = _resolver_empresa_id(empresa)
+    for foto in fotos:
+        RegistoDiarioFotoAmostra.objects.create(
+            registo=registo,
+            empresa_id=empresa_id,
+            imagem=foto,
+        )
+
+
+@transaction.atomic
+def atualizar_registo_diario_empregado(registo, form):
+    registo.editado_por_empregado = True
+    registo.editado_em = timezone.now()
+    return atualizar_registo_diario(registo, form)

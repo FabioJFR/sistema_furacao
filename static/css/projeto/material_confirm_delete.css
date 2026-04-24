@@ -1,0 +1,46 @@
+.mtd-wrap {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #34495e;
+    color: #ecf0f1;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.mtd-form {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.mtd-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.mtd-btn-delete {
+    background-color: #c0392b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.mtd-btn-delete:hover {
+    background: #e74c3c;
+}
+
+.mtd-btn-cancel {
+    background-color: #2980b9;
+    color: #fff;
+    text-decoration: none;
+}
+
+.mtd-btn-cancel:hover {
+    background: #3498db;
+}

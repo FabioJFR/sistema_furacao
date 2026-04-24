@@ -298,6 +298,10 @@
             font-size: 14px;
         }
 
+        .section-title-spaced {
+            margin-top: 26px;
+        }
+
         .table-wrap {
             overflow-x: auto;
             margin-top: 10px;

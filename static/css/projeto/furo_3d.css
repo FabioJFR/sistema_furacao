@@ -1,0 +1,334 @@
+.furo-3d-shell {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.furo-3d-card {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+}
+
+.furo-3d-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.furo-3d-panel,
+.furo-3d-main {
+    background: rgba(15, 23, 42, 0.48);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.furo-3d-panel {
+    padding: 1rem;
+    position: sticky;
+    top: 90px;
+}
+
+.furo-3d-main {
+    padding: 1rem;
+}
+
+.furo-3d-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0 1.25rem;
+}
+
+.furo-3d-stat {
+    background: rgba(30, 41, 59, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 0.9rem 1rem;
+}
+
+.furo-3d-stat span {
+    display: block;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.furo-3d-stat strong {
+    font-size: 1.1rem;
+    color: #f8fafc;
+}
+
+.furo-3d-section + .furo-3d-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.furo-3d-section h3 {
+    margin: 0 0 0.8rem;
+    font-size: 0.95rem;
+    color: #f8fafc;
+}
+
+.furo-3d-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.7rem;
+    font-size: 0.92rem;
+    color: #cbd5e1;
+}
+
+.furo-3d-control-block {
+    display: block;
+}
+
+.furo-3d-control-title {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.furo-3d-control input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #22c55e;
+}
+
+.furo-3d-control input[type="range"] {
+    width: 100%;
+    accent-color: #38bdf8;
+}
+
+.furo-3d-control select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(15, 23, 42, 0.7);
+    color: #f8fafc;
+    padding: 0.7rem 0.8rem;
+}
+
+.furo-3d-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.furo-3d-actions-single {
+    grid-template-columns: 1fr;
+}
+
+.furo-3d-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 0.8rem 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.furo-3d-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.94;
+}
+
+.furo-3d-btn-blue {
+    background: #2563eb;
+}
+
+.furo-3d-btn-green {
+    background: #16a34a;
+}
+
+.furo-3d-btn-slate {
+    background: #475569;
+}
+
+.furo-3d-btn-purple {
+    background: #7c3aed;
+}
+
+.furo-3d-btn-red {
+    background: #dc2626;
+}
+
+.furo-3d-note {
+    font-size: 0.84rem;
+    color: #94a3b8;
+    line-height: 1.45;
+}
+
+.furo-3d-note-top {
+    margin-top: 0.9rem;
+}
+
+.furo-3d-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1rem;
+    margin-top: 1rem;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+}
+
+.furo-3d-legend span::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    margin-right: 0.45rem;
+    vertical-align: middle;
+}
+
+.legend-ok::before {
+    background: #22c55e;
+}
+
+.legend-warn::before {
+    background: #facc15;
+}
+
+.legend-critical::before {
+    background: #ef4444;
+}
+
+.legend-plan::before {
+    background: #f97316;
+}
+
+.legend-final::before {
+    background: #94a3b8;
+}
+
+.furo-3d-plot {
+    min-height: 780px;
+}
+
+.furo-3d-plot-wrap {
+    position: relative;
+}
+
+.furo-3d-camera-overlay {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    max-width: min(100%, 420px);
+}
+
+.furo-3d-camera-btn {
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1;
+    background: rgba(15, 23, 42, 0.78);
+    color: #e2e8f0;
+    backdrop-filter: blur(8px);
+}
+
+.furo-3d-alert {
+    display: none;
+    margin-top: 0.9rem;
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    font-weight: 700;
+}
+
+.furo-3d-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.furo-3d-info-box {
+    background: rgba(30, 41, 59, 0.72);
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.furo-3d-info-box h4 {
+    margin: 0 0 0.55rem;
+    font-size: 0.92rem;
+    color: #f8fafc;
+}
+
+.furo-3d-info-box div {
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    margin-bottom: 0.32rem;
+}
+
+.furo-3d-topdogleg-item {
+    padding: 0;
+}
+
+.furo-3d-topdogleg-item + .furo-3d-topdogleg-item {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.furo-3d-topdogleg-title {
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.furo-3d-topdogleg-sub {
+    font-size: 0.86rem;
+    color: #cbd5e1;
+}
+
+.furo-3d-topdogleg-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.furo-3d-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1000;
+}
+
+.furo-3d-modal-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 90vw;
+}
+
+.furo-3d-modal-image {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 1100px) {
+    .furo-3d-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .furo-3d-panel {
+        position: static;
+    }
+}

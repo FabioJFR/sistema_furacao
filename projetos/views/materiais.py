@@ -4,13 +4,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.dateparse import parse_date
 
 from core.permissions import admin_required
 from ..decorators import empregado_required
 
-from ..models.empregado import Empregados
-from ..models.projeto import Projeto
 from ..models.material import Material
 from ..forms.material import (
     MaterialForm,
@@ -20,12 +17,17 @@ from ..forms.material import (
     DevolucaoMaterialForm,
 )
 
+from projetos.selectors.acesso import (
+    obter_contexto_admin_projetos,
+    resolver_empregado_por_user_ou_email,
+)
 from projetos.selectors.material import (
-    obter_lista_materiais,
+    obter_contexto_filtros_levantamentos_admin,
+    obter_lista_materiais_filtrada_nome,
     obter_contexto_material_detail,
     obter_levantamentos_empregado,
     obter_devolucoes_empregado,
-    obter_levantamentos_admin,
+    obter_levantamentos_admin_filtrados,
     obter_devolucoes_admin,
 )
 
@@ -34,12 +36,7 @@ from projetos.services.stock import (
     registrar_saida_material,
 )
 
-from plataforma.models import PerfilPlataforma
-
 logger = logging.getLogger("core")
-
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
 
 
 # ---------------- HELPERS ----------------
@@ -50,11 +47,7 @@ def _obter_contexto_admin_materiais(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em materiais.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -100,7 +93,7 @@ def _obter_empregado_autenticado_materiais(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado = _resolver_empregado_por_user_ou_email(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em materiais.py. user_id=%s",
@@ -122,6 +115,19 @@ def _obter_empregado_autenticado_materiais(request):
         return None, redirect("projetos:redirect_after_login")
 
     return empregado, None
+
+
+def _resolver_empregado_por_user_ou_email(user):
+    empregado, ligado_por_fallback = resolver_empregado_por_user_ou_email(user)
+    if ligado_por_fallback and empregado is not None:
+        logger.warning(
+            "Ligação automática User -> Empregados executada em materiais.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
+            user.id,
+            empregado.id,
+            empregado.empresa_id,
+            getattr(user, "email", ""),
+        )
+    return empregado
 
 @login_required
 @admin_required
@@ -246,10 +252,7 @@ def material_list(request):
         return resposta_erro
 
     nome = (request.GET.get("nome") or "").strip()
-    materiais = obter_lista_materiais(empresa=empresa)
-
-    if nome:
-        materiais = materiais.filter(nome__icontains=nome)
+    materiais = obter_lista_materiais_filtrada_nome(empresa=empresa, nome=nome)
 
     logger.info(
         "View material_list carregada com sucesso. user_id=%s, empresa_id=%s, total_materiais=%s, filtro_nome='%s'",
@@ -579,34 +582,12 @@ def levantamento_material_admin_list(request):
     if resposta_erro:
         logger.warning("Acesso bloqueado na view levantamento_material_admin_list. user_id=%s", request.user.id)
         return resposta_erro
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
-
-    levantamentos = obter_levantamentos_admin(empresa=empresa)
-
-    empregado_id = request.GET.get('empregado')
-    material_id = request.GET.get('material')
-    projeto_id = request.GET.get('projeto')
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-
-    if empregado_id:
-        levantamentos = levantamentos.filter(empregado_id=empregado_id)
-
-    if material_id:
-        levantamentos = levantamentos.filter(material_id=material_id)
-
-    if projeto_id:
-        levantamentos = levantamentos.filter(projeto_id=projeto_id)
-
-    if data_inicio:
-        levantamentos = levantamentos.filter(data__gte=parse_date(data_inicio))
-
-    if data_fim:
-        levantamentos = levantamentos.filter(data__lte=parse_date(data_fim))
-
-    empregados = Empregados.objects.filter(empresa_id=empresa_id).order_by("nome")
-    materiais = Material.objects.filter(empresa_id=empresa_id).order_by("nome")
-    projetos = Projeto.objects.filter(empresa_id=empresa_id).order_by("nome")
+    resultados = obter_levantamentos_admin_filtrados(
+        empresa=empresa,
+        filtros=request.GET,
+    )
+    levantamentos = resultados["levantamentos"]
+    contexto_filtros = obter_contexto_filtros_levantamentos_admin(empresa=empresa)
 
     logger.info(
         "View levantamento_material_admin_list carregada com sucesso. user_id=%s, empresa_id=%s, total_levantamentos=%s",
@@ -616,16 +597,10 @@ def levantamento_material_admin_list(request):
     )
     return render(request, "projetos/levantamento_material_admin_list.html", {
         "levantamentos": levantamentos,
-        "empregados": empregados,
-        "materiais": materiais,
-        "projetos": projetos,
-        "filtros": {
-            "empregado": empregado_id or "",
-            "material": material_id or "",
-            "projeto": projeto_id or "",
-            "data_inicio": data_inicio or "",
-            "data_fim": data_fim or "",
-        }
+        "empregados": contexto_filtros["empregados"],
+        "materiais": contexto_filtros["materiais"],
+        "projetos": contexto_filtros["projetos"],
+        "filtros": resultados["filtros"],
     })
 
 # ----------- Devolução MAteriais -----------------------#

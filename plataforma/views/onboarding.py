@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 
 from plataforma.decorators import platform_admin_required
 from plataforma.forms.onboarding import OnboardingEmpresaForm
-from plataforma.models import Plano
+from plataforma import selectors
 from plataforma.services.onboarding import criar_empresa_com_admin
 
 
@@ -110,17 +110,8 @@ def onboarding_empresa(request):
             getattr(request.user, "id", None),
         )
 
-    planos_periodos = {
-        str(plano.pk): plano.periodos_cobranca_disponiveis_normalizados
-        for plano in Plano.objects.filter(ativo=True)
-    }
-    planos_precos = {
-        str(plano.pk): {
-            "preco_mensal": str(plano.preco_mensal or 0),
-            "preco_anual": str(plano.preco_anual or 0),
-        }
-        for plano in Plano.objects.filter(ativo=True)
-    }
+    planos = selectors.listar_planos_ativos()
+    planos_periodos, planos_precos = selectors.construir_planos_periodos_precos(planos)
 
     return render(request, "plataforma/onboarding_empresa.html", {
         "form": form,

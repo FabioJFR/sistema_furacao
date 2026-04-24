@@ -6,51 +6,44 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from core.permissions import user_is_global_admin
-from plataforma.models import Empresa, PerfilPlataforma
-from projetos.models import Empregados
+from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.dashboard import (
     obter_alertas_dashboard,
     obter_cards_dashboard,
+    obter_empresas_contexto_dashboard,
     obter_graficos_dashboard,
     obter_intervalo_filtros,
     obter_opcoes_filtros_dashboard,
+    resolver_empresa_contexto_global_dashboard,
 )
 from projetos.selectors.projetos import obter_projetos_mapa
 
 logger = logging.getLogger("core")
 
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-
-
 def _resolver_empresa_contexto_global(request):
     empresa_id = request.GET.get("empresa") or request.GET.get("empresa_contexto")
-
-    empresas_qs = Empresa.objects.select_related("plano").all().order_by("nome")
-
-    if empresa_id:
-        empresa = empresas_qs.filter(pk=empresa_id).first()
-        if empresa:
+    empresa, origem = resolver_empresa_contexto_global_dashboard(empresa_id=empresa_id)
+    if empresa:
+        if origem == "querystring":
             logger.info(
                 "Contexto global do dashboard resolvido por querystring. user_id=%s, empresa_id=%s",
                 request.user.id,
                 empresa.id,
             )
-            return empresa
+        else:
+            logger.info(
+                "Contexto global do dashboard resolvido pela primeira empresa disponível. user_id=%s, empresa_id=%s",
+                request.user.id,
+                empresa.id,
+            )
+        return empresa
 
+    if empresa_id:
         logger.warning(
             "Empresa pedida por utilizador global não encontrada. user_id=%s, empresa_id=%s",
             request.user.id,
             empresa_id,
         )
-
-    empresa = empresas_qs.first()
-    if empresa:
-        logger.info(
-            "Contexto global do dashboard resolvido pela primeira empresa disponível. user_id=%s, empresa_id=%s",
-            request.user.id,
-            empresa.id,
-        )
-        return empresa
 
     logger.warning(
         "Não existem empresas disponíveis para contexto global do dashboard. user_id=%s",
@@ -84,11 +77,7 @@ def _obter_contexto_admin_dashboard(request):
             tipo_acesso="global_admin",
         )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa", "empresa__plano").first()
+    perfil = obter_contexto_admin_projetos(request.user)
 
     if perfil and perfil.empresa_id:
         logger.info(
@@ -184,7 +173,7 @@ def _montar_contexto_dashboard(request, contexto_admin, incluir_mapa=False):
         }
 
         if user_is_global_admin(request.user):
-            context["empresas_contexto"] = Empresa.objects.order_by("nome")
+            context["empresas_contexto"] = obter_empresas_contexto_dashboard()
 
         if incluir_mapa:
             context["projetos"] = obter_projetos_mapa(empresa=empresa)

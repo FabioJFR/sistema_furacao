@@ -8,9 +8,9 @@ app_name = "login_register"
 
 urlpatterns = [
     # Temporary redirects to website app (auth moved out of projetos)
-    path("", lambda request: redirect("/")),
-    path("redirect-after-login/", lambda request: redirect("/")),
+    path("", lambda request: redirect("website:home")),
+    path("redirect-after-login/", lambda request: redirect("website:home")),
 
-    path("registos/criar/", lambda request: redirect("/registo/")),
-    path("registo/", lambda request: redirect("/registo/")),
+    path("registos/criar/", lambda request: redirect("website:registo")),
+    path("registo/", lambda request: redirect("website:registo")),
 ]

@@ -4,7 +4,7 @@ import re
 from django.core.files.base import ContentFile
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 
-from .models import DeteccaoImagemAI
+from inspecao_ai.models import DeteccaoImagemAI
 
 
 OCR_TEMPLATE_CHARS = "0123456789mM-./:,%º°HQNBPSS"

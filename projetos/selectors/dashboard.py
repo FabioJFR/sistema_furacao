@@ -4,6 +4,7 @@ from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
+from plataforma.models import Empresa
 from projetos.models import (
     DevolucaoMaterial,
     Despesa,
@@ -16,6 +17,18 @@ from projetos.models import (
     RegistoDiarioEmpregado,
 )
 
+
+def obter_empresas_contexto_dashboard():
+    return Empresa.objects.select_related("plano").all().order_by("nome")
+
+
+def resolver_empresa_contexto_global_dashboard(empresa_id=None):
+    empresas_qs = obter_empresas_contexto_dashboard()
+    if empresa_id:
+        empresa = empresas_qs.filter(pk=empresa_id).first()
+        if empresa:
+            return empresa, "querystring"
+    return empresas_qs.first(), "fallback_primeira"
 
 
 def _resolver_empresa_id(empresa):

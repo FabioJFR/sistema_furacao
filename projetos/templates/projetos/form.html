@@ -1,27 +1,32 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 
 {% block title %}Criar Novo Furo{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/furo_form.css' %}">
+{% endblock %}
+
 {% block content %}
 <section class="container mx-auto p-6">
-    <div style="max-width:700px; margin:0 auto; background:#121A21; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#000000;">
-        <h2 style="text-align:center; margin-bottom:20px;">{{ titulo|default:"Criar Novo Furo" }}</h2>
+    <div class="ff-shell">
+        <h2 class="ff-title">{{ titulo|default:"Criar Novo Furo" }}</h2>
 
         {% if form.non_field_errors %}
-            <div style="background:#e74c3c; color:rgb(255, 255, 255); padding:12px 15px; border-radius:8px; margin-bottom:20px;">
+            <div class="ff-error-global">
                 {{ form.non_field_errors }}
             </div>
         {% endif %}
 
         {% if memoria_zona_alerta %}
-            <div style="background:#fff7ed; color:#9a3412; padding:14px 16px; border-radius:10px; margin-bottom:20px; border:1px solid #fdba74;">
-                <div style="font-weight:bold; margin-bottom:8px;">Memória operacional da zona</div>
-                <div style="font-size:0.95rem; margin-bottom:8px;">
+            <div class="ff-memory-box">
+                <div class="ff-memory-title">Memória operacional da zona</div>
+                <div class="ff-memory-intro">
                     Já existem furos registados perto desta localização ou com a mesma referência textual. Convém rever o histórico antes de avançar.
                 </div>
-                <ul style="margin:0; padding-left:18px;">
+                <ul class="ff-memory-list">
                     {% for item in memoria_zona_alerta %}
-                        <li style="margin-bottom:6px;">
+                        <li class="ff-memory-item">
                             <strong>{{ item.nome }}</strong> · {{ item.projeto }} · {{ item.estado }}
                             {% if item.distancia_km is not None %} · {{ item.distancia_km }} km{% endif %}
                             {% if item.mesma_localizacao_textual %} · mesma localização textual{% endif %}
@@ -31,73 +36,42 @@
             </div>
         {% endif %}
 
-        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:18px;">
+        <form method="POST" enctype="multipart/form-data" class="ff-form">
             {% csrf_token %}
 
             {% for field in form %}
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label for="{{ field.id_for_label }}" style="font-weight:bold;color:aliceblue">
+                <div class="ff-field">
+                    <label for="{{ field.id_for_label }}" class="ff-label">
                         {{ field.label }}
                     </label>
 
                     {{ field }}
 
                     {% if field.help_text %}
-                        <small style="color:#bdc3c7;">{{ field.help_text }}</small>
+                        <small class="ff-help">{{ field.help_text }}</small>
                     {% endif %}
 
                     {% if field.errors %}
-                        <div style="color:#ffb3b3; font-size:0.875rem;">
+                        <div class="ff-errors">
                             {{ field.errors }}
                         </div>
                     {% endif %}
                 </div>
             {% endfor %}
 
-            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
-                <button type="submit" style="
-                    flex:1;
-                    min-width:180px;
-                    background:#27ae60;
-                    color:white;
-                    padding:12px 15px;
-                    border:none;
-                    border-radius:5px;
-                    font-weight:bold;
-                    cursor:pointer;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+            <div class="ff-actions">
+                <button type="submit" class="ff-btn ff-btn-save">
                     💾 Salvar
                 </button>
 
-                <a href="{% url 'projetos:furo_list' %}" style="
-                    flex:1;
-                    min-width:180px;
-                    text-align:center;
-                    background:#7f8c8d;
-                    color:white;
-                    padding:12px 15px;
-                    border-radius:5px;
-                    font-weight:bold;
-                    text-decoration:none;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#95a5a6'" onmouseout="this.style.background='#7f8c8d'">
+                <a href="{% url 'projetos:furo_list' %}" class="ff-btn ff-btn-cancel">
                     ❌ Cancelar
                 </a>
             </div>
         </form>
 
-        <div style="text-align:center; margin-top:15px;">
-            <a href="{% url 'projetos:furo_list' %}" style="
-                display:inline-block;
-                background:#2980b9;
-                color:white;
-                padding:10px 15px;
-                border-radius:5px;
-                font-weight:bold;
-                text-decoration:none;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+        <div class="ff-footer">
+            <a href="{% url 'projetos:furo_list' %}" class="ff-btn-back">
                 🔙 Voltar à Lista
             </a>
         </div>

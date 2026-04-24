@@ -28,7 +28,7 @@
                 </button>
 
                 {% if furo %}
-                    <a href="{% url 'projetos:furo_detail' furo.id %}" 
+                    <a href="{{ furo.get_absolute_url }}" 
                        class="flex-1 flex items-center justify-center bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
                         🔙 Voltar
                     </a>

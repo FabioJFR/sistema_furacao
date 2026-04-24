@@ -20,7 +20,7 @@
                 🗑️ Apagar
             </button>
 
-            <a href="{% url 'projetos:projeto_detail' projeto.pk %}" 
+            <a href="{{ projeto.get_absolute_url }}" 
                class="bg-blue-600 text-white font-bold px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow">
                 ❌ Cancelar
             </a>

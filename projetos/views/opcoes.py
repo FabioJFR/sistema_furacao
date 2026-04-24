@@ -19,6 +19,8 @@ from django.utils.text import slugify
 from core.permissions import admin_required
 
 from projetos.forms import EmpresaFinanceiraForm, PreferenciasForm
+from projetos.selectors.acesso import obter_contexto_admin_projetos
+from projetos.selectors.opcoes import obter_resultados_procurar_dashboard
 from projetos.models import (
     Despesa,
     Empregados,
@@ -32,11 +34,24 @@ from projetos.models import (
     RegistoDiarioEmpregado,
 )
 
-from .projetos import _obter_empresa_admin_projetos
-
 
 def _empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
+
+
+def _obter_empresa_admin_opcoes(request):
+    contexto_admin = obter_contexto_admin_projetos(request.user)
+    if not contexto_admin:
+        messages.error(request, "Não tens permissão para aceder a esta área.")
+        return None, redirect("projetos:redirect_after_login")
+
+    empresa = getattr(contexto_admin, "empresa", None)
+    empresa_id = getattr(contexto_admin, "empresa_id", None)
+    if not empresa_id or not empresa:
+        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
+        return None, redirect("projetos:dashboard")
+
+    return empresa, None
 
 
 def _parse_data(valor):
@@ -832,7 +847,7 @@ def _renderizar_pdf_exportacao(dataset_info, empresa, linhas):
 @login_required
 @admin_required
 def definicoes_admin(request):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_opcoes(request)
     if resposta_erro:
         return resposta_erro
 
@@ -892,194 +907,12 @@ def definicoes_admin(request):
 @login_required
 @admin_required
 def procurar_dashboard(request):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_opcoes(request)
     if resposta_erro:
         return resposta_erro
 
     termo = request.GET.get("q", "").strip()
-    empresa_id = _empresa_id(empresa)
-
-    resultados = {
-        "projetos": Projeto.objects.none(),
-        "furos": Furo.objects.none(),
-        "empregados": Empregados.objects.none(),
-        "maquinas": Maquina.objects.none(),
-        "materiais": Material.objects.none(),
-        "registos": RegistoDiarioEmpregado.objects.none(),
-        "medicoes": Medicao.objects.none(),
-        "despesas": Despesa.objects.none(),
-        "eventos": EventoAnalytics.objects.none(),
-    }
-    totais = {chave: 0 for chave in resultados}
-
-    if termo:
-        resultados["projetos"] = (
-            Projeto.objects.filter(empresa_id=empresa_id)
-            .filter(
-                Q(nome__icontains=termo)
-                | Q(cliente__icontains=termo)
-                | Q(cidade__icontains=termo)
-                | Q(pais__icontains=termo)
-                | Q(notas__icontains=termo)
-            )
-            .order_by("nome")[:12]
-        )
-        resultados["furos"] = (
-            Furo.objects.filter(empresa_id=empresa_id)
-            .select_related("projeto")
-            .filter(
-                Q(nome__icontains=termo)
-                | Q(localizacao__icontains=termo)
-                | Q(local_sondagem__icontains=termo)
-                | Q(detalhes__icontains=termo)
-            )
-            .order_by("nome")[:12]
-        )
-        resultados["empregados"] = (
-            Empregados.objects.filter(empresa_id=empresa_id)
-            .filter(
-                Q(nome__icontains=termo)
-                | Q(email__icontains=termo)
-                | Q(telefone__icontains=termo)
-                | Q(funcao__icontains=termo)
-                | Q(morada__icontains=termo)
-            )
-            .order_by("nome")[:12]
-        )
-        resultados["maquinas"] = (
-            Maquina.objects.filter(empresa_id=empresa_id)
-            .filter(
-                Q(nome__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(marca__icontains=termo)
-                | Q(modelo__icontains=termo)
-                | Q(numero_serie__icontains=termo)
-                | Q(matricula__icontains=termo)
-                | Q(localizacao_atual__icontains=termo)
-            )
-            .order_by("nome")[:12]
-        )
-        resultados["materiais"] = (
-            Material.objects.filter(empresa_id=empresa_id)
-            .select_related("projeto", "furo")
-            .filter(
-                Q(nome__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(marca__icontains=termo)
-                | Q(numero_serie__icontains=termo)
-                | Q(fornecedor__icontains=termo)
-                | Q(localizacao__icontains=termo)
-                | Q(observacoes__icontains=termo)
-            )
-            .order_by("nome")[:12]
-        )
-        resultados["registos"] = (
-            RegistoDiarioEmpregado.objects.filter(empresa_id=empresa_id)
-            .select_related("empregado", "projeto", "furo")
-            .filter(
-                Q(observacoes__icontains=termo)
-                | Q(empregado__nome__icontains=termo)
-                | Q(projeto__nome__icontains=termo)
-                | Q(furo__nome__icontains=termo)
-            )
-            .order_by("-data", "-criado_em")[:12]
-        )
-        resultados["medicoes"] = (
-            Medicao.objects.filter(empresa_id=empresa_id)
-            .select_related("furo")
-            .filter(
-                Q(nome_furo_snapshot__icontains=termo)
-                | Q(tipo_rocha__icontains=termo)
-                | Q(observacoes__icontains=termo)
-                | Q(furo__nome__icontains=termo)
-            )
-            .order_by("-criado_em")[:12]
-        )
-        resultados["despesas"] = (
-            Despesa.objects.filter(empresa_id=empresa_id)
-            .select_related("projeto", "furo", "maquina")
-            .filter(
-                Q(descricao__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(categoria__icontains=termo)
-                | Q(observacoes__icontains=termo)
-            )
-            .order_by("-data", "-criado_em")[:12]
-        )
-        resultados["eventos"] = (
-            EventoAnalytics.objects.filter(empresa_id=empresa_id)
-            .select_related("projeto", "furo", "empregado", "material", "maquina")
-            .filter(
-                Q(entidade_tipo__icontains=termo)
-                | Q(entidade_label__icontains=termo)
-                | Q(actor_username__icontains=termo)
-            )
-            .order_by("-criado_em")[:20]
-        )
-
-        totais = {
-            "projetos": Projeto.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome__icontains=termo)
-                | Q(cliente__icontains=termo)
-                | Q(cidade__icontains=termo)
-                | Q(pais__icontains=termo)
-                | Q(notas__icontains=termo)
-            ).count(),
-            "furos": Furo.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome__icontains=termo)
-                | Q(localizacao__icontains=termo)
-                | Q(local_sondagem__icontains=termo)
-                | Q(detalhes__icontains=termo)
-            ).count(),
-            "empregados": Empregados.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome__icontains=termo)
-                | Q(email__icontains=termo)
-                | Q(telefone__icontains=termo)
-                | Q(funcao__icontains=termo)
-                | Q(morada__icontains=termo)
-            ).count(),
-            "maquinas": Maquina.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(marca__icontains=termo)
-                | Q(modelo__icontains=termo)
-                | Q(numero_serie__icontains=termo)
-                | Q(matricula__icontains=termo)
-                | Q(localizacao_atual__icontains=termo)
-            ).count(),
-            "materiais": Material.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(marca__icontains=termo)
-                | Q(numero_serie__icontains=termo)
-                | Q(fornecedor__icontains=termo)
-                | Q(localizacao__icontains=termo)
-                | Q(observacoes__icontains=termo)
-            ).count(),
-            "registos": RegistoDiarioEmpregado.objects.filter(empresa_id=empresa_id).filter(
-                Q(observacoes__icontains=termo)
-                | Q(empregado__nome__icontains=termo)
-                | Q(projeto__nome__icontains=termo)
-                | Q(furo__nome__icontains=termo)
-            ).count(),
-            "medicoes": Medicao.objects.filter(empresa_id=empresa_id).filter(
-                Q(nome_furo_snapshot__icontains=termo)
-                | Q(tipo_rocha__icontains=termo)
-                | Q(observacoes__icontains=termo)
-                | Q(furo__nome__icontains=termo)
-            ).count(),
-            "despesas": Despesa.objects.filter(empresa_id=empresa_id).filter(
-                Q(descricao__icontains=termo)
-                | Q(tipo__icontains=termo)
-                | Q(categoria__icontains=termo)
-                | Q(observacoes__icontains=termo)
-            ).count(),
-            "eventos": EventoAnalytics.objects.filter(empresa_id=empresa_id).filter(
-                Q(entidade_tipo__icontains=termo)
-                | Q(entidade_label__icontains=termo)
-                | Q(actor_username__icontains=termo)
-            ).count(),
-        }
+    resultados, totais = obter_resultados_procurar_dashboard(empresa, termo)
 
     return render(
         request,
@@ -1096,7 +929,7 @@ def procurar_dashboard(request):
 @login_required
 @admin_required
 def relatorios_exportacao(request):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_opcoes(request)
     if resposta_erro:
         return resposta_erro
 
@@ -1136,7 +969,7 @@ def relatorios_exportacao(request):
 @login_required
 @admin_required
 def relatorios_download(request, dataset, formato):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_opcoes(request)
     if resposta_erro:
         return resposta_erro
 
@@ -1183,7 +1016,7 @@ def relatorios_download(request, dataset, formato):
 @login_required
 @admin_required
 def relatorios_download_tudo(request, formato):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_opcoes(request)
     if resposta_erro:
         return resposta_erro
 

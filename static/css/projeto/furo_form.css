@@ -1,0 +1,134 @@
+.ff-shell {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #121a21;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #000;
+}
+
+.ff-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ff-error-global {
+    background: #e74c3c;
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ff-memory-box {
+    background: #fff7ed;
+    color: #9a3412;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #fdba74;
+}
+
+.ff-memory-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.ff-memory-intro {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+}
+
+.ff-memory-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.ff-memory-item {
+    margin-bottom: 6px;
+}
+
+.ff-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.ff-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ff-label {
+    font-weight: 700;
+    color: aliceblue;
+}
+
+.ff-help {
+    color: #bdc3c7;
+}
+
+.ff-errors {
+    color: #ffb3b3;
+    font-size: 0.875rem;
+}
+
+.ff-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.ff-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 12px 15px;
+    border-radius: 5px;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.ff-btn-save {
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.ff-btn-save:hover {
+    background: #2ecc71;
+}
+
+.ff-btn-cancel {
+    text-align: center;
+    background: #7f8c8d;
+    color: #fff;
+    text-decoration: none;
+}
+
+.ff-btn-cancel:hover {
+    background: #95a5a6;
+}
+
+.ff-footer {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.ff-btn-back {
+    display: inline-block;
+    background: #2980b9;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.ff-btn-back:hover {
+    background: #3498db;
+}

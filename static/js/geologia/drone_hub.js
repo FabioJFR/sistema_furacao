@@ -55,9 +55,11 @@
     const btnTestarLigacao = document.getElementById("btn-drone-testar-ligacao");
     const btnProcurar = document.getElementById("btn-drone-procurar");
     const btnSincronizar = document.getElementById("btn-drone-sincronizar");
-    const apiEstadoUrl = "/app/geologia/drone/api/estado/";
-    const apiTestarUrl = "/app/geologia/drone/api/testar-ligacao/";
-    const apiProcurarUrl = "/app/geologia/drone/api/procurar/";
+    const root = document.querySelector("[data-drone-hub-root]");
+    const apiEstadoUrl = root?.dataset.apiEstadoUrl;
+    const apiTestarUrl = root?.dataset.apiTestarUrl;
+    const apiProcurarUrl = root?.dataset.apiProcurarUrl;
+    const endpointsConfigurados = Boolean(apiEstadoUrl && apiTestarUrl && apiProcurarUrl);
 
     function appendLog(tipo, mensagem) {
         if (!debugLog) return;
@@ -238,6 +240,9 @@
     }
 
     async function requestDroneStatus(url, method) {
+        if (!url) {
+            throw new Error("Endpoint de drone não configurado.");
+        }
         const options = { method: method || "GET", headers: { "X-Requested-With": "XMLHttpRequest" } };
         if (method === "POST") {
             options.headers["X-CSRFToken"] = document.querySelector("[name=csrfmiddlewaretoken]")?.value || "";
@@ -254,6 +259,15 @@
             renderBridgeSourceInfo(data.estado);
         }
         return data;
+    }
+
+    if (!endpointsConfigurados) {
+        appendLog("erro", "Endpoints do drone não configurados nesta página.");
+        [btnTestarLigacao, btnProcurar, btnSincronizar].forEach(function (button) {
+            if (!button) return;
+            button.disabled = true;
+            button.classList.add("opacity-50", "cursor-not-allowed");
+        });
     }
 
     if (btnTestarLigacao) {
@@ -361,13 +375,15 @@
         });
     }
 
-    requestDroneStatus(apiEstadoUrl, "GET").catch(function () {
-        appendLog("erro", "Não foi possível obter o estado inicial do drone.");
-    });
-
-    window.setInterval(function () {
+    if (endpointsConfigurados) {
         requestDroneStatus(apiEstadoUrl, "GET").catch(function () {
-            appendLog("erro", "Falhou a atualização automática do estado do drone.");
+            appendLog("erro", "Não foi possível obter o estado inicial do drone.");
         });
-    }, 8000);
+
+        window.setInterval(function () {
+            requestDroneStatus(apiEstadoUrl, "GET").catch(function () {
+                appendLog("erro", "Falhou a atualização automática do estado do drone.");
+            });
+        }, 8000);
+    }
 })();

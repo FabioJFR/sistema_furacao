@@ -1,0 +1,57 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #020617;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 24px;
+}
+
+.bridge-live-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.bridge-live-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 18px;
+}
+
+.bridge-live-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.bridge-live-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.bridge-live-muted {
+    color: #94a3b8;
+}
+
+.bridge-live-image {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #334155;
+}
+
+.bridge-live-dl {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 8px 12px;
+    margin: 0;
+}
+
+.bridge-live-dl dt {
+    color: #94a3b8;
+}
+
+.bridge-live-dl dd {
+    margin: 0;
+    font-weight: 600;
+}

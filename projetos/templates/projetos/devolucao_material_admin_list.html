@@ -35,7 +35,7 @@
                                 <td class="px-4 py-3">{{ devolucao.quantidade }}</td>
                                 <td class="px-4 py-3">
                                     {% if devolucao.projeto %}
-                                        <a href="{% url 'projetos:projeto_detail' devolucao.projeto.id %}" class="text-blue-600 hover:underline">
+                                        <a href="{{ devolucao.projeto.get_absolute_url }}" class="text-blue-600 hover:underline">
                                             {{ devolucao.projeto.nome }}
                                         </a>
                                     {% else %}
@@ -44,7 +44,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     {% if devolucao.furo %}
-                                        <a href="{% url 'projetos:furo_detail' devolucao.furo.id %}" class="text-blue-600 hover:underline">
+                                        <a href="{{ devolucao.furo.get_absolute_url }}" class="text-blue-600 hover:underline">
                                             {{ devolucao.furo.nome }}
                                         </a>
                                     {% else %}

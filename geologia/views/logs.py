@@ -1,13 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 from geologia.forms import AnexoLogGeologicoForm, LogGeologicoFuroForm
-from geologia.models import LogGeologicoFuro
-from projetos.models import Furo
+from geologia.selectors_logs import (
+    obter_anexos_log,
+    obter_furo_log_geologico,
+    obter_log_geologico,
+)
 
-from .common import filtrar_queryset_por_empresa, obter_empresa_admin_geologia
+from .common import obter_empresa_admin_geologia
 
 
 @login_required
@@ -17,10 +20,7 @@ def log_geologico_create(request, furo_id):
     if resposta_erro:
         return resposta_erro
 
-    furo = get_object_or_404(
-        filtrar_queryset_por_empresa(Furo.objects.select_related("projeto"), empresa=empresa),
-        pk=furo_id,
-    )
+    furo = obter_furo_log_geologico(furo_id, empresa=empresa)
 
     if request.method == "POST":
         form = LogGeologicoFuroForm(request.POST, request.FILES, furo=furo, empresa=empresa)
@@ -58,12 +58,8 @@ def log_geologico_detail(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    logs_qs = filtrar_queryset_por_empresa(
-        LogGeologicoFuro.objects.select_related("furo", "furo__projeto", "medicao", "missao_drone"),
-        empresa=empresa,
-    )
-    log = get_object_or_404(logs_qs, pk=pk)
-    anexos = log.anexos.all().order_by("-criado_em")
+    log = obter_log_geologico(pk, empresa=empresa)
+    anexos = obter_anexos_log(log)
 
     return render(
         request,
@@ -83,7 +79,7 @@ def log_geologico_update(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    log = get_object_or_404(filtrar_queryset_por_empresa(LogGeologicoFuro.objects.all(), empresa=empresa), pk=pk)
+    log = obter_log_geologico(pk, empresa=empresa)
 
     if request.method == "POST":
         form = LogGeologicoFuroForm(
@@ -120,7 +116,7 @@ def anexo_log_create(request, pk):
     if resposta_erro:
         return resposta_erro
 
-    log = get_object_or_404(filtrar_queryset_por_empresa(LogGeologicoFuro.objects.all(), empresa=empresa), pk=pk)
+    log = obter_log_geologico(pk, empresa=empresa)
 
     if request.method == "POST":
         form = AnexoLogGeologicoForm(request.POST, request.FILES)

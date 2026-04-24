@@ -1,0 +1,31 @@
+.globo-cesium-container {
+    width: 100%;
+    height: 85vh;
+    border-radius: 12px;
+}
+
+.globo-popup {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+    max-width: 260px;
+    border-radius: 5px;
+    font-family: sans-serif;
+}
+
+.globo-popup-title {
+    margin: 0 0 5px;
+}
+
+.globo-popup-location {
+    margin: 0;
+}
+
+.globo-popup-status {
+    margin: 5px 0;
+}
+
+.globo-popup-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #2563eb;
+}

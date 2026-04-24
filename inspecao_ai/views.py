@@ -1,10 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Sum
-from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.text import slugify
 import json
 import re
 from pathlib import Path
@@ -13,10 +11,11 @@ from core.permissions import admin_required
 from plataforma.models import Empresa, PerfilPlataforma
 from projetos.models import Furo
 
+from . import domain_logic as dl
+from . import workflows as wf
 from .chat_services import construir_resumo_empresa, gerar_resposta_chat, normalizar_json_chat
 from .forms import AnaliseImagemAIForm
 from .models import AnaliseImagemAI, AnaliseZonaPresetAI, ChatMensagemAI, ChatSessaoAI
-from .services import executar_analise_imagem
 
 
 ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
@@ -59,379 +58,57 @@ def _render_inspecao(request, template_name, context):
 
 
 def _normalizar_valor_comparacao_ai(valor):
-    texto = (valor or "").strip().lower()
-    texto = re.sub(r"\s+", " ", texto)
-    texto = texto.replace("ã", "a").replace("á", "a").replace("à", "a").replace("â", "a")
-    texto = texto.replace("é", "e").replace("ê", "e")
-    texto = texto.replace("í", "i")
-    texto = texto.replace("ó", "o").replace("ô", "o").replace("õ", "o")
-    texto = texto.replace("ú", "u")
-    texto = re.sub(r"[^a-z0-9./:,\- ]", "", texto)
-    return texto.strip()
+    return dl.normalizar_valor_comparacao_ai(valor)
 
 
 def _nome_base_analise_reprocessada(nome):
-    base = (nome or "").strip()
-    if not base:
-        return "Análise"
-    suffixes = {
-        "Data",
-        "Turno",
-        "Equipa",
-        "Observações",
-        "Área central do relatório",
-        "Faixa superior impressa",
-        "Rodapé impresso",
-        "reprocessada",
-    }
-    parts = [part.strip() for part in base.split("·")]
-    while len(parts) > 1 and parts[-1] in suffixes:
-        parts.pop()
-    cleaned = " · ".join(part for part in parts if part)
-    return cleaned or base
+    return dl.nome_base_analise_reprocessada(nome)
 
 
 def _parse_zone_payload(raw_value, *, single):
-    if not raw_value:
-        return None if single else []
-    parsed = json.loads(raw_value)
-    zones = [parsed] if single and isinstance(parsed, dict) else parsed
-    if not isinstance(zones, list):
-        raise ValueError("Formato inválido.")
-    cleaned = []
-    for zone in zones:
-        if not isinstance(zone, dict):
-            raise ValueError("Zona inválida.")
-        item = {
-            "x_percent": round(float(zone.get("x_percent") or 0), 2),
-            "y_percent": round(float(zone.get("y_percent") or 0), 2),
-            "w_percent": round(float(zone.get("w_percent") or 0), 2),
-            "h_percent": round(float(zone.get("h_percent") or 0), 2),
-        }
-        if min(item["x_percent"], item["y_percent"]) < 0 or min(item["w_percent"], item["h_percent"]) <= 0:
-            raise ValueError("Zona fora dos limites.")
-        if item["x_percent"] + item["w_percent"] > 100.0 + 1e-6 or item["y_percent"] + item["h_percent"] > 100.0 + 1e-6:
-            raise ValueError("Zona fora dos limites.")
-        nome = (zone.get("name") or "").strip()
-        if nome:
-            item["name"] = nome[:80]
-        cleaned.append(item)
-    return cleaned[0] if single else cleaned
+    return dl.parse_zone_payload(raw_value, single=single)
 
 
 def _construir_resumo_validacao_analise(analise):
-    campos = list(((analise.campos_extraidos or {}).get("campos") or []))
-    total_validados = 0
-    total_acertos = 0
-    total_falhas = 0
-
-    for campo in campos:
-        valor_lido = campo.get("valor_validado") if campo.get("validado_utilizador") and campo.get("valor_validado") else campo.get("valor_lido")
-        campo["valor_validado"] = campo.get("valor_validado") or ""
-        campo["comparacao_estado"] = "sem_validacao"
-        campo["comparacao_label"] = "Sem validação"
-
-        if not campo.get("validado_utilizador") or not campo.get("valor_validado"):
-            continue
-
-        total_validados += 1
-        valor_ai = _normalizar_valor_comparacao_ai(campo.get("valor_lido"))
-        valor_validado = _normalizar_valor_comparacao_ai(campo.get("valor_validado"))
-
-        if valor_ai and valor_ai == valor_validado:
-            campo["comparacao_estado"] = "acertou"
-            campo["comparacao_label"] = "AI acertou"
-            total_acertos += 1
-        else:
-            campo["comparacao_estado"] = "falhou"
-            campo["comparacao_label"] = "AI falhou"
-            total_falhas += 1
-
-    taxa_acerto = round((total_acertos / total_validados) * 100, 1) if total_validados else None
-    return {
-        "campos": campos,
-        "total_validados": total_validados,
-        "total_acertos": total_acertos,
-        "total_falhas": total_falhas,
-        "taxa_acerto": taxa_acerto,
-    }
+    return dl.construir_resumo_validacao_analise(analise)
 
 
 def _construir_sugestoes_reprocessamento(analise, resumo_validacao):
-    if analise.tipo_documento != "relatorio_trabalhador":
-        return []
-
-    sugestoes = []
-    vistos = set()
-    mapping = {
-        "data": ("data", "Reanalisar Data", "A validação indica que o campo de data ainda precisa de foco dedicado."),
-        "turno": ("turno", "Reanalisar Turno", "O turno validado não bateu certo com a leitura atual da AI."),
-        "equipa": ("equipa", "Reanalisar Equipa", "A identificação da equipa continua fraca e merece nova tentativa focada."),
-        "observacoes": ("observacoes", "Reanalisar área central do relatório", "A escrita manual da área central do relatório continua a falhar na leitura estimada."),
-    }
-
-    for campo in resumo_validacao["campos"]:
-        if campo.get("comparacao_estado") != "falhou":
-            continue
-        semantic = (campo.get("campo_semantico") or "").strip()
-        if semantic not in mapping or semantic in vistos:
-            continue
-        vistos.add(semantic)
-        focus, label, reason = mapping[semantic]
-        sugestoes.append(
-            {
-                "focus": focus,
-                "label": label,
-                "reason": reason,
-            }
-        )
-
-    if not sugestoes and resumo_validacao["total_falhas"] > 0:
-        sugestoes.append(
-            {
-                "focus": "",
-                "label": "Reanalisar relatório completo",
-                "reason": "Existem falhas validadas, mas sem um campo semântico claro para isolar a próxima tentativa.",
-            }
-        )
-
-    return sugestoes
+    return dl.construir_sugestoes_reprocessamento(analise, resumo_validacao)
 
 
 def _construir_resumo_ai_relatorio(analise):
-    if analise.tipo_documento != "relatorio_trabalhador":
-        return []
-
-    campos = list(((analise.campos_extraidos or {}).get("campos") or []))
-    secoes = {
-        "Topo esquerdo": [],
-        "Topo direito": [],
-        "Área central": [],
-        "Zona inferior": [],
-    }
-    semantic_to_section = {
-        "cliente": "Topo esquerdo",
-        "estaleiro": "Topo esquerdo",
-        "sondagem_numero": "Topo esquerdo",
-        "inclinacao": "Topo esquerdo",
-        "perfil_furacao": "Topo esquerdo",
-        "data": "Topo direito",
-        "turno": "Topo direito",
-        "profundidade_inicio": "Topo direito",
-        "profundidade_final": "Topo direito",
-        "avanco_turno": "Topo direito",
-        "testemunho_recuperado": "Topo direito",
-        "recuperacao_percentual": "Topo direito",
-        "tempos": "Área central",
-        "parametros": "Área central",
-        "furacao_registo": "Área central",
-        "observacoes": "Área central",
-        "assinatura_equipa": "Zona inferior",
-        "rodape_validacao": "Zona inferior",
-        "identificacao_relatorio": "Topo esquerdo",
-    }
-
-    for campo in campos:
-        titulo = campo.get("campo_impresso") or campo.get("campo") or "Campo do relatório"
-        valor = campo.get("valor_preenchido_trabalhador") or campo.get("valor_lido") or "-"
-        section = semantic_to_section.get(campo.get("campo_semantico"), "Área central")
-        secoes.setdefault(section, []).append(f"{titulo}: {valor}")
-
-    resumo = []
-    for section, linhas in secoes.items():
-        if not linhas:
-            continue
-        resumo.append(section)
-        resumo.extend(linhas)
-    return resumo
+    return dl.construir_resumo_ai_relatorio(analise)
 
 
 def _construir_dashboard_aprendizagem_ai(analises):
-    total_validados = 0
-    total_acertos = 0
-    total_falhas = 0
-    por_tipo = {}
-    por_campo = {}
-    ultimas_validacoes = []
-
-    for analise in analises:
-        tipo = analise.tipo_documento
-        tipo_item = por_tipo.setdefault(
-            tipo,
-            {
-                "label": analise.get_tipo_documento_display(),
-                "total_validados": 0,
-                "total_acertos": 0,
-                "total_falhas": 0,
-                "taxa_acerto": None,
-            },
-        )
-
-        for campo in ((analise.campos_extraidos or {}).get("campos") or []):
-            if not campo.get("validado_utilizador") or not campo.get("valor_validado"):
-                continue
-
-            total_validados += 1
-            tipo_item["total_validados"] += 1
-
-            valor_ai = _normalizar_valor_comparacao_ai(campo.get("valor_lido"))
-            valor_validado = _normalizar_valor_comparacao_ai(campo.get("valor_validado"))
-            acertou = bool(valor_ai and valor_ai == valor_validado)
-
-            campo_chave = campo.get("campo_semantico") or campo.get("campo") or "campo_livre"
-            campo_item = por_campo.setdefault(
-                campo_chave,
-                {
-                    "label": campo_chave.replace("_", " "),
-                    "total_validados": 0,
-                    "total_acertos": 0,
-                    "total_falhas": 0,
-                    "taxa_acerto": None,
-                },
-            )
-            campo_item["total_validados"] += 1
-
-            if acertou:
-                total_acertos += 1
-                tipo_item["total_acertos"] += 1
-                campo_item["total_acertos"] += 1
-            else:
-                total_falhas += 1
-                tipo_item["total_falhas"] += 1
-                campo_item["total_falhas"] += 1
-
-            ultimas_validacoes.append(
-                {
-                    "analise_id": analise.pk,
-                    "analise_nome": analise.nome,
-                    "criado_em": analise.criado_em,
-                    "tipo_documento": analise.get_tipo_documento_display(),
-                    "campo_label": campo_item["label"],
-                    "valor_ai": campo.get("valor_lido") or "-",
-                    "valor_validado": campo.get("valor_validado") or "-",
-                    "estado": "acertou" if acertou else "falhou",
-                }
-            )
-
-    for item in por_tipo.values():
-        if item["total_validados"]:
-            item["taxa_acerto"] = round((item["total_acertos"] / item["total_validados"]) * 100, 1)
-
-    for item in por_campo.values():
-        if item["total_validados"]:
-            item["taxa_acerto"] = round((item["total_acertos"] / item["total_validados"]) * 100, 1)
-
-    ranking_problematicos = [
-        item
-        for item in sorted(
-            por_campo.values(),
-            key=lambda item: (-item["total_falhas"], item["taxa_acerto"] if item["taxa_acerto"] is not None else 999, item["label"]),
-        )
-        if item["total_falhas"] > 0
-    ][:6]
-
-    ultimas_validacoes = sorted(ultimas_validacoes, key=lambda item: item["criado_em"], reverse=True)[:10]
-
-    return {
-        "total_validados": total_validados,
-        "total_acertos": total_acertos,
-        "total_falhas": total_falhas,
-        "taxa_acerto_global": round((total_acertos / total_validados) * 100, 1) if total_validados else None,
-        "por_tipo": sorted(por_tipo.values(), key=lambda item: (-item["total_validados"], item["label"])),
-        "por_campo": sorted(por_campo.values(), key=lambda item: (-item["total_validados"], item["label"])),
-        "ranking_problematicos": ranking_problematicos,
-        "ultimas_validacoes": ultimas_validacoes,
-    }
+    return dl.construir_dashboard_aprendizagem_ai(analises)
 
 
 def _filtrar_analises_visiveis(queryset):
-    resultado = []
-    for analise in queryset:
-        opcoes = ((analise.metadados or {}).get("opcoes_entrada") or {})
-        preview_mode = bool(opcoes.get("preview_mode"))
-        if preview_mode and not analise.guardada:
-            continue
-        resultado.append(analise)
-    return resultado
+    return dl.filtrar_analises_visiveis(queryset)
 
 
 def _obter_empresa_admin_inspecao(request):
-    if request.user.is_superuser:
-        empresa_id = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
-        empresa_qs = Empresa.objects.all().order_by("nome")
-        if empresa_id:
-            empresa = empresa_qs.filter(pk=empresa_id).first()
-            if empresa:
-                return empresa, None
-        empresa = empresa_qs.first()
-        if empresa:
-            return empresa, None
-        messages.error(request, "Ainda não existe nenhuma empresa disponível para abrir a área de inspeção AI.")
-        return None, redirect("plataforma:dashboard")
-
-    perfil = (
-        PerfilPlataforma.objects.filter(
-            user=request.user,
-            ativo=True,
-            tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-        )
-        .select_related("empresa")
-        .first()
-    )
-    if not perfil or not perfil.empresa_id:
-        messages.error(request, "Não tens permissão para aceder à área de inspeção AI.")
-        return None, redirect("projetos:redirect_after_login")
-    return perfil.empresa, None
+    return wf.obter_empresa_admin_inspecao(request)
 
 
 def _listar_documentos_biblioteca_base_conhecimento():
-    pdf_root = KNOWLEDGE_BASE_ROOT / "pdf"
-    if not pdf_root.exists():
-        return []
-
-    documentos = []
-    for path in sorted(pdf_root.rglob("*")):
-        if not path.is_file() or path.name.startswith(".") or path.name.lower() == "readme.md":
-            continue
-        sidecar_txt = path.with_suffix(".txt")
-        extensao = path.suffix.lower()
-        leitura = "direta" if extensao in EXTENSOES_TEXTO_DIRETO else ("txt_auxiliar" if sidecar_txt.exists() else "nao_preparado")
-        documentos.append(
-            {
-                "nome": path.name,
-                "relativo": str(path.relative_to(KNOWLEDGE_BASE_ROOT)),
-                "txt_relativo": str(sidecar_txt.relative_to(KNOWLEDGE_BASE_ROOT)) if sidecar_txt.exists() else "",
-                "tem_txt": sidecar_txt.exists(),
-                "extensao": extensao or "(sem extensão)",
-                "tamanho_kb": round(path.stat().st_size / 1024, 1) if path.exists() else 0,
-                "leitura": leitura,
-            }
-        )
-    return documentos
+    return wf.listar_documentos_biblioteca_base_conhecimento()
 
 
 def _normalizar_nome_documento(nome_original):
-    path = Path(nome_original or "")
-    extensao = path.suffix.lower().strip()
-    base = slugify(path.stem or "")
-    if not base:
-        base = "documento"
-    return base, extensao
+    return dl.normalizar_nome_documento(nome_original)
 
 
 def _resolver_path_unico(base_dir, base_nome, extensao):
-    candidato = base_dir / f"{base_nome}{extensao}"
-    indice = 2
-    while candidato.exists():
-        candidato = base_dir / f"{base_nome}-{indice}{extensao}"
-        indice += 1
-    return candidato
+    return dl.resolver_path_unico(base_dir, base_nome, extensao)
 
 
 @login_required
 @admin_required
 def hub(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -440,8 +117,8 @@ def hub(request):
         .select_related("projeto", "furo")
         .order_by("-criado_em")
     )
-    analises = _filtrar_analises_visiveis(list(analises_qs))
-    dashboard_aprendizagem = _construir_dashboard_aprendizagem_ai(analises)
+    analises = dl.filtrar_analises_visiveis(list(analises_qs))
+    dashboard_aprendizagem = dl.construir_dashboard_aprendizagem_ai(analises)
     return _render_inspecao(
         request,
         "inspecao_ai/hub.html",
@@ -458,11 +135,11 @@ def hub(request):
 @login_required
 @admin_required
 def biblioteca_pdf(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
-    biblioteca_dir = KNOWLEDGE_BASE_ROOT / "pdf"
+    biblioteca_dir = wf.KNOWLEDGE_BASE_ROOT / "pdf"
     biblioteca_dir.mkdir(parents=True, exist_ok=True)
 
     if request.method == "POST":
@@ -471,35 +148,11 @@ def biblioteca_pdf(request):
             messages.error(request, "Seleciona um ficheiro para adicionar à biblioteca.")
             return redirect("inspecao_ai:biblioteca_pdf")
 
-        base_nome, extensao = _normalizar_nome_documento(ficheiro.name)
-        if not extensao:
-            messages.error(request, "O ficheiro precisa de ter uma extensão reconhecível.")
+        try:
+            destino, txt_criado = wf.guardar_documento_biblioteca(ficheiro)
+        except ValueError as exc:
+            messages.error(request, str(exc))
             return redirect("inspecao_ai:biblioteca_pdf")
-
-        if extensao not in EXTENSOES_BIBLIOTECA_PERMITIDAS:
-            messages.error(
-                request,
-                f"A extensão {extensao} não está permitida nesta biblioteca.",
-            )
-            return redirect("inspecao_ai:biblioteca_pdf")
-
-        destino = _resolver_path_unico(biblioteca_dir, base_nome, extensao)
-        with destino.open("wb") as output_file:
-            for chunk in ficheiro.chunks():
-                output_file.write(chunk)
-
-        txt_criado = ""
-        if extensao == ".pdf":
-            txt_path = destino.with_suffix(".txt")
-            if not txt_path.exists():
-                txt_path.write_text(
-                    (
-                        f"Ficheiro auxiliar criado automaticamente para {destino.name}.\n\n"
-                        "Coloca aqui o texto extraído, resumo fiel ou notas principais do PDF para a AI consultar.\n"
-                    ),
-                    encoding="utf-8",
-                )
-            txt_criado = txt_path.name
 
         if destino.name != ficheiro.name:
             messages.success(
@@ -518,7 +171,7 @@ def biblioteca_pdf(request):
 
     filtro_leitura = (request.GET.get("leitura") or "todas").strip()
     filtro_extensao = (request.GET.get("extensao") or "todas").strip()
-    documentos_pdf = _listar_documentos_biblioteca_base_conhecimento()
+    documentos_pdf = wf.listar_documentos_biblioteca_base_conhecimento()
     if filtro_leitura == "direta":
         documentos_pdf = [item for item in documentos_pdf if item["leitura"] == "direta"]
     elif filtro_leitura == "txt_auxiliar":
@@ -531,7 +184,7 @@ def biblioteca_pdf(request):
     extensoes_disponiveis = sorted(
         {
             item["extensao"]
-            for item in _listar_documentos_biblioteca_base_conhecimento()
+            for item in wf.listar_documentos_biblioteca_base_conhecimento()
             if item["extensao"] and item["extensao"] != "(sem extensão)"
         }
     )
@@ -542,8 +195,8 @@ def biblioteca_pdf(request):
         {
             "empresa": empresa,
             "documentos_pdf": documentos_pdf,
-            "biblioteca_path": str((KNOWLEDGE_BASE_ROOT / "pdf").resolve()),
-            "extensoes_upload_permitidas": ", ".join(sorted(EXTENSOES_BIBLIOTECA_PERMITIDAS)),
+            "biblioteca_path": str((wf.KNOWLEDGE_BASE_ROOT / "pdf").resolve()),
+            "extensoes_upload_permitidas": ", ".join(sorted(wf.EXTENSOES_BIBLIOTECA_PERMITIDAS)),
             "filtro_leitura": filtro_leitura,
             "filtro_extensao": filtro_extensao,
             "filtro_choices": [
@@ -566,108 +219,13 @@ def biblioteca_pdf(request):
 
 
 def construir_memoria_operacional_furo(furo):
-    projeto = getattr(furo, "projeto", None)
-
-    profundidade_planeada = getattr(furo, "profundidade", None)
-    profundidade_atingida = getattr(furo, "profundidade_maxima_atingida", None)
-
-    if profundidade_atingida in [None, ""] and profundidade_planeada not in [None, ""]:
-        profundidade_atingida = profundidade_planeada
-
-    total_despesas = getattr(furo, "total_despesas_diretas", None)
-    total_medicoes = getattr(furo, "total_medicoes_registadas", None)
-
-    tem_coordenadas = bool(
-        getattr(furo, "latitude", None) not in [None, ""]
-        and getattr(furo, "longitude", None) not in [None, ""]
-    )
-
-    resumo = {
-        "id": str(furo.pk),
-        "nome": getattr(furo, "nome", "") or f"Furo {furo.pk}",
-        "projeto_id": str(projeto.pk) if projeto else None,
-        "projeto_nome": getattr(projeto, "nome", "") if projeto else "",
-        "estado": getattr(furo, "estado", "") or "",
-        "estado_label": getattr(furo, "get_estado_display", lambda: getattr(furo, "estado", ""))(),
-        "data": getattr(furo, "data", None),
-        "localizacao": getattr(furo, "localizacao", "") or "",
-        "local_sondagem": getattr(furo, "local_sondagem", "") or "",
-        "latitude": getattr(furo, "latitude", None),
-        "longitude": getattr(furo, "longitude", None),
-        "tem_coordenadas": tem_coordenadas,
-        "profundidade_planeada": profundidade_planeada,
-        "profundidade_atingida": profundidade_atingida,
-        "total_despesas_diretas": float(total_despesas or 0),
-        "total_medicoes_registadas": int(total_medicoes or 0),
-        "observacoes": getattr(furo, "observacoes", "") or "",
-    }
-
-    destaques = []
-
-    if resumo["projeto_nome"]:
-        destaques.append(f"Projeto: {resumo['projeto_nome']}")
-
-    if resumo["estado_label"]:
-        destaques.append(f"Estado: {resumo['estado_label']}")
-
-    if resumo["profundidade_atingida"] not in [None, ""]:
-        destaques.append(f"Profundidade: {resumo['profundidade_atingida']} m")
-
-    if resumo["total_medicoes_registadas"]:
-        destaques.append(f"Medições: {resumo['total_medicoes_registadas']}")
-
-    if resumo["total_despesas_diretas"]:
-        destaques.append(f"Despesas diretas: {resumo['total_despesas_diretas']:.2f}")
-
-    if resumo["tem_coordenadas"]:
-        destaques.append("Com coordenadas")
-
-    resumo["destaques"] = destaques
-
-    texto_memoria = []
-    texto_memoria.append(f"Furo: {resumo['nome']}")
-
-    if resumo["projeto_nome"]:
-        texto_memoria.append(f"Projeto: {resumo['projeto_nome']}")
-
-    if resumo["estado_label"]:
-        texto_memoria.append(f"Estado: {resumo['estado_label']}")
-
-    if resumo["localizacao"]:
-        texto_memoria.append(f"Localização: {resumo['localizacao']}")
-
-    if resumo["local_sondagem"]:
-        texto_memoria.append(f"Local de sondagem: {resumo['local_sondagem']}")
-
-    if resumo["profundidade_planeada"] not in [None, ""]:
-        texto_memoria.append(f"Profundidade planeada: {resumo['profundidade_planeada']} m")
-
-    if resumo["profundidade_atingida"] not in [None, ""]:
-        texto_memoria.append(f"Profundidade atingida: {resumo['profundidade_atingida']} m")
-
-    if resumo["total_medicoes_registadas"]:
-        texto_memoria.append(f"Total de medições: {resumo['total_medicoes_registadas']}")
-
-    if resumo["total_despesas_diretas"]:
-        texto_memoria.append(f"Despesas diretas acumuladas: {resumo['total_despesas_diretas']:.2f}")
-
-    if resumo["tem_coordenadas"]:
-        texto_memoria.append(
-            f"Coordenadas: {resumo['latitude']}, {resumo['longitude']}"
-        )
-
-    if resumo["observacoes"]:
-        texto_memoria.append(f"Observações: {resumo['observacoes']}")
-
-    resumo["texto_memoria"] = " | ".join(texto_memoria)
-
-    return resumo
+    return dl.construir_memoria_operacional_furo(furo)
 
 
 @login_required
 @admin_required
 def memoria_operacional(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -677,40 +235,14 @@ def memoria_operacional(request):
     despesas_altas = (request.GET.get("despesas_altas") or "").strip() == "1"
     ordenar = (request.GET.get("ordenar") or "recentes").strip()
 
-    furos_qs = (
-        Furo.objects.filter(empresa=empresa)
-        .select_related("projeto")
-        .annotate(
-            total_despesas_diretas=Sum("despesas__valor"),
-            total_medicoes_registadas=Count("medicoes", distinct=True),
-        )
+    furos, memoria_cards = wf.aplicar_filtros_memoria_operacional(
+        empresa=empresa,
+        termo=termo,
+        estado=estado,
+        com_coordenadas=com_coordenadas,
+        despesas_altas=despesas_altas,
+        ordenar=ordenar,
     )
-    if termo:
-        furos_qs = furos_qs.filter(
-            Q(nome__icontains=termo)
-            | Q(localizacao__icontains=termo)
-            | Q(local_sondagem__icontains=termo)
-            | Q(projeto__nome__icontains=termo)
-        )
-    if estado:
-        furos_qs = furos_qs.filter(estado=estado)
-    if com_coordenadas:
-        furos_qs = furos_qs.filter(latitude__isnull=False, longitude__isnull=False)
-    if despesas_altas:
-        furos_qs = furos_qs.filter(total_despesas_diretas__gte=1000)
-
-    ordenacao_map = {
-        "recentes": ("-data",),
-        "profundos": ("-profundidade_maxima_atingida", "-data"),
-        "caros": ("-total_despesas_diretas", "-data"),
-        "medicoes": ("-total_medicoes_registadas", "-data"),
-    }
-    furos_qs = furos_qs.order_by(*ordenacao_map.get(ordenar, ("-data",)))
-
-    furos = list(furos_qs[:24])
-    memoria_cards = []
-    for furo in furos:
-        memoria_cards.append(construir_memoria_operacional_furo(furo))
 
     return _render_inspecao(
         request,
@@ -737,7 +269,7 @@ def memoria_operacional(request):
 @login_required
 @admin_required
 def analise_list(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -752,7 +284,7 @@ def analise_list(request):
         analises_qs = analises_qs.filter(estado=estado)
     if tipo_documento:
         analises_qs = analises_qs.filter(tipo_documento=tipo_documento)
-    analises = _filtrar_analises_visiveis(list(analises_qs))
+    analises = dl.filtrar_analises_visiveis(list(analises_qs))
 
     return _render_inspecao(
         request,
@@ -770,7 +302,7 @@ def analise_list(request):
 @login_required
 @admin_required
 def analise_create(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -781,29 +313,7 @@ def analise_create(request):
         .values("id", "nome", "tipo_documento", "zona_relatorio", "zonas_texto")
     )
     if request.method == "POST" and form.is_valid():
-        analise = form.save(commit=False)
-        analise.empresa = empresa
-        analise.criado_por = request.user
-        analise.guardada = False
-        analise.metadados = {
-            **(analise.metadados or {}),
-            "opcoes_entrada": {
-                "auto_corrigir_inclinacao": bool(form.cleaned_data.get("auto_corrigir_inclinacao")),
-                "rotacao_manual_graus": float(form.cleaned_data.get("rotacao_manual") or 0),
-                "relatorio_focus": (form.cleaned_data.get("relatorio_focus") or "").strip(),
-                "zona_relatorio": form.cleaned_data.get("report_zone") or None,
-                "area_prioritaria": {
-                    "x_percent": float(form.cleaned_data.get("area_x_percent") or 0),
-                    "y_percent": float(form.cleaned_data.get("area_y_percent") or 0),
-                    "w_percent": float(form.cleaned_data.get("area_w_percent") or 100),
-                    "h_percent": float(form.cleaned_data.get("area_h_percent") or 100),
-                },
-                "zonas_texto_custom": form.cleaned_data.get("custom_text_zones") or [],
-                "preview_mode": True,
-            },
-        }
-        analise.save()
-        executar_analise_imagem(analise)
+        analise = wf.criar_analise_preview(form=form, empresa=empresa, user=request.user)
         messages.success(
             request,
             "A análise visual foi executada. Revê o resultado e carrega em guardar se quiseres colocá-la no histórico.",
@@ -824,7 +334,7 @@ def analise_create(request):
 @login_required
 @admin_required
 def zona_preset_guardar(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return JsonResponse({"ok": False, "error": "Sem acesso à empresa atual."}, status=403)
 
@@ -840,21 +350,16 @@ def zona_preset_guardar(request):
         return JsonResponse({"ok": False, "error": "Indica um nome para o preset."}, status=400)
 
     try:
-        zona_relatorio = _parse_zone_payload(report_zone, single=True)
-        zonas_texto = _parse_zone_payload(custom_zones, single=False)
+        preset = wf.guardar_preset_zonas(
+            empresa=empresa,
+            user=request.user,
+            nome=nome,
+            tipo_documento=tipo_documento,
+            report_zone_raw=report_zone,
+            custom_zones_raw=custom_zones,
+        )
     except (ValueError, TypeError, json.JSONDecodeError):
         return JsonResponse({"ok": False, "error": "As zonas definidas são inválidas."}, status=400)
-
-    preset, _created = AnaliseZonaPresetAI.objects.update_or_create(
-        empresa=empresa,
-        tipo_documento=tipo_documento,
-        nome=nome,
-        defaults={
-            "zona_relatorio": zona_relatorio or {},
-            "zonas_texto": zonas_texto or [],
-            "criado_por": request.user,
-        },
-    )
     return JsonResponse(
         {
             "ok": True,
@@ -872,7 +377,7 @@ def zona_preset_guardar(request):
 @login_required
 @admin_required
 def analise_detail(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -881,9 +386,9 @@ def analise_detail(request, pk):
         pk=pk,
         empresa=empresa,
     )
-    resumo_validacao = _construir_resumo_validacao_analise(analise)
-    sugestoes_reprocessamento = _construir_sugestoes_reprocessamento(analise, resumo_validacao)
-    resumo_ai_relatorio = _construir_resumo_ai_relatorio(analise)
+    resumo_validacao = dl.construir_resumo_validacao_analise(analise)
+    sugestoes_reprocessamento = dl.construir_sugestoes_reprocessamento(analise, resumo_validacao)
+    resumo_ai_relatorio = dl.construir_resumo_ai_relatorio(analise)
     return _render_inspecao(
         request,
         "inspecao_ai/analise_detail.html",
@@ -899,26 +404,12 @@ def analise_detail(request, pk):
 @login_required
 @admin_required
 def analise_corrigir_campos(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
     analise = get_object_or_404(AnaliseImagemAI, pk=pk, empresa=empresa)
-    campos_extraidos = dict(analise.campos_extraidos or {})
-    campos = list(campos_extraidos.get("campos") or [])
-    corrigidos = 0
-
-    for indice, campo in enumerate(campos):
-        valor_validado = (request.POST.get(f"campo_validado_{indice}") or "").strip()
-        campo["valor_validado"] = valor_validado
-        campo["validado_utilizador"] = bool(valor_validado)
-        if valor_validado:
-            corrigidos += 1
-
-    campos_extraidos["campos"] = campos
-    campos_extraidos["tem_validacao_utilizador"] = corrigidos > 0
-    analise.campos_extraidos = campos_extraidos
-    analise.save(update_fields=["campos_extraidos", "atualizado_em"])
+    wf.guardar_correcoes_campos(analise, request.POST)
     messages.success(request, "As correções manuais da análise foram guardadas.")
     return redirect("inspecao_ai:analise_detail", pk=analise.pk)
 
@@ -926,20 +417,12 @@ def analise_corrigir_campos(request, pk):
 @login_required
 @admin_required
 def analise_guardar(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
     analise = get_object_or_404(AnaliseImagemAI, pk=pk, empresa=empresa)
-    analise.guardada = True
-    analise.metadados = {
-        **(analise.metadados or {}),
-        "opcoes_entrada": {
-            **(((analise.metadados or {}).get("opcoes_entrada")) or {}),
-            "preview_mode": False,
-        },
-    }
-    analise.save(update_fields=["guardada", "metadados", "atualizado_em"])
+    wf.guardar_analise_no_historico(analise)
     messages.success(request, "A análise foi guardada no histórico.")
     return redirect("inspecao_ai:analise_detail", pk=analise.pk)
 
@@ -947,7 +430,7 @@ def analise_guardar(request, pk):
 @login_required
 @admin_required
 def analise_reprocessar(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -957,52 +440,11 @@ def analise_reprocessar(request, pk):
         empresa=empresa,
     )
     relatorio_focus = (request.POST.get("relatorio_focus") or "").strip()
-    foco_labels = {
-        "cabecalho": "Faixa superior impressa",
-        "data": "Data",
-        "turno": "Turno",
-        "equipa": "Equipa",
-        "observacoes": "Área central do relatório",
-        "rodape": "Rodapé impresso",
-    }
-    sufixo_nome = foco_labels.get(relatorio_focus, "reprocessada")
-    nome_base = _nome_base_analise_reprocessada(analise_origem.nome)
-
-    nova_analise = AnaliseImagemAI(
-        empresa=empresa,
-        projeto=analise_origem.projeto,
-        furo=analise_origem.furo,
-        criado_por=request.user,
-        nome=f"{nome_base} · {sufixo_nome}",
-        tipo_documento=analise_origem.tipo_documento,
-        estado="pendente",
-        guardada=False,
-        marcador_predominante="indefinido",
-        motor_analise=analise_origem.motor_analise,
-        observacoes=analise_origem.observacoes,
-        metadados={
-            **(analise_origem.metadados or {}),
-            "opcoes_entrada": {
-                **(((analise_origem.metadados or {}).get("opcoes_entrada")) or {}),
-                "relatorio_focus": relatorio_focus,
-                "preview_mode": True,
-            },
-            "reprocessada_de": str(analise_origem.pk),
-        },
+    nova_analise, foco_labels = wf.reprocessar_analise(
+        analise_origem=analise_origem,
+        user=request.user,
+        relatorio_focus=relatorio_focus,
     )
-
-    if analise_origem.imagem_original:
-        analise_origem.imagem_original.open("rb")
-        try:
-            conteudo = analise_origem.imagem_original.read()
-        finally:
-            analise_origem.imagem_original.close()
-        nome_original = (analise_origem.imagem_original.name or "").split("/")[-1] or f"{analise_origem.pk}.jpg"
-        nova_analise.imagem_original.save(nome_original, ContentFile(conteudo), save=False)
-
-    nova_analise.save()
-
-    executar_analise_imagem(nova_analise)
     if relatorio_focus:
         messages.success(
             request,
@@ -1019,7 +461,7 @@ def analise_reprocessar(request, pk):
 @login_required
 @admin_required
 def chatbox(request):
-    empresa, resposta_erro = _obter_empresa_admin_inspecao(request)
+    empresa, resposta_erro = wf.obter_empresa_admin_inspecao(request)
     if resposta_erro:
         return resposta_erro
 
@@ -1056,7 +498,7 @@ def chatbox(request):
                 sessao.titulo = pergunta[:80]
             resumo_contexto = construir_resumo_empresa(empresa)
             if furo_contexto:
-                resumo_contexto["memoria_furo_contexto"] = construir_memoria_operacional_furo(furo_contexto)
+                resumo_contexto["memoria_furo_contexto"] = dl.construir_memoria_operacional_furo(furo_contexto)
             sessao.ultimo_resumo_contexto = normalizar_json_chat(resumo_contexto)
             sessao.save(update_fields=["titulo", "ultimo_resumo_contexto", "atualizado_em"])
         return redirect(f"{request.path}?sessao={sessao.pk}")

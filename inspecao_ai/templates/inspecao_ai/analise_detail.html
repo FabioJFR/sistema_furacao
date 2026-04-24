@@ -1,4 +1,5 @@
 {% extends base_template %}
+{% load static %}
 
 {% block title %}{{ analise.nome }}{% endblock %}
 
@@ -113,7 +114,13 @@
                 {% widthratio analise.metadados.area_prioritaria_bbox.y_min analise.metadados.altura 100 as area_top_original %}
                 {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge_original %}
                 {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge_original %}
-                <div class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none" style="left: {{ area_left_original }}%; top: {{ area_top_original }}%; right: calc(100% - {{ area_right_edge_original }}%); bottom: calc(100% - {{ area_bottom_edge_original }}%);"></div>
+                <div
+                    class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay"
+                    data-left="{{ area_left_original }}"
+                    data-top="{{ area_top_original }}"
+                    data-right-edge="{{ area_right_edge_original }}"
+                    data-bottom-edge="{{ area_bottom_edge_original }}"
+                ></div>
                 <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">Área prioritária da AI</div>
             {% endif %}
         </div>
@@ -132,8 +139,11 @@
                     {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge %}
                     {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge %}
                     <div
-                        class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none"
-                        style="left: {{ area_left }}%; top: {{ area_top }}%; right: calc(100% - {{ area_right_edge }}%); bottom: calc(100% - {{ area_bottom_edge }}%);"
+                        class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay"
+                        data-left="{{ area_left }}"
+                        data-top="{{ area_top }}"
+                        data-right-edge="{{ area_right_edge }}"
+                        data-bottom-edge="{{ area_bottom_edge }}"
                     ></div>
                     <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">
                         Área prioritária da AI
@@ -365,30 +375,5 @@
         {% endif %}
     </div>
 </div>
-<script>
-(() => {
-    const zoom = document.getElementById("image-zoom");
-    const contrast = document.getElementById("image-contrast");
-    const brightness = document.getElementById("image-brightness");
-    const images = [
-        document.getElementById("analise-imagem-original"),
-        document.getElementById("analise-imagem-processada"),
-    ].filter(Boolean);
-
-    function applyViewAdjustments() {
-        const scale = zoom ? Number(zoom.value || 1) : 1;
-        const contrastValue = contrast ? Number(contrast.value || 1) : 1;
-        const brightnessValue = brightness ? Number(brightness.value || 1) : 1;
-        images.forEach((image) => {
-            image.style.transform = `scale(${scale})`;
-            image.style.filter = `contrast(${contrastValue}) brightness(${brightnessValue})`;
-        });
-    }
-
-    [zoom, contrast, brightness].filter(Boolean).forEach((input) => {
-        input.addEventListener("input", applyViewAdjustments);
-    });
-    applyViewAdjustments();
-})();
-</script>
+<script src="{% static 'js/inspecao_ai/analise_detail.js' %}"></script>
 {% endblock %}

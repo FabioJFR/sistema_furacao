@@ -1,0 +1,41 @@
+.eap-card {
+    max-width: 600px;
+}
+
+.eap-field {
+    margin-bottom: 16px;
+}
+
+.eap-label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.eap-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.eap-info {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.eap-info-row {
+    margin-bottom: 6px;
+}
+
+.eap-note {
+    color: #92400e;
+}
+
+.eap-actions {
+    display: flex;
+    gap: 10px;
+}

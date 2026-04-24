@@ -1,6 +1,11 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 
 {% block title %}Importar Trajetória 3D{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/furo_3d_importar_externo.css' %}">
+{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
@@ -118,7 +123,7 @@
                             🖼️ PNG
                         </button>
                     </div>
-                    <div id="plot-3d" style="width:100%; min-height:72vh;"></div>
+                    <div id="plot-3d" class="furo-3d-import-plot"></div>
                 {% else %}
                     <div class="flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500">
                         Carrega um ficheiro externo para desenhar aqui a trajetória em 3D.
@@ -131,50 +136,11 @@
 
 {% if imported_trace %}
 {{ imported_trace|json_script:"imported-trace-data" }}
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-<script>
-const importedTrace = JSON.parse(document.getElementById("imported-trace-data").textContent || "{}");
-const exportPngBtn = document.getElementById("exportPngBtn");
-
-if (importedTrace.x && importedTrace.x.length) {
-    const trace = {
-        x: importedTrace.x,
-        y: importedTrace.y,
-        z: importedTrace.z,
-        mode: "lines+markers",
-        type: "scatter3d",
-        name: importedTrace.name || "Trajetória importada",
-        line: { width: 7, color: "#7c3aed" },
-        marker: { size: 4, color: "#a855f7" },
-        hovertemplate: "X: %{x:.2f}<br>Y: %{y:.2f}<br>Z: %{z:.2f}<extra></extra>",
-    };
-
-    Plotly.newPlot("plot-3d", [trace], {
-        margin: { l: 0, r: 0, b: 0, t: 10 },
-        paper_bgcolor: "#ffffff",
-        plot_bgcolor: "#ffffff",
-        scene: {
-            bgcolor: "#f8fafc",
-            xaxis: { title: "X", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
-            yaxis: { title: "Y", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
-            zaxis: { title: "Z", backgroundcolor: "#f8fafc", gridcolor: "#d1d5db", zerolinecolor: "#9ca3af" },
-            camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } }
-        }
-    }, {
-        responsive: true,
-        displaylogo: false,
-    }).then((plot) => {
-        exportPngBtn?.addEventListener("click", () => {
-            Plotly.downloadImage(plot, {
-                format: "png",
-                filename: "trajetoria-importada-3d",
-                width: 1600,
-                height: 900,
-                scale: 2
-            });
-        });
-    });
-}
-</script>
 {% endif %}
+<div id="furo-3d-import-config" data-png-filename="trajetoria-importada-3d"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'js/projetos/furo_3d_importar_externo.js' %}"></script>
 {% endblock %}

@@ -254,6 +254,31 @@ O comando `preencher_furos_e_materiais_base` permite:
 
 ---
 
+## Gate pré-release
+
+Antes de publicar ou criar release, usar o gate único de validação:
+
+```bash
+make pre-release-gate
+```
+
+Ou diretamente:
+
+```bash
+./.venv/bin/python3 manage.py url_hygiene_gate --strict
+```
+
+Este gate valida:
+
+- higiene de URLs (evitar hardcoded em templates/JS/redirects)
+- `Django check` para consistência geral
+
+Referência:
+
+- [docs/url_hygiene_checklist.md](/Users/fabiorevez/Desktop/sistema_furacao/docs/url_hygiene_checklist.md:1)
+
+---
+
 ## Arranque rápido
 
 ### Ambiente local

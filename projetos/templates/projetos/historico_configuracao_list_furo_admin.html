@@ -11,7 +11,7 @@
             <p class="text-gray-500 mt-1">Furo: {{ furo.nome }}</p>
         </div>
 
-        <a href="{% url 'projetos:furo_detail' furo.pk %}"
+        <a href="{{ furo.get_absolute_url }}"
            class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
             🔙 Voltar ao Furo
         </a>

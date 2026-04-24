@@ -76,7 +76,7 @@
 
                 {% if medicao.furo %}
                 <div class="mt-3">
-                    <a href="{% url 'projetos:furo_detail' medicao.furo.id %}" 
+                    <a href="{{ medicao.furo.get_absolute_url }}" 
                        class="block text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
                         🔍 Ver Furo
                     </a>

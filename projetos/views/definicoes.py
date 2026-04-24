@@ -5,9 +5,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import translation
 
-from projetos.models import PreferenciasUser
 from projetos.forms import PreferenciasForm
-from projetos.models import Empregados
+from projetos.selectors.acesso import resolver_empregado_por_user_ou_email
+from projetos.selectors.preferencias import (
+    garantir_preferencias_empresa,
+    obter_ou_criar_preferencias_user,
+)
 
 logger = logging.getLogger("core")
 
@@ -20,7 +23,15 @@ def _obter_empregado_autenticado_definicoes(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado, ligado_por_fallback = resolver_empregado_por_user_ou_email(request.user)
+    if ligado_por_fallback and empregado is not None:
+        logger.warning(
+            "Ligação automática User -> Empregados executada em definicoes.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
+            request.user.id,
+            empregado.id,
+            empregado.empresa_id,
+            getattr(request.user, "email", ""),
+        )
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em definicoes.py. user_id=%s",
@@ -56,11 +67,9 @@ def definicoes(request):
         logger.warning("Acesso bloqueado na view definicoes. user_id=%s", request.user.id)
         return resposta_erro
 
-    preferencias, created = PreferenciasUser.objects.get_or_create(user=request.user)
-
+    preferencias, _ = obter_ou_criar_preferencias_user(request.user)
     if empregado and empregado.empresa_id:
-        preferencias.empresa = empregado.empresa
-        preferencias.save(update_fields=["empresa"])
+        preferencias = garantir_preferencias_empresa(preferencias, empregado.empresa)
 
     if request.method == "POST":
         form = PreferenciasForm(request.POST, instance=preferencias)

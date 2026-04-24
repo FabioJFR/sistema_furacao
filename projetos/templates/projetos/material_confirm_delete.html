@@ -1,36 +1,24 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}Apagar Material{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/material_confirm_delete.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="max-width:500px; margin:50px auto; background:#34495e; color:#ecf0f1; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); text-align:center;">
+<div class="mtd-wrap">
     <h1>Apagar Material</h1>
     <p>Tem a certeza que deseja apagar "<strong>{{ material.nome }}</strong>"?</p>
 
-    <form method="post" style="margin-top:20px; display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+    <form method="post" class="mtd-form">
         {% csrf_token %}
-        <button type="submit" style="
-            background-color:#c0392b;
-            color:white;
-            padding:10px 20px;
-            border:none;
-            border-radius:5px;
-            font-weight:bold;
-            cursor:pointer;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+        <button type="submit" class="mtd-btn mtd-btn-delete">
             🗑️ Sim, apagar
         </button>
 
-        <a href="{% url 'projetos:material_detail' material.id %}" style="
-            background-color:#2980b9;
-            color:white;
-            padding:10px 20px;
-            border-radius:5px;
-            font-weight:bold;
-            text-decoration:none;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+        <a href="{% url 'projetos:material_detail' material.id %}" class="mtd-btn mtd-btn-cancel">
             🔙 Cancelar
         </a>
     </form>

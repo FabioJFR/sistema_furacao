@@ -4,6 +4,7 @@
 from .empresa import Empresa
 from .projeto import Projeto
 from .furo import Furo
+from .furo_versao import FuroVersao
 
 # ===============================
 # RECURSOS HUMANOS

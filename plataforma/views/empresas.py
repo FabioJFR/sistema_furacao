@@ -1,12 +1,13 @@
-from datetime import date, timedelta
+from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
-from django.utils import timezone
 
 from plataforma.decorators import platform_admin_required
-from plataforma.models import Empresa, MovimentoFinanceiroPlataforma, Plano, SubscricaoEmpresa
+from plataforma.models import Empresa, Plano
+from plataforma import selectors
+from plataforma.services import empresas as empresas_service
 
 # TODO futuro:
 # - ligar com subscrição (SubscricaoEmpresa)
@@ -21,76 +22,15 @@ from plataforma.models import Empresa, MovimentoFinanceiroPlataforma, Plano, Sub
 # TODO futuro:
 # - substituir este padrão por serviços/selectors dedicados para empresas da plataforma
 # - separar ações críticas (alterar plano, suspender) em services próprios
-
-
-def _adicionar_meses(data_base, meses):
-    import calendar
-
-    mes = data_base.month - 1 + meses
-    ano = data_base.year + mes // 12
-    mes = mes % 12 + 1
-    dia = min(data_base.day, calendar.monthrange(ano, mes)[1])
-    return data_base.replace(year=ano, month=mes, day=dia)
-
-
-def _calcular_proxima_renovacao(data_inicio, ciclo_cobranca):
-    valor = str(ciclo_cobranca or "").strip()
-    if valor == "mensal":
-        meses = 1
-    elif valor == "anual":
-        meses = 12
-    else:
-        try:
-            meses = int(valor)
-        except (TypeError, ValueError):
-            meses = 1
-    return _adicionar_meses(data_inicio, meses)
-
-
-def _obter_valor_por_ciclo(plano, ciclo_cobranca):
-    valor = str(ciclo_cobranca or "").strip()
-    if valor == "mensal":
-        meses = 1
-    elif valor == "anual":
-        meses = 12
-    else:
-        try:
-            meses = int(valor)
-        except (TypeError, ValueError):
-            meses = 1
-    if meses == 12 and plano.preco_anual:
-        return plano.preco_anual or 0
-    return (plano.preco_mensal or 0) * meses
-
 @login_required
 @platform_admin_required
 def empresa_detail_plataforma(request, pk):
     perfil = request.perfil_plataforma
 
-    empresa = get_object_or_404(
-        Empresa.objects.select_related("plano"),
-        pk=pk,
-    )
-    subscricao_atual = (
-        SubscricaoEmpresa.objects
-        .select_related("plano")
-        .filter(empresa=empresa)
-        .order_by("-data_inicio", "-criado_em")
-        .first()
-    )
-    movimentos_financeiros = (
-        MovimentoFinanceiroPlataforma.objects
-        .select_related("plano", "subscricao")
-        .filter(empresa=empresa)
-        .order_by("-data_vencimento", "-criado_em")[:5]
-    )
-    alerta_renovacao = None
-    if subscricao_atual and subscricao_atual.proxima_renovacao:
-        hoje = timezone.now().date()
-        if subscricao_atual.proxima_renovacao <= hoje:
-            alerta_renovacao = "Renovação em atraso ou a vencer hoje."
-        elif subscricao_atual.proxima_renovacao <= (hoje + timedelta(days=7)):
-            alerta_renovacao = "Renovação próxima nos próximos 7 dias."
+    empresa = selectors.obter_empresa_com_plano(pk)
+    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
+    movimentos_financeiros = selectors.listar_movimentos_financeiros_empresa(empresa, limit=5)
+    alerta_renovacao = empresas_service.calcular_alerta_renovacao(subscricao_atual)
 
     # =========================
     # MÉTRICAS BASE (placeholder para evolução)
@@ -124,21 +64,12 @@ def empresa_detail_plataforma(request, pk):
 @login_required
 @platform_admin_required
 def atualizar_renovacao_subscricao_empresa(request, pk):
-    empresa = get_object_or_404(Empresa, pk=pk)
+    empresa = selectors.obter_empresa(pk)
 
     if request.method != "POST":
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    subscricao_atual = (
-        SubscricaoEmpresa.objects
-        .filter(empresa=empresa)
-        .order_by("-data_inicio", "-criado_em")
-        .first()
-    )
-
-    if not subscricao_atual:
-        messages.error(request, "A empresa não tem subscrição ativa para atualizar a renovação.")
-        return redirect("plataforma:empresa_detail", pk=empresa.pk)
+    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
 
     nova_data_raw = (request.POST.get("proxima_renovacao") or "").strip()
     if not nova_data_raw:
@@ -151,21 +82,11 @@ def atualizar_renovacao_subscricao_empresa(request, pk):
         messages.error(request, "A data indicada para a renovação é inválida.")
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    if subscricao_atual.data_inicio and nova_data < subscricao_atual.data_inicio:
-        messages.error(request, "A próxima renovação não pode ser anterior ao início da subscrição.")
+    try:
+        empresas_service.atualizar_renovacao_subscricao(subscricao_atual, nova_data)
+    except Exception as exc:
+        messages.error(request, str(exc))
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
-
-    subscricao_atual.proxima_renovacao = nova_data
-    subscricao_atual.data_fim = nova_data
-    subscricao_atual.renovacao_definida_manualmente = True
-    subscricao_atual.save(
-        update_fields=[
-            "proxima_renovacao",
-            "data_fim",
-            "renovacao_definida_manualmente",
-            "atualizado_em",
-        ]
-    )
 
     messages.success(
         request,
@@ -179,19 +100,9 @@ def atualizar_renovacao_subscricao_empresa(request, pk):
 def alterar_plano_empresa(request, pk):
     perfil = request.perfil_plataforma
 
-    empresa = get_object_or_404(
-        Empresa.objects.select_related("plano"),
-        pk=pk,
-    )
-
-    planos = Plano.objects.filter(ativo=True).order_by("tipo", "preco_mensal", "nome")
-    subscricao_atual = (
-        SubscricaoEmpresa.objects
-        .select_related("plano")
-        .filter(empresa=empresa)
-        .order_by("-data_inicio", "-criado_em")
-        .first()
-    )
+    empresa = selectors.obter_empresa_com_plano(pk)
+    planos = selectors.listar_planos_para_admin()
+    subscricao_atual = selectors.obter_subscricao_atual_empresa(empresa)
 
     if request.method == "POST":
         plano_id = request.POST.get("plano")
@@ -199,46 +110,16 @@ def alterar_plano_empresa(request, pk):
         estado_empresa = (request.POST.get("estado_empresa") or empresa.status or "teste").strip()
         novo_plano = get_object_or_404(Plano, pk=plano_id, ativo=True)
 
-        estados_empresa_validos = {valor for valor, _ in Empresa.STATUS_CHOICES}
-
-        if ciclo_subscricao not in ["1", "3", "6", "12"]:
-            messages.error(request, "Selecione um período de pagamento válido.")
+        resultado = empresas_service.alterar_plano_empresa(
+            empresa=empresa,
+            subscricao_atual=subscricao_atual,
+            novo_plano=novo_plano,
+            ciclo_subscricao=ciclo_subscricao,
+            estado_empresa=estado_empresa,
+        )
+        if not resultado.ok:
+            messages.error(request, resultado.erro)
             return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
-
-        if estado_empresa not in estados_empresa_validos:
-            messages.error(request, "Selecione um estado válido para a empresa.")
-            return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
-
-        if int(ciclo_subscricao) not in novo_plano.periodos_cobranca_disponiveis_normalizados:
-            messages.error(request, "O plano selecionado não permite esse período de pagamento.")
-            return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
-
-        if int(ciclo_subscricao) in [1, 3, 6] and not novo_plano.preco_mensal:
-            messages.error(request, "O plano selecionado precisa de preço mensal para esse período.")
-            return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
-
-        if int(ciclo_subscricao) == 12 and not novo_plano.preco_anual and not novo_plano.preco_mensal:
-            messages.error(request, "O plano selecionado precisa de preço anual ou mensal para 12 meses.")
-            return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
-
-        empresa.plano = novo_plano
-        empresa.status = estado_empresa
-        empresa.save()
-
-        if subscricao_atual:
-            subscricao_atual.plano = novo_plano
-            subscricao_atual.ciclo_cobranca = ciclo_subscricao
-            subscricao_atual.valor = _obter_valor_por_ciclo(novo_plano, ciclo_subscricao)
-
-            if not subscricao_atual.renovacao_definida_manualmente:
-                proxima_renovacao = _calcular_proxima_renovacao(
-                    subscricao_atual.data_inicio,
-                    ciclo_subscricao,
-                )
-                subscricao_atual.proxima_renovacao = proxima_renovacao
-                subscricao_atual.data_fim = proxima_renovacao
-
-            subscricao_atual.save()
 
         messages.success(
             request,
@@ -261,24 +142,12 @@ def alterar_plano_empresa(request, pk):
 @login_required
 @platform_admin_required
 def toggle_empresa_ativa(request, pk):
-    perfil = request.perfil_plataforma
-
-    empresa = get_object_or_404(Empresa, pk=pk)
+    empresa = selectors.obter_empresa(pk)
 
     if request.method != "POST":
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    empresa.ativo = not empresa.ativo
-
-    if empresa.ativo:
-        if empresa.status in ["suspensa", "cancelada"]:
-            empresa.status = "ativa"
-        mensagem = f"Empresa '{empresa.nome}' reativada com sucesso."
-    else:
-        empresa.status = "suspensa"
-        mensagem = f"Empresa '{empresa.nome}' suspensa com sucesso."
-
-    empresa.save(update_fields=["ativo", "status", "atualizado_em"])
+    empresa, mensagem = empresas_service.toggle_ativa_empresa(empresa)
 
     messages.success(request, mensagem)
     return redirect("plataforma:empresa_detail", pk=empresa.pk)

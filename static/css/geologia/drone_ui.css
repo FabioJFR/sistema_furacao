@@ -1,0 +1,20 @@
+.drone-inline-form {
+    display: inline;
+}
+
+.drone-live-frame {
+    height: 300px;
+}
+
+.drone-snapshot-image {
+    height: 300px;
+    object-fit: cover;
+}
+
+.drone-control-map {
+    height: 460px;
+}
+
+.drone-sf-control-map {
+    height: 420px;
+}

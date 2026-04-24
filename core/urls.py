@@ -71,6 +71,7 @@ urlpatterns = [
 
     # API Dispositivos
     path("api/dispositivos/", include("dispositivos.api.urls")),
+    path("api/v1/projetos/", include("projetos.api.urls")),
 ]
 
 if settings.DEBUG:

@@ -64,7 +64,7 @@
                 📄 Ver detalhe
             </a>
 
-            <a href="{% url 'projetos:furo_detail' historico.furo.id %}"
+            <a href="{{ historico.furo.get_absolute_url }}"
                class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
                 🔙 Voltar
             </a>

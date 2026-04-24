@@ -1,0 +1,30 @@
+.features-layout { display:grid; grid-template-columns: 340px 1fr; gap: 24px; }
+.features-card { background:#fff; border:1px solid #e5e7eb; border-radius:18px; padding:20px; box-shadow:0 12px 30px rgba(15, 23, 42, .06); }
+.features-card h2 { font-size:1.05rem; font-weight:700; color:#0f172a; margin:0 0 6px; }
+.features-note { color:#64748b; font-size:.94rem; margin:0 0 16px; }
+.entity-list { display:flex; flex-direction:column; gap:10px; }
+.entity-link { display:block; border:1px solid #e5e7eb; border-radius:14px; padding:12px 14px; text-decoration:none; color:inherit; }
+.entity-link.active { border-color:#0f766e; background:#f0fdfa; }
+.entity-meta { display:block; color:#64748b; font-size:.85rem; margin-top:4px; }
+.entity-count { display:inline-block; margin-top:8px; font-size:.8rem; font-weight:700; color:#0f766e; background:#ccfbf1; padding:4px 8px; border-radius:999px; }
+.group-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+.feature-group { border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
+.feature-group h3 { margin:0 0 12px; font-size:1rem; color:#0f172a; }
+.feature-row { border-top:1px solid #f1f5f9; padding:12px 0; }
+.feature-row:first-child { border-top:0; padding-top:0; }
+.feature-head { display:flex; align-items:flex-start; gap:12px; }
+.feature-head input { margin-top:4px; width:18px; height:18px; }
+.feature-label { font-weight:700; color:#0f172a; }
+.feature-desc { color:#64748b; font-size:.88rem; margin-top:3px; }
+.feature-badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.badge-mini { font-size:.76rem; padding:4px 8px; border-radius:999px; font-weight:700; }
+.badge-mini.base { background:#e2e8f0; color:#334155; }
+.badge-mini.override { background:#fef3c7; color:#92400e; }
+.badge-mini.active { background:#dcfce7; color:#166534; }
+.badge-mini.inactive { background:#fee2e2; color:#991b1b; }
+.features-actions { display:flex; gap:12px; align-items:center; margin-top:20px; }
+.btn-save { background:#0f766e; color:#fff; border:0; border-radius:12px; padding:10px 16px; font-weight:700; cursor:pointer; }
+.btn-muted { color:#475569; text-decoration:none; }
+.features-stats-grid { margin-bottom:24px; }
+.features-individuais-title { margin-top:22px; }
+@media (max-width: 980px) { .features-layout { grid-template-columns:1fr; } }

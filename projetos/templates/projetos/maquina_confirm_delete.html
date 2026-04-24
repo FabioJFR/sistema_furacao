@@ -1,42 +1,32 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}Apagar Máquina{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_confirm_delete.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="max-width:500px; margin:60px auto; background:#34495e; padding:30px; border-radius:12px; text-align:center; color:#ecf0f1;">
+<div class="mcd-wrap">
 
-    <h2 style="margin-bottom:20px;">⚠️ Apagar Máquina</h2>
+    <h2 class="mcd-title">⚠️ Apagar Máquina</h2>
 
-    <p style="margin-bottom:20px;">
+    <p class="mcd-text">
         Tem a certeza que deseja apagar a máquina:
     </p>
 
-    <h3 style="margin-bottom:30px;">{{ maquina.nome }}</h3>
+    <h3 class="mcd-name">{{ maquina.nome }}</h3>
 
     <form method="POST">
         {% csrf_token %}
 
-        <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
-            <button type="submit" style="
-                background:#c0392b;
-                color:white;
-                padding:10px 20px;
-                border:none;
-                border-radius:6px;
-                font-weight:bold;
-                cursor:pointer;
-            ">
+        <div class="mcd-actions">
+            <button type="submit" class="mcd-btn mcd-btn-delete">
                 🗑️ Sim, apagar
             </button>
 
-            <a href="{% url 'projetos:maquina_detail' maquina.id %}" style="
-                background:#2980b9;
-                color:white;
-                padding:10px 20px;
-                border-radius:6px;
-                text-decoration:none;
-                font-weight:bold;
-            ">
+            <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mcd-btn mcd-btn-cancel">
                 🔙 Cancelar
             </a>
         </div>

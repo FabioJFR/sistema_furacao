@@ -8,6 +8,7 @@
     <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar ao Drone S_F</a>
 {% endblock %}
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/geologia/drone_ui.css' %}">
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -126,8 +127,7 @@
                     </div>
                     <div
                         id="droneSfControlMap"
-                        class="rounded-xl border border-gray-200"
-                        style="height: 420px;"
+                        class="rounded-xl border border-gray-200 drone-sf-control-map"
                         data-current-lat="{{ operacao.latitude_atual|default_if_none:'' }}"
                         data-current-lon="{{ operacao.longitude_atual|default_if_none:'' }}"
                         data-target-lat="{{ operacao.alvo_latitude|default_if_none:'' }}"
@@ -426,7 +426,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="ativa" value="0">
                                     <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
-                                        <input type="checkbox" name="ativa" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-700" {% if missao.ativa %}checked{% endif %} onchange="this.form.submit()">
+                                        <input type="checkbox" name="ativa" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-700" {% if missao.ativa %}checked{% endif %} data-auto-submit-on-change>
                                         Repetir automaticamente
                                     </label>
                                 </form>
@@ -436,7 +436,7 @@
                                         {% csrf_token %}
                                         <button type="submit" class="px-4 py-2 rounded bg-cyan-700 text-white font-semibold">Executar agora</button>
                                     </form>
-                                    <form method="post" action="{% url 'geologia:drone_sf_missao_programada_delete' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" onsubmit="return confirm('Apagar esta missão programada?');">
+                                    <form method="post" action="{% url 'geologia:drone_sf_missao_programada_delete' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" data-confirm-submit="Apagar esta missão programada?">
                                         {% csrf_token %}
                                         <button type="submit" class="px-4 py-2 rounded bg-rose-600 text-white font-semibold">Apagar</button>
                                     </form>

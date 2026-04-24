@@ -1,0 +1,67 @@
+.eu-shell {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #34495e;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #ecf0f1;
+}
+
+.eu-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.eu-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.eu-global-errors {
+    background: #e74c3c;
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.eu-errors {
+    color: #ff6b6b;
+    font-size: 13px;
+}
+
+.eu-btn-save {
+    background: #27ae60;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.eu-btn-save:hover {
+    background: #2ecc71;
+}
+
+.eu-footer {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.eu-link-back {
+    display: inline-block;
+    background: #2980b9;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.eu-link-back:hover {
+    background: #3498db;
+}

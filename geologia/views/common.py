@@ -1,44 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from plataforma.models import Empresa
-from plataforma.models import PerfilPlataforma
-
-
-ADMIN_TIPOS_ACESSO_PLATAFORMA = ["platform_owner", "platform_admin"]
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-ADMIN_TIPOS_ACESSO_GEOLOGIA = ADMIN_TIPOS_ACESSO_PLATAFORMA + ADMIN_TIPOS_ACESSO_EMPRESA
+from geologia.selectors_access import (
+    obter_contexto_admin_geologia_user,
+    resolver_empresa_global_geologia,
+)
 
 
 def obter_contexto_admin_geologia(request):
-    if request.user.is_superuser:
-        return {
-            "perfil": None,
-            "empresa": None,
-            "empresa_id": None,
-            "is_global": True,
-        }
-
-    perfil = (
-        PerfilPlataforma.objects.filter(
-            user=request.user,
-            ativo=True,
-            tipo_acesso__in=ADMIN_TIPOS_ACESSO_GEOLOGIA,
-        )
-        .select_related("empresa")
-        .first()
-    )
-
-    if not perfil:
-        return None
-
-    is_global = perfil.tipo_acesso in ADMIN_TIPOS_ACESSO_PLATAFORMA
-    return {
-        "perfil": perfil,
-        "empresa": getattr(perfil, "empresa", None),
-        "empresa_id": getattr(perfil, "empresa_id", None),
-        "is_global": is_global,
-    }
+    return obter_contexto_admin_geologia_user(request.user)
 
 
 def obter_empresa_admin_geologia(request):
@@ -52,12 +22,9 @@ def obter_empresa_admin_geologia(request):
 
     if contexto_admin.get("is_global"):
         empresa_param = (request.GET.get("empresa") or request.POST.get("empresa") or "").strip()
-        empresas_disponiveis = Empresa.objects.filter(ativo=True).order_by("nome")
-        empresa_selecionada = None
-        if empresa_param:
-            empresa_selecionada = empresas_disponiveis.filter(pk=empresa_param).first()
-            if empresa_selecionada is None:
-                messages.error(request, "A empresa selecionada para geologia nao existe ou nao esta disponivel.")
+        empresa_selecionada, empresas_disponiveis = resolver_empresa_global_geologia(empresa_param)
+        if empresa_param and empresa_selecionada is None:
+            messages.error(request, "A empresa selecionada para geologia nao existe ou nao esta disponivel.")
         contexto_admin["empresas_disponiveis"] = empresas_disponiveis
         contexto_admin["empresa_selecionada"] = empresa_selecionada
         contexto_admin["empresa_id"] = getattr(empresa_selecionada, "pk", None)

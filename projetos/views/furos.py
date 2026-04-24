@@ -1,6 +1,5 @@
 import logging
 import math
-import csv
 import io
 import json
 import zipfile
@@ -9,41 +8,41 @@ import plotly.graph_objects as go
 from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
-from ..models.empregado import Empregados
 from ..models.furo import Furo
 from ..models.importacao_furo_3d import ImportacaoFuro3DExterna
 from ..models.medicao import Medicao
 from ..models.registo import RegistoDiarioEmpregado
-from ..models.despesa import Despesa
-from ..models.material import Material
-from ..models.maquina import Maquina
-from ..models.empregado_furo import EmpregadoFuro
 from ..models.configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregado
 from ..utils.tragetoria import calcular_linha_planeada, construir_segmentos_tubos
+from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
 from projetos.selectors.furos import (
     obter_contexto_detalhe_furo,
     obter_equipa_e_configuracao_por_furo,
     obter_furo,
     obter_lista_furos,
 )
-from projetos.services.furos import criar_furo
+from projetos.services.furo_3d_io import (
+    dados_completos_furo as dados_completos_furo_service,
+    dados_exportacao_furo_3d as dados_exportacao_furo_3d_service,
+    parse_imported_3d_file as parse_imported_3d_file_service,
+    renderizar_furo_3d_csv as renderizar_furo_3d_csv_service,
+    renderizar_furo_3d_geojson as renderizar_furo_3d_geojson_service,
+)
+from projetos.services.furo_memoria import (
+    obter_memoria_zona_furos as obter_memoria_zona_furos_service,
+    parse_float_or_none as parse_float_or_none_service,
+)
+from projetos.services.furos import atualizar_furo, criar_furo
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
 from geologia.models import LogGeologicoFuro, MissaoDroneFuro
-from plataforma.models import PerfilPlataforma
 
 logger = logging.getLogger("core")
-
-
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-FURO_MEMORY_RADIUS_KM = 0.35
 
 
 def _resolver_empresa_id(empresa):
@@ -51,77 +50,18 @@ def _resolver_empresa_id(empresa):
 
 
 def _parse_float_or_none(value):
-    if value in {None, ""}:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _distancia_km(lat1, lon1, lat2, lon2):
-    if None in {lat1, lon1, lat2, lon2}:
-        return None
-    raio = 6371.0
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-    return 2 * raio * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return parse_float_or_none_service(value)
 
 
 def _obter_memoria_zona_furos(*, empresa_id, latitude=None, longitude=None, localizacao=None, excluir_furo_id=None, limite=6):
-    candidatos = (
-        Furo.objects.filter(empresa_id=empresa_id)
-        .select_related("projeto")
-        .prefetch_related("medicoes", "registos_furo")
+    return obter_memoria_zona_furos_service(
+        empresa_id=empresa_id,
+        latitude=latitude,
+        longitude=longitude,
+        localizacao=localizacao,
+        excluir_furo_id=excluir_furo_id,
+        limite=limite,
     )
-    if excluir_furo_id:
-        candidatos = candidatos.exclude(pk=excluir_furo_id)
-
-    localizacao_ref = (localizacao or "").strip().lower()
-    encontrados = []
-
-    for candidato in candidatos:
-        distancia = _distancia_km(latitude, longitude, candidato.latitude, candidato.longitude)
-        correspondencia_local = False
-        if localizacao_ref:
-            candidato_local = (candidato.localizacao or candidato.local_sondagem or "").strip().lower()
-            correspondencia_local = bool(candidato_local and candidato_local == localizacao_ref)
-
-        if distancia is None and not correspondencia_local:
-            continue
-        if distancia is not None and distancia > FURO_MEMORY_RADIUS_KM and not correspondencia_local:
-            continue
-
-        total_medicoes = candidato.medicoes.count()
-        total_registos = candidato.registos_furo.count()
-        total_despesas = float(Despesa.objects.filter(furo=candidato).aggregate(total=Sum("valor")).get("total") or 0)
-        encontrados.append(
-            {
-                "id": str(candidato.pk),
-                "nome": candidato.nome,
-                "projeto": candidato.projeto.nome if candidato.projeto_id else "-",
-                "estado": candidato.get_estado_display(),
-                "localizacao": candidato.localizacao or candidato.local_sondagem or "-",
-                "distancia_km": round(distancia, 3) if distancia is not None else None,
-                "mesma_localizacao_textual": correspondencia_local,
-                "profundidade_maxima_atingida": float(candidato.profundidade_maxima_atingida or 0),
-                "metros_furados": float(candidato.metros_furados or 0),
-                "total_medicoes": total_medicoes,
-                "total_registos": total_registos,
-                "total_despesas": round(total_despesas, 2),
-            }
-        )
-
-    encontrados.sort(
-        key=lambda item: (
-            0 if item["mesma_localizacao_textual"] else 1,
-            item["distancia_km"] if item["distancia_km"] is not None else 999999,
-        )
-    )
-    return encontrados[:limite]
 
 
 def _medicoes_ordenadas_furo(furo):
@@ -344,247 +284,23 @@ def _tracos_juntas_tubo_3d(juntas, segmentos, tamanho=1.1):
 
 
 def _dados_exportacao_furo_3d(furo):
-    medicoes = _medicoes_ordenadas_furo(furo)
-    origem = _origem_furo(furo)
-    profundidade_planeada = _profundidade_planeada_final(furo)
-    inclinacao_planeada, azimute_planeado = _orientacao_planeada_furo(furo)
-    linha_planeada = calcular_linha_planeada(
-        origem=origem,
-        inclinacao=inclinacao_planeada,
-        azimute=azimute_planeado,
-        comprimento=profundidade_planeada,
-    )
-
-    real_points = []
-    if medicoes:
-        pontos, doglegs, alertas = calcular_trajetoria_min_curv(medicoes, origem=origem)
-        for idx, medicao in enumerate(medicoes, start=1):
-            x, y, z = pontos[idx]
-            real_points.append(
-                {
-                    "md": float(medicao.profundidade_medida or 0.0),
-                    "inclination": float(medicao.inclinacao_real_medida or 0.0),
-                    "azimuth": float(medicao.azimute_real_medido or 0.0),
-                    "dogleg": float(doglegs[idx] if idx < len(doglegs) else 0.0),
-                    "status": alertas[idx] if idx < len(alertas) else "OK",
-                    "x": float(x),
-                    "y": float(y),
-                    "z": float(z),
-                }
-            )
-
-    planned_points = []
-    for idx, x in enumerate(linha_planeada["x"]):
-        planned_points.append(
-            {
-                "index": idx,
-                "x": float(x),
-                "y": float(linha_planeada["y"][idx]),
-                "z": float(linha_planeada["z"][idx]),
-            }
-        )
-
-    return {
-        "furo": {
-            "id": str(furo.pk),
-            "nome": furo.nome,
-            "projeto": furo.projeto.nome if furo.projeto_id else "",
-            "origem_este": origem[0],
-            "origem_norte": origem[1],
-            "origem_tvd": origem[2],
-            "profundidade_alvo": profundidade_planeada,
-            "inclinacao_planeada": inclinacao_planeada,
-            "azimute_planeado": azimute_planeado,
-        },
-        "real_points": real_points,
-        "planned_points": planned_points,
-    }
+    return dados_exportacao_furo_3d_service(furo)
 
 
 def _renderizar_furo_3d_csv(payload):
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["track", "md", "inclination", "azimuth", "dogleg", "status", "x", "y", "z"])
-    for point in payload["real_points"]:
-        writer.writerow([
-            "real",
-            point["md"],
-            point["inclination"],
-            point["azimuth"],
-            point["dogleg"],
-            point["status"],
-            point["x"],
-            point["y"],
-            point["z"],
-        ])
-    for point in payload["planned_points"]:
-        writer.writerow([
-            "planned",
-            "",
-            payload["furo"]["inclinacao_planeada"],
-            payload["furo"]["azimute_planeado"],
-            "",
-            "",
-            point["x"],
-            point["y"],
-            point["z"],
-        ])
-    return output.getvalue()
+    return renderizar_furo_3d_csv_service(payload)
 
 
 def _renderizar_furo_3d_geojson(payload):
-    return json.dumps(
-        {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "name": payload["furo"]["nome"],
-                        "track": "real",
-                    },
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [[p["x"], p["y"], p["z"]] for p in payload["real_points"]],
-                    },
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "name": payload["furo"]["nome"],
-                        "track": "planned",
-                    },
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [[p["x"], p["y"], p["z"]] for p in payload["planned_points"]],
-                    },
-                },
-            ],
-        },
-        ensure_ascii=False,
-        indent=2,
-    )
+    return renderizar_furo_3d_geojson_service(payload)
 
 
 def _dados_completos_furo(furo):
-    payload_3d = _dados_exportacao_furo_3d(furo)
-    return {
-        "furo": payload_3d["furo"],
-        "planeado": payload_3d["planned_points"],
-        "trajetoria_real": payload_3d["real_points"],
-        "medicoes": [
-            {
-                "id": str(m.pk),
-                "profundidade_medida": m.profundidade_medida,
-                "inclinacao_real_medida": m.inclinacao_real_medida,
-                "azimute_real_medido": m.azimute_real_medido,
-                "magnetismo": m.magnetismo,
-                "tipo_rocha": m.tipo_rocha,
-                "criado_em": m.criado_em.isoformat() if m.criado_em else "",
-            }
-            for m in _medicoes_ordenadas_furo(furo)
-        ],
-        "registos": [
-            {
-                "id": str(r.pk),
-                "data": r.data.isoformat() if r.data else "",
-                "empregado": r.empregado.nome if r.empregado_id else "",
-                "metros_furados": r.metros_furados,
-                "horas_trabalhadas": r.horas_trabalhadas,
-                "observacoes": r.observacoes,
-            }
-            for r in RegistoDiarioEmpregado.objects.filter(furo=furo, empresa_id=furo.empresa_id).select_related("empregado").order_by("-data")
-        ],
-        "materiais": [
-            {
-                "id": str(material.pk),
-                "nome": material.nome,
-                "tipo": material.tipo,
-                "quantidade": material.quantidade,
-                "valor": material.valor,
-            }
-            for material in Material.objects.filter(furo=furo, empresa_id=furo.empresa_id).order_by("nome")
-        ],
-        "maquinas": [
-            {
-                "id": str(maquina.pk),
-                "nome": maquina.nome,
-                "tipo": maquina.tipo,
-                "estado": maquina.estado,
-                "horimetro": maquina.horimetro,
-            }
-            for maquina in Maquina.objects.filter(furos=furo, empresa_id=furo.empresa_id).distinct().order_by("nome")
-        ],
-        "empregados": [
-            {
-                "id": str(ligacao.empregado.pk),
-                "nome": ligacao.empregado.nome,
-                "funcao": ligacao.empregado.funcao,
-                "data_inicio": ligacao.data_inicio.isoformat() if ligacao.data_inicio else "",
-                "data_fim": ligacao.data_fim.isoformat() if ligacao.data_fim else "",
-                "ativo": ligacao.ativo,
-            }
-            for ligacao in EmpregadoFuro.objects.filter(furo=furo, empresa_id=furo.empresa_id).select_related("empregado").order_by("-ativo", "data_inicio")
-        ],
-        "despesas": [
-            {
-                "id": str(d.pk),
-                "data": d.data.isoformat() if d.data else "",
-                "categoria": d.categoria,
-                "tipo": d.tipo,
-                "descricao": d.descricao,
-                "valor": d.valor,
-            }
-            for d in Despesa.objects.filter(furo=furo, empresa_id=furo.empresa_id).order_by("-data")
-        ],
-    }
+    return dados_completos_furo_service(furo)
 
 
 def _parse_imported_3d_file(uploaded_file):
-    nome = (uploaded_file.name or "").lower()
-    raw = uploaded_file.read()
-    text = raw.decode("utf-8", errors="ignore")
-
-    if nome.endswith(".json") or nome.endswith(".geojson"):
-        data = json.loads(text)
-        if data.get("type") == "FeatureCollection":
-            for feature in data.get("features", []):
-                geometry = feature.get("geometry") or {}
-                if geometry.get("type") == "LineString":
-                    coords = geometry.get("coordinates") or []
-                    return {
-                        "name": feature.get("properties", {}).get("name") or uploaded_file.name,
-                        "x": [float(c[0]) for c in coords],
-                        "y": [float(c[1]) for c in coords],
-                        "z": [float(c[2]) for c in coords],
-                    }
-        if isinstance(data, dict) and "points" in data:
-            points = data.get("points") or []
-            return {
-                "name": data.get("name") or uploaded_file.name,
-                "x": [float(p.get("x", 0)) for p in points],
-                "y": [float(p.get("y", 0)) for p in points],
-                "z": [float(p.get("z", 0)) for p in points],
-            }
-        raise ValueError("JSON/GeoJSON sem estrutura reconhecida para trajetória 3D.")
-
-    if nome.endswith(".csv"):
-        reader = csv.DictReader(io.StringIO(text))
-        x, y, z = [], [], []
-        for row in reader:
-            x.append(float(row.get("x", 0) or 0))
-            y.append(float(row.get("y", 0) or 0))
-            z.append(float(row.get("z", 0) or 0))
-        if not x:
-            raise ValueError("CSV sem pontos válidos.")
-        return {
-            "name": uploaded_file.name,
-            "x": x,
-            "y": y,
-            "z": z,
-        }
-
-    raise ValueError("Formato não suportado. Usa CSV, JSON ou GeoJSON.")
+    return parse_imported_3d_file_service(uploaded_file)
 
 
 # ---------------- HELPERS ----------------
@@ -595,11 +311,7 @@ def _obter_contexto_admin_furos(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -645,7 +357,7 @@ def _obter_empregado_autenticado_furos(request):
         request.user.username,
     )
 
-    empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+    empregado = obter_empregado_por_user(request.user)
     if not empregado:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em furos.py. user_id=%s",
@@ -762,7 +474,7 @@ def furo_create(request):
                 furo.pk,
             )
             messages.success(request, "Furo criado com sucesso.")
-            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
+            return redirect(furo)
 
         logger.warning(
             "Erro ao criar furo. user_id=%s, erros=%s",
@@ -782,7 +494,19 @@ def furo_create(request):
 
 @login_required
 @admin_required
-def furo_detail(request, pk):
+def furo_detail_legacy(request, pk):
+    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        return resposta_erro
+
+    furo = get_object_or_404(Furo, pk=pk, empresa_id=empresa_id)
+    return redirect(furo)
+
+
+@login_required
+@admin_required
+def furo_detail(request, pk, slug):
     logger.info(
         "Entrada na view furo_detail. user_id=%s, username='%s', furo_pk=%s",
         request.user.id,
@@ -797,6 +521,9 @@ def furo_detail(request, pk):
 
     context = obter_contexto_detalhe_furo(pk, empresa=empresa_id)
     furo = context["furo"]
+    if slug != furo.slug_url:
+        return redirect(furo)
+
     context["configuracoes"] = obter_equipa_e_configuracao_por_furo(
         furo,
         empresa=empresa_id,
@@ -817,6 +544,7 @@ def furo_detail(request, pk):
         localizacao=furo.localizacao or furo.local_sondagem,
         excluir_furo_id=furo.pk,
     )
+    context["page_title"] = f"Furo · {furo.nome}"
 
     logger.info(
         "View furo_detail carregada com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
@@ -874,22 +602,7 @@ def furo_update(request, pk):
     if request.method == "POST":
         form = FuroForm(request.POST, instance=furo, empresa=empresa_id)
         if form.is_valid():
-            furo = form.save(commit=False)
-            furo.empresa_id = empresa_id
-
-            if furo.profundidade_atual and furo.profundidade_maxima_atingida:
-                if furo.profundidade_atual > furo.profundidade_maxima_atingida:
-                    furo.profundidade_maxima_atingida = furo.profundidade_atual
-
-            if not furo.medicoes.exists():
-                furo.profundidade_atual = 0.0
-                furo.profundidade_maxima_atingida = 0.0
-
-            furo.origem_este = furo.origem_este or 0.0
-            furo.origem_norte = furo.origem_norte or 0.0
-            furo.origem_tvd = furo.origem_tvd or 0.0
-
-            furo.save()
+            furo = atualizar_furo(form, empresa=empresa_id)
 
             logger.info(
                 "Furo atualizado com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
@@ -898,7 +611,7 @@ def furo_update(request, pk):
                 furo.pk,
             )
             messages.success(request, "Furo atualizado com sucesso.")
-            return redirect(reverse("projetos:furo_detail", kwargs={"pk": furo.pk}))
+            return redirect(furo)
 
         logger.warning(
             "Erro ao atualizar furo. user_id=%s, furo_pk=%s, erros=%s",

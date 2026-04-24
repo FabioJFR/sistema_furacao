@@ -2,13 +2,12 @@ import logging
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from ..decorators import admin_required
 from ..forms.medicao import MedicaoForm
-from ..models.empregado import Empregados
-from ..models.furo import Furo
-from plataforma.models import PerfilPlataforma
+from projetos.selectors.acesso import obter_contexto_admin_projetos
+from projetos.selectors.furos import obter_furo
 from projetos.selectors.medicoes import (
     obter_lista_medicoes,
     obter_medicao,
@@ -21,9 +20,6 @@ from projetos.services.medicoes import (
 logger = logging.getLogger("core")
 
 
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-
-
 # ---------------- HELPERS ----------------
 def _obter_contexto_admin_medicoes(request):
     logger.debug(
@@ -32,11 +28,7 @@ def _obter_contexto_admin_medicoes(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em medicoes.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -118,7 +110,7 @@ def medicao_create(request, furo_id):
         logger.warning("Acesso bloqueado na view medicao_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo = get_object_or_404(Furo, pk=furo_id, empresa=empresa)
+    furo = obter_furo(furo_id, empresa=empresa)
 
     if request.method == "POST":
         form = MedicaoForm(
@@ -137,7 +129,7 @@ def medicao_create(request, furo_id):
                     furo.pk,
                 )
                 messages.success(request, "Medição criada com sucesso.")
-                return redirect("projetos:furo_detail", pk=furo.pk)
+                return redirect(furo)
 
             except ValidationError as e:
                 form.add_error(None, e)
@@ -268,7 +260,7 @@ def medicao_delete(request, pk):
             medicao_id,
         )
         messages.success(request, "Medição apagada com sucesso.")
-        return redirect("projetos:medicao:medicao_list")
+        return redirect("projetos:medicao_list")
 
     return render(
         request,

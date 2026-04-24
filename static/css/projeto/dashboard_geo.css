@@ -1,0 +1,10 @@
+.dashboard-geo-card {
+    max-width: 900px;
+    margin: 0 auto;
+    height: 400px;
+}
+
+.dashboard-geo-canvas {
+    width: 100%;
+    height: 100%;
+}

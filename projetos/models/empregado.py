@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.urls import reverse
+from django.utils.text import slugify
 from django.utils import timezone
 from .projeto import Projeto
 from .furo import Furo
@@ -121,6 +123,17 @@ class Empregados(models.Model):
 
     def __str__(self):
         return self.nome if self.nome else "Empregado sem nome"
+
+    @property
+    def slug_url(self):
+        nome_slug = slugify(self.nome or "empregado") or "empregado"
+        return f"{nome_slug}--{str(self.pk)[:8]}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "projetos:empregado_detail",
+            kwargs={"pk": self.pk, "slug": self.slug_url},
+        )
 
     @property
     def projetos_atuais(self):

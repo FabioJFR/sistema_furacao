@@ -1,80 +1,48 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}Lista de Materiais{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/material_list.css' %}">
+{% endblock %}
+
 {% block content %}
-<section style="max-width:1100px; margin:40px auto;">
+<section class="ml-wrap">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
-        <h1 style="margin:0; color:#2c3e50;">Lista de Materiais</h1>
+    <div class="ml-top">
+        <h1>Lista de Materiais</h1>
 
-        <a href="{% url 'projetos:material_create' %}" style="
-            background-color:#2980b9;
-            color:white;
-            padding:12px 25px;
-            border-radius:8px;
-            text-decoration:none;
-            font-weight:bold;
-            transition:0.2s;
-        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+        <a href="{% url 'projetos:material_create' %}" class="ml-btn ml-btn-add">
             ➕ Adicionar Novo Material
         </a>
     </div>
 
-    <div style="
-        background:white;
-        padding:18px;
-        border-radius:12px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.06);
-        margin-bottom:20px;
-    ">
-        <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
-            <div style="flex:1; min-width:260px;">
-                <label style="display:block; font-weight:bold; margin-bottom:6px; color:#2c3e50;">Nome do Material</label>
+    <div class="ml-filter-card">
+        <form method="get" class="ml-filter-form">
+            <div class="ml-filter-field">
+                <label class="ml-filter-label">Nome do Material</label>
                 <input type="text"
                        name="nome"
                        value="{{ filtros.nome }}"
                        placeholder="Ex.: tubo, broca, haste..."
-                       style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+                       class="ml-filter-input">
             </div>
 
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button type="submit" style="
-                    background-color:#2980b9;
-                    color:white;
-                    padding:10px 18px;
-                    border:none;
-                    border-radius:8px;
-                    font-weight:bold;
-                    cursor:pointer;
-                ">Filtrar</button>
+            <div class="ml-filter-actions">
+                <button type="submit" class="ml-btn-filter">Filtrar</button>
 
-                <a href="{% url 'projetos:material_list' %}" style="
-                    background-color:#f39c12;
-                    color:white;
-                    padding:10px 18px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    font-weight:bold;
-                ">Limpar</a>
+                <a href="{% url 'projetos:material_list' %}" class="ml-btn-clear">Limpar</a>
             </div>
         </form>
     </div>
 
     {% if materiais %}
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+    <div class="ml-grid">
         {% for material in materiais %}
-        <div style="
-            background:#f4f4f4;
-            border-radius:12px;
-            box-shadow:0 8px 20px rgba(0,0,0,0.08);
-            padding:25px;
-            display:flex;
-            flex-direction:column;
-            justify-content:space-between;
-        ">
+        <div class="ml-card">
             <div>
-                <h2 style="margin-top:0; color:#2c3e50;">{{ material.nome }}</h2>
+                <h2>{{ material.nome }}</h2>
 
                 <p><strong>Projeto:</strong> {{ material.projeto.nome }}</p>
 
@@ -92,46 +60,16 @@
                 <p><strong>Localização:</strong> {{ material.localizacao|default:"-" }}</p>
             </div>
 
-            <div style="margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;">
-                <a href="{% url 'projetos:material_detail' material.id %}" style="
-                    flex:1;
-                    text-align:center;
-                    background-color:#27ae60;
-                    color:white;
-                    padding:10px 0;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition:0.2s;
-                " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+            <div class="ml-card-actions">
+                <a href="{% url 'projetos:material_detail' material.id %}" class="ml-action ml-action-view">
                     🔍 Ver
                 </a>
 
-                <a href="{% url 'projetos:material_update' material.id %}" style="
-                    flex:1;
-                    text-align:center;
-                    background-color:#f39c12;
-                    color:white;
-                    padding:10px 0;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition:0.2s;
-                " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                <a href="{% url 'projetos:material_update' material.id %}" class="ml-action ml-action-edit">
                     ✏️ Editar
                 </a>
 
-                <a href="{% url 'projetos:material_delete' material.id %}" style="
-                    flex:1;
-                    text-align:center;
-                    background-color:#c0392b;
-                    color:white;
-                    padding:10px 0;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition:0.2s;
-                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                <a href="{% url 'projetos:material_delete' material.id %}" class="ml-action ml-action-delete">
                     🗑️ Apagar
                 </a>
             </div>
@@ -139,14 +77,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <div style="
-        background:white;
-        padding:30px;
-        border-radius:12px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.06);
-        text-align:center;
-        color:#7f8c8d;
-    ">
+    <div class="ml-empty">
         Nenhum material registado.
     </div>
     {% endif %}

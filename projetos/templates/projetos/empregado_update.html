@@ -1,16 +1,21 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/empregado_update.css' %}">
+{% endblock %}
+
 {% block content %}
 <section class="container mx-auto p-6">
-    <div style="max-width:600px; margin:0 auto; background:#34495e; padding:30px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#ecf0f1;">
-        <h2 style="text-align:center; margin-bottom:20px;">{{ titulo }}</h2>
+    <div class="eu-shell">
+        <h2 class="eu-title">{{ titulo }}</h2>
 
-        <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+        <form method="POST" class="eu-form">
             {% csrf_token %}
             {% if form.non_field_errors %}
-                <div style="background:#e74c3c; color:white; padding:10px; border-radius:6px;">
+                <div class="eu-global-errors">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
@@ -19,7 +24,7 @@
                 <label for="id_nome" class="block font-semibold mb-1">Nome</label>
                 {{ form.nome }}
                 {% if form.nome.errors %}
-                    <div style="color:#ff6b6b; font-size:13px;">{{ form.nome.errors }}</div>
+                    <div class="eu-errors">{{ form.nome.errors }}</div>
                 {% endif %}
             </div>
 
@@ -27,7 +32,7 @@
                 <label for="id_funcao" class="block font-semibold mb-1">Função</label>
                 {{ form.funcao }}
                 {% if form.funcao.errors %}
-                    <div style="color:#ff6b6b; font-size:13px;">{{ form.funcao.errors }}</div>
+                    <div class="eu-errors">{{ form.funcao.errors }}</div>
                 {% endif %}
             </div>
 
@@ -35,7 +40,7 @@
                 <label for="id_email" class="block font-semibold mb-1">Email</label>
                 {{ form.email }}
                 {% if form.email.errors %}
-                    <div style="color:#ff6b6b; font-size:13px;">{{ form.email.errors }}</div>
+                    <div class="eu-errors">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
 
@@ -43,35 +48,17 @@
                 <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
                 {{ form.data_admissao }}
                 {% if form.data_admissao.errors %}
-                    <div style="color:#ff6b6b; font-size:13px;">{{ form.data_admissao.errors }}</div>
+                    <div class="eu-errors">{{ form.data_admissao.errors }}</div>
                 {% endif %}
             </div>
 
-            <button type="submit" style="
-                background:#27ae60;
-                color:white;
-                padding:10px 15px;
-                border:none;
-                border-radius:5px;
-                font-weight:bold;
-                cursor:pointer;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+            <button type="submit" class="eu-btn-save">
                 💾 Salvar Alterações
             </button>
         </form>
 
-        <div style="text-align:center; margin-top:15px;">
-            <a href="{% url 'projetos:empregados_list' %}" style="
-                display:inline-block;
-                background:#2980b9;
-                color:white;
-                padding:10px 15px;
-                border-radius:5px;
-                font-weight:bold;
-                text-decoration:none;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+        <div class="eu-footer">
+            <a href="{% url 'projetos:empregados_list' %}" class="eu-link-back">
                 🔙 Voltar à Lista
             </a>
         </div>

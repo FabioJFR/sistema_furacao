@@ -1,18 +1,36 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 
-from projetos.models import EventoAnalytics
+from projetos.selectors.acesso import obter_contexto_admin_projetos
+from projetos.selectors.analytics import (
+    obter_entidades_analytics_disponiveis,
+    obter_eventos_analytics_filtrados,
+    obter_resumo_tipos_evento_analytics,
+)
 
-from .projetos import _obter_empresa_admin_projetos
+
+def _obter_empresa_admin_analytics(request):
+    contexto_admin = obter_contexto_admin_projetos(request.user)
+    if not contexto_admin:
+        messages.error(request, "Não tens permissão para aceder a esta área.")
+        return None, redirect("projetos:redirect_after_login")
+
+    empresa = getattr(contexto_admin, "empresa", None)
+    empresa_id = getattr(contexto_admin, "empresa_id", None)
+    if not empresa_id or not empresa:
+        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
+        return None, redirect("projetos:dashboard")
+
+    return empresa, None
 
 
 @login_required
 @admin_required
 def analytics_eventos(request):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_analytics(request)
     if resposta_erro:
         return resposta_erro
 
@@ -23,36 +41,9 @@ def analytics_eventos(request):
         "furo": request.GET.get("furo", "").strip(),
     }
 
-    eventos = (
-        EventoAnalytics.objects.filter(empresa_id=getattr(empresa, "pk", empresa))
-        .select_related("projeto", "furo", "empregado", "material", "maquina", "actor_user")
-        .order_by("-criado_em")
-    )
-
-    if filtros["tipo_evento"]:
-        eventos = eventos.filter(tipo_evento=filtros["tipo_evento"])
-    if filtros["entidade_tipo"]:
-        eventos = eventos.filter(entidade_tipo=filtros["entidade_tipo"])
-    if filtros["projeto"]:
-        eventos = eventos.filter(projeto_id=filtros["projeto"])
-    if filtros["furo"]:
-        eventos = eventos.filter(furo_id=filtros["furo"])
-
-    entidades_disponiveis = (
-        EventoAnalytics.objects.filter(empresa_id=getattr(empresa, "pk", empresa))
-        .values_list("entidade_tipo", flat=True)
-        .distinct()
-        .order_by("entidade_tipo")
-    )
-
-    resumo_tipo = {
-        item["tipo_evento"]: item["total"]
-        for item in (
-            EventoAnalytics.objects.filter(empresa_id=getattr(empresa, "pk", empresa))
-            .values("tipo_evento")
-            .annotate(total=Count("id"))
-        )
-    }
+    eventos = obter_eventos_analytics_filtrados(empresa, filtros)
+    entidades_disponiveis = obter_entidades_analytics_disponiveis(empresa)
+    resumo_tipo = obter_resumo_tipos_evento_analytics(empresa)
 
     context = {
         "eventos": eventos[:150],

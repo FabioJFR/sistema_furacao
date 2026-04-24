@@ -5,8 +5,7 @@ from django.contrib.auth.decorators import login_required
 from core.permissions import admin_required
 from django.shortcuts import redirect, render
 
-from plataforma.models import PerfilPlataforma
-from projetos.models import Empregados
+from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.dashboard import (
     obter_alertas_dashboard,
     obter_cards_dashboard,
@@ -15,9 +14,6 @@ from projetos.selectors.dashboard import (
 )
 
 logger = logging.getLogger("core")
-
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-
 
 # TODO futuro:
 # - unificar esta lógica com `projetos/views/dashboard.py` para evitar duplicação
@@ -33,11 +29,7 @@ def _obter_admin_empregado_graficos(request):
         getattr(request.user, "username", None),
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
 
     if perfil and perfil.empresa_id:
         logger.info(

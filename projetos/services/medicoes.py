@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from projetos.models import Medicao
+from projetos.services.furo_versioning import registar_versao_furo
 
 
 # TODO futuro:
@@ -141,6 +142,7 @@ def criar_medicao(form, furo=None, empresa=None):
 
     if medicao.furo:
         atualizar_estado_real_furo_por_medicao(medicao.furo, medicao)
+        registar_versao_furo(medicao.furo, origem="medicao")
 
     return medicao
 
@@ -155,5 +157,6 @@ def atualizar_medicao(form, empresa=None):
 
     if medicao.furo:
         atualizar_estado_real_furo_por_medicao(medicao.furo, medicao)
+        registar_versao_furo(medicao.furo, origem="medicao")
 
     return medicao

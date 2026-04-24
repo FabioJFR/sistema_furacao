@@ -1,4 +1,5 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 <!-- area_empregado.html-->
 
 {% block title %}Minha Área{% endblock %}
@@ -195,52 +196,6 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const labels = JSON.parse(document.getElementById('grafico-labels').textContent);
-    const dadosMetros = JSON.parse(document.getElementById('grafico-metros').textContent);
-    const dadosHoras = JSON.parse(document.getElementById('grafico-horas').textContent);
-    const dadosProdutividade = JSON.parse(document.getElementById('grafico-produtividade').textContent);
-
-    new Chart(document.getElementById('graficoMetros'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Metros',
-                data: dadosMetros,
-                borderWidth: 2,
-                tension: 0.3
-            }]
-        },
-        options: { responsive: true }
-    });
-
-    new Chart(document.getElementById('graficoHoras'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Horas',
-                data: dadosHoras,
-                borderWidth: 2,
-                tension: 0.3
-            }]
-        },
-        options: { responsive: true }
-    });
-
-    new Chart(document.getElementById('graficoProdutividade'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'm/h',
-                data: dadosProdutividade,
-                borderWidth: 1
-            }]
-        },
-        options: { responsive: true }
-    });
-</script>
+<script src="{% static 'js/projetos/area_empregado.js' %}"></script>
 {% endblock %}
 {% endblock %}

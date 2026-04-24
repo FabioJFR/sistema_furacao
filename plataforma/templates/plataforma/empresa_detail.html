@@ -14,7 +14,7 @@ Detalhe da empresa, métricas principais e ações administrativas.
 {% endblock %}
 
 {% block page_actions %}
-<a href="/plataforma/dashboard/" class="btn btn-light">← Voltar</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar</a>
 {% endblock %}
 
 {% block content %}

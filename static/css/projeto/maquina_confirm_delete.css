@@ -1,0 +1,47 @@
+.mcd-wrap {
+    max-width: 500px;
+    margin: 60px auto;
+    background: #34495e;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    color: #ecf0f1;
+}
+
+.mcd-title {
+    margin-bottom: 20px;
+}
+
+.mcd-text {
+    margin-bottom: 20px;
+}
+
+.mcd-name {
+    margin-bottom: 30px;
+}
+
+.mcd-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.mcd-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.mcd-btn-delete {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.mcd-btn-cancel {
+    background: #2980b9;
+    color: #fff;
+    text-decoration: none;
+}

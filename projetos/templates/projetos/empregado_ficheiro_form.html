@@ -43,7 +43,7 @@
                     💾 Guardar
                 </button>
 
-                <a href="{% url 'projetos:empregado_detail' empregado.id %}"
+                <a href="{{ empregado.get_absolute_url }}"
                    class="bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
                     🔙 Voltar
                 </a>

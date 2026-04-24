@@ -1,6 +1,7 @@
 {% extends "projetos/base.html" %}
 
 {% load static %}
+{% block title %}{{ page_title|default:"Furo" }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/furo_detail.css' %}">
@@ -11,6 +12,14 @@
 <section class="furo-detail-page">
 <div class="furo-shell">
     {{ furo_mapa|json_script:"furo-data" }}
+
+    <nav class="text-sm text-gray-500 mb-3">
+        <a href="{% url 'projetos:dashboard' %}" class="hover:text-gray-700">Dashboard</a>
+        <span class="mx-2">/</span>
+        <a href="{% url 'projetos:furo_list' %}" class="hover:text-gray-700">Furos</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-700 font-semibold">{{ furo.nome }}</span>
+    </nav>
 
     <div class="furo-header">
         <div class="furo-title-wrap">
@@ -44,16 +53,16 @@
     {% if memoria_zona_alerta %}
     <section class="furo-section">
         <h2 class="furo-section-title">Memória Operacional da Zona</h2>
-        <div style="background:#fff7ed; border:1px solid #fdba74; border-radius:16px; padding:18px 20px;">
-            <p style="margin:0 0 14px; color:#9a3412; font-weight:600;">
+        <div class="furo-memory-box">
+            <p class="furo-memory-intro">
                 A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto.
             </p>
             <div class="furo-grid">
                 {% for item in memoria_zona_alerta %}
-                    <div class="furo-stat-card" style="border-color:#fdba74; background:#fffbeb;">
+                    <div class="furo-stat-card furo-memory-card">
                         <span class="furo-stat-label">{{ item.nome }}</span>
                         <span class="furo-stat-value">{{ item.projeto }}</span>
-                        <div style="margin-top:8px; color:#7c2d12; font-size:0.95rem;">
+                        <div class="furo-memory-meta">
                             Estado: <strong>{{ item.estado }}</strong><br>
                             Profundidade máxima: <strong>{{ item.profundidade_maxima_atingida }} m</strong><br>
                             Metros furados: <strong>{{ item.metros_furados }} m</strong><br>
@@ -193,7 +202,7 @@
                     <td>{{ medicao.altitude|default:"-" }}</td>
                     <td>
                         {% if medicao.imagem %}
-                            <img src="{{ medicao.imagem.url }}" class="furo-thumb" onclick="abrirModal('{{ medicao.imagem.url }}')">
+                            <img src="{{ medicao.imagem.url }}" class="furo-thumb" data-modal-image="{{ medicao.imagem.url }}">
                         {% else %}
                             -
                         {% endif %}
@@ -252,8 +261,8 @@
             </table>
         </div>
         {% if missoes_drone_recentes %}
-            <div style="padding: 0 20px 20px;">
-                <h3 style="margin: 18px 0 10px;">Missões Drone Recentes</h3>
+            <div class="furo-drone-recent-wrap">
+                <h3 class="furo-drone-recent-title">Missões Drone Recentes</h3>
                 <ul class="furo-list">
                     {% for missao in missoes_drone_recentes %}
                         <li class="furo-list-item">
@@ -300,7 +309,7 @@
                                 <td>{{ levantamento.quantidade }}</td>
                                 <td>
                                     {% if levantamento.projeto %}
-                                        <a href="{% url 'projetos:projeto_detail' levantamento.projeto.id %}" class="furo-link">
+                                        <a href="{{ levantamento.projeto.get_absolute_url }}" class="furo-link">
                                             {{ levantamento.projeto.nome }}
                                         </a>
                                     {% else %}
@@ -314,7 +323,7 @@
                 </table>
             </div>
         {% else %}
-            <div class="furo-empty" style="margin: 0 20px 20px;">Ainda não existem levantamentos de material neste furo.</div>
+            <div class="furo-empty furo-empty-table">Ainda não existem levantamentos de material neste furo.</div>
         {% endif %}
     </section>
 
@@ -326,68 +335,19 @@
 
 </div>
 </section>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-function abrirModal(src) {
-    document.getElementById("modal_img").src = src;
-    document.getElementById("modal").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
-}
-
-function fecharModal() {
-    document.getElementById("modal").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-}
-
-const furoMapa = JSON.parse(document.getElementById("furo-data").textContent || "{}");
-
-const lat = Number(furoMapa.lat);
-const lon = Number(furoMapa.lon);
-
-if (Number.isFinite(lat) && Number.isFinite(lon)) {
-    const holeLatLng = [lat, lon];
-    const map = L.map("map", { zoomControl: true }).setView(holeLatLng, 16);
-
-    setTimeout(() => {
-        map.invalidateSize();
-        map.setView(holeLatLng, Math.max(map.getZoom(), 16), { animate: false });
-    }, 200);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
-
-    const marker = L.marker(holeLatLng)
-        .addTo(map)
-        .bindPopup(`
-            <strong>${furoMapa.nome}</strong><br>
-            Projeto: ${furoMapa.projeto || "-"}<br>
-            Profundidade atual: ${furoMapa.profundidade_atual} m<br>
-            Profundidade alvo inicial: ${furoMapa.profundidade_alvo_inicial} m<br>
-            Profundidade alvo atual: ${furoMapa.profundidade_alvo_atual} m<br>
-            Inclinação planeada inicial: ${furoMapa.inclinacao_planeada_inicial}°<br>
-            Azimute planeado inicial: ${furoMapa.azimute_planeado_inicial}°
-        `)
-        .openPopup();
-
-    map.whenReady(() => {
-        map.setView(holeLatLng, 16, { animate: false });
-        marker.openPopup();
-    });
-} else {
-    document.getElementById("map").innerHTML =
-        "<div style='display:flex; align-items:center; justify-content:center; height:100%; color:#ecf0f1;'>Sem coordenadas para mostrar o mapa.</div>";
-}
-</script>
 
 <!-- Modal imagem -->
 <div id="overlay" class="furo-modal-overlay"></div>
 <div id="modal" class="furo-modal">
     <img id="modal_img">
     <div class="furo-modal-actions">
-        <button onclick="fecharModal()" class="furo-modal-close">Fechar</button>
+        <button id="furo-modal-close" class="furo-modal-close">Fechar</button>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="{% static 'js/projetos/furo_detail.js' %}"></script>
 {% endblock %}

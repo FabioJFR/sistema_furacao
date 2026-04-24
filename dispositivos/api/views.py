@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -9,10 +8,13 @@ from dispositivos.api.serializers import (
     SessaoDispositivoCreateSerializer,
     SessaoDispositivoSerializer,
 )
-from dispositivos.models import SessaoDispositivo
+from dispositivos.selectors.dispositivos import (
+    obter_empregado_autenticado,
+    obter_sessao_empresa,
+    obter_sessao_ligada_empresa,
+)
 from dispositivos.services.conexao import construir_driver
 from dispositivos.services.ingestao import guardar_leitura_dispositivo
-from projetos.models import Empregados
 
 
 class CriarSessaoDispositivoAPIView(APIView):
@@ -22,7 +24,7 @@ class CriarSessaoDispositivoAPIView(APIView):
         serializer = SessaoDispositivoCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+        empregado = obter_empregado_autenticado(request.user)
         if not empregado or not empregado.empresa_id:
             return Response(
                 {"erro": "O utilizador autenticado não está associado a um empregado com empresa válida."},
@@ -60,18 +62,14 @@ class LerDispositivoAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+        empregado = obter_empregado_autenticado(request.user)
         if not empregado or not empregado.empresa_id:
             return Response(
                 {"erro": "O utilizador autenticado não está associado a um empregado com empresa válida."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        sessao = get_object_or_404(
-            SessaoDispositivo.objects.select_related("dispositivo", "furo", "empresa", "empregado"),
-            pk=pk,
-            empresa_id=empregado.empresa_id,
-        )
+        sessao = obter_sessao_empresa(pk=pk, empresa_id=empregado.empresa_id)
 
         driver = construir_driver(sessao.dispositivo)
 
@@ -128,7 +126,7 @@ class BridgeLeituraAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        empregado = Empregados.objects.filter(user=request.user).select_related("empresa").first()
+        empregado = obter_empregado_autenticado(request.user)
         if not empregado or not empregado.empresa_id:
             return Response(
                 {"erro": "O utilizador autenticado não está associado a um empregado com empresa válida."},
@@ -149,12 +147,7 @@ class BridgeLeituraAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        sessao = get_object_or_404(
-            SessaoDispositivo.objects.select_related("empresa", "furo", "dispositivo"),
-            pk=sessao_id,
-            empresa_id=empregado.empresa_id,
-            status="ligado",
-        )
+        sessao = obter_sessao_ligada_empresa(sessao_id=sessao_id, empresa_id=empregado.empresa_id)
 
         resultado = guardar_leitura_dispositivo(
             sessao=sessao,

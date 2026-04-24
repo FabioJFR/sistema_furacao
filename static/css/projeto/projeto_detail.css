@@ -1,0 +1,64 @@
+.projeto-detail-map-shell {
+    position: relative;
+    margin-top: 16px;
+}
+
+.projeto-detail-map-toolbar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: rgba(248, 250, 252, 0.96);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(4px);
+}
+
+.projeto-detail-map-btn {
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    transition: 0.2s;
+}
+
+.projeto-detail-map-btn:hover {
+    background: #1d4ed8;
+}
+
+.projeto-detail-map-btn-nav {
+    width: 44px;
+    height: 44px;
+}
+
+.projeto-detail-map-btn-open {
+    background: #16a34a;
+    padding: 10px 16px;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+}
+
+.projeto-detail-map-btn-open:hover {
+    background: #15803d;
+}
+
+.projeto-detail-map-info {
+    flex: 1;
+    min-width: 220px;
+    color: #1f2937;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
+    padding: 4px 8px;
+}

@@ -13,7 +13,7 @@
 
 {% block content %}
 {% if tipo_pagina == "saida" %}
-    <div class="card" style="margin-bottom: 24px;">
+    <div class="card card-mb-24">
         <div class="section-title">
             <div>
                 <h2>{% if movimento_edicao %}Editar despesa{% else %}Adicionar despesa{% endif %}</h2>
@@ -54,7 +54,7 @@
     </div>
 {% endif %}
 
-<div class="grid-cards" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+<div class="grid-cards grid-cards-four">
     <div class="card">
         <div class="metric-label">Total de movimentos</div>
         <div class="metric-value">{{ total_movimentos }}</div>

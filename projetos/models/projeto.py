@@ -1,6 +1,8 @@
 import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
+from django.utils.text import slugify
 from django.utils import timezone
 
 # ------------------------
@@ -39,6 +41,17 @@ class Projeto(models.Model):
 
     def __str__(self):
         return self.nome or "Projeto sem nome"
+
+    @property
+    def slug_url(self):
+        nome_slug = slugify(self.nome or "projeto") or "projeto"
+        return f"{nome_slug}--{str(self.pk)[:8]}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "projetos:projeto_detail",
+            kwargs={"pk": self.pk, "slug": self.slug_url},
+        )
 
     def clean(self):
         super().clean()

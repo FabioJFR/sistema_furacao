@@ -121,7 +121,7 @@
                     <a href="{% url 'plataforma:uteis_export_ai_json' item.slug %}" class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
                         Descarregar
                     </a>
-                    <form method="post" action="{% url 'plataforma:uteis_clear_scope' item.slug %}" onsubmit="return confirm('Tens a certeza que queres limpar os dados de {{ item.label|escapejs }}? Esta ação é irreversível.');">
+                    <form method="post" action="{% url 'plataforma:uteis_clear_scope' item.slug %}" data-confirm-submit="Tens a certeza que queres limpar os dados de {{ item.label|escapejs }}? Esta ação é irreversível.">
                         {% csrf_token %}
                         <button type="submit" class="inline-flex items-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700">
                             Limpar dados

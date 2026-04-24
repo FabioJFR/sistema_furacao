@@ -1,42 +1,29 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}Lista de Máquinas{% endblock %}
 
-{% block content %}
-<div style="max-width: 1100px; margin: 30px auto;">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
-        <h1 style="margin:0;">Lista de Máquinas</h1>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_list.css' %}">
+{% endblock %}
 
-        <a href="{% url 'projetos:maquina_create' %}" style="
-            background-color:#27ae60;
-            color:white;
-            padding:10px 20px;
-            border-radius:8px;
-            font-weight:bold;
-            text-decoration:none;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+{% block content %}
+<div class="mql-wrap">
+    <div class="mql-top">
+        <h1>Lista de Máquinas</h1>
+
+        <a href="{% url 'projetos:maquina_create' %}" class="mql-btn-add">
             ➕ Adicionar Nova Máquina
         </a>
     </div>
 
     {% if maquinas %}
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+    <div class="mql-grid">
         {% for maquina in maquinas %}
-        <div style="
-            background:#34495e;
-            padding:20px;
-            border-radius:12px;
-            box-shadow:0 4px 12px rgba(0,0,0,0.2);
-            color:#ecf0f1;
-            display:flex;
-            flex-direction:column;
-            justify-content:space-between;
-            transition: transform 0.2s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+        <div class="mql-card">
 
             <div>
-                <h2 style="margin-top:0; margin-bottom:12px;">{{ maquina.nome }}</h2>
+                <h2>{{ maquina.nome }}</h2>
 
                 <p><strong>Tipo:</strong> {{ maquina.tipo|default:"-" }}</p>
                 <p><strong>Marca:</strong> {{ maquina.marca|default:"-" }}</p>
@@ -52,40 +39,16 @@
                 </p>
             </div>
 
-            <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                <a href="{% url 'projetos:maquina_detail' maquina.id %}" style="
-                    background:#2980b9;
-                    color:white;
-                    padding:8px 12px;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+            <div class="mql-actions">
+                <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mql-action mql-action-view">
                     🔍 Ver
                 </a>
 
-                <a href="{% url 'projetos:maquina_update' maquina.id %}" style="
-                    background:#f39c12;
-                    color:white;
-                    padding:8px 12px;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#f1c40f'" onmouseout="this.style.background='#f39c12'">
+                <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mql-action mql-action-edit">
                     ✏️ Editar
                 </a>
 
-                <a href="{% url 'projetos:maquina_delete' maquina.id %}" style="
-                    background:#c0392b;
-                    color:white;
-                    padding:8px 12px;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+                <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mql-action mql-action-delete">
                     🗑️ Apagar
                 </a>
             </div>
@@ -93,14 +56,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <div style="
-        background:white;
-        padding:30px;
-        border-radius:12px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.08);
-        text-align:center;
-        color:#6b7280;
-    ">
+    <div class="mql-empty">
         Nenhuma máquina registada.
     </div>
     {% endif %}

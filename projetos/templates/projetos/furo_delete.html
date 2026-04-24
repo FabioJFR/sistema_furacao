@@ -1,40 +1,28 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 <!-- projetos/templates/projetos/furo_delete.html -->
 
 {% block title %}Apagar Furo{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/furo_delete.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="max-width: 500px; margin: 50px auto; background: #e74c3c; padding: 30px; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); text-align: center;">
+<div class="fd-wrap">
     <h2>⚠️ Confirmação de Exclusão</h2>
     <p>Tem certeza que deseja apagar o furo <strong>{{ furo.nome }}</strong>?</p>
     <p>Esta ação não pode ser desfeita!</p>
 
-    <div style="margin-top: 20px; display:flex; justify-content:center; gap:10px;">
-        <form method="POST" style="display:inline;">
+    <div class="fd-actions">
+        <form method="POST" class="fd-form-inline">
             {% csrf_token %}
-            <button type="submit" style="
-                background: white;
-                color: #e74c3c;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#f2f2f2'" onmouseout="this.style.background='white'">
+            <button type="submit" class="fd-btn fd-btn-delete">
                 🗑️ Apagar
             </button>
         </form>
 
-        <a href="{% url 'projetos:detail' furo.id %}" style="
-            background: #2980b9;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+        <a href="{% url 'projetos:detail' furo.id %}" class="fd-btn fd-btn-cancel">
             ❌ Cancelar
         </a>
     </div>

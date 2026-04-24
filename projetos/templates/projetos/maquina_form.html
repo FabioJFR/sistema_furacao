@@ -1,32 +1,37 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_form.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="max-width:900px; margin:40px auto; background:#34495e; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.25); color:#ecf0f1;">
+<div class="mqf-wrap">
 
-    <h2 style="text-align:center; margin-bottom:25px;">{{ titulo }}</h2>
+    <h2 class="mqf-title">{{ titulo }}</h2>
 
-    <form method="POST" style="display:flex; flex-direction:column; gap:20px;">
+    <form method="POST" class="mqf-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-            <div style="background:#e74c3c; padding:10px; border-radius:6px;">
+            <div class="mqf-global-errors">
                 {{ form.non_field_errors }}
             </div>
         {% endif %}
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;color:black;">
+        <div class="mqf-grid">
             {% for field in form %}
                 <div>
-                    <label style="font-weight:bold; margin-bottom:4px; display:block;color: aliceblue;">
+                    <label class="mqf-label">
                         {{ field.label }}
                     </label>
 
                     {{ field }}
 
                     {% if field.errors %}
-                        <div style="color:#ff6b6b; font-size:13px; margin-top:4px;">
+                        <div class="mqf-errors">
                             {{ field.errors }}
                         </div>
                     {% endif %}
@@ -34,30 +39,12 @@
             {% endfor %}
         </div>
 
-        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:10px;">
-            <button type="submit" style="
-                background-color:#27ae60;
-                color:white;
-                padding:10px 20px;
-                border:none;
-                border-radius:6px;
-                font-weight:bold;
-                cursor:pointer;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#2ecc71'" onmouseout="this.style.background='#27ae60'">
+        <div class="mqf-actions">
+            <button type="submit" class="mqf-btn mqf-btn-save">
                 💾 Salvar
             </button>
 
-            <a href="{% url 'projetos:maquina_list' %}" style="
-                background-color:#2980b9;
-                color:white;
-                padding:10px 20px;
-                border-radius:6px;
-                font-weight:bold;
-                text-decoration:none;
-                text-align:center;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#3498db'" onmouseout="this.style.background='#2980b9'">
+            <a href="{% url 'projetos:maquina_list' %}" class="mqf-btn mqf-btn-back">
                 🔙 Voltar
             </a>
         </div>

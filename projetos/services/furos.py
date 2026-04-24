@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from projetos.models import Furo, RegistoDiarioEmpregado
+from projetos.services.furo_versioning import registar_versao_furo
 
 
 
@@ -139,6 +140,7 @@ def criar_furo(form, empresa):
     furo = _preparar_furo_novo(furo, empresa=empresa)
 
     furo.save()
+    registar_versao_furo(furo, origem="criado")
     form.save_m2m()
     return furo
 
@@ -150,6 +152,7 @@ def atualizar_furo(form, empresa):
     furo = _preparar_furo_para_atualizacao(furo, empresa=empresa)
 
     furo.save()
+    registar_versao_furo(furo, origem="atualizado")
     form.save_m2m()
     return furo
 
@@ -215,5 +218,6 @@ def recalcular_resumo_furo(furo):
             "total_horas",
         ]
     )
+    registar_versao_furo(furo, origem="recalculo")
 
     return furo

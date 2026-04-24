@@ -11,10 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/projeto/base.css' %}">
     {% block extra_head %}{% endblock %}
-
-    <style>
-        
-    </style>
 </head>
 
 <body>
@@ -28,7 +24,7 @@
                 aria-label="{% trans 'Abrir menu principal' %}"
                 aria-controls="topNavMenu"
                 aria-expanded="false"
-                onclick="toggleMenu()"
+                data-menu-toggle
             >
                 ☰
             </button>
@@ -53,7 +49,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Plataforma' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             🏢 {% trans "Plataforma" %} ▾
                         </button>
@@ -61,7 +57,7 @@
                             <a href="{% url 'plataforma:onboarding_empresa' %}" role="menuitem">🏢 {% trans "Nova Empresa" %}</a>
                             <a href="{% url 'plataforma:plano_list' %}" role="menuitem">💳 {% trans "Planos" %}</a>
                             <a href="{% url 'plataforma:subscricao_list' %}" role="menuitem">🧾 {% trans "Subscrições" %}</a>
-                            <a href="/app/dispositivos/" role="menuitem">📡 {% trans "Dispositivos" %}</a>
+                            <a href="{% url 'dispositivos:dashboard' %}" role="menuitem">📡 {% trans "Dispositivos" %}</a>
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
                             {% endif %}
@@ -75,7 +71,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Geologia' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             Geologia â–¾
                         </button>
@@ -98,18 +94,17 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Operação' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             📁 {% trans "Operação" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
-                            <a href="/app/dashboard/graficos/" role="menuitem">📊 {% trans "Gráficos" %}</a>
-                            <a href="/app/projetos/" role="menuitem">📁 {% trans "Projetos" %}</a>
-                            <a href="/app/empregados/" role="menuitem">👷 {% trans "Empregados" %}</a>
-                            <a href="/app/maquinas/" role="menuitem">⚙️ {% trans "Máquinas" %}</a>
-                            <a href="/app/furos/" role="menuitem">🕳 {% trans "Furos" %}</a>
-                            <a href="/app/medicoes/list/" role="menuitem">📊 {% trans "Medições" %}</a>
-                            <a href="/app/materiais/" role="menuitem">📦 {% trans "Materiais" %}</a>
+                            <a href="{% url 'projetos:projeto_list' %}" role="menuitem">📁 {% trans "Projetos" %}</a>
+                            <a href="{% url 'projetos:empregado_list' %}" role="menuitem">👷 {% trans "Empregados" %}</a>
+                            <a href="{% url 'projetos:maquina_list' %}" role="menuitem">⚙️ {% trans "Máquinas" %}</a>
+                            <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Furos" %}</a>
+                            <a href="{% url 'projetos:medicao_list' %}" role="menuitem">📊 {% trans "Medições" %}</a>
+                            <a href="{% url 'projetos:material_list' %}" role="menuitem">📦 {% trans "Materiais" %}</a>
                         </div>
                     </div>
 
@@ -120,15 +115,15 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Registos' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             📈 {% trans "Registos" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
-                            <a href="/app/registos/admin/" role="menuitem">📈 {% trans "Produção" %}</a>
-                            <a href="/app/levantamentos/admin/" role="menuitem">📦 {% trans "Levantamentos" %}</a>
-                            <a href="/app/devolucoes/admin/" role="menuitem">↩️ {% trans "Devoluções" %}</a>
-                            <a href="/app/empregados/pendentes/" role="menuitem">📝 {% trans "Empregados Pendentes" %}</a>
+                            <a href="{% url 'projetos:registos_admin_list' %}" role="menuitem">📈 {% trans "Produção" %}</a>
+                            <a href="{% url 'projetos:levantamento_material_admin_list' %}" role="menuitem">📦 {% trans "Levantamentos" %}</a>
+                            <a href="{% url 'projetos:devolucao_material_admin_list' %}" role="menuitem">↩️ {% trans "Devoluções" %}</a>
+                            <a href="{% url 'projetos:empregado_pendentes' %}" role="menuitem">📝 {% trans "Empregados Pendentes" %}</a>
                         </div>
                     </div>
 
@@ -139,7 +134,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Analytics' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             📊 {% trans "Analytics" %} ▾
                         </button>
@@ -156,7 +151,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu AI' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             🤖 {% trans "AI" %} ▾
                         </button>
@@ -177,7 +172,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu 3D' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             🧭 {% trans "3D" %} ▾
                         </button>
@@ -193,7 +188,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Opções' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             🛠️ {% trans "Opções" %} ▾
                         </button>
@@ -218,7 +213,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Operação' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             ⚙️ {% trans "Operação" %} ▾
                         </button>
@@ -238,7 +233,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Registos' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             📋 {% trans "Registos" %} ▾
                         </button>
@@ -257,14 +252,14 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Materiais' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             📦 {% trans "Materiais" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Materiais' %}">
                             <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" role="menuitem">📦 {% trans "Disponíveis" %}</a>
-                            <a href="/app/levantamentos/meus/" role="menuitem">📤 {% trans "Meus Levantamentos" %}</a>
-                            <a href="/app/devolucoes/minhas/" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
+                            <a href="{% url 'projetos:levantamento_list' %}" role="menuitem">📤 {% trans "Meus Levantamentos" %}</a>
+                            <a href="{% url 'projetos:devolucao_material_list' %}" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
                         </div>
                     </div>
                     {% endif %}
@@ -276,7 +271,7 @@
                             aria-haspopup="true"
                             aria-expanded="false"
                             aria-label="{% trans 'Abrir menu Conta' %}"
-                            onclick="toggleDropdown(event, this)"
+                            data-dropdown-toggle
                         >
                             👤 {% trans "Conta" %} ▾
                         </button>
@@ -285,7 +280,7 @@
                             {% if perfil_tipo != "individual" %}
                             <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
                             {% endif %}
-                            <a href="/app/minha-area/definicoes/" role="menuitem">🛠️ {% trans "Definições" %}</a>
+                            <a href="{% url 'projetos:definicoes' %}" role="menuitem">🛠️ {% trans "Definições" %}</a>
                         </div>
                     </div>
                     {% endwith %}
@@ -300,7 +295,7 @@
                         aria-haspopup="true"
                         aria-expanded="false"
                         aria-label="{% trans 'Abrir menu do utilizador' %}"
-                        onclick="toggleDropdown(event, this)"
+                        data-dropdown-toggle
                     >
                         <div>
                             <span class="user-label">{% trans "Utilizador online" %}</span>
@@ -323,7 +318,7 @@
             {% for message in messages %}
                 <div class="msg-box msg-{{ message.tags }}">
                     <div class="msg-content">{{ message }}</div>
-                    <button type="button" onclick="fecharMensagem(this)" class="msg-close" aria-label="{% trans 'Fechar mensagem' %}">×</button>
+                    <button type="button" data-close-message class="msg-close" aria-label="{% trans 'Fechar mensagem' %}">×</button>
                 </div>
             {% endfor %}
         </div>

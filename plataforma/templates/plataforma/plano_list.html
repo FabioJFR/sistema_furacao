@@ -12,8 +12,8 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
 {% endblock %}
 
 {% block page_actions %}
-<a href="/plataforma/planos/novo/" class="btn btn-primary">+ Novo plano</a>
-<a href="/plataforma/dashboard/" class="btn btn-light">Voltar à dashboard</a>
+<a href="{% url 'plataforma:plano_create' %}" class="btn btn-primary">+ Novo plano</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">Voltar à dashboard</a>
 {% endblock %}
 
 {% block content %}
@@ -91,8 +91,8 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
                             </td>
                             <td>
                                 <div class="acoes">
-                                    <a href="/plataforma/planos/{{ plano.pk }}/editar/" class="mini-btn">Editar</a>
-                                    <form method="post" action="/plataforma/planos/{{ plano.pk }}/toggle/">
+                                    <a href="{% url 'plataforma:plano_update' plano.pk %}" class="mini-btn">Editar</a>
+                                    <form method="post" action="{% url 'plataforma:plano_toggle_ativo' plano.pk %}">
                                         {% csrf_token %}
                                         {% if plano.ativo %}
                                             <button type="submit" class="mini-btn">Desativar</button>

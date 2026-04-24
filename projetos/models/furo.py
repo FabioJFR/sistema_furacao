@@ -1,6 +1,8 @@
 import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
+from django.utils.text import slugify
 from .projeto import Projeto
 
 
@@ -136,6 +138,17 @@ class Furo(models.Model):
     def __str__(self):
         projeto_nome = self.projeto.nome if self.projeto_id and self.projeto else "-"
         return f"{self.nome} - {projeto_nome}"
+
+    @property
+    def slug_url(self):
+        nome_slug = slugify(self.nome or "furo") or "furo"
+        return f"{nome_slug}--{str(self.pk)[:8]}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "projetos:furo_detail",
+            kwargs={"pk": self.pk, "slug": self.slug_url},
+        )
 
     def clean(self):
         super().clean()

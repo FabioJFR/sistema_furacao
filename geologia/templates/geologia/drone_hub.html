@@ -8,6 +8,7 @@
     <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar a geologia</a>
 {% endblock %}
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/geologia/drone_ui.css' %}">
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,7 +18,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 py-8">
+<div
+    class="max-w-7xl mx-auto px-6 py-8"
+    data-drone-hub-root
+    data-api-estado-url="{% url 'geologia:api_estado_drone' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}"
+    data-api-testar-url="{% url 'geologia:api_testar_ligacao_drone' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}"
+    data-api-procurar-url="{% url 'geologia:api_procurar_drone' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}"
+>
     {% if contexto_geologia.is_global %}
     <form method="get" class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm mb-8 flex flex-col md:flex-row md:items-end gap-4">
         <div class="flex-1">
@@ -84,9 +91,9 @@
                                 {% endif %}
                             </div>
                             {% if operacao.live_view_url %}
-                                <iframe src="{{ operacao.live_view_url }}" class="w-full rounded-lg bg-black border border-slate-800" style="height: 300px;" allowfullscreen></iframe>
+                                <iframe src="{{ operacao.live_view_url }}" class="w-full rounded-lg bg-black border border-slate-800 drone-live-frame" allowfullscreen></iframe>
                             {% elif operacao.frame_snapshot_url %}
-                                <img src="{{ operacao.frame_snapshot_url }}" alt="Frame atual do drone" class="w-full rounded-lg border border-slate-800" style="height: 300px; object-fit: cover;">
+                                <img src="{{ operacao.frame_snapshot_url }}" alt="Frame atual do drone" class="w-full rounded-lg border border-slate-800 drone-snapshot-image">
                             {% else %}
                                 <div class="rounded-lg border border-dashed border-slate-700 text-slate-300 px-6 py-16 text-center">
                                     Ainda não existe stream configurado. Já podes definir a URL do live view no painel ao lado.
@@ -190,8 +197,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         </div>
                         <div
                             id="droneControlMap"
-                            class="rounded-xl border border-gray-200"
-                            style="height: 460px;"
+                            class="rounded-xl border border-gray-200 drone-control-map"
                             data-current-lat="{{ operacao.latitude_atual|default_if_none:'' }}"
                             data-current-lon="{{ operacao.longitude_atual|default_if_none:'' }}"
                             data-target-lat="{{ operacao.alvo_latitude|default_if_none:'' }}"

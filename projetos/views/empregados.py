@@ -34,7 +34,14 @@ from projetos.models import ConfiguracaoPerfuracaoEmpregado
 from projetos.selectors.configuracao_perfuracao import (
     obter_lista_configuracoes_perfuracao_empregado,
 )
+from projetos.selectors.acesso import (
+    obter_contexto_admin_projetos,
+    obter_individual_por_user,
+    obter_perfil_ativo_por_user,
+    resolver_empregado_por_user_ou_email,
+)
 from projetos.selectors.empregados import (
+    obter_contexto_area_empregado,
     obter_empregados_pendentes,
     obter_lista_empregados,
 )
@@ -50,9 +57,6 @@ from plataforma.models import PerfilPlataforma
 logger = logging.getLogger("core")
 
 
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-
-
 # ---------------- HELPERS ----------------
 def _obter_contexto_admin_empregados(request):
     logger.debug(
@@ -61,11 +65,7 @@ def _obter_contexto_admin_empregados(request):
         request.user.username,
     )
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-        tipo_acesso__in=ADMIN_TIPOS_ACESSO_EMPRESA,
-    ).select_related("empresa").first()
+    perfil = obter_contexto_admin_projetos(request.user)
     if perfil:
         logger.info(
             "Contexto administrativo resolvido via PerfilPlataforma em empregados.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
@@ -134,47 +134,22 @@ def _obter_empregado_autenticado(request):
 
     return empregado, None
 
-# Helper: resolve empregado por user ou email
+
 def _resolver_empregado_por_user_ou_email(user):
-    empregado = Empregados.objects.filter(user=user).select_related("empresa").first()
-    if empregado:
-        return empregado
-
-    email = (getattr(user, "email", "") or "").strip()
-    if not email:
-        return None
-
-    candidatos = Empregados.objects.filter(
-        email__iexact=email,
-        user__isnull=True,
-    ).select_related("empresa")
-
-    total_candidatos = candidatos.count()
-    if total_candidatos != 1:
+    empregado, ligado_por_fallback = resolver_empregado_por_user_ou_email(user)
+    if ligado_por_fallback and empregado is not None:
         logger.warning(
-            "Fallback por email não aplicado em empregados.py. user_id=%s, email='%s', total_candidatos=%s",
-            getattr(user, "id", None),
-            email,
-            total_candidatos,
+            "Ligação automática User -> Empregados executada em empregados.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
+            user.id,
+            empregado.id,
+            empregado.empresa_id,
+            getattr(user, "email", ""),
         )
-        return None
-
-    empregado = candidatos.first()
-    empregado.user = user
-    empregado.save(update_fields=["user"])
-
-    logger.warning(
-        "Ligação automática User -> Empregados executada em empregados.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
-        user.id,
-        empregado.id,
-        empregado.empresa_id,
-        email,
-    )
     return empregado
 
 
 def _resolver_individual_por_user(user):
-    return Individual.objects.filter(user=user).first()
+    return obter_individual_por_user(user)
 
 # ---------------- EMPREGADOS ----------------
 # TODO futuro:
@@ -333,7 +308,7 @@ def empregado_create(request):
                 request,
                 "O novo empregado ficou pendente. Aprova o registo para lhe dar acesso à plataforma.",
             )
-            return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+            return redirect(empregado)
         except Exception as e:
             logger.exception(
                 "Erro ao criar empregado com utilizador. admin_user_id=%s, empresa_id=%s, erro=%s",
@@ -354,7 +329,19 @@ def empregado_create(request):
 
 @login_required
 @admin_required
-def empregado_detail(request, pk):
+def empregado_detail_legacy(request, pk):
+    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view empregado_detail_legacy. user_id=%s", request.user.id)
+        return resposta_erro
+
+    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    return redirect(empregado)
+
+
+@login_required
+@admin_required
+def empregado_detail(request, pk, slug):
     logger.info(
         "Entrada na view empregado_detail. user_id=%s, username='%s', empregado_pk=%s",
         request.user.id,
@@ -367,6 +354,9 @@ def empregado_detail(request, pk):
         return resposta_erro
 
     empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa)
+    if slug != empregado.slug_url:
+        return redirect(empregado)
+
     logger.info(
         "View empregado_detail carregada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
         request.user.id,
@@ -375,6 +365,7 @@ def empregado_detail(request, pk):
     )
     return render(request, "projetos/empregado_detail.html", {
         "empregado": empregado,
+        "page_title": f"Empregado · {empregado.nome}",
     })
 
 
@@ -414,7 +405,7 @@ def empregado_update(request, pk):
                 empregado.id,
             )
             messages.success(request, "Empregado atualizado com sucesso.")
-            return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+            return redirect(empregado)
 
         logger.warning("Erro ao atualizar empregado. user_id=%s, empregado_pk=%s, erros=%s", request.user.id, pk, form.errors)
         messages.error(request, "Erro ao atualizar empregado. Verifique os dados.")
@@ -511,7 +502,7 @@ def empregado_adicionar_projeto(request, pk):
                     ligacao.id,
                 )
                 messages.success(request, "Projeto associado ao empregado com sucesso.")
-                return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+                return redirect(empregado)
         else:
             logger.warning(
                 "Erro ao associar projeto ao empregado. user_id=%s, empregado_pk=%s, erros=%s",
@@ -591,7 +582,7 @@ def empregado_editar_projeto(request, pk, ligacao_id):
                     nova_ligacao.id,
                 )
                 messages.success(request, "Ligação projeto/empregado atualizada com sucesso.")
-                return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+                return redirect(empregado)
         else:
             logger.warning(
                 "Erro ao atualizar ligação projeto/empregado. user_id=%s, empregado_pk=%s, ligacao_id=%s, erros=%s",
@@ -649,7 +640,7 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
             ligacao.id,
         )
         messages.success(request, "Projeto encerrado para este empregado com sucesso.")
-        return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+        return redirect(empregado)
 
     return render(request, "projetos/empregado_projeto_confirm_terminar.html", {
         "empregado": empregado,
@@ -689,7 +680,7 @@ def empregado_adicionar_ficheiro(request, pk):
                 ficheiro.id,
             )
             messages.success(request, "Ficheiro adicionado com sucesso.")
-            return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+            return redirect(empregado)
         else:
             logger.warning(
                 "Erro ao adicionar ficheiro ao empregado. user_id=%s, empregado_pk=%s, erros=%s",
@@ -745,7 +736,7 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
             ficheiro_id_removido,
         )
         messages.success(request, "Ficheiro removido com sucesso.")
-        return redirect(reverse("projetos:empregado_detail", args=[empregado.id]))
+        return redirect(empregado)
 
     return render(request, "projetos/empregado_ficheiro_confirm_delete.html", {
         "empregado": empregado,
@@ -810,6 +801,47 @@ def empregado_aprovar(request, pk):
     return render(request, "projetos/empregado_aprovar_confirm.html", {
         "empregado": empregado,
     })
+
+
+@login_required
+@admin_required
+def empregado_rejeitar(request, pk):
+    logger.info(
+        "Entrada na view empregado_rejeitar. user_id=%s, username='%s', empregado_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view empregado_rejeitar. user_id=%s", request.user.id)
+        return resposta_erro
+
+    empregado = get_object_or_404(Empregados, pk=pk, empresa=empresa, aprovado=False)
+
+    if request.method == "POST":
+        user = empregado.user
+        empregado_nome = empregado.nome
+        empregado_id = empregado.id
+
+        if user:
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+
+        empregado.delete()
+        logger.info(
+            "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
+            request.user.id,
+            empresa.id,
+            empregado_id,
+            empregado_nome,
+        )
+        messages.success(request, "Registo do empregado rejeitado com sucesso.")
+        return redirect("projetos:empregado_pendentes")
+
+    return redirect("projetos:empregado_pendentes")
+
 
 @login_required
 @empregado_required
@@ -1271,7 +1303,7 @@ def area_empregado(request):
         request.user.id,
         request.user.username,
     )
-    perfil = PerfilPlataforma.objects.filter(user=request.user, ativo=True).first()
+    perfil = obter_perfil_ativo_por_user(request.user)
     if perfil and perfil.tipo_acesso == "individual":
         individual = _resolver_individual_por_user(request.user)
         if not individual:
@@ -1290,73 +1322,11 @@ def area_empregado(request):
         logger.warning("Acesso bloqueado na view area_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    furo_ids_associados = EmpregadoFuro.objects.filter(
-        empregado=empregado,
+    contexto_empregado = obter_contexto_area_empregado(empregado, empresa=empregado.empresa)
+    contexto_empregado["configuracoes_perfuracao"] = obter_lista_configuracoes_perfuracao_empregado(
+        empregado,
         empresa=empregado.empresa,
-    ).values_list("furo_id", flat=True)
-
-    furo_ids_registos = empregado.registos_diarios.filter(
-        furo__isnull=False,
-        empresa=empregado.empresa,
-    ).values_list("furo_id", flat=True)
-
-    furos_trabalhados = Furo.objects.filter(
-        empresa=empregado.empresa,
-        id__in=list(furo_ids_associados) + list(furo_ids_registos)
-    ).distinct().order_by("nome")
-
-    ultimos_registos = empregado.registos_diarios.select_related(
-        "projeto", "furo"
-    ).filter(empresa=empregado.empresa)[:5]
-
-    configuracoes_perfuracao = empregado.configuracoes_perfuracao.select_related(
-        "furo", "atualizado_por"
-    ).filter(empresa=empregado.empresa).order_by("furo__nome")
-
-    horas_hoje = empregado.horas_diarias or 0
-    horas_mes = empregado.horas_trabalhadas_mes or 0
-    horas_total = empregado.horas_total or 0
-
-    metros_hoje = empregado.metros_furados_hoje or 0
-    metros_total = empregado.total_metros_furados or 0
-
-    total_furos = empregado.total_furos_trabalhados or 0
-    media_metros_hora = empregado.media_metros_por_hora or 0
-    media_metros_dia = empregado.media_metros_por_dia or 0
-
-    registos_grafico = empregado.registos_diarios.filter(empresa=empregado.empresa).order_by("data")
-
-    labels = []
-    metros_por_dia = []
-    horas_por_dia = []
-    produtividade_por_dia = []
-
-    agregados = {}
-
-    for registo in registos_grafico:
-        if not registo.data:
-            continue
-
-        chave = registo.data.strftime("%d/%m/%Y")
-
-        if chave not in agregados:
-            agregados[chave] = {
-                "metros": 0,
-                "horas": 0,
-            }
-
-        agregados[chave]["metros"] += registo.metros_furados or 0
-        agregados[chave]["horas"] += registo.horas_trabalhadas or 0
-
-    for data_label, valores in agregados.items():
-        labels.append(data_label)
-        metros = valores["metros"]
-        horas = valores["horas"]
-        produtividade = (metros / horas) if horas > 0 else 0
-
-        metros_por_dia.append(round(metros, 2))
-        horas_por_dia.append(round(horas, 2))
-        produtividade_por_dia.append(round(produtividade, 2))
+    )
 
     logger.info(
         "View area_empregado carregada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s",
@@ -1364,24 +1334,7 @@ def area_empregado(request):
         empregado.id,
         empregado.empresa_id,
     )
-    return render(request, "projetos/area_empregado.html", {
-        "empregado": empregado,
-        "horas_hoje": horas_hoje,
-        "horas_mes": horas_mes,
-        "horas_total": horas_total,
-        "metros_hoje": metros_hoje,
-        "metros_total": metros_total,
-        "total_furos": total_furos,
-        "media_metros_hora": media_metros_hora,
-        "media_metros_dia": media_metros_dia,
-        "ultimos_registos": ultimos_registos,
-        "grafico_labels": labels,
-        "grafico_metros": metros_por_dia,
-        "grafico_horas": horas_por_dia,
-        "grafico_produtividade": produtividade_por_dia,
-        "furos_trabalhados": furos_trabalhados,
-        "configuracoes_perfuracao": configuracoes_perfuracao,
-    })
+    return render(request, "projetos/area_empregado.html", contexto_empregado)
 
 # --------- REDIRECT ------------
 
@@ -1403,10 +1356,7 @@ def redirect_after_login(request):
         )
         return redirect("plataforma:dashboard")
 
-    perfil = PerfilPlataforma.objects.filter(
-        user=request.user,
-        ativo=True,
-    ).first()
+    perfil = obter_perfil_ativo_por_user(request.user)
 
     if perfil:
         logger.info(

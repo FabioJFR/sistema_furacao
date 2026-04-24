@@ -17,75 +17,75 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
 {% endblock %}
 
 {% block content %}
-<div style="max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 32px;">
+<div class="onb-wrap">
     {% if form.non_field_errors %}
-        <div style="padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; background: #fee2e2; color: #991b1b;">
+        <div class="onb-error-box">
             {{ form.non_field_errors }}
         </div>
     {% endif %}
 
-    <form method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px;">
+    <form method="post" class="onb-grid">
         {% csrf_token %}
 
-        <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
-            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Empresa</h2>
+        <div class="onb-card">
+            <h2>Empresa</h2>
 
             {% for field in form %}
                 {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes" %}
-                    <div style="margin-bottom: 14px;">
-                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                    <div class="onb-field">
+                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
                         {{ field }}
                         {% if field.help_text %}
-                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                            <span class="onb-help">{{ field.help_text }}</span>
                         {% endif %}
                         {% if field.errors %}
-                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                            <div class="onb-error">{{ field.errors }}</div>
                         {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
         </div>
 
-        <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
-            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Administrador inicial</h2>
+        <div class="onb-card">
+            <h2>Administrador inicial</h2>
 
             {% for field in form %}
                 {% if field.name in "nome_admin username_admin email_admin password_admin tipo_acesso" %}
-                    <div style="margin-bottom: 14px;">
-                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                    <div class="onb-field">
+                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
                         {{ field }}
                         {% if field.help_text %}
-                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                            <span class="onb-help">{{ field.help_text }}</span>
                         {% endif %}
                         {% if field.errors %}
-                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                            <div class="onb-error">{{ field.errors }}</div>
                         {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
         </div>
 
-        <div style="grid-column: 1 / -1; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; background: #fafafa;">
-            <h2 style="margin-top: 0; font-size: 18px; color: #111827;">Plano e faturação inicial</h2>
+        <div class="onb-card onb-card-full">
+            <h2>Plano e faturação inicial</h2>
 
             {% for field in form %}
                 {% if field.name in "plano ciclo_subscricao estado_empresa criar_subscricao_inicial valor_subscricao" %}
-                    <div style="margin-bottom: 14px;">
-                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">{{ field.label }}</label>
+                    <div class="onb-field">
+                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
                         {{ field }}
                         {% if field.help_text %}
-                            <span style="display: block; margin-top: 6px; font-size: 12px; color: #6b7280;">{{ field.help_text }}</span>
+                            <span class="onb-help">{{ field.help_text }}</span>
                         {% endif %}
                         {% if field.errors %}
-                            <div style="margin-top: 6px; color: #b91c1c; font-size: 13px;">{{ field.errors }}</div>
+                            <div class="onb-error">{{ field.errors }}</div>
                         {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
         </div>
 
-        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
-            <button type="submit" style="border: none; background: #2563eb; color: white; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <div class="onb-actions">
+            <button type="submit" class="onb-submit">
                 Criar empresa
             </button>
         </div>
@@ -96,79 +96,5 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
 {% block extra_scripts %}
 {{ planos_periodos|json_script:"planos-periodos-data" }}
 {{ planos_precos|json_script:"planos-precos-data" }}
-<script>
-(() => {
-    const planoSelect = document.getElementById("id_plano");
-    const periodoSelect = document.getElementById("id_ciclo_subscricao");
-    const valorSubscricaoInput = document.getElementById("id_valor_subscricao");
-    const criarSubscricaoCheckbox = document.getElementById("id_criar_subscricao_inicial");
-
-    if (!planoSelect || !periodoSelect || !valorSubscricaoInput) {
-        return;
-    }
-
-    const planosPeriodos = JSON.parse(document.getElementById("planos-periodos-data")?.textContent || "{}");
-    const planosPrecos = JSON.parse(document.getElementById("planos-precos-data")?.textContent || "{}");
-
-    function formatarValor(valor) {
-        return Number(valor || 0).toFixed(2);
-    }
-
-    function obterValorCalculado() {
-        const planoId = planoSelect.value;
-        const periodo = Number(periodoSelect.value || 1);
-        const precos = planosPrecos[planoId];
-
-        if (!planoId || !precos) {
-            return "";
-        }
-
-        const precoMensal = Number(precos.preco_mensal || 0);
-        const precoAnual = Number(precos.preco_anual || 0);
-
-        if (periodo === 12) {
-            return formatarValor(precoAnual || (precoMensal * 12));
-        }
-
-        return formatarValor(precoMensal * periodo);
-    }
-
-    function atualizarValorSubscricao() {
-        if (criarSubscricaoCheckbox && !criarSubscricaoCheckbox.checked) {
-            valorSubscricaoInput.value = "";
-            valorSubscricaoInput.setAttribute("aria-disabled", "true");
-            return;
-        }
-
-        valorSubscricaoInput.value = obterValorCalculado();
-        valorSubscricaoInput.removeAttribute("aria-disabled");
-    }
-
-    function atualizarPeriodosDisponiveis() {
-        const option = planoSelect.selectedOptions?.[0];
-        const periodos = (planosPeriodos[option?.value] || [1, 12]).map(String);
-
-        Array.from(periodoSelect.options).forEach((periodoOption) => {
-            const permitido = periodos.includes(periodoOption.value);
-            periodoOption.hidden = !permitido;
-            periodoOption.disabled = !permitido;
-        });
-
-        if (!periodos.includes(periodoSelect.value) && periodos.length) {
-            periodoSelect.value = periodos[0];
-        }
-
-        atualizarValorSubscricao();
-    }
-
-    planoSelect.addEventListener("change", atualizarPeriodosDisponiveis);
-    periodoSelect.addEventListener("change", atualizarValorSubscricao);
-
-    if (criarSubscricaoCheckbox) {
-        criarSubscricaoCheckbox.addEventListener("change", atualizarValorSubscricao);
-    }
-
-    atualizarPeriodosDisponiveis();
-})();
-</script>
+<script src="{% static 'js/plataforma/onboarding_empresa.js' %}"></script>
 {% endblock %}

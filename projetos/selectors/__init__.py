@@ -7,3 +7,7 @@ from . import material
 from . import medicoes
 from . import configuracao_perfuracao
 from . import historico_configuracao
+from . import acesso
+from . import analytics
+from . import preferencias
+from . import opcoes

@@ -5,6 +5,7 @@ import urllib.error
 import urllib.request
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from geologia.bridge.sources import normalize_external_payload
@@ -183,27 +184,16 @@ class BridgeState:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="3">
   <title>{self.ui_title}</title>
-  <style>
-    body {{ font-family: Arial, sans-serif; background: #020617; color: #e2e8f0; margin: 0; padding: 24px; }}
-    .wrap {{ max-width: 1100px; margin: 0 auto; }}
-    .grid {{ display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }}
-    .card {{ background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 18px; }}
-    .title {{ font-size: 28px; font-weight: 700; margin: 0 0 8px; }}
-    .muted {{ color: #94a3b8; }}
-    img {{ width: 100%; border-radius: 12px; border: 1px solid #334155; }}
-    dl {{ display: grid; grid-template-columns: 170px 1fr; gap: 8px 12px; margin: 0; }}
-    dt {{ color: #94a3b8; }}
-    dd {{ margin: 0; font-weight: 600; }}
-  </style>
+  <link rel="stylesheet" href="{self.base_url}/live.css">
 </head>
 <body>
-  <div class="wrap">
-    <p class="title">Live View da {self.ui_title}</p>
-    <p class="muted">Base preparada para receber uma fonte DJI externa e empurrar dados para a plataforma.</p>
-    <div class="grid">
-      <div class="card"><img src="{self.snapshot_url()}" alt="Snapshot bridge"></div>
-      <div class="card">
-        <dl>
+  <div class="bridge-live-wrap">
+    <p class="bridge-live-title">Live View da {self.ui_title}</p>
+    <p class="bridge-live-muted">Base preparada para receber uma fonte DJI externa e empurrar dados para a plataforma.</p>
+    <div class="bridge-live-grid">
+      <div class="bridge-live-card"><img src="{self.snapshot_url()}" alt="Snapshot bridge" class="bridge-live-image"></div>
+      <div class="bridge-live-card">
+        <dl class="bridge-live-dl">
           <dt>Fonte</dt><dd>{payload["source_mode"]}</dd>
           <dt>Descrição</dt><dd>{payload["source_description"]}</dd>
           <dt>Estado</dt><dd>{payload["estado_conexao"]}</dd>
@@ -222,6 +212,13 @@ class BridgeState:
   </div>
 </body>
 </html>""".encode("utf-8")
+
+    def live_css(self):
+        css_path = Path(__file__).resolve().parents[2] / "static" / "css" / "geologia" / "bridge_runtime_live.css"
+        try:
+            return css_path.read_bytes()
+        except OSError:
+            return b""
 
 
 class BridgeRuntimeServer:
@@ -269,6 +266,9 @@ class BridgeRuntimeServer:
                     return
                 if parsed.path == "/live":
                     self._write(200, state.html_live_view(), "text/html; charset=utf-8")
+                    return
+                if parsed.path == "/live.css":
+                    self._write(200, state.live_css(), "text/css; charset=utf-8")
                     return
                 if parsed.path == "/":
                     self._write(

@@ -23,7 +23,7 @@
     </div>
 
     <div class="text-center">
-        <a href="{% url 'projetos:projeto_detail' projeto.id %}" 
+        <a href="{{ projeto.get_absolute_url }}" 
            class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
             🔙 Voltar ao Projeto
         </a>

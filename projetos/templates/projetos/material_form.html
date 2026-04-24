@@ -1,73 +1,47 @@
 {% extends 'projetos/base.html' %}
+{% load static %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/material_form.css' %}">
+{% endblock %}
+
 {% block content %}
-<section style="max-width:900px; margin:60px auto;">
+<section class="mf-shell">
 
-    <div style="
-        background:#ffffff;
-        padding:30px;
-        border-radius:12px;
-        box-shadow:0 8px 20px rgba(0,0,0,0.1);
-        border-top:5px solid #2980b9;
-    ">
+    <div class="mf-card">
 
-        <h1 style="
-            text-align:center;
-            margin-bottom:25px;
-            font-size:1.8rem;
-            color:#2c3e50;
-        ">
+        <h1 class="mf-title">
             {{ titulo }}
         </h1>
 
-        <form method="post" style="display:flex; flex-direction:column; gap:20px;">
+        <form method="post" class="mf-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div style="
-                    background:#fdecea;
-                    color:#c0392b;
-                    padding:12px;
-                    border-radius:8px;
-                    font-weight:bold;
-                ">
+                <div class="mf-global-errors">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <div style="
-                display:grid;
-                grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
-                gap:18px;
-            ">
+            <div class="mf-grid">
                 {% for field in form %}
-                    <div style="{% if field.name == 'observacoes' %}grid-column: span 2;{% endif %}">
-                        <label style="
-                            font-weight:600;
-                            color:#34495e;
-                            display:block;
-                            margin-bottom:6px;
-                        ">
+                    <div class="{% if field.name == 'observacoes' %}mf-field-full{% endif %}">
+                        <label class="mf-label">
                             {{ field.label }}
                         </label>
 
                         {{ field }}
 
                         {% if field.help_text %}
-                            <small style="display:block; color:#7f8c8d; margin-top:4px;">
+                            <small class="mf-help">
                                 {{ field.help_text }}
                             </small>
                         {% endif %}
 
                         {% if field.errors %}
-                            <div style="
-                                color:#c0392b;
-                                font-size:13px;
-                                margin-top:5px;
-                                font-weight:600;
-                            ">
+                            <div class="mf-errors">
                                 {{ field.errors }}
                             </div>
                         {% endif %}
@@ -75,41 +49,13 @@
                 {% endfor %}
             </div>
 
-            <div style="display:flex; gap:10px; margin-top:25px; flex-wrap:wrap;">
+            <div class="mf-actions">
 
-                <button type="submit" style="
-                    flex:1;
-                    background:#27ae60;
-                    color:white;
-                    border:none;
-                    padding:12px;
-                    border-radius:8px;
-                    font-weight:bold;
-                    cursor:pointer;
-                    transition:0.2s;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-                    min-width:160px;
-                "
-                onmouseover="this.style.background='#2ecc71'; this.style.transform='scale(1.02)';"
-                onmouseout="this.style.background='#27ae60'; this.style.transform='scale(1)';">
+                <button type="submit" class="mf-btn mf-btn-save">
                     💾 Salvar
                 </button>
 
-                <a href="{% url 'projetos:material_list' %}" style="
-                    flex:1;
-                    text-align:center;
-                    background:#e74c3c;
-                    color:white;
-                    padding:12px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    transition:0.2s;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-                    min-width:160px;
-                "
-                onmouseover="this.style.background='#c0392b'; this.style.transform='scale(1.02)';"
-                onmouseout="this.style.background='#e74c3c'; this.style.transform='scale(1)';">
+                <a href="{% url 'projetos:material_list' %}" class="mf-btn mf-btn-back">
                     🔙 Voltar
                 </a>
 
