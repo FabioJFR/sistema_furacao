@@ -6,7 +6,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.3-beta**
+- Versão atual: **v0.9.3.1-beta**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **Projetos** e **IA**
 
