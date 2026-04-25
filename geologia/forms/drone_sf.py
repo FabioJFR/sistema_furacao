@@ -9,6 +9,7 @@ from geologia.models import (
     OperacaoDroneSFTempoReal,
     SensorDroneSF,
 )
+from geologia.selectors.forms import listar_modulos_sensor_form_qs
 
 
 def _resolver_empresa_id(empresa):
@@ -200,7 +201,7 @@ class SensorDroneSFForm(forms.ModelForm):
             self.instance.drone = drone
             self.fields["modulo"].queryset = drone.modulos.all().order_by("tipo", "nome")
         else:
-            self.fields["modulo"].queryset = ModuloDroneSF.objects.none()
+            self.fields["modulo"].queryset = listar_modulos_sensor_form_qs(None)
         if empresa is not None:
             self.instance.empresa_id = _resolver_empresa_id(empresa)
 

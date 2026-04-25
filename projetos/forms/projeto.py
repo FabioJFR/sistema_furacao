@@ -1,11 +1,12 @@
 from django import forms
 
 from ..models.projeto import Projeto
+from ..selectors.forms import existe_projeto_nome_empresa, resolver_empresa_id
 
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 
@@ -46,13 +47,11 @@ class ProjetoForm(forms.ModelForm):
             raise forms.ValidationError("O nome do projeto é obrigatório.")
 
         if self.empresa:
-            empresa_id = _resolver_empresa_id(self.empresa)
-            qs = Projeto.objects.filter(nome__iexact=nome, empresa_id=empresa_id)
-
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-
-            if qs.exists():
+            if existe_projeto_nome_empresa(
+                nome=nome,
+                empresa=self.empresa,
+                exclude_pk=self.instance.pk if self.instance.pk else None,
+            ):
                 raise forms.ValidationError("Já existe um projeto com este nome nesta empresa.")
 
         return nome

@@ -125,3 +125,13 @@ def listar_furos_configuracao_perfuracao_qs(*, empregado=None, empresa=None):
     if empresa is not None:
         queryset = queryset.filter(empresa_id=resolver_empresa_id(empresa))
     return queryset.distinct().order_by("nome")
+
+
+def existe_projeto_nome_empresa(nome, empresa, *, exclude_pk=None):
+    queryset = Projeto.objects.filter(
+        nome__iexact=nome,
+        empresa_id=resolver_empresa_id(empresa),
+    )
+    if exclude_pk is not None:
+        queryset = queryset.exclude(pk=exclude_pk)
+    return queryset.exists()

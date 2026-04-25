@@ -16,8 +16,6 @@ from plataforma.views.financas import (
 )
 from plataforma.views.features import features_dashboard
 from plataforma.views.uteis import uteis_dashboard, uteis_export_ai_json, uteis_clear_scope
-from django.conf import settings
-from django.conf.urls.static import static
 
 app_name = "plataforma"
 
@@ -44,4 +42,4 @@ urlpatterns = [
     path("uteis/export-ai/<slug:scope>/", uteis_export_ai_json, name="uteis_export_ai_json"),
     path("uteis/clear/<slug:scope>/", uteis_clear_scope, name="uteis_clear_scope"),
     path("dispositivos/", include("dispositivos.urls")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]

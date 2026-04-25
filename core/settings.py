@@ -35,9 +35,11 @@ def env_bool(name, default=False):
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-SECRET_KEY = env("DJANGO_SECRET_KEY", 'django-insecure-ahs1cu-_etpmaxvd&k-iu@mdhc+w7g6=x+blhfuifhiuwhihxrwe7bs57=b2*9')
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("DJANGO_SECRET_KEY em falta. Define a variável no ambiente/.env.")
 
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = [host.strip() for host in env("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
 
@@ -93,14 +95,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+POSTGRES_DB = env("POSTGRES_DB")
+POSTGRES_USER = env("POSTGRES_USER")
+POSTGRES_PASSWORD = env("POSTGRES_PASSWORD")
+POSTGRES_HOST = env("POSTGRES_HOST", "127.0.0.1")
+POSTGRES_PORT = env("POSTGRES_PORT", "5432")
+
+if not DEBUG and not all([POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD]):
+    raise RuntimeError(
+        "POSTGRES_DB/POSTGRES_USER/POSTGRES_PASSWORD em falta. "
+        "Define as variáveis de ambiente antes de arrancar em produção."
+    )
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "postgres_db"),
-        "USER": os.getenv("POSTGRES_USER", "fabiorevez"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "fabio12345"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "NAME": POSTGRES_DB or "postgres_db",
+        "USER": POSTGRES_USER or "postgres",
+        "PASSWORD": POSTGRES_PASSWORD or "postgres",
+        "HOST": POSTGRES_HOST,
+        "PORT": POSTGRES_PORT,
     }
 }
 
@@ -138,6 +152,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -152,6 +167,16 @@ LOGOUT_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@sistemafuracao.local'
+
+# Segurança (produção): controlada por variáveis de ambiente para manter
+# desenvolvimento local simples e deploy endurecido.
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = int(env("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
+SECURE_REFERRER_POLICY = env("DJANGO_SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin")
 
 
 LOG_DIR = BASE_DIR / "logs"

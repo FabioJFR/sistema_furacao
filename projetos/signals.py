@@ -7,12 +7,13 @@ from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from inspecao_ai.models import AnaliseImagemAI, ChatMensagemAI, ChatSessaoAI, DeteccaoImagemAI
+from projetos.selectors.analytics_events import obter_instancia_original
+from projetos.services.analytics_events import criar_evento_analytics
 from projetos.models import (
     DevolucaoMaterial,
     Despesa,
     EmpregadoFuro,
     EmpregadoProjeto,
-    EventoAnalytics,
     Furo,
     LevantamentoMaterial,
     Maquina,
@@ -152,20 +153,12 @@ def _contexto_relacional(instance):
 def _criar_evento(instance, tipo_evento):
     user = get_current_user()
     contexto = _contexto_relacional(instance)
-    EventoAnalytics.objects.create(
-        actor_user=user if getattr(user, "is_authenticated", False) else None,
-        actor_username=getattr(user, "username", "") if user else "",
-        actor_tipo=_actor_tipo(user),
-        empresa_id=contexto["empresa_id"],
-        projeto_id=contexto["projeto_id"],
-        furo_id=contexto["furo_id"],
-        empregado_id=contexto["empregado_id"],
-        material_id=contexto["material_id"],
-        maquina_id=contexto["maquina_id"],
+    criar_evento_analytics(
+        user=user,
+        contexto=contexto,
+        instance=instance,
         tipo_evento=tipo_evento,
-        entidade_tipo=instance.__class__.__name__,
-        entidade_id=str(instance.pk),
-        entidade_label=str(instance),
+        actor_tipo=_actor_tipo(user),
         snapshot_antes=getattr(instance, "_analytics_snapshot_antes", {}) or {},
         snapshot_depois={} if tipo_evento == "delete" else _snapshot(instance),
         metricas=_metricas(instance),
@@ -176,7 +169,7 @@ def _criar_evento(instance, tipo_evento):
 def analytics_pre_save(sender, instance, **kwargs):
     if sender not in TRACKED_MODELS or not getattr(instance, "pk", None):
         return
-    original = sender.objects.filter(pk=instance.pk).first()
+    original = obter_instancia_original(sender, instance.pk)
     instance._analytics_snapshot_antes = _snapshot(original) if original else {}
 
 

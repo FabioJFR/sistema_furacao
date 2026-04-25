@@ -1,11 +1,15 @@
 from django import forms
 
-from projetos.models import Medicao
 from geologia.models import LogGeologicoFuro
+from geologia.selectors.forms import (
+    listar_medicoes_furo_qs,
+    listar_missoes_furo_qs,
+    resolver_empresa_id,
+)
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 class LogGeologicoFuroForm(forms.ModelForm):
@@ -20,9 +24,8 @@ class LogGeologicoFuroForm(forms.ModelForm):
             self.instance.empresa_id = _resolver_empresa_id(self.empresa)
 
         if self.furo is not None:
-            medicoes_qs = Medicao.objects.filter(furo=self.furo).order_by("-criado_em", "-profundidade_medida")
-            self.fields["medicao"].queryset = medicoes_qs
-            self.fields["missao_drone"].queryset = self.furo.missoes_drone_geologia.all().order_by("-data_voo", "-criado_em")
+            self.fields["medicao"].queryset = listar_medicoes_furo_qs(self.furo)
+            self.fields["missao_drone"].queryset = listar_missoes_furo_qs(self.furo)
 
     class Meta:
         model = LogGeologicoFuro
@@ -86,4 +89,3 @@ class LogGeologicoFuroForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-

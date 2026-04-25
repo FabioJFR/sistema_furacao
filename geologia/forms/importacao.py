@@ -3,16 +3,16 @@ import json
 from django import forms
 
 from geologia.models import MissaoDroneFuro
-from projetos.models import Furo
+from geologia.selectors.forms import listar_furos_importacao_qs, resolver_empresa_id
 
 
 def _resolver_empresa_id(empresa):
-    return getattr(empresa, "pk", empresa)
+    return resolver_empresa_id(empresa)
 
 
 class ImportarMissaoDroneForm(forms.Form):
     furo = forms.ModelChoiceField(
-        queryset=Furo.objects.none(),
+        queryset=listar_furos_importacao_qs(None).none(),
         widget=forms.Select(attrs={"class": "border rounded px-3 py-2 w-full"}),
         label="Furo",
     )
@@ -55,11 +55,7 @@ class ImportarMissaoDroneForm(forms.Form):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.empresa = empresa
-        empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
-        queryset = Furo.objects.select_related("projeto").order_by("projeto__nome", "nome")
-        if empresa_id is not None:
-            queryset = queryset.filter(empresa_id=empresa_id)
-        self.fields["furo"].queryset = queryset
+        self.fields["furo"].queryset = listar_furos_importacao_qs(empresa)
 
     def clean_ficheiro_metadados(self):
         ficheiro = self.cleaned_data.get("ficheiro_metadados")

@@ -1,6 +1,6 @@
 from django import forms
 
-from plataforma.models import Plano
+from plataforma.selectors.forms import listar_planos_ativos_nome_qs
 
 
 class OnboardingEmpresaForm(forms.Form):
@@ -81,7 +81,7 @@ class OnboardingEmpresaForm(forms.Form):
 
     plano = forms.ModelChoiceField(
         label="Plano",
-        queryset=Plano.objects.filter(ativo=True).order_by("nome"),
+        queryset=listar_planos_ativos_nome_qs().none(),
         required=False,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
@@ -150,6 +150,10 @@ class OnboardingEmpresaForm(forms.Form):
             return (plano.preco_mensal or 0) * 12
 
         return (plano.preco_mensal or 0) * periodo_meses
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["plano"].queryset = listar_planos_ativos_nome_qs()
 
     def clean_nome_empresa(self):
         valor = self.cleaned_data.get("nome_empresa", "").strip()
