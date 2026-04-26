@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Sistema de Furação" %}</title>
+    <title>{% trans "Sistema de Furação | Plataforma profissional para operações de drilling" %}</title>
     <link rel="stylesheet" href="{% static 'css/website/home.css' %}">
 </head>
 <body>
-    <div class="container">
+    <div class="bg-decor"></div>
+    <div class="container home-page">
         <header class="topbar">
-            <a href="/" class="brand">
+            <a href="{% url 'website:home' %}" class="brand">
                 <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="{% trans 'Logo Sistema de Furação' %}" class="brand-logo">
                 <div class="brand-text">
                     <span class="brand-title">{% trans "Sistema de Furação" %}</span>
@@ -19,112 +20,115 @@
             </a>
 
             <div class="topbar-actions">
-                <a href="/planos/" class="btn btn-light">{% trans "Ver planos" %}</a>
-                <a href="/login/" class="btn btn-primary">{% trans "Entrar" %}</a>
+                <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
+                <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>
         </header>
 
         <section class="hero">
-            <div>
-                <span class="hero-badge">{% trans "Plataforma SaaS para Diamond Drilling" %}</span>
-                <h1>{% trans "Gestão profissional de operações de furação diamantada" %}</h1>
+            <div class="hero-copy">
+                <span class="hero-badge">{% trans "SaaS especializado para operações de diamond drilling" %}</span>
+                <h1>{% trans "Do planeamento ao relatório final, tudo numa única plataforma" %}</h1>
                 <p>
-                    {% blocktrans %}Centraliza projetos, furos, medições, materiais, produção e operação diária
-                    numa plataforma preparada para crescer com dashboards avançados, dispositivos
-                    de campo, IA e relatórios inteligentes.{% endblocktrans %}
+                    {% blocktrans %}Centraliza projetos, furos, medições, materiais, produção, despesas e analytics num fluxo único.
+                    O Sistema de Furação foi pensado para equipas técnicas que precisam de controlo operacional,
+                    rastreabilidade e capacidade real de escalar.{% endblocktrans %}
                 </p>
 
                 <div class="actions">
-                    <a href="/registo/" class="btn btn-primary">{% trans "Criar conta" %}</a>
-                    <a href="/planos/" class="btn btn-light">{% trans "Comparar planos" %}</a>
+                    <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Criar conta" %}</a>
+                    <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Comparar planos" %}</a>
+                </div>
+
+                <div class="trust-row">
+                    <span>{% trans "Operação e registos técnicos" %}</span>
+                    <span>{% trans "IA visual + chat técnico" %}</span>
+                    <span>{% trans "Gestão financeira e subscrições" %}</span>
                 </div>
             </div>
 
             <div class="hero-card">
-                <div class="hero-logo-wrap">
-                    <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="{% trans 'Logo Sistema de Furação' %}" class="hero-logo">
-                </div>
+                <h3>{% trans "O que já está disponível" %}</h3>
 
-                <h3>{% trans "Visão rápida da plataforma" %}</h3>
-
-                <div class="metric">
-                    <span>{% trans "Projetos e furos" %}</span>
-                    <strong>{% trans "Centralizados" %}</strong>
-                </div>
-                <div class="metric">
-                    <span>{% trans "Controlo por empresa" %}</span>
-                    <strong>{% trans "Multiempresa" %}</strong>
-                </div>
-                <div class="metric">
-                    <span>{% trans "Produção e stock" %}</span>
-                    <strong>{% trans "Tempo real" %}</strong>
-                </div>
-                <div class="metric">
-                    <span>{% trans "Evolução futura" %}</span>
-                    <strong>{% trans "IA + sensores" %}</strong>
-                </div>
+                <div class="metric"><span>📁 {% trans "Projetos, furos, medições e registos" %}</span></div>
+                <div class="metric"><span>📦 {% trans "Materiais com levantamento e devolução" %}</span></div>
+                <div class="metric"><span>💶 {% trans "Despesas e controlo financeiro por contexto" %}</span></div>
+                <div class="metric"><span>🤖 {% trans "Módulo AI Visual, chat técnico e biblioteca PDF" %}</span></div>
+                <div class="metric"><span>🧩 {% trans "Features por plano/empresa/individual" %}</span></div>
+                <div class="metric"><span>🌍 {% trans "Módulos 3D e geologia prontos para evolução" %}</span></div>
             </div>
         </section>
 
-        <section class="grid">
+        <section class="grid modules-grid">
             <div class="card">
-                <h3>{% trans "Operação centralizada" %}</h3>
+                <h3>{% trans "Operação diária" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Projetos, furos, materiais, máquinas, medições e dashboards
-                    no mesmo sistema.{% endblocktrans %}
+                    {% blocktrans %}Organiza produção por projeto e furo, com medições, registos, equipas e histórico técnico.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="card">
-                <h3>{% trans "Multiempresa" %}</h3>
+                <h3>{% trans "Materiais e terreno" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Cada cliente vê apenas os seus próprios dados,
-                    com isolamento total por empresa.{% endblocktrans %}
+                    {% blocktrans %}Controla stock operacional com levantamentos e devoluções associados à execução em campo.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="card">
-                <h3>{% trans "Preparado para crescer" %}</h3>
+                <h3>{% trans "Inteligência aplicada" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Base preparada para integração com dispositivos,
-                    IA e relatórios inteligentes.{% endblocktrans %}
+                    {% blocktrans %}Extrai conhecimento com IA visual, chatbox contextual e memória operacional para melhorar decisões.{% endblocktrans %}
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>{% trans "Gestão profissional" %}</h3>
+                <p class="muted">
+                    {% blocktrans %}Suporta multiempresa, permissões por perfil, planos de subscrição e visão financeira da operação.{% endblocktrans %}
                 </p>
             </div>
         </section>
 
-        <h2 class="section-title">{% trans "O que a plataforma permite" %}</h2>
+        <h2 class="section-title">{% trans "Funcionalidades principais" %}</h2>
 
         <section class="features">
             <div class="feature-box">
-                <h3>{% trans "Gestão operacional" %}</h3>
+                <h3>{% trans "Multiempresa e perfis" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Acompanha projetos, furos, equipas, máquinas e materiais
-                    com mais organização e rastreabilidade.{% endblocktrans %}
+                    {% blocktrans %}Isolamento total por empresa, com acesso por superuser, admin de empresa, empregado e conta individual.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>{% trans "Análise e produtividade" %}</h3>
+                <h3>{% trans "Registos e analytics" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Consolida registos diários e apoia a análise de produtividade,
-                    desempenho e controlo operacional.{% endblocktrans %}
+                    {% blocktrans %}Acompanha produtividade, histórico, eventos operacionais e indicadores para melhorar execução no terreno.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>{% trans "Visão técnica" %}</h3>
+                <h3>{% trans "AI + conhecimento técnico" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Inclui estrutura para medições, dados técnicos e evolução
-                    futura para integração com sensores e dispositivos.{% endblocktrans %}
+                    {% blocktrans %}Módulo AI Visual com segmentação de relatórios, chatbox, biblioteca documental e base de memória operacional.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>{% trans "Escalabilidade" %}</h3>
+                <h3>{% trans "Financeiro e subscrições" %}</h3>
                 <p class="muted">
-                    {% blocktrans %}Pensado para crescer de uma operação local para uma
-                    plataforma completa por empresa ou grupo.{% endblocktrans %}
+                    {% blocktrans %}Planos configuráveis, cobrança por ciclo, pagamentos e rastreio financeiro para acompanhar crescimento com controlo.{% endblocktrans %}
                 </p>
+            </div>
+        </section>
+
+        <section class="cta">
+            <h2>{% trans "Pronto para profissionalizar a tua operação?" %}</h2>
+            <p class="muted">
+                {% blocktrans %}Cria a tua conta e começa já a estruturar projetos, furos, equipa e dados técnicos numa base sólida.{% endblocktrans %}
+            </p>
+            <div class="actions">
+                <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Começar agora" %}</a>
+                <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
             </div>
         </section>
 

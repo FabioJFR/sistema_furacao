@@ -1,11 +1,11 @@
 :root {
-    --bg: #f5f7fb;
+    --bg: #f3f5f9;
     --card: #ffffff;
     --text: #111827;
     --muted: #6b7280;
     --border: #dbe2ea;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary: #3d5a73;
+    --primary-hover: #31485d;
     --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     --radius: 16px;
 }
@@ -17,14 +17,29 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: linear-gradient(to bottom, #f8fbff, #f5f7fb);
+    background: linear-gradient(to bottom, #f8fafc, #f3f5f9);
     color: var(--text);
+}
+
+.bg-decor {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 8% 10%, rgba(61, 90, 115, 0.12), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(127, 155, 181, 0.1), transparent 25%),
+        radial-gradient(circle at 50% 100%, rgba(61, 90, 115, 0.06), transparent 30%);
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 24px;
+}
+
+.home-page {
+    padding-top: 26px;
 }
 
 .topbar {
@@ -113,13 +128,14 @@ body {
     grid-template-columns: 1.15fr 0.85fr;
     gap: 28px;
     align-items: center;
-    padding: 50px 0 30px;
+    padding: 46px 0 26px;
 }
 
 .hero h1 {
-    font-size: 48px;
+    font-size: 50px;
     margin: 0 0 16px;
-    line-height: 1.1;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
 }
 
 .hero p {
@@ -132,8 +148,8 @@ body {
 .hero-badge {
     display: inline-block;
     margin-bottom: 18px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: #d9e6ef;
+    color: #31485d;
     padding: 8px 12px;
     border-radius: 999px;
     font-size: 13px;
@@ -155,30 +171,14 @@ body {
     border: 1px solid #eef2f7;
 }
 
-.hero-logo-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 22px;
-}
-
-.hero-logo {
-    width: 180px;
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.18));
-}
-
 .hero-card h3 {
     margin-top: 0;
     margin-bottom: 18px;
-    font-size: 20px;
-    text-align: center;
+    font-size: 21px;
 }
 
 .metric {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px solid #eef2f7;
@@ -189,10 +189,9 @@ body {
     border-bottom: none;
 }
 
-.metric strong {
-    font-size: 18px;
-    color: var(--primary);
-    text-align: right;
+.metric span {
+    font-weight: 600;
+    color: #1f2937;
 }
 
 .grid {
@@ -223,7 +222,8 @@ body {
 .section-title {
     margin-top: 70px;
     margin-bottom: 18px;
-    font-size: 28px;
+    font-size: 30px;
+    letter-spacing: -0.01em;
 }
 
 .features {
@@ -240,6 +240,43 @@ body {
     border: 1px solid #eef2f7;
 }
 
+.trust-row {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.trust-row span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #415266;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #d7e0e8;
+    border-radius: 999px;
+    padding: 7px 10px;
+}
+
+.cta {
+    margin-top: 62px;
+    background: #ffffff;
+    border: 1px solid #d8e1e8;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+}
+
+.cta h2 {
+    margin: 0 0 10px;
+    font-size: 31px;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+}
+
+.cta .actions {
+    margin-top: 18px;
+}
+
 .footer {
     margin-top: 70px;
     padding: 24px 0 10px;
@@ -249,6 +286,10 @@ body {
 }
 
 @media (max-width: 900px) {
+    .container {
+        padding: 18px;
+    }
+
     .hero {
         grid-template-columns: 1fr;
     }
@@ -259,7 +300,7 @@ body {
     }
 
     .hero h1 {
-        font-size: 34px;
+        font-size: 36px;
     }
 
     .topbar {
@@ -273,5 +314,35 @@ body {
 
     .topbar-actions {
         justify-content: center;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .cta {
+        padding: 22px;
+    }
+
+    .cta h2 {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 540px) {
+    .hero p {
+        font-size: 16px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .cta h2 {
+        font-size: 24px;
     }
 }
