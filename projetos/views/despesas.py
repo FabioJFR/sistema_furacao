@@ -10,6 +10,7 @@ from projetos.selectors.despesas import (
     obter_lista_despesas_admin,
     obter_lista_despesas_empregado,
 )
+from projetos.selectors.acesso import obter_perfil_ativo_por_user
 from projetos.services.acesso_contexto import (
     obter_empresa_admin_contexto,
     obter_empregado_autenticado_contexto,
@@ -17,6 +18,11 @@ from projetos.services.acesso_contexto import (
 from projetos.services.despesas import criar_despesa
 
 logger = logging.getLogger("core")
+
+
+def _user_conta_individual(user):
+    perfil = obter_perfil_ativo_por_user(user)
+    return bool(perfil and perfil.tipo_acesso == "individual")
 
 
 @login_required
@@ -80,10 +86,10 @@ def despesa_create_admin(request):
 @login_required
 @empregado_required
 def despesa_list_empregado(request):
-    messages.error(request, "A área de Finanças não está disponível para contas de empregado ou individual.")
-    return redirect("projetos:area_empregado")
+    if not _user_conta_individual(request.user):
+        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
+        return redirect("projetos:area_empregado")
 
-    # Mantido abaixo apenas como referência para futura reativação controlada.
     empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
         request=request,
         mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
@@ -110,10 +116,10 @@ def despesa_list_empregado(request):
 @login_required
 @empregado_required
 def despesa_create_empregado(request):
-    messages.error(request, "A área de Finanças não está disponível para contas de empregado ou individual.")
-    return redirect("projetos:area_empregado")
+    if not _user_conta_individual(request.user):
+        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
+        return redirect("projetos:area_empregado")
 
-    # Mantido abaixo apenas como referência para futura reativação controlada.
     empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
         request=request,
         mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",

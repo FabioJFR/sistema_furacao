@@ -1,4 +1,6 @@
 import logging
+import calendar
+from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -72,10 +74,34 @@ def _obter_individual_autenticado_area(request):
     return individual, None
 
 
+def _normalizar_periodo_meses(ciclo):
+    valor = str(ciclo or "").strip().lower()
+    if valor == "mensal":
+        return 1
+    if valor == "anual":
+        return 12
+    try:
+        inteiro = int(valor)
+    except (TypeError, ValueError):
+        return 1
+    return inteiro if inteiro in [1, 3, 6, 12] else 1
+
+
+def _adicionar_meses(data_base: date, meses: int):
+    if not data_base:
+        return None
+    mes = data_base.month - 1 + meses
+    ano = data_base.year + mes // 12
+    mes = mes % 12 + 1
+    dia = min(data_base.day, calendar.monthrange(ano, mes)[1])
+    return data_base.replace(year=ano, month=mes, day=dia)
+
+
 def _obter_contexto_plano_pagamento(request, *, empregado=None):
     empresa_associada = getattr(empregado, "empresa", None) if empregado else None
     plano_atual = getattr(empresa_associada, "plano", None) if empresa_associada else None
     subscricao_atual = None
+    data_inicio_plano = None
     data_fim_plano = None
     proximo_pagamento = None
 
@@ -84,6 +110,7 @@ def _obter_contexto_plano_pagamento(request, *, empregado=None):
         if subscricao_atual:
             if not plano_atual:
                 plano_atual = subscricao_atual.plano
+            data_inicio_plano = subscricao_atual.data_inicio
             data_fim_plano = subscricao_atual.data_fim
             proximo_pagamento = subscricao_atual.proxima_renovacao
 
@@ -114,8 +141,22 @@ def _obter_contexto_plano_pagamento(request, *, empregado=None):
         if movimento_com_plano and not plano_atual:
             plano_atual = movimento_com_plano.plano
 
+        if movimento_com_plano and not data_inicio_plano:
+            data_inicio_plano = movimento_com_plano.data_competencia or movimento_com_plano.criado_em.date()
+
         if movimento_com_plano and not data_fim_plano:
             data_fim_plano = movimento_com_plano.data_vencimento
+            if (not data_fim_plano) and data_inicio_plano:
+                data_fim_plano = _adicionar_meses(
+                    data_inicio_plano,
+                    _normalizar_periodo_meses(movimento_com_plano.ciclo_cobranca),
+                )
+
+        if movimento_com_plano and data_inicio_plano and data_fim_plano and data_fim_plano <= data_inicio_plano:
+            data_fim_plano = _adicionar_meses(
+                data_inicio_plano,
+                _normalizar_periodo_meses(movimento_com_plano.ciclo_cobranca),
+            )
 
         movimento_pendente = (
             MovimentoFinanceiroPlataforma.objects.filter(
@@ -130,10 +171,23 @@ def _obter_contexto_plano_pagamento(request, *, empregado=None):
         if movimento_pendente and not proximo_pagamento:
             proximo_pagamento = movimento_pendente.data_vencimento
 
+    # Ajuste de consistência:
+    # quando o próximo pagamento vem igual à criação da conta/movimento inicial,
+    # deve refletir a data de renovação/fim do ciclo atual.
+    if (
+        data_inicio_plano
+        and data_fim_plano
+        and proximo_pagamento
+        and data_fim_plano > data_inicio_plano
+        and proximo_pagamento <= data_inicio_plano
+    ):
+        proximo_pagamento = data_fim_plano
+
     return {
         "empresa_associada": empresa_associada,
         "subscricao_atual": subscricao_atual,
         "plano_atual": plano_atual,
+        "data_inicio_plano": data_inicio_plano,
         "data_fim_plano": data_fim_plano,
         "proximo_pagamento": proximo_pagamento,
     }

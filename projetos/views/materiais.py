@@ -29,6 +29,7 @@ from projetos.services.acesso_contexto import (
     obter_empregado_autenticado_contexto,
     obter_empresa_admin_contexto,
 )
+from projetos.selectors.acesso import obter_perfil_ativo_por_user
 
 from projetos.services.stock import (
     apagar_material_admin,
@@ -92,6 +93,11 @@ def _obter_empregado_autenticado_materiais(request):
             getattr(request.user, "email", ""),
         )
     return empregado, None
+
+
+def _conta_individual(user):
+    perfil = obter_perfil_ativo_por_user(user)
+    return bool(perfil and perfil.tipo_acesso == "individual")
 
 @login_required
 @admin_required
@@ -294,6 +300,55 @@ def material_create(request):
     return render(request, 'projetos/material_form.html', {
         'form': form,
         'titulo': 'Novo Material'
+    })
+
+
+@login_required
+@empregado_required
+def material_create_empregado(request):
+    logger.info(
+        "Entrada na view material_create_empregado. user_id=%s, username='%s', method=%s",
+        request.user.id,
+        request.user.username,
+        request.method,
+    )
+    if not _conta_individual(request.user):
+        messages.error(
+            request,
+            "Criação de materiais nesta área está disponível apenas para contas individuais.",
+        )
+        return redirect("projetos:materiais_disponiveis_empregado")
+
+    empregado, resposta_erro = _obter_empregado_autenticado_materiais(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view material_create_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    if request.method == "POST":
+        form = MaterialForm(request.POST, empresa=empregado.empresa)
+        if form.is_valid():
+            material = criar_material_admin(form=form, empresa=empregado.empresa)
+            logger.info(
+                "Material criado por conta individual. user_id=%s, empregado_id=%s, empresa_id=%s, material_id=%s",
+                request.user.id,
+                empregado.id,
+                empregado.empresa_id,
+                material.id,
+            )
+            messages.success(request, "Material criado com sucesso.")
+            return redirect("projetos:materiais_disponiveis_empregado")
+        logger.warning(
+            "Erro ao criar material por conta individual. user_id=%s, erros=%s",
+            request.user.id,
+            form.errors,
+        )
+        messages.error(request, "Erro ao criar o material. Verifique os dados.")
+    else:
+        form = MaterialForm(empresa=empregado.empresa)
+
+    return render(request, "projetos/material_form.html", {
+        "form": form,
+        "titulo": "Novo Material",
     })
 
 

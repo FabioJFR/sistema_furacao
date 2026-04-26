@@ -33835,3 +33835,288 @@ django.template.exceptions.TemplateSyntaxError: Template: /Users/fabiorevez/Desk
 [2026-04-26 08:59:13,946] INFO django.server | "GET /static/css/geologia/drone_ui.css HTTP/1.1" 200 244
 [2026-04-26 08:59:14,015] INFO django.server | "GET /static/js/geologia/drone_hub.js HTTP/1.1" 200 16181
 [2026-04-26 08:59:19,065] INFO django.server | "GET /app/geologia/drone-sf/ HTTP/1.1" 200 34113
+[2026-04-26 19:38:33,996] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 19:38:37,477] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-26 19:38:37,487] INFO django.server | "GET / HTTP/1.1" 200 5045
+[2026-04-26 19:38:37,548] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-26 19:38:37,550] WARNING django.request | Not Found: /favicon.ico
+[2026-04-26 19:38:37,551] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-26 19:38:37,552] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-26 19:38:37,552] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-26 19:38:37,552] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-26 19:38:38,931] INFO django.server | "GET /login/ HTTP/1.1" 200 1726
+[2026-04-26 19:38:48,142] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-26 19:38:48,170] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=6
+[2026-04-26 19:38:48,178] INFO core | Empregado encontrado em redirect_after_login. user_id=6, empregado_id=7d9bf77a-30a2-4dc2-be63-f6115066fb18, aprovado=True, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 19:38:48,178] INFO core | Fallback via Empregados em redirect_after_login. user_id=6, empregado_id=7d9bf77a-30a2-4dc2-be63-f6115066fb18, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 19:38:48,189] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 19:38:48,211] INFO core | Entrada na view area_empregado. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:38:48,212] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:38:48,276] ERROR django.request | Internal Server Error: /app/minha-area/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/core/permissions.py", line 144, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py", line 1116, in area_empregado
+    contexto_empregado = obter_contexto_area_empregado(empregado, empresa=empregado.empresa)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/empregados.py", line 124, in obter_contexto_area_empregado
+    ultimos_registos = ultimos_registos.filter(empresa_id=empresa_id)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 1554, in _filter_or_exclude
+    raise TypeError("Cannot filter a query once a slice has been taken.")
+TypeError: Cannot filter a query once a slice has been taken.
+[2026-04-26 19:38:48,278] ERROR django.server | "GET /app/minha-area/ HTTP/1.1" 500 87294
+[2026-04-26 19:39:37,423] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/empregados.py changed, reloading.
+[2026-04-26 19:39:38,123] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 19:40:19,176] INFO core | Entrada na view area_empregado. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:40:19,179] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:40:19,190] INFO core | View area_empregado carregada com sucesso. user_id=6, empregado_id=7d9bf77a-30a2-4dc2-be63-f6115066fb18, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 19:40:19,272] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 20150
+[2026-04-26 19:40:19,304] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 200 6918
+[2026-04-26 19:40:19,305] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 19618
+[2026-04-26 19:40:19,305] INFO django.server | "GET /static/js/projetos/area_empregado.js HTTP/1.1" 200 1764
+[2026-04-26 19:42:06,231] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/despesas.py changed, reloading.
+[2026-04-26 19:42:07,007] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 19:45:34,149] INFO core | Entrada na view area_empregado. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:45:34,152] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=6, username='empregado1empresa1'
+[2026-04-26 19:45:34,169] INFO core | View area_empregado carregada com sucesso. user_id=6, empregado_id=7d9bf77a-30a2-4dc2-be63-f6115066fb18, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 19:45:34,272] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 19297
+[2026-04-26 19:48:19,106] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-26 19:48:19,119] INFO django.server | "GET / HTTP/1.1" 200 5045
+[2026-04-26 19:48:23,339] INFO django.server | "GET /registo/ HTTP/1.1" 200 5972
+[2026-04-26 19:48:23,711] INFO django.server | "GET /static/css/website/registo.css HTTP/1.1" 200 2489
+[2026-04-26 19:48:23,711] INFO django.server | "GET /static/js/website/registo.js HTTP/1.1" 200 2942
+[2026-04-26 19:49:16,935] INFO django.server | "POST /registo/ HTTP/1.1" 200 6459
+[2026-04-26 19:49:38,403] INFO django.server | "POST /registo/ HTTP/1.1" 302 0
+[2026-04-26 19:49:38,420] INFO django.server | "GET /login/ HTTP/1.1" 200 1923
+[2026-04-26 19:50:02,890] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-26 19:50:02,919] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=12
+[2026-04-26 19:50:02,921] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=12, tipo_acesso=individual, empresa_id=None
+[2026-04-26 19:50:02,922] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 19:50:02,942] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:50:02,959] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 4898
+[2026-04-26 19:50:16,512] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:50:16,570] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 4898
+[2026-04-26 19:52:53,925] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:52:53,990] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 7690
+[2026-04-26 19:52:57,282] INFO core | Entrada na view medicao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:52:57,282] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=12, username='testeindividual'
+[2026-04-26 19:52:57,297] WARNING core | Utilizador autenticado sem registo em Empregados em empregados.py. user_id=12
+[2026-04-26 19:52:57,297] WARNING core | Acesso bloqueado na view medicao_list_empregado. user_id=12
+[2026-04-26 19:52:57,303] INFO django.server | "GET /app/minha-area/medicoes/ HTTP/1.1" 302 0
+[2026-04-26 19:52:57,338] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=12
+[2026-04-26 19:52:57,343] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=12, tipo_acesso=individual, empresa_id=None
+[2026-04-26 19:52:57,350] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 19:52:57,393] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:52:57,430] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 8103
+[2026-04-26 19:56:26,217] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-26 19:56:26,872] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 19:57:46,377] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:57:46,475] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 7690
+[2026-04-26 19:57:49,548] INFO core | Entrada na view medicao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:57:49,553] INFO core | View medicao_list_empregado carregada para conta individual. user_id=12, individual_id=7f678712-eae4-4342-932d-8bae10e080d4
+[2026-04-26 19:57:49,585] INFO django.server | "GET /app/minha-area/medicoes/ HTTP/1.1" 200 6857
+[2026-04-26 19:58:18,150] INFO core | Entrada na view configuracao_perfuracao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:58:18,151] DEBUG core | A resolver empregado autenticado em configuracao_perfuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 19:58:18,158] WARNING core | Utilizador autenticado sem registo em Empregados em configuracao_perfuracao.py. user_id=12
+[2026-04-26 19:58:18,158] WARNING core | Acesso bloqueado na view configuracao_perfuracao_list_empregado. user_id=12
+[2026-04-26 19:58:18,164] INFO django.server | "GET /app/configuracoes/configuracoes-perfuracao/ HTTP/1.1" 302 0
+[2026-04-26 19:58:18,216] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=12
+[2026-04-26 19:58:18,219] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=12, tipo_acesso=individual, empresa_id=None
+[2026-04-26 19:58:18,224] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 19:58:18,264] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:58:18,304] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 8103
+[2026-04-26 19:59:50,952] INFO core | Entrada na view configuracao_perfuracao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:59:50,953] DEBUG core | A resolver empregado autenticado em configuracao_perfuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 19:59:50,962] WARNING core | Utilizador autenticado sem registo em Empregados em configuracao_perfuracao.py. user_id=12
+[2026-04-26 19:59:50,962] WARNING core | Acesso bloqueado na view configuracao_perfuracao_list_empregado. user_id=12
+[2026-04-26 19:59:50,969] INFO django.server | "GET /app/configuracoes/configuracoes-perfuracao/ HTTP/1.1" 302 0
+[2026-04-26 19:59:51,000] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=12
+[2026-04-26 19:59:51,005] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=12, tipo_acesso=individual, empresa_id=None
+[2026-04-26 19:59:51,013] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 19:59:51,050] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 19:59:51,088] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 8103
+[2026-04-26 20:03:37,118] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/acesso.py changed, reloading.
+[2026-04-26 20:03:37,825] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:03:51,659] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-26 20:03:52,063] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:04:46,570] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/configuracao_perfuracao.py changed, reloading.
+[2026-04-26 20:04:46,982] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:04:51,332] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/registos.py changed, reloading.
+[2026-04-26 20:04:51,739] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:04:57,126] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregado_area.py changed, reloading.
+[2026-04-26 20:04:57,538] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:05:02,930] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/historico_configuracao.py changed, reloading.
+[2026-04-26 20:05:03,358] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:05:09,787] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/historico_configuracao.py changed, reloading.
+[2026-04-26 20:05:10,301] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:05:24,067] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-26 20:05:24,620] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:05:39,470] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/diario_tecnico.py changed, reloading.
+[2026-04-26 20:05:39,889] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:06:20,339] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:20,449] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 7690
+[2026-04-26 20:06:26,109] INFO core | Entrada na view configuracao_perfuracao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:26,109] DEBUG core | A resolver empregado autenticado em configuracao_perfuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:26,200] INFO core | View configuracao_perfuracao_list_empregado carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_configuracoes=0
+[2026-04-26 20:06:26,232] INFO django.server | "GET /app/configuracoes/configuracoes-perfuracao/ HTTP/1.1" 200 7342
+[2026-04-26 20:06:28,393] INFO core | Entrada na view configuracao_perfuracao_create_empregado. user_id=12, username='testeindividual', method=GET
+[2026-04-26 20:06:28,394] DEBUG core | A resolver empregado autenticado em configuracao_perfuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:28,462] INFO django.server | "GET /app/configuracoes/configuracoes-perfuracao/nova/ HTTP/1.1" 200 15539
+[2026-04-26 20:06:28,983] INFO django.server | "GET /static/js/projetos/configuracao_perfuracao_form.js HTTP/1.1" 200 1964
+[2026-04-26 20:06:33,002] INFO core | Entrada na view configuracao_perfuracao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:33,002] DEBUG core | A resolver empregado autenticado em configuracao_perfuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:33,012] INFO core | View configuracao_perfuracao_list_empregado carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_configuracoes=0
+[2026-04-26 20:06:33,052] INFO django.server | "GET /app/configuracoes/configuracoes-perfuracao/ HTTP/1.1" 200 7342
+[2026-04-26 20:06:35,015] INFO core | Entrada na view historico_configuracao_list_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:35,015] DEBUG core | A resolver empregado autenticado em historico_configuracao.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:35,029] INFO core | View historico_configuracao_list_empregado carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_historicos=0
+[2026-04-26 20:06:35,075] INFO django.server | "GET /app/historico-configuracao/empregado/ HTTP/1.1" 200 7081
+[2026-04-26 20:06:36,914] INFO core | Entrada na view area_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:36,962] INFO django.server | "GET /app/minha-area/ HTTP/1.1" 200 7690
+[2026-04-26 20:06:40,676] INFO core | Entrada na view registo_diario_create. user_id=12, username='testeindividual', method=GET
+[2026-04-26 20:06:40,676] DEBUG core | A resolver empregado autenticado em registos.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:40,740] INFO django.server | "GET /app/registos/meus/novo/ HTTP/1.1" 200 12240
+[2026-04-26 20:06:43,595] INFO core | Entrada na view registo_diario_list. user_id=12, username='testeindividual'
+[2026-04-26 20:06:43,595] DEBUG core | A resolver empregado autenticado em registos.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:43,604] INFO core | View registo_diario_list carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_registos=0
+[2026-04-26 20:06:43,643] INFO django.server | "GET /app/registos/meus/ HTTP/1.1" 200 6671
+[2026-04-26 20:06:48,718] INFO core | Entrada na view materiais_disponiveis_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:06:48,718] DEBUG core | A resolver empregado autenticado em empregados.py. user_id=12, username='testeindividual'
+[2026-04-26 20:06:48,739] INFO core | View materiais_disponiveis_empregado carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, empresa_id=ad6bab59-3faa-4b8d-992a-c97f55b1cb84, total_materiais=0, filtro_nome=''
+[2026-04-26 20:06:48,795] INFO django.server | "GET /app/minha-area/materiais-disponiveis/ HTTP/1.1" 200 8731
+[2026-04-26 20:07:10,558] INFO core | Entrada na view levantamento_material_list. user_id=12, username='testeindividual'
+[2026-04-26 20:07:10,558] DEBUG core | A resolver empregado autenticado em materiais.py. user_id=12, username='testeindividual'
+[2026-04-26 20:07:10,570] INFO core | View levantamento_material_list carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_levantamentos=0
+[2026-04-26 20:07:10,610] INFO django.server | "GET /app/levantamentos/meus/ HTTP/1.1" 200 6701
+[2026-04-26 20:07:13,053] INFO core | Entrada na view devolucao_material_list. user_id=12, username='testeindividual'
+[2026-04-26 20:07:13,053] DEBUG core | A resolver empregado autenticado em materiais.py. user_id=12, username='testeindividual'
+[2026-04-26 20:07:13,065] INFO core | View devolucao_material_list carregada com sucesso. user_id=12, empregado_id=67c1fbd4-288f-4a11-bb41-d1262b2a3682, total_devolucoes=0
+[2026-04-26 20:07:13,105] INFO django.server | "GET /app/devolucoes/minhas/ HTTP/1.1" 200 6694
+[2026-04-26 20:07:15,460] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:07:15,462] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:07:15,492] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 8251
+[2026-04-26 20:07:46,158] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:07:46,161] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:07:46,211] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 8251
+[2026-04-26 20:12:01,192] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregado_area.py changed, reloading.
+[2026-04-26 20:12:02,121] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:18:14,141] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/models/__init__.py changed, reloading.
+[2026-04-26 20:18:14,836] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:18:29,700] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/forms/__init__.py changed, reloading.
+[2026-04-26 20:18:30,283] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:19:04,985] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/opcoes.py changed, reloading.
+[2026-04-26 20:19:05,608] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:19:10,007] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/opcoes.py changed, reloading.
+[2026-04-26 20:19:10,447] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:19:52,415] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/services/__init__.py changed, reloading.
+[2026-04-26 20:19:53,064] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:20:02,716] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/views.py changed, reloading.
+[2026-04-26 20:20:03,256] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:20:07,649] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/urls.py changed, reloading.
+[2026-04-26 20:20:08,061] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:20:14,498] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/core/settings.py changed, reloading.
+[2026-04-26 20:20:15,191] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:20:55,109] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/services/__init__.py changed, reloading.
+[2026-04-26 20:20:55,863] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:23:34,751] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:23:45,321] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:23:45,327] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:23:45,664] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9073
+[2026-04-26 20:52:17,038] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:52:26,497] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:52:26,499] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:52:26,633] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9183
+[2026-04-26 20:52:29,521] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:52:29,524] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:52:29,581] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9183
+[2026-04-26 20:53:28,867] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:53:28,869] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:53:28,940] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9183
+[2026-04-26 20:57:05,718] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregado_area.py changed, reloading.
+[2026-04-26 20:57:06,413] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 20:58:13,957] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:58:13,959] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:58:14,093] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9183
+[2026-04-26 20:58:17,311] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 20:58:17,313] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 20:58:17,372] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9183
+[2026-04-26 21:00:05,875] INFO core | Entrada na view meus_dados_empregado. user_id=12, username='testeindividual'
+[2026-04-26 21:00:05,876] DEBUG core | A resolver individual autenticado em empregado_area.py. user_id=12, username='testeindividual'
+[2026-04-26 21:00:05,921] INFO django.server | "GET /app/minha-area/meus-dados/ HTTP/1.1" 200 9189
+[2026-04-26 21:00:10,044] INFO django.server | "GET /app/opcoes/sugestoes/ HTTP/1.1" 200 8810
+[2026-04-26 21:00:18,054] ERROR django.request | Internal Server Error: /app/opcoes/sugestoes/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/models.py", line 503, in _post_clean
+    self.instance.full_clean(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        exclude=exclude, validate_unique=False, validate_constraints=False
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/base.py", line 1712, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'user': ['A sugestão deve estar associada a um utilizador.']}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/views/opcoes.py", line 203, in sugestoes_plataforma
+    if form.is_valid():
+       ~~~~~~~~~~~~~^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/forms.py", line 206, in is_valid
+    return self.is_bound and not self.errors
+                                 ^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/forms.py", line 201, in errors
+    self.full_clean()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/forms.py", line 339, in full_clean
+    self._post_clean()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/models.py", line 507, in _post_clean
+    self._update_errors(e)
+    ~~~~~~~~~~~~~~~~~~~^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/models.py", line 477, in _update_errors
+    self.add_error(None, errors)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/forms/forms.py", line 301, in add_error
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: 'SugestaoPlataformaForm' has no field named 'user'.
+[2026-04-26 21:00:18,059] ERROR django.server | "POST /app/opcoes/sugestoes/ HTTP/1.1" 500 102150
+[2026-04-26 21:00:54,296] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/opcoes.py changed, reloading.
+[2026-04-26 21:00:54,957] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:01:34,810] INFO django.server | "POST /app/opcoes/sugestoes/ HTTP/1.1" 302 0
+[2026-04-26 21:01:35,922] INFO django.server | "GET /app/opcoes/sugestoes/ HTTP/1.1" 200 9197
+[2026-04-26 21:15:06,585] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/empregados.py changed, reloading.
+[2026-04-26 21:15:07,268] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:15:15,879] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-26 21:15:16,273] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:15:29,996] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/materiais.py changed, reloading.
+[2026-04-26 21:15:30,419] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:15:33,735] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/empregado_area.py changed, reloading.
+[2026-04-26 21:15:34,156] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:15:48,947] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/despesas.py changed, reloading.
+[2026-04-26 21:15:49,370] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:15:58,925] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/forms/despesa.py changed, reloading.
+[2026-04-26 21:15:59,351] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:16:08,937] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/despesas.py changed, reloading.
+[2026-04-26 21:16:09,348] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 21:17:08,179] INFO django.server | "GET /app/opcoes/sugestoes/ HTTP/1.1" 200 8592
+[2026-04-26 21:17:08,792] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 304 0
+[2026-04-26 21:17:31,522] INFO django.server | "GET /app/despesas/minha-area/minhas/ HTTP/1.1" 200 6661
+[2026-04-26 21:17:33,470] INFO django.server | "GET /app/despesas/minha-area/adicionar/ HTTP/1.1" 200 14153

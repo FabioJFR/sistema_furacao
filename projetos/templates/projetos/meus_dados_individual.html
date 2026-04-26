@@ -62,11 +62,15 @@
                 {% endif %}
             </div>
             <div>
+                <strong>{% trans "Conta desde:" %}</strong>
+                {{ data_inicio_plano|date:"d/m/Y"|default:"-" }}
+            </div>
+            <div>
                 <strong>{% trans "Termina em:" %}</strong>
                 {{ data_fim_plano|date:"d/m/Y"|default:"-" }}
             </div>
             <div>
-                <strong>{% trans "Próximo pagamento:" %}</strong>
+                <strong>{% trans "Data Limite de pagamento:" %}</strong>
                 {{ proximo_pagamento|date:"d/m/Y"|default:"-" }}
             </div>
             <div>

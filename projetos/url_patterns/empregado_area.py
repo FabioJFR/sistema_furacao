@@ -30,4 +30,5 @@ urlpatterns = [
 
     # ---------------- MATERIAIS ----------------
     path("materiais-disponiveis/", views.materiais_disponiveis_empregado, name="materiais_disponiveis_empregado"),
+    path("materiais/novo/", views.material_create_empregado, name="material_create_empregado"),
 ]

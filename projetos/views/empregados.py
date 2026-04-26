@@ -1242,6 +1242,8 @@ def materiais_disponiveis_empregado(request):
     if resposta_erro:
         logger.warning("Acesso bloqueado na view materiais_disponiveis_empregado. user_id=%s", request.user.id)
         return resposta_erro
+    perfil = obter_perfil_ativo_por_user(request.user)
+    conta_individual = bool(perfil and perfil.tipo_acesso == "individual")
 
     projeto_id = request.GET.get("projeto")
     furo_id = request.GET.get("furo")
@@ -1252,6 +1254,7 @@ def materiais_disponiveis_empregado(request):
         projeto_id=projeto_id or "",
         furo_id=furo_id or "",
         nome=nome,
+        incluir_todos_empresa=conta_individual,
     )
     materiais = contexto_materiais["materiais"]
     projetos = contexto_materiais["projetos"]
@@ -1276,4 +1279,5 @@ def materiais_disponiveis_empregado(request):
             "nome": nome,
         },
         "titulo": "Materiais Disponíveis",
+        "conta_individual": conta_individual,
     })

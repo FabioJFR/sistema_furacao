@@ -376,7 +376,14 @@ def obter_empregado_pendente_admin_por_pk(pk, empresa):
     return get_object_or_404(Empregados, pk=pk, empresa_id=empresa_id, aprovado=False)
 
 
-def obter_contexto_materiais_disponiveis_empregado(empregado, *, projeto_id="", furo_id="", nome=""):
+def obter_contexto_materiais_disponiveis_empregado(
+    empregado,
+    *,
+    projeto_id="",
+    furo_id="",
+    nome="",
+    incluir_todos_empresa=False,
+):
     projetos_ids = list(
         empregado.ligacoes_projetos.filter(empresa=empregado.empresa).values_list("projeto_id", flat=True)
     )
@@ -399,9 +406,10 @@ def obter_contexto_materiais_disponiveis_empregado(empregado, *, projeto_id="", 
     if empregado.empresa_id:
         materiais = materiais.filter(empresa=empregado.empresa)
 
-    materiais = materiais.filter(
-        Q(projeto_id__in=projetos_ids) | Q(furo_id__in=furos_ids)
-    ).distinct()
+    if not incluir_todos_empresa:
+        materiais = materiais.filter(
+            Q(projeto_id__in=projetos_ids) | Q(furo_id__in=furos_ids)
+        ).distinct()
 
     if projeto_id:
         materiais = materiais.filter(projeto_id=projeto_id)
@@ -411,14 +419,18 @@ def obter_contexto_materiais_disponiveis_empregado(empregado, *, projeto_id="", 
         materiais = materiais.filter(nome__icontains=nome)
     materiais = materiais.select_related("projeto", "furo").order_by("nome")
 
-    projetos = Projeto.objects.filter(
-        empresa=empregado.empresa,
-        id__in=projetos_ids,
-    ).distinct().order_by("nome")
-    furos = Furo.objects.filter(
-        empresa=empregado.empresa,
-        id__in=furos_ids,
-    ).distinct().order_by("nome")
+    if incluir_todos_empresa:
+        projetos = Projeto.objects.filter(empresa=empregado.empresa).distinct().order_by("nome")
+        furos = Furo.objects.filter(empresa=empregado.empresa).distinct().order_by("nome")
+    else:
+        projetos = Projeto.objects.filter(
+            empresa=empregado.empresa,
+            id__in=projetos_ids,
+        ).distinct().order_by("nome")
+        furos = Furo.objects.filter(
+            empresa=empregado.empresa,
+            id__in=furos_ids,
+        ).distinct().order_by("nome")
 
     return {
         "materiais": materiais,

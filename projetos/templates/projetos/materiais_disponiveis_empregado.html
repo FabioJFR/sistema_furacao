@@ -18,6 +18,9 @@
                 <a href="{% url 'projetos:area_empregado' %}" class="btn btn-primary">🏠 {% trans "Painel" %}</a>
                 <a href="{% url 'projetos:meus_projetos_empregado' %}" class="btn btn-warning">📁 {% trans "Meus Projetos" %}</a>
                 <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-success">🕳 {% trans "Meus Furos" %}</a>
+                {% if conta_individual %}
+                    <a href="{% url 'projetos:material_create_empregado' %}" class="btn btn-primary">➕ {% trans "Novo Material" %}</a>
+                {% endif %}
             </div>
         </div>
     </div>

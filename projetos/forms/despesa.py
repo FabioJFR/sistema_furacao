@@ -35,10 +35,16 @@ class DespesaForm(forms.ModelForm):
             self.fields["maquina"].queryset = Maquina.objects.filter(empresa=empresa).order_by("nome")
 
         if empregado is not None:
-            projetos_ids = (
+            projetos_ligacoes_ativas = (
                 empregado.ligacoes_projetos.filter(ativo=True)
                 .values_list("projeto_id", flat=True)
             )
+            projetos_registos = empregado.registos_diarios.filter(
+                projeto__isnull=False,
+                empresa=empregado.empresa,
+            ).values_list("projeto_id", flat=True)
+            projetos_ids = set(projetos_ligacoes_ativas).union(set(projetos_registos))
+
             self.fields["projeto"].queryset = self.fields["projeto"].queryset.filter(pk__in=projetos_ids)
             self.fields["furo"].queryset = self.fields["furo"].queryset.filter(projeto_id__in=projetos_ids)
             self.fields["maquina"].queryset = self.fields["maquina"].queryset.filter(

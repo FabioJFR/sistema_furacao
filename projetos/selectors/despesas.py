@@ -12,16 +12,21 @@ def obter_lista_despesas_admin(*, empresa):
 
 
 def obter_lista_despesas_empregado(*, empregado):
-    ligacoes_ativas = EmpregadoProjeto.objects.filter(
+    projetos_ligacoes_ativas = EmpregadoProjeto.objects.filter(
         empregado=empregado,
         ativo=True,
     ).values_list("projeto_id", flat=True)
+    projetos_registos = empregado.registos_diarios.filter(
+        projeto__isnull=False,
+        empresa=empregado.empresa,
+    ).values_list("projeto_id", flat=True)
+    projetos_ids = set(projetos_ligacoes_ativas).union(set(projetos_registos))
 
     return (
         Despesa.objects.filter(empresa=empregado.empresa)
         .filter(
-            Q(projeto_id__in=ligacoes_ativas)
-            | Q(furo__projeto_id__in=ligacoes_ativas)
+            Q(projeto_id__in=projetos_ids)
+            | Q(furo__projeto_id__in=projetos_ids)
             | Q(tipo="geral")
         )
         .select_related("projeto", "furo", "maquina")

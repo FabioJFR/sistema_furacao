@@ -200,35 +200,46 @@ def relatorios_download_tudo(request, formato):
 def sugestoes_plataforma(request):
     if request.method == "POST":
         form = SugestaoPlataformaForm(request.POST)
+        form.instance.user = request.user
         if form.is_valid():
-            sugestao = form.save(commit=False)
-            sugestao.user = request.user
             try:
-                enviado, email_destino = enviar_sugestao_para_superusers(sugestao=sugestao)
+                sugestao = form.save(commit=False)
+                try:
+                    enviado, email_destino = enviar_sugestao_para_superusers(sugestao=sugestao)
+                except Exception:
+                    logger.exception(
+                        "Falha ao enviar sugestão por email. user_id=%s",
+                        request.user.id,
+                    )
+                    enviado = False
+                    email_destino = ""
+
+                sugestao.enviado_por_email = enviado
+                sugestao.email_destino = email_destino
+                sugestao.save()
+
+                if enviado:
+                    messages.success(
+                        request,
+                        "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
+                    )
+                else:
+                    messages.warning(
+                        request,
+                        "Sugestão guardada com sucesso. Não foi possível enviar o email ao superuser neste momento.",
+                    )
+                return redirect("projetos:sugestoes_plataforma")
             except Exception:
                 logger.exception(
-                    "Falha ao enviar sugestão por email. user_id=%s",
+                    "Erro ao processar sugestão na plataforma. user_id=%s",
                     request.user.id,
                 )
-                enviado = False
-                email_destino = ""
-
-            sugestao.enviado_por_email = enviado
-            sugestao.email_destino = email_destino
-            sugestao.save()
-
-            if enviado:
-                messages.success(
+                messages.error(
                     request,
-                    "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
+                    "Ocorreu um erro ao enviar a sugestão. Tenta novamente em instantes.",
                 )
-            else:
-                messages.warning(
-                    request,
-                    "Sugestão guardada com sucesso. Não foi possível enviar o email ao superuser neste momento.",
-                )
-            return redirect("projetos:sugestoes_plataforma")
-        messages.error(request, "Corrige os campos assinalados para enviar a sugestão.")
+        else:
+            messages.error(request, "Corrige os campos assinalados para enviar a sugestão.")
     else:
         form = SugestaoPlataformaForm()
 
