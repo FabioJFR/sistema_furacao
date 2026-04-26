@@ -46,6 +46,12 @@
             <p class="muted muted-top">
                 {% trans "Não tens conta?" %} <a href="{% url 'website:registo' %}">{% trans "Criar conta" %}</a>
             </p>
+            <form method="post" action="{% url 'website:reenviar_confirmacao' %}" class="muted muted-top reenvio-form">
+                {% csrf_token %}
+                <label for="id_reenvio_email">{% trans "Não recebeste o email de confirmação?" %}</label>
+                <input id="id_reenvio_email" name="email" type="email" placeholder="{% trans 'O teu email' %}">
+                <button type="submit" class="btn btn-secondary">{% trans "Reenviar confirmação" %}</button>
+            </form>
             <p class="muted">
                 <a href="{% url 'password_reset' %}">{% trans "Recuperar password" %}</a>
             </p>

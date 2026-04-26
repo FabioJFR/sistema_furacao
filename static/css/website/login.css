@@ -127,6 +127,20 @@ input:focus {
     text-decoration: underline;
 }
 
+.reenvio-form label {
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.reenvio-form input {
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+.reenvio-form .btn {
+    width: 100%;
+}
+
 .errorlist {
     color: #991b1b;
 }

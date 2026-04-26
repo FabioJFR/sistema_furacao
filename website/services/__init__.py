@@ -1,4 +1,5 @@
 import calendar
+import logging
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -20,6 +21,8 @@ from plataforma.models import (
 )
 from projetos.models import Individual
 from website import selectors
+
+logger = logging.getLogger("core")
 
 
 @dataclass
@@ -97,6 +100,17 @@ def validar_pedido_registo(payload):
 
 
 def enviar_email_confirmacao_conta(*, user, request=None):
+    backend_email = (getattr(settings, "EMAIL_BACKEND", "") or "").strip()
+    if (not settings.DEBUG) and backend_email in {
+        "django.core.mail.backends.console.EmailBackend",
+        "django.core.mail.backends.locmem.EmailBackend",
+        "django.core.mail.backends.filebased.EmailBackend",
+        "django.core.mail.backends.dummy.EmailBackend",
+    }:
+        raise RuntimeError(
+            "EMAIL_BACKEND não está configurado para entrega real de email em produção."
+        )
+
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
     caminho = reverse("website:confirmar_conta", kwargs={"uidb64": uid, "token": token})
@@ -127,6 +141,12 @@ def enviar_email_confirmacao_conta(*, user, request=None):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
         fail_silently=False,
+    )
+    logger.info(
+        "Email de confirmação enviado. user_id=%s, email='%s', backend='%s'",
+        user.id,
+        user.email,
+        backend_email,
     )
 
 
@@ -266,3 +286,21 @@ def executar_registo(payload, request=None):
         )
 
     return ResultadoRegisto(sucesso=True, erros=[], user_id=user.id, tipo_conta=tipo_conta)
+
+
+def reenviar_confirmacao_por_email(*, email, request=None):
+    email = (email or "").strip()
+    if not email:
+        return 0
+
+    utilizadores_inativos = User.objects.filter(
+        email__iexact=email,
+        is_active=False,
+    ).order_by("-date_joined")
+
+    enviados = 0
+    for user in utilizadores_inativos:
+        enviar_email_confirmacao_conta(user=user, request=request)
+        enviados += 1
+
+    return enviados

@@ -95,3 +95,28 @@ def confirmar_conta(request, uidb64, token):
     user.save(update_fields=["is_active"])
     messages.success(request, "Conta confirmada com sucesso. Já podes iniciar sessão.")
     return redirect("login")
+
+
+def reenviar_confirmacao(request):
+    if request.method != "POST":
+        return redirect("login")
+
+    email = (request.POST.get("email") or "").strip()
+    if not email:
+        messages.error(request, "Indica o email para reenviar a confirmação.")
+        return redirect("login")
+
+    try:
+        services.reenviar_confirmacao_por_email(email=email, request=request)
+    except Exception:
+        messages.error(
+            request,
+            "Não foi possível reenviar o email de confirmação neste momento. Tenta novamente.",
+        )
+        return redirect("login")
+
+    messages.success(
+        request,
+        "Se existir uma conta pendente com esse email, enviámos um novo link de confirmação.",
+    )
+    return redirect("login")
