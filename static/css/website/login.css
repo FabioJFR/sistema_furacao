@@ -139,3 +139,21 @@ input:focus {
     margin-bottom: 18px;
     font-size: 14px;
 }
+
+.success-box {
+    background: #dcfce7;
+    color: #166534;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+.info-box {
+    background: #e0f2fe;
+    color: #075985;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}

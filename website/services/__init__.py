@@ -12,6 +12,7 @@ from plataforma.models import (
     PerfilPlataforma,
     SubscricaoEmpresa,
 )
+from projetos.models import Individual
 from website import selectors
 
 
@@ -136,6 +137,17 @@ def executar_registo(payload):
         empresa=empresa,
         ativo=True,
     )
+
+    if tipo_conta == "individual":
+        nome_individual = nome_responsavel or username
+        Individual.objects.get_or_create(
+            user=user,
+            defaults={
+                "nome": nome_individual,
+                "email": email,
+                "ativo": True,
+            },
+        )
 
     ciclo_normalizado = str(normalizar_periodo_cobranca(ciclo_subscricao))
     if tipo_conta == "empresa":

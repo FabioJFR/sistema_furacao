@@ -12,6 +12,13 @@
         <h1 class="title">{% trans "Entrar" %}</h1>
         <p class="subtitle">{% trans "Acede à tua conta para continuar" %}</p>
         <div class="card">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}success-box{% elif message.tags == 'error' %}error-box{% else %}info-box{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
             {% if form.errors %}
                 <div class="error-box">
                     {% trans "Username ou password inválidos." %}

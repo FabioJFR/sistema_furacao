@@ -13,6 +13,7 @@ from projetos.models import (
     Projeto,
     Furo,
     Material,
+    Individual,
     EmpregadoFuro,
     EmpregadoProjeto,
     EmpregadoFicheiro,
@@ -1083,8 +1084,22 @@ def area_empregado(request):
     if perfil and perfil.tipo_acesso == "individual":
         individual = _resolver_individual_por_user(request.user)
         if not individual:
-            messages.error(request, "A tua conta individual não está configurada corretamente.")
-            return redirect("projetos:redirect_after_login")
+            nome = (
+                request.user.get_full_name().strip()
+                or request.user.username
+                or request.user.email
+                or "Conta Individual"
+            )
+            individual = Individual.objects.create(
+                user=request.user,
+                nome=nome,
+                email=request.user.email or "",
+                ativo=True,
+            )
+            messages.info(
+                request,
+                "A tua conta individual foi reparada automaticamente. Já podes continuar.",
+            )
 
         return render(request, "projetos/area_individual.html", {
             "individual": individual,
