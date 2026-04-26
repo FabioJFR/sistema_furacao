@@ -1,6 +1,10 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
 
 from website import selectors
 from website import services
@@ -33,7 +37,7 @@ def registo(request):
     planos_contexto = selectors.construir_planos_contexto(planos_qs)
 
     if request.method == "POST":
-        resultado = services.executar_registo(request.POST)
+        resultado = services.executar_registo(request.POST, request=request)
         if not resultado.sucesso:
             for erro in resultado.erros:
                 messages.error(request, erro)
@@ -49,7 +53,7 @@ def registo(request):
 
         messages.success(
             request,
-            "Conta criada com sucesso. Já podes iniciar sessão.",
+            "Conta criada com sucesso. Enviámos um email para confirmares a conta antes do primeiro login.",
         )
         return redirect("login")
 
@@ -66,3 +70,28 @@ def registo(request):
 def logout_user(request):
     logout(request)
     return redirect("website:home")
+
+
+def confirmar_conta(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.filter(pk=uid).first()
+    except (TypeError, ValueError, OverflowError):
+        user = None
+
+    if not user:
+        messages.error(request, "Link de confirmação inválido.")
+        return redirect("login")
+
+    if user.is_active:
+        messages.info(request, "A tua conta já está confirmada. Podes iniciar sessão.")
+        return redirect("login")
+
+    if not default_token_generator.check_token(user, token):
+        messages.error(request, "Este link de confirmação é inválido ou já expirou.")
+        return redirect("login")
+
+    user.is_active = True
+    user.save(update_fields=["is_active"])
+    messages.success(request, "Conta confirmada com sucesso. Já podes iniciar sessão.")
+    return redirect("login")

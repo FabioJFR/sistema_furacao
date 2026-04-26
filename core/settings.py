@@ -178,8 +178,15 @@ LOGIN_URL = '/login/'  # website app
 LOGIN_REDIRECT_URL = '/app/'
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@sistemafuracao.local'
+EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("DJANGO_EMAIL_HOST", "")
+EMAIL_PORT = int(env("DJANGO_EMAIL_PORT", "587"))
+EMAIL_HOST_USER = env("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
+DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", "noreply@sistemafuracao.local")
+SITE_BASE_URL = env("SITE_BASE_URL", "")
 
 # Pagamentos (PayPal) - base de configuração para integração de checkout.
 PAYPAL_ENABLED = env_bool("PAYPAL_ENABLED", False)

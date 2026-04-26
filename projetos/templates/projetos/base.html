@@ -315,7 +315,6 @@
 
                 {% elif is_empregado_user %}
                     {% with perfil_tipo=perfil_plataforma.tipo_acesso|default:'' %}
-                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -333,26 +332,7 @@
                             <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
                         </div>
                     </div>
-                    {% endif %}
 
-                    <div class="nav-item">
-                        <button
-                            type="button"
-                            class="nav-link"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label="{% trans 'Abrir menu Finanças' %}"
-                            data-dropdown-toggle
-                        >
-                            💶 {% trans "Finanças" %} ▾
-                        </button>
-                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Finanças' %}">
-                            <a href="{% url 'projetos:despesa_list_empregado' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
-                            <a href="{% url 'projetos:despesa_create_empregado' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
-                        </div>
-                    </div>
-
-                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -369,9 +349,7 @@
                             <a href="{% url 'projetos:registo_diario_list' %}" role="menuitem">📋 {% trans "Meus Registos" %}</a>
                         </div>
                     </div>
-                    {% endif %}
 
-                    {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -389,7 +367,6 @@
                             <a href="{% url 'projetos:devolucao_material_list' %}" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
                         </div>
                     </div>
-                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -404,9 +381,7 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Conta' %}">
                             <a href="{% url 'projetos:meus_dados_empregado' %}" role="menuitem">👤 {% trans "Meus Dados" %}</a>
-                            {% if perfil_tipo != "individual" %}
                             <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
-                            {% endif %}
                             <a href="{% url 'projetos:definicoes' %}" role="menuitem">🛠️ {% trans "Definições" %}</a>
                         </div>
                     </div>
@@ -446,6 +421,7 @@
                             <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
                             <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
                         {% endif %}
+                        <a href="{% url 'projetos:sugestoes_plataforma' %}" role="menuitem">💡 {% trans "Sugestões" %}</a>
                         <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
                     </div>
                 </div>

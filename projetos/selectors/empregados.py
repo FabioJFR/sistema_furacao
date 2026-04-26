@@ -116,13 +116,15 @@ def obter_contexto_area_empregado(empregado, empresa=None):
         return _contexto_empregado_vazio(empregado)
 
     furos_trabalhados = Furo.objects.filter(registos_furo__empregado=empregado).distinct()
-    ultimos_registos = empregado.registos_diarios.select_related("projeto", "furo")[:5]
+    ultimos_registos_qs = empregado.registos_diarios.select_related("projeto", "furo")
     registos_grafico = empregado.registos_diarios.order_by("data", "criado_em")
 
     if empresa_id is not None:
         furos_trabalhados = furos_trabalhados.filter(empresa_id=empresa_id)
-        ultimos_registos = ultimos_registos.filter(empresa_id=empresa_id)
+        ultimos_registos_qs = ultimos_registos_qs.filter(empresa_id=empresa_id)
         registos_grafico = registos_grafico.filter(empresa_id=empresa_id)
+
+    ultimos_registos = ultimos_registos_qs[:5]
 
     dados_grafico = _obter_dados_grafico_registos(registos_grafico)
 

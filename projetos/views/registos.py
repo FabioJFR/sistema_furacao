@@ -68,7 +68,7 @@ def _obter_empregado_autenticado_registos(request):
         mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
         redirect_sem_empregado="projetos:redirect_after_login",
         redirect_sem_empresa="projetos:redirect_after_login",
-        vincular_por_email=False,
+        vincular_por_email=True,
     )
     if resposta_erro:
         logger.warning(

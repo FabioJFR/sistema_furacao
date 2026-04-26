@@ -1,8 +1,14 @@
 import calendar
 from dataclasses import dataclass
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db import transaction
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.utils import timezone
 
 from plataforma.models import (
@@ -65,6 +71,8 @@ def validar_pedido_registo(payload):
         erros.append("Já existe um utilizador com esse username.")
     if email and User.objects.filter(email=email).exists():
         erros.append("Já existe um utilizador com esse email.")
+    if not email:
+        erros.append("O email é obrigatório para confirmares a conta.")
 
     if not password1 or not password2:
         erros.append("A password é obrigatória.")
@@ -88,8 +96,42 @@ def validar_pedido_registo(payload):
     return {"erros": erros, "plano": plano}
 
 
+def enviar_email_confirmacao_conta(*, user, request=None):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    caminho = reverse("website:confirmar_conta", kwargs={"uidb64": uid, "token": token})
+
+    if request is not None:
+        url_confirmacao = request.build_absolute_uri(caminho)
+    else:
+        base_url = getattr(settings, "SITE_BASE_URL", "").strip()
+        if base_url:
+            url_confirmacao = f"{base_url.rstrip('/')}{caminho}"
+        else:
+            dominio = settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else "localhost:8000"
+            protocolo = "https" if not settings.DEBUG else "http"
+            url_confirmacao = f"{protocolo}://{dominio}{caminho}"
+
+    assunto = "Confirmação de conta - Sistema Furação"
+    mensagem = (
+        "Olá!\n\n"
+        "Obrigado por criares conta no Sistema Furação.\n"
+        "Para ativares o acesso, confirma o teu email no link abaixo:\n\n"
+        f"{url_confirmacao}\n\n"
+        "Se não foste tu, ignora esta mensagem."
+    )
+
+    send_mail(
+        subject=assunto,
+        message=mensagem,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
 @transaction.atomic
-def executar_registo(payload):
+def executar_registo(payload, request=None):
     validacao = validar_pedido_registo(payload)
     erros = validacao["erros"]
     plano = validacao["plano"]
@@ -112,7 +154,7 @@ def executar_registo(payload):
         username=username,
         email=email,
         password=password1,
-        is_active=True,
+        is_active=False,
     )
 
     empresa = None
@@ -210,6 +252,17 @@ def executar_registo(payload):
             data_vencimento=hoje,
             estado="pendente",
             observacoes="Registo criado automaticamente para futura exportação e integração financeira.",
+        )
+
+    try:
+        enviar_email_confirmacao_conta(user=user, request=request)
+    except Exception:
+        transaction.set_rollback(True)
+        return ResultadoRegisto(
+            sucesso=False,
+            erros=[
+                "Não foi possível enviar o email de confirmação. Verifica a configuração de email e tenta novamente."
+            ],
         )
 
     return ResultadoRegisto(sucesso=True, erros=[], user_id=user.id, tipo_conta=tipo_conta)

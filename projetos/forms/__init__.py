@@ -21,3 +21,4 @@ from .material import *
 from .maquina import *
 from .medicao import *
 from .despesa import *
+from .sugestao import SugestaoPlataformaForm

@@ -49,6 +49,36 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Plano e Pagamentos" %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+            <div>
+                <strong>{% trans "Empresa associada:" %}</strong>
+                {% if empresa_associada %}
+                    {{ empresa_associada.nome_comercial|default:empresa_associada.nome|default:"-" }}
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+            <div>
+                <strong>{% trans "Plano atual:" %}</strong>
+                {% if plano_atual %}
+                    {{ plano_atual.nome }}
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+            <div>
+                <strong>{% trans "Termina em:" %}</strong>
+                {{ data_fim_plano|date:"d/m/Y"|default:"-" }}
+            </div>
+            <div>
+                <strong>{% trans "Próximo pagamento:" %}</strong>
+                {{ proximo_pagamento|date:"d/m/Y"|default:"-" }}
+            </div>
+        </div>
+    </div>
+
     <!-- DOCUMENTOS -->
     <div class="bg-white rounded-xl shadow p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Documentos" %}</h2>

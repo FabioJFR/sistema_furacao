@@ -17,6 +17,7 @@ urlpatterns = [
         name="relatorios_download",
     ),
     path("definicoes/", views.definicoes_admin, name="definicoes_admin"),
+    path("sugestoes/", views.sugestoes_plataforma, name="sugestoes_plataforma"),
     path(
         "definicoes-financeiras/",
         views.definicoes_financeiras_admin,

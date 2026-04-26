@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -6,7 +8,7 @@ from django.utils.text import slugify
 
 from core.permissions import admin_required
 
-from projetos.forms import EmpresaFinanceiraForm, PreferenciasForm
+from projetos.forms import EmpresaFinanceiraForm, PreferenciasForm, SugestaoPlataformaForm
 from projetos.services.opcoes_exportacao import (
     construir_resposta_download_dataset,
     construir_resposta_download_tudo,
@@ -20,6 +22,7 @@ from projetos.services.opcoes import (
     guardar_preferencias_admin,
     obter_empresa_admin_opcoes,
 )
+from projetos.services.sugestoes import enviar_sugestao_para_superusers
 from projetos.selectors.opcoes import (
     listar_furos_filtro_exportacao,
     listar_projetos_filtro_exportacao,
@@ -30,6 +33,8 @@ from projetos.selectors.preferencias import (
     obter_ou_criar_preferencias_user,
 )
 from projetos.models import Despesa
+
+logger = logging.getLogger("core")
 
 
 @login_required
@@ -188,4 +193,50 @@ def relatorios_download_tudo(request, formato):
         empresa=empresa,
         filtros=filtros,
         slugify_fn=slugify,
+    )
+
+
+@login_required
+def sugestoes_plataforma(request):
+    if request.method == "POST":
+        form = SugestaoPlataformaForm(request.POST)
+        if form.is_valid():
+            sugestao = form.save(commit=False)
+            sugestao.user = request.user
+            try:
+                enviado, email_destino = enviar_sugestao_para_superusers(sugestao=sugestao)
+            except Exception:
+                logger.exception(
+                    "Falha ao enviar sugestão por email. user_id=%s",
+                    request.user.id,
+                )
+                enviado = False
+                email_destino = ""
+
+            sugestao.enviado_por_email = enviado
+            sugestao.email_destino = email_destino
+            sugestao.save()
+
+            if enviado:
+                messages.success(
+                    request,
+                    "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
+                )
+            else:
+                messages.warning(
+                    request,
+                    "Sugestão guardada com sucesso. Não foi possível enviar o email ao superuser neste momento.",
+                )
+            return redirect("projetos:sugestoes_plataforma")
+        messages.error(request, "Corrige os campos assinalados para enviar a sugestão.")
+    else:
+        form = SugestaoPlataformaForm()
+
+    return render(
+        request,
+        "projetos/sugestoes_form.html",
+        {
+            "form": form,
+            "titulo": "Sugestões",
+        },
     )

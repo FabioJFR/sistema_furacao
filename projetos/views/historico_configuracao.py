@@ -5,7 +5,10 @@ from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 from projetos.decorators import empregado_required
-from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
+from projetos.selectors.acesso import (
+    obter_contexto_admin_projetos,
+    resolver_empregado_por_user_ou_email,
+)
 from projetos.selectors.historico_configuracao import (
     obter_empregado_historico_por_pk_empresa,
     obter_furo_historico_por_pk_empresa,
@@ -62,7 +65,7 @@ def _obter_empregado_autenticado_historico(request):
         mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
         redirect_sem_empregado="projetos:redirect_after_login",
         redirect_sem_empresa="projetos:redirect_after_login",
-        vincular_por_email=False,
+        vincular_por_email=True,
     )
     if resposta_erro:
         logger.warning(
@@ -88,7 +91,7 @@ def _utilizador_pode_ver_historico(request, historico):
             )
         return permitido, True
 
-    empregado = obter_empregado_por_user(request.user)
+    empregado, _ = resolver_empregado_por_user_ou_email(request.user)
     permitido = bool(
         empregado and
         empregado.empresa_id and

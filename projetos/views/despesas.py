@@ -80,6 +80,10 @@ def despesa_create_admin(request):
 @login_required
 @empregado_required
 def despesa_list_empregado(request):
+    messages.error(request, "A área de Finanças não está disponível para contas de empregado ou individual.")
+    return redirect("projetos:area_empregado")
+
+    # Mantido abaixo apenas como referência para futura reativação controlada.
     empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
         request=request,
         mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
@@ -106,6 +110,10 @@ def despesa_list_empregado(request):
 @login_required
 @empregado_required
 def despesa_create_empregado(request):
+    messages.error(request, "A área de Finanças não está disponível para contas de empregado ou individual.")
+    return redirect("projetos:area_empregado")
+
+    # Mantido abaixo apenas como referência para futura reativação controlada.
     empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
         request=request,
         mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
