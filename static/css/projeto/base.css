@@ -24,6 +24,15 @@
             --btn-industrial-hover: #33485c;
             --btn-danger: #8f4a4f;
             --btn-danger-hover: #7a3f44;
+            --sf-font-size-base: 16px;
+        }
+
+        html[data-text-size="grande"] {
+            --sf-font-size-base: 17px;
+        }
+
+        html[data-text-size="extra-grande"] {
+            --sf-font-size-base: 18px;
         }
 
         html[data-theme="industrial-blue"] {
@@ -115,6 +124,7 @@
 
         body {
             font-family: Arial, sans-serif;
+            font-size: var(--sf-font-size-base);
             background: var(--bg);
             color: var(--text);
         }
@@ -626,8 +636,16 @@
 
         @media (max-width: 992px) {
             body {
-                font-size: 16px;
-                line-height: 1.5;
+                font-size: 17px;
+                line-height: 1.55;
+            }
+
+            html[data-text-size="grande"] body {
+                font-size: 18px;
+            }
+
+            html[data-text-size="extra-grande"] body {
+                font-size: 19px;
             }
 
             .content-wrap p,
@@ -640,7 +658,7 @@
             .content-wrap textarea,
             .content-wrap button,
             .content-wrap a.btn {
-                font-size: 1rem;
+                font-size: 1.04rem;
             }
 
             .content-wrap h1 {
@@ -687,7 +705,7 @@
                 width: 100%;
                 justify-content: space-between;
                 padding: 14px 20px 14px 14px;
-                font-size: 16px;
+                font-size: 17px;
                 min-height: 50px;
             }
 
@@ -714,7 +732,7 @@
                 margin: 2px 0;
                 color: var(--nav-text);
                 white-space: normal;
-                font-size: 15px;
+                font-size: 16px;
                 line-height: 1.4;
             }
 
@@ -747,12 +765,61 @@
             .user-box {
                 width: 100%;
                 justify-content: space-between;
-                font-size: 15px;
+                font-size: 16px;
                 min-height: 52px;
                 padding: 12px 14px;
             }
 
             .dropdown-user {
                 min-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 18px;
+                line-height: 1.58;
+            }
+
+            html[data-text-size="grande"] body {
+                font-size: 19px;
+            }
+
+            html[data-text-size="extra-grande"] body {
+                font-size: 20px;
+            }
+
+            .content-wrap p,
+            .content-wrap li,
+            .content-wrap td,
+            .content-wrap th,
+            .content-wrap label,
+            .content-wrap input,
+            .content-wrap select,
+            .content-wrap textarea,
+            .content-wrap button,
+            .content-wrap a,
+            .content-wrap a.btn {
+                font-size: 1.08rem;
+            }
+
+            .content-wrap .text-sm {
+                font-size: 1rem !important;
+            }
+
+            .content-wrap .text-xs {
+                font-size: 0.92rem !important;
+            }
+
+            .content-wrap h1 {
+                font-size: 1.9rem !important;
+            }
+
+            .content-wrap h2 {
+                font-size: 1.55rem !important;
+            }
+
+            .content-wrap h3 {
+                font-size: 1.28rem !important;
             }
         }

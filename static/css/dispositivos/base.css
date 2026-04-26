@@ -590,3 +590,29 @@
         width: 100%;
     }
 }
+
+@media (max-width: 768px) {
+    .device-shell {
+        font-size: 1.04rem;
+    }
+
+    .device-shell .text-sm,
+    .device-shell .device-meta-chip,
+    .device-shell .device-table tbody td,
+    .device-shell .device-card p,
+    .device-shell .device-btn,
+    .device-shell input,
+    .device-shell select,
+    .device-shell textarea {
+        font-size: 1rem;
+    }
+
+    .device-shell .text-xs,
+    .device-shell .device-table thead th {
+        font-size: 0.9rem;
+    }
+
+    .device-shell .device-btn {
+        min-height: 44px;
+    }
+}

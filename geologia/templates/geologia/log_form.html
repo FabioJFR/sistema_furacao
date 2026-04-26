@@ -3,9 +3,11 @@
 
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
-{% block page_description %}Furo {{ furo.nome }} · Projeto {{ furo.projeto.nome }}{% endblock %}
+{% block page_description %}
+{% blocktrans with furo_nome=furo.nome projeto_nome=furo.projeto.nome %}Furo {{ furo_nome }} · Projeto {{ projeto_nome }}{% endblocktrans %}
+{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">Voltar ao furo</a>
+    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">{% trans "Voltar ao furo" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -17,8 +19,8 @@
         {% endif %}
 
         <div class="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            <strong>Intervalo atual:</strong>
-            <span data-intervalo-preview>Sem intervalo definido.</span>
+            <strong>{% trans "Intervalo atual:" %}</strong>
+            <span data-intervalo-preview>{% trans "Sem intervalo definido." %}</span>
         </div>
 
         {% for field in form %}
@@ -31,7 +33,7 @@
         {% endfor %}
 
         <div class="flex flex-wrap gap-3 pt-2">
-            <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">Guardar log</button>
+            <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">{% trans "Guardar log" %}</button>
         </div>
     </form>
 </div>

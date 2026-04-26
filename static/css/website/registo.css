@@ -164,3 +164,27 @@ select {
     color: #5b21b6;
     border-color: #ddd6fe;
 }
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 16px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+
+    label,
+    input,
+    select,
+    .helper,
+    .message,
+    .top-link {
+        font-size: 16px;
+    }
+
+    .btn {
+        font-size: 16px;
+        min-height: 46px;
+    }
+}

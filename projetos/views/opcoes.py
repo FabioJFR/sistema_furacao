@@ -205,7 +205,7 @@ def sugestoes_plataforma(request):
             try:
                 sugestao = form.save(commit=False)
                 try:
-                    enviado, email_destino = enviar_sugestao_para_superusers(sugestao=sugestao)
+                    enviado, email_destino, diagnostico_envio = enviar_sugestao_para_superusers(sugestao=sugestao)
                 except Exception:
                     logger.exception(
                         "Falha ao enviar sugestão por email. user_id=%s",
@@ -213,10 +213,19 @@ def sugestoes_plataforma(request):
                     )
                     enviado = False
                     email_destino = ""
+                    diagnostico_envio = "Falha técnica no envio de email."
 
                 sugestao.enviado_por_email = enviado
                 sugestao.email_destino = email_destino
                 sugestao.save()
+
+                if diagnostico_envio:
+                    logger.warning(
+                        "Sugestão sem entrega por email. user_id=%s, destino=%s, diagnostico=%s",
+                        request.user.id,
+                        email_destino or "-",
+                        diagnostico_envio,
+                    )
 
                 if enviado:
                     messages.success(
@@ -226,7 +235,7 @@ def sugestoes_plataforma(request):
                 else:
                     messages.warning(
                         request,
-                        "Sugestão guardada com sucesso. Não foi possível enviar o email ao superuser neste momento.",
+                        f"Sugestão guardada com sucesso. Não foi possível enviar o email neste momento. {diagnostico_envio}",
                     )
                 return redirect("projetos:sugestoes_plataforma")
             except Exception:

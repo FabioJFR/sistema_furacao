@@ -3,61 +3,62 @@
 
 {% block title %}{{ drone.nome }}{% endblock %}
 {% block page_title %}{{ drone.nome }}{% endblock %}
-{% block page_description %}Centro técnico do Drone S_F, com hardware, sensores, módulos e configuração operacional.{% endblock %}
+{% block page_description %}{% trans "Centro técnico do Drone S_F, com hardware, sensores, módulos e configuração operacional." %}{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:drone_sf_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar à Interface Drone S_F</a>
-    <a href="{% url 'geologia:drone_sf_modulo_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Novo módulo</a>
-    <a href="{% url 'geologia:drone_sf_sensor_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Novo sensor</a>
-    <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Operação S_F</a>
+    <a href="{% url 'geologia:drone_sf_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">{% trans "Voltar à Interface Drone S_F" %}</a>
+    <a href="{% url 'geologia:drone_sf_modulo_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Novo módulo" %}</a>
+    <a href="{% url 'geologia:drone_sf_sensor_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Novo sensor" %}</a>
+    <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Operação S_F" %}</a>
 {% endblock %}
 
 {% block content %}
+{% trans "Sem observações." as sem_observacoes_texto %}
 <div class="max-w-7xl mx-auto px-6 py-8">
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <a href="{% url 'geologia:drone_sf_modulo_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm hover:border-emerald-300 hover:bg-emerald-100">
-            <div class="text-sm font-semibold text-emerald-950">Atalho: módulos</div>
-            <p class="mt-2 text-sm text-emerald-900">Adicionar blocos do hardware do drone, como estrutura, energia, computação e comunicação.</p>
+            <div class="text-sm font-semibold text-emerald-950">{% trans "Atalho: módulos" %}</div>
+            <p class="mt-2 text-sm text-emerald-900">{% trans "Adicionar blocos do hardware do drone, como estrutura, energia, computação e comunicação." %}</p>
         </a>
         <a href="{% url 'geologia:drone_sf_sensor_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm hover:border-amber-300 hover:bg-amber-100">
-            <div class="text-sm font-semibold text-amber-950">Atalho: sensores</div>
-            <p class="mt-2 text-sm text-amber-900">Adicionar sensores de proximidade, som, RGB e outros módulos de leitura do Drone S_F.</p>
+            <div class="text-sm font-semibold text-amber-950">{% trans "Atalho: sensores" %}</div>
+            <p class="mt-2 text-sm text-amber-900">{% trans "Adicionar sensores de proximidade, som, RGB e outros módulos de leitura do Drone S_F." %}</p>
         </a>
         <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm hover:border-cyan-300 hover:bg-cyan-100">
-            <div class="text-sm font-semibold text-cyan-950">Atalho: telemetria S_F</div>
-            <p class="mt-2 text-sm text-cyan-900">Ativar bridge, vídeo, operação em tempo real e fila de comandos próprios do Drone S_F.</p>
+            <div class="text-sm font-semibold text-cyan-950">{% trans "Atalho: telemetria S_F" %}</div>
+            <p class="mt-2 text-sm text-cyan-900">{% trans "Ativar bridge, vídeo, operação em tempo real e fila de comandos próprios do Drone S_F." %}</p>
         </a>
     </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-900 mb-4">Resumo técnico</h2>
+            <h2 class="text-xl font-semibold text-slate-900 mb-4">{% trans "Resumo técnico" %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div><strong>Status:</strong> {{ drone.get_status_display }}</div>
-                <div><strong>Código:</strong> {{ drone.codigo|default:"-" }}</div>
+                <div><strong>{% trans "Status:" %}</strong> {{ drone.get_status_display }}</div>
+                <div><strong>{% trans "Código:" %}</strong> {{ drone.codigo|default:"-" }}</div>
                 <div><strong>Frame:</strong> {{ drone.frame_modelo|default:"-" }}</div>
-                <div><strong>Controlador de voo:</strong> {{ drone.controlador_voo|default:"-" }}</div>
+                <div><strong>{% trans "Controlador de voo:" %}</strong> {{ drone.controlador_voo|default:"-" }}</div>
                 <div><strong>Firmware:</strong> {{ drone.firmware_voo|default:"-" }}</div>
-                <div><strong>Telemetria:</strong> {{ drone.protocolo_telemetria|default:"-" }}</div>
+                <div><strong>{% trans "Telemetria:" %}</strong> {{ drone.protocolo_telemetria|default:"-" }}</div>
                 <div><strong>Companion computer:</strong> {{ drone.companion_computer|default:"-" }}</div>
-                <div><strong>Autonomia alvo:</strong> {{ drone.autonomia_alvo_min|default:"0" }} min</div>
-                <div><strong>Payload alvo:</strong> {{ drone.payload_alvo_kg|default:"0" }} kg</div>
-                <div><strong>Peso estimado:</strong> {{ drone.peso_estimado_kg|default:"0" }} kg</div>
-                <div><strong>Tensão do sistema:</strong> {{ drone.tensao_sistema_v|default:"-" }} V</div>
-                <div><strong>Empresa:</strong> {{ drone.empresa }}</div>
+                <div><strong>{% trans "Autonomia alvo:" %}</strong> {{ drone.autonomia_alvo_min|default:"0" }} min</div>
+                <div><strong>{% trans "Payload alvo:" %}</strong> {{ drone.payload_alvo_kg|default:"0" }} kg</div>
+                <div><strong>{% trans "Peso estimado:" %}</strong> {{ drone.peso_estimado_kg|default:"0" }} kg</div>
+                <div><strong>{% trans "Tensão do sistema:" %}</strong> {{ drone.tensao_sistema_v|default:"-" }} V</div>
+                <div><strong>{% trans "Empresa:" %}</strong> {{ drone.empresa }}</div>
             </div>
             <div class="mt-6">
-                <h3 class="font-semibold text-slate-900 mb-2">Observações</h3>
-                <p class="text-slate-700 whitespace-pre-line">{{ drone.observacoes|default:"Sem observações." }}</p>
+                <h3 class="font-semibold text-slate-900 mb-2">{% trans "Observações" %}</h3>
+                <p class="text-slate-700 whitespace-pre-line">{{ drone.observacoes|default:sem_observacoes_texto }}</p>
             </div>
         </section>
 
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-900 mb-4">Indicadores</h2>
+            <h2 class="text-xl font-semibold text-slate-900 mb-4">{% trans "Indicadores" %}</h2>
             <div class="space-y-3 text-sm">
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>Módulos:</strong> {{ drone.modulos.count }}</div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>Sensores:</strong> {{ drone.sensores.count }}</div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>Telemetria ativa:</strong> {% if configuracao.telemetria_ativa %}Sim{% else %}Não{% endif %}</div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>Software embarcado:</strong> {% if configuracao.software_embarcado_ativo %}Ativo{% else %}Inativo{% endif %}</div>
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>{% trans "Módulos:" %}</strong> {{ drone.modulos.count }}</div>
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>{% trans "Sensores:" %}</strong> {{ drone.sensores.count }}</div>
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>{% trans "Telemetria ativa:" %}</strong> {% if configuracao.telemetria_ativa %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong>{% trans "Software embarcado:" %}</strong> {% if configuracao.software_embarcado_ativo %}{% trans "Ativo" %}{% else %}{% trans "Inativo" %}{% endif %}</div>
             </div>
         </section>
     </div>
@@ -65,7 +66,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-6 mt-6">
         <section class="space-y-6">
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-xl font-semibold text-slate-900 mb-4">Módulos instalados</h2>
+                <h2 class="text-xl font-semibold text-slate-900 mb-4">{% trans "Módulos instalados" %}</h2>
                 <div class="space-y-3">
                     {% for modulo in drone.modulos.all %}
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -73,13 +74,13 @@
                         <div class="text-sm text-slate-600 mt-1">{{ modulo.get_tipo_display }} · {{ modulo.get_status_display }}</div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem módulos registados para este drone.</div>
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem módulos registados para este drone." %}</div>
                     {% endfor %}
                 </div>
             </article>
 
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-xl font-semibold text-slate-900 mb-4">Sensores instalados</h2>
+                <h2 class="text-xl font-semibold text-slate-900 mb-4">{% trans "Sensores instalados" %}</h2>
                 <div class="space-y-3">
                     {% for sensor in drone.sensores.all %}
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -87,14 +88,14 @@
                         <div class="text-sm text-slate-600 mt-1">{{ sensor.get_tipo_display }} · {{ sensor.get_status_display }}</div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem sensores registados para este drone.</div>
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem sensores registados para este drone." %}</div>
                     {% endfor %}
                 </div>
             </article>
         </section>
 
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-900 mb-4">Configuração operacional</h2>
+            <h2 class="text-xl font-semibold text-slate-900 mb-4">{% trans "Configuração operacional" %}</h2>
             <form method="post" class="space-y-4">
                 {% csrf_token %}
                 {% if config_form.non_field_errors %}
@@ -109,7 +110,7 @@
                     </div>
                 {% endfor %}
                 <div class="pt-2">
-                    <button type="submit" class="px-4 py-2 rounded bg-slate-900 text-white font-semibold">Guardar configuração</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Guardar configuração" %}</button>
                 </div>
             </form>
         </section>

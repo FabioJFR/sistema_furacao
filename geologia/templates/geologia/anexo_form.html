@@ -3,9 +3,11 @@
 
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
-{% block page_description %}Furo {{ furo.nome }} · {{ log.titulo }}{% endblock %}
+{% block page_description %}
+{% blocktrans with furo_nome=furo.nome log_titulo=log.titulo %}Furo {{ furo_nome }} · {{ log_titulo }}{% endblocktrans %}
+{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:log_detail' log.id %}" class="btn btn-light">Voltar ao log</a>
+    <a href="{% url 'geologia:log_detail' log.id %}" class="btn btn-light">{% trans "Voltar ao log" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +27,7 @@
         {% endfor %}
 
         <div class="flex flex-wrap gap-3 pt-2">
-            <button type="submit" class="px-4 py-2 rounded bg-gray-900 text-white font-semibold">Guardar anexo</button>
+            <button type="submit" class="px-4 py-2 rounded bg-gray-900 text-white font-semibold">{% trans "Guardar anexo" %}</button>
         </div>
     </form>
 </div>

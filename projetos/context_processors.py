@@ -1,5 +1,6 @@
 from core.permissions import user_is_empresa_admin, user_is_empregado, user_is_platform_admin
 from projetos.selectors.acesso import obter_empregado_por_user, obter_perfil_ativo_por_user
+from projetos.selectors.preferencias import obter_ou_criar_preferencias_user
 
 
 def menu_context(request):
@@ -14,6 +15,7 @@ def menu_context(request):
             "is_platform_owner": False,
             "perfil_plataforma": None,
             "empregado_menu_obj": None,
+            "tamanho_texto": "normal",
         }
 
     perfil = obter_perfil_ativo_por_user(user)
@@ -28,6 +30,9 @@ def menu_context(request):
 
     is_admin_user = is_empresa_admin
     is_empregado_user = user_is_empregado(user)
+    preferencias = getattr(request, "sf_preferencias", None)
+    if preferencias is None:
+        preferencias, _ = obter_ou_criar_preferencias_user(user)
 
     return {
         "is_admin_user": is_admin_user,
@@ -37,4 +42,5 @@ def menu_context(request):
         "is_empresa_admin": is_empresa_admin,
         "perfil_plataforma": perfil,
         "empregado_menu_obj": empregado_menu_obj,
+        "tamanho_texto": getattr(preferencias, "tamanho_texto", "normal"),
     }

@@ -10,71 +10,71 @@
 {% block page_title %}{{ empresa.nome }}{% endblock %}
 
 {% block page_description %}
-Detalhe da empresa, métricas principais e ações administrativas.
+{% trans "Detalhe da empresa, métricas principais e ações administrativas." %}
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← {% trans "Voltar" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
 <div class="empresa-detail-page">
     <div class="empresa-grid-metricas">
         <div class="empresa-card empresa-metrica-card">
-            <div class="empresa-card-title">Projetos</div>
+            <div class="empresa-card-title">{% trans "Projetos" %}</div>
             <div class="empresa-card-value">{{ total_projetos }}</div>
         </div>
         <div class="empresa-card empresa-metrica-card">
-            <div class="empresa-card-title">Furos</div>
+            <div class="empresa-card-title">{% trans "Furos" %}</div>
             <div class="empresa-card-value">{{ total_furos }}</div>
         </div>
         <div class="empresa-card empresa-metrica-card">
-            <div class="empresa-card-title">Empregados</div>
+            <div class="empresa-card-title">{% trans "Empregados" %}</div>
             <div class="empresa-card-value">{{ total_empregados }}</div>
         </div>
     </div>
 
     <div class="empresa-section">
-        <h2>Informação da Empresa</h2>
+        <h2>{% trans "Informação da Empresa" %}</h2>
 
-        <div class="empresa-row"><strong>Estado:</strong> {{ empresa.get_status_display }}</div>
-        <div class="empresa-row"><strong>Ativo:</strong> {% if empresa.ativo %}Sim{% else %}Não{% endif %}</div>
-        <div class="empresa-row"><strong>Email:</strong> {{ empresa.email }}</div>
-        <div class="empresa-row"><strong>Telefone:</strong> {{ empresa.telefone }}</div>
-        <div class="empresa-row"><strong>Localização:</strong> {{ empresa.cidade }}, {{ empresa.pais }}</div>
+        <div class="empresa-row"><strong>{% trans "Estado:" %}</strong> {{ empresa.get_status_display }}</div>
+        <div class="empresa-row"><strong>{% trans "Ativo:" %}</strong> {% if empresa.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
+        <div class="empresa-row"><strong>{% trans "Email:" %}</strong> {{ empresa.email }}</div>
+        <div class="empresa-row"><strong>{% trans "Telefone:" %}</strong> {{ empresa.telefone }}</div>
+        <div class="empresa-row"><strong>{% trans "Localização:" %}</strong> {{ empresa.cidade }}, {{ empresa.pais }}</div>
 
         <div class="empresa-row">
-            <strong>Plano:</strong>
+            <strong>{% trans "Plano:" %}</strong>
             {% if empresa.plano %}
                 {{ empresa.plano.nome }}
             {% else %}
-                Sem plano
+                {% trans "Sem plano" %}
             {% endif %}
         </div>
 
-        <div class="empresa-row"><strong>Data início:</strong> {{ empresa.data_inicio }}</div>
-        <div class="empresa-row"><strong>Data fim:</strong> {{ empresa.data_fim }}</div>
+        <div class="empresa-row"><strong>{% trans "Data início:" %}</strong> {{ empresa.data_inicio }}</div>
+        <div class="empresa-row"><strong>{% trans "Data fim:" %}</strong> {{ empresa.data_fim }}</div>
         {% if subscricao_atual %}
-            <div class="empresa-row"><strong>Subscrição atual:</strong> {{ subscricao_atual.plano.nome }}</div>
-            <div class="empresa-row"><strong>Período:</strong> {{ subscricao_atual.periodo_cobranca_label }}</div>
-            <div class="empresa-row"><strong>Valor atual:</strong> {{ subscricao_atual.valor }} €</div>
-            <div class="empresa-row"><strong>Data início da subscrição:</strong> {{ subscricao_atual.data_inicio }}</div>
-            <div class="empresa-row"><strong>Próxima renovação:</strong> {{ subscricao_atual.proxima_renovacao|default:"—" }}</div>
+            <div class="empresa-row"><strong>{% trans "Subscrição atual:" %}</strong> {{ subscricao_atual.plano.nome }}</div>
+            <div class="empresa-row"><strong>{% trans "Período:" %}</strong> {{ subscricao_atual.periodo_cobranca_label }}</div>
+            <div class="empresa-row"><strong>{% trans "Valor atual:" %}</strong> {{ subscricao_atual.valor }} €</div>
+            <div class="empresa-row"><strong>{% trans "Data início da subscrição:" %}</strong> {{ subscricao_atual.data_inicio }}</div>
+            <div class="empresa-row"><strong>{% trans "Próxima renovação:" %}</strong> {{ subscricao_atual.proxima_renovacao|default:"—" }}</div>
             <div class="empresa-row">
-                <strong>Origem da renovação:</strong>
+                <strong>{% trans "Origem da renovação:" %}</strong>
                 {% if subscricao_atual.renovacao_definida_manualmente %}
-                    <span class="empresa-badge empresa-badge--manual">Definida manualmente</span>
+                    <span class="empresa-badge empresa-badge--manual">{% trans "Definida manualmente" %}</span>
                 {% else %}
-                    <span class="empresa-badge empresa-badge--auto">Calculada automaticamente</span>
+                    <span class="empresa-badge empresa-badge--auto">{% trans "Calculada automaticamente" %}</span>
                 {% endif %}
             </div>
-            <div class="empresa-row"><strong>Estado da subscrição:</strong> {{ subscricao_atual.get_estado_display }}</div>
+            <div class="empresa-row"><strong>{% trans "Estado da subscrição:" %}</strong> {{ subscricao_atual.get_estado_display }}</div>
             {% if alerta_renovacao %}
-                <div class="empresa-row"><strong>Alerta de renovação:</strong> {{ alerta_renovacao }}</div>
+                <div class="empresa-row"><strong>{% trans "Alerta de renovação:" %}</strong> {{ alerta_renovacao }}</div>
             {% endif %}
             <form method="post" action="{% url 'plataforma:empresa_atualizar_renovacao' empresa.id %}" class="empresa-renovacao-form">
                 {% csrf_token %}
-                <label for="proxima_renovacao"><strong>Alterar próxima renovação:</strong></label>
+                <label for="proxima_renovacao"><strong>{% trans "Alterar próxima renovação:" %}</strong></label>
                 <div class="empresa-renovacao-row">
                     <input
                         type="date"
@@ -83,38 +83,38 @@ Detalhe da empresa, métricas principais e ações administrativas.
                         value="{% if subscricao_atual.proxima_renovacao %}{{ subscricao_atual.proxima_renovacao|date:'Y-m-d' }}{% endif %}"
                         min="{{ subscricao_atual.data_inicio|date:'Y-m-d' }}"
                     >
-                    <button type="submit" class="btn btn-primary">Atualizar renovação</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Atualizar renovação" %}</button>
                 </div>
             </form>
         {% else %}
-            <div class="empresa-row"><strong>Subscrição:</strong> Sem subscrição registada</div>
+            <div class="empresa-row"><strong>{% trans "Subscrição:" %}</strong> {% trans "Sem subscrição registada" %}</div>
         {% endif %}
 
         {% if movimentos_financeiros %}
-            <div class="empresa-row"><strong>Últimos registos financeiros:</strong></div>
+            <div class="empresa-row"><strong>{% trans "Últimos registos financeiros:" %}</strong></div>
             {% for movimento in movimentos_financeiros %}
                 <div class="empresa-row">
                     {{ movimento.get_tipo_movimento_display }} · {{ movimento.valor }} € ·
                     {{ movimento.get_estado_display }} ·
-                    vencimento {{ movimento.data_vencimento|default:"—" }}
+                    {% trans "vencimento" %} {{ movimento.data_vencimento|default:"—" }}
                 </div>
             {% endfor %}
         {% endif %}
 
         <div class="empresa-actions">
             <a href="{% url 'plataforma:empresa_alterar_plano' empresa.id %}" class="btn btn-primary">
-                Editar subscrição
+                {% trans "Editar subscrição" %}
             </a>
 
             <form method="post" action="{% url 'plataforma:empresa_toggle_ativa' empresa.id %}" class="empresa-action-form">
                 {% csrf_token %}
                 {% if empresa.ativo %}
                     <button type="submit" class="btn btn-danger">
-                        Suspender
+                        {% trans "Suspender" %}
                     </button>
                 {% else %}
                     <button type="submit" class="btn btn-danger">
-                        Reativar
+                        {% trans "Reativar" %}
                     </button>
                 {% endif %}
             </form>

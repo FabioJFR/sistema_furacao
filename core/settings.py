@@ -186,6 +186,7 @@ EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
 EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
 DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", "noreply@sistemafuracao.local")
+SUGESTOES_EMAIL_DESTINO = env_list("DJANGO_SUGESTOES_EMAIL_DESTINO")
 SITE_BASE_URL = env("SITE_BASE_URL", "")
 
 # Pagamentos (PayPal) - base de configuração para integração de checkout.

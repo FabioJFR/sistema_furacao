@@ -1,9 +1,10 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" data-text-size="{{ tamanho_texto|default:'normal' }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% trans "Sistema de Perfuração" %}{% endblock %}</title>
 
     <link rel="shortcut icon" type="image/png" href="{% static 'img/sistema_furacao_logo.png' %}">
@@ -327,6 +328,10 @@
                             ⚙️ {% trans "Operação" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
+                            {% if perfil_tipo == "individual" %}
+                                <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
+                                <a href="{% url 'projetos:furo_create' %}" role="menuitem">➕ {% trans "Novo Furo" %}</a>
+                            {% endif %}
                             <a href="{% url 'projetos:medicao_list_empregado' %}" role="menuitem">📊 {% trans "Medições" %}</a>
                             <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
                             <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>

@@ -76,6 +76,17 @@
                     <div class="text-red-600 text-sm mt-2">{{ form.idioma.errors }}</div>
                 {% endif %}
             </div>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <label class="block font-semibold mb-2 text-gray-800">🔠 {% trans "Tamanho do Texto" %}</label>
+                {{ form.tamanho_texto|add_class:"w-full p-2 border rounded bg-white" }}
+                {% if form.tamanho_texto.errors %}
+                    <div class="text-red-600 text-sm mt-2">{{ form.tamanho_texto.errors }}</div>
+                {% endif %}
+                <p class="text-sm text-gray-500 mt-2">
+                    {% trans "Define a escala de texto da interface desta conta, incluindo telemóvel." %}
+                </p>
+            </div>
         </div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">

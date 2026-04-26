@@ -81,6 +81,17 @@
                     {% trans "Este campo será usado para ativar a troca dinâmica de idioma na interface." %}
                 </p>
             </div>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <label class="block font-semibold mb-2 text-gray-800">🔠 {% trans "Tamanho do Texto" %}</label>
+                {{ form.tamanho_texto|add_class:"w-full p-2 border rounded bg-white" }}
+                {% if form.tamanho_texto.errors %}
+                    <div class="text-red-600 text-sm mt-2">{{ form.tamanho_texto.errors }}</div>
+                {% endif %}
+                <p class="text-sm text-gray-500 mt-2">
+                    {% trans "Ajusta a leitura da plataforma para o teu ecrã (inclui telemóvel)." %}
+                </p>
+            </div>
         </div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">

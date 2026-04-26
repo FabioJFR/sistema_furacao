@@ -26,6 +26,7 @@ from projetos.selectors.furos import (
     obter_configuracao_visual_furo,
     obter_lista_furos,
 )
+from projetos.selectors.acesso import obter_perfil_ativo_por_user
 from projetos.services.furo_3d_io import (
     dados_completos_furo as dados_completos_furo_service,
     dados_exportacao_furo_3d as dados_exportacao_furo_3d_service,
@@ -345,6 +346,24 @@ def _obter_empregado_autenticado_furos(request):
     return empregado, None
 
 
+def _obter_empresa_contexto_gestao_furos(request):
+    if user_is_empresa_admin(request.user):
+        empresa, resposta_erro = _obter_empresa_admin_furos(request)
+        if resposta_erro:
+            return None, False, resposta_erro
+        return empresa, False, None
+
+    perfil = obter_perfil_ativo_por_user(request.user)
+    if perfil and perfil.tipo_acesso == "individual":
+        empregado, resposta_erro = _obter_empregado_autenticado_furos(request)
+        if resposta_erro:
+            return None, True, resposta_erro
+        return empregado.empresa, True, None
+
+    messages.error(request, "Não tens permissão para gerir furos.")
+    return None, False, redirect("projetos:redirect_after_login")
+
+
 
 # ---------------- FUROS ----------------
 @login_required
@@ -392,7 +411,6 @@ def furo_detail_empregado(request, pk):
 
 
 @login_required
-@admin_required
 def furo_create(request):
     logger.info(
         "Entrada na view furo_create. user_id=%s, username='%s', method=%s",
@@ -400,7 +418,7 @@ def furo_create(request):
         request.user.username,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view furo_create. user_id=%s", request.user.id)
@@ -443,9 +461,8 @@ def furo_create(request):
 
 
 @login_required
-@admin_required
 def furo_detail_legacy(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         return resposta_erro
@@ -455,7 +472,6 @@ def furo_detail_legacy(request, pk):
 
 
 @login_required
-@admin_required
 def furo_detail(request, pk, slug):
     logger.info(
         "Entrada na view furo_detail. user_id=%s, username='%s', furo_pk=%s",
@@ -463,7 +479,7 @@ def furo_detail(request, pk, slug):
         request.user.username,
         pk,
     )
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view furo_detail. user_id=%s", request.user.id)
@@ -507,14 +523,13 @@ def furo_detail(request, pk, slug):
 
 # Multiempresa: o administrador só pode listar e gerir furos da sua própria empresa.
 @login_required
-@admin_required
 def furo_list(request):
     logger.info(
         "Entrada na view furo_list. user_id=%s, username='%s'",
         request.user.id,
         request.user.username,
     )
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view furo_list. user_id=%s", request.user.id)
@@ -533,7 +548,6 @@ def furo_list(request):
 
 
 @login_required
-@admin_required
 def furo_update(request, pk):
     logger.info(
         "Entrada na view furo_update. user_id=%s, username='%s', furo_pk=%s, method=%s",
@@ -542,7 +556,7 @@ def furo_update(request, pk):
         pk,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view furo_update. user_id=%s", request.user.id)
@@ -582,7 +596,6 @@ def furo_update(request, pk):
 
 
 @login_required
-@admin_required
 def furo_delete(request, pk):
     logger.info(
         "Entrada na view furo_delete. user_id=%s, username='%s', furo_pk=%s, method=%s",
@@ -591,7 +604,7 @@ def furo_delete(request, pk):
         pk,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view furo_delete. user_id=%s", request.user.id)
@@ -623,8 +636,11 @@ def furo_3d_geologico(request, furo_id):
     )
     furo = None
 
-    if user_is_empresa_admin(request.user):
-        empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    perfil = obter_perfil_ativo_por_user(request.user)
+    acesso_individual = bool(perfil and perfil.tipo_acesso == "individual")
+
+    if user_is_empresa_admin(request.user) or acesso_individual:
+        empresa, _acesso_individual_resolvido, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
         if resposta_erro:
             logger.warning("Acesso bloqueado na view furo_3d_geologico. user_id=%s", request.user.id)
             return resposta_erro
@@ -1158,9 +1174,8 @@ def furo_3d_importar_externo(request):
 
 
 @login_required
-@admin_required
 def furo_3d_export(request, furo_id, formato):
-    empresa, resposta_erro = _obter_empresa_admin_furos(request)
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         return resposta_erro

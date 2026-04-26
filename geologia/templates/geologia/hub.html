@@ -1,47 +1,48 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Centro de Geologia{% endblock %}
-{% block page_title %}Centro de Geologia{% endblock %}
+{% block title %}{% trans "Centro de Geologia" %}{% endblock %}
+{% block page_title %}{% trans "Centro de Geologia" %}{% endblock %}
 {% block page_description %}
     {% if contexto_geologia.is_global %}
-    Vista global da geologia da plataforma, incluindo logging do furo e integracoes DJI.
+    {% trans "Vista global da geologia da plataforma, incluindo logging do furo e integracoes DJI." %}
     {% else %}
-    Vista operacional da geologia da empresa, incluindo logging do furo e integracoes DJI.
+    {% trans "Vista operacional da geologia da empresa, incluindo logging do furo e integracoes DJI." %}
     {% endif %}
 {% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:drone_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Abrir interface DJI</a>
+    <a href="{% url 'geologia:drone_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Abrir interface DJI" %}</a>
 {% endblock %}
 
 {% block content %}
+{% trans "Sem litologia principal" as sem_litologia_principal %}
 <div class="max-w-7xl mx-auto px-6 py-8">
     {% if contexto_geologia.is_global %}
     <form method="get" class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm mb-8 flex flex-col md:flex-row md:items-end gap-4">
         <div class="flex-1">
-            <label for="id_empresa_geologia" class="block text-sm font-semibold text-amber-900 mb-1">Empresa para operar geologia</label>
+            <label for="id_empresa_geologia" class="block text-sm font-semibold text-amber-900 mb-1">{% trans "Empresa para operar geologia" %}</label>
             <select id="id_empresa_geologia" name="empresa" class="border rounded px-3 py-2 w-full bg-white">
-                <option value="">Seleciona uma empresa</option>
+                <option value="">{% trans "Seleciona uma empresa" %}</option>
                 {% for empresa_item in contexto_geologia.empresas_disponiveis %}
                     <option value="{{ empresa_item.id }}" {% if empresa_geologia and empresa_item.id == empresa_geologia.id %}selected{% endif %}>{{ empresa_item }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="px-4 py-2 rounded bg-amber-600 text-white font-semibold">Usar empresa</button>
+        <button type="submit" class="px-4 py-2 rounded bg-amber-600 text-white font-semibold">{% trans "Usar empresa" %}</button>
     </form>
     {% endif %}
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-gray-500">Furos com geologia</div>
+            <div class="text-sm text-gray-500">{% trans "Furos com geologia" %}</div>
             <div class="text-3xl font-bold text-gray-900 mt-2">{{ total_furos }}</div>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-gray-500">Logs geologicos</div>
+            <div class="text-sm text-gray-500">{% trans "Logs geologicos" %}</div>
             <div class="text-3xl font-bold text-gray-900 mt-2">{{ total_logs }}</div>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-gray-500">Missoes DJI</div>
+            <div class="text-sm text-gray-500">{% trans "Missoes DJI" %}</div>
             <div class="text-3xl font-bold text-gray-900 mt-2">{{ total_missoes }}</div>
         </div>
     </div>
@@ -49,8 +50,8 @@
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <section class="xl:col-span-2 rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="px-6 py-4 border-b border-gray-100">
-                <h2 class="text-xl font-semibold text-gray-900">Furos disponiveis</h2>
-                <p class="text-sm text-gray-500 mt-1">Entrada direta na geologia do furo.</p>
+                <h2 class="text-xl font-semibold text-gray-900">{% trans "Furos disponiveis" %}</h2>
+                <p class="text-sm text-gray-500 mt-1">{% trans "Entrada direta na geologia do furo." %}</p>
             </div>
             <div class="divide-y divide-gray-100">
                 {% for furo in furos %}
@@ -58,15 +59,15 @@
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ furo.nome }}</h3>
                         <p class="text-sm text-gray-600 mt-1">{{ furo.projeto.nome }}</p>
-                        <p class="text-xs text-gray-500 mt-1">Profundidade atual: {{ furo.profundidade_atual|default:"0" }} m</p>
+                        <p class="text-xs text-gray-500 mt-1">{% trans "Profundidade atual:" %} {{ furo.profundidade_atual|default:"0" }} m</p>
                     </div>
                     <div class="flex flex-wrap gap-3">
-                        <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">Abrir geologia</a>
-                        <a href="{% url 'geologia:log_create' furo.id %}" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">Novo log</a>
+                        <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Abrir geologia" %}</a>
+                        <a href="{% url 'geologia:log_create' furo.id %}" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">{% trans "Novo log" %}</a>
                     </div>
                 </article>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-gray-500">Nao existem furos disponiveis para geologia.</div>
+                <div class="px-6 py-8 text-center text-gray-500">{% trans "Nao existem furos disponiveis para geologia." %}</div>
                 {% endfor %}
             </div>
         </section>
@@ -74,7 +75,7 @@
         <section class="space-y-6">
             <article class="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-xl font-semibold text-gray-900">Logs recentes</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">{% trans "Logs recentes" %}</h2>
                 </div>
                 <div class="p-6 space-y-4">
                     {% for log in logs_recentes %}
@@ -83,17 +84,17 @@
                             <a href="{% url 'geologia:log_detail' log.id %}" class="hover:text-emerald-700">{{ log.titulo }}</a>
                         </h3>
                         <p class="text-sm text-gray-600 mt-2">{{ log.furo.nome }} · {{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</p>
-                        <p class="text-sm text-gray-600 mt-1">{{ log.litologia_principal|default:"Sem litologia principal" }}</p>
+                        <p class="text-sm text-gray-600 mt-1">{{ log.litologia_principal|default:sem_litologia_principal }}</p>
                     </article>
                     {% empty %}
-                    <p class="text-gray-500">Ainda nao existem logs registados.</p>
+                    <p class="text-gray-500">{% trans "Ainda nao existem logs registados." %}</p>
                     {% endfor %}
                 </div>
             </article>
 
             <article class="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-xl font-semibold text-gray-900">Missoes DJI recentes</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">{% trans "Missoes DJI recentes" %}</h2>
                 </div>
                 <div class="p-6 space-y-4">
                     {% for missao in missoes_recentes %}
@@ -105,7 +106,7 @@
                         <p class="text-sm text-gray-600 mt-1">{{ missao.resumo_captura }}</p>
                     </article>
                     {% empty %}
-                    <p class="text-gray-500">Ainda nao existem missoes registadas.</p>
+                    <p class="text-gray-500">{% trans "Ainda nao existem missoes registadas." %}</p>
                     {% endfor %}
                 </div>
             </article>

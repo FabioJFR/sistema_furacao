@@ -1,9 +1,13 @@
 {% extends base_template %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}Memória Operacional AI{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
+{% endblock %}
 
 {% block content %}
+<div class="ai-mobile-scale">
 <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
     <div>
         <h1 class="text-3xl font-bold text-slate-900">Memória Operacional</h1>
@@ -111,4 +115,5 @@
         Não encontrei memória operacional para esse filtro. Tenta pesquisar por nome do furo, projeto ou localização.
     </div>
 {% endif %}
+</div>
 {% endblock %}

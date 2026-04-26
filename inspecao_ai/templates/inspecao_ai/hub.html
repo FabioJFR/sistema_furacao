@@ -1,9 +1,13 @@
 {% extends base_template %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}AI Visual{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
+{% endblock %}
 
 {% block content %}
+<div class="ai-mobile-scale">
 <div class="page-header mb-6">
     <div>
         <h1 class="text-3xl font-bold text-slate-900">AI Visual</h1>
@@ -205,5 +209,6 @@
             Ainda não existem análises AI nesta empresa. Começa por enviar uma fotografia de uma caixa cilíndrica.
         </div>
     {% endif %}
+</div>
 </div>
 {% endblock %}

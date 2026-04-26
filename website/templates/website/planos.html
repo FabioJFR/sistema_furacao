@@ -12,8 +12,8 @@
         <div class="topbar">
             <h1>{% trans "Planos" %}</h1>
             <div>
-                <a href="/" class="btn btn-light">{% trans "Voltar" %}</a>
-                <a href="/login/" class="btn btn-primary">{% trans "Entrar" %}</a>
+                <a href="{% url 'website:home' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+                <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>
         </div>
 
@@ -33,7 +33,7 @@
                     <p>{% trans "Multiutilizador:" %}
                         <strong>{% if plano.permite_multiplos_utilizadores %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
-                    <a href="/registo/" class="btn btn-primary">{% trans "Escolher este plano" %}</a>
+                    <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Escolher este plano" %}</a>
                 </div>
             {% empty %}
                 <div class="card">

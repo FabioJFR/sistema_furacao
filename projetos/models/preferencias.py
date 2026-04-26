@@ -25,6 +25,12 @@ class PreferenciasUser(models.Model):
         ("sandstone", "Areia Industrial"),
     ]
 
+    TAMANHO_TEXTO_CHOICES = [
+        ("normal", "Normal"),
+        ("grande", "Grande"),
+        ("extra-grande", "Extra Grande"),
+    ]
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -34,6 +40,7 @@ class PreferenciasUser(models.Model):
     tema = models.CharField(max_length=10, choices=TEMA_CHOICES, default="claro")
     paleta = models.CharField(max_length=30, choices=PALETA_CHOICES, default="industrial-blue")
     idioma = models.CharField(max_length=10, choices=IDIOMA_CHOICES, default="pt-pt")
+    tamanho_texto = models.CharField(max_length=20, choices=TAMANHO_TEXTO_CHOICES, default="normal")
     # TODO futuro:
     # - avaliar preferências por empresa vs preferências globais do utilizador
     # - adicionar mais opções (layout, notificações, dashboard inicial)

@@ -1,0 +1,43 @@
+.ai-mobile-scale {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .ai-mobile-scale h1 {
+        font-size: 2.05rem !important;
+        line-height: 1.2;
+    }
+
+    .ai-mobile-scale h2 {
+        font-size: 1.35rem !important;
+        line-height: 1.28;
+    }
+
+    .ai-mobile-scale h3 {
+        font-size: 1.12rem !important;
+    }
+
+    .ai-mobile-scale p,
+    .ai-mobile-scale li,
+    .ai-mobile-scale label,
+    .ai-mobile-scale .text-sm,
+    .ai-mobile-scale .form-control,
+    .ai-mobile-scale .btn,
+    .ai-mobile-scale select,
+    .ai-mobile-scale input {
+        font-size: 1rem !important;
+        line-height: 1.5;
+    }
+
+    .ai-mobile-scale .text-xs {
+        font-size: 0.9rem !important;
+    }
+
+    .ai-mobile-scale .btn {
+        min-height: 44px;
+        padding-top: 0.62rem;
+        padding-bottom: 0.62rem;
+        padding-left: 0.95rem;
+        padding-right: 0.95rem;
+    }
+}

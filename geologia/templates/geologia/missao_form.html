@@ -3,9 +3,11 @@
 
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
-{% block page_description %}Preparado para operacao com DJI Mini 4 Pro no furo {{ furo.nome }}.{% endblock %}
+{% block page_description %}
+{% blocktrans with nome=furo.nome %}Preparado para operacao com DJI Mini 4 Pro no furo {{ nome }}.{% endblocktrans %}
+{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">Voltar ao furo</a>
+    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">{% trans "Voltar ao furo" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -17,8 +19,8 @@
         {% endif %}
 
         <div class="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-800">
-            <strong>Resumo operacional:</strong>
-            <span data-missao-resumo>Sem resumo operacional ainda.</span>
+            <strong>{% trans "Resumo operacional:" %}</strong>
+            <span data-missao-resumo>{% trans "Sem resumo operacional ainda." %}</span>
         </div>
 
         {% for field in form %}
@@ -31,9 +33,9 @@
         {% endfor %}
 
         <div class="flex flex-wrap gap-3 pt-2">
-            <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">Guardar missao</button>
+            <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Guardar missao" %}</button>
             {% if missao %}
-            <a href="{% url 'geologia:missao_detail' missao.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">Ver detalhe</a>
+            <a href="{% url 'geologia:missao_detail' missao.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Ver detalhe" %}</a>
             {% endif %}
         </div>
     </form>

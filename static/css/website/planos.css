@@ -68,4 +68,25 @@ body {
     .grid {
         grid-template-columns: 1fr;
     }
+
+    body,
+    .muted,
+    .price-period {
+        font-size: 16px;
+    }
+
+    .topbar {
+        gap: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .price {
+        font-size: 38px;
+    }
+
+    .btn {
+        font-size: 16px;
+        min-height: 46px;
+    }
 }

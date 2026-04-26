@@ -14,11 +14,12 @@ class PreferenciasForm(forms.ModelForm):
 
     class Meta:
         model = PreferenciasUser
-        fields = ["tema", "paleta", "idioma"]
+        fields = ["tema", "paleta", "idioma", "tamanho_texto"]
         widgets = {
             "tema": forms.Select(attrs={"class": "form-control"}),
             "paleta": forms.Select(attrs={"class": "form-control"}),
             "idioma": forms.Select(attrs={"class": "form-control"}),
+            "tamanho_texto": forms.Select(attrs={"class": "form-control"}),
         }
 
     def clean(self):

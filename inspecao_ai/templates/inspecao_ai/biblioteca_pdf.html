@@ -1,71 +1,71 @@
 {% extends base_template %}
 {% load i18n %}
 
-{% block title %}Biblioteca Documental AI{% endblock %}
+{% block title %}{% trans "Biblioteca Documental AI" %}{% endblock %}
 
 {% block content %}
 <div class="page-header mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900">Biblioteca PDF da AI</h1>
+        <h1 class="text-3xl font-bold text-slate-900">{% trans "Biblioteca PDF da AI" %}</h1>
         <p class="text-slate-600 mt-2">
-            Aqui vês os documentos guardados em `knowledge_base/pdf/` e como a AI os consegue consultar.
+            {% trans "Aqui vês os documentos guardados em `knowledge_base/pdf/` e como a AI os consegue consultar." %}
         </p>
     </div>
     <div class="mt-4 flex gap-3 flex-wrap">
-        <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">Voltar ao hub AI</a>
-        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">Abrir Chatbox</a>
+        <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">{% trans "Voltar ao hub AI" %}</a>
+        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">{% trans "Abrir Chatbox" %}</a>
     </div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-    <h2 class="text-xl font-semibold text-slate-900 mb-3">Adicionar documento à biblioteca</h2>
+    <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Adicionar documento à biblioteca" %}</h2>
     <p class="text-slate-600 mb-4">
-        O sistema valida e normaliza automaticamente o nome do ficheiro. Se o documento for `.pdf`, cria também um `.txt` com o mesmo nome para apoio à AI.
+        {% trans "O sistema valida e normaliza automaticamente o nome do ficheiro. Se o documento for `.pdf`, cria também um `.txt` com o mesmo nome para apoio à AI." %}
     </p>
     <form method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-4">
         {% csrf_token %}
         <div class="min-w-[280px]">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Ficheiro</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{% trans "Ficheiro" %}</label>
             <input type="file" name="documento" class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 bg-white">
             <div class="mt-2 text-xs text-slate-500">
-                Extensões permitidas: {{ extensoes_upload_permitidas }}
+                {% trans "Extensões permitidas:" %} {{ extensoes_upload_permitidas }}
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Adicionar à biblioteca</button>
+        <button type="submit" class="btn btn-primary">{% trans "Adicionar à biblioteca" %}</button>
     </form>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="text-sm uppercase tracking-wide text-slate-500">Documentos</div>
+        <div class="text-sm uppercase tracking-wide text-slate-500">{% trans "Documentos" %}</div>
         <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_documentos }}</div>
-        <div class="text-slate-600 mt-2">Ficheiros presentes em `knowledge_base/pdf`.</div>
+        <div class="text-slate-600 mt-2">{% trans "Ficheiros presentes em `knowledge_base/pdf`." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-5 bg-emerald-50/40">
-        <div class="text-sm uppercase tracking-wide text-emerald-700">Leitura direta</div>
+        <div class="text-sm uppercase tracking-wide text-emerald-700">{% trans "Leitura direta" %}</div>
         <div class="text-3xl font-bold text-emerald-800 mt-2">{{ total_leitura_direta }}</div>
-        <div class="text-slate-600 mt-2">Formatos textuais que a AI consegue consultar sem ficheiro auxiliar.</div>
+        <div class="text-slate-600 mt-2">{% trans "Formatos textuais que a AI consegue consultar sem ficheiro auxiliar." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 bg-amber-50/40">
-        <div class="text-sm uppercase tracking-wide text-amber-700">Via TXT auxiliar</div>
+        <div class="text-sm uppercase tracking-wide text-amber-700">{% trans "Via TXT auxiliar" %}</div>
         <div class="text-3xl font-bold text-amber-800 mt-2">{{ total_txt_auxiliar }}</div>
-        <div class="text-slate-600 mt-2">Documentos não textuais que já têm um `.txt` de apoio.</div>
+        <div class="text-slate-600 mt-2">{% trans "Documentos não textuais que já têm um `.txt` de apoio." %}</div>
     </div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-    <h2 class="text-xl font-semibold text-slate-900 mb-3">Local da biblioteca</h2>
+    <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Local da biblioteca" %}</h2>
     <div class="text-slate-700">
-        Pasta local:
+        {% trans "Pasta local:" %}
         <a href="{{ biblioteca_path }}" class="text-sky-700 font-semibold">{{ biblioteca_path }}</a>
     </div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-    <h2 class="text-xl font-semibold text-slate-900 mb-3">Filtro rápido</h2>
+    <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Filtro rápido" %}</h2>
     <form method="get" class="flex flex-wrap items-end gap-4">
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Estado de leitura</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{% trans "Estado de leitura" %}</label>
             <select name="leitura" class="rounded-xl border border-slate-300 px-4 py-2 text-slate-800">
                 {% for valor, label in filtro_choices %}
                     <option value="{{ valor }}" {% if filtro_leitura == valor %}selected{% endif %}>{{ label }}</option>
@@ -73,51 +73,51 @@
             </select>
         </div>
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Extensão</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{% trans "Extensão" %}</label>
             <select name="extensao" class="rounded-xl border border-slate-300 px-4 py-2 text-slate-800">
                 {% for valor, label in extensao_choices %}
                     <option value="{{ valor }}" {% if filtro_extensao == valor %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Aplicar filtro</button>
-        <a href="{% url 'inspecao_ai:biblioteca_pdf' %}" class="btn btn-secondary">Limpar filtro</a>
+        <button type="submit" class="btn btn-primary">{% trans "Aplicar filtro" %}</button>
+        <a href="{% url 'inspecao_ai:biblioteca_pdf' %}" class="btn btn-secondary">{% trans "Limpar filtro" %}</a>
     </form>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-    <h2 class="text-xl font-semibold text-slate-900 mb-3">Como usar esta biblioteca</h2>
+    <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Como usar esta biblioteca" %}</h2>
     <div class="space-y-2 text-slate-700">
-        <div><strong>1.</strong> Coloca o documento em `knowledge_base/pdf/`.</div>
-        <div><strong>2.</strong> Formatos textuais como `.md`, `.txt`, `.json`, `.csv`, `.log`, `.yaml`, `.yml`, `.xml`, `.html`, `.ini` e `.cfg` podem ser lidos diretamente.</div>
-        <div><strong>3.</strong> Para `.pdf` e outros formatos não textuais, adiciona um `.txt` com o mesmo nome.</div>
-        <div><strong>4.</strong> Exemplo: `manual_operacao.pdf` + `manual_operacao.txt`.</div>
-        <div><strong>5.</strong> A AI usa o `.txt` como base de consulta textual no Chatbox e noutras respostas documentais.</div>
-        <div><strong>6.</strong> Se o nome vier com acentos, espaços ou caracteres estranhos, o sistema substitui automaticamente por um nome estável e seguro.</div>
+        <div><strong>{% trans "1." %}</strong> {% trans "Coloca o documento em `knowledge_base/pdf/`." %}</div>
+        <div><strong>{% trans "2." %}</strong> {% trans "Formatos textuais como `.md`, `.txt`, `.json`, `.csv`, `.log`, `.yaml`, `.yml`, `.xml`, `.html`, `.ini` e `.cfg` podem ser lidos diretamente." %}</div>
+        <div><strong>{% trans "3." %}</strong> {% trans "Para `.pdf` e outros formatos não textuais, adiciona um `.txt` com o mesmo nome." %}</div>
+        <div><strong>{% trans "4." %}</strong> {% trans "Exemplo: `manual_operacao.pdf` + `manual_operacao.txt`." %}</div>
+        <div><strong>{% trans "5." %}</strong> {% trans "A AI usa o `.txt` como base de consulta textual no Chatbox e noutras respostas documentais." %}</div>
+        <div><strong>{% trans "6." %}</strong> {% trans "Se o nome vier com acentos, espaços ou caracteres estranhos, o sistema substitui automaticamente por um nome estável e seguro." %}</div>
     </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="text-sm uppercase tracking-wide text-slate-500">PDFs</div>
+        <div class="text-sm uppercase tracking-wide text-slate-500">{% trans "PDFs" %}</div>
         <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_pdfs }}</div>
-        <div class="text-slate-600 mt-2">Só os ficheiros `.pdf` dentro da biblioteca filtrada.</div>
+        <div class="text-slate-600 mt-2">{% trans "Só os ficheiros `.pdf` dentro da biblioteca filtrada." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-5 bg-emerald-50/40">
-        <div class="text-sm uppercase tracking-wide text-emerald-700">PDFs com TXT</div>
+        <div class="text-sm uppercase tracking-wide text-emerald-700">{% trans "PDFs com TXT" %}</div>
         <div class="text-3xl font-bold text-emerald-800 mt-2">{{ total_pdfs_com_txt }}</div>
-        <div class="text-slate-600 mt-2">PDFs que já têm apoio textual associado.</div>
+        <div class="text-slate-600 mt-2">{% trans "PDFs que já têm apoio textual associado." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-rose-200 p-5 bg-rose-50/40">
-        <div class="text-sm uppercase tracking-wide text-rose-700">Não preparados</div>
+        <div class="text-sm uppercase tracking-wide text-rose-700">{% trans "Não preparados" %}</div>
         <div class="text-3xl font-bold text-rose-800 mt-2">{{ total_nao_preparado }}</div>
-        <div class="text-slate-600 mt-2">Documentos que ainda precisam de preparação para a AI consultar bem.</div>
+        <div class="text-slate-600 mt-2">{% trans "Documentos que ainda precisam de preparação para a AI consultar bem." %}</div>
     </div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
     <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
-        <h2 class="text-xl font-semibold text-slate-900">Documentos encontrados</h2>
+        <h2 class="text-xl font-semibold text-slate-900">{% trans "Documentos encontrados" %}</h2>
     </div>
 
     {% if documentos_pdf %}
@@ -134,24 +134,24 @@
                             {% elif documento.leitura == 'txt_auxiliar' %}bg-amber-100 text-amber-700
                             {% else %}bg-rose-100 text-rose-700{% endif %}">
                             {% if documento.leitura == "direta" %}
-                                Leitura direta
+                                {% trans "Leitura direta" %}
                             {% elif documento.leitura == "txt_auxiliar" %}
-                                TXT auxiliar
+                                {% trans "TXT auxiliar" %}
                             {% else %}
-                                Não preparado
+                                {% trans "Não preparado" %}
                             {% endif %}
                         </span>
                     </div>
                     <div class="mt-3 text-sm text-slate-700">
-                        Extensão: <strong>{{ documento.extensao }}</strong> · Tamanho: <strong>{{ documento.tamanho_kb }} KB</strong>
+                        {% trans "Extensão:" %} <strong>{{ documento.extensao }}</strong> · {% trans "Tamanho:" %} <strong>{{ documento.tamanho_kb }} KB</strong>
                     </div>
                     <div class="mt-2 text-sm text-slate-700">
                         {% if documento.leitura == "direta" %}
-                            A AI consegue consultar este ficheiro diretamente.
+                            {% trans "A AI consegue consultar este ficheiro diretamente." %}
                         {% elif documento.tem_txt %}
-                            Texto auxiliar: <strong>{{ documento.txt_relativo }}</strong>
+                            {% trans "Texto auxiliar:" %} <strong>{{ documento.txt_relativo }}</strong>
                         {% else %}
-                            Para consulta textual profunda, convém adicionar um `.txt` com o mesmo nome.
+                            {% trans "Para consulta textual profunda, convém adicionar um `.txt` com o mesmo nome." %}
                         {% endif %}
                     </div>
                 </div>
@@ -159,7 +159,7 @@
         </div>
     {% else %}
         <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-slate-600">
-            Ainda não existem documentos em `knowledge_base/pdf/`.
+            {% trans "Ainda não existem documentos em `knowledge_base/pdf/`." %}
         </div>
     {% endif %}
 </div>

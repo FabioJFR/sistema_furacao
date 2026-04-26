@@ -15,8 +15,10 @@ class UserLanguageMiddleware:
                 defaults={
                     "idioma": "pt-pt",
                     "tema": "claro",
+                    "tamanho_texto": "normal",
                 },
             )
+            request.sf_preferencias = preferencias
 
             if preferencias.idioma:
                 translation.activate(preferencias.idioma)

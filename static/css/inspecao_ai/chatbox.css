@@ -110,3 +110,52 @@
         bottom: 6%;
     }
 }
+
+@media (max-width: 768px) {
+    .ai-chat-shell {
+        height: min(78vh, 820px);
+    }
+
+    .ai-chat-messages {
+        padding: 1rem 1rem 2.2rem;
+    }
+
+    .ai-chat-messages::after {
+        height: 7rem;
+    }
+
+    .ai-chat-composer {
+        bottom: 5.5%;
+        margin: -4.4rem 0.65rem 0.65rem;
+        border-radius: 14px;
+    }
+
+    .ai-chat-input {
+        min-height: 74px;
+        max-height: 170px;
+        padding: 0.82rem 0.92rem;
+        font-size: 1rem;
+        line-height: 1.52;
+    }
+
+    .ai-chat-submit {
+        min-height: 44px;
+        padding: 0.62rem 1.05rem;
+        font-size: 0.96rem;
+    }
+
+    .ai-chat-sugestoes-header {
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+    }
+
+    .ai-chat-sugestoes {
+        gap: 0.6rem;
+    }
+
+    .ai-chat-sugestao-btn {
+        font-size: 0.9rem;
+        padding: 0.58rem 0.82rem;
+        line-height: 1.25;
+    }
+}

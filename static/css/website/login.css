@@ -171,3 +171,32 @@ input:focus {
     margin-bottom: 18px;
     font-size: 14px;
 }
+
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+
+    .title {
+        font-size: 36px;
+    }
+
+    .subtitle,
+    label,
+    input,
+    .muted,
+    .error-box,
+    .success-box,
+    .info-box {
+        font-size: 16px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+
+    .btn {
+        font-size: 16px;
+        min-height: 46px;
+    }
+}

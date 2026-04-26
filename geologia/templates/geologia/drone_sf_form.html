@@ -5,7 +5,7 @@
 {% block page_title %}{{ titulo }}{% endblock %}
 {% block page_description %}{{ subtitulo }}{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:drone_sf_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar à Interface Drone S_F</a>
+    <a href="{% url 'geologia:drone_sf_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">{% trans "Voltar à Interface Drone S_F" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -17,8 +17,8 @@
         {% endif %}
 
         <div class="rounded-xl border border-cyan-100 bg-cyan-50 px-4 py-4 text-sm text-cyan-900">
-            <strong>Base do Drone S_F:</strong>
-            cria aqui o hardware principal. Depois, no detalhe, ligamos sensores, módulos e configuração operacional.
+            <strong>{% trans "Base do Drone S_F:" %}</strong>
+            {% trans "cria aqui o hardware principal. Depois, no detalhe, ligamos sensores, módulos e configuração operacional." %}
         </div>
 
         {% for field in form %}
@@ -31,7 +31,7 @@
         {% endfor %}
 
         <div class="pt-2">
-            <button type="submit" class="px-4 py-2 rounded bg-slate-900 text-white font-semibold">Guardar Drone S_F</button>
+            <button type="submit" class="px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Guardar Drone S_F" %}</button>
         </div>
     </form>
 </div>
