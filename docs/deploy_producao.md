@@ -5,8 +5,8 @@
 ```bash
 cd /var/www/sistema_furacao
 git fetch origin
-git checkout release-v0.9.3.1
-git pull origin release-v0.9.3.1
+git checkout release-v0.9.4
+git pull origin release-v0.9.4
 ```
 
 ## 2) Virtualenv e dependências
@@ -68,4 +68,3 @@ curl -I http://127.0.0.1
 pg_dump -h 127.0.0.1 -U <db_user> -d <db_name> > backup_$(date +%F_%H%M).sql
 tar -czf media_backup_$(date +%F_%H%M).tar.gz media/
 ```
-

@@ -6,7 +6,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.3.1**
+- Versão atual: **v0.9.4**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **Projetos**, **IA** e **estabilização para produção**
 
@@ -21,10 +21,20 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ---
 
-## Release 0.9.3.1 (resumo)
+## Release 0.9.4 (resumo)
 
 Principais evoluções consolidadas nesta versão:
 
+- paridade de permissões para conta `individual` na área de trabalhador (fluxo equivalente ao empregado de empresa)
+- criação automática de contexto interno de operação para contas individuais (evita bloqueios em menus operacionais)
+- melhoria de `Conta > Meus Dados` com bloco de plano atual, fim de ciclo e próximo pagamento
+- exibição da empresa associada para empregados de empresa em `Conta > Meus Dados`
+- novo atalho `Sugestões` no submenu de utilizador (empresa, empregado e individual)
+- nova página de sugestões com avaliação, opinião e propostas de melhoria
+- envio automático das sugestões por email para o(s) superuser(s), com registo persistido em base de dados
+- ativação de conta por confirmação de email no registo público (conta nasce inativa até validação)
+- nova rota de confirmação de conta e integração de token seguro no fluxo de registo
+- parametrização de SMTP por variáveis de ambiente (`DJANGO_EMAIL_*` e `SITE_BASE_URL`)
 - reorganização da operação `Drone S_F` para ficar alinhada com o padrão visual da área `DJI`
 - motor de missões programadas com repetição contínua por checkbox (ativar/desativar)
 - quadro de estado com últimas missões disparadas e últimos comandos gerados
