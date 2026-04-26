@@ -1,6 +1,7 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 <!-- projetos/templates/projetos/dashboard_geo.html -->
+{% block title %}{% trans "Dashboard Geológico" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/dashboard_geo.css' %}">
@@ -10,7 +11,7 @@
 <section class="container mx-auto p-6">
     <!-- TÍTULO -->
     <div class="header-bar mb-6">
-        <h1 class="title">📊 Dashboard Geológico - {{ furo.nome }}</h1>
+        <h1 class="title">{% blocktrans with nome=furo.nome %}📊 Dashboard Geológico - {{ nome }}{% endblocktrans %}</h1>
     </div>
 
     <!-- CARD DO GRÁFICO -->

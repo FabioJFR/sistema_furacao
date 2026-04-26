@@ -1,4 +1,74 @@
 (() => {
+    const THEME_STORAGE_KEY = "sf_theme_palette";
+    const AVAILABLE_THEMES = ["industrial-blue", "earth-drill", "graphite-tech", "sandstone"];
+
+    function applyTheme(themeName) {
+        const safeTheme = AVAILABLE_THEMES.includes(themeName) ? themeName : "industrial-blue";
+        document.documentElement.setAttribute("data-theme", safeTheme);
+        return safeTheme;
+    }
+
+    function setupThemePicker() {
+        const pickers = [...document.querySelectorAll("[data-theme-picker]")];
+        const pickerTheme = pickers[0]?.value;
+        const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+        const initialTheme = AVAILABLE_THEMES.includes(storedTheme)
+            ? storedTheme
+            : (AVAILABLE_THEMES.includes(pickerTheme) ? pickerTheme : "industrial-blue");
+
+        const activeTheme = applyTheme(initialTheme);
+        window.localStorage.setItem(THEME_STORAGE_KEY, activeTheme);
+
+        pickers.forEach((picker) => {
+            picker.value = activeTheme;
+            const temaInput = picker.form?.querySelector('input[name$="-tema"], input[name="tema"]');
+            if (temaInput) {
+                temaInput.value = activeTheme === "graphite-tech" ? "escuro" : "claro";
+            }
+            picker.addEventListener("change", () => {
+                const selectedTheme = applyTheme(picker.value);
+                window.localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
+                const targetTemaInput = picker.form?.querySelector('input[name$="-tema"], input[name="tema"]');
+                if (targetTemaInput) {
+                    targetTemaInput.value = selectedTheme === "graphite-tech" ? "escuro" : "claro";
+                }
+                pickers.forEach((otherPicker) => {
+                    if (otherPicker !== picker) {
+                        otherPicker.value = selectedTheme;
+                    }
+                });
+                updatePalettePresetState(selectedTheme);
+            });
+        });
+
+        updatePalettePresetState(activeTheme);
+    }
+
+    function updatePalettePresetState(themeName) {
+        document.querySelectorAll("[data-theme-preset]").forEach((button) => {
+            const isActive = button.getAttribute("data-theme-preset") === themeName;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+    }
+
+    function setupThemePresets() {
+        const presetButtons = [...document.querySelectorAll("[data-theme-preset]")];
+        if (!presetButtons.length) {
+            return;
+        }
+        presetButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const targetTheme = button.getAttribute("data-theme-preset");
+                const pickers = [...document.querySelectorAll("[data-theme-picker]")];
+                pickers.forEach((picker) => {
+                    picker.value = targetTheme;
+                    picker.dispatchEvent(new Event("change", { bubbles: true }));
+                });
+            });
+        });
+    }
+
     function closeMessage(button) {
         const box = button?.closest(".msg-box");
         if (!box) {
@@ -122,4 +192,7 @@
             }
         });
     });
+
+    setupThemePicker();
+    setupThemePresets();
 })();

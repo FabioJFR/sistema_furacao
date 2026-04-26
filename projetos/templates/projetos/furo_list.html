@@ -1,5 +1,6 @@
 {% extends "projetos/base.html" %}
-{% block title %}Dashboard de Furos{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Dashboard de Furos" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto p-6">
@@ -7,13 +8,13 @@
     <!-- HEADER -->
     <div class="flex justify-between items-center flex-wrap gap-4 mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">🕳 Dashboard de Furos</h1>
-            <p class="text-gray-600 mt-1">Visão geral de todos os furos registados.</p>
+            <h1 class="text-3xl font-bold text-gray-800">🕳 {% trans "Dashboard de Furos" %}</h1>
+            <p class="text-gray-600 mt-1">{% trans "Visão geral de todos os furos registados." %}</p>
         </div>
 
         <a href="{% url 'projetos:furo_create' %}" 
             class="btn btn-success">
-                ➕ Criar Novo Furo
+                ➕ {% trans "Criar Novo Furo" %}
         </a>
     </div>
 
@@ -41,11 +42,11 @@
                 </div>
 
                 <div class="space-y-1 text-sm text-gray-700">
-                    <p><strong>Inclinação:</strong> {{ furo.inclinacao }}°</p>
-                    <p><strong>Azimute:</strong> {{ furo.azimute }}°</p>
-                    <p><strong>Profundidade Atual:</strong> {{ furo.profundidade_atual }} m</p>
-                    <p><strong>Profundidade Alvo:</strong> {{ furo.profundidade_alvo }} m</p>
-                    <p><strong>Coord.:</strong> {{ furo.get_sistema_coordenadas_display }}</p>
+                    <p><strong>{% trans "Inclinação:" %}</strong> {{ furo.inclinacao }}°</p>
+                    <p><strong>{% trans "Azimute:" %}</strong> {{ furo.azimute }}°</p>
+                    <p><strong>{% trans "Profundidade Atual:" %}</strong> {{ furo.profundidade_atual }} m</p>
+                    <p><strong>{% trans "Profundidade Alvo:" %}</strong> {{ furo.profundidade_alvo }} m</p>
+                    <p><strong>{% trans "Coord.:" %}</strong> {{ furo.get_sistema_coordenadas_display }}</p>
                 </div>
 
                 <div class="mt-3 text-xs text-gray-500">
@@ -58,11 +59,11 @@
             <!-- ACTIONS -->
             <div class="flex gap-2 mt-4">
                 <a href="{{ furo.get_absolute_url }}" class="btn btn-primary flex-1 text-center">
-                    ℹ️ Detalhes
+                    ℹ️ {% trans "Detalhes" %}
                 </a>
 
                 <a href="{% url 'projetos:medicao_create' furo.id %}" class="btn btn-warning flex-1 text-center">
-                    ➕ Medição
+                    ➕ {% trans "Medição" %}
                 </a>
             </div>
 
@@ -71,7 +72,7 @@
     </div>
     {% else %}
     <div class="bg-white rounded-xl shadow p-8 text-center text-gray-600">
-        Nenhum furo registado ainda.
+        {% trans "Nenhum furo registado ainda." %}
     </div>
     {% endif %}
 

@@ -1,6 +1,6 @@
 {% extends "projetos/base.html" %}
-{% block title %}Gráficos{% endblock %}
-{% load static %}
+{% block title %}{% trans "Gráficos" %}{% endblock %}
+{% load static  i18n %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/graficos_dashboard.css' %}">
@@ -9,19 +9,19 @@
 {% block content %}
 <section class="p-0 m-0 space-y-6">
     <div class="gkd-header">
-        <h1 class="gkd-title">📊 Gráficos e Indicadores</h1>
+        <h1 class="gkd-title">📊 {% trans "Gráficos e Indicadores" %}</h1>
     </div>
 
     <div class="gkd-filter-card">
         <form method="get" class="gkd-filter-grid">
             <div>
-                <label class="gkd-label">Período</label>
+                <label class="gkd-label">{% trans "Período" %}</label>
                 <select name="periodo" class="w-full p-2 border rounded">
-                    <option value="hoje" {% if filtros.periodo == "hoje" %}selected{% endif %}>Hoje</option>
-                    <option value="7_dias" {% if filtros.periodo == "7_dias" %}selected{% endif %}>Últimos 7 dias</option>
-                    <option value="30_dias" {% if filtros.periodo == "30_dias" %}selected{% endif %}>Últimos 30 dias</option>
-                    <option value="mes" {% if filtros.periodo == "mes" %}selected{% endif %}>Mês atual</option>
-                    <option value="personalizado" {% if filtros.periodo == "personalizado" %}selected{% endif %}>Personalizado</option>
+                    <option value="hoje" {% if filtros.periodo == "hoje" %}selected{% endif %}>{% trans "Hoje" %}</option>
+                    <option value="7_dias" {% if filtros.periodo == "7_dias" %}selected{% endif %}>{% trans "Últimos 7 dias" %}</option>
+                    <option value="30_dias" {% if filtros.periodo == "30_dias" %}selected{% endif %}>{% trans "Últimos 30 dias" %}</option>
+                    <option value="mes" {% if filtros.periodo == "mes" %}selected{% endif %}>{% trans "Mês atual" %}</option>
+                    <option value="personalizado" {% if filtros.periodo == "personalizado" %}selected{% endif %}>{% trans "Personalizado" %}</option>
                 </select>
             </div>
 
@@ -56,8 +56,8 @@
             </div>
 
             <div class="gkd-filter-actions">
-                <button type="submit" class="btn btn-primary">Filtrar</button>
-                <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">Limpar</a>
+                <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
             </div>
         </form>
     </div>

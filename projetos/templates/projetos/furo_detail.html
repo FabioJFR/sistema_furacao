@@ -1,7 +1,13 @@
 {% extends "projetos/base.html" %}
 
-{% load static %}
-{% block title %}{{ page_title|default:"Furo" }}{% endblock %}
+{% load static  i18n %}
+{% block title %}
+    {% if page_title %}
+        {{ page_title }}
+    {% else %}
+        {% trans "Furo" %}
+    {% endif %}
+{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/furo_detail.css' %}">
@@ -14,39 +20,39 @@
     {{ furo_mapa|json_script:"furo-data" }}
 
     <nav class="text-sm text-gray-500 mb-3">
-        <a href="{% url 'projetos:dashboard' %}" class="hover:text-gray-700">Dashboard</a>
+        <a href="{% url 'projetos:dashboard' %}" class="hover:text-gray-700">{% trans "Dashboard" %}</a>
         <span class="mx-2">/</span>
-        <a href="{% url 'projetos:furo_list' %}" class="hover:text-gray-700">Furos</a>
+        <a href="{% url 'projetos:furo_list' %}" class="hover:text-gray-700">{% trans "Furos" %}</a>
         <span class="mx-2">/</span>
         <span class="text-gray-700 font-semibold">{{ furo.nome }}</span>
     </nav>
 
     <div class="furo-header">
         <div class="furo-title-wrap">
-            <h1>Furo {{ furo.nome }}</h1>
-            <p class="furo-subtitle">Projeto {{ furo.projeto.nome }} · acompanhamento técnico, equipa e produção do furo.</p>
+            <h1>{% blocktrans with nome=furo.nome %}Furo {{ nome }}{% endblocktrans %}</h1>
+            <p class="furo-subtitle">{% blocktrans with projeto_nome=furo.projeto.nome %}Projeto {{ projeto_nome }} · acompanhamento técnico, equipa e produção do furo.{% endblocktrans %}</p>
         </div>
         <div class="furo-status-badge">
-            <span>Estado</span>
+            <span>{% trans "Estado" %}</span>
             <strong>{{ furo.get_estado_display }}</strong>
         </div>
     </div>
 
     <section class="furo-section">
-        <h2 class="furo-section-title">Dados Gerais do Furo</h2>
+        <h2 class="furo-section-title">{% trans "Dados Gerais do Furo" %}</h2>
         <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">Projeto</span><span class="furo-stat-value">{{ furo.projeto.nome }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Tipo</span><span class="furo-stat-value">{{ furo.get_tipo_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade inicial</span><span class="furo-stat-value">{{ furo.profundidade_inicial }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade atual</span><span class="furo-stat-value">{{ furo.profundidade_atual }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade máxima</span><span class="furo-stat-value">{{ furo.profundidade_maxima_atingida }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Total de horas</span><span class="furo-stat-value">{{ total_horas_registos_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Magnetismo</span><span class="furo-stat-value">{{ furo.magnetismo|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Latitude</span><span class="furo-stat-value">{{ furo.latitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Longitude</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Altitude</span><span class="furo-stat-value">{{ furo.altitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Sistema de coordenadas</span><span class="furo-stat-value">{{ furo.get_sistema_coordenadas_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Data de criação</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Projeto" %}</span><span class="furo-stat-value">{{ furo.projeto.nome }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Tipo" %}</span><span class="furo-stat-value">{{ furo.get_tipo_display }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade inicial" %}</span><span class="furo-stat-value">{{ furo.profundidade_inicial }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade atual" %}</span><span class="furo-stat-value">{{ furo.profundidade_atual }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade máxima" %}</span><span class="furo-stat-value">{{ furo.profundidade_maxima_atingida }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Total de horas" %}</span><span class="furo-stat-value">{{ total_horas_registos_display }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Magnetismo" %}</span><span class="furo-stat-value">{{ furo.magnetismo|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Latitude" %}</span><span class="furo-stat-value">{{ furo.latitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Longitude" %}</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Altitude" %}</span><span class="furo-stat-value">{{ furo.altitude|default:"-" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Sistema de coordenadas" %}</span><span class="furo-stat-value">{{ furo.get_sistema_coordenadas_display }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data de criação" %}</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
         </div>
     </section>
 
@@ -80,88 +86,95 @@
     {% endif %}
 
     <section class="furo-section">
-        <h2 class="furo-section-title">Planeamento Inicial</h2>
+        <h2 class="furo-section-title">{% trans "Planeamento Inicial" %}</h2>
         <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade alvo inicial</span><span class="furo-stat-value">{{ furo.profundidade_alvo_inicial }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação planeada inicial</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_inicial }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Azimute planeado inicial</span><span class="furo-stat-value">{{ furo.azimute_planeado_inicial }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade alvo inicial" %}</span><span class="furo-stat-value">{{ furo.profundidade_alvo_inicial }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação planeada inicial" %}</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_inicial }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute planeado inicial" %}</span><span class="furo-stat-value">{{ furo.azimute_planeado_inicial }}°</span></div>
         </div>
     </section>
 
     <section class="furo-section">
-        <h2 class="furo-section-title">Planeamento Atual</h2>
+        <h2 class="furo-section-title">{% trans "Planeamento Atual" %}</h2>
         <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">Profundidade alvo atual</span><span class="furo-stat-value">{{ furo.profundidade_alvo_atual }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação planeada atual</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_atual|default:"-" }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Azimute planeado atual</span><span class="furo-stat-value">{{ furo.azimute_planeado_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade alvo atual" %}</span><span class="furo-stat-value">{{ furo.profundidade_alvo_atual }} m</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação planeada atual" %}</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute planeado atual" %}</span><span class="furo-stat-value">{{ furo.azimute_planeado_atual|default:"-" }}°</span></div>
         </div>
     </section>
 
     <section class="furo-section">
-        <h2 class="furo-section-title">Estado Real Atual</h2>
+        <h2 class="furo-section-title">{% trans "Estado Real Atual" %}</h2>
         <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">Inclinação real atual</span><span class="furo-stat-value">{{ furo.inclinacao_real_atual|default:"-" }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">Azimute real atual</span><span class="furo-stat-value">{{ furo.azimute_real_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação real atual" %}</span><span class="furo-stat-value">{{ furo.inclinacao_real_atual|default:"-" }}°</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute real atual" %}</span><span class="furo-stat-value">{{ furo.azimute_real_atual|default:"-" }}°</span></div>
         </div>
     </section>
 
     <section class="furo-map-wrap">
-        <h2 class="furo-section-title">Mapa do Furo</h2>
+        <h2 class="furo-section-title">{% trans "Mapa do Furo" %}</h2>
         <div class="furo-map-card">
             <div id="map"></div>
         </div>
         <div class="furo-actions">
-            <a href="{% url 'projetos:furo_3d' furo.id %}" class="furo-action-btn btn-3d">Ver Trajetória 3D</a>
-            <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ Adicionar Trabalhador ao Furo</a>
-            <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 Histórico de Configurações</a>
-            <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 Adicionar Medição</a>
-            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="furo-action-btn btn-team">Geologia e Drone</a>
+            <a href="{% url 'projetos:furo_3d' furo.id %}" class="furo-action-btn btn-3d">{% trans "Ver Trajetória 3D" %}</a>
+            <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ {% trans "Adicionar Trabalhador ao Furo" %}</a>
+            <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 {% trans "Histórico de Configurações" %}</a>
+            <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 {% trans "Adicionar Medição" %}</a>
+            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="furo-action-btn btn-team">{% trans "Geologia e Drone" %}</a>
         </div>
     </section>
 
     <div class="furo-panels">
         <div class="furo-panel">
-            <h3>Materiais usados</h3>
+            <h3>{% trans "Materiais usados" %}</h3>
             <ul class="furo-list">
                 {% for material in furo.materiais.all %}
                     <li class="furo-list-item">
                         <div class="furo-list-main">{{ material.nome }}</div>
-                        <div class="furo-list-sub">Quantidade: {{ material.quantidade }} · Valor: {{ material.valor }} €</div>
+                        <div class="furo-list-sub">{% blocktrans with quantidade=material.quantidade valor=material.valor %}Quantidade: {{ quantidade }} · Valor: {{ valor }} €{% endblocktrans %}</div>
                     </li>
                 {% empty %}
-                    <li class="furo-empty">Nenhum material registado.</li>
+                    <li class="furo-empty">{% trans "Nenhum material registado." %}</li>
                 {% endfor %}
             </ul>
         </div>
 
         <div class="furo-panel">
-            <h3>Máquinas usadas</h3>
+            <h3>{% trans "Máquinas usadas" %}</h3>
             <ul class="furo-list">
                 {% for maquina in furo.maquinas.all %}
                     <li class="furo-list-item">
                         <div class="furo-list-main">{{ maquina.nome }}</div>
-                        <div class="furo-list-sub">{{ maquina.modelo|default:"Sem modelo" }} · {{ maquina.get_estado_display|default:maquina.estado }}</div>
+                        <div class="furo-list-sub">
+                            {% if maquina.modelo %}
+                                {{ maquina.modelo }}
+                            {% else %}
+                                {% trans "Sem modelo" %}
+                            {% endif %}
+                            · {{ maquina.get_estado_display|default:maquina.estado }}
+                        </div>
                     </li>
                 {% empty %}
-                    <li class="furo-empty">Nenhuma máquina registada.</li>
+                    <li class="furo-empty">{% trans "Nenhuma máquina registada." %}</li>
                 {% endfor %}
             </ul>
         </div>
 
         <div class="furo-panel">
-            <h3>Empregados envolvidos</h3>
+            <h3>{% trans "Empregados envolvidos" %}</h3>
             <ul class="furo-list">
                 {% for ligacao in furo.ligacoes_empregados.all %}
                     <li class="furo-list-item">
                         <div class="furo-list-main">{{ ligacao.empregado.nome }}</div>
                         <div class="furo-list-sub">{{ ligacao.get_funcao_display }}</div>
                         <div class="furo-mini-actions">
-                            <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}" class="furo-mini-btn btn-edit">Editar</a>
-                            <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}" class="furo-mini-btn btn-delete">Remover</a>
+                            <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}" class="furo-mini-btn btn-edit">{% trans "Editar" %}</a>
+                            <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}" class="furo-mini-btn btn-delete">{% trans "Remover" %}</a>
                         </div>
                     </li>
                 {% empty %}
-                    <li class="furo-empty">Nenhum empregado registado neste furo.</li>
+                    <li class="furo-empty">{% trans "Nenhum empregado registado neste furo." %}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -170,23 +183,23 @@
     <section class="furo-table-card">
         <div class="furo-table-header">
             <div>
-                <h2>Medições</h2>
-                <p>Histórico técnico das medições registadas para este furo.</p>
+                <h2>{% trans "Medições" %}</h2>
+                <p>{% trans "Histórico técnico das medições registadas para este furo." %}</p>
             </div>
         </div>
         <div class="furo-table-wrap">
             <table class="furo-table">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Profundidade</th>
-                        <th>Inclinação real</th>
-                        <th>Azimute real</th>
-                        <th>Magnetismo</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Altitude</th>
-                        <th>Imagem</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Profundidade" %}</th>
+                        <th>{% trans "Inclinação real" %}</th>
+                        <th>{% trans "Azimute real" %}</th>
+                        <th>{% trans "Magnetismo" %}</th>
+                        <th>{% trans "Latitude" %}</th>
+                        <th>{% trans "Longitude" %}</th>
+                        <th>{% trans "Altitude" %}</th>
+                        <th>{% trans "Imagem" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -210,7 +223,7 @@
                  </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9" class="furo-empty">Nenhuma medição registada.</td>
+                    <td colspan="9" class="furo-empty">{% trans "Nenhuma medição registada." %}</td>
                 </tr>
             {% endfor %}
                 </tbody>
@@ -221,24 +234,24 @@
     <section class="furo-table-card">
         <div class="furo-table-header">
             <div>
-                <h2>Logging Geológico</h2>
-                <p>Resumo recente do fluxo geológico do furo e integração com missões DJI Mini 4 Pro.</p>
+                <h2>{% trans "Logging Geológico" %}</h2>
+                <p>{% trans "Resumo recente do fluxo geológico do furo e integração com missões DJI Mini 4 Pro." %}</p>
             </div>
             <div>
-                <a href="{% url 'geologia:log_create' furo.id %}" class="furo-action-btn btn-measure">Novo Log</a>
+                <a href="{% url 'geologia:log_create' furo.id %}" class="furo-action-btn btn-measure">{% trans "Novo Log" %}</a>
             </div>
         </div>
         <div class="furo-table-wrap">
             <table class="furo-table">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Intervalo</th>
-                        <th>Litologia</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Intervalo" %}</th>
+                        <th>{% trans "Litologia" %}</th>
                         <th>RQD</th>
-                        <th>Recuperação</th>
-                        <th>Drone</th>
-                        <th>Ações</th>
+                        <th>{% trans "Recuperação" %}</th>
+                        <th>{% trans "Drone" %}</th>
+                        <th>{% trans "Ações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -250,11 +263,11 @@
                         <td>{{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</td>
                         <td>{{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</td>
                         <td>{{ log.missao_drone.titulo|default:"-" }}</td>
-                        <td><a href="{% url 'geologia:log_detail' log.id %}" class="furo-link">Abrir</a></td>
+                        <td><a href="{% url 'geologia:log_detail' log.id %}" class="furo-link">{% trans "Abrir" %}</a></td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="furo-empty">Ainda não existem logs geológicos para este furo.</td>
+                        <td colspan="7" class="furo-empty">{% trans "Ainda não existem logs geológicos para este furo." %}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -262,7 +275,7 @@
         </div>
         {% if missoes_drone_recentes %}
             <div class="furo-drone-recent-wrap">
-                <h3 class="furo-drone-recent-title">Missões Drone Recentes</h3>
+                <h3 class="furo-drone-recent-title">{% trans "Missões Drone Recentes" %}</h3>
                 <ul class="furo-list">
                     {% for missao in missoes_drone_recentes %}
                         <li class="furo-list-item">
@@ -278,8 +291,8 @@
     <section class="furo-table-card">
         <div class="furo-table-header">
             <div>
-                <h2>Levantamentos de Material</h2>
-                <p>Movimentos de material associados a este furo.</p>
+                <h2>{% trans "Levantamentos de Material" %}</h2>
+                <p>{% trans "Movimentos de material associados a este furo." %}</p>
             </div>
         </div>
 
@@ -288,12 +301,12 @@
                 <table class="furo-table">
                     <thead>
                         <tr>
-                            <th>Data</th>
-                            <th>Empregado</th>
-                            <th>Material</th>
-                            <th>Quantidade</th>
-                            <th>Projeto</th>
-                            <th>Observações</th>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Empregado" %}</th>
+                            <th>{% trans "Material" %}</th>
+                            <th>{% trans "Quantidade" %}</th>
+                            <th>{% trans "Projeto" %}</th>
+                            <th>{% trans "Observações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -313,7 +326,7 @@
                                             {{ levantamento.projeto.nome }}
                                         </a>
                                     {% else %}
-                                        Stock
+                                        {% trans "Stock" %}
                                     {% endif %}
                                 </td>
                                 <td>{{ levantamento.observacoes|default:"-" }}</td>
@@ -323,14 +336,14 @@
                 </table>
             </div>
         {% else %}
-            <div class="furo-empty furo-empty-table">Ainda não existem levantamentos de material neste furo.</div>
+            <div class="furo-empty furo-empty-table">{% trans "Ainda não existem levantamentos de material neste furo." %}</div>
         {% endif %}
     </section>
 
     <div class="furo-footer-actions">
-        <a href="{% url 'projetos:furo_update' furo.id %}" class="furo-action-btn btn-edit">✏️ Editar Furo</a>
-        <a href="{% url 'projetos:furo_delete' furo.id %}" class="furo-action-btn btn-delete">🗑️ Apagar Furo</a>
-        <a href="{% url 'projetos:furo_list' %}" class="furo-action-btn btn-back">🔙 Voltar</a>
+        <a href="{% url 'projetos:furo_update' furo.id %}" class="furo-action-btn btn-edit">✏️ {% trans "Editar Furo" %}</a>
+        <a href="{% url 'projetos:furo_delete' furo.id %}" class="furo-action-btn btn-delete">🗑️ {% trans "Apagar Furo" %}</a>
+        <a href="{% url 'projetos:furo_list' %}" class="furo-action-btn btn-back">🔙 {% trans "Voltar" %}</a>
     </div>
 
 </div>
@@ -341,7 +354,7 @@
 <div id="modal" class="furo-modal">
     <img id="modal_img">
     <div class="furo-modal-actions">
-        <button id="furo-modal-close" class="furo-modal-close">Fechar</button>
+        <button id="furo-modal-close" class="furo-modal-close">{% trans "Fechar" %}</button>
     </div>
 </div>
 

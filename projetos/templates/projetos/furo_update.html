@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/furo_update.css' %}">
@@ -9,7 +9,7 @@
 <div class="fu-shell">
     <div class="fu-card">
 
-        <h1 class="fu-title">Editar Furo: {{ form.instance.nome }}</h1>
+        <h1 class="fu-title">{% blocktrans with nome=form.instance.nome %}Editar Furo: {{ nome }}{% endblocktrans %}</h1>
 
         <form method="POST" enctype="multipart/form-data" class="fu-form">
             {% csrf_token %}
@@ -25,9 +25,9 @@
             {% endfor %}
 
             <div class="fu-actions">
-                <button type="submit" class="fu-btn fu-btn-save">💾 Salvar</button>
+                <button type="submit" class="fu-btn fu-btn-save">💾 {% trans "Salvar" %}</button>
 
-                <a href="{{ furo.get_absolute_url }}" class="fu-btn fu-btn-cancel">❌ Cancelar</a>
+                <a href="{{ furo.get_absolute_url }}" class="fu-btn fu-btn-cancel">❌ {% trans "Cancelar" %}</a>
             </div>
         </form>
 

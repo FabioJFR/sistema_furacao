@@ -47,6 +47,7 @@ def _serializar_furo_mapa(furo):
 
     return {
         "id": str(furo.id),
+        "slug": furo.slug_url,
         "nome": furo.nome,
         "profundidade_atual": furo.profundidade_atual or 0,
         "profundidade_alvo_inicial": furo.profundidade_alvo_inicial or 0,

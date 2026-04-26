@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}Subscrições{% endblock %}
 {% block extra_css %}
@@ -16,7 +16,7 @@ Gestão de subscrições das empresas na plataforma.
 <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <h1>Subscrições</h1>
 
 <div class="grid">

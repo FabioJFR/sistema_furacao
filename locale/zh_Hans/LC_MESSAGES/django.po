@@ -1,0 +1,4972 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-26 08:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: dispositivos/templates/dispositivos/captura.html:5
+#: dispositivos/templates/dispositivos/captura.html:22
+msgid "Captura de Dispositivo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:24
+msgid ""
+"Inicie uma sessão real com dispositivo e furo para associar corretamente as "
+"leituras."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:30
+msgid "Ver sessões"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:33
+msgid "Ver dispositivos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:40
+msgid "Nova sessão de captura"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:46
+#: dispositivos/templates/dispositivos/sessao_detail.html:30
+#: dispositivos/templates/dispositivos/sessao_list.html:35
+msgid "Dispositivo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:54
+msgid "Sem dispositivos ativos disponíveis"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:60
+#: dispositivos/templates/dispositivos/captura.html:198
+#: dispositivos/templates/dispositivos/captura.html:229
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:71
+#: dispositivos/templates/dispositivos/sessao_detail.html:48
+#: dispositivos/templates/dispositivos/sessao_list.html:36
+#: dispositivos/templates/dispositivos/survey_shot_list.html:64
+#: projetos/templates/projetos/analytics_eventos.html:69
+#: projetos/templates/projetos/area_empregado.html:152
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:29
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:32
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:37
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:37
+#: projetos/templates/projetos/despesa_form.html:61
+#: projetos/templates/projetos/devolucao_material_admin_list.html:22
+#: projetos/templates/projetos/devolucao_material_list.html:28
+#: projetos/templates/projetos/furo_detail.html:8
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:35
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:35
+#: projetos/templates/projetos/levantamento_material_admin_list.html:81
+#: projetos/templates/projetos/levantamento_material_list.html:28
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:40
+#: projetos/templates/projetos/material_detail.html:98
+#: projetos/templates/projetos/material_detail.html:153
+#: projetos/templates/projetos/meus_dados_empregado.html:156
+msgid "Furo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:68
+msgid "Sem furos disponíveis"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:77
+msgid "Criar sessão e abrir detalhe"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:82
+msgid "Iniciar procura USB"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:88
+msgid "Parar procura"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:93
+msgid "Iniciar Bluetooth"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:99
+msgid "Parar Bluetooth"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:105
+msgid "Testar leitura"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:114
+msgid "Monitor de ligação e leitura"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:116
+msgid ""
+"Acompanhe em tempo real o que está a acontecer com a ligação USB e veja os "
+"dados recebidos."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:124
+msgid "Estado / eventos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:127
+msgid "USB parado"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:130
+msgid "Bluetooth parado"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:135
+msgid "Sistema pronto para procurar portas e testar leituras."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:140
+msgid "Portas encontradas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:142
+msgid "Ainda não foi feita nenhuma procura."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:146
+msgid "Bluetooth encontrados"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:148
+msgid "Ainda não foi feita nenhuma procura Bluetooth."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:155
+msgid "Dados recebidos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:159
+msgid "Texto"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:160
+#: dispositivos/templates/dispositivos/captura.html:164
+msgid "Sem dados ainda."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:163
+msgid "Hex"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:173
+msgid "Dispositivos já encontrados"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:175
+msgid ""
+"Resumo dos equipamentos detetados durante as procuras USB e Bluetooth nesta "
+"sessão de trabalho."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:181
+msgid "Ainda não foram encontrados dispositivos."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:188
+msgid "Sessões ativas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:201
+#: dispositivos/templates/dispositivos/dispositivo_list.html:50
+#: dispositivos/templates/dispositivos/sessao_list.html:38
+#: projetos/templates/projetos/empregado_detail.html:138
+#: projetos/templates/projetos/empregado_pendentes.html:33
+#: projetos/templates/projetos/furo_3d_empregado.html:18
+#: projetos/templates/projetos/furo_detail.html:36
+#: projetos/templates/projetos/furo_detail_empregado.html:16
+#: projetos/templates/projetos/furo_detail_empregado.html:57
+#: projetos/templates/projetos/historico_configuracao_comparar.html:30
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:82
+#: projetos/templates/projetos/meus_dados_empregado.html:116
+#: projetos/templates/projetos/meus_projetos_empregado.html:42
+#: projetos/templates/projetos/projeto_detail_empregado.html:20
+#: projetos/templates/projetos/projeto_detail_empregado.html:91
+#: projetos/templates/projetos/projeto_editar.html:42
+msgid "Estado"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:205
+#: projetos/templates/projetos/dashboard.html:78
+#: projetos/templates/projetos/furo_detail.html:266
+msgid "Abrir"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:212
+msgid "Não existem sessões ativas neste momento."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:219
+msgid "Sessões recentes"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:236
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:73
+#: dispositivos/templates/dispositivos/sessao_detail.html:153
+#: dispositivos/templates/dispositivos/sessao_list.html:99
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:107
+#: projetos/templates/projetos/historico_configuracao_comparar.html:64
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:53
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:51
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:44
+msgid "Ver detalhe"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/captura.html:243
+#: dispositivos/templates/dispositivos/sessao_list.html:110
+msgid "Ainda não existem sessões registadas."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:4
+#: dispositivos/templates/dispositivos/dispositivo_list.html:11
+#: projetos/templates/projetos/base.html:58
+msgid "Dispositivos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:13
+msgid "Gestão e monitorização dos dispositivos ligados ao sistema."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:21
+msgid "Total de dispositivos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:26
+msgid "Ligação suportada"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:27
+msgid "USB / Serial, Bluetooth, Arquivo, Simulador"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:31
+msgid "Integração futura"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:38
+msgid "Lista de Dispositivos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:46
+#: projetos/templates/projetos/empregado_form.html:56
+#: projetos/templates/projetos/empregado_list.html:21
+#: projetos/templates/projetos/empregado_pendentes.html:29
+#: projetos/templates/projetos/empregado_update.html:24
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:78
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:33
+#: projetos/templates/projetos/meus_dados_individual_editar.html:30
+#: projetos/templates/projetos/projeto_editar.html:21
+#: projetos/templates/projetos/projeto_form.html:19
+msgid "Nome"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:47
+#: projetos/templates/projetos/area_empregado.html:155
+#: projetos/templates/projetos/despesa_form.html:41
+#: projetos/templates/projetos/despesa_list.html:35
+#: projetos/templates/projetos/empregado_detail.html:263
+#: projetos/templates/projetos/furo_detail.html:45
+#: projetos/templates/projetos/furo_detail_empregado.html:56
+#: projetos/templates/projetos/meus_furos_empregado.html:32
+msgid "Tipo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:48
+msgid "Canal"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:49
+msgid "Identificador"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:79
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:16
+#: projetos/templates/projetos/meus_dados_empregado.html:128
+msgid "Ativo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:83
+msgid "Inativo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:95
+msgid "Ainda não existem dispositivos registados"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/dispositivo_list.html:97
+msgid ""
+"Os dispositivos registados aparecerão aqui para suporte às sessões e "
+"capturas do sistema."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:4
+msgid "Detalhe da Leitura Bruta"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:12
+msgid "Leitura Bruta do Dispositivo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:15
+msgid "Inspeção técnica do payload recebido do dispositivo."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:21
+msgid "Voltar à sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:29
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:35
+#: dispositivos/templates/dispositivos/survey_shot_list.html:63
+msgid "Sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:34
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:36
+#: dispositivos/templates/dispositivos/sessao_detail.html:125
+msgid "Sequência"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:39
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:37
+#: dispositivos/templates/dispositivos/sessao_detail.html:126
+msgid "Recebido em"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:45
+#: projetos/templates/projetos/furo_detail_empregado.html:52
+msgid "Informação Geral"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:49
+#: website/templates/website/registo.html:33
+msgid "Empresa"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:60
+msgid "Dispositivo da sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:82
+#: dispositivos/templates/dispositivos/sessao_detail.html:57
+#: dispositivos/templates/dispositivos/sessao_list.html:37
+#: projetos/templates/projetos/dashboard.html:121
+#: projetos/templates/projetos/devolucao_material_admin_list.html:18
+#: projetos/templates/projetos/empregado_detail.html:8
+#: projetos/templates/projetos/furo_detail.html:305
+#: projetos/templates/projetos/levantamento_material_admin_list.html:19
+#: projetos/templates/projetos/levantamento_material_admin_list.html:77
+#: projetos/templates/projetos/material_detail.html:95
+#: projetos/templates/projetos/material_detail.html:150
+msgid "Empregado"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:96
+msgid "Payload Texto"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:101
+msgid "Sem conteúdo em texto."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:106
+msgid "Payload Hex"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:111
+msgid "Sem conteúdo hexadecimal."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:116
+msgid "Payload JSON"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_detail.html:121
+msgid "Sem conteúdo JSON."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:4
+msgid "Leituras Brutas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:13
+msgid "Leituras Brutas do Dispositivo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:16
+msgid "Dados recebidos diretamente do dispositivo (debug e análise)."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:22
+#: dispositivos/templates/dispositivos/sessao_list.html:22
+#: dispositivos/templates/dispositivos/survey_shot_list.html:19
+#: projetos/templates/projetos/dashboard.html:2
+#: projetos/templates/projetos/empregado_detail.html:17
+#: projetos/templates/projetos/furo_detail.html:23
+#: projetos/templates/projetos/projeto_detail.html:16
+msgid "Dashboard"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:38
+#: dispositivos/templates/dispositivos/sessao_detail.html:127
+msgid "Preview"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:39
+#: dispositivos/templates/dispositivos/sessao_detail.html:128
+#: dispositivos/templates/dispositivos/sessao_list.html:41
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:95
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:36
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:44
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:41
+#: projetos/templates/projetos/empregado_detail.html:139
+#: projetos/templates/projetos/empregado_detail.html:267
+#: projetos/templates/projetos/empregado_list.html:27
+#: projetos/templates/projetos/empregado_pendentes.html:35
+#: projetos/templates/projetos/furo_detail.html:254
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:39
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:38
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:83
+msgid "Ações"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/leitura_bruta_list.html:84
+msgid "Ainda não existem leituras brutas registadas."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:5
+msgid "Detalhe da Sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:13
+msgid "Sessão de Dispositivo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:16
+msgid "Detalhe completo da sessão, leituras recebidas e shots gerados."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:22
+msgid "Voltar à lista"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:43
+msgid "Capturar leitura USB/Serial"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:62
+msgid "Estado da Sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:83
+msgid "Iniciado em"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:86
+msgid "Terminado em"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:93
+msgid "Mensagem de erro"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:100
+msgid "Leituras brutas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:105
+msgid "Leituras processadas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:110
+msgid "Survey shots"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:117
+msgid "Leituras Brutas da Sessão"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:163
+msgid "Ainda não existem leituras brutas associadas a esta sessão."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:170
+msgid "Leituras Processadas"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:178
+msgid "Timestamp Device"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:179
+msgid "Profundidade (m)"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:180
+msgid "Inclinação (°)"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:181
+msgid "Azimute (°)"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:182
+msgid "Qualidade"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:202
+msgid "Ainda não existem leituras processadas nesta sessão."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:209
+#: dispositivos/templates/dispositivos/survey_shot_list.html:4
+#: dispositivos/templates/dispositivos/survey_shot_list.html:11
+msgid "Survey Shots"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:217
+#: dispositivos/templates/dispositivos/survey_shot_list.html:65
+#: projetos/templates/projetos/furo_detail.html:195
+#: projetos/templates/projetos/furo_detail_empregado.html:101
+msgid "Profundidade"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:218
+#: dispositivos/templates/dispositivos/survey_shot_list.html:66
+#: projetos/templates/projetos/furo_detail_empregado.html:102
+msgid "Inclinação"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:219
+#: dispositivos/templates/dispositivos/survey_shot_list.html:67
+#: projetos/templates/projetos/furo_detail_empregado.html:103
+msgid "Azimute"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:220
+#: dispositivos/templates/dispositivos/survey_shot_list.html:68
+msgid "Origem"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:221
+#: dispositivos/templates/dispositivos/survey_shot_list.html:69
+msgid "Válido"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:222
+#: dispositivos/templates/dispositivos/survey_shot_list.html:70
+msgid "Criado em"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:235
+#: dispositivos/templates/dispositivos/survey_shot_list.html:89
+#: projetos/templates/projetos/empregado_detail.html:77
+#: projetos/templates/projetos/furo_remover_empregado.html:19
+#: projetos/templates/projetos/maquina_detail.html:34
+#: projetos/templates/projetos/material_detail.html:66
+#: website/templates/website/planos.html:28
+#: website/templates/website/planos.html:31
+#: website/templates/website/planos.html:34
+msgid "Sim"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:239
+#: dispositivos/templates/dispositivos/survey_shot_list.html:93
+#: projetos/templates/projetos/empregado_detail.html:77
+#: projetos/templates/projetos/furo_remover_empregado.html:19
+#: projetos/templates/projetos/maquina_detail.html:34
+#: projetos/templates/projetos/material_detail.html:66
+#: website/templates/website/planos.html:28
+#: website/templates/website/planos.html:31
+#: website/templates/website/planos.html:34
+msgid "Não"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_detail.html:251
+msgid "Ainda não existem survey shots nesta sessão."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_list.html:4
+#: dispositivos/templates/dispositivos/sessao_list.html:13
+msgid "Sessões de Dispositivos"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_list.html:16
+msgid "Monitorização das ligações e recolha de dados dos dispositivos."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_list.html:39
+#: projetos/templates/projetos/empregado_detail.html:136
+#: projetos/templates/projetos/meus_dados_empregado.html:114
+#: projetos/templates/projetos/projeto_detail_empregado.html:69
+msgid "Início"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/sessao_list.html:40
+#: projetos/templates/projetos/empregado_detail.html:137
+#: projetos/templates/projetos/meus_dados_empregado.html:115
+msgid "Fim"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:13
+msgid ""
+"Lista das medições direcionais capturadas a partir das sessões de "
+"dispositivos."
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:22
+msgid "Sessões"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:30
+msgid "Total de shots"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:35
+msgid "Último registo"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:46
+msgid "Origem principal"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:106
+msgid "Ainda não existem survey shots registados"
+msgstr ""
+
+#: dispositivos/templates/dispositivos/survey_shot_list.html:108
+msgid ""
+"Os shots aparecerão aqui assim que houver leituras processadas a partir das "
+"sessões dos dispositivos."
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:3
+msgid "Analytics · Eventos"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:13
+msgid "Eventos Analytics"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:15
+msgid ""
+"Histórico de alterações em projetos, furos, medições, materiais, despesas, "
+"máquinas e associações de trabalhadores."
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:22
+msgid "Eventos visíveis"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:26
+msgid "Criações"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:30
+msgid "Atualizações"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:34
+msgid "Eliminações"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:42
+msgid "Tipo de evento"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:44
+#: projetos/templates/projetos/analytics_eventos.html:62
+#: projetos/templates/projetos/analytics_eventos.html:71
+#: projetos/templates/projetos/dashboard.html:111
+#: projetos/templates/projetos/dashboard.html:123
+#: projetos/templates/projetos/furo_3d_empregado.html:71
+#: projetos/templates/projetos/levantamento_material_admin_list.html:21
+#: projetos/templates/projetos/levantamento_material_admin_list.html:33
+#: projetos/templates/projetos/levantamento_material_admin_list.html:45
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:30
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:42
+msgid "Todos"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:45
+msgid "Criação"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:46
+msgid "Atualização"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:47
+msgid "Eliminação"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:51
+#: projetos/templates/projetos/analytics_eventos.html:92
+msgid "Entidade"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:53
+msgid "Todas"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:60
+#: projetos/templates/projetos/area_empregado.html:151
+#: projetos/templates/projetos/dashboard.html:109
+#: projetos/templates/projetos/despesa_form.html:57
+#: projetos/templates/projetos/devolucao_material_admin_list.html:21
+#: projetos/templates/projetos/devolucao_material_list.html:27
+#: projetos/templates/projetos/empregado_detail.html:135
+#: projetos/templates/projetos/furo_3d_empregado.html:17
+#: projetos/templates/projetos/furo_detail.html:44
+#: projetos/templates/projetos/furo_detail.html:308
+#: projetos/templates/projetos/furo_detail_empregado.html:13
+#: projetos/templates/projetos/furo_detail_empregado.html:83
+#: projetos/templates/projetos/levantamento_material_admin_list.html:43
+#: projetos/templates/projetos/levantamento_material_admin_list.html:80
+#: projetos/templates/projetos/levantamento_material_list.html:27
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:28
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:79
+#: projetos/templates/projetos/material_detail.html:97
+#: projetos/templates/projetos/material_detail.html:152
+#: projetos/templates/projetos/meus_dados_empregado.html:113
+#: projetos/templates/projetos/meus_dados_empregado.html:155
+#: projetos/templates/projetos/meus_furos_empregado.html:23
+msgid "Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:78
+#: projetos/templates/projetos/dashboard.html:133
+#: projetos/templates/projetos/graficos_dashboard.html:59
+#: projetos/templates/projetos/levantamento_material_admin_list.html:65
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:61
+#: projetos/templates/projetos/material_list.html:33
+#: projetos/templates/projetos/registos_admin_list.html:64
+msgid "Filtrar"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:79
+#: projetos/templates/projetos/dashboard.html:134
+#: projetos/templates/projetos/graficos_dashboard.html:60
+#: projetos/templates/projetos/levantamento_material_admin_list.html:66
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:62
+#: projetos/templates/projetos/material_list.html:35
+#: projetos/templates/projetos/registos_admin_list.html:65
+msgid "Limpar"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:90
+msgid "Momento"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:91
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:93
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:36
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:36
+msgid "Ação"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:93
+#: website/templates/website/login.html:23
+msgid "Utilizador"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:94
+msgid "Projeto / Furo"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:95
+msgid "Métricas"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:118
+msgid "Sistema"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:124
+#: projetos/templates/projetos/area_empregado.html:121
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:14
+#: projetos/templates/projetos/material_detail.html:30
+#: projetos/templates/projetos/material_list.html:47
+#: projetos/templates/projetos/medicao_empregado_detail.html:35
+msgid "Projeto:"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:125
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:19
+#: projetos/templates/projetos/empregado_detail.html:205
+#: projetos/templates/projetos/furo_remover_empregado.html:16
+#: projetos/templates/projetos/historico_configuracao_detail.html:33
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:12
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:19
+#: projetos/templates/projetos/material_detail.html:40
+#: projetos/templates/projetos/medicao_empregado_detail.html:34
+msgid "Furo:"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:137
+msgid "Sem métricas numéricas"
+msgstr ""
+
+#: projetos/templates/projetos/analytics_eventos.html:146
+msgid "Ainda não existem eventos analytics para os filtros selecionados."
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:5
+#: projetos/templates/projetos/area_individual.html:4
+msgid "Minha Área"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:13
+#: projetos/templates/projetos/area_individual.html:11
+#, python-format
+msgid "Bem-vindo, %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:14
+msgid "Resumo geral da tua atividade."
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:20
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:4
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:4
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:11
+#: projetos/templates/projetos/empregado_detail.html:193
+msgid "Configurações de Perfuração"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:25
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:19
+#: projetos/templates/projetos/meus_projetos_empregado.html:4
+#: projetos/templates/projetos/meus_projetos_empregado.html:11
+#: projetos/templates/projetos/projeto_detail_empregado.html:25
+msgid "Meus Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:30
+#: projetos/templates/projetos/furo_3d_empregado.html:23
+#: projetos/templates/projetos/furo_detail_empregado.html:21
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:20
+#: projetos/templates/projetos/medicao_empregado_detail.html:9
+#: projetos/templates/projetos/meus_furos_empregado.html:4
+#: projetos/templates/projetos/meus_furos_empregado.html:9
+#: projetos/templates/projetos/meus_projetos_empregado.html:19
+#: projetos/templates/projetos/projeto_detail_empregado.html:26
+msgid "Meus Furos"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:39
+msgid "Horas Hoje"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:44
+msgid "Horas Mês"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:49
+#: projetos/templates/projetos/area_individual.html:26
+#: projetos/templates/projetos/meus_dados_individual.html:43
+msgid "Total Horas"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:54
+msgid "Metros Hoje"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:59
+#: projetos/templates/projetos/area_individual.html:30
+#: projetos/templates/projetos/meus_dados_individual.html:47
+msgid "Total Metros"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:64
+msgid "Furos Trabalhados"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:69
+#: projetos/templates/projetos/projeto_detail_empregado.html:49
+msgid "Média m/h"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:74
+msgid "Média m/dia"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:81
+#: projetos/templates/projetos/empregado_detail.html:103
+#: projetos/templates/projetos/empregado_list.html:26
+msgid "Projetos Atuais"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:92
+#: projetos/templates/projetos/empregado_detail.html:122
+msgid "Sem projetos atuais."
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:98
+msgid "Metros por Dia"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:103
+msgid "Horas por Dia"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:108
+msgid "Produtividade (m/h)"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:114
+msgid "Furos em que Trabalhei"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:122
+#: projetos/templates/projetos/furo_list.html:47
+msgid "Profundidade Atual:"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:127
+msgid "Ver Detalhes"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:132
+#: projetos/templates/projetos/furo_detail_empregado.html:23
+#: projetos/templates/projetos/projeto_detail.html:29
+#: projetos/templates/projetos/projeto_detail_empregado.html:102
+msgid "Ver 3D"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:139
+msgid "Ainda não existem furos associados aos teus registos."
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:144
+msgid "Últimos Registos"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:150
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:92
+#: projetos/templates/projetos/despesa_form.html:53
+#: projetos/templates/projetos/despesa_list.html:33
+#: projetos/templates/projetos/devolucao_material_admin_list.html:17
+#: projetos/templates/projetos/devolucao_material_list.html:24
+#: projetos/templates/projetos/furo_detail.html:194
+#: projetos/templates/projetos/furo_detail.html:248
+#: projetos/templates/projetos/furo_detail.html:304
+#: projetos/templates/projetos/furo_detail_empregado.html:106
+#: projetos/templates/projetos/furo_detail_empregado.html:136
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:34
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:34
+#: projetos/templates/projetos/levantamento_material_admin_list.html:76
+#: projetos/templates/projetos/levantamento_material_list.html:24
+#: projetos/templates/projetos/material_detail.html:94
+#: projetos/templates/projetos/material_detail.html:149
+msgid "Data"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:153
+#: projetos/templates/projetos/furo_detail_empregado.html:138
+msgid "Horas"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:154
+#: projetos/templates/projetos/furo_detail_empregado.html:139
+msgid "Paragem"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:156
+#: projetos/templates/projetos/furo_detail_empregado.html:137
+msgid "Metros"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:157
+msgid "Foto"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:173
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:61
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:55
+#: projetos/templates/projetos/empregado_detail.html:281
+#: projetos/templates/projetos/empregado_pendentes.html:55
+#: projetos/templates/projetos/maquina_list.html:44
+#: projetos/templates/projetos/material_list.html:65
+#: projetos/templates/projetos/registo_diario_list.html:56
+#: projetos/templates/projetos/registos_admin_list.html:134
+msgid "Ver"
+msgstr ""
+
+#: projetos/templates/projetos/area_empregado.html:182
+msgid "Sem registos ainda"
+msgstr ""
+
+#: projetos/templates/projetos/area_individual.html:12
+msgid "Resumo da tua conta individual."
+msgstr ""
+
+#: projetos/templates/projetos/area_individual.html:18
+#: projetos/templates/projetos/base.html:400
+#: projetos/templates/projetos/meus_dados_empregado.html:4
+#: projetos/templates/projetos/meus_dados_empregado.html:11
+#: projetos/templates/projetos/meus_dados_individual.html:4
+#: projetos/templates/projetos/meus_dados_individual.html:10
+msgid "Meus Dados"
+msgstr ""
+
+#: projetos/templates/projetos/area_individual.html:34
+#: projetos/templates/projetos/meus_dados_empregado.html:83
+#: projetos/templates/projetos/meus_dados_individual.html:39
+msgid "Total Registos"
+msgstr ""
+
+#: projetos/templates/projetos/area_individual.html:40
+msgid "Conta Individual"
+msgstr ""
+
+#: projetos/templates/projetos/area_individual.html:42
+msgid ""
+"Esta conta não está ligada a nenhuma empresa. Podes usar a tua área pessoal "
+"sem depender de contexto empresarial."
+msgstr ""
+
+#: projetos/templates/projetos/base.html:7
+msgid "Sistema de Perfuração"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:24
+msgid "Abrir menu principal"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:34
+#: website/templates/registration/password_reset_email.html:13
+msgid "Sistema Furação"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:39
+msgid "Menu principal"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:47
+msgid "Abrir menu Plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:50
+msgid "Plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:52
+msgid "Menu Plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:53
+msgid "Nova Empresa"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:54
+#: website/templates/website/planos.html:7
+#: website/templates/website/planos.html:13
+msgid "Planos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:55
+msgid "Subscrições"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:56
+#: projetos/templates/projetos/base.html:114
+#: projetos/templates/projetos/base.html:247
+#: projetos/templates/projetos/base.html:341
+#: projetos/templates/projetos/base.html:429
+msgid "Finanças"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:57
+#: projetos/templates/projetos/base.html:138
+#: projetos/templates/projetos/base.html:430
+msgid "Features"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:60
+#: projetos/templates/projetos/base.html:435
+msgid "Úteis"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:71
+#: projetos/templates/projetos/base.html:204
+#: projetos/templates/projetos/base.html:319
+msgid "Abrir menu Operação"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:74
+#: projetos/templates/projetos/base.html:207
+#: projetos/templates/projetos/base.html:322
+msgid "Operação"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:76
+#: projetos/templates/projetos/base.html:209
+#: projetos/templates/projetos/base.html:324
+msgid "Menu Operação"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:77
+#: projetos/templates/projetos/base.html:210
+#: projetos/templates/projetos/dashboard.html:68
+#: projetos/templates/projetos/projeto_detail.html:18
+#: projetos/templates/projetos/projeto_list.html:16
+msgid "Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:78
+#: projetos/templates/projetos/base.html:211
+#: projetos/templates/projetos/empregado_detail.html:19
+msgid "Empregados"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:79
+#: projetos/templates/projetos/base.html:212
+msgid "Máquinas"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:80
+#: projetos/templates/projetos/base.html:213
+#: projetos/templates/projetos/furo_detail.html:25
+#: projetos/templates/projetos/meus_projetos_empregado.html:37
+msgid "Furos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:81
+#: projetos/templates/projetos/base.html:214
+#: projetos/templates/projetos/base.html:325
+#: projetos/templates/projetos/furo_detail.html:186
+#: projetos/templates/projetos/furo_detail_empregado.html:75
+#: projetos/templates/projetos/furo_detail_empregado.html:92
+#: projetos/templates/projetos/medicao_list.html:4
+#: projetos/templates/projetos/medicao_list.html:11
+msgid "Medições"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:82
+#: projetos/templates/projetos/base.html:215
+#: projetos/templates/projetos/base.html:378
+msgid "Materiais"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:92
+#: projetos/templates/projetos/base.html:225
+#: projetos/templates/projetos/base.html:356
+msgid "Abrir menu Registos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:95
+#: projetos/templates/projetos/base.html:228
+#: projetos/templates/projetos/base.html:359
+msgid "Registos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:97
+#: projetos/templates/projetos/base.html:230
+#: projetos/templates/projetos/base.html:361
+msgid "Menu Registos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:98
+#: projetos/templates/projetos/base.html:231
+msgid "Produção"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:99
+#: projetos/templates/projetos/base.html:232
+msgid "Levantamentos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:100
+#: projetos/templates/projetos/base.html:233
+msgid "Devoluções"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:101
+#: projetos/templates/projetos/base.html:234
+#: projetos/templates/projetos/empregado_pendentes.html:4
+msgid "Empregados Pendentes"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:111
+#: projetos/templates/projetos/base.html:244
+#: projetos/templates/projetos/base.html:338
+msgid "Abrir menu Finanças"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:116
+#: projetos/templates/projetos/base.html:249
+#: projetos/templates/projetos/base.html:343
+msgid "Menu Finanças"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:117
+#: projetos/templates/projetos/base.html:250
+#: projetos/templates/projetos/base.html:344
+#: projetos/templates/projetos/despesa_list.html:4
+#: projetos/templates/projetos/despesa_list.html:14
+msgid "Minhas despesas"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:118
+#: projetos/templates/projetos/base.html:251
+#: projetos/templates/projetos/base.html:345
+#: projetos/templates/projetos/despesa_form.html:8
+#: projetos/templates/projetos/despesa_form.html:20
+#: projetos/templates/projetos/despesa_list.html:21
+msgid "Adicionar despesa"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:119
+#: projetos/templates/projetos/base.html:252
+msgid "Definições financeiras"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:120
+msgid "Finanças da Plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:130
+#: projetos/templates/projetos/base.html:262
+msgid "Abrir menu Analytics"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:133
+#: projetos/templates/projetos/base.html:265
+msgid "Analytics"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:135
+#: projetos/templates/projetos/base.html:267
+msgid "Menu Analytics"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:136
+#: projetos/templates/projetos/base.html:268
+#: projetos/templates/projetos/graficos_dashboard.html:2
+msgid "Gráficos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:137
+#: projetos/templates/projetos/base.html:269
+msgid "Eventos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:148
+#: projetos/templates/projetos/base.html:279
+msgid "Abrir menu AI"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:151
+#: projetos/templates/projetos/base.html:282
+msgid "AI"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:153
+#: projetos/templates/projetos/base.html:284
+msgid "Menu AI"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:154
+#: projetos/templates/projetos/base.html:285
+msgid "AI Visual"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:155
+#: projetos/templates/projetos/base.html:286
+msgid "Chatbox"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:156
+#: projetos/templates/projetos/base.html:287
+msgid "Biblioteca PDF"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:157
+#: projetos/templates/projetos/base.html:288
+msgid "Memória Operacional"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:158
+#: projetos/templates/projetos/base.html:289
+msgid "Nova análise"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:159
+#: projetos/templates/projetos/base.html:290
+msgid "Histórico AI"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:169
+#: projetos/templates/projetos/base.html:300
+msgid "Abrir menu 3D"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:172
+#: projetos/templates/projetos/base.html:303
+msgid "3D"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:174
+#: projetos/templates/projetos/base.html:305
+msgid "Menu 3D"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:175
+#: projetos/templates/projetos/base.html:306
+msgid "Importar trajetória externa"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:185
+msgid "Abrir menu Geologia"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:188
+#: projetos/templates/projetos/base.html:191
+msgid "Geologia"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:190
+msgid "Menu Geologia"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:192
+msgid "DJI Mini 4 Pro"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:193
+msgid "Interface Drone S_F"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:326
+msgid "Minhas Configurações"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:327
+msgid "Histórico Configurações"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:362
+msgid "Novo Registo Diário"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:363
+#: projetos/templates/projetos/furo_detail_empregado.html:79
+#: projetos/templates/projetos/registo_diario_list.html:4
+msgid "Meus Registos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:375
+msgid "Abrir menu Materiais"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:380
+msgid "Menu Materiais"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:381
+msgid "Disponíveis"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:382
+#: projetos/templates/projetos/levantamento_material_list.html:4
+msgid "Meus Levantamentos"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:383
+#: projetos/templates/projetos/devolucao_material_list.html:4
+msgid "Minhas Devoluções"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:394
+msgid "Abrir menu Conta"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:397
+msgid "Conta"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:399
+msgid "Menu Conta"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:402
+#: projetos/templates/projetos/diario_tecnico.html:4
+#: projetos/templates/projetos/diario_tecnico.html:11
+msgid "Diário Técnico"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:404
+#: projetos/templates/projetos/base.html:433
+#: projetos/templates/projetos/base.html:441
+#: projetos/templates/projetos/definicoes.html:4
+#: projetos/templates/projetos/definicoes.html:10
+#: projetos/templates/projetos/definicoes_admin.html:4
+#: projetos/templates/projetos/definicoes_admin.html:9
+msgid "Definições"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:418
+msgid "Abrir menu do utilizador"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:422
+msgid "Utilizador online"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:427
+msgid "Menu do utilizador"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:431
+#: projetos/templates/projetos/base.html:439
+#: projetos/templates/projetos/procurar_dashboard.html:4
+#: projetos/templates/projetos/procurar_dashboard.html:10
+#: projetos/templates/projetos/procurar_dashboard.html:25
+msgid "Procurar"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:432
+#: projetos/templates/projetos/base.html:440
+msgid "Relatórios"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:443
+msgid "Sair"
+msgstr ""
+
+#: projetos/templates/projetos/base.html:457
+msgid "Fechar mensagem"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:4
+msgid "Apagar Configuração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:11
+msgid "Apagar Configuração de Perfuração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:13
+msgid "Tens a certeza que queres apagar esta configuração?"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:18
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:13
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:13
+#: projetos/templates/projetos/historico_configuracao_detail.html:32
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:18
+msgid "Empregado:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:20
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:55
+#: projetos/templates/projetos/empregado_detail.html:206
+#: projetos/templates/projetos/historico_configuracao_detail.html:43
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:28
+msgid "Tubo:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:21
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:56
+#: projetos/templates/projetos/empregado_detail.html:207
+#: projetos/templates/projetos/historico_configuracao_detail.html:44
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:29
+msgid "Karoutier:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:22
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:59
+#: projetos/templates/projetos/empregado_detail.html:210
+#: projetos/templates/projetos/historico_configuracao_detail.html:47
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:32
+msgid "Record:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:23
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:60
+#: projetos/templates/projetos/empregado_detail.html:211
+#: projetos/templates/projetos/historico_configuracao_detail.html:48
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:33
+msgid "Bit:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:31
+msgid "Confirmar Apagar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:37
+#: projetos/templates/projetos/configuracao_perfuracao_confirm_delete.html:42
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:30
+#: projetos/templates/projetos/empregado_confirm_delete.html:31
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:31
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:32
+#: projetos/templates/projetos/empregados_delete.html:23
+#: projetos/templates/projetos/form.html:68
+#: projetos/templates/projetos/furo_confirm_delete.html:14
+#: projetos/templates/projetos/furo_delete.html:27
+#: projetos/templates/projetos/furo_remover_empregado.html:31
+#: projetos/templates/projetos/furo_update.html:30
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:53
+#: projetos/templates/projetos/maquina_confirm_delete.html:31
+#: projetos/templates/projetos/material_confirm_delete.html:23
+#: projetos/templates/projetos/medicao_delete.html:19
+#: projetos/templates/projetos/projeto_confirm_delete.html:42
+#: projetos/templates/projetos/projeto_delete.html:28
+msgid "Cancelar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:4
+msgid "Detalhe da Configuração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:13
+msgid "Detalhe da Configuração de Perfuração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:15
+#: projetos/templates/projetos/historico_configuracao_comparar.html:13
+#, python-format
+msgid "Empregado: %(empregado_nome)s | Furo: %(furo_nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:23
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:38
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:50
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:55
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:65
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:59
+#: projetos/templates/projetos/empregado_detail.html:47
+#: projetos/templates/projetos/empregado_detail.html:169
+#: projetos/templates/projetos/empregado_list.html:80
+#: projetos/templates/projetos/furo_detail.html:172
+#: projetos/templates/projetos/maquina_detail.html:18
+#: projetos/templates/projetos/maquina_list.html:48
+#: projetos/templates/projetos/material_detail.html:18
+#: projetos/templates/projetos/material_list.html:69
+#: projetos/templates/projetos/medicao_list.html:73
+#: projetos/templates/projetos/projeto_detail.html:33
+#: projetos/templates/projetos/projeto_list.html:39
+#: projetos/templates/projetos/registo_diario_list.html:65
+msgid "Editar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:28
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:43
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:69
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:63
+#: projetos/templates/projetos/empregado_detail.html:52
+#: projetos/templates/projetos/empregado_detail.html:286
+#: projetos/templates/projetos/empregado_list.html:85
+#: projetos/templates/projetos/furo_delete.html:22
+#: projetos/templates/projetos/maquina_detail.html:22
+#: projetos/templates/projetos/maquina_list.html:52
+#: projetos/templates/projetos/material_detail.html:22
+#: projetos/templates/projetos/material_list.html:73
+#: projetos/templates/projetos/medicao_delete.html:15
+#: projetos/templates/projetos/medicao_list.html:77
+#: projetos/templates/projetos/projeto_confirm_delete.html:36
+#: projetos/templates/projetos/projeto_delete.html:23
+#: projetos/templates/projetos/projeto_detail.html:37
+msgid "Apagar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:33
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:48
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:22
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:22
+msgid "Ver Histórico"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:57
+#: projetos/templates/projetos/empregado_detail.html:208
+#: projetos/templates/projetos/historico_configuracao_detail.html:45
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:30
+msgid "Acrescento:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:58
+#: projetos/templates/projetos/empregado_detail.html:209
+#: projetos/templates/projetos/historico_configuracao_detail.html:46
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:31
+msgid "Calibrador:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:61
+#: projetos/templates/projetos/empregado_detail.html:212
+#: projetos/templates/projetos/historico_configuracao_detail.html:49
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:34
+msgid "Caixa de mola:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:62
+#: projetos/templates/projetos/empregado_detail.html:213
+#: projetos/templates/projetos/historico_configuracao_detail.html:50
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:35
+msgid "Tubo interior:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:63
+#: projetos/templates/projetos/historico_configuracao_detail.html:51
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:36
+msgid "Acrescento do tubo interior:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:64
+#: projetos/templates/projetos/empregado_detail.html:214
+#: projetos/templates/projetos/historico_configuracao_detail.html:52
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:37
+msgid "Cabeça de interior:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:65
+#: projetos/templates/projetos/historico_configuracao_detail.html:53
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:38
+msgid "Total do Conjunto de Fundo:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:66
+#: projetos/templates/projetos/historico_configuracao_detail.html:54
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:39
+msgid "Total do Tubo Interior:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:70
+msgid "Última alteração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:74
+#: projetos/templates/projetos/historico_configuracao_detail.html:34
+msgid "Ação:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:75
+msgid "Data:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:76
+#: projetos/templates/projetos/historico_configuracao_detail.html:35
+msgid "Alterado por:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:77
+#: projetos/templates/projetos/historico_configuracao_detail.html:36
+#: projetos/templates/projetos/medicao_empregado_detail.html:51
+msgid "Observações:"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:80
+msgid "Ainda não existe histórico associado a esta configuração."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:85
+msgid "Últimos registos do histórico"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:94
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:37
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:37
+msgid "Alterado por"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:116
+msgid "Sem histórico disponível."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:124
+#: projetos/templates/projetos/configuracao_perfuracao_detail.html:129
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:159
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:164
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:26
+#: projetos/templates/projetos/criar_registo.html:60
+#: projetos/templates/projetos/devolucao_material_form.html:47
+#: projetos/templates/projetos/empregado_ficheiro_form.html:49
+#: projetos/templates/projetos/empregado_projeto_form.html:49
+#: projetos/templates/projetos/entrada_material.html:55
+#: projetos/templates/projetos/furo_adicionar_empregado.html:66
+#: projetos/templates/projetos/furo_detail.html:346
+#: projetos/templates/projetos/furo_form.html:22
+#: projetos/templates/projetos/historico_configuracao_comparar.html:69
+#: projetos/templates/projetos/historico_configuracao_detail.html:62
+#: projetos/templates/projetos/historico_configuracao_detail.html:67
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:23
+#: projetos/templates/projetos/levantamento_material_form.html:42
+#: projetos/templates/projetos/maquina_form.html:48
+#: projetos/templates/projetos/material_form.html:59
+#: projetos/templates/projetos/medicao_form.html:34
+#: projetos/templates/projetos/medicao_form.html:39
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:17
+#: projetos/templates/projetos/meus_dados_individual_editar.html:15
+#: projetos/templates/projetos/projeto_form.html:57
+#: projetos/templates/projetos/registo_admin_form.html:76
+#: projetos/templates/projetos/registo_diario_form.html:79
+#: projetos/templates/projetos/saida_material.html:27
+#: projetos/templates/projetos/sem_permissao.html:14
+#: website/templates/website/login.html:32
+#: website/templates/website/planos.html:15
+#: website/templates/website/registo.html:105
+msgid "Voltar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:14
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:12
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:12
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:12
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:12
+#, python-format
+msgid "Empregado: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:35
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:38
+msgid "Tubo"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:42
+msgid "Karoutier (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:46
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:59
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:72
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:85
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:108
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:121
+#: projetos/templates/projetos/devolucao_material_admin_list.html:20
+#: projetos/templates/projetos/devolucao_material_list.html:26
+#: projetos/templates/projetos/furo_detail.html:307
+#: projetos/templates/projetos/levantamento_material_admin_list.html:79
+#: projetos/templates/projetos/levantamento_material_list.html:26
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:80
+#: projetos/templates/projetos/material_detail.html:96
+#: projetos/templates/projetos/material_detail.html:151
+msgid "Quantidade"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:55
+msgid "Acrescento (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:68
+msgid "Calibrador (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:81
+msgid "Record (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:92
+msgid "Bit (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:97
+msgid "Caixa de mola (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:104
+msgid "Tubo interior (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:117
+msgid "Acrescento do tubo interior (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:128
+msgid "Cabeça de interior (m)"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:135
+msgid "Comprimento total do Conjunto de Fundo"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:138
+msgid "Soma de Karoutier, acrescento, calibrador, record e bit."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:142
+msgid "Comprimento total do Tubo Interior"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:145
+msgid ""
+"Soma de caixa de mola, tubo interior, acrescento do tubo interior e cabeça "
+"de interior."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_form.html:153
+#: projetos/templates/projetos/empregado_ficheiro_form.html:44
+#: projetos/templates/projetos/empregado_projeto_form.html:44
+#: projetos/templates/projetos/furo_adicionar_empregado.html:61
+msgid "Guardar"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:11
+#, python-format
+msgid "Configurações de Perfuração - %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:17
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:22
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:18
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:18
+msgid "Nova Configuração"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:33
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:38
+msgid "Conjunto de Fundo"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:34
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:39
+msgid "Tubo Interior"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:35
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:43
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:40
+msgid "Atualizado em"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list.html:65
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:73
+msgid "Ainda não existem configurações de perfuração registadas."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:26
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:23
+msgid "Voltar ao Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:39
+msgid "Karoutier"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:40
+msgid "Record"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:41
+msgid "Bit"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:42
+msgid "Atualizado por"
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_admin.html:79
+#: projetos/templates/projetos/empregado_detail.html:221
+msgid "Ainda não existem configurações de perfuração para este empregado."
+msgstr ""
+
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:4
+#: projetos/templates/projetos/configuracao_perfuracao_list_empregado.html:11
+msgid "Minhas Configurações de Perfuração"
+msgstr ""
+
+#: projetos/templates/projetos/criar_registo.html:4
+#: projetos/templates/projetos/criar_registo.html:11
+msgid "Criar Registo Diário"
+msgstr ""
+
+#: projetos/templates/projetos/criar_registo.html:47
+msgid ""
+"Regista aqui o trabalho diário realizado no furo, incluindo metros furados, "
+"horas e eventuais paragens."
+msgstr ""
+
+#: projetos/templates/projetos/criar_registo.html:53
+#: projetos/templates/projetos/registo_diario_form.html:73
+msgid "Guardar Registo"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:14
+msgid "Projetos totais"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:19
+msgid "Furos totais"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:24
+msgid "Empregados totais"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:29
+msgid "Empregados pendentes"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:34
+msgid "Máquinas totais"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:39
+msgid "Materiais totais"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:44
+msgid "Registos no período"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:52
+#, python-format
+msgid "Existem %(total)s empregado(s) pendente(s) de aprovação."
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:54
+msgid ""
+"Isto inclui registos criados pela empresa e contas criadas pelos próprios "
+"trabalhadores no site."
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:57
+msgid "Ver pendentes"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:72
+msgid "Sem projeto selecionado"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:79
+msgid "Mapa Plano"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:88
+#: projetos/templates/projetos/graficos_dashboard.html:18
+msgid "Período"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:90
+#: projetos/templates/projetos/graficos_dashboard.html:20
+msgid "Hoje"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:91
+#: projetos/templates/projetos/graficos_dashboard.html:21
+msgid "Últimos 7 dias"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:92
+#: projetos/templates/projetos/graficos_dashboard.html:22
+msgid "Últimos 30 dias"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:93
+#: projetos/templates/projetos/graficos_dashboard.html:23
+msgid "Mês atual"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:94
+#: projetos/templates/projetos/graficos_dashboard.html:24
+msgid "Personalizado"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:99
+#: projetos/templates/projetos/levantamento_material_admin_list.html:55
+msgid "Data início"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:104
+#: projetos/templates/projetos/levantamento_material_admin_list.html:60
+msgid "Data fim"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:142
+msgid "A mostrar dados de: Hoje"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:144
+msgid "A mostrar dados de: Últimos 7 dias"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:146
+msgid "A mostrar dados de: Últimos 30 dias"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:148
+msgid "A mostrar dados de: Mês atual"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:150
+#, python-format
+msgid "A mostrar dados de: %(data_inicio)s até %(data_fim)s"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:157
+msgid "Metros no período"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:162
+msgid "Horas no período"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:167
+msgid "Produtividade média"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:172
+msgid "Empregados ativos"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:177
+msgid "Furos ativos"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:182
+msgid "Projetos ativos"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:191
+msgid "Materiais com stock baixo"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:195
+#, python-format
+msgid "%(nome)s — %(quantidade)s / mín. %(stock_minimo)s"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:198
+msgid "Sem alertas de stock."
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:204
+msgid "Máquinas em alerta"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:208
+#, python-format
+msgid "%(nome)s — %(estado)s"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:211
+msgid "Sem máquinas em alerta."
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:217
+msgid "Furos com baixa produção"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:221
+#, python-format
+msgid "%(nome)s — %(total_metros)s m / %(total_horas)s h"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard.html:224
+msgid "Sem alertas de baixa produção."
+msgstr ""
+
+#: projetos/templates/projetos/dashboard_geo.html:4
+msgid "Dashboard Geológico"
+msgstr ""
+
+#: projetos/templates/projetos/dashboard_geo.html:14
+#, python-format
+msgid "📊 Dashboard Geológico - %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:12
+msgid ""
+"Personaliza a tua experiência na plataforma. Estas preferências ficam "
+"associadas ao teu utilizador."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:28
+#: projetos/templates/projetos/definicoes_admin.html:27
+msgid "Paleta de Cores"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:31
+msgid "A paleta é aplicada imediatamente e fica guardada no teu navegador."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:33
+#: projetos/templates/projetos/definicoes_admin.html:32
+msgid "Escolher paleta visual"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:35
+#: projetos/templates/projetos/definicoes_admin.html:34
+msgid "Aço Profissional"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:44
+#: projetos/templates/projetos/definicoes_admin.html:43
+msgid "Terra Técnica"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:53
+#: projetos/templates/projetos/definicoes_admin.html:52
+msgid "Grafite Elegante"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:62
+#: projetos/templates/projetos/definicoes_admin.html:61
+msgid "Areia Industrial"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:75
+#: projetos/templates/projetos/definicoes_admin.html:73
+msgid "Idioma"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:81
+msgid ""
+"Este campo será usado para ativar a troca dinâmica de idioma na interface."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:87
+msgid "Próximos melhoramentos desta área"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:89
+msgid "Aplicação automática do idioma em toda a plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:90
+msgid "Tema escuro real e persistente em todas as páginas"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:91
+msgid "Novas preferências visuais e operacionais"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes.html:96
+msgid "Guardar Definições"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:11
+#, python-format
+msgid ""
+"Ajusta as preferências da tua conta para gerir a empresa %(empresa_nome)s no "
+"painel de projetos."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:30
+msgid ""
+"A paleta é aplicada imediatamente e fica guardada no navegador desta conta."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:82
+msgid "Esta área controla"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:84
+msgid "Preferências visuais e linguísticas da tua conta administrativa"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:85
+msgid "Base para futuras definições operacionais do dashboard da empresa"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_admin.html:90
+msgid "Guardar Preferências"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:5
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:21
+msgid "Definições Financeiras"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:23
+msgid ""
+"Define os valores manuais da empresa. Os totais operacionais são calculados "
+"automaticamente."
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:32
+msgid "Custo por metro cliente"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:40
+msgid "Outros valores gastos associados"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:50
+msgid "Custo por metro empresa"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:54
+msgid "Valor total cobrado ao cliente"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:58
+msgid "Valor total ganho em furos"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:62
+msgid "Valor total gasto em furos"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:66
+msgid "Valor total gasto em materiais"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:70
+msgid "Valor total gasto em máquinas"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:74
+msgid "Margem total estimada"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:78
+msgid "Margem por metro estimada"
+msgstr ""
+
+#: projetos/templates/projetos/definicoes_financeiras_admin.html:84
+msgid "Guardar Definições Financeiras"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:23
+msgid "Regista uma nova despesa associada ao modelo financeiro."
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:37
+#: projetos/templates/projetos/despesa_list.html:34
+msgid "Categoria"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:45
+#: projetos/templates/projetos/despesa_list.html:36
+msgid "Descrição"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:49
+#: projetos/templates/projetos/despesa_list.html:38
+msgid "Valor (€)"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:65
+msgid "Máquina"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:69
+msgid "Comprovativo"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:73
+#: projetos/templates/projetos/devolucao_material_admin_list.html:23
+#: projetos/templates/projetos/devolucao_material_list.html:29
+#: projetos/templates/projetos/empregado_detail.html:266
+#: projetos/templates/projetos/furo_3d_importar_externo.html:73
+#: projetos/templates/projetos/furo_adicionar_empregado.html:53
+#: projetos/templates/projetos/furo_detail.html:309
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:38
+#: projetos/templates/projetos/levantamento_material_admin_list.html:82
+#: projetos/templates/projetos/levantamento_material_list.html:29
+#: projetos/templates/projetos/maquina_detail.html:101
+#: projetos/templates/projetos/material_detail.html:78
+#: projetos/templates/projetos/material_detail.html:99
+#: projetos/templates/projetos/material_detail.html:154
+#: projetos/templates/projetos/meus_dados_individual_editar.html:43
+msgid "Observações"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_form.html:80
+msgid "Guardar despesa"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:17
+msgid "Lista de despesas registadas no modelo de despesas da plataforma."
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:37
+msgid "Projeto/Furo/Máquina"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:49
+#, python-format
+msgid "Projeto: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:50
+#: projetos/templates/projetos/furo_adicionar_empregado.html:12
+#, python-format
+msgid "Furo: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:51
+#, python-format
+msgid "Máquina: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:52
+msgid "Geral"
+msgstr ""
+
+#: projetos/templates/projetos/despesa_list.html:63
+msgid "Ainda não existem despesas para mostrar."
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_admin_list.html:4
+#: projetos/templates/projetos/devolucao_material_admin_list.html:10
+msgid "Devoluções de Material"
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_admin_list.html:19
+#: projetos/templates/projetos/devolucao_material_list.html:25
+#: projetos/templates/projetos/furo_detail.html:306
+#: projetos/templates/projetos/levantamento_material_admin_list.html:31
+#: projetos/templates/projetos/levantamento_material_admin_list.html:78
+#: projetos/templates/projetos/levantamento_material_list.html:25
+msgid "Material"
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_admin_list.html:43
+#: projetos/templates/projetos/devolucao_material_list.html:42
+#: projetos/templates/projetos/furo_detail.html:329
+#: projetos/templates/projetos/levantamento_material_admin_list.html:98
+#: projetos/templates/projetos/material_detail.html:36
+#: projetos/templates/projetos/material_detail.html:115
+#: projetos/templates/projetos/material_detail.html:169
+msgid "Stock"
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_admin_list.html:62
+#: projetos/templates/projetos/devolucao_material_list.html:59
+msgid "Ainda não existem devoluções registadas."
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_form.html:40
+msgid "Guardar Devolução"
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_list.html:11
+msgid "Minhas Devoluções de Material"
+msgstr ""
+
+#: projetos/templates/projetos/devolucao_material_list.html:15
+msgid "Nova Devolução"
+msgstr ""
+
+#: projetos/templates/projetos/diario_tecnico.html:19
+msgid "Voltar à Minha Área"
+msgstr ""
+
+#: projetos/templates/projetos/diario_tecnico.html:27
+msgid "Secções"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:4
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:9
+msgid "Aprovar Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:12
+#: projetos/templates/projetos/empregado_confirm_delete.html:13
+#: projetos/templates/projetos/meus_dados_empregado.html:26
+#: projetos/templates/projetos/meus_dados_individual.html:22
+msgid "Nome:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:13
+#: projetos/templates/projetos/empregado_confirm_delete.html:15
+#: projetos/templates/projetos/empregado_detail.html:92
+#: projetos/templates/projetos/meus_dados_empregado.html:27
+#: projetos/templates/projetos/meus_dados_individual.html:23
+msgid "Email:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:14
+#: projetos/templates/projetos/empregado_confirm_delete.html:14
+#: projetos/templates/projetos/empregado_detail.html:91
+#: projetos/templates/projetos/furo_remover_empregado.html:18
+#: projetos/templates/projetos/meus_dados_empregado.html:41
+msgid "Função:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:18
+msgid "Tem a certeza que deseja aprovar este empregado?"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_aprovar_confirm.html:25
+#: projetos/templates/projetos/empregado_pendentes.html:61
+msgid "Aprovar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_confirm_delete.html:4
+#: projetos/templates/projetos/empregado_confirm_delete.html:10
+msgid "Apagar Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_confirm_delete.html:19
+msgid ""
+"Tem a certeza que deseja apagar este empregado? Esta ação não pode ser "
+"desfeita."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_confirm_delete.html:26
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:26
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:27
+msgid "Confirmar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:28
+msgid ""
+"Painel completo do trabalhador, projetos, documentos e configurações "
+"associadas."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:34
+msgid "Associar Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:41
+msgid "Aprovar Registo"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:59
+msgid "Acesso à Plataforma"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:63
+msgid "Estado de aprovação:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:66
+msgid "Aprovado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:70
+#: projetos/templates/projetos/empregado_pendentes.html:47
+msgid "Pendente"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:75
+msgid "Data de aprovação:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:76
+msgid "Nome de utilizador:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:77
+msgid "Ligado a utilizador:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:81
+msgid "Nota importante"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:83
+msgid ""
+"A palavra-passe temporária é mostrada ao administrador no momento da criação "
+"ou aprovação do empregado."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:84
+msgid ""
+"Se precisares de entregar novo acesso ao empregado, o mais seguro é "
+"redefinir a palavra-passe no utilizador associado."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:93
+#: projetos/templates/projetos/meus_dados_empregado.html:42
+msgid "Data de Admissão:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:94
+#: projetos/templates/projetos/meus_dados_empregado.html:29
+msgid "Idade:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:95
+#: projetos/templates/projetos/meus_dados_empregado.html:30
+#: projetos/templates/projetos/meus_dados_individual.html:28
+msgid "Nacionalidade:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:96
+#: projetos/templates/projetos/meus_dados_empregado.html:31
+#: projetos/templates/projetos/meus_dados_individual.html:29
+msgid "NIF:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:97
+#: projetos/templates/projetos/meus_dados_empregado.html:43
+msgid "Salário:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:98
+#: projetos/templates/projetos/meus_dados_empregado.html:44
+msgid "Horas Diárias:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:115
+msgid "Ver Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:128
+msgid "Histórico de Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:157
+#: projetos/templates/projetos/historico_configuracao_comparar.html:29
+msgid "Atual"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:161
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:16
+#: projetos/templates/projetos/meus_dados_empregado.html:132
+msgid "Concluído"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:175
+msgid "Terminar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:186
+msgid "Sem histórico de projetos."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:197
+msgid "Ver / Editar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:215
+msgid "Atualizado em:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:216
+msgid "Atualizado por:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:228
+msgid "Ficheiros do Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:232
+msgid "Adicionar Ficheiro"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:240
+msgid "Currículo principal"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:242
+#: projetos/templates/projetos/empregado_detail.html:251
+#: projetos/templates/projetos/empregado_form.html:199
+#: projetos/templates/projetos/empregado_form.html:217
+#: projetos/templates/projetos/meus_dados_empregado.html:60
+#: projetos/templates/projetos/meus_dados_empregado.html:69
+msgid "Ver ficheiro"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:249
+msgid "Contrato principal"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:264
+msgid "Título"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:265
+msgid "Upload"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:296
+msgid "Sem ficheiros adicionais."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_detail.html:306
+#: projetos/templates/projetos/empregado_form.html:265
+#: projetos/templates/projetos/empregado_update.html:62
+#: projetos/templates/projetos/form.html:75
+#: projetos/templates/projetos/material_detail.html:195
+msgid "Voltar à Lista"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:4
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:10
+msgid "Apagar Ficheiro"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:14
+#: projetos/templates/projetos/maquina_detail.html:29
+#: projetos/templates/projetos/maquina_list.html:28
+#: projetos/templates/projetos/material_detail.html:50
+#: projetos/templates/projetos/material_list.html:50
+#: website/templates/website/planos.html:26
+msgid "Tipo:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:15
+msgid "Título:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_ficheiro_confirm_delete.html:19
+msgid "Tem a certeza que deseja apagar este ficheiro?"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_ficheiro_form.html:13
+#: projetos/templates/projetos/empregado_projeto_form.html:13
+#, python-format
+msgid "Empregado: <strong>%(nome)s</strong>"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:16
+msgid "Acesso definido pelo administrador"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:18
+msgid ""
+"Ao criar um novo empregado, o administrador define o nome de utilizador e a "
+"palavra-passe inicial."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:19
+msgid ""
+"Essas credenciais ficam associadas ao empregado para acesso imediato à "
+"plataforma."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:24
+msgid "Registo pendente de aprovação"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:26
+msgid ""
+"Este empregado ainda não está aprovado. A aprovação pode ser feita na área "
+"de detalhes do empregado,"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:27
+msgid "onde também ficará visível o utilizador associado."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:37
+msgid "Corrige os erros abaixo antes de guardar."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:64
+#: projetos/templates/projetos/empregado_list.html:22
+#: projetos/templates/projetos/empregado_pendentes.html:31
+#: projetos/templates/projetos/empregado_update.html:32
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:37
+#: projetos/templates/projetos/projeto_detail_empregado.html:66
+msgid "Função"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:73
+#: projetos/templates/projetos/empregado_list.html:23
+#: projetos/templates/projetos/empregado_pendentes.html:30
+#: projetos/templates/projetos/empregado_update.html:40
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:41
+#: projetos/templates/projetos/meus_dados_individual_editar.html:32
+#: website/templates/registration/password_reset_form.html:26
+#: website/templates/website/registo.html:44
+msgid "Email"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:82
+msgid "Nome de utilizador"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:90
+msgid "Palavra-passe inicial"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:103
+#: projetos/templates/projetos/empregado_list.html:24
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:45
+#: projetos/templates/projetos/meus_dados_individual_editar.html:33
+msgid "Telefone"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:113
+#: projetos/templates/projetos/empregado_list.html:25
+#: projetos/templates/projetos/empregado_update.html:48
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:49
+msgid "Data de Admissão"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:123
+msgid "Início do Contrato"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:133
+msgid "Fim do Contrato"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:143
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:65
+#: projetos/templates/projetos/meus_dados_individual_editar.html:39
+msgid "NIF"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:153
+msgid "NIB / IBAN"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:163
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:53
+#: projetos/templates/projetos/meus_dados_individual_editar.html:38
+msgid "Nacionalidade"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:173
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:57
+#: projetos/templates/projetos/meus_dados_individual_editar.html:36
+msgid "Idade"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:183
+msgid "Salário"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:193
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:69
+#: projetos/templates/projetos/meus_dados_individual_editar.html:40
+msgid "Currículo"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:197
+#: projetos/templates/projetos/empregado_form.html:215
+#: projetos/templates/projetos/registo_admin_form.html:40
+#: projetos/templates/projetos/registo_diario_form.html:42
+msgid "Atual:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:211
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:73
+msgid "Contrato"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:229
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:61
+#: projetos/templates/projetos/meus_dados_individual_editar.html:37
+msgid "Morada"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:239
+msgid "Alertas (JSON)"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:251
+msgid "Utilizador associado:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:253
+msgid ""
+"A palavra-passe não é mostrada aqui por segurança. Se precisares de entregar "
+"novo acesso,"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:254
+msgid "redefine a palavra-passe do utilizador associado."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_form.html:259
+#: projetos/templates/projetos/form.html:64
+#: projetos/templates/projetos/furo_form.html:21
+#: projetos/templates/projetos/furo_update.html:28
+#: projetos/templates/projetos/maquina_form.html:44
+#: projetos/templates/projetos/material_form.html:55
+#: projetos/templates/projetos/medicao_form.html:28
+#: projetos/templates/projetos/projeto_form.html:53
+msgid "Salvar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_list.html:4
+#: projetos/templates/projetos/empregado_list.html:9
+msgid "Lista de Empregados"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_list.html:12
+msgid "Criar Novo Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_list.html:66
+msgid "Sem projetos atuais"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_list.html:75
+#: projetos/templates/projetos/furo_3d_empregado.html:22
+#: projetos/templates/projetos/furo_list.html:62
+#: projetos/templates/projetos/projeto_detail_empregado.html:99
+#: projetos/templates/projetos/projeto_list.html:35
+msgid "Detalhes"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_list.html:93
+msgid "Nenhum empregado registrado."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:14
+msgid "Empregados Pendentes de Aprovação"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:20
+msgid "Voltar aos Empregados"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:32
+#: projetos/templates/projetos/registo_empregado.html:5
+#: website/templates/website/registo.html:7
+msgid "Registo"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:34
+msgid "Data Admissão"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:68
+msgid "Rejeitar"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_pendentes.html:80
+msgid "Não existem empregados pendentes. Tudo em dia!"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:4
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:10
+msgid "Terminar Projeto do Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:15
+msgid "Início:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:16
+msgid "Estado atual:"
+msgstr ""
+
+#: projetos/templates/projetos/empregado_projeto_confirm_terminar.html:20
+msgid ""
+"Ao confirmar, esta ligação ficará como concluída. Se não houver data de fim, "
+"será usada a data de hoje."
+msgstr ""
+
+#: projetos/templates/projetos/empregado_update.html:56
+#: projetos/templates/projetos/projeto_editar.html:66
+msgid "Salvar Alterações"
+msgstr ""
+
+#: projetos/templates/projetos/empregados_delete.html:4
+#: projetos/templates/projetos/empregados_delete.html:13
+msgid "Excluir Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/empregados_delete.html:14
+#, python-format
+msgid "Tem certeza que deseja excluir o empregado <strong>%(nome)s</strong>?"
+msgstr ""
+
+#: projetos/templates/projetos/empregados_delete.html:19
+msgid "Excluir"
+msgstr ""
+
+#: projetos/templates/projetos/entrada_material.html:4
+#: projetos/templates/projetos/entrada_material.html:11
+msgid "Entrada de Material"
+msgstr ""
+
+#: projetos/templates/projetos/entrada_material.html:13
+#: projetos/templates/projetos/saida_material.html:14
+msgid "Material:"
+msgstr ""
+
+#: projetos/templates/projetos/entrada_material.html:51
+msgid "Registar Entrada"
+msgstr ""
+
+#: projetos/templates/projetos/form.html:4
+#: projetos/templates/projetos/form.html:13
+#: projetos/templates/projetos/furo_list.html:17
+msgid "Criar Novo Furo"
+msgstr ""
+
+#: projetos/templates/projetos/form.html:23
+msgid "Memória operacional da zona"
+msgstr ""
+
+#: projetos/templates/projetos/form.html:25
+msgid ""
+"Já existem furos registados perto desta localização ou com a mesma "
+"referência textual. Convém rever o histórico antes de avançar."
+msgstr ""
+
+#: projetos/templates/projetos/form.html:32
+msgid "mesma localização textual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:3
+msgid "Furo 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:15
+#, python-format
+msgid "Furo 3D Geológico: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:18
+msgid ""
+"Explora a trajetória real e planeada do furo com filtros visuais, camadas e "
+"destaque de dogleg."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:22
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:17
+msgid "Voltar ao Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:23
+msgid "Rotação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:24
+msgid "Exportar"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:39
+#: projetos/templates/projetos/furo_3d_empregado.html:39
+msgid "Modo de visualização"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:42
+#: projetos/templates/projetos/furo_3d_empregado.html:42
+msgid "Comparação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:43
+#: projetos/templates/projetos/furo_3d_empregado.html:43
+msgid "Só trajetória real"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d.html:44
+#: projetos/templates/projetos/furo_3d_empregado.html:44
+msgid "Só trajetória planeada"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:16
+msgid "3D do Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:24
+#: projetos/templates/projetos/furo_detail_empregado.html:22
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:18
+#: projetos/templates/projetos/meus_projetos_empregado.html:18
+#: projetos/templates/projetos/projeto_detail_empregado.html:27
+msgid "Painel"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:29
+msgid "Nº de Medições"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:30
+#: projetos/templates/projetos/furo_detail_empregado.html:30
+#: projetos/templates/projetos/meus_furos_empregado.html:33
+#: projetos/templates/projetos/projeto_detail_empregado.html:92
+msgid "Profundidade Atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:31
+#: projetos/templates/projetos/furo_detail_empregado.html:35
+#: projetos/templates/projetos/meus_furos_empregado.html:34
+msgid "Profundidade Alvo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:32
+#: projetos/templates/projetos/furo_detail_empregado.html:40
+#: projetos/templates/projetos/meus_furos_empregado.html:35
+#: projetos/templates/projetos/projeto_detail_empregado.html:93
+msgid "Inclinação Atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:33
+#: projetos/templates/projetos/furo_detail_empregado.html:45
+#: projetos/templates/projetos/meus_furos_empregado.html:36
+#: projetos/templates/projetos/projeto_detail_empregado.html:94
+msgid "Azimute Atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:48
+msgid ""
+"Alterna rapidamente entre a execução real, o planeamento e a comparação "
+"entre ambos."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:53
+msgid "Camadas do gráfico"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:54
+msgid "Trajetória real"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:55
+msgid "Trajetória planeada"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:59
+msgid "Dogleg e alertas"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:61
+msgid "Destacar dogleg"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:65
+msgid "Filtro mínimo de dogleg"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:69
+msgid "Mostrar pontos por estado"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:72
+msgid "Atenção + Crítico"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:73
+msgid "Só Crítico"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:77
+msgid ""
+"Se ainda não existirem medições reais, vais ver apenas a trajetória planeada "
+"do furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:82
+msgid "Intervalo de profundidade"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:84
+msgid "Profundidade mínima visível"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:88
+msgid "Profundidade máxima visível"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:94
+msgid "Exportação rápida"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:97
+msgid "Imprimir"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:100
+msgid ""
+"Exporta a vista atual do gráfico ou imprime esta página como resumo do furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:105
+msgid "Comparação final"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:107
+msgid "Desvio final"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:108
+msgid "Dif. inclinação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:109
+msgid "Dif. azimute"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:112
+msgid ""
+"Resume a distância e a diferença angular entre a trajetória real e a "
+"planeada no ponto mais fundo visível."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:117
+msgid "Top 5 doglegs"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:119
+msgid "Sem dados suficientes."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:122
+msgid ""
+"Mostra os pontos mais críticos do furo dentro do intervalo atualmente "
+"visível."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:131
+#: projetos/templates/projetos/furo_3d_importar_externo.html:117
+#: projetos/templates/projetos/projeto_3d.html:4
+msgid "Visualização 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:132
+msgid "Trajetória calculada com base nas medições"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:149
+msgid "Planeado"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:153
+msgid "Informação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:156
+msgid ""
+"O gráfico mostra a trajetória 3D do furo com base nas medições registadas."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:157
+msgid "Cada ponto representa uma medição ao longo da profundidade."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:159
+msgid "Sem medições reais: estás a ver a trajetória planeada do furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:160
+msgid ""
+"A linha tracejada representa o planeamento desde a origem até à profundidade "
+"alvo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:162
+msgid "Podes rodar, aproximar e afastar para analisar melhor a trajetória."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_empregado.html:178
+msgid "Sem pontos visíveis no intervalo atual."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:4
+#: projetos/templates/projetos/furo_3d_importar_externo.html:14
+msgid "Importar Trajetória 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:16
+msgid ""
+"Carrega ficheiros externos em `CSV`, `JSON` ou `GeoJSON` para desenhar a "
+"trajetória de um furo em 3D, mesmo quando os dados vêm de outra plataforma."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:20
+msgid "Voltar a Furos"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:27
+msgid "Ficheiro externo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:29
+msgid ""
+"O ficheiro deve conter coordenadas `x`, `y`, `z` ou uma `LineString` 3D."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:36
+msgid "Selecionar ficheiro"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:47
+msgid "Origem da aplicação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:52
+msgid "Ex.: Software X, Plataforma Cliente, Survey Tool"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:58
+msgid "Associar ao furo da empresa"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:63
+msgid "Sem associação direta"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:77
+msgid ""
+"Notas sobre a origem, qualidade dos dados ou referência do carregamento."
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:84
+msgid "Ler e desenhar em 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:92
+msgid "Guardar nas bases de dados como carregamento externo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:98
+msgid "Formatos suportados:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:107
+msgid "Trajetória:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:108
+msgid "Pontos:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:119
+msgid "Trajetória importada"
+msgstr ""
+
+#: projetos/templates/projetos/furo_3d_importar_externo.html:129
+msgid "Carrega um ficheiro externo para desenhar aqui a trajetória em 3D."
+msgstr ""
+
+#: projetos/templates/projetos/furo_adicionar_empregado.html:26
+msgid "Trabalhador"
+msgstr ""
+
+#: projetos/templates/projetos/furo_adicionar_empregado.html:31
+msgid "Função no Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_adicionar_empregado.html:36
+msgid "Data Início"
+msgstr ""
+
+#: projetos/templates/projetos/furo_adicionar_empregado.html:41
+msgid "Data Fim"
+msgstr ""
+
+#: projetos/templates/projetos/furo_adicionar_empregado.html:48
+msgid "Ligação ativa"
+msgstr ""
+
+#: projetos/templates/projetos/furo_confirm_delete.html:3
+#: projetos/templates/projetos/furo_confirm_delete.html:7
+#: projetos/templates/projetos/furo_delete.html:5
+#: projetos/templates/projetos/furo_detail.html:345
+msgid "Apagar Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_confirm_delete.html:8
+#: projetos/templates/projetos/furo_delete.html:15
+#, python-format
+msgid "Tem certeza que deseja apagar o furo <strong>%(furo_nome)s</strong>?"
+msgstr ""
+
+#: projetos/templates/projetos/furo_confirm_delete.html:13
+#: projetos/templates/projetos/maquina_confirm_delete.html:27
+#: projetos/templates/projetos/material_confirm_delete.html:19
+msgid "Sim, apagar"
+msgstr ""
+
+#: projetos/templates/projetos/furo_delete.html:14
+#: projetos/templates/projetos/projeto_delete.html:12
+msgid "Confirmação de Exclusão"
+msgstr ""
+
+#: projetos/templates/projetos/furo_delete.html:16
+#: projetos/templates/projetos/projeto_confirm_delete.html:26
+#: projetos/templates/projetos/projeto_delete.html:16
+msgid "Esta ação não pode ser desfeita!"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:32
+#, python-format
+msgid "Furo %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:33
+#, python-format
+msgid ""
+"Projeto %(projeto_nome)s · acompanhamento técnico, equipa e produção do furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:42
+msgid "Dados Gerais do Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:46
+msgid "Profundidade inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:47
+msgid "Profundidade atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:48
+msgid "Profundidade máxima"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:49
+msgid "Total de horas"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:50
+#: projetos/templates/projetos/furo_detail.html:198
+msgid "Magnetismo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:51
+#: projetos/templates/projetos/furo_detail.html:199
+#: projetos/templates/projetos/projeto_editar.html:53
+msgid "Latitude"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:52
+#: projetos/templates/projetos/furo_detail.html:200
+#: projetos/templates/projetos/projeto_editar.html:57
+msgid "Longitude"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:53
+#: projetos/templates/projetos/furo_detail.html:201
+msgid "Altitude"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:54
+msgid "Sistema de coordenadas"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:55
+msgid "Data de criação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:89
+msgid "Planeamento Inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:91
+msgid "Profundidade alvo inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:92
+msgid "Inclinação planeada inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:93
+msgid "Azimute planeado inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:98
+msgid "Planeamento Atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:100
+msgid "Profundidade alvo atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:101
+msgid "Inclinação planeada atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:102
+msgid "Azimute planeado atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:107
+msgid "Estado Real Atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:109
+msgid "Inclinação real atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:110
+msgid "Azimute real atual"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:115
+msgid "Mapa do Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:120
+msgid "Ver Trajetória 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:121
+msgid "Adicionar Trabalhador ao Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:122
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:4
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:11
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:4
+msgid "Histórico de Configurações"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:123
+msgid "Adicionar Medição"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:124
+msgid "Geologia e Drone"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:130
+msgid "Materiais usados"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:135
+#, python-format
+msgid "Quantidade: %(quantidade)s · Valor: %(valor)s €"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:138
+#: projetos/templates/projetos/material_list.html:81
+msgid "Nenhum material registado."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:144
+msgid "Máquinas usadas"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:153
+msgid "Sem modelo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:159
+#: projetos/templates/projetos/maquina_list.html:60
+msgid "Nenhuma máquina registada."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:165
+msgid "Empregados envolvidos"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:173
+msgid "Remover"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:177
+msgid "Nenhum empregado registado neste furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:187
+msgid "Histórico técnico das medições registadas para este furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:196
+msgid "Inclinação real"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:197
+msgid "Azimute real"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:202
+msgid "Imagem"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:226
+msgid "Nenhuma medição registada."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:237
+msgid "Logging Geológico"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:238
+msgid ""
+"Resumo recente do fluxo geológico do furo e integração com missões DJI Mini "
+"4 Pro."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:241
+msgid "Novo Log"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:249
+msgid "Intervalo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:250
+msgid "Litologia"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:252
+msgid "Recuperação"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:253
+msgid "Drone"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:270
+msgid "Ainda não existem logs geológicos para este furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:278
+msgid "Missões Drone Recentes"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:294
+#: projetos/templates/projetos/levantamento_material_admin_list.html:4
+#: projetos/templates/projetos/levantamento_material_admin_list.html:11
+msgid "Levantamentos de Material"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:295
+msgid "Movimentos de material associados a este furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:339
+msgid "Ainda não existem levantamentos de material neste furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:344
+msgid "Editar Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail.html:357
+msgid "Fechar"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:58
+#: projetos/templates/projetos/projeto_detail_empregado.html:16
+msgid "Localização"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:59
+msgid "Local Sondagem"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:62
+msgid "Profundidade Inicial"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:63
+msgid "Profundidade Máxima"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:64
+msgid "Inclinação Planeada"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:65
+msgid "Azimute Planeado"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:71
+#: projetos/templates/projetos/meus_dados_individual.html:36
+msgid "Resumo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:93
+msgid "Abrir 3D"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:104
+msgid "Rocha"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:105
+msgid "Cor"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:124
+msgid "Sem medições registadas."
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:129
+msgid "Meus Registos neste Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_detail_empregado.html:155
+msgid "Ainda não tens registos neste furo."
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:3
+#: projetos/templates/projetos/furo_list.html:11
+msgid "Dashboard de Furos"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:12
+msgid "Visão geral de todos os furos registados."
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:45
+#: projetos/templates/projetos/medicao_empregado_list.html:41
+#: projetos/templates/projetos/medicao_list.html:50
+msgid "Inclinação:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:46
+#: projetos/templates/projetos/medicao_empregado_list.html:42
+#: projetos/templates/projetos/medicao_list.html:51
+msgid "Azimute:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:48
+msgid "Profundidade Alvo:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:49
+msgid "Coord.:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:66
+#: projetos/templates/projetos/medicao_list.html:40
+msgid "Medição"
+msgstr ""
+
+#: projetos/templates/projetos/furo_list.html:75
+msgid "Nenhum furo registado ainda."
+msgstr ""
+
+#: projetos/templates/projetos/furo_remover_empregado.html:4
+#: projetos/templates/projetos/furo_remover_empregado.html:11
+msgid "Remover Trabalhador do Furo"
+msgstr ""
+
+#: projetos/templates/projetos/furo_remover_empregado.html:12
+msgid "Tens a certeza que queres remover esta ligação?"
+msgstr ""
+
+#: projetos/templates/projetos/furo_remover_empregado.html:17
+msgid "Trabalhador:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_remover_empregado.html:19
+#: projetos/templates/projetos/material_detail.html:66
+msgid "Ativo:"
+msgstr ""
+
+#: projetos/templates/projetos/furo_remover_empregado.html:26
+msgid "Confirmar Remoção"
+msgstr ""
+
+#: projetos/templates/projetos/furo_update.html:12
+#, python-format
+msgid "Editar Furo: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/globo.html:3
+#: projetos/templates/projetos/projetos_globo.html:4
+#: projetos/templates/projetos/projetos_globo_interativo.html:4
+msgid "Globo de Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/graficos_dashboard.html:12
+msgid "Gráficos e Indicadores"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:4
+msgid "Comparar Histórico"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:11
+msgid "Comparação com a Versão Anterior"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:19
+msgid "Versão atual:"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:20
+msgid "Versão anterior:"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:27
+msgid "Campo"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:28
+msgid "Anterior"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:42
+msgid "Alterado"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:46
+msgid "Igual"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_comparar.html:57
+msgid ""
+"Esta é a primeira versão registada. Não existe histórico anterior para "
+"comparar."
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_detail.html:4
+#: projetos/templates/projetos/historico_configuracao_detail.html:12
+msgid "Detalhe do Histórico"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_detail.html:13
+#, python-format
+msgid "Registo criado em %(criado_em)s"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_detail.html:20
+msgid "Comparar com anterior"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_detail.html:26
+msgid "Restaurar esta versão"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_detail.html:40
+msgid "Snapshot da configuração"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:18
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:18
+msgid "Ver Configurações"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_list_admin.html:62
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:60
+msgid "Ainda não existe histórico para este empregado."
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_list_empregado.html:11
+msgid "Histórico das Minhas Configurações"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:4
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:11
+msgid "Histórico de Configurações do Furo"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_list_furo_admin.html:53
+msgid "Ainda não existe histórico para este furo."
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:4
+msgid "Restaurar Configuração"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:11
+msgid "Restaurar Versão do Histórico"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:13
+msgid "Tens a certeza que queres restaurar esta versão da configuração?"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:20
+msgid "Data do histórico:"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:21
+msgid "Ação original:"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:25
+msgid "Valores que serão restaurados"
+msgstr ""
+
+#: projetos/templates/projetos/historico_configuracao_restaurar.html:48
+msgid "Confirmar Restauração"
+msgstr ""
+
+#: projetos/templates/projetos/levantamento_material_admin_list.html:117
+#: projetos/templates/projetos/levantamento_material_list.html:59
+msgid "Ainda não existem levantamentos registados."
+msgstr ""
+
+#: projetos/templates/projetos/levantamento_material_form.html:36
+msgid "Guardar Levantamento"
+msgstr ""
+
+#: projetos/templates/projetos/levantamento_material_list.html:11
+msgid "Meus Levantamentos de Material"
+msgstr ""
+
+#: projetos/templates/projetos/levantamento_material_list.html:15
+msgid "Novo Levantamento"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_confirm_delete.html:4
+#: projetos/templates/projetos/maquina_confirm_delete.html:14
+msgid "Apagar Máquina"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_confirm_delete.html:17
+msgid "Tem a certeza que deseja apagar a máquina:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:4
+msgid "Detalhes da Máquina"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:30
+#: projetos/templates/projetos/maquina_list.html:29
+#: projetos/templates/projetos/material_detail.html:51
+#: projetos/templates/projetos/material_list.html:51
+msgid "Marca:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:31
+#: projetos/templates/projetos/maquina_list.html:30
+msgid "Modelo:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:32
+#: projetos/templates/projetos/material_list.html:52
+msgid "Nº Série:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:33
+#: projetos/templates/projetos/maquina_list.html:32
+#: projetos/templates/projetos/material_detail.html:65
+#: projetos/templates/projetos/material_list.html:59
+msgid "Estado:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:34
+msgid "Ativa:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:38
+msgid "Matrícula:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:39
+msgid "Quilómetros:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:40
+msgid "Horímetro:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:41
+msgid "Ano Registo:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:42
+#: projetos/templates/projetos/material_detail.html:64
+#: projetos/templates/projetos/material_list.html:56
+msgid "Valor:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:43
+msgid "Localização Atual:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:47
+#: projetos/templates/projetos/material_detail.html:72
+msgid "Data Compra:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:48
+msgid "Data Registo:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:49
+msgid "Data Revisão:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:50
+msgid "Seguro:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:51
+msgid "Validade Seguro:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:52
+msgid "Validade IUC:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:57
+msgid "Projeto Atual"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:65
+msgid "Sem projeto atual."
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:70
+msgid "Projetos Associados"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:80
+msgid "Sem projetos associados."
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:85
+msgid "Furos Associados"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:95
+msgid "Sem furos associados."
+msgstr ""
+
+#: projetos/templates/projetos/maquina_detail.html:110
+msgid "Voltar à Lista de Máquinas"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_list.html:4
+#: projetos/templates/projetos/maquina_list.html:13
+msgid "Lista de Máquinas"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_list.html:16
+msgid "Adicionar Nova Máquina"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_list.html:31
+msgid "Ano:"
+msgstr ""
+
+#: projetos/templates/projetos/maquina_list.html:33
+msgid "Projeto Atual:"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:4
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:11
+msgid "Materiais Disponíveis"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:13
+msgid "Consulta os materiais disponíveis nos teus projetos."
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:52
+#: projetos/templates/projetos/material_list.html:24
+msgid "Nome do Material"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:56
+#: projetos/templates/projetos/material_list.html:28
+msgid "Ex.: tubo, broca, haste..."
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:69
+#: projetos/templates/projetos/material_list.html:4
+#: projetos/templates/projetos/material_list.html:14
+msgid "Lista de Materiais"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:70
+msgid "resultado(s)"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:81
+msgid "Stock Mínimo"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:99
+msgid "Levantar"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:102
+msgid "Devolver"
+msgstr ""
+
+#: projetos/templates/projetos/materiais_disponiveis_empregado.html:112
+msgid "Não existem materiais disponíveis para os filtros selecionados."
+msgstr ""
+
+#: projetos/templates/projetos/material_confirm_delete.html:4
+#: projetos/templates/projetos/material_confirm_delete.html:13
+msgid "Apagar Material"
+msgstr ""
+
+#: projetos/templates/projetos/material_confirm_delete.html:14
+#, python-format
+msgid "Tem a certeza que deseja apagar \"<strong>%(nome)s</strong>\"?"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:4
+msgid "Detalhes do Material"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:52
+msgid "Número de Série:"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:56
+msgid "Quantidade em stock:"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:63
+#: projetos/templates/projetos/material_list.html:55
+msgid "Diâmetro:"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:70
+#: projetos/templates/projetos/material_list.html:58
+msgid "Fornecedor:"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:71
+#: projetos/templates/projetos/material_list.html:60
+msgid "Localização:"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:87
+msgid "Histórico de Levantamentos"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:136
+msgid "Ainda não existem levantamentos para este material."
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:142
+msgid "Histórico de Devoluções"
+msgstr ""
+
+#: projetos/templates/projetos/material_detail.html:188
+msgid "Ainda não existem devoluções para este material."
+msgstr ""
+
+#: projetos/templates/projetos/material_list.html:17
+msgid "Adicionar Novo Material"
+msgstr ""
+
+#: projetos/templates/projetos/material_list.html:54
+msgid "Quantidade:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_delete.html:4
+#: projetos/templates/projetos/medicao_delete.html:8
+msgid "Apagar Medição"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_delete.html:9
+msgid "Tem certeza que deseja apagar esta medição?"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:7
+#: projetos/templates/projetos/medicao_empregado_list.html:8
+msgid "Minhas Medições"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:8
+#: projetos/templates/projetos/medicao_empregado_list.html:54
+#: projetos/templates/projetos/medicao_list.html:85
+msgid "Ver Furo"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:14
+msgid "Detalhe da Medição"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:22
+msgid "Dados medidos"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:23
+#: projetos/templates/projetos/medicao_empregado_list.html:40
+#: projetos/templates/projetos/medicao_list.html:49
+msgid "Profundidade:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:24
+msgid "Inclinação real:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:25
+msgid "Azimute real:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:26
+#: projetos/templates/projetos/medicao_empregado_list.html:43
+#: projetos/templates/projetos/medicao_list.html:53
+msgid "Magnetismo:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:27
+msgid "Altitude:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:28
+msgid "Latitude:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:29
+msgid "Longitude:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:33
+msgid "Contexto do furo"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:36
+msgid "Profundidade alvo inicial:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:37
+msgid "Profundidade alvo atual:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:38
+msgid "Inclinação planeada inicial:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:39
+msgid "Inclinação planeada atual:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:40
+msgid "Azimute planeado inicial:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:41
+msgid "Azimute planeado atual:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:47
+msgid "Geologia e observação"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:48
+msgid "Tipo de rocha:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:49
+msgid "Cor:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:50
+msgid "Dureza:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:56
+msgid "Sem observações."
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:62
+msgid "Histórico"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:63
+#: projetos/templates/projetos/medicao_empregado_list.html:44
+msgid "Criada em:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:64
+msgid "Atualizada em:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_detail.html:67
+msgid "Imagem:"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_list.html:9
+msgid "Medições dos furos aos quais estás associado ou onde já tens registos."
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_list.html:13
+#: projetos/templates/projetos/medicao_empregado_list.html:67
+msgid "Ver Meus Furos"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_list.html:50
+msgid "Ver Medição"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_empregado_list.html:63
+msgid "Ainda não tens medições disponíveis."
+msgstr ""
+
+#: projetos/templates/projetos/medicao_list.html:14
+#: projetos/templates/projetos/medicao_list.html:103
+msgid "Ir para Furos"
+msgstr ""
+
+#: projetos/templates/projetos/medicao_list.html:99
+msgid "Nenhuma medição registrada."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:12
+msgid "Consulta dos teus dados pessoais, profissionais e atividade no sistema."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:17
+#: projetos/templates/projetos/meus_dados_individual.html:15
+msgid "Editar Dados"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:23
+#: projetos/templates/projetos/meus_dados_individual.html:20
+msgid "Dados Pessoais"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:28
+#: projetos/templates/projetos/meus_dados_individual.html:24
+msgid "Telefone:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:32
+#: projetos/templates/projetos/meus_dados_individual.html:30
+msgid "Morada:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:38
+msgid "Dados Profissionais"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:45
+msgid "Horas Mensais:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:46
+msgid "Horas Extra:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:47
+msgid "Horas Trabalhadas no Mês:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:48
+msgid "Horas Totais:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:54
+msgid "Documentos"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:58
+msgid "Currículo:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:67
+msgid "Contrato:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:79
+msgid "Interação com a Aplicação"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:88
+msgid "Total Levantamentos"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:93
+msgid "Total Devoluções"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:98
+msgid "Configurações Criadas"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:106
+msgid "Projetos em que estiveste envolvido"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:142
+msgid "Ainda não existem projetos associados."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:148
+msgid "Furos em que trabalhaste"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:157
+msgid "Metros Furados"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:158
+msgid "Horas Trabalhadas"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado.html:174
+msgid "Ainda não existem furos registados para este empregado."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:4
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:11
+#: projetos/templates/projetos/meus_dados_individual_editar.html:4
+#: projetos/templates/projetos/meus_dados_individual_editar.html:10
+msgid "Editar Meus Dados"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:12
+msgid "Atualiza os teus dados pessoais e profissionais."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_empregado_editar.html:81
+#: projetos/templates/projetos/meus_dados_individual_editar.html:49
+msgid "Guardar Alterações"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual.html:11
+msgid "Consulta dos teus dados pessoais na conta individual."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual.html:25
+msgid "Especialidade:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual.html:26
+msgid "Data de nascimento:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual.html:27
+msgid "Início de atividade:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual.html:31
+msgid "Biografia:"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:11
+msgid "Atualiza os teus dados da conta individual."
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:31
+msgid "Especialidade"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:34
+msgid "Data de nascimento"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:35
+msgid "Início de atividade"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:41
+msgid "Documento"
+msgstr ""
+
+#: projetos/templates/projetos/meus_dados_individual_editar.html:42
+msgid "Biografia"
+msgstr ""
+
+#: projetos/templates/projetos/meus_furos_empregado.html:11
+msgid "Lista dos furos onde estás associado ou já tens registos."
+msgstr ""
+
+#: projetos/templates/projetos/meus_furos_empregado.html:53
+msgid "Ainda não tens furos associados."
+msgstr ""
+
+#: projetos/templates/projetos/meus_projetos_empregado.html:13
+msgid "Projetos onde estás associado ou já tens atividade registada."
+msgstr ""
+
+#: projetos/templates/projetos/meus_projetos_empregado.html:52
+#: projetos/templates/projetos/projeto_detail_empregado.html:39
+msgid "Metros Registados"
+msgstr ""
+
+#: projetos/templates/projetos/meus_projetos_empregado.html:56
+#: projetos/templates/projetos/projeto_detail_empregado.html:44
+msgid "Horas Registadas"
+msgstr ""
+
+#: projetos/templates/projetos/meus_projetos_empregado.html:64
+msgid "Abrir Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/meus_projetos_empregado.html:72
+msgid "Ainda não tens projetos associados."
+msgstr ""
+
+#: projetos/templates/projetos/projeto_3d.html:10
+#, python-format
+msgid "Visualização 3D do Projeto: %(nome)s"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_3d.html:20
+msgid "Sem dados 3D disponíveis"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_3d.html:21
+msgid "Este projeto ainda não possui furos com medições para visualização 3D."
+msgstr ""
+
+#: projetos/templates/projetos/projeto_3d.html:29
+#: projetos/templates/projetos/projeto_editar.html:70
+msgid "Voltar ao Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_confirm_delete.html:4
+#: projetos/templates/projetos/projeto_delete.html:4
+msgid "Apagar Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_confirm_delete.html:13
+msgid "Confirmar Exclusão"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_confirm_delete.html:18
+msgid "Tem certeza que deseja apagar o projeto:"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_delete.html:14
+#, python-format
+msgid "Tem certeza que deseja apagar o projeto <strong>%(nome)s</strong>?"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail.html:4
+msgid "Detalhes do Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:13
+#: projetos/templates/projetos/projeto_editar.html:26
+#: projetos/templates/projetos/projeto_form.html:24
+msgid "Cliente"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:34
+msgid "Furos no Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:56
+msgid "Trabalhadores Envolvidos"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:57
+msgid "trabalhador(es)"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:75
+msgid "Ainda não existem trabalhadores envolvidos visíveis neste projeto."
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:81
+msgid "Furos do Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_detail_empregado.html:109
+msgid "Não existem furos visíveis neste projeto."
+msgstr ""
+
+#: projetos/templates/projetos/projeto_editar.html:4
+#: projetos/templates/projetos/projeto_editar.html:12
+msgid "Editar Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_editar.html:32
+#: projetos/templates/projetos/projeto_form.html:30
+msgid "Cidade"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_editar.html:36
+#: projetos/templates/projetos/projeto_form.html:34
+msgid "País"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_editar.html:47
+#: projetos/templates/projetos/projeto_form.html:45
+msgid "Notas"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_form.html:4
+#: projetos/templates/projetos/projeto_form.html:11
+#: projetos/templates/projetos/projeto_list.html:19
+msgid "Criar Projeto"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_form.html:40
+msgid "Status"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:4
+msgid "Lista de Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:29
+msgid "Cliente:"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:30
+msgid "Cidade:"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:31
+msgid "País:"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:44
+msgid "Nenhum projeto encontrado."
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:49
+msgid "Mapa de Projetos"
+msgstr ""
+
+#: projetos/templates/projetos/projeto_list.html:61
+msgid "Nenhum projeto selecionado"
+msgstr ""
+
+#: projetos/templates/projetos/registo_admin_form.html:42
+#: projetos/templates/projetos/registo_diario_form.html:44
+msgid "Ver imagem"
+msgstr ""
+
+#: projetos/templates/projetos/registo_admin_form.html:52
+#: projetos/templates/projetos/registo_diario_form.html:54
+msgid "Fotos de Amostra já guardadas"
+msgstr ""
+
+#: projetos/templates/projetos/registo_admin_form.html:58
+#: projetos/templates/projetos/registo_diario_form.html:60
+msgid "Foto amostra"
+msgstr ""
+
+#: projetos/templates/projetos/registo_admin_form.html:72
+msgid "Guardar Correção"
+msgstr ""
+
+#: projetos/templates/projetos/registo_diario_list.html:11
+msgid "Meus Registos Diários"
+msgstr ""
+
+#: projetos/templates/projetos/registo_diario_list.html:15
+msgid "Novo Registo"
+msgstr ""
+
+#: projetos/templates/projetos/registo_diario_list.html:72
+#: projetos/templates/projetos/registo_diario_list.html:80
+msgid "Ainda não existem registos diários."
+msgstr ""
+
+#: projetos/templates/projetos/registo_empregado.html:11
+msgid "Registo de Empregado"
+msgstr ""
+
+#: projetos/templates/projetos/registo_empregado.html:41
+msgid "Enviar Registo"
+msgstr ""
+
+#: projetos/templates/projetos/registo_empregado.html:47
+msgid "Voltar ao Login"
+msgstr ""
+
+#: projetos/templates/projetos/registos_admin_list.html:4
+#: projetos/templates/projetos/registos_admin_list.html:10
+msgid "Registos de Produção"
+msgstr ""
+
+#: projetos/templates/projetos/registos_admin_list.html:145
+msgid "Sem registos encontrados."
+msgstr ""
+
+#: projetos/templates/projetos/relatorios_exportacao.html:4
+#: projetos/templates/projetos/relatorios_exportacao.html:11
+msgid "Relatórios e Exportação"
+msgstr ""
+
+#: projetos/templates/projetos/relatorios_exportacao.html:20
+msgid "CSV"
+msgstr ""
+
+#: projetos/templates/projetos/relatorios_exportacao.html:24
+msgid "XLSX"
+msgstr ""
+
+#: projetos/templates/projetos/relatorios_exportacao.html:28
+msgid "JSON"
+msgstr ""
+
+#: projetos/templates/projetos/relatorios_exportacao.html:32
+msgid "PDF"
+msgstr ""
+
+#: projetos/templates/projetos/saida_material.html:4
+#: projetos/templates/projetos/saida_material.html:11
+msgid "Saída de Material"
+msgstr ""
+
+#: projetos/templates/projetos/saida_material.html:32
+msgid "Registar saída"
+msgstr ""
+
+#: projetos/templates/projetos/sem_permissao.html:4
+msgid "Sem Permissão"
+msgstr ""
+
+#: projetos/templates/projetos/sem_permissao.html:9
+msgid "Sem permissão"
+msgstr ""
+
+#: projetos/templates/projetos/sem_permissao.html:10
+msgid "Não tens permissão para aceder a esta página."
+msgstr ""
+
+#: projetos/templates/projetos/sem_permissao.html:18
+msgid "Ir para o painel"
+msgstr ""
+
+#: website/templates/registration/password_reset_complete.html:3
+msgid "Password Alterada"
+msgstr ""
+
+#: website/templates/registration/password_reset_complete.html:9
+msgid "Password alterada com sucesso"
+msgstr ""
+
+#: website/templates/registration/password_reset_complete.html:13
+msgid "Já podes entrar na plataforma com a tua nova password."
+msgstr ""
+
+#: website/templates/registration/password_reset_complete.html:17
+msgid "Ir para o login"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:3
+msgid "Nova Password"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:9
+msgid "Definir Nova Password"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:23
+msgid "Nova password"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:31
+msgid "Confirmar nova password"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:39
+msgid "Guardar nova password"
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:44
+msgid "Este link é inválido ou já expirou."
+msgstr ""
+
+#: website/templates/registration/password_reset_confirm.html:49
+msgid "Pedir novo link"
+msgstr ""
+
+#: website/templates/registration/password_reset_done.html:3
+msgid "Email Enviado"
+msgstr ""
+
+#: website/templates/registration/password_reset_done.html:9
+msgid "Email enviado"
+msgstr ""
+
+#: website/templates/registration/password_reset_done.html:13
+msgid ""
+"Se existir uma conta com esse email, foi enviado um link para redefinir a "
+"password."
+msgstr ""
+
+#: website/templates/registration/password_reset_done.html:17
+#: website/templates/registration/password_reset_form.html:40
+msgid "Voltar ao login"
+msgstr ""
+
+#: website/templates/registration/password_reset_email.html:2
+#, python-format
+msgid "Olá %(username)s,"
+msgstr ""
+
+#: website/templates/registration/password_reset_email.html:4
+msgid "Recebemos um pedido para redefinir a tua password no Sistema Furação."
+msgstr ""
+
+#: website/templates/registration/password_reset_email.html:6
+msgid "Clica no link abaixo para definir uma nova password:"
+msgstr ""
+
+#: website/templates/registration/password_reset_email.html:10
+msgid "Se não fizeste este pedido, ignora este email."
+msgstr ""
+
+#: website/templates/registration/password_reset_email.html:12
+msgid "Obrigado,"
+msgstr ""
+
+#: website/templates/registration/password_reset_form.html:3
+#: website/templates/registration/password_reset_form.html:9
+msgid "Redefinir Password"
+msgstr ""
+
+#: website/templates/registration/password_reset_form.html:13
+msgid "Introduz o teu email para receberes um link de redefinição de password."
+msgstr ""
+
+#: website/templates/registration/password_reset_form.html:34
+msgid "Enviar link de recuperação"
+msgstr ""
+
+#: website/templates/website/home.html:7 website/templates/website/home.html:16
+msgid "Sistema de Furação"
+msgstr ""
+
+#: website/templates/website/home.html:14
+#: website/templates/website/home.html:45
+msgid "Logo Sistema de Furação"
+msgstr ""
+
+#: website/templates/website/home.html:17
+msgid "Plataforma para Diamond Drilling"
+msgstr ""
+
+#: website/templates/website/home.html:22
+msgid "Ver planos"
+msgstr ""
+
+#: website/templates/website/home.html:23
+#: website/templates/website/login.html:12
+#: website/templates/website/login.html:35
+#: website/templates/website/planos.html:16
+msgid "Entrar"
+msgstr ""
+
+#: website/templates/website/home.html:29
+msgid "Plataforma SaaS para Diamond Drilling"
+msgstr ""
+
+#: website/templates/website/home.html:30
+msgid "Gestão profissional de operações de furação diamantada"
+msgstr ""
+
+#: website/templates/website/home.html:32
+msgid ""
+"Centraliza projetos, furos, medições, materiais, produção e operação diária\n"
+"                    numa plataforma preparada para crescer com dashboards "
+"avançados, dispositivos\n"
+"                    de campo, IA e relatórios inteligentes."
+msgstr ""
+
+#: website/templates/website/home.html:38
+#: website/templates/website/login.html:40
+#: website/templates/website/registo.html:13
+#: website/templates/website/registo.html:106
+msgid "Criar conta"
+msgstr ""
+
+#: website/templates/website/home.html:39
+msgid "Comparar planos"
+msgstr ""
+
+#: website/templates/website/home.html:48
+msgid "Visão rápida da plataforma"
+msgstr ""
+
+#: website/templates/website/home.html:51
+msgid "Projetos e furos"
+msgstr ""
+
+#: website/templates/website/home.html:52
+msgid "Centralizados"
+msgstr ""
+
+#: website/templates/website/home.html:55
+msgid "Controlo por empresa"
+msgstr ""
+
+#: website/templates/website/home.html:56
+#: website/templates/website/home.html:79
+msgid "Multiempresa"
+msgstr ""
+
+#: website/templates/website/home.html:59
+msgid "Produção e stock"
+msgstr ""
+
+#: website/templates/website/home.html:60
+msgid "Tempo real"
+msgstr ""
+
+#: website/templates/website/home.html:63
+msgid "Evolução futura"
+msgstr ""
+
+#: website/templates/website/home.html:64
+msgid "IA + sensores"
+msgstr ""
+
+#: website/templates/website/home.html:71
+msgid "Operação centralizada"
+msgstr ""
+
+#: website/templates/website/home.html:73
+msgid ""
+"Projetos, furos, materiais, máquinas, medições e dashboards\n"
+"                    no mesmo sistema."
+msgstr ""
+
+#: website/templates/website/home.html:81
+msgid ""
+"Cada cliente vê apenas os seus próprios dados,\n"
+"                    com isolamento total por empresa."
+msgstr ""
+
+#: website/templates/website/home.html:87
+msgid "Preparado para crescer"
+msgstr ""
+
+#: website/templates/website/home.html:89
+msgid ""
+"Base preparada para integração com dispositivos,\n"
+"                    IA e relatórios inteligentes."
+msgstr ""
+
+#: website/templates/website/home.html:95
+msgid "O que a plataforma permite"
+msgstr ""
+
+#: website/templates/website/home.html:99
+msgid "Gestão operacional"
+msgstr ""
+
+#: website/templates/website/home.html:101
+msgid ""
+"Acompanha projetos, furos, equipas, máquinas e materiais\n"
+"                    com mais organização e rastreabilidade."
+msgstr ""
+
+#: website/templates/website/home.html:107
+msgid "Análise e produtividade"
+msgstr ""
+
+#: website/templates/website/home.html:109
+msgid ""
+"Consolida registos diários e apoia a análise de produtividade,\n"
+"                    desempenho e controlo operacional."
+msgstr ""
+
+#: website/templates/website/home.html:115
+msgid "Visão técnica"
+msgstr ""
+
+#: website/templates/website/home.html:117
+msgid ""
+"Inclui estrutura para medições, dados técnicos e evolução\n"
+"                    futura para integração com sensores e dispositivos."
+msgstr ""
+
+#: website/templates/website/home.html:123
+msgid "Escalabilidade"
+msgstr ""
+
+#: website/templates/website/home.html:125
+msgid ""
+"Pensado para crescer de uma operação local para uma\n"
+"                    plataforma completa por empresa ou grupo."
+msgstr ""
+
+#: website/templates/website/home.html:132
+msgid ""
+"© 2026 Sistema de Furação · Plataforma para gestão de operações de diamond "
+"drilling"
+msgstr ""
+
+#: website/templates/website/login.html:7
+msgid "Login"
+msgstr ""
+
+#: website/templates/website/login.html:13
+msgid "Acede à tua conta para continuar"
+msgstr ""
+
+#: website/templates/website/login.html:17
+msgid "Username ou password inválidos."
+msgstr ""
+
+#: website/templates/website/login.html:27
+#: website/templates/website/registo.html:95
+msgid "Password"
+msgstr ""
+
+#: website/templates/website/login.html:40
+msgid "Não tens conta?"
+msgstr ""
+
+#: website/templates/website/login.html:43
+msgid "Recuperar password"
+msgstr ""
+
+#: website/templates/website/planos.html:25
+#: website/templates/website/registo.html:63
+msgid "/mês"
+msgstr ""
+
+#: website/templates/website/planos.html:27
+msgid "Dashboard empresa:"
+msgstr ""
+
+#: website/templates/website/planos.html:30
+msgid "Painel empregado:"
+msgstr ""
+
+#: website/templates/website/planos.html:33
+msgid "Multiutilizador:"
+msgstr ""
+
+#: website/templates/website/planos.html:36
+msgid "Escolher este plano"
+msgstr ""
+
+#: website/templates/website/planos.html:40
+msgid "Não existem planos ativos disponíveis."
+msgstr ""
+
+#: website/templates/website/registo.html:12
+msgid "Voltar à Home"
+msgstr ""
+
+#: website/templates/website/registo.html:20
+msgid "Fechar aviso"
+msgstr ""
+
+#: website/templates/website/registo.html:31
+msgid "Tipo de conta"
+msgstr ""
+
+#: website/templates/website/registo.html:34
+msgid "Individual"
+msgstr ""
+
+#: website/templates/website/registo.html:39
+msgid "Username"
+msgstr ""
+
+#: website/templates/website/registo.html:49
+msgid "Nome do responsável"
+msgstr ""
+
+#: website/templates/website/registo.html:54
+msgid "Nome da empresa"
+msgstr ""
+
+#: website/templates/website/registo.html:59
+msgid "Plano"
+msgstr ""
+
+#: website/templates/website/registo.html:70
+msgid "Período de pagamento"
+msgstr ""
+
+#: website/templates/website/registo.html:72
+msgid "1 mês"
+msgstr ""
+
+#: website/templates/website/registo.html:73
+msgid "3 meses"
+msgstr ""
+
+#: website/templates/website/registo.html:74
+msgid "6 meses"
+msgstr ""
+
+#: website/templates/website/registo.html:75
+msgid "12 meses"
+msgstr ""
+
+#: website/templates/website/registo.html:80
+msgid "Valor da subscrição"
+msgstr ""
+
+#: website/templates/website/registo.html:91
+msgid ""
+"O tipo de conta deve corresponder ao plano selecionado. O valor é calculado "
+"automaticamente e fica registado para faturação e relatórios futuros."
+msgstr ""
+
+#: website/templates/website/registo.html:100
+msgid "Confirmar password"
+msgstr ""

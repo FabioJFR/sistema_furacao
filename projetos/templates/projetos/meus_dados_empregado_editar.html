@@ -1,19 +1,20 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Editar Meus Dados{% endblock %}
+{% block title %}{% trans "Editar Meus Dados" %}{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
 
     <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">✏️ Editar Meus Dados</h1>
-            <p class="text-gray-500 mt-1">Atualiza os teus dados pessoais e profissionais.</p>
+            <h1 class="text-2xl font-bold text-gray-800">✏️ {% trans "Editar Meus Dados" %}</h1>
+            <p class="text-gray-500 mt-1">{% trans "Atualiza os teus dados pessoais e profissionais." %}</p>
         </div>
 
         <a href="{% url 'projetos:meus_dados_empregado' %}"
            class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-            🔙 Voltar
+            🔙 {% trans "Voltar" %}
         </a>
     </div>
 
@@ -29,47 +30,47 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Nome</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Nome" %}</label>
                     {{ form.nome }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Função</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Função" %}</label>
                     {{ form.funcao }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Email</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Email" %}</label>
                     {{ form.email }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Telefone</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Telefone" %}</label>
                     {{ form.telefone }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Data de Admissão</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Data de Admissão" %}</label>
                     {{ form.data_admissao }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Nacionalidade</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Nacionalidade" %}</label>
                     {{ form.nacionalidade }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Idade</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Idade" %}</label>
                     {{ form.idade }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Morada</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Morada" %}</label>
                     {{ form.morada }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">NIF</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "NIF" %}</label>
                     {{ form.nif }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Currículo</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Currículo" %}</label>
                     {{ form.curriculo }}
                 </div>
                 <div>
-                    <label class="block font-semibold text-gray-700 mb-1">Contrato</label>
+                    <label class="block font-semibold text-gray-700 mb-1">{% trans "Contrato" %}</label>
                     {{ form.contrato }}
                 </div>
             </div>
@@ -77,7 +78,7 @@
             <div>
                 <button type="submit"
                         class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
-                    💾 Guardar Alterações
+                    💾 {% trans "Guardar Alterações" %}
                 </button>
             </div>
         </form>

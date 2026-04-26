@@ -1,15 +1,22 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}{{ page_title|default:"Empregado" }}{% endblock %}
+{% block title %}
+    {% if page_title %}
+        {{ page_title }}
+    {% else %}
+        {% trans "Empregado" %}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <nav class="text-sm text-gray-500">
-            <a href="{% url 'projetos:dashboard' %}" class="hover:text-blue-600">Dashboard</a>
+            <a href="{% url 'projetos:dashboard' %}" class="hover:text-blue-600">{% trans "Dashboard" %}</a>
             <span class="mx-2">/</span>
-            <a href="{% url 'projetos:empregado_list' %}" class="hover:text-blue-600">Empregados</a>
+            <a href="{% url 'projetos:empregado_list' %}" class="hover:text-blue-600">{% trans "Empregados" %}</a>
             <span class="mx-2">/</span>
             <span class="text-gray-800 font-medium">{{ empregado.nome }}</span>
         </nav>
@@ -18,82 +25,82 @@
         <div class="flex justify-between items-center flex-wrap gap-3">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">{{ empregado.nome }}</h2>
-                <p class="mt-1 text-sm text-gray-500">Painel completo do trabalhador, projetos, documentos e configurações associadas.</p>
+                <p class="mt-1 text-sm text-gray-500">{% trans "Painel completo do trabalhador, projetos, documentos e configurações associadas." %}</p>
             </div>
 
             <div class="flex gap-3 flex-wrap">
                 <a href="{% url 'projetos:empregado_adicionar_projeto' empregado.id %}" 
                    class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                    ➕ Associar Projeto
+                    ➕ {% trans "Associar Projeto" %}
                 </a>
                 {% if not empregado.aprovado %}
                     <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}" class="inline">
                         {% csrf_token %}
                         <button type="submit"
                                 class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                            ✅ Aprovar Registo
+                            ✅ {% trans "Aprovar Registo" %}
                         </button>
                     </form>
                 {% endif %}
                 <a href="{% url 'projetos:empregado_update' empregado.id %}" 
                    class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
-                    ✏️ Editar
+                    ✏️ {% trans "Editar" %}
                 </a>
 
                 <a href="{% url 'projetos:empregado_delete' empregado.id %}" 
                    class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
-                    🗑️ Apagar
+                    🗑️ {% trans "Apagar" %}
                 </a>
             </div>
         </div>
 
         <!-- ACESSO À PLATAFORMA -->
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-blue-900 mb-4">Acesso à Plataforma</h3>
+            <h3 class="text-xl font-bold text-blue-900 mb-4">{% trans "Acesso à Plataforma" %}</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
                 <p>
-                    <strong>Estado de aprovação:</strong>
+                    <strong>{% trans "Estado de aprovação:" %}</strong>
                     {% if empregado.aprovado %}
                         <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                            Aprovado
+                            {% trans "Aprovado" %}
                         </span>
                     {% else %}
                         <span class="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold">
-                            Pendente
+                            {% trans "Pendente" %}
                         </span>
                     {% endif %}
                 </p>
 
-                <p><strong>Data de aprovação:</strong> {{ empregado.data_aprovacao|default:"-" }}</p>
-                <p><strong>Nome de utilizador:</strong> {{ username_gerado|default:"-" }}</p>
-                <p><strong>Ligado a utilizador:</strong> {% if empregado.user %}Sim{% else %}Não{% endif %}</p>
+                <p><strong>{% trans "Data de aprovação:" %}</strong> {{ empregado.data_aprovacao|default:"-" }}</p>
+                <p><strong>{% trans "Nome de utilizador:" %}</strong> {{ username_gerado|default:"-" }}</p>
+                <p><strong>{% trans "Ligado a utilizador:" %}</strong> {% if empregado.user %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
             </div>
 
             <div class="mt-4 text-sm text-blue-900 bg-white border border-blue-100 rounded-lg p-4">
-                <p class="font-semibold mb-1">Nota importante</p>
+                <p class="font-semibold mb-1">{% trans "Nota importante" %}</p>
                 <p>
-                    A palavra-passe temporária é mostrada ao administrador no momento da criação ou aprovação do empregado.
-                    Se precisares de entregar novo acesso ao empregado, o mais seguro é redefinir a palavra-passe no utilizador associado.
+                    {% trans "A palavra-passe temporária é mostrada ao administrador no momento da criação ou aprovação do empregado." %}
+                    {% trans "Se precisares de entregar novo acesso ao empregado, o mais seguro é redefinir a palavra-passe no utilizador associado." %}
                 </p>
             </div>
         </div>
 
         <!-- DADOS DO EMPREGADO -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>Função:</strong> {{ empregado.get_funcao_display|default:"-" }}</p>
-            <p><strong>Email:</strong> {{ empregado.email|default:"-" }}</p>
-            <p><strong>Data de Admissão:</strong> {{ empregado.data_admissao|default:"-" }}</p>
-            <p><strong>Idade:</strong> {{ empregado.idade|default:"-" }}</p>
-            <p><strong>Nacionalidade:</strong> {{ empregado.nacionalidade|default:"-" }}</p>
-            <p><strong>NIF:</strong> {{ empregado.nif|default:"-" }}</p>
-            <p><strong>Salário:</strong> {{ empregado.salario|default:"-" }}</p>
-            <p><strong>Horas Diárias:</strong> {{ empregado.horas_diarias|default:"-" }}</p>
+            <p><strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:"-" }}</p>
+            <p><strong>{% trans "Email:" %}</strong> {{ empregado.email|default:"-" }}</p>
+            <p><strong>{% trans "Data de Admissão:" %}</strong> {{ empregado.data_admissao|default:"-" }}</p>
+            <p><strong>{% trans "Idade:" %}</strong> {{ empregado.idade|default:"-" }}</p>
+            <p><strong>{% trans "Nacionalidade:" %}</strong> {{ empregado.nacionalidade|default:"-" }}</p>
+            <p><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</p>
+            <p><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default:"-" }}</p>
+            <p><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default:"-" }}</p>
         </div>
 
         <!-- PROJETOS ATUAIS -->
         <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Projetos Atuais</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Projetos Atuais" %}</h3>
 
             {% if empregado.projetos_atuais %}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -105,31 +112,31 @@
                             <div class="mt-3">
                                 <a href="{{ projeto.get_absolute_url }}" 
                                    class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                   Ver Projeto
+                                   {% trans "Ver Projeto" %}
                                 </a>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">Sem projetos atuais.</p>
+                <p class="text-gray-500">{% trans "Sem projetos atuais." %}</p>
             {% endif %}
         </div>
 
         <!-- HISTÓRICO -->
         <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Histórico de Projetos</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Histórico de Projetos" %}</h3>
 
             {% if empregado.ligacoes_projetos.all %}
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="text-left px-4 py-3">Projeto</th>
-                                <th class="text-left px-4 py-3">Início</th>
-                                <th class="text-left px-4 py-3">Fim</th>
-                                <th class="text-left px-4 py-3">Estado</th>
-                                <th class="text-left px-4 py-3">Ações</th>
+                                <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Início" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Fim" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -147,11 +154,11 @@
                                     <td class="px-4 py-3">
                                         {% if ligacao.ativo %}
                                             <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                Atual
+                                                {% trans "Atual" %}
                                             </span>
                                         {% else %}
                                             <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                Concluído
+                                                {% trans "Concluído" %}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -159,13 +166,13 @@
                                         <div class="flex gap-2 flex-wrap">
                                             <a href="{% url 'projetos:empregado_editar_projeto' empregado.id ligacao.id %}"
                                             class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                                Editar
+                                                {% trans "Editar" %}
                                             </a>
 
                                             {% if ligacao.ativo %}
                                                 <a href="{% url 'projetos:empregado_terminar_projeto' empregado.id ligacao.id %}"
                                                 class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                                    Terminar
+                                                    {% trans "Terminar" %}
                                                 </a>
                                             {% endif %}
                                         </div>
@@ -176,18 +183,18 @@
                     </table>
                 </div>
             {% else %}
-                <p class="text-gray-500">Sem histórico de projetos.</p>
+                <p class="text-gray-500">{% trans "Sem histórico de projetos." %}</p>
             {% endif %}
         </div>
         
         <!--  CONFIGURAÇÃO DE PERFURAÇÃO -->
         <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Configurações de Perfuração</h2>
+                <h2 class="text-xl font-bold text-gray-800">{% trans "Configurações de Perfuração" %}</h2>
 
                 <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado.pk %}"
                 class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    Ver / Editar
+                    {% trans "Ver / Editar" %}
                 </a>
             </div>
 
@@ -195,34 +202,34 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
                     {% for config in empregado.configuracoes_perfuracao.all %}
                         <div class="border rounded-lg p-4">
-                            <div><strong>Furo:</strong> {{ config.furo.nome }}</div>
-                            <div><strong>Tubo:</strong> {{ config.comprimento_tubo }} m</div>
-                            <div><strong>Karoutier:</strong> {{ config.comprimento_karoutier }} m</div>
-                            <div><strong>Acrescento:</strong> {{ config.comprimento_acrescento }} m</div>
-                            <div><strong>Calibrador:</strong> {{ config.comprimento_calibrador }} m</div>
-                            <div><strong>Record:</strong> {{ config.comprimento_record }} m</div>
-                            <div><strong>Bit:</strong> {{ config.comprimento_bit }} m</div>
-                            <div><strong>Caixa de mola:</strong> {{ config.comprimento_caixa_mola }} m</div>
-                            <div><strong>Tubo interior:</strong> {{ config.comprimento_tubo_interior }} m</div>
-                            <div><strong>Cabeça de interior:</strong> {{ config.comprimento_cabeca_interior }} m</div>
-                            <div><strong>Atualizado em:</strong> {{ config.atualizado_em }}</div>
-                            <div><strong>Atualizado por:</strong> {{ config.atualizado_por|default:"-" }}</div>
+                            <div><strong>{% trans "Furo:" %}</strong> {{ config.furo.nome }}</div>
+                            <div><strong>{% trans "Tubo:" %}</strong> {{ config.comprimento_tubo }} m</div>
+                            <div><strong>{% trans "Karoutier:" %}</strong> {{ config.comprimento_karoutier }} m</div>
+                            <div><strong>{% trans "Acrescento:" %}</strong> {{ config.comprimento_acrescento }} m</div>
+                            <div><strong>{% trans "Calibrador:" %}</strong> {{ config.comprimento_calibrador }} m</div>
+                            <div><strong>{% trans "Record:" %}</strong> {{ config.comprimento_record }} m</div>
+                            <div><strong>{% trans "Bit:" %}</strong> {{ config.comprimento_bit }} m</div>
+                            <div><strong>{% trans "Caixa de mola:" %}</strong> {{ config.comprimento_caixa_mola }} m</div>
+                            <div><strong>{% trans "Tubo interior:" %}</strong> {{ config.comprimento_tubo_interior }} m</div>
+                            <div><strong>{% trans "Cabeça de interior:" %}</strong> {{ config.comprimento_cabeca_interior }} m</div>
+                            <div><strong>{% trans "Atualizado em:" %}</strong> {{ config.atualizado_em }}</div>
+                            <div><strong>{% trans "Atualizado por:" %}</strong> {{ config.atualizado_por|default:"-" }}</div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">Ainda não existem configurações de perfuração para este empregado.</p>
+                <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração para este empregado." %}</p>
             {% endif %}
         </div>
 
         <!-- FICHEIROS DO EMPREGADO -->
         <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
             <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Ficheiros do Empregado</h3>
+                <h3 class="text-xl font-bold text-gray-800">{% trans "Ficheiros do Empregado" %}</h3>
 
                 <a href="{% url 'projetos:empregado_adicionar_ficheiro' empregado.id %}" 
                 class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                    📎 Adicionar Ficheiro
+                    📎 {% trans "Adicionar Ficheiro" %}
                 </a>
             </div>
 
@@ -230,18 +237,18 @@
             <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {% if empregado.curriculo %}
                 <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <p class="font-semibold text-gray-800">Currículo principal</p>
+                    <p class="font-semibold text-gray-800">{% trans "Currículo principal" %}</p>
                     <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
-                        Ver ficheiro
+                        {% trans "Ver ficheiro" %}
                     </a>
                 </div>
                 {% endif %}
 
                 {% if empregado.contrato %}
                 <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <p class="font-semibold text-gray-800">Contrato principal</p>
+                    <p class="font-semibold text-gray-800">{% trans "Contrato principal" %}</p>
                     <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
-                        Ver ficheiro
+                        {% trans "Ver ficheiro" %}
                     </a>
                 </div>
                 {% endif %}
@@ -253,11 +260,11 @@
                     <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="text-left px-4 py-3">Tipo</th>
-                                <th class="text-left px-4 py-3">Título</th>
-                                <th class="text-left px-4 py-3">Upload</th>
-                                <th class="text-left px-4 py-3">Observações</th>
-                                <th class="text-left px-4 py-3">Ações</th>
+                                <th class="text-left px-4 py-3">{% trans "Tipo" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Título" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Upload" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -271,12 +278,12 @@
                                         <div class="flex gap-2 flex-wrap">
                                             <a href="{{ ficheiro.ficheiro.url }}" target="_blank"
                                             class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-                                                Ver
+                                                {% trans "Ver" %}
                                             </a>
 
                                             <a href="{% url 'projetos:empregado_apagar_ficheiro' empregado.id ficheiro.id %}"
                                             class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                                Apagar
+                                                {% trans "Apagar" %}
                                             </a>
                                         </div>
                                     </td>
@@ -286,7 +293,7 @@
                     </table>
                 </div>
             {% else %}
-                <p class="text-gray-500">Sem ficheiros adicionais.</p>
+                <p class="text-gray-500">{% trans "Sem ficheiros adicionais." %}</p>
             {% endif %}
         </div>
 
@@ -296,7 +303,7 @@
         <div class="pt-2">
             <a href="{% url 'projetos:empregado_list' %}" 
                class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                🔙 Voltar à Lista
+                🔙 {% trans "Voltar à Lista" %}
             </a>
         </div>
 

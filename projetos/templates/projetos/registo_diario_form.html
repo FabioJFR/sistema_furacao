@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 <!-- registo_diario_form.html -->
 
 {% block title %}{{ titulo }}{% endblock %}
@@ -39,9 +39,9 @@
 
                         {% if field.name == 'relatorio_foto' and form.instance.pk and form.instance.relatorio_foto %}
                             <p class="text-sm text-gray-600 mt-2">
-                                Atual:
+                                {% trans "Atual:" %}
                                 <a href="{{ form.instance.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                    Ver imagem
+                                    {% trans "Ver imagem" %}
                                 </a>
                             </p>
                         {% endif %}
@@ -51,13 +51,13 @@
 
             {% if form.instance.pk and form.instance.fotos_amostra.all %}
                 <div class="mt-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-3">Fotos de Amostra já guardadas</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">{% trans "Fotos de Amostra já guardadas" %}</h3>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {% for foto in form.instance.fotos_amostra.all %}
                             <div class="border rounded-lg p-2 bg-gray-50">
                                 <a href="{{ foto.imagem.url }}" target="_blank">
-                                    <img src="{{ foto.imagem.url }}" alt="Foto amostra" class="w-full h-32 object-cover rounded">
+                                    <img src="{{ foto.imagem.url }}" alt="{% trans 'Foto amostra' %}" class="w-full h-32 object-cover rounded">
                                 </a>
 
                                 {% if foto.descricao %}
@@ -70,13 +70,13 @@
             {% endif %}
 
             <button type="submit" class="btn btn-success mt-4 w-full text-center">
-                💾 Guardar Registo
+                💾 {% trans "Guardar Registo" %}
             </button>
         </form>
 
         <div class="mt-4 text-center">
             <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-primary">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>

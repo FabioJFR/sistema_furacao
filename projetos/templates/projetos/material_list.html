@@ -1,7 +1,7 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Lista de Materiais{% endblock %}
+{% block title %}{% trans "Lista de Materiais" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/material_list.css' %}">
@@ -11,28 +11,28 @@
 <section class="ml-wrap">
 
     <div class="ml-top">
-        <h1>Lista de Materiais</h1>
+        <h1>{% trans "Lista de Materiais" %}</h1>
 
         <a href="{% url 'projetos:material_create' %}" class="ml-btn ml-btn-add">
-            ➕ Adicionar Novo Material
+            ➕ {% trans "Adicionar Novo Material" %}
         </a>
     </div>
 
     <div class="ml-filter-card">
         <form method="get" class="ml-filter-form">
             <div class="ml-filter-field">
-                <label class="ml-filter-label">Nome do Material</label>
+                <label class="ml-filter-label">{% trans "Nome do Material" %}</label>
                 <input type="text"
                        name="nome"
                        value="{{ filtros.nome }}"
-                       placeholder="Ex.: tubo, broca, haste..."
+                       placeholder="{% trans 'Ex.: tubo, broca, haste...' %}"
                        class="ml-filter-input">
             </div>
 
             <div class="ml-filter-actions">
-                <button type="submit" class="ml-btn-filter">Filtrar</button>
+                <button type="submit" class="ml-btn-filter">{% trans "Filtrar" %}</button>
 
-                <a href="{% url 'projetos:material_list' %}" class="ml-btn-clear">Limpar</a>
+                <a href="{% url 'projetos:material_list' %}" class="ml-btn-clear">{% trans "Limpar" %}</a>
             </div>
         </form>
     </div>
@@ -44,33 +44,33 @@
             <div>
                 <h2>{{ material.nome }}</h2>
 
-                <p><strong>Projeto:</strong> {{ material.projeto.nome }}</p>
+                <p><strong>{% trans "Projeto:" %}</strong> {{ material.projeto.nome }}</p>
 
 
-                <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
-                <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>
-                <p><strong>Nº Série:</strong> {{ material.numero_serie|default:"-" }}</p>
+                <p><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
+                <p><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
+                <p><strong>{% trans "Nº Série:" %}</strong> {{ material.numero_serie|default:"-" }}</p>
 
-                <p><strong>Quantidade:</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
-                <p><strong>Diâmetro:</strong> {{ material.diametro|default:"0"|floatformat:2 }}</p>
-                <p><strong>Valor:</strong> €{{ material.valor|floatformat:2 }}</p>
+                <p><strong>{% trans "Quantidade:" %}</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
+                <p><strong>{% trans "Diâmetro:" %}</strong> {{ material.diametro|default:"0"|floatformat:2 }}</p>
+                <p><strong>{% trans "Valor:" %}</strong> €{{ material.valor|floatformat:2 }}</p>
 
-                <p><strong>Fornecedor:</strong> {{ material.fornecedor|default:"-" }}</p>
-                <p><strong>Estado:</strong> {{ material.get_estado_display }}</p>
-                <p><strong>Localização:</strong> {{ material.localizacao|default:"-" }}</p>
+                <p><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
+                <p><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
+                <p><strong>{% trans "Localização:" %}</strong> {{ material.localizacao|default:"-" }}</p>
             </div>
 
             <div class="ml-card-actions">
                 <a href="{% url 'projetos:material_detail' material.id %}" class="ml-action ml-action-view">
-                    🔍 Ver
+                    🔍 {% trans "Ver" %}
                 </a>
 
                 <a href="{% url 'projetos:material_update' material.id %}" class="ml-action ml-action-edit">
-                    ✏️ Editar
+                    ✏️ {% trans "Editar" %}
                 </a>
 
                 <a href="{% url 'projetos:material_delete' material.id %}" class="ml-action ml-action-delete">
-                    🗑️ Apagar
+                    🗑️ {% trans "Apagar" %}
                 </a>
             </div>
         </div>
@@ -78,7 +78,7 @@
     </div>
     {% else %}
     <div class="ml-empty">
-        Nenhum material registado.
+        {% trans "Nenhum material registado." %}
     </div>
     {% endif %}
 

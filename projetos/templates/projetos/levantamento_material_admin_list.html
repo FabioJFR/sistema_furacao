@@ -1,13 +1,14 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Levantamentos de Material{% endblock %}
+{% block title %}{% trans "Levantamentos de Material" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">📦 Levantamentos de Material</h1>
+            <h1 class="text-2xl font-bold text-gray-800">📦 {% trans "Levantamentos de Material" %}</h1>
         </div>
 
         <!-- FILTROS -->
@@ -15,9 +16,9 @@
             <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Empregado</label>
+                    <label class="block text-sm font-semibold mb-1">{% trans "Empregado" %}</label>
                     <select name="empregado" class="w-full p-2 border rounded">
-                        <option value="">Todos</option>
+                        <option value="">{% trans "Todos" %}</option>
                         {% for e in empregados %}
                             <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
                                 {{ e.nome }}
@@ -27,9 +28,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Material</label>
+                    <label class="block text-sm font-semibold mb-1">{% trans "Material" %}</label>
                     <select name="material" class="w-full p-2 border rounded">
-                        <option value="">Todos</option>
+                        <option value="">{% trans "Todos" %}</option>
                         {% for m in materiais %}
                             <option value="{{ m.id }}" {% if filtros.material == m.id|stringformat:"s" %}selected{% endif %}>
                                 {{ m.nome }}
@@ -39,9 +40,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Projeto</label>
+                    <label class="block text-sm font-semibold mb-1">{% trans "Projeto" %}</label>
                     <select name="projeto" class="w-full p-2 border rounded">
-                        <option value="">Todos</option>
+                        <option value="">{% trans "Todos" %}</option>
                         {% for p in projetos %}
                             <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
                                 {{ p.nome }}
@@ -51,18 +52,18 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Data início</label>
+                    <label class="block text-sm font-semibold mb-1">{% trans "Data início" %}</label>
                     <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full p-2 border rounded">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Data fim</label>
+                    <label class="block text-sm font-semibold mb-1">{% trans "Data fim" %}</label>
                     <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
                 </div>
 
                 <div class="md:col-span-5 flex gap-3 pt-2">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                    <a href="{% url 'projetos:levantamento_material_admin_list' %}" class="btn btn-warning">Limpar</a>
+                    <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+                    <a href="{% url 'projetos:levantamento_material_admin_list' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
                 </div>
             </form>
         </div>
@@ -72,13 +73,13 @@
                 <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Empregado</th>
-                            <th class="text-left px-4 py-3">Material</th>
-                            <th class="text-left px-4 py-3">Quantidade</th>
-                            <th class="text-left px-4 py-3">Projeto</th>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Observações</th>
+                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Empregado" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Material" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Quantidade" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,7 +95,7 @@
                                             {{ levantamento.projeto.nome }}
                                         </a>
                                     {% else %}
-                                        Stock
+                                        {% trans "Stock" %}
                                     {% endif %}
                                 </td>
                                 <td class="px-4 py-3">
@@ -113,7 +114,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem levantamentos registados.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem levantamentos registados." %}</p>
         {% endif %}
 
     </div>

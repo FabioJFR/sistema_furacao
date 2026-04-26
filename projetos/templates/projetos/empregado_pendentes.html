@@ -1,16 +1,23 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Empregados Pendentes{% endblock %}
+{% block title %}{% trans "Empregados Pendentes" %}{% endblock %}
 
 {% block content %}
 <section class="w-full px-4 py-6 sm:px-6 lg:px-8">
     <div class="max-w-screen-2xl mx-auto bg-white rounded-xl shadow-lg p-6">
         <div class="flex justify-between items-center flex-wrap gap-3 mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">{{ titulo|default:"Empregados Pendentes de Aprovação" }}</h1>
+            <h1 class="text-2xl font-bold text-gray-800">
+                {% if titulo %}
+                    {{ titulo }}
+                {% else %}
+                    {% trans "Empregados Pendentes de Aprovação" %}
+                {% endif %}
+            </h1>
 
             <a href="{% url 'projetos:empregado_list' %}"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 Voltar aos Empregados
+                🔙 {% trans "Voltar aos Empregados" %}
             </a>
         </div>
 
@@ -19,13 +26,13 @@
                 <table class="min-w-[1180px] w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Nome</th>
-                            <th class="text-left px-4 py-3">Email</th>
-                            <th class="text-left px-4 py-3">Função</th>
-                            <th class="text-left px-4 py-3">Registo</th>
-                            <th class="text-left px-4 py-3">Estado</th>
-                            <th class="text-left px-4 py-3">Data Admissão</th>
-                            <th class="text-left px-4 py-3 w-[340px]">Ações</th>
+                            <th class="text-left px-4 py-3">{% trans "Nome" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Email" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Função" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Registo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Data Admissão" %}</th>
+                            <th class="text-left px-4 py-3 w-[340px]">{% trans "Ações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,7 +44,7 @@
                                 <td class="px-4 py-3">{{ empregado.data_registo|date:"d/m/Y H:i"|default:"-" }}</td>
                                 <td class="px-4 py-3">
                                     <span class="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                        Pendente
+                                        {% trans "Pendente" %}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ empregado.data_admissao|date:"d/m/Y"|default:"-" }}</td>
@@ -45,20 +52,20 @@
                                     <div class="flex gap-2 items-start min-w-[300px] whitespace-nowrap">
                                         <a href="{{ empregado.get_absolute_url }}"
                                            class="inline-flex items-center justify-center bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition whitespace-nowrap">
-                                            Ver
+                                            {% trans "Ver" %}
                                         </a>
                                         <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}" class="inline">
                                             {% csrf_token %}
                                             <button type="submit"
                                                 class="inline-flex items-center justify-center bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition whitespace-nowrap">
-                                                ✔ Aprovar
+                                                ✔ {% trans "Aprovar" %}
                                             </button>
                                         </form>
                                         <form method="post" action="{% url 'projetos:empregado_rejeitar' empregado.id %}" class="inline">
                                             {% csrf_token %}
                                             <button type="submit"
                                                 class="inline-flex items-center justify-center bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition whitespace-nowrap">
-                                                ✖ Rejeitar
+                                                ✖ {% trans "Rejeitar" %}
                                             </button>
                                         </form>
                                     </div>
@@ -70,7 +77,7 @@
             </div>
         {% else %}
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
-                <p class="text-gray-600 font-medium">🎉 Não existem empregados pendentes. Tudo em dia!</p>
+                <p class="text-gray-600 font-medium">🎉 {% trans "Não existem empregados pendentes. Tudo em dia!" %}</p>
             </div>
         {% endif %}
     </div>

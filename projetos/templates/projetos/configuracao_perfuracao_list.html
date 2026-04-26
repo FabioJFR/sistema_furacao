@@ -1,24 +1,25 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Configurações de Perfuração{% endblock %}
+{% block title %}{% trans "Configurações de Perfuração" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
         <div class="flex justify-between items-center flex-wrap gap-3">
             <h1 class="text-2xl font-bold text-gray-800">
-                Configurações de Perfuração - {{ empregado.nome }}
+                {% blocktrans with nome=empregado.nome %}Configurações de Perfuração - {{ nome }}{% endblocktrans %}
             </h1>
 
             {% if modo_admin %}
                 <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado.pk %}"
                    class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    Nova Configuração
+                    {% trans "Nova Configuração" %}
                 </a>
             {% else %}
                 <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}"
                    class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    Nova Configuração
+                    {% trans "Nova Configuração" %}
                 </a>
             {% endif %}
         </div>
@@ -28,11 +29,11 @@
             <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <th class="text-left px-4 py-3">Furo</th>
-                        <th class="text-left px-4 py-3">Conjunto de Fundo</th>
-                        <th class="text-left px-4 py-3">Tubo Interior</th>
-                        <th class="text-left px-4 py-3">Atualizado em</th>
-                        <th class="text-left px-4 py-3">Ações</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Conjunto de Fundo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Tubo Interior" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Atualizado em" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,14 +45,14 @@
                         <td class="px-4 py-3">{{ config.atualizado_em }}</td>
                         <td class="px-4 py-3">
                             {% if modo_admin %}
-                                <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
+                                    <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
                                    class="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition">
-                                    Editar
+                                    {% trans "Editar" %}
                                 </a>
                             {% else %}
                                 <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
                                    class="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition">
-                                    Editar
+                                    {% trans "Editar" %}
                                 </a>
                             {% endif %}
                         </td>
@@ -61,7 +62,7 @@
             </table>
         </div>
         {% else %}
-        <p class="text-gray-500">Ainda não existem configurações de perfuração registadas.</p>
+        <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração registadas." %}</p>
         {% endif %}
     </div>
 </section>

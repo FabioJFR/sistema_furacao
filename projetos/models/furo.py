@@ -199,6 +199,17 @@ class Furo(models.Model):
                 "profundidade_alvo_inicial": "A profundidade alvo inicial não pode ser menor que a profundidade inicial."
             })
 
+        if self.tipo == "superficie":
+            erros_inclinacao = {}
+            if self.inclinacao_planeada_inicial is not None and self.inclinacao_planeada_inicial > 0:
+                erros_inclinacao["inclinacao_planeada_inicial"] = "Para furos de Superfície, a inclinação não pode ser positiva."
+            if self.inclinacao_planeada_atual is not None and self.inclinacao_planeada_atual > 0:
+                erros_inclinacao["inclinacao_planeada_atual"] = "Para furos de Superfície, a inclinação não pode ser positiva."
+            if self.inclinacao_real_atual is not None and self.inclinacao_real_atual > 0:
+                erros_inclinacao["inclinacao_real_atual"] = "Para furos de Superfície, a inclinação não pode ser positiva."
+            if erros_inclinacao:
+                raise ValidationError(erros_inclinacao)
+
         if self.latitude is not None and not (-90 <= self.latitude <= 90):
             raise ValidationError({
                 "latitude": "Latitude inválida."

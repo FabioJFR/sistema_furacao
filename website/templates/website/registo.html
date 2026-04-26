@@ -1,23 +1,23 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registo</title>
+    <title>{% trans "Registo" %}</title>
     <link rel="stylesheet" href="{% static 'css/website/registo.css' %}">
 </head>
 <body>
     <div class="container">
-        <a href="{% url 'website:home' %}" class="top-link">← Voltar à Home</a>
-        <h1>Criar conta</h1>
+        <a href="{% url 'website:home' %}" class="top-link">← {% trans "Voltar à Home" %}</a>
+        <h1>{% trans "Criar conta" %}</h1>
 
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
                     <div class="message {{ message.tags }}" data-message>
                         <div class="message__content">{{ message }}</div>
-                        <button type="button" class="message__close" aria-label="Fechar aviso" data-message-close>×</button>
+                        <button type="button" class="message__close" aria-label="{% trans 'Fechar aviso' %}" data-message-close>×</button>
                     </div>
                 {% endfor %}
             </div>
@@ -28,56 +28,56 @@
                 {% csrf_token %}
 
                 <div class="row">
-                    <label>Tipo de conta</label>
+                    <label>{% trans "Tipo de conta" %}</label>
                     <select name="tipo_conta" id="id_tipo_conta">
-                        <option value="empresa" {% if dados.tipo_conta == 'empresa' %}selected{% endif %}>Empresa</option>
-                        <option value="individual" {% if dados.tipo_conta == 'individual' %}selected{% endif %}>Individual</option>
+                        <option value="empresa" {% if dados.tipo_conta == 'empresa' %}selected{% endif %}>{% trans "Empresa" %}</option>
+                        <option value="individual" {% if dados.tipo_conta == 'individual' %}selected{% endif %}>{% trans "Individual" %}</option>
                     </select>
                 </div>
 
                 <div class="row">
-                    <label>Username</label>
+                    <label>{% trans "Username" %}</label>
                     <input type="text" name="username" value="{{ dados.username|default:'' }}">
                 </div>
 
                 <div class="row">
-                    <label>Email</label>
+                    <label>{% trans "Email" %}</label>
                     <input type="email" name="email" value="{{ dados.email|default:'' }}">
                 </div>
 
                 <div class="row">
-                    <label>Nome do responsável</label>
+                    <label>{% trans "Nome do responsável" %}</label>
                     <input type="text" name="nome_responsavel" value="{{ dados.nome_responsavel|default:'' }}">
                 </div>
 
                 <div class="row" id="empresa_row">
-                    <label>Nome da empresa</label>
+                    <label>{% trans "Nome da empresa" %}</label>
                     <input type="text" name="nome_empresa" id="id_nome_empresa" value="{{ dados.nome_empresa|default:'' }}">
                 </div>
 
                 <div class="row">
-                    <label>Plano</label>
+                    <label>{% trans "Plano" %}</label>
                     <select name="plano" id="id_plano">
                         {% for plano in planos %}
                             <option value="{{ plano.id }}" {% if dados.plano == plano.id|stringformat:"s" %}selected{% endif %}>
-                                {{ plano.nome }} - {{ plano.preco_mensal }} €/mês
+                                {{ plano.nome }} - {{ plano.preco_mensal }} €{% trans "/mês" %}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="row">
-                    <label>Período de pagamento</label>
+                    <label>{% trans "Período de pagamento" %}</label>
                     <select name="ciclo_subscricao" id="id_ciclo_subscricao">
-                        <option value="1" {% if dados.ciclo_subscricao == '1' or not dados.ciclo_subscricao %}selected{% endif %}>1 mês</option>
-                        <option value="3" {% if dados.ciclo_subscricao == '3' %}selected{% endif %}>3 meses</option>
-                        <option value="6" {% if dados.ciclo_subscricao == '6' %}selected{% endif %}>6 meses</option>
-                        <option value="12" {% if dados.ciclo_subscricao == '12' %}selected{% endif %}>12 meses</option>
+                        <option value="1" {% if dados.ciclo_subscricao == '1' or not dados.ciclo_subscricao %}selected{% endif %}>{% trans "1 mês" %}</option>
+                        <option value="3" {% if dados.ciclo_subscricao == '3' %}selected{% endif %}>{% trans "3 meses" %}</option>
+                        <option value="6" {% if dados.ciclo_subscricao == '6' %}selected{% endif %}>{% trans "6 meses" %}</option>
+                        <option value="12" {% if dados.ciclo_subscricao == '12' %}selected{% endif %}>{% trans "12 meses" %}</option>
                     </select>
                 </div>
 
                 <div class="row">
-                    <label>Valor da subscrição</label>
+                    <label>{% trans "Valor da subscrição" %}</label>
                     <input
                         type="number"
                         id="id_valor_subscricao"
@@ -88,22 +88,22 @@
                     >
                 </div>
                 <p class="helper">
-                    O tipo de conta deve corresponder ao plano selecionado. O valor é calculado automaticamente e fica registado para faturação e relatórios futuros.
+                    {% trans "O tipo de conta deve corresponder ao plano selecionado. O valor é calculado automaticamente e fica registado para faturação e relatórios futuros." %}
                 </p>
 
                 <div class="row">
-                    <label>Password</label>
+                    <label>{% trans "Password" %}</label>
                     <input type="password" name="password1">
                 </div>
 
                 <div class="row">
-                    <label>Confirmar password</label>
+                    <label>{% trans "Confirmar password" %}</label>
                     <input type="password" name="password2">
                 </div>
 
                 <div class="actions">
-                    <a href="{% url 'website:home' %}" class="btn btn-secondary">Voltar</a>
-                    <button type="submit" class="btn btn-primary">Criar conta</button>
+                    <a href="{% url 'website:home' %}" class="btn btn-secondary">{% trans "Voltar" %}</a>
+                    <button type="submit" class="btn btn-primary">{% trans "Criar conta" %}</button>
                 </div>
             </form>
         </div>

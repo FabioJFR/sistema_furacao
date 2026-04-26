@@ -12,7 +12,6 @@ from projetos.forms.registo import (
     RegistoDiarioEmpregadoAdminForm,
     RegistoDiarioEmpregadoForm,
 )
-from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
 from projetos.selectors.registos import (
     obter_contexto_filtros_registos_admin,
     obter_registo_admin,
@@ -26,6 +25,10 @@ from projetos.services.registos import (
     atualizar_registo_diario_empregado,
     criar_registo_diario,
 )
+from projetos.services.acesso_contexto import (
+    obter_empregado_autenticado_contexto,
+    obter_empresa_admin_contexto,
+)
 
 logger = logging.getLogger("core")
 
@@ -34,48 +37,20 @@ logger = logging.getLogger("core")
 
 
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_registos(request):
-    logger.debug(
-        "A resolver contexto administrativo em registos.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em registos.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em registos.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_registos(request):
-    contexto_admin = _obter_contexto_admin_registos(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em registos.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em registos.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -87,26 +62,20 @@ def _obter_empregado_autenticado_registos(request):
         request.user.username,
     )
 
-    empregado = obter_empregado_por_user(request.user)
-    if not empregado:
+    empregado, _ligado_por_fallback, resposta_erro = obter_empregado_autenticado_contexto(
+        request=request,
+        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
+        redirect_sem_empregado="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:redirect_after_login",
+        vincular_por_email=False,
+    )
+    if resposta_erro:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em registos.py. user_id=%s",
             request.user.id,
         )
-        messages.error(
-            request,
-            "A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        )
-        return None, redirect("projetos:redirect_after_login")
-
-    if not empregado.empresa_id:
-        logger.warning(
-            "Empregado sem empresa associada em registos.py. user_id=%s, empregado_id=%s",
-            request.user.id,
-            empregado.id,
-        )
-        messages.error(request, "A tua conta não está associada a uma empresa. Contacta o administrador.")
-        return None, redirect("projetos:redirect_after_login")
+        return None, resposta_erro
 
     return empregado, None
 

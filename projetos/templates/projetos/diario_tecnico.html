@@ -1,13 +1,14 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Diário Técnico{% endblock %}
+{% block title %}{% trans "Diário Técnico" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto p-6 space-y-6">
 
     <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📘 Diário Técnico</h1>
+            <h1 class="text-3xl font-bold text-gray-800">📘 {% trans "Diário Técnico" %}</h1>
             <p class="text-gray-600 mt-1">
                 Base de consulta rápida para ajudantes, sondadores e equipa de perfuração.
             </p>
@@ -15,7 +16,7 @@
 
         <a href="{% url 'projetos:area_empregado' %}"
            class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-            🔙 Voltar à Minha Área
+            🔙 {% trans "Voltar à Minha Área" %}
         </a>
     </div>
 
@@ -23,7 +24,7 @@
 
         <!-- MENU LATERAL -->
         <aside class="bg-white rounded-xl shadow p-4 h-fit">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Secções</h2>
+            <h2 class="text-lg font-bold text-gray-800 mb-4">{% trans "Secções" %}</h2>
             <nav class="space-y-2">
                 {% for secao in secoes %}
                     <a href="#{{ secao.id }}"

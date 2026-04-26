@@ -1,15 +1,14 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
-{% load static %}
+{% load widget_tweaks i18n %}
 
-{% block title %}Definições{% endblock %}
+{% block title %}{% trans "Definições" %}{% endblock %}
 
 {% block content %}
-<section class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
+<section class="sf-panel">
     <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-gray-800">⚙️ Definições</h2>
+        <h2 class="text-2xl font-bold text-gray-800">⚙️ {% trans "Definições" %}</h2>
         <p class="text-sm text-gray-600 mt-2">
-            Ajusta as preferências da tua conta para gerir a empresa {{ empresa.nome }} no painel de projetos.
+            {% blocktrans with empresa_nome=empresa.nome %}Ajusta as preferências da tua conta para gerir a empresa {{ empresa_nome }} no painel de projetos.{% endblocktrans %}
         </p>
     </div>
 
@@ -24,15 +23,54 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <label class="block font-semibold mb-2 text-gray-800">🌙 Tema</label>
-                {{ form.tema|add_class:"w-full p-2 border rounded bg-white" }}
-                {% if form.tema.errors %}
-                    <div class="text-red-600 text-sm mt-2">{{ form.tema.errors }}</div>
-                {% endif %}
+                {{ form.tema.as_hidden }}
+                <label for="themePickerDefinicoesAdmin" class="block font-semibold mb-2 text-gray-800">🎨 {% trans "Paleta de Cores" %}</label>
+                {{ form.paleta|add_class:"w-full p-2 border rounded bg-white"|attr:"id:themePickerDefinicoesAdmin"|attr:"data-theme-picker:data-theme-picker" }}
+                <p class="text-sm text-gray-500 mt-2">
+                    {% trans "A paleta é aplicada imediatamente e fica guardada no navegador desta conta." %}
+                </p>
+                <div class="palette-grid" aria-label="{% trans 'Escolher paleta visual' %}">
+                    <button type="button" class="palette-option" data-theme-preset="industrial-blue" aria-pressed="false">
+                        <span class="palette-option__name">{% trans "Aço Profissional" %}</span>
+                        <span class="palette-option__swatches">
+                            <span style="background:#1c2632;"></span>
+                            <span style="background:#3d5a73;"></span>
+                            <span style="background:#3f566d;"></span>
+                            <span style="background:#8f4a4f;"></span>
+                        </span>
+                    </button>
+                    <button type="button" class="palette-option" data-theme-preset="earth-drill" aria-pressed="false">
+                        <span class="palette-option__name">{% trans "Terra Técnica" %}</span>
+                        <span class="palette-option__swatches">
+                            <span style="background:#2d392e;"></span>
+                            <span style="background:#59684d;"></span>
+                            <span style="background:#5f704d;"></span>
+                            <span style="background:#8f5a4b;"></span>
+                        </span>
+                    </button>
+                    <button type="button" class="palette-option" data-theme-preset="graphite-tech" aria-pressed="false">
+                        <span class="palette-option__name">{% trans "Grafite Elegante" %}</span>
+                        <span class="palette-option__swatches">
+                            <span style="background:#1b2533;"></span>
+                            <span style="background:#4a617f;"></span>
+                            <span style="background:#4c637f;"></span>
+                            <span style="background:#86515f;"></span>
+                        </span>
+                    </button>
+                    <button type="button" class="palette-option" data-theme-preset="sandstone" aria-pressed="false">
+                        <span class="palette-option__name">{% trans "Areia Industrial" %}</span>
+                        <span class="palette-option__swatches">
+                            <span style="background:#3e3329;"></span>
+                            <span style="background:#8b6d52;"></span>
+                            <span style="background:#8f7255;"></span>
+                            <span style="background:#8c5a4b;"></span>
+                        </span>
+                    </button>
+                </div>
             </div>
 
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <label class="block font-semibold mb-2 text-gray-800">🌍 Idioma</label>
+                <label class="block font-semibold mb-2 text-gray-800">🌍 {% trans "Idioma" %}</label>
                 {{ form.idioma|add_class:"w-full p-2 border rounded bg-white" }}
                 {% if form.idioma.errors %}
                     <div class="text-red-600 text-sm mt-2">{{ form.idioma.errors }}</div>
@@ -41,101 +79,16 @@
         </div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
-            <h3 class="font-bold mb-2">Esta área controla</h3>
+            <h3 class="font-bold mb-2">{% trans "Esta área controla" %}</h3>
             <ul class="text-sm leading-6 list-disc pl-5">
-                <li>Preferências visuais e linguísticas da tua conta administrativa</li>
-                <li>Base para futuras definições operacionais do dashboard da empresa</li>
+                <li>{% trans "Preferências visuais e linguísticas da tua conta administrativa" %}</li>
+                <li>{% trans "Base para futuras definições operacionais do dashboard da empresa" %}</li>
             </ul>
         </div>
 
         <button type="submit" name="guardar_preferencias" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-            Guardar Preferências
+            {% trans "Guardar Preferências" %}
         </button>
     </form>
 </section>
-
-<section class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow mt-6"
-    data-financeiro-preview
-    data-total-metros="{{ financeiro_preview.total_metros|default:0 }}"
-    data-total-despesas="{{ financeiro_preview.total_despesas|default:0 }}"
-    data-total-materiais="{{ financeiro_preview.valor_total_gasto_materias|default:0 }}"
-    data-gasto-furo-base="{{ empresa.valor_total_gasto_furo|default:0 }}"
-    data-gasto-maquinas-base="{{ empresa.valor_total_gasto_maquinas|default:0 }}"
-    data-custo-empresa-base="{{ empresa.custo_por_metro_empresa|default:0 }}"
-    data-cobrado-base="{{ empresa.valor_total_cobrado_cliente|default:0 }}"
-    data-ganho-furo-base="{{ empresa.valor_total_ganho_furo|default:0 }}"
-    data-custo-cliente-inicial="{{ empresa.custo_por_metro_cliente|default:0 }}"
-    data-outros-iniciais="{{ empresa.outros_valores_gastos_associados|default:0 }}">
-    <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-gray-800">💶 Definições Financeiras</h2>
-        <p class="text-sm text-gray-600 mt-2">
-            Define os valores manuais da empresa. Os totais operacionais são calculados automaticamente.
-        </p>
-    </div>
-
-    <form method="POST" class="space-y-6">
-        {% csrf_token %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <label class="block font-semibold mb-2 text-gray-800">Custo por metro cliente</label>
-                {{ financeiro_form.custo_por_metro_cliente|add_class:"w-full p-2 border rounded bg-white" }}
-                {% if financeiro_form.custo_por_metro_cliente.errors %}
-                    <div class="text-red-600 text-sm mt-2">{{ financeiro_form.custo_por_metro_cliente.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <label class="block font-semibold mb-2 text-gray-800">Outros valores gastos associados</label>
-                {{ financeiro_form.outros_valores_gastos_associados|add_class:"w-full p-2 border rounded bg-white" }}
-                {% if financeiro_form.outros_valores_gastos_associados.errors %}
-                    <div class="text-red-600 text-sm mt-2">{{ financeiro_form.outros_valores_gastos_associados.errors }}</div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Custo por metro empresa</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-custo-empresa>{{ empresa.custo_por_metro_empresa }} €</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Valor total cobrado ao cliente</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-cobrado>{{ empresa.valor_total_cobrado_cliente }} €</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Valor total ganho em furos</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-ganho-furo>{{ empresa.valor_total_ganho_furo }} €</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em furos</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-furo>{{ empresa.valor_total_gasto_furo }} €</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em materiais</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-materiais>{{ empresa.valor_total_gasto_materias }} €</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <div class="text-sm text-slate-600 font-semibold">Valor total gasto em máquinas</div>
-                <div class="text-2xl font-bold text-slate-900 mt-2" data-financeiro-gasto-maquinas>{{ empresa.valor_total_gasto_maquinas }} €</div>
-            </div>
-            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <div class="text-sm text-emerald-700 font-semibold">Margem total estimada</div>
-                <div class="text-2xl font-bold text-emerald-900 mt-2" data-financeiro-margem-total>0.00 €</div>
-            </div>
-            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <div class="text-sm text-emerald-700 font-semibold">Margem por metro estimada</div>
-                <div class="text-2xl font-bold text-emerald-900 mt-2" data-financeiro-margem-metro>0.00 €</div>
-            </div>
-        </div>
-
-        <button type="submit" name="guardar_financeiro" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-            Guardar Definições Financeiras
-        </button>
-    </form>
-</section>
-{% endblock %}
-
-{% block extra_scripts %}
-<script src="{% static 'js/projetos/definicoes_admin.js' %}"></script>
 {% endblock %}

@@ -1,28 +1,29 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Configurações de Perfuração{% endblock %}
+{% block title %}{% trans "Configurações de Perfuração" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
 
     <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">⚙️ Configurações de Perfuração</h1>
-            <p class="text-gray-500 mt-1">Empregado: {{ empregado_obj.nome }}</p>
+            <h1 class="text-2xl font-bold text-gray-800">⚙️ {% trans "Configurações de Perfuração" %}</h1>
+            <p class="text-gray-500 mt-1">{% blocktrans with nome=empregado_obj.nome %}Empregado: {{ nome }}{% endblocktrans %}</p>
         </div>
 
         <div class="flex gap-3 flex-wrap">
             <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado_obj.pk %}"
                class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                ➕ Nova Configuração
+                ➕ {% trans "Nova Configuração" %}
             </a>
             <a href="{% url 'projetos:historico_empregado_admin_list' empregado_obj.pk %}"
             class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
-                🕘 Ver Histórico
+                🕘 {% trans "Ver Histórico" %}
             </a>
             <a href="{{ empregado_obj.get_absolute_url }}"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 Voltar ao Empregado
+                🔙 {% trans "Voltar ao Empregado" %}
             </a>
         </div>
     </div>
@@ -33,14 +34,14 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Tubo</th>
-                            <th class="text-left px-4 py-3">Karoutier</th>
-                            <th class="text-left px-4 py-3">Record</th>
-                            <th class="text-left px-4 py-3">Bit</th>
-                            <th class="text-left px-4 py-3">Atualizado por</th>
-                            <th class="text-left px-4 py-3">Atualizado em</th>
-                            <th class="text-left px-4 py-3">Ações</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Tubo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Karoutier" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Record" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Bit" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Atualizado por" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Atualizado em" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -57,15 +58,15 @@
                                     <div class="flex gap-2 flex-wrap">
                                         <a href="{% url 'projetos:configuracao_perfuracao_detail_admin' config.pk %}"
                                         class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                            Ver
+                                            {% trans "Ver" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
                                         class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                            ✏️ Editar
+                                            ✏️ {% trans "Editar" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' config.pk %}"
                                         class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                            🗑️ Apagar
+                                            🗑️ {% trans "Apagar" %}
                                         </a>
                                     </div>
                                 </td>
@@ -75,7 +76,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem configurações de perfuração para este empregado.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração para este empregado." %}</p>
         {% endif %}
     </div>
 

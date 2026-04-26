@@ -1,71 +1,72 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Meus Dados{% endblock %}
+{% block title %}{% trans "Meus Dados" %}{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
 
     <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">👤 Meus Dados</h1>
-            <p class="text-gray-500 mt-1">Consulta dos teus dados pessoais, profissionais e atividade no sistema.</p>
+            <h1 class="text-2xl font-bold text-gray-800">👤 {% trans "Meus Dados" %}</h1>
+            <p class="text-gray-500 mt-1">{% trans "Consulta dos teus dados pessoais, profissionais e atividade no sistema." %}</p>
         </div>
 
         <a href="{% url 'projetos:meus_dados_empregado_editar' %}"
            class="bg-yellow-500 text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition shadow font-semibold">
-            ✏️ Editar Dados
+            ✏️ {% trans "Editar Dados" %}
         </a>
     </div>
 
     <!-- DADOS PESSOAIS -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Dados Pessoais</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Dados Pessoais" %}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>Nome:</strong> {{ empregado.nome|default:"-" }}</div>
-            <div><strong>Email:</strong> {{ empregado.email|default:"-" }}</div>
-            <div><strong>Telefone:</strong> {{ empregado.telefone|default:"-" }}</div>
-            <div><strong>Idade:</strong> {{ empregado.idade|default:"-" }}</div>
-            <div><strong>Nacionalidade:</strong> {{ empregado.nacionalidade|default:"-" }}</div>
-            <div><strong>NIF:</strong> {{ empregado.nif|default:"-" }}</div>
-            <div class="md:col-span-2"><strong>Morada:</strong> {{ empregado.morada|default:"-" }}</div>
+            <div><strong>{% trans "Nome:" %}</strong> {{ empregado.nome|default:"-" }}</div>
+            <div><strong>{% trans "Email:" %}</strong> {{ empregado.email|default:"-" }}</div>
+            <div><strong>{% trans "Telefone:" %}</strong> {{ empregado.telefone|default:"-" }}</div>
+            <div><strong>{% trans "Idade:" %}</strong> {{ empregado.idade|default:"-" }}</div>
+            <div><strong>{% trans "Nacionalidade:" %}</strong> {{ empregado.nacionalidade|default:"-" }}</div>
+            <div><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</div>
+            <div class="md:col-span-2"><strong>{% trans "Morada:" %}</strong> {{ empregado.morada|default:"-" }}</div>
         </div>
     </div>
 
     <!-- DADOS PROFISSIONAIS -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Dados Profissionais</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Dados Profissionais" %}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>Função:</strong> {{ empregado.get_funcao_display|default:empregado.funcao|default:"-" }}</div>
-            <div><strong>Data de Admissão:</strong> {{ empregado.data_admissao|default:"-" }}</div>
-            <div><strong>Salário:</strong> {{ empregado.salario|default:"-" }}</div>
-            <div><strong>Horas Diárias:</strong> {{ empregado.horas_diarias|default:"-" }}</div>
-            <div><strong>Horas Mensais:</strong> {{ empregado.horas_mensais|default:"-" }}</div>
-            <div><strong>Horas Extra:</strong> {{ empregado.horas_extra|default:"-" }}</div>
-            <div><strong>Horas Trabalhadas no Mês:</strong> {{ empregado.horas_trabalhadas_mes|default:"-" }}</div>
-            <div><strong>Horas Totais:</strong> {{ empregado.horas_total|default:"-" }}</div>
+            <div><strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:empregado.funcao|default:"-" }}</div>
+            <div><strong>{% trans "Data de Admissão:" %}</strong> {{ empregado.data_admissao|default:"-" }}</div>
+            <div><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default:"-" }}</div>
+            <div><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default:"-" }}</div>
+            <div><strong>{% trans "Horas Mensais:" %}</strong> {{ empregado.horas_mensais|default:"-" }}</div>
+            <div><strong>{% trans "Horas Extra:" %}</strong> {{ empregado.horas_extra|default:"-" }}</div>
+            <div><strong>{% trans "Horas Trabalhadas no Mês:" %}</strong> {{ empregado.horas_trabalhadas_mes|default:"-" }}</div>
+            <div><strong>{% trans "Horas Totais:" %}</strong> {{ empregado.horas_total|default:"-" }}</div>
         </div>
     </div>
 
     <!-- DOCUMENTOS -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Documentos</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Documentos" %}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <div>
-                <strong>Currículo:</strong>
+                <strong>{% trans "Currículo:" %}</strong>
                 {% if empregado.curriculo %}
-                    <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">Ver ficheiro</a>
+                    <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">{% trans "Ver ficheiro" %}</a>
                 {% else %}
                     -
                 {% endif %}
             </div>
 
             <div>
-                <strong>Contrato:</strong>
+                <strong>{% trans "Contrato:" %}</strong>
                 {% if empregado.contrato %}
-                    <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">Ver ficheiro</a>
+                    <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">{% trans "Ver ficheiro" %}</a>
                 {% else %}
                     -
                 {% endif %}
@@ -75,26 +76,26 @@
 
     <!-- INTERAÇÃO COM A APLICAÇÃO -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Interação com a Aplicação</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Interação com a Aplicação" %}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">Total Registos</div>
+                <div class="text-gray-500 text-sm">{% trans "Total Registos" %}</div>
                 <div class="text-2xl font-bold">{{ total_registos|default:0 }}</div>
             </div>
 
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">Total Levantamentos</div>
+                <div class="text-gray-500 text-sm">{% trans "Total Levantamentos" %}</div>
                 <div class="text-2xl font-bold">{{ total_levantamentos|default:0 }}</div>
             </div>
 
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">Total Devoluções</div>
+                <div class="text-gray-500 text-sm">{% trans "Total Devoluções" %}</div>
                 <div class="text-2xl font-bold">{{ total_devolucoes|default:0 }}</div>
             </div>
 
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">Configurações Criadas</div>
+                <div class="text-gray-500 text-sm">{% trans "Configurações Criadas" %}</div>
                 <div class="text-2xl font-bold">{{ total_configuracoes|default:0 }}</div>
             </div>
         </div>
@@ -102,17 +103,17 @@
 
     <!-- PROJETOS -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📁 Projetos em que estiveste envolvido</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">📁 {% trans "Projetos em que estiveste envolvido" %}</h2>
 
         {% if projetos_historico %}
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Projeto</th>
-                            <th class="text-left px-4 py-3">Início</th>
-                            <th class="text-left px-4 py-3">Fim</th>
-                            <th class="text-left px-4 py-3">Estado</th>
+                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Início" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Fim" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,11 +125,11 @@
                                 <td class="px-4 py-3">
                                     {% if ligacao.ativo %}
                                         <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Ativo
+                                            {% trans "Ativo" %}
                                         </span>
                                     {% else %}
                                         <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Concluído
+                                            {% trans "Concluído" %}
                                         </span>
                                     {% endif %}
                                 </td>
@@ -138,23 +139,23 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem projetos associados.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem projetos associados." %}</p>
         {% endif %}
     </div>
 
     <!-- FUROS -->
     <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">🕳 Furos em que trabalhaste</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">🕳 {% trans "Furos em que trabalhaste" %}</h2>
 
         {% if furos_resumo %}
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Projeto</th>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Metros Furados</th>
-                            <th class="text-left px-4 py-3">Horas Trabalhadas</th>
+                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Metros Furados" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Horas Trabalhadas" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,7 +171,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem furos registados para este empregado.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem furos registados para este empregado." %}</p>
         {% endif %}
     </div>
 

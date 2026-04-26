@@ -17,6 +17,7 @@ urlpatterns = [
     path("historico-configuracao/", include("projetos.url_patterns.historico_configuracao")),
     path("login-register/", include("projetos.url_patterns.login_register")),
     path("medicoes/", include("projetos.url_patterns.medicao")),
+    path("despesas/", include("projetos.url_patterns.despesas")),
     path("analytics/", include("projetos.url_patterns.analytics")),
     path("opcoes/", include("projetos.url_patterns.opcoes")),
 ]

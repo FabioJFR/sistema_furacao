@@ -1,14 +1,14 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 
-{% block title %}Criar Registo Diário{% endblock %}
+{% block title %}{% trans "Criar Registo Diário" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
 
         <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            📘 Criar Registo Diário
+            📘 {% trans "Criar Registo Diário" %}
         </h1>
 
         <form method="post" enctype="multipart/form-data" class="space-y-5">
@@ -44,20 +44,20 @@
 
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
                 <p class="text-sm">
-                    Regista aqui o trabalho diário realizado no furo, incluindo metros furados, horas e eventuais paragens.
+                    {% trans "Regista aqui o trabalho diário realizado no furo, incluindo metros furados, horas e eventuais paragens." %}
                 </p>
             </div>
 
             <button type="submit"
                     class="bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow w-full text-lg">
-                💾 Guardar Registo
+                💾 {% trans "Guardar Registo" %}
             </button>
         </form>
 
         <div class="mt-4 text-center">
             <a href="{% url 'projetos:area_empregado' %}"
                class="inline-block bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
 

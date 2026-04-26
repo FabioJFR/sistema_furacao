@@ -1,7 +1,7 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Detalhes do Material{% endblock %}
+{% block title %}{% trans "Detalhes do Material" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/material_detail.css' %}">
@@ -15,11 +15,11 @@
 
         <div class="mdt-actions">
             <a href="{% url 'projetos:material_update' material.id %}" class="mdt-btn mdt-btn-edit">
-                ✏️ Editar
+                ✏️ {% trans "Editar" %}
             </a>
 
             <a href="{% url 'projetos:material_delete' material.id %}" class="mdt-btn mdt-btn-delete">
-                🗑️ Apagar
+                🗑️ {% trans "Apagar" %}
             </a>
         </div>
     </div>
@@ -27,17 +27,17 @@
     <div class="mdt-grid">
 
         <div>
-            <p><strong>Projeto:</strong>
+            <p><strong>{% trans "Projeto:" %}</strong>
                 {% if material.projeto %}
                     <a href="{{ material.projeto.get_absolute_url }}" class="mdt-link">
                         {{ material.projeto.nome }}
                     </a>
                 {% else %}
-                    Stock
+                    {% trans "Stock" %}
                 {% endif %}
             </p>
 
-            <p><strong>Furo:</strong>
+            <p><strong>{% trans "Furo:" %}</strong>
                 {% if material.furo %}
                     <a href="{{ material.furo.get_absolute_url }}" class="mdt-link">
                         {{ material.furo.nome }}
@@ -47,35 +47,35 @@
                 {% endif %}
             </p>
 
-            <p><strong>Tipo:</strong> {{ material.tipo|default:"-" }}</p>
-            <p><strong>Marca:</strong> {{ material.marca|default:"-" }}</p>
-            <p><strong>Número de Série:</strong> {{ material.numero_serie|default:"-" }}</p>
+            <p><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
+            <p><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
+            <p><strong>{% trans "Número de Série:" %}</strong> {{ material.numero_serie|default:"-" }}</p>
         </div>
 
         <div>
-            <p><strong>Quantidade em stock:</strong>
+            <p><strong>{% trans "Quantidade em stock:" %}</strong>
                 <span class="mdt-stock {% if material.quantidade > 10 %}mdt-stock-ok{% elif material.quantidade > 0 %}mdt-stock-low{% else %}mdt-stock-zero{% endif %}">
                     {{ material.quantidade }}
                 </span>
                 {{ material.unidade|default:"" }}
             </p>
 
-            <p><strong>Diâmetro:</strong> {{ material.diametro|floatformat:2 }}</p>
-            <p><strong>Valor:</strong> {{ material.valor|floatformat:2 }}€</p>
-            <p><strong>Estado:</strong> {{ material.get_estado_display }}</p>
-            <p><strong>Ativo:</strong> {% if material.ativo %}Sim{% else %}Não{% endif %}</p>
+            <p><strong>{% trans "Diâmetro:" %}</strong> {{ material.diametro|floatformat:2 }}</p>
+            <p><strong>{% trans "Valor:" %}</strong> {{ material.valor|floatformat:2 }}€</p>
+            <p><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
+            <p><strong>{% trans "Ativo:" %}</strong> {% if material.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
         </div>
 
         <div>
-            <p><strong>Fornecedor:</strong> {{ material.fornecedor|default:"-" }}</p>
-            <p><strong>Localização:</strong> {{ material.localizacao|default:"-" }}</p>
-            <p><strong>Data Compra:</strong> {{ material.data_compra|default:"-" }}</p>
+            <p><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
+            <p><strong>{% trans "Localização:" %}</strong> {{ material.localizacao|default:"-" }}</p>
+            <p><strong>{% trans "Data Compra:" %}</strong> {{ material.data_compra|default:"-" }}</p>
         </div>
     </div>
 
     {% if material.observacoes %}
     <div class="mdt-section-observacoes">
-        <h3 class="mdt-observ-title">Observações</h3>
+        <h3 class="mdt-observ-title">{% trans "Observações" %}</h3>
         <div class="mdt-observ-box">
             {{ material.observacoes }}
         </div>
@@ -84,19 +84,19 @@
 
     <!-- HISTÓRICO DE LEVANTAMENTOS -->
     <div class="mdt-section">
-        <h2 class="mdt-section-title">Histórico de Levantamentos</h2>
+        <h2 class="mdt-section-title">{% trans "Histórico de Levantamentos" %}</h2>
 
         {% if levantamentos %}
         <div class="mdt-table-wrap">
             <table class="mdt-table">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Empregado</th>
-                        <th>Quantidade</th>
-                        <th>Projeto</th>
-                        <th>Furo</th>
-                        <th>Observações</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Empregado" %}</th>
+                        <th>{% trans "Quantidade" %}</th>
+                        <th>{% trans "Projeto" %}</th>
+                        <th>{% trans "Furo" %}</th>
+                        <th>{% trans "Observações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@
                                     {{ levantamento.projeto.nome }}
                                 </a>
                             {% else %}
-                                Stock
+                                {% trans "Stock" %}
                             {% endif %}
                         </td>
 
@@ -133,25 +133,25 @@
             </table>
         </div>
         {% else %}
-        <p class="mdt-empty">Ainda não existem levantamentos para este material.</p>
+        <p class="mdt-empty">{% trans "Ainda não existem levantamentos para este material." %}</p>
         {% endif %}
     </div>
 
     <!-- HISTORICO DE DEVOLUÇÔES -->
     <div class="mdt-section">
-        <h2 class="mdt-section-title">Histórico de Devoluções</h2>
+        <h2 class="mdt-section-title">{% trans "Histórico de Devoluções" %}</h2>
 
         {% if devolucoes %}
         <div class="mdt-table-wrap">
             <table class="mdt-table">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Empregado</th>
-                        <th>Quantidade</th>
-                        <th>Projeto</th>
-                        <th>Furo</th>
-                        <th>Observações</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Empregado" %}</th>
+                        <th>{% trans "Quantidade" %}</th>
+                        <th>{% trans "Projeto" %}</th>
+                        <th>{% trans "Furo" %}</th>
+                        <th>{% trans "Observações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,7 +166,7 @@
                                     {{ devolucao.projeto.nome }}
                                 </a>
                             {% else %}
-                                Stock
+                                {% trans "Stock" %}
                             {% endif %}
                         </td>
                         <td>
@@ -185,14 +185,14 @@
             </table>
         </div>
         {% else %}
-        <p class="mdt-empty">Ainda não existem devoluções para este material.</p>
+        <p class="mdt-empty">{% trans "Ainda não existem devoluções para este material." %}</p>
         {% endif %}
     </div>
 
 
     <div class="mdt-back-wrap">
         <a href="{% url 'projetos:material_list' %}" class="mdt-btn mdt-btn-back">
-            🔙 Voltar à Lista
+            🔙 {% trans "Voltar à Lista" %}
         </a>
     </div>
 

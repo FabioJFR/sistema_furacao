@@ -76,6 +76,8 @@ EXTENSOES_TEXTO_DIRETO = {
     ".htm",
 }
 
+PROMPT_APROFUNDAR_TEMA = "Quero aprofundar um tema."
+
 
 def gerar_resposta_chat(*, empresa, pergunta):
     texto = (pergunta or "").strip()
@@ -90,11 +92,31 @@ def gerar_resposta_chat(*, empresa, pergunta):
         if resultado is not None:
             return (
                 f"Resultado: {resultado}\n\nPosso também ajudar a relacionar este cálculo com metros furados, custos, margens ou despesas da empresa.",
-                {"tipo": "calculo"},
+                {"tipo": "calculo", "sugestoes": _sugestoes_por_tipo("calculo")},
             )
 
     if any(palavra in texto_lower for palavra in ["funciona a plataforma", "como funciona", "o que podes fazer", "ajuda", "ajudar"]):
-        return _resposta_capacidades(resumo), {"tipo": "ajuda"}
+        return _resposta_capacidades(resumo), {
+            "tipo": "ajuda",
+            "sugestoes": _sugestoes_por_tipo("ajuda"),
+        }
+
+    if any(
+        palavra in texto_lower
+        for palavra in [
+            "aprofundar um tema",
+            "aprofundar tema",
+            "explorar temas",
+            "menu de temas",
+            "temas disponíveis",
+            "temas disponiveis",
+            "mostrar temas",
+        ]
+    ):
+        return _resposta_menu_temas(), {
+            "tipo": "menu_temas",
+            "sugestoes": _sugestoes_menu_temas(),
+        }
 
     if any(
         palavra in texto_lower
@@ -112,7 +134,32 @@ def gerar_resposta_chat(*, empresa, pergunta):
             "zona do furo",
         ]
     ):
-        return _resposta_memoria_zona(empresa=empresa, texto=texto), {"tipo": "memoria_zona", "resumo": resumo}
+        return _resposta_memoria_zona(empresa=empresa, texto=texto), {
+            "tipo": "memoria_zona",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("memoria_zona"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["furos ativos", "ativos dos furos"]):
+        return _resposta_furos_ativos(resumo), {
+            "tipo": "furos_ativos",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("furos_ativos"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["furos concluídos", "furos concluidos", "concluídos dos furos", "concluidos dos furos"]):
+        return _resposta_furos_concluidos(resumo), {
+            "tipo": "furos_concluidos",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("furos_concluidos"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["resumo de medições", "resumo de medicoes", "medições dos furos", "medicoes dos furos"]):
+        return _resposta_furos_medicoes(resumo), {
+            "tipo": "furos_medicoes",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("furos_medicoes"),
+        }
 
     if any(
         palavra in texto_lower
@@ -137,30 +184,134 @@ def gerar_resposta_chat(*, empresa, pergunta):
             "deploy",
         ]
     ):
-        return _resposta_base_conhecimento(texto_lower), {"tipo": "base_conhecimento"}
+        return _resposta_base_conhecimento(texto_lower), {
+            "tipo": "base_conhecimento",
+            "sugestoes": _sugestoes_por_tipo("base_conhecimento"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["estados das máquinas", "estados das maquinas", "estado das máquinas", "estado das maquinas"]):
+        return _resposta_maquinas_estados(resumo), {
+            "tipo": "maquinas_estados",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("maquinas_estados"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["máquinas em alerta", "maquinas em alerta", "máquinas não operacionais", "maquinas nao operacionais"]):
+        return _resposta_maquinas_alerta(resumo), {
+            "tipo": "maquinas_alerta",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("maquinas_alerta"),
+        }
 
     if any(palavra in texto_lower for palavra in ["alerta", "alertas", "problema", "problemas", "risco", "riscos"]):
-        return _resposta_alertas(resumo), {"tipo": "alertas", "resumo": resumo}
+        return _resposta_alertas(resumo), {
+            "tipo": "alertas",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("alertas"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["materiais com stock baixo", "stock baixo de materiais", "stock crítico", "stock critico"]):
+        return _resposta_materiais_stock_baixo(resumo), {
+            "tipo": "materiais_stock",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("materiais_stock"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["resumo de levantamentos", "levantamentos de materiais"]):
+        return _resposta_materiais_levantamentos(resumo), {
+            "tipo": "materiais_levantamentos",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("materiais_levantamentos"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["resumo de devoluções", "resumo de devolucoes", "devoluções de materiais", "devolucoes de materiais"]):
+        return _resposta_materiais_devolucoes(resumo), {
+            "tipo": "materiais_devolucoes",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("materiais_devolucoes"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["categorias de despesa", "top categorias de despesa"]):
+        return _resposta_financeira_categorias(resumo), {
+            "tipo": "financeiro_categorias",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("financeiro_categorias"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["despesa por furo", "despesas por furo"]):
+        return _resposta_financeira_furo(resumo), {
+            "tipo": "financeiro_furo",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("financeiro_furo"),
+        }
 
     if any(palavra in texto_lower for palavra in ["despesa", "despesas", "gasto", "gastos", "contabilidade", "financeiro", "custos"]):
-        return _resposta_financeira(empresa=empresa, resumo=resumo, texto=texto_lower), {"tipo": "financeiro", "resumo": resumo}
+        return _resposta_financeira(empresa=empresa, resumo=resumo, texto=texto_lower), {
+            "tipo": "financeiro",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("financeiro"),
+        }
 
     if any(palavra in texto_lower for palavra in ["furo", "furos", "metros", "perfuração", "perfuracao", "medição", "medições", "medicoes"]):
-        return _resposta_furos(empresa=empresa, resumo=resumo, texto=texto), {"tipo": "furos", "resumo": resumo}
+        return _resposta_furos(empresa=empresa, resumo=resumo, texto=texto), {
+            "tipo": "furos",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("furos"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["resumo de empregados", "total de empregados"]):
+        return _resposta_empregados_total(resumo), {
+            "tipo": "empregados_total",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("empregados_total"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["empregados pendentes", "pendentes de empregados", "pendentes"]):
+        return _resposta_empregados_pendentes(resumo), {
+            "tipo": "empregados_pendentes",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("empregados_pendentes"),
+        }
+
+    if any(palavra in texto_lower for palavra in ["registos de empregados", "registos diários de empregados", "registos diarios de empregados"]):
+        return _resposta_empregados_registos(resumo), {
+            "tipo": "empregados_registos",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("empregados_registos"),
+        }
 
     if any(palavra in texto_lower for palavra in ["empregado", "empregados", "trabalhador", "trabalhadores", "equipa", "equipe"]):
-        return _resposta_empregados(resumo), {"tipo": "empregados", "resumo": resumo}
+        return _resposta_empregados(resumo), {
+            "tipo": "empregados",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("empregados"),
+        }
 
     if any(palavra in texto_lower for palavra in ["máquina", "maquina", "máquinas", "maquinas", "equipamento", "equipamentos"]):
-        return _resposta_maquinas(resumo), {"tipo": "maquinas", "resumo": resumo}
+        return _resposta_maquinas(resumo), {
+            "tipo": "maquinas",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("maquinas"),
+        }
 
     if any(palavra in texto_lower for palavra in ["material", "materiais", "stock", "estoque", "levantamento", "devolução", "devolucao"]):
-        return _resposta_materiais(resumo), {"tipo": "materiais", "resumo": resumo}
+        return _resposta_materiais(resumo), {
+            "tipo": "materiais",
+            "resumo": resumo,
+            "sugestoes": _sugestoes_por_tipo("materiais"),
+        }
 
     if any(palavra in texto_lower for palavra in ["evento", "eventos", "alteração", "alteracoes", "alteração", "analytics"]):
-        return _resposta_eventos(empresa), {"tipo": "eventos"}
+        return _resposta_eventos(empresa), {
+            "tipo": "eventos",
+            "sugestoes": _sugestoes_por_tipo("eventos"),
+        }
 
-    return _resposta_geral(resumo), {"tipo": "geral", "resumo": resumo}
+    return _resposta_geral(resumo), {
+        "tipo": "geral",
+        "resumo": resumo,
+        "sugestoes": _sugestoes_por_tipo("geral"),
+    }
 
 
 def construir_resumo_empresa(empresa):
@@ -451,6 +602,25 @@ def _resposta_financeira(*, empresa, resumo, texto):
     return "\n".join(resposta)
 
 
+def _resposta_financeira_categorias(resumo):
+    if not resumo["despesas_top_categorias"]:
+        return "Ainda não existem categorias de despesa suficientes para resumir."
+    return "Top categorias de despesa:\n" + "\n".join(
+        f"- {item['categoria']}: {float(item['total'] or 0):.2f} €" for item in resumo["despesas_top_categorias"]
+    )
+
+
+def _resposta_financeira_furo(resumo):
+    if not resumo["furos_ativos_lista"]:
+        return "Não encontrei furos ativos para cruzar com despesa por furo."
+    linhas = [
+        "Para despesa por furo com valor exato, indica o nome do furo (ex.: 'despesa por furo Furo-12').",
+        "Furos ativos disponíveis para consulta rápida:",
+    ]
+    linhas.extend(f"- {item['nome']} · {item['projeto__nome']}" for item in resumo["furos_ativos_lista"][:8])
+    return "\n".join(linhas)
+
+
 def _resposta_furos(*, empresa, resumo, texto):
     resposta = [
         f"Furos ativos: {resumo['furos_ativos']}.",
@@ -488,11 +658,62 @@ def _resposta_furos(*, empresa, resumo, texto):
     return "\n".join(resposta)
 
 
+def _resposta_furos_ativos(resumo):
+    linhas = [f"Furos ativos no momento: {resumo['furos_ativos']}."]
+    if resumo["furos_ativos_lista"]:
+        linhas.append("Lista rápida dos furos em curso:")
+        linhas.extend(
+            f"- {item['nome']} · {item['projeto__nome']} · {float(item['profundidade_atual'] or 0):.1f}/{float(item['profundidade_alvo_atual'] or 0):.1f} m"
+            for item in resumo["furos_ativos_lista"][:8]
+        )
+    else:
+        linhas.append("Não encontrei furos ativos listados neste momento.")
+    return "\n".join(linhas)
+
+
+def _resposta_furos_concluidos(resumo):
+    linhas = [f"Furos concluídos: {resumo['furos_concluidos']}."]
+    if resumo["furos_concluidos_lista"]:
+        linhas.append("Últimos furos concluídos registados:")
+        linhas.extend(
+            f"- {item['nome']} · {item['projeto__nome']} · profundidade máxima {float(item['profundidade_maxima_atingida'] or 0):.1f} m"
+            for item in resumo["furos_concluidos_lista"][:8]
+        )
+    else:
+        linhas.append("Ainda não encontrei furos concluídos para listar.")
+    return "\n".join(linhas)
+
+
+def _resposta_furos_medicoes(resumo):
+    return (
+        f"Resumo de medições dos furos:\n"
+        f"- Total de medições: {resumo['total_medicoes']}\n"
+        f"- Total de registos diários: {resumo['total_registos']}\n"
+        f"- Metros furados acumulados: {resumo['total_metros_furados']:.2f} m"
+    )
+
+
 def _resposta_empregados(resumo):
     return (
         f"Total de empregados: {resumo['total_empregados']}.\n"
         f"Pendentes de aprovação: {resumo['empregados_pendentes']}.\n"
         f"Registos diários guardados: {resumo['total_registos']}."
+    )
+
+
+def _resposta_empregados_total(resumo):
+    return f"Total de empregados registados: {resumo['total_empregados']}."
+
+
+def _resposta_empregados_pendentes(resumo):
+    return f"Empregados pendentes de aprovação: {resumo['empregados_pendentes']}."
+
+
+def _resposta_empregados_registos(resumo):
+    return (
+        "Resumo de atividade dos empregados:\n"
+        f"- Registos diários guardados: {resumo['total_registos']}\n"
+        f"- Empregados registados: {resumo['total_empregados']}"
     )
 
 
@@ -513,6 +734,23 @@ def _resposta_maquinas(resumo):
     return "\n".join(linhas)
 
 
+def _resposta_maquinas_estados(resumo):
+    linhas = ["Estados atuais das máquinas:"]
+    if resumo["maquinas_estados"]:
+        linhas.extend(f"- {item['estado']}: {item['total']}" for item in resumo["maquinas_estados"])
+    else:
+        linhas.append("- Sem estados registados.")
+    return "\n".join(linhas)
+
+
+def _resposta_maquinas_alerta(resumo):
+    if not resumo["maquinas_alerta"]:
+        return "Neste momento não encontrei máquinas em alerta."
+    return "Máquinas em alerta:\n" + "\n".join(
+        f"- {item['nome']} ({item['estado']})" for item in resumo["maquinas_alerta"][:10]
+    )
+
+
 def _resposta_materiais(resumo):
     linhas = [f"Total de materiais registados: {resumo['total_materiais']}."]
     if resumo["materiais_baixo_stock"]:
@@ -520,6 +758,28 @@ def _resposta_materiais(resumo):
     else:
         linhas.append("Não encontrei materiais em stock baixo neste momento.")
     return "\n".join(linhas)
+
+
+def _resposta_materiais_stock_baixo(resumo):
+    if resumo["materiais_baixo_stock"]:
+        return "Materiais com stock baixo ou esgotado:\n" + "\n".join(
+            f"- {item}" for item in resumo["materiais_baixo_stock"][:12]
+        )
+    return "Não encontrei materiais com stock baixo neste momento."
+
+
+def _resposta_materiais_levantamentos(resumo):
+    return (
+        "Posso analisar levantamentos por período/projeto/furo.\n"
+        "Para detalhar, clica em Furos ou indica um furo/projeto específico para cruzar com materiais."
+    )
+
+
+def _resposta_materiais_devolucoes(resumo):
+    return (
+        "Posso analisar devoluções por período/projeto/furo.\n"
+        "Para detalhar, clica em Furos ou indica um furo/projeto específico para cruzar com materiais."
+    )
 
 
 def _resposta_eventos(empresa):
@@ -537,8 +797,223 @@ def _resposta_geral(resumo):
         f"Resumo rápido da empresa: {resumo['total_projetos']} projetos, {resumo['total_furos']} furos, "
         f"{resumo['total_empregados']} empregados, {resumo['total_maquinas']} máquinas, {resumo['total_materiais']} materiais e "
         f"{resumo['total_despesas']:.2f} € em despesas registadas.\n\n"
-        "Posso aprofundar um tema específico se perguntares por furos, despesas, alertas, materiais, máquinas, empregados, eventos ou histórico de furos por zona."
+        "Posso aprofundar um tema específico. Clica em “Aprofundar um tema” para abrir opções com links clicáveis."
     )
+
+
+def _resposta_menu_temas():
+    return (
+        "Escolhe um tema para aprofundar. Depois posso continuar com novas opções e respostas relacionadas."
+    )
+
+
+def _sugestao(label, prompt):
+    return {"label": label, "prompt": prompt}
+
+
+def _sugestoes_menu_temas():
+    return [
+        _sugestao("Furos", "Quero aprofundar furos."),
+        _sugestao("Despesas", "Quero aprofundar despesas."),
+        _sugestao("Alertas", "Quero aprofundar alertas."),
+        _sugestao("Materiais", "Quero aprofundar materiais."),
+        _sugestao("Máquinas", "Quero aprofundar máquinas."),
+        _sugestao("Empregados", "Quero aprofundar empregados."),
+        _sugestao("Eventos", "Quero aprofundar eventos."),
+        _sugestao("Histórico por zona", "Quero histórico de furos por zona."),
+    ]
+
+
+def _sugestoes_por_tipo(tipo):
+    if tipo in {"geral", "ajuda"}:
+        return [_sugestao("Aprofundar um tema", PROMPT_APROFUNDAR_TEMA)]
+
+    if tipo == "menu_temas":
+        return _sugestoes_menu_temas()
+
+    if tipo == "furos":
+        return [
+            _sugestao("Furos ativos", "Mostra os furos ativos."),
+            _sugestao("Furos concluídos", "Mostra os furos concluídos."),
+            _sugestao("Resumo de medições", "Quero resumo de medições dos furos."),
+            _sugestao("Histórico por zona", "Quero histórico de furos por zona."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "furos_ativos":
+        return [
+            _sugestao("Furos concluídos", "Mostra os furos concluídos."),
+            _sugestao("Resumo de medições", "Quero resumo de medições dos furos."),
+            _sugestao("Histórico por zona", "Quero histórico de furos por zona."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "furos_concluidos":
+        return [
+            _sugestao("Furos ativos", "Mostra os furos ativos."),
+            _sugestao("Resumo de medições", "Quero resumo de medições dos furos."),
+            _sugestao("Histórico por zona", "Quero histórico de furos por zona."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "furos_medicoes":
+        return [
+            _sugestao("Furos ativos", "Mostra os furos ativos."),
+            _sugestao("Furos concluídos", "Mostra os furos concluídos."),
+            _sugestao("Histórico por zona", "Quero histórico de furos por zona."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "financeiro":
+        return [
+            _sugestao("Top categorias", "Mostra as categorias de despesa com maior peso."),
+            _sugestao("Despesa por furo", "Quero despesa por furo."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "financeiro_categorias":
+        return [
+            _sugestao("Despesa por furo", "Quero despesa por furo."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "financeiro_furo":
+        return [
+            _sugestao("Top categorias", "Mostra as categorias de despesa com maior peso."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "alertas":
+        return [
+            _sugestao("Stock baixo", "Mostra materiais com stock baixo."),
+            _sugestao("Máquinas em alerta", "Mostra máquinas em alerta."),
+            _sugestao("Empregados pendentes", "Mostra empregados pendentes."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "materiais":
+        return [
+            _sugestao("Stock baixo", "Mostra materiais com stock baixo."),
+            _sugestao("Levantamentos", "Quero resumo de levantamentos de materiais."),
+            _sugestao("Devoluções", "Quero resumo de devoluções de materiais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "materiais_stock":
+        return [
+            _sugestao("Levantamentos", "Quero resumo de levantamentos de materiais."),
+            _sugestao("Devoluções", "Quero resumo de devoluções de materiais."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "materiais_levantamentos":
+        return [
+            _sugestao("Stock baixo", "Mostra materiais com stock baixo."),
+            _sugestao("Devoluções", "Quero resumo de devoluções de materiais."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "materiais_devolucoes":
+        return [
+            _sugestao("Stock baixo", "Mostra materiais com stock baixo."),
+            _sugestao("Levantamentos", "Quero resumo de levantamentos de materiais."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "maquinas":
+        return [
+            _sugestao("Estados das máquinas", "Mostra os estados das máquinas."),
+            _sugestao("Máquinas não operacionais", "Mostra máquinas não operacionais."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "maquinas_estados":
+        return [
+            _sugestao("Máquinas em alerta", "Mostra máquinas em alerta."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Empregados", "Quero aprofundar empregados."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "maquinas_alerta":
+        return [
+            _sugestao("Estados das máquinas", "Mostra os estados das máquinas."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "empregados":
+        return [
+            _sugestao("Total de empregados", "Mostra resumo de empregados."),
+            _sugestao("Pendentes", "Mostra empregados pendentes."),
+            _sugestao("Registos diários", "Mostra resumo de registos diários."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "empregados_total":
+        return [
+            _sugestao("Pendentes", "Mostra empregados pendentes."),
+            _sugestao("Registos de empregados", "Mostra registos diários de empregados."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "empregados_pendentes":
+        return [
+            _sugestao("Total de empregados", "Mostra resumo de empregados."),
+            _sugestao("Registos de empregados", "Mostra registos diários de empregados."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "empregados_registos":
+        return [
+            _sugestao("Total de empregados", "Mostra resumo de empregados."),
+            _sugestao("Pendentes", "Mostra empregados pendentes."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "eventos":
+        return [
+            _sugestao("Eventos recentes", "Mostra eventos recentes."),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Alertas", "Quero os alertas atuais."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "memoria_zona":
+        return [
+            _sugestao("Cruzar zona", "Há memória operacional nesta zona?"),
+            _sugestao("Furo próximo", "Já houve um furo perto desta zona?"),
+            _sugestao("Furos", "Quero aprofundar furos."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "base_conhecimento":
+        return [
+            _sugestao("Documentos", "Que documentos existem na base de conhecimento?"),
+            _sugestao("Resumo plataforma", "Resume a base funcional da plataforma."),
+            _sugestao("Go live", "O que falta para colocar a plataforma online?"),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    if tipo == "calculo":
+        return [
+            _sugestao("Relacionar com custos", "Relaciona este cálculo com despesas."),
+            _sugestao("Relacionar com furos", "Relaciona este cálculo com metros furados."),
+            _sugestao("Outro tema", PROMPT_APROFUNDAR_TEMA),
+        ]
+
+    return [_sugestao("Aprofundar um tema", PROMPT_APROFUNDAR_TEMA)]
 
 
 def _parece_calculo(texto):

@@ -1,7 +1,7 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Lista de Máquinas{% endblock %}
+{% block title %}{% trans "Lista de Máquinas" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/maquina_list.css' %}">
@@ -10,10 +10,10 @@
 {% block content %}
 <div class="mql-wrap">
     <div class="mql-top">
-        <h1>Lista de Máquinas</h1>
+        <h1>{% trans "Lista de Máquinas" %}</h1>
 
         <a href="{% url 'projetos:maquina_create' %}" class="mql-btn-add">
-            ➕ Adicionar Nova Máquina
+            ➕ {% trans "Adicionar Nova Máquina" %}
         </a>
     </div>
 
@@ -25,12 +25,12 @@
             <div>
                 <h2>{{ maquina.nome }}</h2>
 
-                <p><strong>Tipo:</strong> {{ maquina.tipo|default:"-" }}</p>
-                <p><strong>Marca:</strong> {{ maquina.marca|default:"-" }}</p>
-                <p><strong>Modelo:</strong> {{ maquina.modelo|default:"-" }}</p>
-                <p><strong>Ano:</strong> {{ maquina.ano_registo|default:"-" }}</p>
-                <p><strong>Estado:</strong> {{ maquina.get_estado_display }}</p>
-                <p><strong>Projeto Atual:</strong>
+                <p><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
+                <p><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
+                <p><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
+                <p><strong>{% trans "Ano:" %}</strong> {{ maquina.ano_registo|default:"-" }}</p>
+                <p><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
+                <p><strong>{% trans "Projeto Atual:" %}</strong>
                     {% if maquina.projeto_atual %}
                         {{ maquina.projeto_atual.nome }}
                     {% else %}
@@ -41,15 +41,15 @@
 
             <div class="mql-actions">
                 <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mql-action mql-action-view">
-                    🔍 Ver
+                    🔍 {% trans "Ver" %}
                 </a>
 
                 <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mql-action mql-action-edit">
-                    ✏️ Editar
+                    ✏️ {% trans "Editar" %}
                 </a>
 
                 <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mql-action mql-action-delete">
-                    🗑️ Apagar
+                    🗑️ {% trans "Apagar" %}
                 </a>
             </div>
         </div>
@@ -57,7 +57,7 @@
     </div>
     {% else %}
     <div class="mql-empty">
-        Nenhuma máquina registada.
+        {% trans "Nenhuma máquina registada." %}
     </div>
     {% endif %}
 </div>

@@ -8,7 +8,6 @@ from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
 
-from projetos.selectors.acesso import obter_contexto_admin_projetos as obter_contexto_admin_projetos_selector
 from projetos.selectors.projetos import (
     obter_contexto_projeto_detail,
     obter_dados_3d_projeto,
@@ -18,7 +17,13 @@ from projetos.selectors.projetos import (
     obter_projeto,
     obter_projetos_globo,
 )
-from projetos.services.projetos import associar_empregado_projeto, atualizar_projeto, criar_projeto
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
+from projetos.services.projetos import (
+    apagar_projeto,
+    associar_empregado_projeto,
+    atualizar_projeto,
+    criar_projeto,
+)
 from projetos.services.empregados import terminar_ligacao_projeto_empregado
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
@@ -27,49 +32,20 @@ from ..forms.projeto import ProjetoForm
 logger = logging.getLogger("core")
 
 
-def _obter_contexto_admin_projetos(request):
-    logger.debug(
-        "A resolver contexto administrativo em projetos.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos_selector(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em projetos.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em projetos.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
 def _obter_empresa_admin_projetos(request):
-    contexto_admin = _obter_contexto_admin_projetos(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or empresa is None:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa válida.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa válida em projetos.py. user_id=%s, empresa_id=%s, empresa_valor=%r",
+            "Falha ao resolver empresa administrativa em projetos.py. user_id=%s",
             request.user.id,
-            empresa_id,
-            empresa,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa válida.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -243,8 +219,7 @@ def projeto_delete(request, pk):
     projeto = obter_projeto(pk, empresa=empresa_id)
 
     if request.method == "POST":
-        projeto_id = projeto.pk
-        projeto.delete()
+        projeto_id = apagar_projeto(projeto=projeto, empresa=empresa_id)
         logger.info(
             "Projeto apagado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
             request.user.id,

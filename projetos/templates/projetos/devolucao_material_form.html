@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -37,14 +37,14 @@
             </div>
 
             <button type="submit" class="bg-green-600 hover:bg-green-700 transition text-white font-semibold py-3 rounded-lg shadow w-full">
-                💾 Guardar Devolução
+                💾 {% trans "Guardar Devolução" %}
             </button>
         </form>
 
         <div class="mt-4 text-center">
             <a href="{% url 'projetos:area_empregado' %}" 
                class="inline-block bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-5 rounded-lg shadow">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>

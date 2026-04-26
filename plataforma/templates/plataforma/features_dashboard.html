@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}Features{% endblock %}
 {% block page_title %}Gestão de Features{% endblock %}
@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{% static 'css/plataforma/features_dashboard.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
     <div class="grid-cards features-stats-grid">
         <div class="card">
             <div class="metric-label">Empresas configuráveis</div>

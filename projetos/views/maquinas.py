@@ -6,13 +6,14 @@ from django.shortcuts import redirect, render
 
 from ..decorators import admin_required
 from ..forms.maquina import MaquinaForm
-from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.maquinas import (
     obter_contexto_maquina_detail,
     obter_lista_maquinas,
     obter_maquina,
 )
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.maquinas import (
+    apagar_maquina,
     atualizar_maquina,
     criar_maquina,
 )
@@ -21,48 +22,20 @@ logger = logging.getLogger("core")
 
 
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_maquinas(request):
-    logger.debug(
-        "A resolver contexto administrativo em maquinas.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em maquinas.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em maquinas.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_maquinas(request):
-    contexto_admin = _obter_contexto_admin_maquinas(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em maquinas.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em maquinas.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -223,8 +196,7 @@ def maquina_delete(request, maquina_id):
     maquina = obter_maquina(maquina_id, empresa=empresa)
 
     if request.method == "POST":
-        maquina_id_removida = maquina.id
-        maquina.delete()
+        maquina_id_removida = apagar_maquina(maquina=maquina, empresa=empresa)
         logger.info(
             "Máquina apagada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
             request.user.id,

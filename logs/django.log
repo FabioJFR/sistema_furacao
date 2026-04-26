@@ -32653,3 +32653,1185 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'configuracao_perfuracao_hist
 [2026-04-24 15:09:40,039] INFO django.utils.autoreload | Watching for file changes with StatReloader
 [2026-04-24 18:27:13,744] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/plataforma/views/empresas.py changed, reloading.
 [2026-04-24 18:27:14,531] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:10:13,294] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:10:45,998] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:11:23,810] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17754
+[2026-04-25 15:11:23,926] INFO django.server | "GET /static/css/plataforma/base.css HTTP/1.1" 304 0
+[2026-04-25 15:11:23,928] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 304 0
+[2026-04-25 15:11:23,928] INFO django.server | "GET /static/js/plataforma/base.js HTTP/1.1" 304 0
+[2026-04-25 15:11:28,545] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17754
+[2026-04-25 15:11:33,658] INFO django.server | "GET /plataforma/uteis/ HTTP/1.1" 200 32678
+[2026-04-25 15:13:08,570] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-25 15:13:08,580] INFO django.server | "GET / HTTP/1.1" 200 5045
+[2026-04-25 15:13:08,636] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 304 0
+[2026-04-25 15:13:08,636] INFO django.server | "GET /static/css/website/home.css HTTP/1.1" 200 4484
+[2026-04-25 15:13:08,787] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-25 15:13:08,793] WARNING django.request | Not Found: /favicon.ico
+[2026-04-25 15:13:08,787] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-25 15:13:08,793] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-25 15:13:08,794] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-25 15:13:08,794] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-25 15:13:10,158] INFO django.server | "GET /login/ HTTP/1.1" 200 1708
+[2026-04-25 15:13:10,462] INFO django.server | "GET /static/css/website/login.css HTTP/1.1" 304 0
+[2026-04-25 15:13:17,765] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-25 15:13:17,787] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=2
+[2026-04-25 15:13:17,789] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=2, tipo_acesso=empresa_admin, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 15:13:17,801] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-25 15:13:17,820] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 15:13:17,820] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 15:13:17,825] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 15:13:17,973] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 15:13:17,999] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 15:13:18,011] INFO django.server | "GET /static/css/projeto/dashboard.css HTTP/1.1" 200 5052
+[2026-04-25 15:13:18,012] INFO django.server | "GET /static/js/projetos/dashboard.js HTTP/1.1" 200 9196
+[2026-04-25 15:13:18,031] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 15:13:18,032] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 200 3768
+[2026-04-25 15:13:28,971] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/empregados.py changed, reloading.
+[2026-04-25 15:13:29,883] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:13:36,478] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-25 15:13:37,091] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:14:11,641] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-25 15:14:12,463] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:15:07,526] INFO core | Entrada na view maquina_list. user_id=2, username='empresa1'
+[2026-04-25 15:15:07,537] INFO core | View maquina_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_maquinas=10
+[2026-04-25 15:15:07,658] INFO django.server | "GET /app/maquinas/ HTTP/1.1" 200 20116
+[2026-04-25 15:15:08,342] INFO django.server | "GET /static/css/projeto/maquina_list.css HTTP/1.1" 200 1719
+[2026-04-25 15:16:32,401] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/empregados.py changed, reloading.
+[2026-04-25 15:16:33,094] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:16:43,709] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-25 15:16:44,430] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:17:38,974] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/empregados.py changed, reloading.
+[2026-04-25 15:17:39,416] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:17:47,885] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregados.py changed, reloading.
+[2026-04-25 15:17:48,292] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:19:31,404] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/stock.py changed, reloading.
+[2026-04-25 15:19:31,946] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:19:44,641] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/materiais.py changed, reloading.
+[2026-04-25 15:19:45,152] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:20:54,010] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/maquinas.py changed, reloading.
+[2026-04-25 15:20:54,697] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:21:00,139] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/maquinas.py changed, reloading.
+[2026-04-25 15:21:00,628] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:21:23,702] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/projetos.py changed, reloading.
+[2026-04-25 15:21:24,296] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:21:29,703] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/projetos.py changed, reloading.
+[2026-04-25 15:21:30,240] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:21:49,136] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/medicoes.py changed, reloading.
+[2026-04-25 15:21:49,704] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:21:58,204] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/medicoes.py changed, reloading.
+[2026-04-25 15:21:58,629] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:22:20,641] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/furos.py changed, reloading.
+[2026-04-25 15:22:21,238] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:22:29,767] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-25 15:22:30,299] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:23:15,188] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/opcoes.py changed, reloading.
+[2026-04-25 15:23:15,866] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:23:25,418] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/opcoes.py changed, reloading.
+[2026-04-25 15:23:25,967] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:24:16,901] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 37272
+[2026-04-25 15:25:06,020] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregado_area.py changed, reloading.
+[2026-04-25 15:25:06,625] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:25:23,453] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/definicoes.py changed, reloading.
+[2026-04-25 15:25:24,059] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:25:44,007] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/empregado_area.py changed, reloading.
+[2026-04-25 15:25:44,415] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:27:23,029] INFO django.server | "GET /app/ia/biblioteca-pdf/ HTTP/1.1" 200 20345
+[2026-04-25 15:27:51,352] INFO django.server | "GET /app/ia/chatbox/ HTTP/1.1" 200 27243
+[2026-04-25 15:28:19,712] INFO django.server | "POST /app/ia/chatbox/ HTTP/1.1" 302 0
+[2026-04-25 15:28:19,865] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 29612
+[2026-04-25 15:29:34,501] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:29:34,613] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 42451
+[2026-04-25 15:31:02,884] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:31:03,000] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 55324
+[2026-04-25 15:39:55,685] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 55521
+[2026-04-25 15:39:56,383] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 384
+[2026-04-25 15:39:56,457] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 200 853
+[2026-04-25 15:40:09,079] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:40:09,225] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 57869
+[2026-04-25 15:40:09,260] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:40:09,331] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:43:32,526] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 57887
+[2026-04-25 15:43:32,601] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 1147
+[2026-04-25 15:43:32,695] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:43:58,319] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:43:58,471] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 60234
+[2026-04-25 15:43:58,506] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:43:58,582] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:53:36,847] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:53:37,471] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:53:43,924] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:53:44,328] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:54:54,612] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 60564
+[2026-04-25 15:54:54,715] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 1614
+[2026-04-25 15:54:55,066] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 200 1455
+[2026-04-25 15:55:02,567] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:02,722] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 63664
+[2026-04-25 15:55:02,758] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:55:02,838] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:55:09,911] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:10,046] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 70328
+[2026-04-25 15:55:10,079] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:55:10,153] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:55:21,260] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:21,399] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 76139
+[2026-04-25 15:55:21,416] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:55:21,474] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:55:28,146] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:28,285] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 81950
+[2026-04-25 15:55:28,360] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:55:31,280] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:31,413] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 87761
+[2026-04-25 15:55:31,429] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:55:51,406] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:55:51,575] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 93588
+[2026-04-25 15:55:51,593] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:55:51,652] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:56:00,150] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:56:00,302] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 99415
+[2026-04-25 15:56:01,020] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:56:01,856] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:56:08,375] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:56:08,471] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 105238
+[2026-04-25 15:56:08,492] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:56:08,548] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:56:15,973] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:56:16,110] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 111902
+[2026-04-25 15:56:18,811] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:56:19,236] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:56:37,067] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:56:37,718] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:57:07,030] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:57:07,567] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:57:41,845] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 111902
+[2026-04-25 15:57:41,870] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:57:41,971] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:57:45,055] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 111902
+[2026-04-25 15:57:54,623] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:57:54,750] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 115002
+[2026-04-25 15:57:57,408] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:57:57,596] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 121666
+[2026-04-25 15:57:59,221] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:57:59,374] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 126421
+[2026-04-25 15:58:00,861] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:00,989] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 131386
+[2026-04-25 15:58:07,130] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:07,245] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 138202
+[2026-04-25 15:58:07,261] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:58:07,319] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:58:14,136] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:14,283] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 143142
+[2026-04-25 15:58:17,585] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:58:18,253] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:58:20,712] ERROR django.request | Internal Server Error: /app/ia/chatbox/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/core/permissions.py", line 110, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/views.py", line 363, in chatbox
+    sessao = processar_interacao_chat(
+        empresa=empresa,
+    ...<3 lines>...
+        furo_contexto=furo_contexto,
+    )
+  File "/Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/services/chat.py", line 40, in processar_interacao_chat
+    resposta, metadados = gerar_resposta_chat(empresa=empresa, pergunta=pergunta)
+                          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py", line 270, in gerar_resposta_chat
+    return _resposta_empregados_pendentes(resumo), {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name '_resposta_empregados_pendentes' is not defined
+[2026-04-25 15:58:20,714] ERROR django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 500 87768
+[2026-04-25 15:58:29,632] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:29,744] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 150552
+[2026-04-25 15:58:32,025] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:32,151] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 156946
+[2026-04-25 15:58:32,168] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 15:58:32,234] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 15:58:34,040] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 15:58:34,175] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 161629
+[2026-04-25 15:58:37,309] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:58:37,926] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:59:01,934] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:59:02,496] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 15:59:21,415] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/inspecao_ai/chat_services.py changed, reloading.
+[2026-04-25 15:59:21,963] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 16:00:15,338] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 163483
+[2026-04-25 16:00:15,358] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:00:15,430] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:02:16,156] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 163483
+[2026-04-25 16:02:16,179] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 1770
+[2026-04-25 16:02:16,265] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:02:21,924] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:22,104] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 168871
+[2026-04-25 16:02:26,888] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:27,039] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 175380
+[2026-04-25 16:02:30,120] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:30,290] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 181889
+[2026-04-25 16:02:30,309] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:02:32,556] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:32,726] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 187277
+[2026-04-25 16:02:34,162] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:34,294] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 192063
+[2026-04-25 16:02:35,975] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:36,175] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 199620
+[2026-04-25 16:02:38,087] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:38,278] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 206387
+[2026-04-25 16:02:40,250] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:40,390] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 213598
+[2026-04-25 16:02:42,686] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:42,874] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 220095
+[2026-04-25 16:02:44,435] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:44,578] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 225483
+[2026-04-25 16:02:44,596] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:02:46,602] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:46,699] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 231992
+[2026-04-25 16:02:48,129] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:48,325] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 238501
+[2026-04-25 16:02:50,795] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:50,880] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 245268
+[2026-04-25 16:02:53,356] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:53,535] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 250331
+[2026-04-25 16:02:56,345] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:56,507] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 254787
+[2026-04-25 16:02:59,440] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:02:59,633] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 259848
+[2026-04-25 16:02:59,651] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:03:05,056] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:03:05,215] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266345
+[2026-04-25 16:03:05,293] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:06:07,512] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266310
+[2026-04-25 16:06:07,614] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2203
+[2026-04-25 16:06:07,684] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:09:17,418] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266310
+[2026-04-25 16:09:17,589] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2202
+[2026-04-25 16:09:17,804] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:10:11,646] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266310
+[2026-04-25 16:10:11,696] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2197
+[2026-04-25 16:10:15,016] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266310
+[2026-04-25 16:10:15,209] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:12:18,632] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 266310
+[2026-04-25 16:12:18,701] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2208
+[2026-04-25 16:12:18,796] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:12:28,559] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:12:28,646] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 269513
+[2026-04-25 16:12:28,659] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:14:39,781] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 269513
+[2026-04-25 16:14:39,849] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2270
+[2026-04-25 16:14:39,930] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:14:42,049] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 269513
+[2026-04-25 16:14:48,217] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:14:48,309] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:14:48,327] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:17:04,199] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:17:04,286] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2299
+[2026-04-25 16:17:04,362] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:17:55,350] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:17:55,398] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2299
+[2026-04-25 16:18:49,724] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:18:49,764] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2298
+[2026-04-25 16:19:32,293] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:19:32,320] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:19:32,396] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:19:33,821] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 272716
+[2026-04-25 16:19:52,106] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:19:52,266] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 275919
+[2026-04-25 16:19:52,285] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:19:57,833] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:19:57,998] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 282686
+[2026-04-25 16:20:01,901] INFO django.server | "POST /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 302 0
+[2026-04-25 16:20:01,999] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 289183
+[2026-04-25 16:20:02,016] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:23:31,054] INFO django.server | "GET /app/ia/chatbox/ HTTP/1.1" 200 289183
+[2026-04-25 16:23:32,035] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2296
+[2026-04-25 16:23:32,245] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 16:23:52,773] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 289183
+[2026-04-25 16:23:52,789] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 16:24:04,517] INFO django.server | "GET /app/ia/biblioteca-pdf/ HTTP/1.1" 200 20345
+[2026-04-25 16:24:30,327] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 16:24:30,327] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 16:24:30,335] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 16:24:30,488] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 16:24:30,522] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 16:29:17,208] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 16:29:17,209] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 16:29:17,219] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 16:29:17,378] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 16:29:17,418] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 16:29:26,177] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 16:29:26,177] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 16:29:26,190] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 16:29:26,351] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 16:29:26,397] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 16:29:26,416] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 13033
+[2026-04-25 16:29:26,418] INFO django.server | "GET /static/css/projeto/dashboard.css HTTP/1.1" 200 5052
+[2026-04-25 16:29:26,419] INFO django.server | "GET /static/js/projetos/dashboard.js HTTP/1.1" 200 9196
+[2026-04-25 16:29:26,419] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 200 3768
+[2026-04-25 16:29:26,426] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 200 1268999
+[2026-04-25 16:30:13,889] INFO core | Entrada na view projeto_list. user_id=2, username='empresa1'
+[2026-04-25 16:30:13,897] DEBUG core | Empresa resolvida em projeto_list. user_id=2, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-25 16:30:13,938] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 14059
+[2026-04-25 16:30:13,963] INFO django.server | "GET /static/css/projeto/projeto_list.css HTTP/1.1" 200 1488
+[2026-04-25 16:30:13,965] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 16:30:14,040] INFO django.server | "GET /static/js/projetos/projeto_list.js HTTP/1.1" 200 5865
+[2026-04-25 16:30:44,513] INFO django.server | "GET /app/projetos/8710ee68-321e-4f74-b7be-1618a0bf7b84/ HTTP/1.1" 302 0
+[2026-04-25 16:30:44,548] INFO core | Entrada na view projeto_detail. user_id=2, username='empresa1', projeto_pk=8710ee68-321e-4f74-b7be-1618a0bf7b84
+[2026-04-25 16:30:44,594] INFO core | View projeto_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=8710ee68-321e-4f74-b7be-1618a0bf7b84
+[2026-04-25 16:30:44,799] ERROR django.request | Internal Server Error: /app/projetos/8710ee68-321e-4f74-b7be-1618a0bf7b84/projetoteste123--8710ee68/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/core/permissions.py", line 110, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/views/projetos.py", line 276, in projeto_detail
+    return render(request, "projetos/projeto_detail.html", context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 160, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 66, in render
+    result = block.nodelist.render(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/defaulttags.py", line 511, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'furo_detail' with arguments '('00000000-0000-0000-0000-000000000000',)' not found. 1 pattern(s) tried: ['app/furos/(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/(?P<slug>[-a-zA-Z0-9_]+)/\\Z']
+[2026-04-25 16:30:44,810] ERROR django.server | "GET /app/projetos/8710ee68-321e-4f74-b7be-1618a0bf7b84/projetoteste123--8710ee68/ HTTP/1.1" 500 183215
+[2026-04-25 16:30:44,911] WARNING django.request | Not Found: /favicon.ico
+[2026-04-25 16:30:44,911] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-25 20:02:38,917] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:02:41,799] INFO core | Entrada na view projeto_detail. user_id=2, username='empresa1', projeto_pk=8710ee68-321e-4f74-b7be-1618a0bf7b84
+[2026-04-25 20:02:41,840] INFO core | View projeto_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=8710ee68-321e-4f74-b7be-1618a0bf7b84
+[2026-04-25 20:02:41,934] INFO django.server | "GET /app/projetos/8710ee68-321e-4f74-b7be-1618a0bf7b84/projetoteste123--8710ee68/ HTTP/1.1" 200 17583
+[2026-04-25 20:02:42,147] INFO django.server | "GET /static/css/projeto/projeto_detail.css HTTP/1.1" 200 1256
+[2026-04-25 20:02:42,151] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 304 0
+[2026-04-25 20:02:42,152] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 20:02:42,153] INFO django.server | "GET /static/js/projetos/projeto_detail.js HTTP/1.1" 200 6004
+[2026-04-25 20:02:42,494] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-25 20:02:42,494] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-25 20:02:42,691] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-25 20:02:42,691] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-25 20:02:42,748] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 200 1268999
+[2026-04-25 20:04:21,492] INFO django.server | "GET /static/img/sistema_furacao_logo.png HTTP/1.1" 200 1268999
+[2026-04-25 20:04:21,541] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-25 20:04:21,541] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-25 20:04:21,542] WARNING django.request | Not Found: /favicon.ico
+[2026-04-25 20:04:21,542] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-25 20:04:21,543] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-25 20:04:21,544] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-25 20:11:38,012] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15245
+[2026-04-25 20:11:38,207] INFO django.server | "GET /static/js/projetos/definicoes_admin.js HTTP/1.1" 200 3763
+[2026-04-25 20:13:09,940] INFO django.server | "GET /app/opcoes/procurar/ HTTP/1.1" 200 10227
+[2026-04-25 20:13:52,536] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15837
+[2026-04-25 20:14:18,996] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15837
+[2026-04-25 20:14:32,944] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15837
+[2026-04-25 20:16:06,797] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15837
+[2026-04-25 20:17:39,361] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15995
+[2026-04-25 20:17:43,282] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15995
+[2026-04-25 20:17:52,871] INFO django.server | "POST /app/opcoes/definicoes/ HTTP/1.1" 302 0
+[2026-04-25 20:17:52,981] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 16358
+[2026-04-25 20:19:31,881] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:19:31,882] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:19:31,893] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:19:32,149] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:19:32,172] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:19:32,265] INFO django.server | "GET /static/js/projetos/dashboard.js HTTP/1.1" 304 0
+[2026-04-25 20:19:36,062] INFO core | Entrada na view empregado_list. user_id=2, username='empresa1'
+[2026-04-25 20:19:36,069] INFO core | View empregado_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_empregados=17
+[2026-04-25 20:19:36,182] INFO django.server | "GET /app/empregados/ HTTP/1.1" 200 67326
+[2026-04-25 20:19:38,852] INFO core | Entrada na view furo_list. user_id=2, username='empresa1'
+[2026-04-25 20:19:38,852] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 20:19:38,859] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 20:19:38,862] INFO core | View furo_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=63
+[2026-04-25 20:19:38,965] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 120430
+[2026-04-25 20:19:41,364] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 20:19:41,391] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 20:19:41,890] ERROR django.request | Internal Server Error: /app/medicoes/list/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/core/permissions.py", line 110, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/views/medicoes.py", line 64, in medicao_list
+    return render(
+        request,
+        "projetos/medicao_list.html",
+        {"medicoes": medicoes},
+    )
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 160, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 66, in render
+    result = block.nodelist.render(context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/defaulttags.py", line 333, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/defaulttags.py", line 249, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/defaulttags.py", line 511, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/urls/resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'medicao_update' with arguments '(UUID('a4775042-0cd3-4110-a493-b00f4d711c09'),)' not found. 1 pattern(s) tried: ['app/medicoes/(?P<pk>[0-9]+)/editar/\\Z']
+[2026-04-25 20:19:41,894] ERROR django.server | "GET /app/medicoes/list/ HTTP/1.1" 500 215336
+[2026-04-25 20:20:21,785] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/medicao.py changed, reloading.
+[2026-04-25 20:20:22,539] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:20:35,261] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 20:20:35,281] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 20:20:36,133] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4034067
+[2026-04-25 20:20:56,084] INFO core | Entrada na view levantamento_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 20:20:56,095] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-25 20:20:56,318] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 302693
+[2026-04-25 20:20:59,326] INFO core | Entrada na view devolucao_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 20:20:59,336] INFO core | View devolucao_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_devolucoes=186
+[2026-04-25 20:20:59,507] INFO django.server | "GET /app/devolucoes/admin/ HTTP/1.1" 200 335669
+[2026-04-25 20:21:01,907] INFO core | Entrada na view empregado_pendentes. user_id=2, username='empresa1'
+[2026-04-25 20:21:01,915] INFO core | View empregado_pendentes carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_pendentes=0
+[2026-04-25 20:21:01,956] INFO django.server | "GET /app/empregados/pendentes/ HTTP/1.1" 200 9029
+[2026-04-25 20:21:05,021] INFO core | Entrada na view graficos_dashboard (compat). user_id=2, username='empresa1'
+[2026-04-25 20:21:05,021] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:21:05,031] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:21:05,231] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=False, projeto_id=None, empregado_id=None
+[2026-04-25 20:21:05,270] INFO django.server | "GET /app/dashboard/graficos/ HTTP/1.1" 200 82488
+[2026-04-25 20:21:05,317] INFO django.server | "GET /static/css/projeto/graficos_dashboard.css HTTP/1.1" 200 6290
+[2026-04-25 20:21:05,396] INFO django.server | "GET /static/js/projetos/graficos_dashboard.js HTTP/1.1" 200 7305
+[2026-04-25 20:22:05,366] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 20:22:05,373] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 20:22:05,449] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 29977
+[2026-04-25 20:22:05,963] INFO django.server | "GET /static/css/projeto/furo_3d_importar_externo.css HTTP/1.1" 200 64
+[2026-04-25 20:22:06,038] INFO django.server | "GET /static/js/projetos/furo_3d_importar_externo.js HTTP/1.1" 200 2025
+[2026-04-25 20:22:08,302] INFO core | Entrada na view furo_list. user_id=2, username='empresa1'
+[2026-04-25 20:22:08,302] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 20:22:08,307] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 20:22:08,309] INFO core | View furo_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=63
+[2026-04-25 20:22:08,393] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 120430
+[2026-04-25 20:22:11,591] INFO core | Entrada na view furo_detail. user_id=2, username='empresa1', furo_pk=17fe855e-6c50-4fd3-861d-f4d2864a9ba2
+[2026-04-25 20:22:11,592] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 20:22:11,597] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 20:22:11,987] INFO core | View furo_detail carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, furo_id=17fe855e-6c50-4fd3-861d-f4d2864a9ba2
+[2026-04-25 20:22:12,034] INFO django.server | "GET /app/furos/17fe855e-6c50-4fd3-861d-f4d2864a9ba2/furo3projeto2empresa1--17fe855e/ HTTP/1.1" 200 51265
+[2026-04-25 20:22:12,056] INFO django.server | "GET /static/css/projeto/furo_detail.css HTTP/1.1" 200 7621
+[2026-04-25 20:22:12,120] INFO django.server | "GET /static/js/projetos/furo_detail.js HTTP/1.1" 200 2663
+[2026-04-25 20:22:51,928] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 16076
+[2026-04-25 20:24:34,983] INFO django.server | "GET /app/opcoes/relatorios/ HTTP/1.1" 200 54578
+[2026-04-25 20:24:35,009] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 16472
+[2026-04-25 20:24:50,043] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:24:50,044] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:24:50,050] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:24:50,231] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:24:50,281] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:25:40,612] INFO core | Entrada na view registos_admin_list. user_id=2, username='empresa1'
+[2026-04-25 20:25:40,626] INFO core | View registos_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_registos=1244
+[2026-04-25 20:25:41,273] INFO django.server | "GET /app/registos/admin/ HTTP/1.1" 200 1781775
+[2026-04-25 20:26:13,019] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15742
+[2026-04-25 20:26:13,096] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 20:27:48,588] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/models/preferencias.py changed, reloading.
+[2026-04-25 20:27:49,323] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:27:54,759] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/forms/preferencias.py changed, reloading.
+[2026-04-25 20:27:55,177] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:29:54,079] ERROR django.request | Internal Server Error: /app/opcoes/definicoes/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedColumn: column projetos_preferenciasuser.paleta does not exist
+LINE 1: ...r"."user_id", "projetos_preferenciasuser"."tema", "projetos_...
+                                                             ^
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/middleware.py", line 13, in __call__
+    preferencias, _ = obter_ou_criar_preferencias_user(
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        user=request.user,
+        ^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        },
+        ^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/selectors/preferencias.py", line 5, in obter_ou_criar_preferencias_user
+    return PreferenciasUser.objects.get_or_create(user=user, defaults=defaults or {})
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 987, in get_or_create
+    return self.get(**kwargs), False
+           ~~~~~~~~^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 635, in get
+    num = len(clone)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/models/sql/compiler.py", line 1624, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+django.db.utils.ProgrammingError: column projetos_preferenciasuser.paleta does not exist
+LINE 1: ...r"."user_id", "projetos_preferenciasuser"."tema", "projetos_...
+                                                             ^
+[2026-04-25 20:29:54,115] ERROR django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 500 138215
+[2026-04-25 20:32:52,319] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:32:54,601] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15720
+[2026-04-25 20:32:54,674] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 20:33:06,105] INFO django.server | "POST /app/opcoes/definicoes/ HTTP/1.1" 302 0
+[2026-04-25 20:33:06,211] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 16083
+[2026-04-25 20:33:12,274] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:33:12,274] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:33:12,283] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:33:12,512] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:33:12,549] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:33:25,992] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15720
+[2026-04-25 20:33:31,397] INFO django.server | "POST /app/opcoes/definicoes/ HTTP/1.1" 302 0
+[2026-04-25 20:33:31,492] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 16083
+[2026-04-25 20:34:08,184] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:34:08,185] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:34:08,194] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:34:08,367] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:34:08,399] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:34:11,351] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:34:11,352] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:34:11,361] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:34:11,496] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:34:11,530] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:38:47,193] INFO django.server | "GET /app/ia/chatbox/ HTTP/1.1" 200 289183
+[2026-04-25 20:38:47,296] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 20:38:47,301] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 200 2296
+[2026-04-25 20:38:47,391] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 200 1455
+[2026-04-25 20:39:07,801] INFO django.server | "GET /app/ia/chatbox/?sessao=4604d58b-f431-448c-9478-c059ac2b3783 HTTP/1.1" 200 289183
+[2026-04-25 20:39:14,864] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 37272
+[2026-04-25 20:39:20,553] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/urls.py changed, reloading.
+[2026-04-25 20:39:21,210] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:39:25,438] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/__init__.py changed, reloading.
+[2026-04-25 20:39:25,820] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:39:37,616] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 20:39:37,616] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 20:39:37,626] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 20:39:37,855] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 20:39:37,943] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21061
+[2026-04-25 20:39:38,020] INFO django.server | "GET /static/css/projeto/dashboard.css HTTP/1.1" 304 0
+[2026-04-25 20:39:43,692] INFO core | Entrada na view projeto_list. user_id=2, username='empresa1'
+[2026-04-25 20:39:43,703] DEBUG core | Empresa resolvida em projeto_list. user_id=2, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-25 20:39:43,740] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 14059
+[2026-04-25 20:39:43,745] INFO django.server | "GET /static/js/projetos/projeto_list.js HTTP/1.1" 304 0
+[2026-04-25 20:39:43,746] INFO django.server | "GET /static/css/projeto/projeto_list.css HTTP/1.1" 304 0
+[2026-04-25 20:39:51,452] INFO core | Entrada na view levantamento_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 20:39:51,462] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-25 20:39:51,674] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 302693
+[2026-04-25 20:40:14,190] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 254746
+[2026-04-25 20:40:14,245] INFO django.server | "GET /static/css/projeto/analytics_eventos.css HTTP/1.1" 200 3069
+[2026-04-25 20:43:48,156] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 254746
+[2026-04-25 20:43:48,247] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 20:43:54,009] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 275111
+[2026-04-25 20:44:32,847] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 275111
+[2026-04-25 20:46:52,108] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/forms/__init__.py changed, reloading.
+[2026-04-25 20:46:52,845] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:47:24,411] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/despesas.py changed, reloading.
+[2026-04-25 20:47:25,120] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:47:53,604] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/despesas.py changed, reloading.
+[2026-04-25 20:47:54,349] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 20:48:16,539] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/despesas.py changed, reloading.
+[2026-04-25 20:48:17,086] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 22:21:19,963] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:21:19,971] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:21:20,086] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30651
+[2026-04-25 22:21:20,169] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:26:14,889] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:26:14,892] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:26:14,935] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:27:47,084] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:27:47,097] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:27:47,188] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:27:54,541] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:27:54,549] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:27:54,665] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:30:30,571] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:30:30,577] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:30:30,652] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:30:33,365] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:30:33,371] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:30:33,493] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:31:34,800] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:31:34,806] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:31:34,866] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:32:25,386] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:32:25,392] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:32:25,457] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:32:26,777] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:32:26,780] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:32:26,843] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:32:32,856] INFO core | Entrada na view graficos_dashboard (compat). user_id=2, username='empresa1'
+[2026-04-25 22:32:32,857] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 22:32:32,867] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 22:32:33,155] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=False, projeto_id=None, empregado_id=None
+[2026-04-25 22:32:33,387] INFO django.server | "GET /app/dashboard/graficos/ HTTP/1.1" 200 82587
+[2026-04-25 22:33:02,860] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-25 22:33:02,884] INFO django.server | "GET / HTTP/1.1" 200 5045
+[2026-04-25 22:33:03,180] INFO django.server | "GET /static/css/website/home.css HTTP/1.1" 200 4484
+[2026-04-25 22:33:03,229] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-25 22:33:03,231] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-25 22:33:03,237] WARNING django.request | Not Found: /favicon.ico
+[2026-04-25 22:33:03,238] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-25 22:33:03,238] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-25 22:33:03,238] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-25 22:33:05,243] INFO django.server | "GET /login/ HTTP/1.1" 200 1708
+[2026-04-25 22:33:05,536] INFO django.server | "GET /static/css/website/login.css HTTP/1.1" 200 2169
+[2026-04-25 22:33:08,787] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-25 22:33:08,804] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=2
+[2026-04-25 22:33:08,806] INFO core | PerfilPlataforma encontrado em redirect_after_login. user_id=2, tipo_acesso=empresa_admin, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 22:33:08,808] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-25 22:33:08,823] INFO core | Entrada na view dashboard. user_id=2, username='empresa1'
+[2026-04-25 22:33:08,824] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 22:33:08,831] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 22:33:08,900] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=True, projeto_id=None, empregado_id=None
+[2026-04-25 22:33:08,930] INFO django.server | "GET /app/dashboard/ HTTP/1.1" 200 21160
+[2026-04-25 22:33:15,566] INFO core | Entrada na view projeto_list. user_id=2, username='empresa1'
+[2026-04-25 22:33:15,573] DEBUG core | Empresa resolvida em projeto_list. user_id=2, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-25 22:33:15,613] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 14158
+[2026-04-25 22:33:21,867] INFO core | Entrada na view empregado_list. user_id=2, username='empresa1'
+[2026-04-25 22:33:21,878] INFO core | View empregado_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_empregados=17
+[2026-04-25 22:33:22,018] INFO django.server | "GET /app/empregados/ HTTP/1.1" 200 67425
+[2026-04-25 22:33:36,826] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:33:36,831] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:33:36,883] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:33:41,611] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 37371
+[2026-04-25 22:36:10,290] INFO django.server | "GET /app/ia/analises/ HTTP/1.1" 200 34705
+[2026-04-25 22:36:10,349] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 16581
+[2026-04-25 22:36:22,450] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 274928
+[2026-04-25 22:38:13,756] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 274991
+[2026-04-25 22:38:13,855] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:38:19,445] INFO core | Entrada na view graficos_dashboard (compat). user_id=2, username='empresa1'
+[2026-04-25 22:38:19,445] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 22:38:19,453] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 22:38:19,627] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=False, projeto_id=None, empregado_id=None
+[2026-04-25 22:38:19,690] INFO django.server | "GET /app/dashboard/graficos/ HTTP/1.1" 200 82587
+[2026-04-25 22:38:23,523] INFO core | Entrada na view levantamento_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 22:38:23,533] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-25 22:38:23,716] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 302792
+[2026-04-25 22:41:25,114] INFO core | Entrada na view levantamento_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:25,133] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-25 22:41:25,429] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 302792
+[2026-04-25 22:41:25,692] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 17111
+[2026-04-25 22:41:30,663] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 254276
+[2026-04-25 22:41:30,689] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:41:34,942] INFO core | Entrada na view projeto_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:34,947] DEBUG core | Empresa resolvida em projeto_list. user_id=2, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-25 22:41:34,977] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 14158
+[2026-04-25 22:41:34,991] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:41:38,469] INFO core | Entrada na view empregado_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:38,478] INFO core | View empregado_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_empregados=17
+[2026-04-25 22:41:38,586] INFO django.server | "GET /app/empregados/ HTTP/1.1" 200 67425
+[2026-04-25 22:41:38,610] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:41:41,903] INFO core | Entrada na view maquina_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:41,911] INFO core | View maquina_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_maquinas=10
+[2026-04-25 22:41:41,999] INFO django.server | "GET /app/maquinas/ HTTP/1.1" 200 20215
+[2026-04-25 22:41:42,022] INFO django.server | "GET /static/css/projeto/maquina_list.css HTTP/1.1" 200 1719
+[2026-04-25 22:41:46,418] INFO core | Entrada na view furo_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:46,418] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:41:46,426] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:41:46,428] INFO core | View furo_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=63
+[2026-04-25 22:41:46,513] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 120529
+[2026-04-25 22:41:46,997] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:41:50,192] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:50,220] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 22:41:52,106] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4034166
+[2026-04-25 22:41:52,118] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:41:56,854] INFO core | Entrada na view material_list. user_id=2, username='empresa1'
+[2026-04-25 22:41:56,862] INFO core | View material_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_materiais=35, filtro_nome=''
+[2026-04-25 22:41:56,927] INFO django.server | "GET /app/materiais/ HTTP/1.1" 200 55800
+[2026-04-25 22:41:57,411] INFO django.server | "GET /static/css/projeto/material_list.css HTTP/1.1" 200 2626
+[2026-04-25 22:42:00,731] INFO core | Entrada na view levantamento_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 22:42:00,743] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-25 22:42:00,927] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 302792
+[2026-04-25 22:42:00,951] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:42:03,597] INFO core | Entrada na view devolucao_material_admin_list. user_id=2, username='empresa1'
+[2026-04-25 22:42:03,607] INFO core | View devolucao_material_admin_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_devolucoes=186
+[2026-04-25 22:42:03,805] INFO django.server | "GET /app/devolucoes/admin/ HTTP/1.1" 200 335768
+[2026-04-25 22:42:06,571] INFO core | Entrada na view empregado_pendentes. user_id=2, username='empresa1'
+[2026-04-25 22:42:06,582] INFO core | View empregado_pendentes carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_pendentes=0
+[2026-04-25 22:42:06,626] INFO django.server | "GET /app/empregados/pendentes/ HTTP/1.1" 200 9128
+[2026-04-25 22:42:12,325] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 274991
+[2026-04-25 22:42:12,347] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:42:14,772] INFO django.server | "GET /app/despesas/adicionar/ HTTP/1.1" 200 25106
+[2026-04-25 22:42:29,294] INFO core | Entrada na view graficos_dashboard (compat). user_id=2, username='empresa1'
+[2026-04-25 22:42:29,294] DEBUG core | A verificar acesso ao dashboard: user_id=2, username='empresa1'
+[2026-04-25 22:42:29,302] INFO core | Acesso ao dashboard concedido via PerfilPlataforma. user_id=2, perfil_id=1, tipo_acesso='empresa_admin', empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-25 22:42:29,506] INFO core | Contexto do dashboard montado com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=False, projeto_id=None, empregado_id=None
+[2026-04-25 22:42:29,544] INFO django.server | "GET /app/dashboard/graficos/ HTTP/1.1" 200 82587
+[2026-04-25 22:42:29,564] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 17403
+[2026-04-25 22:42:43,449] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 254276
+[2026-04-25 22:42:43,468] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:42:54,066] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 37371
+[2026-04-25 22:42:54,587] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:42:56,770] INFO django.server | "GET /app/ia/chatbox/ HTTP/1.1" 200 289282
+[2026-04-25 22:42:56,774] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-25 22:42:56,776] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-25 22:42:57,273] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:00,780] INFO django.server | "GET /app/ia/biblioteca-pdf/ HTTP/1.1" 200 20444
+[2026-04-25 22:43:00,800] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:03,624] INFO django.server | "GET /app/ia/memoria-operacional/ HTTP/1.1" 200 33761
+[2026-04-25 22:43:03,646] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:07,271] INFO django.server | "GET /app/ia/analises/nova/ HTTP/1.1" 200 32982
+[2026-04-25 22:43:07,749] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:07,819] INFO django.server | "GET /static/js/inspecao_ai/analise_form.js HTTP/1.1" 200 20398
+[2026-04-25 22:43:11,123] INFO django.server | "GET /app/ia/analises/ HTTP/1.1" 200 34705
+[2026-04-25 22:43:15,435] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:43:15,440] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:43:15,513] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:43:15,534] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:45,375] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:43:45,381] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:43:45,454] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:43:45,533] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:43:50,608] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:43:50,617] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:43:50,697] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:44:11,732] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:44:11,739] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:44:11,818] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 22:44:11,840] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 22:44:14,079] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 37371
+[2026-04-25 22:44:16,300] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 22:44:16,306] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 22:44:16,384] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 30076
+[2026-04-25 23:05:11,347] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 23:05:11,357] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 23:05:11,416] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 28589
+[2026-04-25 23:05:12,209] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:16:21,369] DEBUG core | A resolver contexto administrativo em furos.py. user_id=2, username='empresa1'
+[2026-04-25 23:16:21,375] INFO core | Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, tipo_acesso=empresa_admin
+[2026-04-25 23:16:21,463] INFO django.server | "GET /app/furos/3d/importar/ HTTP/1.1" 200 28588
+[2026-04-25 23:16:21,572] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 17515
+[2026-04-25 23:22:15,962] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 15738
+[2026-04-25 23:22:16,019] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:23:16,620] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/models/preferencias.py changed, reloading.
+[2026-04-25 23:23:17,425] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 23:26:34,021] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 18291
+[2026-04-25 23:26:34,093] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 200 19618
+[2026-04-25 23:26:58,739] INFO django.server | "POST /app/opcoes/definicoes/ HTTP/1.1" 302 0
+[2026-04-25 23:26:58,852] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 18654
+[2026-04-25 23:26:58,878] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:27:12,948] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/opcoes.py changed, reloading.
+[2026-04-25 23:27:13,560] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 23:27:19,588] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 23:27:19,612] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 23:27:20,290] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4034189
+[2026-04-25 23:27:20,301] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:28:05,652] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 13519
+[2026-04-25 23:28:05,695] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:28:14,210] INFO django.server | "POST /app/opcoes/definicoes/ HTTP/1.1" 302 0
+[2026-04-25 23:28:14,289] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 13882
+[2026-04-25 23:28:24,222] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 23:28:24,234] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 23:28:24,837] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4034189
+[2026-04-25 23:28:27,293] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/opcoes.py changed, reloading.
+[2026-04-25 23:28:27,986] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 23:29:04,055] INFO core | Entrada na view medicao_list. user_id=2, username='empresa1'
+[2026-04-25 23:29:04,070] INFO core | View medicao_list carregada com sucesso. user_id=2, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-25 23:29:05,219] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4034315
+[2026-04-25 23:29:05,277] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-25 23:29:10,047] INFO django.server | "GET /app/opcoes/definicoes-financeiras/ HTTP/1.1" 200 13204
+[2026-04-25 23:29:17,211] INFO django.server | "GET /app/opcoes/definicoes/ HTTP/1.1" 200 13645
+[2026-04-25 23:34:28,142] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/core/settings.py changed, reloading.
+[2026-04-25 23:34:28,828] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 23:34:32,184] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/models/preferencias.py changed, reloading.
+[2026-04-25 23:34:32,600] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-25 23:48:11,242] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/templates/projetos/empregado_detail.html.py changed, reloading.
+[2026-04-25 23:48:11,971] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 07:52:43,165] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/plataforma/templates/plataforma/plano_form.html.py changed, reloading.
+[2026-04-26 07:52:43,803] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:16:02,690] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/templates/registration/password_reset_confirm.html.py changed, reloading.
+[2026-04-26 08:16:03,463] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:20:03,320] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/website/templates/registration/password_reset_confirm.html.py changed, reloading.
+[2026-04-26 08:20:03,935] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:20:44,500] INFO django.server | "GET /logout/ HTTP/1.1" 302 0
+[2026-04-26 08:20:44,514] INFO django.server | "GET / HTTP/1.1" 200 5045
+[2026-04-26 08:20:44,517] INFO django.server | "GET /static/css/website/home.css HTTP/1.1" 304 0
+[2026-04-26 08:20:44,902] WARNING django.request | Not Found: /apple-touch-icon-precomposed.png
+[2026-04-26 08:20:44,907] WARNING django.request | Not Found: /apple-touch-icon.png
+[2026-04-26 08:20:44,911] WARNING django.request | Not Found: /favicon.ico
+[2026-04-26 08:20:44,912] WARNING django.server | "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 5702
+[2026-04-26 08:20:44,912] WARNING django.server | "GET /apple-touch-icon.png HTTP/1.1" 404 5666
+[2026-04-26 08:20:44,912] WARNING django.server | "GET /favicon.ico HTTP/1.1" 404 5639
+[2026-04-26 08:20:46,824] INFO django.server | "GET /login/ HTTP/1.1" 200 1713
+[2026-04-26 08:20:46,827] INFO django.server | "GET /static/css/website/login.css HTTP/1.1" 304 0
+[2026-04-26 08:20:46,828] INFO django.server | "GET /static/css/projeto/dashboard.css HTTP/1.1" 304 0
+[2026-04-26 08:20:46,828] INFO django.server | "GET /static/js/projetos/dashboard.js HTTP/1.1" 304 0
+[2026-04-26 08:20:54,777] INFO django.server | "POST /login/ HTTP/1.1" 302 0
+[2026-04-26 08:20:54,798] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-26 08:20:54,798] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-26 08:20:54,802] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 08:20:54,880] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17061
+[2026-04-26 08:20:54,914] INFO django.server | "GET /static/css/projeto/base.css HTTP/1.1" 304 0
+[2026-04-26 08:20:54,928] INFO django.server | "GET /static/js/projetos/base.js HTTP/1.1" 200 6918
+[2026-04-26 08:20:54,930] INFO django.server | "GET /static/css/plataforma/layout.css HTTP/1.1" 200 6234
+[2026-04-26 08:20:54,930] INFO django.server | "GET /static/css/plataforma/dashboard.css HTTP/1.1" 200 11943
+[2026-04-26 08:25:52,105] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/plataforma/templates/plataforma/plano_form.html.py changed, reloading.
+[2026-04-26 08:25:52,804] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:28:12,167] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17939
+[2026-04-26 08:28:43,952] INFO django.server | "GET /plataforma/features/ HTTP/1.1" 200 27837
+[2026-04-26 08:28:43,984] INFO django.server | "GET /static/css/plataforma/features_dashboard.css HTTP/1.1" 200 2341
+[2026-04-26 08:29:14,407] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17939
+[2026-04-26 08:29:16,011] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 17939
+[2026-04-26 08:29:55,750] INFO django.server | "GET /plataforma/financas/analytics/ HTTP/1.1" 200 9669
+[2026-04-26 08:32:03,970] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 9093
+[2026-04-26 08:32:04,000] INFO django.server | "GET /static/css/dispositivos/base.css HTTP/1.1" 200 11701
+[2026-04-26 08:32:10,996] INFO django.server | "GET /app/dispositivos/lista/ HTTP/1.1" 200 7591
+[2026-04-26 08:35:13,672] INFO django.server | "GET /app/dispositivos/lista/ HTTP/1.1" 200 13716
+[2026-04-26 08:35:42,580] INFO core | Entrada em onboarding_empresa. user_id=1, method=GET
+[2026-04-26 08:35:42,582] DEBUG core | Formulário onboarding_empresa aberto em GET. user_id=1
+[2026-04-26 08:35:42,648] INFO django.server | "GET /plataforma/onboarding/empresa/ HTTP/1.1" 200 23009
+[2026-04-26 08:35:42,672] INFO django.server | "GET /static/css/plataforma/onboardiing_empresa.css HTTP/1.1" 200 2467
+[2026-04-26 08:35:42,733] INFO django.server | "GET /static/js/plataforma/onboarding_empresa.js HTTP/1.1" 200 2580
+[2026-04-26 08:35:45,304] INFO django.server | "GET /plataforma/planos/ HTTP/1.1" 200 22677
+[2026-04-26 08:35:45,682] INFO django.server | "GET /static/css/plataforma/plano_list.css HTTP/1.1" 200 1711
+[2026-04-26 08:35:48,468] INFO django.server | "GET /plataforma/subscricoes/ HTTP/1.1" 200 15793
+[2026-04-26 08:35:48,858] INFO django.server | "GET /static/css/plataforma/subscricao_list.css HTTP/1.1" 200 1736
+[2026-04-26 08:35:54,080] INFO django.server | "GET /plataforma/subscricoes/ HTTP/1.1" 200 15793
+[2026-04-26 08:35:56,470] INFO django.server | "GET /plataforma/financas/analytics/ HTTP/1.1" 200 15794
+[2026-04-26 08:36:00,289] INFO django.server | "GET /plataforma/financas/analytics/ HTTP/1.1" 200 15794
+[2026-04-26 08:36:03,175] INFO django.server | "GET /plataforma/features/ HTTP/1.1" 200 33962
+[2026-04-26 08:36:05,863] INFO django.server | "GET /app/dispositivos/ HTTP/1.1" 200 15218
+[2026-04-26 08:36:11,196] INFO django.server | "GET /plataforma/uteis/ HTTP/1.1" 200 38990
+[2026-04-26 08:36:15,962] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:36:15,969] WARNING core | Falha ao resolver empresa administrativa em projetos.py. user_id=1
+[2026-04-26 08:36:15,969] WARNING core | Acesso bloqueado na view projeto_list. user_id=1
+[2026-04-26 08:36:15,975] INFO django.server | "GET /app/projetos/ HTTP/1.1" 302 0
+[2026-04-26 08:36:16,003] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-26 08:36:16,003] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-26 08:36:16,006] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 08:36:16,075] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 24435
+[2026-04-26 08:36:51,202] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:36:51,212] WARNING core | Falha ao resolver empresa administrativa em projetos.py. user_id=1
+[2026-04-26 08:36:51,212] WARNING core | Acesso bloqueado na view projeto_list. user_id=1
+[2026-04-26 08:36:51,218] INFO django.server | "GET /app/projetos/ HTTP/1.1" 302 0
+[2026-04-26 08:36:51,246] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-26 08:36:51,247] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-26 08:36:51,251] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 08:36:51,330] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 24435
+[2026-04-26 08:38:09,023] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/services/acesso_contexto.py changed, reloading.
+[2026-04-26 08:38:09,702] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:38:22,853] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 24064
+[2026-04-26 08:38:24,967] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:38:24,974] DEBUG core | Empresa resolvida em projeto_list. user_id=1, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-26 08:38:25,006] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 17171
+[2026-04-26 08:38:25,399] INFO django.server | "GET /static/css/projeto/projeto_list.css HTTP/1.1" 304 0
+[2026-04-26 08:38:25,492] INFO django.server | "GET /static/js/projetos/projeto_list.js HTTP/1.1" 304 0
+[2026-04-26 08:39:13,345] INFO core | Entrada na view projeto_create. user_id=1, username='fabiorevez', method=GET
+[2026-04-26 08:39:13,385] INFO django.server | "GET /app/projetos/novo/ HTTP/1.1" 200 14228
+[2026-04-26 08:39:16,865] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:39:16,871] DEBUG core | Empresa resolvida em projeto_list. user_id=1, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-26 08:39:16,892] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 17171
+[2026-04-26 08:39:20,332] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/ HTTP/1.1" 302 0
+[2026-04-26 08:39:20,365] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:20,540] INFO core | View projeto_detail carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:20,619] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/projeto1empresa1--dc646e3f/ HTTP/1.1" 200 257890
+[2026-04-26 08:39:20,640] INFO django.server | "GET /static/css/projeto/projeto_detail.css HTTP/1.1" 304 0
+[2026-04-26 08:39:20,729] INFO django.server | "GET /static/js/projetos/projeto_detail.js HTTP/1.1" 304 0
+[2026-04-26 08:39:26,163] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:26,334] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/3d/ HTTP/1.1" 302 0
+[2026-04-26 08:39:26,356] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:26,447] INFO core | View projeto_detail carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:26,523] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/projeto1empresa1--dc646e3f/ HTTP/1.1" 200 257890
+[2026-04-26 08:39:35,720] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:35,877] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/3d/ HTTP/1.1" 302 0
+[2026-04-26 08:39:35,896] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:35,968] INFO core | View projeto_detail carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:39:36,042] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/projeto1empresa1--dc646e3f/ HTTP/1.1" 200 257890
+[2026-04-26 08:43:22,163] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/url_patterns/projetos.py changed, reloading.
+[2026-04-26 08:43:22,936] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:44:20,108] INFO core | Entrada na view projeto_3d. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:44:20,386] INFO core | View projeto_3d carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_id=dc646e3f-6842-4fad-a156-eacaaa7c29bc, total_furos=32
+[2026-04-26 08:44:20,474] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/3d/ HTTP/1.1" 200 4945763
+[2026-04-26 08:44:51,854] INFO core | Entrada na view projeto_detail. user_id=1, username='fabiorevez', projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:44:52,023] INFO core | View projeto_detail carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_pk=dc646e3f-6842-4fad-a156-eacaaa7c29bc
+[2026-04-26 08:44:52,119] INFO django.server | "GET /app/projetos/dc646e3f-6842-4fad-a156-eacaaa7c29bc/projeto1empresa1--dc646e3f/ HTTP/1.1" 200 257890
+[2026-04-26 08:45:43,698] INFO core | Entrada na view furo_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:45:43,699] DEBUG core | A resolver contexto administrativo em furos.py. user_id=1, username='fabiorevez'
+[2026-04-26 08:45:43,706] WARNING core | Falha ao resolver contexto administrativo em furos.py. user_id=1
+[2026-04-26 08:45:43,708] WARNING core | Acesso bloqueado na view furo_list. user_id=1
+[2026-04-26 08:45:43,717] INFO django.server | "GET /app/furos/ HTTP/1.1" 302 0
+[2026-04-26 08:45:43,747] INFO core | Entrada na view redirect_after_login. authenticated=True, user_id=1
+[2026-04-26 08:45:43,747] INFO core | Acesso total via superuser em redirect_after_login. user_id=1
+[2026-04-26 08:45:43,752] INFO django.server | "GET /app/redirect-after-login/ HTTP/1.1" 302 0
+[2026-04-26 08:45:43,871] INFO django.server | "GET /plataforma/dashboard/ HTTP/1.1" 200 24435
+[2026-04-26 08:51:02,628] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-26 08:51:03,315] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:51:17,131] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-26 08:51:17,667] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:51:34,572] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/forms/furo.py changed, reloading.
+[2026-04-26 08:51:35,185] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:51:44,806] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/models/furo.py changed, reloading.
+[2026-04-26 08:51:45,356] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:52:11,676] INFO django.utils.autoreload | /Users/fabiorevez/Desktop/sistema_furacao/projetos/views/furos.py changed, reloading.
+[2026-04-26 08:52:12,295] INFO django.utils.autoreload | Watching for file changes with StatReloader
+[2026-04-26 08:52:43,423] INFO core | Entrada na view furo_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:52:43,438] INFO core | View furo_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=63
+[2026-04-26 08:52:43,554] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 123542
+[2026-04-26 08:52:47,645] INFO core | Entrada na view furo_create. user_id=1, username='fabiorevez', method=GET
+[2026-04-26 08:52:47,718] INFO django.server | "GET /app/furos/novo/ HTTP/1.1" 200 20173
+[2026-04-26 08:52:47,749] INFO django.server | "GET /static/css/projeto/furo_form.css HTTP/1.1" 200 1994
+[2026-04-26 08:53:05,016] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:53:05,022] DEBUG core | Empresa resolvida em projeto_list. user_id=1, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-26 08:53:05,040] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 17171
+[2026-04-26 08:53:06,820] INFO core | Entrada na view projeto_create. user_id=1, username='fabiorevez', method=GET
+[2026-04-26 08:53:06,851] INFO django.server | "GET /app/projetos/novo/ HTTP/1.1" 200 14228
+[2026-04-26 08:54:00,698] INFO core | Entrada na view projeto_create. user_id=1, username='fabiorevez', method=POST
+[2026-04-26 08:54:01,198] INFO core | Projeto criado com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, projeto_id=e559b73d-b36b-4c64-8994-12b5553efcbb
+[2026-04-26 08:54:01,205] INFO django.server | "POST /app/projetos/novo/ HTTP/1.1" 302 0
+[2026-04-26 08:54:01,246] INFO core | Entrada na view projeto_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:54:01,254] DEBUG core | Empresa resolvida em projeto_list. user_id=1, empresa_tipo=Empresa, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, empresa_repr=<Empresa: Empresa1>
+[2026-04-26 08:54:01,277] INFO django.server | "GET /app/projetos/ HTTP/1.1" 200 18838
+[2026-04-26 08:57:20,305] INFO core | Entrada na view maquina_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:20,314] INFO core | View maquina_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_maquinas=10
+[2026-04-26 08:57:20,394] INFO django.server | "GET /app/maquinas/ HTTP/1.1" 200 23228
+[2026-04-26 08:57:20,398] INFO django.server | "GET /static/css/projeto/maquina_list.css HTTP/1.1" 304 0
+[2026-04-26 08:57:24,106] INFO core | Entrada na view furo_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:24,113] INFO core | View furo_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_furos=63
+[2026-04-26 08:57:24,171] INFO django.server | "GET /app/furos/ HTTP/1.1" 200 123542
+[2026-04-26 08:57:26,627] INFO core | Entrada na view medicao_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:26,642] INFO core | View medicao_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_medicoes=1599
+[2026-04-26 08:57:27,365] INFO django.server | "GET /app/medicoes/list/ HTTP/1.1" 200 4037190
+[2026-04-26 08:57:30,996] INFO core | Entrada na view material_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:31,007] INFO core | View material_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_materiais=35, filtro_nome=''
+[2026-04-26 08:57:31,076] INFO django.server | "GET /app/materiais/ HTTP/1.1" 200 58813
+[2026-04-26 08:57:31,079] INFO django.server | "GET /static/css/projeto/material_list.css HTTP/1.1" 304 0
+[2026-04-26 08:57:33,953] INFO core | Entrada na view registos_admin_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:33,968] INFO core | View registos_admin_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_registos=1244
+[2026-04-26 08:57:34,590] INFO django.server | "GET /app/registos/admin/ HTTP/1.1" 200 1785067
+[2026-04-26 08:57:37,270] INFO core | Entrada na view levantamento_material_admin_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:37,280] INFO core | View levantamento_material_admin_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_levantamentos=187
+[2026-04-26 08:57:37,446] INFO django.server | "GET /app/levantamentos/admin/ HTTP/1.1" 200 306001
+[2026-04-26 08:57:39,614] INFO core | Entrada na view devolucao_material_admin_list. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:39,630] INFO core | View devolucao_material_admin_list carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_devolucoes=186
+[2026-04-26 08:57:39,786] INFO django.server | "GET /app/devolucoes/admin/ HTTP/1.1" 200 338781
+[2026-04-26 08:57:41,947] INFO core | Entrada na view empregado_pendentes. user_id=1, username='fabiorevez'
+[2026-04-26 08:57:41,960] INFO core | View empregado_pendentes carregada com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, total_pendentes=0
+[2026-04-26 08:57:41,986] INFO django.server | "GET /app/empregados/pendentes/ HTTP/1.1" 200 12209
+[2026-04-26 08:57:45,661] INFO django.server | "GET /app/despesas/minhas/ HTTP/1.1" 200 278010
+[2026-04-26 08:58:10,045] INFO django.server | "GET /app/opcoes/definicoes-financeiras/ HTTP/1.1" 200 16092
+[2026-04-26 08:58:10,127] INFO django.server | "GET /static/js/projetos/definicoes_admin.js HTTP/1.1" 304 0
+[2026-04-26 08:58:14,703] INFO django.server | "GET /plataforma/financas/analytics/ HTTP/1.1" 200 15794
+[2026-04-26 08:58:21,514] INFO core | Entrada na view graficos_dashboard (compat). user_id=1, username='fabiorevez'
+[2026-04-26 08:58:21,514] DEBUG core | A verificar acesso ao dashboard: user_id=1, username='fabiorevez'
+[2026-04-26 08:58:21,520] INFO core | Contexto global do dashboard resolvido pela primeira empresa disponível. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 08:58:21,520] INFO core | Acesso ao dashboard concedido via administração global. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b
+[2026-04-26 08:58:21,719] INFO core | Contexto do dashboard montado com sucesso. user_id=1, empresa_id=b36861fc-40e2-4b3e-a781-52158739303b, incluir_mapa=False, projeto_id=None, empregado_id=None
+[2026-04-26 08:58:21,868] ERROR django.request | Internal Server Error: /app/dashboard/graficos/
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 577, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'trans'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/core/permissions.py", line 107, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/projetos/views/graficos.py", line 41, in graficos_dashboard
+    return render(request, "projetos/graficos_dashboard.html", context)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 585, in parse
+    raise self.error(token, e)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 583, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 307, in do_extends
+    nodelist = parser.parse()
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 585, in parse
+    raise self.error(token, e)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 583, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/loader_tags.py", line 235, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 579, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fabiorevez/Desktop/sistema_furacao/.venv/lib/python3.14/site-packages/django/template/base.py", line 634, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /Users/fabiorevez/Desktop/sistema_furacao/projetos/templates/projetos/graficos_dashboard.html, Invalid block tag on line 2: 'trans', expected 'endblock'. Did you forget to register or load this tag?
+[2026-04-26 08:58:21,874] ERROR django.server | "GET /app/dashboard/graficos/ HTTP/1.1" 500 260814
+[2026-04-26 08:58:21,878] INFO django.server | "GET /static/css/projeto/graficos_dashboard.css HTTP/1.1" 304 0
+[2026-04-26 08:58:21,880] INFO django.server | "GET /static/js/projetos/graficos_dashboard.js HTTP/1.1" 304 0
+[2026-04-26 08:58:31,891] INFO django.server | "GET /plataforma/financas/analytics/ HTTP/1.1" 200 15794
+[2026-04-26 08:58:38,460] INFO django.server | "GET /app/analytics/eventos/ HTTP/1.1" 200 282021
+[2026-04-26 08:58:38,463] INFO django.server | "GET /static/css/projeto/analytics_eventos.css HTTP/1.1" 304 0
+[2026-04-26 08:58:41,049] INFO django.server | "GET /plataforma/features/ HTTP/1.1" 200 33962
+[2026-04-26 08:58:43,891] INFO django.server | "GET /app/ia/ HTTP/1.1" 200 40464
+[2026-04-26 08:58:46,073] INFO django.server | "GET /app/ia/chatbox/ HTTP/1.1" 200 292295
+[2026-04-26 08:58:46,077] INFO django.server | "GET /static/css/inspecao_ai/chatbox.css HTTP/1.1" 304 0
+[2026-04-26 08:58:46,078] INFO django.server | "GET /static/js/inspecao_ai/chatbox.js HTTP/1.1" 304 0
+[2026-04-26 08:58:49,338] INFO django.server | "GET /app/ia/biblioteca-pdf/ HTTP/1.1" 200 23537
+[2026-04-26 08:58:51,892] INFO django.server | "GET /app/ia/memoria-operacional/ HTTP/1.1" 200 36854
+[2026-04-26 08:58:54,228] INFO django.server | "GET /app/ia/analises/nova/ HTTP/1.1" 200 36158
+[2026-04-26 08:58:54,232] INFO django.server | "GET /static/js/inspecao_ai/analise_form.js HTTP/1.1" 304 0
+[2026-04-26 08:58:56,572] INFO django.server | "GET /app/ia/analises/ HTTP/1.1" 200 37798
+[2026-04-26 08:59:11,208] INFO django.server | "GET /app/geologia/ HTTP/1.1" 200 26151
+[2026-04-26 08:59:13,924] INFO django.server | "GET /app/geologia/drone/ HTTP/1.1" 200 55737
+[2026-04-26 08:59:13,946] INFO django.server | "GET /static/css/geologia/drone_ui.css HTTP/1.1" 200 244
+[2026-04-26 08:59:14,015] INFO django.server | "GET /static/js/geologia/drone_hub.js HTTP/1.1" 200 16181
+[2026-04-26 08:59:19,065] INFO django.server | "GET /app/geologia/drone-sf/ HTTP/1.1" 200 34113

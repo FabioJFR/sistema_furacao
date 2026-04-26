@@ -1,26 +1,28 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Apagar Material{% endblock %}
+{% block title %}{% trans "Apagar Material" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/material_confirm_delete.css' %}">
 {% endblock %}
 
 {% block content %}
+<section class="sf-page p-6">
 <div class="mtd-wrap">
-    <h1>Apagar Material</h1>
-    <p>Tem a certeza que deseja apagar "<strong>{{ material.nome }}</strong>"?</p>
+    <h1>{% trans "Apagar Material" %}</h1>
+    <p>{% blocktrans with nome=material.nome %}Tem a certeza que deseja apagar "<strong>{{ nome }}</strong>"?{% endblocktrans %}</p>
 
     <form method="post" class="mtd-form">
         {% csrf_token %}
         <button type="submit" class="mtd-btn mtd-btn-delete">
-            🗑️ Sim, apagar
+            🗑️ {% trans "Sim, apagar" %}
         </button>
 
         <a href="{% url 'projetos:material_detail' material.id %}" class="mtd-btn mtd-btn-cancel">
-            🔙 Cancelar
+            🔙 {% trans "Cancelar" %}
         </a>
     </form>
 </div>
+</section>
 {% endblock %}

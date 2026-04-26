@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}Dashboard da Plataforma{% endblock %}
 
@@ -20,7 +20,7 @@
     <a href="{% url 'dispositivos:dashboard' %}" class="btn btn-light">Dispositivos</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
     <div class="grid-cards">
         <div class="card">
             <div class="metric-label">Total de empresas</div>

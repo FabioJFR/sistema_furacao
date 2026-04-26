@@ -39,10 +39,6 @@
             <nav class="nav-center" id="topNavMenu" role="navigation" aria-label="{% trans 'Menu principal' %}">
                 {% if is_platform_admin %}
                     <div class="nav-item">
-                        <a href="{% url 'plataforma:dashboard' %}" class="nav-link">🏠 {% trans "Dashboard" %}</a>
-                    </div>
-
-                    <div class="nav-item">
                         <button
                             type="button"
                             class="nav-link"
@@ -57,34 +53,13 @@
                             <a href="{% url 'plataforma:onboarding_empresa' %}" role="menuitem">🏢 {% trans "Nova Empresa" %}</a>
                             <a href="{% url 'plataforma:plano_list' %}" role="menuitem">💳 {% trans "Planos" %}</a>
                             <a href="{% url 'plataforma:subscricao_list' %}" role="menuitem">🧾 {% trans "Subscrições" %}</a>
+                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças" %}</a>
+                            <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
                             <a href="{% url 'dispositivos:dashboard' %}" role="menuitem">📡 {% trans "Dispositivos" %}</a>
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
                             {% endif %}
                         </div>
-                    </div>
-
-                    <div class="nav-item">
-                        <button
-                            type="button"
-                            class="nav-link"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label="{% trans 'Abrir menu Geologia' %}"
-                            data-dropdown-toggle
-                        >
-                            Geologia â–¾
-                        </button>
-                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
-                            <a href="{% url 'geologia:hub' %}" role="menuitem">Geologia</a>
-                            <a href="{% url 'geologia:drone_hub' %}" role="menuitem">DJI Mini 4 Pro</a>
-                            <a href="{% url 'geologia:drone_sf_hub' %}" role="menuitem">Interface Drone S_F</a>
-                        </div>
-                    </div>
-
-                {% elif is_admin_user %}
-                    <div class="nav-item">
-                        <a href="{% url 'projetos:dashboard' %}" class="nav-link">🏠 {% trans "Dashboard" %}</a>
                     </div>
 
                     <div class="nav-item">
@@ -124,6 +99,157 @@
                             <a href="{% url 'projetos:levantamento_material_admin_list' %}" role="menuitem">📦 {% trans "Levantamentos" %}</a>
                             <a href="{% url 'projetos:devolucao_material_admin_list' %}" role="menuitem">↩️ {% trans "Devoluções" %}</a>
                             <a href="{% url 'projetos:empregado_pendentes' %}" role="menuitem">📝 {% trans "Empregados Pendentes" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Finanças' %}"
+                            data-dropdown-toggle
+                        >
+                            💶 {% trans "Finanças" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Finanças' %}">
+                            <a href="{% url 'projetos:despesa_list_admin' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
+                            <a href="{% url 'projetos:despesa_create_admin' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
+                            <a href="{% url 'projetos:definicoes_financeiras_admin' %}" role="menuitem">⚙️ {% trans "Definições financeiras" %}</a>
+                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">📊 {% trans "Finanças da Plataforma" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Analytics' %}"
+                            data-dropdown-toggle
+                        >
+                            📊 {% trans "Analytics" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Analytics' %}">
+                            <a href="{% url 'projetos:graficos_dashboard' %}" role="menuitem">📈 {% trans "Gráficos" %}</a>
+                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos" %}</a>
+                            <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu AI' %}"
+                            data-dropdown-toggle
+                        >
+                            🤖 {% trans "AI" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu AI' %}">
+                            <a href="{% url 'inspecao_ai:hub' %}" role="menuitem">🧠 {% trans "AI Visual" %}</a>
+                            <a href="{% url 'inspecao_ai:chatbox' %}" role="menuitem">💬 {% trans "Chatbox" %}</a>
+                            <a href="{% url 'inspecao_ai:biblioteca_pdf' %}" role="menuitem">📚 {% trans "Biblioteca PDF" %}</a>
+                            <a href="{% url 'inspecao_ai:memoria_operacional' %}" role="menuitem">🗺️ {% trans "Memória Operacional" %}</a>
+                            <a href="{% url 'inspecao_ai:analise_create' %}" role="menuitem">📸 {% trans "Nova análise" %}</a>
+                            <a href="{% url 'inspecao_ai:analise_list' %}" role="menuitem">🗂️ {% trans "Histórico AI" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu 3D' %}"
+                            data-dropdown-toggle
+                        >
+                            🧭 {% trans "3D" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu 3D' %}">
+                            <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Geologia' %}"
+                            data-dropdown-toggle
+                        >
+                            🌍 {% trans "Geologia" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
+                            <a href="{% url 'geologia:hub' %}" role="menuitem">🌍 {% trans "Geologia" %}</a>
+                            <a href="{% url 'geologia:drone_hub' %}" role="menuitem">🚁 {% trans "DJI Mini 4 Pro" %}</a>
+                            <a href="{% url 'geologia:drone_sf_hub' %}" role="menuitem">🛰️ {% trans "Interface Drone S_F" %}</a>
+                        </div>
+                    </div>
+
+                {% elif is_admin_user %}
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Operação' %}"
+                            data-dropdown-toggle
+                        >
+                            📁 {% trans "Operação" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
+                            <a href="{% url 'projetos:projeto_list' %}" role="menuitem">📁 {% trans "Projetos" %}</a>
+                            <a href="{% url 'projetos:empregado_list' %}" role="menuitem">👷 {% trans "Empregados" %}</a>
+                            <a href="{% url 'projetos:maquina_list' %}" role="menuitem">⚙️ {% trans "Máquinas" %}</a>
+                            <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Furos" %}</a>
+                            <a href="{% url 'projetos:medicao_list' %}" role="menuitem">📊 {% trans "Medições" %}</a>
+                            <a href="{% url 'projetos:material_list' %}" role="menuitem">📦 {% trans "Materiais" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Registos' %}"
+                            data-dropdown-toggle
+                        >
+                            📈 {% trans "Registos" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
+                            <a href="{% url 'projetos:registos_admin_list' %}" role="menuitem">📈 {% trans "Produção" %}</a>
+                            <a href="{% url 'projetos:levantamento_material_admin_list' %}" role="menuitem">📦 {% trans "Levantamentos" %}</a>
+                            <a href="{% url 'projetos:devolucao_material_admin_list' %}" role="menuitem">↩️ {% trans "Devoluções" %}</a>
+                            <a href="{% url 'projetos:empregado_pendentes' %}" role="menuitem">📝 {% trans "Empregados Pendentes" %}</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Finanças' %}"
+                            data-dropdown-toggle
+                        >
+                            💶 {% trans "Finanças" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Finanças' %}">
+                            <a href="{% url 'projetos:despesa_list_admin' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
+                            <a href="{% url 'projetos:despesa_create_admin' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
+                            <a href="{% url 'projetos:definicoes_financeiras_admin' %}" role="menuitem">⚙️ {% trans "Definições financeiras" %}</a>
                         </div>
                     </div>
 
@@ -181,30 +307,8 @@
                         </div>
                     </div>
 
-                    <div class="nav-item">
-                        <button
-                            type="button"
-                            class="nav-link"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label="{% trans 'Abrir menu Opções' %}"
-                            data-dropdown-toggle
-                        >
-                            🛠️ {% trans "Opções" %} ▾
-                        </button>
-                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Opções' %}">
-                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
-                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
-                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
-                        </div>
-                    </div>
-
                 {% elif is_empregado_user %}
                     {% with perfil_tipo=perfil_plataforma.tipo_acesso|default:'' %}
-                    <div class="nav-item">
-                        <a href="{% url 'projetos:area_empregado' %}" class="nav-link">🏠 {% trans "Painel" %}</a>
-                    </div>
-
                     {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
                         <button
@@ -224,6 +328,23 @@
                         </div>
                     </div>
                     {% endif %}
+
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Finanças' %}"
+                            data-dropdown-toggle
+                        >
+                            💶 {% trans "Finanças" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Finanças' %}">
+                            <a href="{% url 'projetos:despesa_list_empregado' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
+                            <a href="{% url 'projetos:despesa_create_empregado' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
+                        </div>
+                    </div>
 
                     {% if perfil_tipo != "individual" %}
                     <div class="nav-item">
@@ -303,7 +424,22 @@
                         </div>
                     </button>
 
-                    <div class="dropdown dropdown-right" role="menu" aria-label="{% trans 'Menu do utilizador' %}">
+                    <div class="dropdown dropdown-user" role="menu" aria-label="{% trans 'Menu do utilizador' %}">
+                        {% if is_platform_admin %}
+                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças" %}</a>
+                            <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
+                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
+                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
+                            {% endif %}
+                        {% endif %}
+                        {% if is_admin_user %}
+                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
+                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
+                        {% endif %}
                         <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
                     </div>
                 </div>

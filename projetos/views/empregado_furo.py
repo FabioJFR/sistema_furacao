@@ -3,15 +3,14 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.urls import reverse
 
 from core.permissions import admin_required
 from projetos.forms.empregado_furo import EmpregadoFuroForm
-from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.empregados import (
     obter_furo_admin_por_pk_empresa,
     obter_ligacao_empregado_furo_admin_por_pk,
 )
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.empregado_furo import (
     criar_ligacao_empregado_furo,
     atualizar_ligacao_empregado_furo,
@@ -21,52 +20,21 @@ from projetos.services.empregados import garantir_ligacao_projeto_por_furo
 logger = logging.getLogger("core")
 
 
-ADMIN_TIPOS_ACESSO_EMPRESA = ["empresa_admin", "empresa_gestor"]
-
-
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_empregado_furo(request):
-    logger.debug(
-        "A resolver contexto administrativo em empregado_furo.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em empregado_furo.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em empregado_furo.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_empregado_furo(request):
-    contexto_admin = _obter_contexto_admin_empregado_furo(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em empregado_furo.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em empregado_furo.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 

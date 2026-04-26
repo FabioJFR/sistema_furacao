@@ -1,25 +1,26 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Devoluções de Material{% endblock %}
+{% block title %}{% trans "Devoluções de Material" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
-        <h1 class="text-2xl font-bold text-gray-800">↩️ Devoluções de Material</h1>
+        <h1 class="text-2xl font-bold text-gray-800">↩️ {% trans "Devoluções de Material" %}</h1>
 
         {% if devolucoes %}
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Empregado</th>
-                            <th class="text-left px-4 py-3">Material</th>
-                            <th class="text-left px-4 py-3">Quantidade</th>
-                            <th class="text-left px-4 py-3">Projeto</th>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Observações</th>
+                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Empregado" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Material" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Quantidade" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +40,7 @@
                                             {{ devolucao.projeto.nome }}
                                         </a>
                                     {% else %}
-                                        Stock
+                                        {% trans "Stock" %}
                                     {% endif %}
                                 </td>
                                 <td class="px-4 py-3">
@@ -58,7 +59,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem devoluções registadas.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem devoluções registadas." %}</p>
         {% endif %}
 
     </div>

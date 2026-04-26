@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -13,18 +13,18 @@
 
         {% if titulo == "Novo Empregado" %}
             <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
-                <h3 class="font-bold mb-2">Acesso definido pelo administrador</h3>
+                <h3 class="font-bold mb-2">{% trans "Acesso definido pelo administrador" %}</h3>
                 <p class="text-sm leading-6">
-                    Ao criar um novo empregado, o administrador define o nome de utilizador e a palavra-passe inicial.
-                    Essas credenciais ficam associadas ao empregado para acesso imediato à plataforma.
+                    {% trans "Ao criar um novo empregado, o administrador define o nome de utilizador e a palavra-passe inicial." %}
+                    {% trans "Essas credenciais ficam associadas ao empregado para acesso imediato à plataforma." %}
                 </p>
             </div>
         {% elif empregado and not empregado.aprovado %}
             <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-900">
-                <h3 class="font-bold mb-2">Registo pendente de aprovação</h3>
+                <h3 class="font-bold mb-2">{% trans "Registo pendente de aprovação" %}</h3>
                 <p class="text-sm leading-6">
-                    Este empregado ainda não está aprovado. A aprovação pode ser feita na área de detalhes do empregado,
-                    onde também ficará visível o utilizador associado.
+                    {% trans "Este empregado ainda não está aprovado. A aprovação pode ser feita na área de detalhes do empregado," %}
+                    {% trans "onde também ficará visível o utilizador associado." %}
                 </p>
             </div>
         {% endif %}
@@ -34,7 +34,7 @@
 
             {% if form.non_field_errors or form.errors %}
                 <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
-                    <p class="font-bold mb-2">Corrige os erros abaixo antes de guardar.</p>
+                    <p class="font-bold mb-2">{% trans "Corrige os erros abaixo antes de guardar." %}</p>
 
                     {% if form.non_field_errors %}
                         <div class="mb-2">{{ form.non_field_errors }}</div>
@@ -53,7 +53,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
-                    <label for="id_nome" class="block font-semibold mb-1">Nome</label>
+                    <label for="id_nome" class="block font-semibold mb-1">{% trans "Nome" %}</label>
                     {{ form.nome|add_class:"w-full p-2 border rounded" }}
                     {% if form.nome.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.nome.errors }}</div>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div>
-                    <label for="id_funcao" class="block font-semibold mb-1">Função</label>
+                    <label for="id_funcao" class="block font-semibold mb-1">{% trans "Função" %}</label>
                     {{ form.funcao|add_class:"w-full p-2 border rounded" }}
                     {% if form.funcao.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.funcao.errors }}</div>
@@ -70,7 +70,7 @@
 
 
                 <div>
-                    <label for="id_email" class="block font-semibold mb-1">Email</label>
+                    <label for="id_email" class="block font-semibold mb-1">{% trans "Email" %}</label>
                     {{ form.email|add_class:"w-full p-2 border rounded" }}
                     {% if form.email.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.email.errors }}</div>
@@ -79,7 +79,7 @@
 
                 {% if titulo == "Novo Empregado" %}
                 <div>
-                    <label for="id_username" class="block font-semibold mb-1">Nome de utilizador</label>
+                    <label for="id_username" class="block font-semibold mb-1">{% trans "Nome de utilizador" %}</label>
                     {{ form.username|add_class:"w-full p-2 border rounded" }}
                     {% if form.username.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.username.errors }}</div>
@@ -87,7 +87,7 @@
                 </div>
 
                 <div>
-                    <label for="id_password" class="block font-semibold mb-1">Palavra-passe inicial</label>
+                    <label for="id_password" class="block font-semibold mb-1">{% trans "Palavra-passe inicial" %}</label>
                     {{ form.password|add_class:"w-full p-2 border rounded" }}
                     {% if form.password.help_text %}
                         <div class="text-gray-500 text-sm mt-1">{{ form.password.help_text }}</div>
@@ -100,7 +100,7 @@
 
                 {% if form.telefone %}
                 <div>
-                    <label for="id_telefone" class="block font-semibold mb-1">Telefone</label>
+                    <label for="id_telefone" class="block font-semibold mb-1">{% trans "Telefone" %}</label>
                     {{ form.telefone|add_class:"w-full p-2 border rounded" }}
                     {% if form.telefone.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.telefone.errors }}</div>
@@ -110,7 +110,7 @@
 
                 {% if form.data_admissao %}
                 <div>
-                    <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
+                    <label for="id_data_admissao" class="block font-semibold mb-1">{% trans "Data de Admissão" %}</label>
                     {{ form.data_admissao|add_class:"w-full p-2 border rounded" }}
                     {% if form.data_admissao.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.data_admissao.errors }}</div>
@@ -120,7 +120,7 @@
 
                 {% if form.data_inicio_contrato %}
                 <div>
-                    <label for="id_data_inicio_contrato" class="block font-semibold mb-1">Início do Contrato</label>
+                    <label for="id_data_inicio_contrato" class="block font-semibold mb-1">{% trans "Início do Contrato" %}</label>
                     {{ form.data_inicio_contrato|add_class:"w-full p-2 border rounded" }}
                     {% if form.data_inicio_contrato.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.data_inicio_contrato.errors }}</div>
@@ -130,7 +130,7 @@
 
                 {% if form.data_fim_contrato %}
                 <div>
-                    <label for="id_data_fim_contrato" class="block font-semibold mb-1">Fim do Contrato</label>
+                    <label for="id_data_fim_contrato" class="block font-semibold mb-1">{% trans "Fim do Contrato" %}</label>
                     {{ form.data_fim_contrato|add_class:"w-full p-2 border rounded" }}
                     {% if form.data_fim_contrato.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.data_fim_contrato.errors }}</div>
@@ -140,7 +140,7 @@
 
                 {% if form.nif %}
                 <div>
-                    <label for="id_nif" class="block font-semibold mb-1">NIF</label>
+                    <label for="id_nif" class="block font-semibold mb-1">{% trans "NIF" %}</label>
                     {{ form.nif|add_class:"w-full p-2 border rounded" }}
                     {% if form.nif.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.nif.errors }}</div>
@@ -150,7 +150,7 @@
 
                 {% if form.nib %}
                 <div>
-                    <label for="id_nib" class="block font-semibold mb-1">NIB / IBAN</label>
+                    <label for="id_nib" class="block font-semibold mb-1">{% trans "NIB / IBAN" %}</label>
                     {{ form.nib|add_class:"w-full p-2 border rounded" }}
                     {% if form.nib.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.nib.errors }}</div>
@@ -160,7 +160,7 @@
 
                 {% if form.nacionalidade %}
                 <div>
-                    <label for="id_nacionalidade" class="block font-semibold mb-1">Nacionalidade</label>
+                    <label for="id_nacionalidade" class="block font-semibold mb-1">{% trans "Nacionalidade" %}</label>
                     {{ form.nacionalidade|add_class:"w-full p-2 border rounded" }}
                     {% if form.nacionalidade.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.nacionalidade.errors }}</div>
@@ -170,7 +170,7 @@
 
                 {% if form.idade %}
                 <div>
-                    <label for="id_idade" class="block font-semibold mb-1">Idade</label>
+                    <label for="id_idade" class="block font-semibold mb-1">{% trans "Idade" %}</label>
                     {{ form.idade|add_class:"w-full p-2 border rounded" }}
                     {% if form.idade.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.idade.errors }}</div>
@@ -180,7 +180,7 @@
 
                 {% if form.salario %}
                 <div>
-                    <label for="id_salario" class="block font-semibold mb-1">Salário</label>
+                    <label for="id_salario" class="block font-semibold mb-1">{% trans "Salário" %}</label>
                     {{ form.salario|add_class:"w-full p-2 border rounded" }}
                     {% if form.salario.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.salario.errors }}</div>
@@ -190,13 +190,13 @@
 
                 {% if form.curriculo %}
                 <div class="md:col-span-2">
-                    <label for="id_curriculo" class="block font-semibold mb-1">Currículo</label>
+                    <label for="id_curriculo" class="block font-semibold mb-1">{% trans "Currículo" %}</label>
                     {{ form.curriculo|add_class:"w-full p-2 border rounded" }}
                     {% if empregado and empregado.curriculo %}
                         <p class="text-sm text-gray-600 mt-1">
-                            Atual:
+                            {% trans "Atual:" %}
                             <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                Ver ficheiro
+                                {% trans "Ver ficheiro" %}
                             </a>
                         </p>
                     {% endif %}
@@ -208,13 +208,13 @@
 
                 {% if form.contrato %}
                 <div class="md:col-span-2">
-                    <label for="id_contrato" class="block font-semibold mb-1">Contrato</label>
+                    <label for="id_contrato" class="block font-semibold mb-1">{% trans "Contrato" %}</label>
                     {{ form.contrato|add_class:"w-full p-2 border rounded" }}
                     {% if empregado and empregado.contrato %}
                         <p class="text-sm text-gray-600 mt-1">
-                            Atual:
+                            {% trans "Atual:" %}
                             <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                Ver ficheiro
+                                {% trans "Ver ficheiro" %}
                             </a>
                         </p>
                     {% endif %}
@@ -226,7 +226,7 @@
 
                 {% if form.morada %}
                 <div class="md:col-span-2">
-                    <label for="id_morada" class="block font-semibold mb-1">Morada</label>
+                    <label for="id_morada" class="block font-semibold mb-1">{% trans "Morada" %}</label>
                     {{ form.morada|add_class:"w-full p-2 border rounded" }}
                     {% if form.morada.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.morada.errors }}</div>
@@ -236,7 +236,7 @@
 
                 {% if form.alertas %}
                 <div class="md:col-span-2">
-                    <label for="id_alertas" class="block font-semibold mb-1">Alertas (JSON)</label>
+                    <label for="id_alertas" class="block font-semibold mb-1">{% trans "Alertas (JSON)" %}</label>
                     {{ form.alertas|add_class:"w-full p-2 border rounded" }}
                     {% if form.alertas.errors %}
                         <div class="text-red-600 text-sm mt-1">{{ form.alertas.errors }}</div>
@@ -248,21 +248,21 @@
 
             {% if empregado and empregado.user %}
                 <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
-                    <p><strong>Utilizador associado:</strong> {{ empregado.user.username }}</p>
+                    <p><strong>{% trans "Utilizador associado:" %}</strong> {{ empregado.user.username }}</p>
                     <p class="mt-1 text-gray-600">
-                        A palavra-passe não é mostrada aqui por segurança. Se precisares de entregar novo acesso,
-                        redefine a palavra-passe do utilizador associado.
+                        {% trans "A palavra-passe não é mostrada aqui por segurança. Se precisares de entregar novo acesso," %}
+                        {% trans "redefine a palavra-passe do utilizador associado." %}
                     </p>
                 </div>
             {% endif %}
             <button type="submit" class="btn btn-success mt-4 w-full text-center">
-                💾 Salvar
+                💾 {% trans "Salvar" %}
             </button>
         </form>
 
         <div class="mt-4 text-center">
             <a href="{% url 'projetos:empregado_list' %}" class="btn btn-primary">
-                🔙 Voltar à Lista
+                🔙 {% trans "Voltar à Lista" %}
             </a>
         </div>
     </div>

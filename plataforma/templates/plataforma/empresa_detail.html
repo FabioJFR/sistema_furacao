@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ empresa.nome }}{% endblock %}
 
@@ -17,7 +17,7 @@ Detalhe da empresa, métricas principais e ações administrativas.
 <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <div class="empresa-detail-page">
     <div class="empresa-grid-metricas">
         <div class="empresa-card empresa-metrica-card">

@@ -11,10 +11,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from core.permissions import user_is_empresa_admin
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
 from ..utils.tragetoria import calcular_linha_planeada, construir_segmentos_tubos
-from projetos.selectors.acesso import obter_contexto_admin_projetos, obter_empregado_por_user
+from projetos.selectors.acesso import obter_empregado_por_user
 from projetos.selectors.furos import (
     empregado_trabalhou_no_furo,
     obter_contexto_detalhe_furo,
@@ -38,7 +39,8 @@ from projetos.services.furo_memoria import (
     obter_memoria_zona_furos as obter_memoria_zona_furos_service,
     parse_float_or_none as parse_float_or_none_service,
 )
-from projetos.services.furos import atualizar_furo, criar_furo
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
+from projetos.services.furos import apagar_furo, atualizar_furo, criar_furo
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
 from geologia.selectors.logs import obter_logs_geologicos_recentes_furo
@@ -300,49 +302,20 @@ def _parse_imported_3d_file(uploaded_file):
     return parse_imported_3d_file_service(uploaded_file)
 
 
-# ---------------- HELPERS ----------------
-def _obter_contexto_admin_furos(request):
-    logger.debug(
-        "A resolver contexto administrativo em furos.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em furos.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em furos.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_furos(request):
-    contexto_admin = _obter_contexto_admin_furos(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em furos.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em furos.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -632,8 +605,7 @@ def furo_delete(request, pk):
 
     furo = obter_furo(pk, empresa=empresa_id)
     if request.method == "POST":
-        furo_id = furo.pk
-        furo.delete()
+        furo_id = apagar_furo(furo=furo, empresa=empresa_id)
         logger.info(
             "Furo apagado com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
             request.user.id,
@@ -657,19 +629,13 @@ def furo_3d_geologico(request, furo_id):
     )
     furo = None
 
-    contexto_admin = _obter_contexto_admin_furos(request)
-    if contexto_admin:
-        empresa = getattr(contexto_admin, "empresa", None)
-        empresa_id = getattr(contexto_admin, "empresa_id", None)
+    if user_is_empresa_admin(request.user):
+        empresa, resposta_erro = _obter_empresa_admin_furos(request)
+        if resposta_erro:
+            logger.warning("Acesso bloqueado na view furo_3d_geologico. user_id=%s", request.user.id)
+            return resposta_erro
 
-        if not empresa_id or not empresa:
-            logger.warning(
-                "Contexto administrativo sem empresa em furo_3d_geologico. user_id=%s",
-                request.user.id,
-            )
-            messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-            return redirect("projetos:dashboard")
-
+        empresa_id = _resolver_empresa_id(empresa)
         furo = obter_furo(furo_id, empresa=empresa_id)
     else:
         empregado, resposta_erro = _obter_empregado_autenticado_furos(request)

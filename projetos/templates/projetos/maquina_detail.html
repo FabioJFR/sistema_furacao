@@ -1,7 +1,7 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Detalhes da Máquina{% endblock %}
+{% block title %}{% trans "Detalhes da Máquina" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/maquina_detail.css' %}">
@@ -15,46 +15,46 @@
 
         <div class="mqd-actions">
             <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mqd-btn mqd-btn-edit">
-                ✏️ Editar
+                ✏️ {% trans "Editar" %}
             </a>
 
             <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mqd-btn mqd-btn-delete">
-                🗑️ Apagar
+                🗑️ {% trans "Apagar" %}
             </a>
         </div>
     </div>
 
     <div class="mqd-grid">
         <div>
-            <p><strong>Tipo:</strong> {{ maquina.tipo|default:"-" }}</p>
-            <p><strong>Marca:</strong> {{ maquina.marca|default:"-" }}</p>
-            <p><strong>Modelo:</strong> {{ maquina.modelo|default:"-" }}</p>
-            <p><strong>Nº Série:</strong> {{ maquina.numero_serie|default:"-" }}</p>
-            <p><strong>Estado:</strong> {{ maquina.get_estado_display }}</p>
-            <p><strong>Ativa:</strong> {% if maquina.ativo %}Sim{% else %}Não{% endif %}</p>
+            <p><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
+            <p><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
+            <p><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
+            <p><strong>{% trans "Nº Série:" %}</strong> {{ maquina.numero_serie|default:"-" }}</p>
+            <p><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
+            <p><strong>{% trans "Ativa:" %}</strong> {% if maquina.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
         </div>
 
         <div>
-            <p><strong>Matrícula:</strong> {{ maquina.matricula|default:"-" }}</p>
-            <p><strong>Quilómetros:</strong> {{ maquina.km|default:"0" }}</p>
-            <p><strong>Horímetro:</strong> {{ maquina.horimetro|default:"0" }}</p>
-            <p><strong>Ano Registo:</strong> {{ maquina.ano_registo|default:"-" }}</p>
-            <p><strong>Valor:</strong> {{ maquina.valor|floatformat:2 }} €</p>
-            <p><strong>Localização Atual:</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
+            <p><strong>{% trans "Matrícula:" %}</strong> {{ maquina.matricula|default:"-" }}</p>
+            <p><strong>{% trans "Quilómetros:" %}</strong> {{ maquina.km|default:"0" }}</p>
+            <p><strong>{% trans "Horímetro:" %}</strong> {{ maquina.horimetro|default:"0" }}</p>
+            <p><strong>{% trans "Ano Registo:" %}</strong> {{ maquina.ano_registo|default:"-" }}</p>
+            <p><strong>{% trans "Valor:" %}</strong> {{ maquina.valor|floatformat:2 }} €</p>
+            <p><strong>{% trans "Localização Atual:" %}</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
         </div>
 
         <div>
-            <p><strong>Data Compra:</strong> {{ maquina.data_compra|default:"-" }}</p>
-            <p><strong>Data Registo:</strong> {{ maquina.data_registo|default:"-" }}</p>
-            <p><strong>Data Revisão:</strong> {{ maquina.data_revisao|default:"-" }}</p>
-            <p><strong>Seguro:</strong> {{ maquina.seguro|default:"-" }}</p>
-            <p><strong>Validade Seguro:</strong> {{ maquina.data_seguro|default:"-" }}</p>
-            <p><strong>Validade IUC:</strong> {{ maquina.data_iuc|default:"-" }}</p>
+            <p><strong>{% trans "Data Compra:" %}</strong> {{ maquina.data_compra|default:"-" }}</p>
+            <p><strong>{% trans "Data Registo:" %}</strong> {{ maquina.data_registo|default:"-" }}</p>
+            <p><strong>{% trans "Data Revisão:" %}</strong> {{ maquina.data_revisao|default:"-" }}</p>
+            <p><strong>{% trans "Seguro:" %}</strong> {{ maquina.seguro|default:"-" }}</p>
+            <p><strong>{% trans "Validade Seguro:" %}</strong> {{ maquina.data_seguro|default:"-" }}</p>
+            <p><strong>{% trans "Validade IUC:" %}</strong> {{ maquina.data_iuc|default:"-" }}</p>
         </div>
     </div>
 
     <div class="mqd-section mqd-section-project">
-        <h3>Projeto Atual</h3>
+        <h3>{% trans "Projeto Atual" %}</h3>
         {% if maquina.projeto_atual %}
             <div class="mqd-soft-card">
                 <a href="{{ maquina.projeto_atual.get_absolute_url }}" class="mqd-link-blue">
@@ -62,12 +62,12 @@
                 </a>
             </div>
         {% else %}
-            <p class="mqd-soft-text">Sem projeto atual.</p>
+            <p class="mqd-soft-text">{% trans "Sem projeto atual." %}</p>
         {% endif %}
     </div>
 
     <div class="mqd-section">
-        <h3>Projetos Associados</h3>
+        <h3>{% trans "Projetos Associados" %}</h3>
         {% if maquina.projetos.all %}
             <div class="mqd-pill-wrap">
                 {% for projeto in maquina.projetos.all %}
@@ -77,12 +77,12 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="mqd-soft-text">Sem projetos associados.</p>
+            <p class="mqd-soft-text">{% trans "Sem projetos associados." %}</p>
         {% endif %}
     </div>
 
     <div class="mqd-section">
-        <h3>Furos Associados</h3>
+        <h3>{% trans "Furos Associados" %}</h3>
         {% if maquina.furos.all %}
             <div class="mqd-pill-wrap">
                 {% for furo in maquina.furos.all %}
@@ -92,13 +92,13 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="mqd-soft-text">Sem furos associados.</p>
+            <p class="mqd-soft-text">{% trans "Sem furos associados." %}</p>
         {% endif %}
     </div>
 
     {% if maquina.observacoes %}
     <div class="mqd-section">
-        <h3>Observações</h3>
+        <h3>{% trans "Observações" %}</h3>
         <div class="mqd-soft-card mqd-observ">
             {{ maquina.observacoes }}
         </div>
@@ -107,7 +107,7 @@
 
     <div class="mqd-footer">
         <a href="{% url 'projetos:maquina_list' %}" class="mqd-btn-back">
-            🔙 Voltar à Lista de Máquinas
+            🔙 {% trans "Voltar à Lista de Máquinas" %}
         </a>
     </div>
 

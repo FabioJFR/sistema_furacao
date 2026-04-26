@@ -1,4 +1,4 @@
-from django.utils import timezone
+from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -13,8 +13,8 @@ from dispositivos.selectors.dispositivos import (
     obter_sessao_empresa,
     obter_sessao_ligada_empresa,
 )
-from dispositivos.services.conexao import construir_driver
 from dispositivos.services.ingestao import guardar_leitura_dispositivo
+from dispositivos.services.sessao import criar_sessao_dispositivo, ler_dispositivo_uma_vez
 
 
 class CriarSessaoDispositivoAPIView(APIView):
@@ -25,32 +25,21 @@ class CriarSessaoDispositivoAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         empregado = obter_empregado_autenticado(request.user)
-        if not empregado or not empregado.empresa_id:
-            return Response(
-                {"erro": "O utilizador autenticado não está associado a um empregado com empresa válida."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         dispositivo = serializer.validated_data["dispositivo"]
         furo = serializer.validated_data.get("furo")
 
-        if dispositivo.empresa_id != empregado.empresa_id:
+        try:
+            sessao = criar_sessao_dispositivo(
+                dispositivo=dispositivo,
+                furo=furo,
+                empregado=empregado,
+            )
+        except ValidationError as exc:
+            erro = exc.messages[0] if hasattr(exc, "messages") and exc.messages else str(exc)
             return Response(
-                {"erro": "O dispositivo não pertence à empresa do empregado autenticado."},
+                {"erro": erro},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        if furo and furo.empresa_id != empregado.empresa_id:
-            return Response(
-                {"erro": "O furo não pertence à empresa do empregado autenticado."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        sessao = serializer.save(
-            empresa=empregado.empresa,
-            empregado=empregado,
-            status="criada",
-        )
 
         return Response(
             SessaoDispositivoSerializer(sessao).data,
@@ -70,56 +59,27 @@ class LerDispositivoAPIView(APIView):
             )
 
         sessao = obter_sessao_empresa(pk=pk, empresa_id=empregado.empresa_id)
-
-        driver = construir_driver(sessao.dispositivo)
-
         try:
-            sessao.status = "ligando"
-            sessao.mensagem_erro = ""
-            sessao.save(update_fields=["status", "mensagem_erro"])
-
-            driver.connect()
-
-            sessao.status = "ligado"
-            sessao.save(update_fields=["status"])
-
-            raw = driver.read_once()
-            resultado = guardar_leitura_dispositivo(sessao=sessao, raw_payload=raw)
-
+            resultado = ler_dispositivo_uma_vez(sessao=sessao)
             return Response(
                 {
                     "ok": True,
-                    "raw_payload": raw,
+                    "raw_payload": resultado["raw_payload"],
                     "dados": resultado["dados"],
-                    "medicao_id": str(resultado["medicao"].id),
-                    "shot_id": str(resultado["shot"].id),
+                    "medicao_id": resultado["medicao_id"],
+                    "shot_id": resultado["shot_id"],
                 },
                 status=status.HTTP_200_OK,
             )
-
-        except Exception as e:
-            sessao.status = "erro"
-            sessao.mensagem_erro = str(e)
-            sessao.save(update_fields=["status", "mensagem_erro"])
-
+        except ValidationError as exc:
+            erro = exc.messages[0] if hasattr(exc, "messages") and exc.messages else str(exc)
             return Response(
                 {
                     "ok": False,
-                    "erro": str(e),
+                    "erro": erro,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        finally:
-            try:
-                driver.disconnect()
-            except Exception:
-                pass
-
-            if sessao.status != "erro":
-                sessao.status = "encerrada"
-                sessao.terminado_em = timezone.now()
-                sessao.save(update_fields=["status", "terminado_em"])
 
 
 class BridgeLeituraAPIView(APIView):

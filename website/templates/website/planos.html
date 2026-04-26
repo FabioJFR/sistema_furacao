@@ -1,19 +1,19 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planos</title>
+    <title>{% trans "Planos" %}</title>
     <link rel="stylesheet" href="{% static 'css/website/planos.css' %}">
 </head>
 <body>
     <div class="container">
         <div class="topbar">
-            <h1>Planos</h1>
+            <h1>{% trans "Planos" %}</h1>
             <div>
-                <a href="/" class="btn btn-light">Voltar</a>
-                <a href="/login/" class="btn btn-primary">Entrar</a>
+                <a href="/" class="btn btn-light">{% trans "Voltar" %}</a>
+                <a href="/login/" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>
         </div>
 
@@ -22,22 +22,22 @@
                 <div class="card">
                     <h2>{{ plano.nome }}</h2>
                     <p class="muted">{{ plano.descricao }}</p>
-                    <div class="price">{{ plano.preco_mensal }} €<span class="muted price-period">/mês</span></div>
-                    <p>Tipo: <strong>{{ plano.get_tipo_display }}</strong></p>
-                    <p>Dashboard empresa:
-                        <strong>{% if plano.acesso_dashboard_empresa %}Sim{% else %}Não{% endif %}</strong>
+                    <div class="price">{{ plano.preco_mensal }} €<span class="muted price-period">{% trans "/mês" %}</span></div>
+                    <p>{% trans "Tipo:" %} <strong>{{ plano.get_tipo_display }}</strong></p>
+                    <p>{% trans "Dashboard empresa:" %}
+                        <strong>{% if plano.acesso_dashboard_empresa %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
-                    <p>Painel empregado:
-                        <strong>{% if plano.acesso_painel_empregado %}Sim{% else %}Não{% endif %}</strong>
+                    <p>{% trans "Painel empregado:" %}
+                        <strong>{% if plano.acesso_painel_empregado %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
-                    <p>Multiutilizador:
-                        <strong>{% if plano.permite_multiplos_utilizadores %}Sim{% else %}Não{% endif %}</strong>
+                    <p>{% trans "Multiutilizador:" %}
+                        <strong>{% if plano.permite_multiplos_utilizadores %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
-                    <a href="/registo/" class="btn btn-primary">Escolher este plano</a>
+                    <a href="/registo/" class="btn btn-primary">{% trans "Escolher este plano" %}</a>
                 </div>
             {% empty %}
                 <div class="card">
-                    <p>Não existem planos ativos disponíveis.</p>
+                    <p>{% trans "Não existem planos ativos disponíveis." %}</p>
                 </div>
             {% endfor %}
         </div>

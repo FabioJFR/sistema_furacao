@@ -6,13 +6,14 @@ from django.shortcuts import redirect, render
 
 from ..decorators import admin_required
 from ..forms.medicao import MedicaoForm
-from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.furos import obter_furo
 from projetos.selectors.medicoes import (
     obter_lista_medicoes,
     obter_medicao,
 )
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.medicoes import (
+    apagar_medicao,
     atualizar_medicao,
     criar_medicao,
 )
@@ -21,48 +22,20 @@ logger = logging.getLogger("core")
 
 
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_medicoes(request):
-    logger.debug(
-        "A resolver contexto administrativo em medicoes.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em medicoes.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em medicoes.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_medicoes(request):
-    contexto_admin = _obter_contexto_admin_medicoes(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em medicoes.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em medicoes.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -251,8 +224,7 @@ def medicao_delete(request, pk):
     medicao = obter_medicao(pk, empresa=empresa)
 
     if request.method == "POST":
-        medicao_id = medicao.pk
-        medicao.delete()
+        medicao_id = apagar_medicao(medicao=medicao, empresa=empresa)
         logger.info(
             "Medição apagada com sucesso. user_id=%s, empresa_id=%s, medicao_id=%s",
             request.user.id,

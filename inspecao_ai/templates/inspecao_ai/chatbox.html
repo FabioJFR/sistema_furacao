@@ -1,7 +1,11 @@
 {% extends base_template %}
+{% load static  i18n %}
 {% load inspecao_ai_extras %}
 
 {% block title %}Chatbox AI{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/chatbox.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
@@ -65,7 +69,7 @@
         </div>
     </aside>
 
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden ai-chat-shell">
         <div class="p-5 border-b border-slate-200">
             <h2 class="text-xl font-semibold text-slate-900">
                 {% if sessao %}{{ sessao.titulo }}{% else %}Nova conversa{% endif %}
@@ -76,7 +80,7 @@
             </p>
         </div>
 
-        <div class="p-5 space-y-4 min-h-[420px] max-h-[620px] overflow-y-auto bg-slate-50">
+        <div id="chat-messages-container" class="p-5 space-y-4 bg-slate-50 ai-chat-messages">
             {% if mensagens %}
                 {% for mensagem in mensagens %}
                     <div class="{% if mensagem.papel == 'user' %}flex justify-end{% else %}flex justify-start{% endif %}">
@@ -92,6 +96,21 @@
                                         </div>
                                     {% endfor %}
                                 </div>
+                                {% if mensagem.metadados.sugestoes %}
+                                    <div class="ai-chat-sugestoes-header mt-3">Próximas ações</div>
+                                    <div class="ai-chat-sugestoes mt-2">
+                                        {% for item in mensagem.metadados.sugestoes %}
+                                            <button
+                                                type="button"
+                                                class="ai-chat-sugestao-btn"
+                                                data-chat-prompt="{{ item.prompt|escape }}"
+                                                title="Enviar pergunta sugerida"
+                                            >
+                                                {{ item.label }}
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="text-sm whitespace-pre-line leading-7">{{ mensagem.conteudo }}</div>
                             {% endif %}
@@ -109,7 +128,7 @@
             {% endif %}
         </div>
 
-        <form method="post" class="p-5 border-t border-slate-200 bg-white">
+        <form id="chat-composer-form" method="post" class="p-4 ai-chat-composer">
             {% csrf_token %}
             {% if sessao %}
                 <input type="hidden" name="sessao_id" value="{{ sessao.pk }}">
@@ -121,14 +140,17 @@
             <textarea
                 id="id_pergunta"
                 name="pergunta"
-                rows="5"
-                class="form-control w-full min-h-[150px] resize-y"
+                rows="2"
+                class="form-control w-full resize-y ai-chat-input"
                 placeholder="Escreve aqui a tua pergunta sobre a operação, despesas, alertas, furos, materiais, máquinas ou cálculo..."
             ></textarea>
-            <div class="flex flex-wrap gap-3 mt-4">
-                <button type="submit" class="btn btn-primary">Enviar para a Chatbox</button>
+            <div class="flex flex-wrap gap-3 mt-3 ai-chat-actions">
+                <button type="submit" class="btn btn-primary ai-chat-submit">Enviar para a Chatbox</button>
             </div>
         </form>
     </section>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="{% static 'js/inspecao_ai/chatbox.js' %}"></script>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Criar Novo Furo{% endblock %}
+{% block title %}{% trans "Criar Novo Furo" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/furo_form.css' %}">
@@ -10,7 +10,7 @@
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="ff-shell">
-        <h2 class="ff-title">{{ titulo|default:"Criar Novo Furo" }}</h2>
+        <h2 class="ff-title">{% if titulo %}{{ titulo }}{% else %}{% trans "Criar Novo Furo" %}{% endif %}</h2>
 
         {% if form.non_field_errors %}
             <div class="ff-error-global">
@@ -20,16 +20,16 @@
 
         {% if memoria_zona_alerta %}
             <div class="ff-memory-box">
-                <div class="ff-memory-title">Memória operacional da zona</div>
+                <div class="ff-memory-title">{% trans "Memória operacional da zona" %}</div>
                 <div class="ff-memory-intro">
-                    Já existem furos registados perto desta localização ou com a mesma referência textual. Convém rever o histórico antes de avançar.
+                    {% trans "Já existem furos registados perto desta localização ou com a mesma referência textual. Convém rever o histórico antes de avançar." %}
                 </div>
                 <ul class="ff-memory-list">
                     {% for item in memoria_zona_alerta %}
                         <li class="ff-memory-item">
                             <strong>{{ item.nome }}</strong> · {{ item.projeto }} · {{ item.estado }}
                             {% if item.distancia_km is not None %} · {{ item.distancia_km }} km{% endif %}
-                            {% if item.mesma_localizacao_textual %} · mesma localização textual{% endif %}
+                            {% if item.mesma_localizacao_textual %} · {% trans "mesma localização textual" %}{% endif %}
                         </li>
                     {% endfor %}
                 </ul>
@@ -61,18 +61,18 @@
 
             <div class="ff-actions">
                 <button type="submit" class="ff-btn ff-btn-save">
-                    💾 Salvar
+                    💾 {% trans "Salvar" %}
                 </button>
 
                 <a href="{% url 'projetos:furo_list' %}" class="ff-btn ff-btn-cancel">
-                    ❌ Cancelar
+                    ❌ {% trans "Cancelar" %}
                 </a>
             </div>
         </form>
 
         <div class="ff-footer">
             <a href="{% url 'projetos:furo_list' %}" class="ff-btn-back">
-                🔙 Voltar à Lista
+                🔙 {% trans "Voltar à Lista" %}
             </a>
         </div>
     </div>

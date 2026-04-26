@@ -14,9 +14,10 @@ class PreferenciasForm(forms.ModelForm):
 
     class Meta:
         model = PreferenciasUser
-        fields = ["tema", "idioma"]
+        fields = ["tema", "paleta", "idioma"]
         widgets = {
             "tema": forms.Select(attrs={"class": "form-control"}),
+            "paleta": forms.Select(attrs={"class": "form-control"}),
             "idioma": forms.Select(attrs={"class": "form-control"}),
         }
 

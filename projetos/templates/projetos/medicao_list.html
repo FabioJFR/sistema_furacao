@@ -1,18 +1,22 @@
 {% extends 'projetos/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Medições" %}{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
+<section class="sf-page">
 
     <!-- HEADER -->
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">📊 Medições</h1>
+        <h1 class="text-3xl font-bold text-gray-800">📊 {% trans "Medições" %}</h1>
         <a href="{% url 'projetos:furo_list' %}" 
            class="flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow w-48">
-            🕳️ Ir para Furos
+            🕳️ {% trans "Ir para Furos" %}
         </a>
     </div>
 
     {% if medicoes %}
+    <div class="sf-panel">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         
         {% for medicao in medicoes %}
@@ -33,7 +37,7 @@
                 <!-- HEADER CARD -->
                 <div class="mb-4">
                     <h2 class="text-lg font-bold text-gray-800">
-                        Medição #{{ medicao.id }}
+                        {% trans "Medição" %} #{{ medicao.id }}
                     </h2>
                     <p class="text-sm text-gray-500">
                         {{ medicao.nome_furo }}
@@ -42,11 +46,11 @@
 
                 <!-- DADOS -->
                 <div class="space-y-2 text-sm text-gray-700">
-                    <p><strong>Profundidade:</strong> {{ medicao.profundidade }} m</p>
-                    <p><strong>Inclinação:</strong> {{ medicao.inclinacao }}°</p>
-                    <p><strong>Azimute:</strong> {{ medicao.azimute }}°</p>
+                    <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade }} m</p>
+                    <p><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao }}°</p>
+                    <p><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute }}°</p>
                     <p>
-                        <strong>Magnetismo:</strong> 
+                        <strong>{% trans "Magnetismo:" %}</strong> 
                         <span class="
                             font-semibold
                             {% if medicao.magnetismo > 50 %}
@@ -66,11 +70,11 @@
                 <div class="flex gap-2 mt-5">
                     <a href="{% url 'projetos:medicao_update' medicao.id %}" 
                        class="flex-1 flex items-center justify-center bg-yellow-400 text-white py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
-                        ✏️ Editar
+                        ✏️ {% trans "Editar" %}
                     </a>
                     <a href="{% url 'projetos:medicao_delete' medicao.id %}" 
                        class="flex-1 flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm font-semibold">
-                        🗑️ Apagar
+                        🗑️ {% trans "Apagar" %}
                     </a>
                 </div>
 
@@ -78,7 +82,7 @@
                 <div class="mt-3">
                     <a href="{{ medicao.furo.get_absolute_url }}" 
                        class="block text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
-                        🔍 Ver Furo
+                        🔍 {% trans "Ver Furo" %}
                     </a>
                 </div>
                 {% endif %}
@@ -88,14 +92,15 @@
 
         {% endfor %}
     </div>
+    </div>
 
     {% else %}
-    <div class="text-center mt-10">
-        <p class="text-gray-500 text-lg">Nenhuma medição registrada.</p>
+    <div class="sf-panel text-center">
+        <p class="text-gray-500 text-lg">{% trans "Nenhuma medição registrada." %}</p>
         <div class="mt-4">
             <a href="{% url 'projetos:furo_list' %}" 
                class="inline-flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                🕳️ Ir para Furos
+                🕳️ {% trans "Ir para Furos" %}
             </a>
         </div>
     </div>

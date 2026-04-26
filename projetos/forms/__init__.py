@@ -20,3 +20,4 @@ from .configuracao_perfuracao import *
 from .material import *
 from .maquina import *
 from .medicao import *
+from .despesa import *

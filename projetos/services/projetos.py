@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from core.utils.coordenadas import obter_coordenadas_por_cidade_pais
 from projetos.models import EmpregadoProjeto, Projeto
@@ -107,3 +108,11 @@ def associar_empregado_projeto(*, empregado, projeto, empresa=None, data_inicio=
         ativo=True,
     )
     return ligacao, True
+
+
+@transaction.atomic
+def apagar_projeto(*, projeto, empresa=None):
+    _validar_projeto_empresa(projeto, empresa=empresa)
+    projeto_id = projeto.pk
+    projeto.delete()
+    return projeto_id

@@ -1,6 +1,7 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Detalhe do Histórico{% endblock %}
+{% block title %}{% trans "Detalhe do Histórico" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-4xl mx-auto p-6 space-y-6">
@@ -8,49 +9,49 @@
     <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
         <div class="flex justify-between items-center flex-wrap gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">📄 Detalhe do Histórico</h1>
-                <p class="text-gray-500 mt-1">Registo criado em {{ historico.criado_em }}</p>
+                <h1 class="text-2xl font-bold text-gray-800">📄 {% trans "Detalhe do Histórico" %}</h1>
+                <p class="text-gray-500 mt-1">{% blocktrans with criado_em=historico.criado_em %}Registo criado em {{ criado_em }}{% endblocktrans %}</p>
             </div>
 
             <div class="flex gap-3 flex-wrap">
                 {% if historico_anterior %}
                     <a href="{% url 'projetos:historico_configuracao_comparar' historico.pk %}"
                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
-                        🆚 Comparar com anterior
+                        🆚 {% trans "Comparar com anterior" %}
                     </a>
                 {% endif %}
 
                 <a href="{% url 'projetos:historico_configuracao_restaurar' historico.pk %}"
                    class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                    ♻️ Restaurar esta versão
+                    ♻️ {% trans "Restaurar esta versão" %}
                 </a>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>Empregado:</strong> {{ historico.empregado.nome|default:"-" }}</div>
-            <div><strong>Furo:</strong> {{ historico.furo.nome|default:"-" }}</div>
-            <div><strong>Ação:</strong> {{ historico.get_acao_display }}</div>
-            <div><strong>Alterado por:</strong> {{ historico.alterado_por|default:"-" }}</div>
-            <div class="md:col-span-2"><strong>Observações:</strong> {{ historico.observacoes|default:"-" }}</div>
+            <div><strong>{% trans "Empregado:" %}</strong> {{ historico.empregado.nome|default:"-" }}</div>
+            <div><strong>{% trans "Furo:" %}</strong> {{ historico.furo.nome|default:"-" }}</div>
+            <div><strong>{% trans "Ação:" %}</strong> {{ historico.get_acao_display }}</div>
+            <div><strong>{% trans "Alterado por:" %}</strong> {{ historico.alterado_por|default:"-" }}</div>
+            <div class="md:col-span-2"><strong>{% trans "Observações:" %}</strong> {{ historico.observacoes|default:"-" }}</div>
         </div>
 
         <div class="border-t pt-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Snapshot da configuração</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Snapshot da configuração" %}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                <div><strong>Tubo:</strong> {{ historico.comprimento_tubo }} m</div>
-                <div><strong>Karoutier:</strong> {{ historico.comprimento_karoutier }} m × {{ historico.quantidade_karoutier|default:1 }}</div>
-                <div><strong>Acrescento:</strong> {{ historico.comprimento_acrescento }} m × {{ historico.quantidade_acrescento|default:1 }}</div>
-                <div><strong>Calibrador:</strong> {{ historico.comprimento_calibrador }} m × {{ historico.quantidade_calibrador|default:1 }}</div>
-                <div><strong>Record:</strong> {{ historico.comprimento_record }} m × {{ historico.quantidade_record|default:1 }}</div>
-                <div><strong>Bit:</strong> {{ historico.comprimento_bit }} m</div>
-                <div><strong>Caixa de mola:</strong> {{ historico.comprimento_caixa_mola }} m</div>
-                <div><strong>Tubo interior:</strong> {{ historico.comprimento_tubo_interior }} m × {{ historico.quantidade_tubo_interior|default:1 }}</div>
-                <div><strong>Acrescento do tubo interior:</strong> {{ historico.comprimento_acrescento_tubo_interior }} m × {{ historico.quantidade_acrescento_tubo_interior|default:1 }}</div>
-                <div><strong>Cabeça de interior:</strong> {{ historico.comprimento_cabeca_interior }} m</div>
-                <div><strong>Total do Conjunto de Fundo:</strong> {{ historico.comprimento_total_conjunto_fundo|floatformat:2 }} m</div>
-                <div><strong>Total do Tubo Interior:</strong> {{ historico.comprimento_total_tubo_interior|floatformat:2 }} m</div>
+                <div><strong>{% trans "Tubo:" %}</strong> {{ historico.comprimento_tubo }} m</div>
+                <div><strong>{% trans "Karoutier:" %}</strong> {{ historico.comprimento_karoutier }} m × {{ historico.quantidade_karoutier|default:1 }}</div>
+                <div><strong>{% trans "Acrescento:" %}</strong> {{ historico.comprimento_acrescento }} m × {{ historico.quantidade_acrescento|default:1 }}</div>
+                <div><strong>{% trans "Calibrador:" %}</strong> {{ historico.comprimento_calibrador }} m × {{ historico.quantidade_calibrador|default:1 }}</div>
+                <div><strong>{% trans "Record:" %}</strong> {{ historico.comprimento_record }} m × {{ historico.quantidade_record|default:1 }}</div>
+                <div><strong>{% trans "Bit:" %}</strong> {{ historico.comprimento_bit }} m</div>
+                <div><strong>{% trans "Caixa de mola:" %}</strong> {{ historico.comprimento_caixa_mola }} m</div>
+                <div><strong>{% trans "Tubo interior:" %}</strong> {{ historico.comprimento_tubo_interior }} m × {{ historico.quantidade_tubo_interior|default:1 }}</div>
+                <div><strong>{% trans "Acrescento do tubo interior:" %}</strong> {{ historico.comprimento_acrescento_tubo_interior }} m × {{ historico.quantidade_acrescento_tubo_interior|default:1 }}</div>
+                <div><strong>{% trans "Cabeça de interior:" %}</strong> {{ historico.comprimento_cabeca_interior }} m</div>
+                <div><strong>{% trans "Total do Conjunto de Fundo:" %}</strong> {{ historico.comprimento_total_conjunto_fundo|floatformat:2 }} m</div>
+                <div><strong>{% trans "Total do Tubo Interior:" %}</strong> {{ historico.comprimento_total_tubo_interior|floatformat:2 }} m</div>
             </div>
         </div>
 
@@ -58,12 +59,12 @@
             {% if is_admin_user %}
                 <a href="{% url 'projetos:historico_empregado_admin_list' historico.empregado.pk %}"
                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             {% else %}
                 <a href="{% url 'projetos:historico_empregado_list' %}"
                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             {% endif %}
         </div>

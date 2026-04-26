@@ -157,6 +157,14 @@ def atualizar_furo(form, empresa):
     return furo
 
 
+@transaction.atomic
+def apagar_furo(*, furo, empresa=None):
+    validar_empresa_furo(furo, empresa=empresa)
+    furo_id = furo.pk
+    furo.delete()
+    return furo_id
+
+
 # Nota de arquitetura:
 # A lógica de criação/edição de medições foi centralizada em `projetos.services.medicoes`.
 # Este service de furos mantém apenas regras próprias do furo e o recálculo baseado nos

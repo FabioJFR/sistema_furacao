@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 {% block title %}Planos da Plataforma{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/plataforma/plano_list.css' %}">
@@ -16,7 +16,7 @@ Gestão central dos planos comerciais, limites e permissões da plataforma.
 <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">Voltar à dashboard</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <div class="stats">
     <div class="stat-box">
         <div class="stat-label">Total de planos</div>

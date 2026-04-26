@@ -1,17 +1,18 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Meus Registos{% endblock %}
+{% block title %}{% trans "Meus Registos" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">Meus Registos Diários</h1>
+            <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Registos Diários" %}</h1>
 
             <a href="{% url 'projetos:registo_diario_create' %}"
                class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                ➕ Novo Registo
+                ➕ {% trans "Novo Registo" %}
             </a>
         </div>
 
@@ -52,7 +53,7 @@
                                 <td class="px-4 py-3">
                                     {% if registo.relatorio_foto %}
                                         <a href="{{ registo.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                            Ver
+                                            {% trans "Ver" %}
                                         </a>
                                     {% else %}
                                         -
@@ -61,14 +62,14 @@
                                 <td class="px-4 py-3">
                                     <a href="{% url 'projetos:registo_diario_update' registo.id %}"
                                        class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                        Editar
+                                        {% trans "Editar" %}
                                     </a>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="13" class="px-4 py-6 text-center text-gray-500">
-                                    Ainda não existem registos diários.
+                                    {% trans "Ainda não existem registos diários." %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -76,7 +77,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem registos diários.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem registos diários." %}</p>
         {% endif %}
 
     </div>

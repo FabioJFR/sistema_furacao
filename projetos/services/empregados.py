@@ -299,6 +299,28 @@ def criar_empregado_com_user_form(*, form, empresa):
 
 
 @transaction.atomic
+def criar_empregado_admin(*, form, empresa):
+    return criar_empregado_com_user_form(form=form, empresa=empresa)
+
+
+@transaction.atomic
+def atualizar_empregado_admin(*, form, empresa):
+    empregado = form.save(commit=False)
+    empregado.empresa = empresa
+    empregado.save()
+    form.save_m2m()
+    return empregado
+
+
+@transaction.atomic
+def apagar_empregado_admin(*, empregado, empresa=None):
+    validar_empregado_empresa(empregado, empresa=empresa)
+    empregado_id = empregado.id
+    empregado.delete()
+    return empregado_id
+
+
+@transaction.atomic
 def registar_utilizador_e_perfil(*, user, tipo_conta, nome, email, telefone=None, funcao=None, especialidade=None, empresa=None):
     if tipo_conta == "individual":
         Individual.objects.create(
@@ -326,3 +348,92 @@ def registar_utilizador_e_perfil(*, user, tipo_conta, nome, email, telefone=None
         aprovado=False,
     )
     return "empregado"
+
+
+@transaction.atomic
+def guardar_ligacao_projeto_empregado(
+    *,
+    empregado,
+    empresa,
+    projeto,
+    ativo=True,
+    data_inicio=None,
+    data_fim=None,
+    ligacao=None,
+):
+    validar_empregado_empresa(empregado, empresa=empresa)
+
+    if projeto.empresa_id != _resolver_empresa_id(empresa):
+        raise ValidationError("O projeto não pertence à empresa atual.")
+
+    if ligacao is None:
+        ligacao = EmpregadoProjeto()
+
+    ligacao.empregado = empregado
+    ligacao.empresa = empresa
+    ligacao.projeto = projeto
+    ligacao.ativo = ativo
+    ligacao.data_inicio = data_inicio
+    ligacao.data_fim = data_fim
+
+    existe_ativa = empregado_ja_tem_projeto_ativo(
+        empregado=empregado,
+        projeto=projeto,
+        excluir_ligacao_id=ligacao.id,
+        empresa=empresa,
+    )
+    if ativo and existe_ativa:
+        raise ValidationError("Este empregado já está associado de forma ativa a este projeto.")
+
+    ligacao.save()
+    return ligacao
+
+
+@transaction.atomic
+def guardar_ficheiro_empregado(*, form, empregado, empresa):
+    validar_empregado_empresa(empregado, empresa=empresa)
+    ficheiro = form.save(commit=False)
+    ficheiro.empregado = empregado
+    ficheiro.empresa = empresa
+    ficheiro.save()
+    return ficheiro
+
+
+@transaction.atomic
+def remover_ficheiro_empregado(*, ficheiro):
+    ficheiro_id = ficheiro.id
+    if ficheiro.ficheiro:
+        ficheiro.ficheiro.delete(save=False)
+    ficheiro.delete()
+    return ficheiro_id
+
+
+@transaction.atomic
+def rejeitar_empregado_pendente(*, empregado, empresa=None):
+    validar_empregado_empresa(empregado, empresa=empresa)
+    user = empregado.user
+    empregado_nome = empregado.nome
+    empregado_id = empregado.id
+
+    if user:
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+
+    empregado.delete()
+    return {
+        "empregado_id": empregado_id,
+        "empregado_nome": empregado_nome,
+    }
+
+
+def construir_resumo_registos_projeto_empregado(*, registos):
+    total_metros = sum((r.metros_furados or 0) for r in registos)
+    total_horas = sum((r.horas_trabalhadas or 0) for r in registos)
+    total_registos = registos.count() if hasattr(registos, "count") else len(registos)
+    media_metros_hora = round(total_metros / total_horas, 2) if total_horas else 0
+    return {
+        "total_metros": round(total_metros, 2),
+        "total_horas": round(total_horas, 2),
+        "total_registos": total_registos,
+        "media_metros_hora": media_metros_hora,
+    }

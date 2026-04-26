@@ -1,6 +1,6 @@
 .mcd-wrap {
-    max-width: 500px;
-    margin: 60px auto;
+    width: 100%;
+    margin: 0;
     background: #34495e;
     padding: 30px;
     border-radius: 12px;

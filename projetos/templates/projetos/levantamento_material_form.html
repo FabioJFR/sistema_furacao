@@ -1,4 +1,5 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -32,13 +33,13 @@
             </div>
 
             <button type="submit" class="btn btn-success mt-4 w-full text-center">
-                💾 Guardar Levantamento
+                💾 {% trans "Guardar Levantamento" %}
             </button>
         </form>
 
         <div class="mt-4 text-center">
             <a href="{% url 'projetos:levantamento_list' %}" class="btn btn-primary">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>

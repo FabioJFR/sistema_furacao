@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from core.permissions import admin_required
 
-from projetos.selectors.acesso import obter_contexto_admin_projetos
+from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.selectors.analytics import (
     obter_entidades_analytics_disponiveis,
     obter_eventos_analytics_filtrados,
@@ -13,18 +12,13 @@ from projetos.selectors.analytics import (
 
 
 def _obter_empresa_admin_analytics(request):
-    contexto_admin = obter_contexto_admin_projetos(request.user)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-    if not empresa_id or not empresa:
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
-    return empresa, None
+    return obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
 
 
 @login_required

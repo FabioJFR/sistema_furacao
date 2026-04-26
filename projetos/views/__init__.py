@@ -15,3 +15,4 @@ from .empregado_area import *
 from .definicoes import *
 from .analytics import *
 from .opcoes import *
+from .despesas import *

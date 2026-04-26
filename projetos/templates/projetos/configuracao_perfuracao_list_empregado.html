@@ -1,28 +1,29 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Minhas Configurações de Perfuração{% endblock %}
+{% block title %}{% trans "Minhas Configurações de Perfuração" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
 
     <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">⚙️ Minhas Configurações de Perfuração</h1>
-            <p class="text-gray-500 mt-1">Empregado: {{ empregado.nome }}</p>
+            <h1 class="text-2xl font-bold text-gray-800">⚙️ {% trans "Minhas Configurações de Perfuração" %}</h1>
+            <p class="text-gray-500 mt-1">{% blocktrans with nome=empregado.nome %}Empregado: {{ nome }}{% endblocktrans %}</p>
         </div>
 
         <div class="flex gap-3 flex-wrap">
             <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}"
                class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                ➕ Nova Configuração
+                ➕ {% trans "Nova Configuração" %}
             </a>
             <a href="{% url 'projetos:historico_empregado_list' %}"
             class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
-                🕘 Ver Histórico
+                🕘 {% trans "Ver Histórico" %}
             </a>
             <a href="{% url 'projetos:area_empregado' %}"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>
@@ -33,11 +34,11 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Conjunto de Fundo</th>
-                            <th class="text-left px-4 py-3">Tubo Interior</th>
-                            <th class="text-left px-4 py-3">Atualizado em</th>
-                            <th class="text-left px-4 py-3">Ações</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Conjunto de Fundo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Tubo Interior" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Atualizado em" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,15 +52,15 @@
                                     <div class="flex gap-2 flex-wrap">
                                         <a href="{% url 'projetos:configuracao_perfuracao_detail_empregado' config.pk %}"
                                         class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                            Ver
+                                            {% trans "Ver" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
                                         class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                                            ✏️ Editar
+                                            ✏️ {% trans "Editar" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' config.pk %}"
                                         class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
-                                            🗑️ Apagar
+                                            🗑️ {% trans "Apagar" %}
                                         </a>
                                     </div>
                                 </td>
@@ -69,7 +70,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem configurações de perfuração registadas.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração registadas." %}</p>
         {% endif %}
     </div>
 

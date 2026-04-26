@@ -14,6 +14,15 @@ class PreferenciasUser(models.Model):
         ("en", "English"),
         ("es", "Español"),
         ("fr", "Français"),
+        ("de", "Deutsch"),
+        ("zh-hans", "简体中文"),
+    ]
+
+    PALETA_CHOICES = [
+        ("industrial-blue", "Aço Profissional"),
+        ("earth-drill", "Terra Técnica"),
+        ("graphite-tech", "Grafite Elegante"),
+        ("sandstone", "Areia Industrial"),
     ]
 
     user = models.OneToOneField(
@@ -23,6 +32,7 @@ class PreferenciasUser(models.Model):
     )
 
     tema = models.CharField(max_length=10, choices=TEMA_CHOICES, default="claro")
+    paleta = models.CharField(max_length=30, choices=PALETA_CHOICES, default="industrial-blue")
     idioma = models.CharField(max_length=10, choices=IDIOMA_CHOICES, default="pt-pt")
     # TODO futuro:
     # - avaliar preferências por empresa vs preferências globais do utilizador

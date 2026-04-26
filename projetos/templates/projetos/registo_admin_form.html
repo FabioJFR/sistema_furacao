@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -37,9 +37,9 @@
 
                         {% if field.name == 'relatorio_foto' and form.instance.pk and form.instance.relatorio_foto %}
                             <p class="text-sm text-gray-600 mt-1">
-                                Atual:
+                                {% trans "Atual:" %}
                                 <a href="{{ form.instance.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                    Ver imagem
+                                    {% trans "Ver imagem" %}
                                 </a>
                             </p>
                         {% endif %}
@@ -49,13 +49,13 @@
 
             {% if form.instance.pk and form.instance.fotos_amostra.all %}
                 <div class="mt-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-3">Fotos de Amostra já guardadas</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">{% trans "Fotos de Amostra já guardadas" %}</h3>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {% for foto in form.instance.fotos_amostra.all %}
                             <div class="border rounded-lg p-2 bg-gray-50">
                                 <a href="{{ foto.imagem.url }}" target="_blank">
-                                    <img src="{{ foto.imagem.url }}" alt="Foto amostra" class="w-full h-32 object-cover rounded">
+                                    <img src="{{ foto.imagem.url }}" alt="{% trans 'Foto amostra' %}" class="w-full h-32 object-cover rounded">
                                 </a>
 
                                 {% if foto.descricao %}
@@ -69,11 +69,11 @@
 
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="btn btn-success">
-                    💾 Guardar Correção
+                    💾 {% trans "Guardar Correção" %}
                 </button>
 
                 <a href="{% url 'projetos:registos_admin_list' %}" class="btn btn-primary">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             </div>
         </form>

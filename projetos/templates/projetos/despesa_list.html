@@ -1,0 +1,67 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Minhas despesas" %}{% endblock %}
+
+{% block content %}
+<div class="sf-page">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            💶
+            {% if titulo %}
+                {{ titulo }}
+            {% else %}
+                {% trans "Minhas despesas" %}
+            {% endif %}
+        </h1>
+        <p class="text-sm text-gray-600 mt-1">{% trans "Lista de despesas registadas no modelo de despesas da plataforma." %}</p>
+        {% if adicionar_url %}
+            <div class="mt-4">
+                <a href="{% url adicionar_url %}" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+                    ➕ {% trans "Adicionar despesa" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if despesas %}
+        <div class="sf-panel">
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left">{% trans "Data" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Categoria" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Tipo" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Descrição" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Projeto/Furo/Máquina" %}</th>
+                        <th class="px-4 py-3 text-right">{% trans "Valor (€)" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for despesa in despesas %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">{{ despesa.data|date:"d/m/Y" }}</td>
+                            <td class="px-4 py-3">{{ despesa.get_categoria_display }}</td>
+                            <td class="px-4 py-3">{{ despesa.get_tipo_display }}</td>
+                            <td class="px-4 py-3">{{ despesa.descricao }}</td>
+                            <td class="px-4 py-3">
+                                {% if despesa.projeto %}{% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}{% endif %}
+                                {% if despesa.furo %}{% blocktrans with nome=despesa.furo.nome %}Furo: {{ nome }}{% endblocktrans %}{% endif %}
+                                {% if despesa.maquina %}{% blocktrans with nome=despesa.maquina.nome %}Máquina: {{ nome }}{% endblocktrans %}{% endif %}
+                                {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}{% trans "Geral" %}{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-right font-semibold">{{ despesa.valor|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="sf-panel text-gray-600">
+            {% trans "Ainda não existem despesas para mostrar." %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

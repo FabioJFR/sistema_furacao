@@ -1,5 +1,5 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -41,11 +41,11 @@
 
         <div class="mqf-actions">
             <button type="submit" class="mqf-btn mqf-btn-save">
-                💾 Salvar
+                💾 {% trans "Salvar" %}
             </button>
 
             <a href="{% url 'projetos:maquina_list' %}" class="mqf-btn mqf-btn-back">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
 

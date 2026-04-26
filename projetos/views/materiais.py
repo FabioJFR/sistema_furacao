@@ -1,5 +1,4 @@
 import logging
-from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -16,23 +15,27 @@ from ..forms.material import (
     DevolucaoMaterialForm,
 )
 
-from projetos.selectors.acesso import (
-    obter_contexto_admin_projetos,
-    resolver_empregado_por_user_ou_email,
-)
 from projetos.selectors.material import (
     obter_contexto_filtros_levantamentos_admin,
     obter_lista_materiais_filtrada_nome,
     obter_material_por_id_empresa,
-    obter_material_por_id_empresa_select_for_update,
     obter_contexto_material_detail,
     obter_levantamentos_empregado,
     obter_devolucoes_empregado,
     obter_levantamentos_admin_filtrados,
     obter_devolucoes_admin,
 )
+from projetos.services.acesso_contexto import (
+    obter_empregado_autenticado_contexto,
+    obter_empresa_admin_contexto,
+)
 
 from projetos.services.stock import (
+    apagar_material_admin,
+    atualizar_material_admin,
+    criar_material_admin,
+    criar_devolucao_material,
+    criar_levantamento_material,
     registrar_entrada_material,
     registrar_saida_material,
 )
@@ -41,48 +44,20 @@ logger = logging.getLogger("core")
 
 
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_materiais(request):
-    logger.debug(
-        "A resolver contexto administrativo em materiais.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em materiais.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em materiais.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_materiais(request):
-    contexto_admin = _obter_contexto_admin_materiais(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em materiais.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em materiais.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -94,41 +69,29 @@ def _obter_empregado_autenticado_materiais(request):
         request.user.username,
     )
 
-    empregado = _resolver_empregado_por_user_ou_email(request.user)
-    if not empregado:
+    empregado, ligado_por_fallback, resposta_erro = obter_empregado_autenticado_contexto(
+        request=request,
+        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
+        redirect_sem_empregado="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:redirect_after_login",
+    )
+    if resposta_erro:
         logger.warning(
-            "Utilizador autenticado sem registo em Empregados em materiais.py. user_id=%s",
+            "Utilizador sem contexto de empregado em materiais.py. user_id=%s",
             request.user.id,
         )
-        messages.error(
-            request,
-            "A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        )
-        return None, redirect("projetos:redirect_after_login")
+        return None, resposta_erro
 
-    if not empregado.empresa_id:
-        logger.warning(
-            "Empregado sem empresa associada em materiais.py. user_id=%s, empregado_id=%s",
-            request.user.id,
-            empregado.id,
-        )
-        messages.error(request, "A tua conta não está associada a uma empresa. Contacta o administrador.")
-        return None, redirect("projetos:redirect_after_login")
-
-    return empregado, None
-
-
-def _resolver_empregado_por_user_ou_email(user):
-    empregado, ligado_por_fallback = resolver_empregado_por_user_ou_email(user)
-    if ligado_por_fallback and empregado is not None:
+    if ligado_por_fallback:
         logger.warning(
             "Ligação automática User -> Empregados executada em materiais.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
-            user.id,
+            request.user.id,
             empregado.id,
             empregado.empresa_id,
-            getattr(user, "email", ""),
+            getattr(request.user, "email", ""),
         )
-    return empregado
+    return empregado, None
 
 @login_required
 @admin_required
@@ -309,9 +272,7 @@ def material_create(request):
     if request.method == "POST":
         form = MaterialForm(request.POST, empresa=empresa)
         if form.is_valid():
-            material = form.save(commit=False)
-            material.empresa = empresa
-            material.save()
+            material = criar_material_admin(form=form, empresa=empresa)
             logger.info(
                 "Material criado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
                 request.user.id,
@@ -356,9 +317,7 @@ def material_update(request, material_id):
     if request.method == "POST":
         form = MaterialForm(request.POST, instance=material, empresa=empresa)
         if form.is_valid():
-            material = form.save(commit=False)
-            material.empresa = empresa
-            material.save()
+            material = atualizar_material_admin(form=form, empresa=empresa)
             logger.info(
                 "Material atualizado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
                 request.user.id,
@@ -403,8 +362,7 @@ def material_delete(request, material_id):
     material = obter_material_por_id_empresa(material_id, empresa)
 
     if request.method == "POST":
-        material_id_removido = material.id
-        material.delete()
+        material_id_removido = apagar_material_admin(material=material, empresa=empresa)
         logger.info(
             "Material apagado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
             request.user.id,
@@ -445,68 +403,30 @@ def levantamento_material_create(request):
         form.instance.empresa = empregado.empresa
 
         if form.is_valid():
-            levantamento = form.save(commit=False)
-            levantamento.empregado = empregado
-            levantamento.empresa = empregado.empresa
-
-            quantidade_levantada = levantamento.quantidade or 0
-
-            if quantidade_levantada <= 0:
-                form.add_error("quantidade", "A quantidade deve ser superior a zero.")
+            try:
+                levantamento = criar_levantamento_material(form=form, empregado=empregado)
+            except ValidationError as e:
+                if hasattr(e, "message_dict"):
+                    for campo, erros in e.message_dict.items():
+                        for erro in erros:
+                            form.add_error(campo if campo in form.fields else None, erro)
+                elif hasattr(e, "messages"):
+                    for erro in e.messages:
+                        form.add_error(None, erro)
+                else:
+                    form.add_error(None, str(e))
             else:
-                with transaction.atomic():
-                    material_levantamento = obter_material_por_id_empresa_select_for_update(
-                        levantamento.material_id,
-                        empregado.empresa,
-                    )
-
-                    if quantidade_levantada > (material_levantamento.quantidade or 0):
-                        form.add_error("quantidade", "Quantidade insuficiente em stock para este levantamento.")
-                    else:
-                        furo_escolhido = form.cleaned_data.get("furo")
-                        projeto_escolhido = form.cleaned_data.get("projeto")
-
-                        levantamento.material = material_levantamento
-                        levantamento.furo = furo_escolhido
-                        levantamento.projeto = projeto_escolhido
-
-                        if levantamento.furo and not levantamento.projeto:
-                            levantamento.projeto = levantamento.furo.projeto
-
-                        if not levantamento.projeto:
-                            levantamento.projeto_id = material_levantamento.projeto_id
-
-                        levantamento.save()
-
-                        material_levantamento.quantidade = (material_levantamento.quantidade or 0) - quantidade_levantada
-
-                        if material_levantamento.quantidade <= 0:
-                            material_levantamento.quantidade = 0
-                            if hasattr(material_levantamento, "estado"):
-                                material_levantamento.estado = "sem_stock"
-                        elif (
-                            hasattr(material_levantamento, "stock_minimo")
-                            and material_levantamento.stock_minimo is not None
-                            and material_levantamento.quantidade <= material_levantamento.stock_minimo
-                        ):
-                            if hasattr(material_levantamento, "estado"):
-                                material_levantamento.estado = "sem_stock"
-                        elif hasattr(material_levantamento, "estado"):
-                            material_levantamento.estado = "em_estoque"
-
-                        material_levantamento.save()
-
-                        logger.info(
-                            "Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
-                            request.user.id,
-                            empregado.id,
-                            empregado.empresa_id,
-                            levantamento.id,
-                            material_levantamento.id,
-                            quantidade_levantada,
-                        )
-                        messages.success(request, "Levantamento registado com sucesso.")
-                        return redirect("projetos:levantamento_list")
+                logger.info(
+                    "Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
+                    request.user.id,
+                    empregado.id,
+                    empregado.empresa_id,
+                    levantamento.id,
+                    levantamento.material_id,
+                    levantamento.quantidade,
+                )
+                messages.success(request, "Levantamento registado com sucesso.")
+                return redirect("projetos:levantamento_list")
         else:
             logger.warning(
                 "Erro ao registar levantamento. user_id=%s, empregado_id=%s, erros=%s",
@@ -622,58 +542,27 @@ def devolucao_material_create(request):
         form.instance.empresa = empregado.empresa
 
         if form.is_valid():
-            devolucao = form.save(commit=False)
-            devolucao.empregado = empregado
-            devolucao.empresa = empregado.empresa
-
-            quantidade_devolvida = devolucao.quantidade or 0
-
-            if quantidade_devolvida <= 0:
-                form.add_error("quantidade", "A quantidade deve ser superior a zero.")
+            try:
+                devolucao = criar_devolucao_material(form=form, empregado=empregado)
+            except ValidationError as e:
+                if hasattr(e, "message_dict"):
+                    for campo, erros in e.message_dict.items():
+                        for erro in erros:
+                            form.add_error(campo if campo in form.fields else None, erro)
+                elif hasattr(e, "messages"):
+                    for erro in e.messages:
+                        form.add_error(None, erro)
+                else:
+                    form.add_error(None, str(e))
             else:
-                with transaction.atomic():
-                    material_devolucao = obter_material_por_id_empresa_select_for_update(
-                        devolucao.material_id,
-                        empregado.empresa,
-                    )
-
-                    furo_escolhido = form.cleaned_data.get("furo")
-                    projeto_escolhido = form.cleaned_data.get("projeto")
-
-                    devolucao.material = material_devolucao
-                    devolucao.furo = furo_escolhido
-                    devolucao.projeto = projeto_escolhido
-
-                    if devolucao.furo and not devolucao.projeto:
-                        devolucao.projeto = devolucao.furo.projeto
-
-                    if not devolucao.projeto:
-                        devolucao.projeto_id = material_devolucao.projeto_id
-
-                    devolucao.save()
-
-                    material_devolucao.quantidade = (material_devolucao.quantidade or 0) + quantidade_devolvida
-
-                    if (
-                        hasattr(material_devolucao, "stock_minimo")
-                        and material_devolucao.stock_minimo is not None
-                        and material_devolucao.quantidade <= material_devolucao.stock_minimo
-                    ):
-                        if hasattr(material_devolucao, "estado"):
-                            material_devolucao.estado = "sem_stock"
-                    elif hasattr(material_devolucao, "estado"):
-                        material_devolucao.estado = "em_estoque"
-
-                    material_devolucao.save()
-
                 logger.info(
                     "Devolução registada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, devolucao_id=%s, material_id=%s, quantidade=%s",
                     request.user.id,
                     empregado.id,
                     empregado.empresa_id,
                     devolucao.id,
-                    material_devolucao.id,
-                    quantidade_devolvida,
+                    devolucao.material_id,
+                    devolucao.quantidade,
                 )
                 messages.success(request, "Devolução registada com sucesso.")
                 return redirect("projetos:devolucao_material_list")

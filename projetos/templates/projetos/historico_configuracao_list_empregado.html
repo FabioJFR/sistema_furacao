@@ -1,25 +1,26 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Histórico de Configurações{% endblock %}
+{% block title %}{% trans "Histórico de Configurações" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
 
     <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🕘 Histórico das Minhas Configurações</h1>
-            <p class="text-gray-500 mt-1">Empregado: {{ empregado.nome }}</p>
+            <h1 class="text-2xl font-bold text-gray-800">🕘 {% trans "Histórico das Minhas Configurações" %}</h1>
+            <p class="text-gray-500 mt-1">{% blocktrans with nome=empregado.nome %}Empregado: {{ nome }}{% endblocktrans %}</p>
         </div>
 
         <div class="flex gap-3 flex-wrap">
             <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                ⚙️ Ver Configurações
+                ⚙️ {% trans "Ver Configurações" %}
             </a>
 
             <a href="{% url 'projetos:area_empregado' %}"
                class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>
@@ -30,11 +31,11 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Ação</th>
-                            <th class="text-left px-4 py-3">Alterado por</th>
-                            <th class="text-left px-4 py-3">Ações</th>
+                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Ação" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Alterado por" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,7 +48,7 @@
                                 <td class="px-4 py-3">
                                     <a href="{% url 'projetos:historico_detail' h.pk %}"
                                        class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                        Ver detalhe
+                                        {% trans "Ver detalhe" %}
                                     </a>
                                 </td>
                             </tr>
@@ -56,7 +57,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existe histórico para este empregado.</p>
+            <p class="text-gray-500">{% trans "Ainda não existe histórico para este empregado." %}</p>
         {% endif %}
     </div>
 

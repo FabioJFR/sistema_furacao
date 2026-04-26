@@ -1,6 +1,6 @@
 {% extends "projetos/base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% load static %}
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% load static  i18n %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/dashboard.css' %}">
@@ -11,37 +11,37 @@
     <!-- CARDS ESTRUTURA -->
     <div class="dsh-grid-estrutura">
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Projetos totais</div>
+            <div class="dsh-label-soft">{% trans "Projetos totais" %}</div>
             <div class="dsh-value-soft">{{ total_projetos }}</div>
         </div>
 
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Furos totais</div>
+            <div class="dsh-label-soft">{% trans "Furos totais" %}</div>
             <div class="dsh-value-soft">{{ total_furos }}</div>
         </div>
 
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Empregados totais</div>
+            <div class="dsh-label-soft">{% trans "Empregados totais" %}</div>
             <div class="dsh-value-soft">{{ total_empregados }}</div>
         </div>
 
         <div class="dsh-card-soft dsh-card-soft-warn">
-            <div class="dsh-label-soft">Empregados pendentes</div>
+            <div class="dsh-label-soft">{% trans "Empregados pendentes" %}</div>
             <div class="dsh-value-soft dsh-value-pending">{{ total_empregados_pendentes }}</div>
         </div>
 
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Máquinas totais</div>
+            <div class="dsh-label-soft">{% trans "Máquinas totais" %}</div>
             <div class="dsh-value-soft">{{ total_maquinas }}</div>
         </div>
 
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Materiais totais</div>
+            <div class="dsh-label-soft">{% trans "Materiais totais" %}</div>
             <div class="dsh-value-soft">{{ total_materiais }}</div>
         </div>
 
         <div class="dsh-card-soft">
-            <div class="dsh-label-soft">Registos no período</div>
+            <div class="dsh-label-soft">{% trans "Registos no período" %}</div>
             <div class="dsh-value-soft">{{ total_registos }}</div>
         </div>
     </div>
@@ -49,12 +49,12 @@
     {% if total_empregados_pendentes %}
     <div class="dsh-pendentes-banner">
         <div>
-            <strong>Existem {{ total_empregados_pendentes }} empregado(s) pendente(s) de aprovação.</strong>
+            <strong>{% blocktrans with total=total_empregados_pendentes %}Existem {{ total }} empregado(s) pendente(s) de aprovação.{% endblocktrans %}</strong>
             <div class="dsh-pendentes-sub">
-                Isto inclui registos criados pela empresa e contas criadas pelos próprios trabalhadores no site.
+                {% trans "Isto inclui registos criados pela empresa e contas criadas pelos próprios trabalhadores no site." %}
             </div>
         </div>
-        <a href="{% url 'projetos:empregado_pendentes' %}" class="dsh-pendentes-link">Ver pendentes</a>
+        <a href="{% url 'projetos:empregado_pendentes' %}" class="dsh-pendentes-link">{% trans "Ver pendentes" %}</a>
     </div>
     {% endif %}
 
@@ -65,18 +65,18 @@
 
         <div class="dsh-map-overlay">
             <div class="dsh-overlay-title">
-                🌍 Projetos
+                🌍 {% trans "Projetos" %}
             </div>
 
             <div id="projetoAtualInfo" class="dsh-overlay-info">
-                Sem projeto selecionado
+                {% trans "Sem projeto selecionado" %}
             </div>
 
             <div class="dsh-overlay-actions">
                 <button id="prevProjetoBtn" class="dsh-btn dsh-btn-blue">◀</button>
                 <button id="nextProjetoBtn" class="dsh-btn dsh-btn-blue">▶</button>
-                <button id="abrirProjetoBtn" class="dsh-btn dsh-btn-green">Abrir</button>
-                <button id="alternarMapaBtn" class="dsh-btn dsh-btn-purple">Mapa Plano</button>
+                <button id="abrirProjetoBtn" class="dsh-btn dsh-btn-green">{% trans "Abrir" %}</button>
+                <button id="alternarMapaBtn" class="dsh-btn dsh-btn-purple">{% trans "Mapa Plano" %}</button>
             </div>
         </div>
     </div>
@@ -85,30 +85,30 @@
     <div class="dsh-filtros-card">
         <form method="get" class="dsh-filtros-grid">
             <div>
-                <label class="dsh-input-label">Período</label>
+                <label class="dsh-input-label">{% trans "Período" %}</label>
                 <select name="periodo" class="dsh-field">
-                    <option value="hoje" {% if filtros.periodo == "hoje" %}selected{% endif %}>Hoje</option>
-                    <option value="7_dias" {% if filtros.periodo == "7_dias" %}selected{% endif %}>Últimos 7 dias</option>
-                    <option value="30_dias" {% if filtros.periodo == "30_dias" %}selected{% endif %}>Últimos 30 dias</option>
-                    <option value="mes" {% if filtros.periodo == "mes" %}selected{% endif %}>Mês atual</option>
-                    <option value="personalizado" {% if filtros.periodo == "personalizado" %}selected{% endif %}>Personalizado</option>
+                    <option value="hoje" {% if filtros.periodo == "hoje" %}selected{% endif %}>{% trans "Hoje" %}</option>
+                    <option value="7_dias" {% if filtros.periodo == "7_dias" %}selected{% endif %}>{% trans "Últimos 7 dias" %}</option>
+                    <option value="30_dias" {% if filtros.periodo == "30_dias" %}selected{% endif %}>{% trans "Últimos 30 dias" %}</option>
+                    <option value="mes" {% if filtros.periodo == "mes" %}selected{% endif %}>{% trans "Mês atual" %}</option>
+                    <option value="personalizado" {% if filtros.periodo == "personalizado" %}selected{% endif %}>{% trans "Personalizado" %}</option>
                 </select>
             </div>
 
             <div>
-                <label class="dsh-input-label">Data início</label>
+                <label class="dsh-input-label">{% trans "Data início" %}</label>
                 <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="dsh-field">
             </div>
 
             <div>
-                <label class="dsh-input-label">Data fim</label>
+                <label class="dsh-input-label">{% trans "Data fim" %}</label>
                 <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="dsh-field">
             </div>
 
             <div>
-                <label class="dsh-input-label">Projeto</label>
+                <label class="dsh-input-label">{% trans "Projeto" %}</label>
                 <select name="projeto" class="dsh-field">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for projeto in projetos_filtro %}
                         <option value="{{ projeto.id }}" {% if filtros.projeto == projeto.id|stringformat:"s" %}selected{% endif %}>
                             {{ projeto.nome }}
@@ -118,9 +118,9 @@
             </div>
 
             <div>
-                <label class="dsh-input-label">Empregado</label>
+                <label class="dsh-input-label">{% trans "Empregado" %}</label>
                 <select name="empregado" class="dsh-field">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for empregado in empregados_filtro %}
                         <option value="{{ empregado.id }}" {% if filtros.empregado == empregado.id|stringformat:"s" %}selected{% endif %}>
                             {{ empregado.nome }}
@@ -130,8 +130,8 @@
             </div>
 
             <div class="dsh-filtro-actions">
-                <button type="submit" class="dsh-btn-filter">Filtrar</button>
-                <a href="{% url 'projetos:dashboard' %}" class="dsh-link-clear">Limpar</a>
+                <button type="submit" class="dsh-btn-filter">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:dashboard' %}" class="dsh-link-clear">{% trans "Limpar" %}</a>
             </div>
         </form>
     </div>
@@ -139,47 +139,47 @@
     <!-- RESUMO DO FILTRO -->
     <div class="dsh-resumo">
         {% if filtros.periodo == "hoje" %}
-            A mostrar dados de: Hoje
+            {% trans "A mostrar dados de: Hoje" %}
         {% elif filtros.periodo == "7_dias" %}
-            A mostrar dados de: Últimos 7 dias
+            {% trans "A mostrar dados de: Últimos 7 dias" %}
         {% elif filtros.periodo == "30_dias" %}
-            A mostrar dados de: Últimos 30 dias
+            {% trans "A mostrar dados de: Últimos 30 dias" %}
         {% elif filtros.periodo == "mes" %}
-            A mostrar dados de: Mês atual
+            {% trans "A mostrar dados de: Mês atual" %}
         {% elif filtros.periodo == "personalizado" %}
-            A mostrar dados de: {{ filtros.data_inicio|default:"-" }} até {{ filtros.data_fim|default:"-" }}
+            {% blocktrans with data_inicio=filtros.data_inicio|default:"-" data_fim=filtros.data_fim|default:"-" %}A mostrar dados de: {{ data_inicio }} até {{ data_fim }}{% endblocktrans %}
         {% endif %}
     </div>
 
     <!-- CARDS OPERACIONAIS -->
     <div class="dsh-grid-operacional">
         <div class="dsh-card-operacional dsh-card-op-blue">
-            <div class="dsh-label-op">Metros no período</div>
+            <div class="dsh-label-op">{% trans "Metros no período" %}</div>
             <div class="dsh-value-op dsh-value-op-blue">{{ total_metros }}</div>
         </div>
 
         <div class="dsh-card-operacional dsh-card-op-green">
-            <div class="dsh-label-op">Horas no período</div>
+            <div class="dsh-label-op">{% trans "Horas no período" %}</div>
             <div class="dsh-value-op dsh-value-op-green">{{ total_horas }}</div>
         </div>
 
         <div class="dsh-card-operacional dsh-card-op-amber">
-            <div class="dsh-label-op">Produtividade média</div>
+            <div class="dsh-label-op">{% trans "Produtividade média" %}</div>
             <div class="dsh-value-op dsh-value-op-amber">{{ produtividade_media }}</div>
         </div>
 
         <div class="dsh-card-operacional dsh-card-op-purple">
-            <div class="dsh-label-op">Empregados ativos</div>
+            <div class="dsh-label-op">{% trans "Empregados ativos" %}</div>
             <div class="dsh-value-op dsh-value-op-purple">{{ empregados_ativos }}</div>
         </div>
 
         <div class="dsh-card-operacional dsh-card-op-red">
-            <div class="dsh-label-op">Furos ativos</div>
+            <div class="dsh-label-op">{% trans "Furos ativos" %}</div>
             <div class="dsh-value-op dsh-value-op-red">{{ furos_ativos }}</div>
         </div>
 
         <div class="dsh-card-operacional dsh-card-op-cyan">
-            <div class="dsh-label-op">Projetos ativos</div>
+            <div class="dsh-label-op">{% trans "Projetos ativos" %}</div>
             <div class="dsh-value-op dsh-value-op-cyan">{{ projetos_ativos }}</div>
         </div>
     </div>
@@ -188,40 +188,40 @@
     <!-- ALERTAS -->
     <div class="dsh-grid-alertas">
         <div class="dsh-alert-card">
-            <h3 class="dsh-alert-title">⚠️ Materiais com stock baixo</h3>
+            <h3 class="dsh-alert-title">⚠️ {% trans "Materiais com stock baixo" %}</h3>
             <ul class="dsh-alert-list">
                 {% for material in materiais_stock_baixo|slice:":5" %}
                     <li>
-                        {{ material.nome }} — {{ material.quantidade }} / mín. {{ material.stock_minimo }}
+                        {% blocktrans with nome=material.nome quantidade=material.quantidade stock_minimo=material.stock_minimo %}{{ nome }} — {{ quantidade }} / mín. {{ stock_minimo }}{% endblocktrans %}
                     </li>
                 {% empty %}
-                    <li>Sem alertas de stock.</li>
+                    <li>{% trans "Sem alertas de stock." %}</li>
                 {% endfor %}
             </ul>
         </div>
 
         <div class="dsh-alert-card">
-            <h3 class="dsh-alert-title">🛠 Máquinas em alerta</h3>
+            <h3 class="dsh-alert-title">🛠 {% trans "Máquinas em alerta" %}</h3>
             <ul class="dsh-alert-list">
                 {% for maquina in maquinas_alerta|slice:":5" %}
                     <li>
-                        {{ maquina.nome }} — {{ maquina.estado }}
+                        {% blocktrans with nome=maquina.nome estado=maquina.estado %}{{ nome }} — {{ estado }}{% endblocktrans %}
                     </li>
                 {% empty %}
-                    <li>Sem máquinas em alerta.</li>
+                    <li>{% trans "Sem máquinas em alerta." %}</li>
                 {% endfor %}
             </ul>
         </div>
 
         <div class="dsh-alert-card">
-            <h3 class="dsh-alert-title">🐢 Furos com baixa produção</h3>
+            <h3 class="dsh-alert-title">🐢 {% trans "Furos com baixa produção" %}</h3>
             <ul class="dsh-alert-list">
                 {% for furo in furos_baixa_producao %}
                     <li>
-                        {{ furo.furo__nome }} — {{ furo.total_metros|default:0 }} m / {{ furo.total_horas|default:0 }} h
+                        {% blocktrans with nome=furo.furo__nome total_metros=furo.total_metros|default:0 total_horas=furo.total_horas|default:0 %}{{ nome }} — {{ total_metros }} m / {{ total_horas }} h{% endblocktrans %}
                     </li>
                 {% empty %}
-                    <li>Sem alertas de baixa produção.</li>
+                    <li>{% trans "Sem alertas de baixa produção." %}</li>
                 {% endfor %}
             </ul>
         </div>

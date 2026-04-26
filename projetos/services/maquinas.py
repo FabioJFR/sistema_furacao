@@ -113,3 +113,11 @@ def atualizar_maquina(form, empresa=None):
     validar_relacoes_maquina_empresa(maquina, empresa=empresa)
 
     return maquina
+
+
+@transaction.atomic
+def apagar_maquina(*, maquina, empresa=None):
+    validar_maquina_empresa(maquina, empresa=empresa)
+    maquina_id = maquina.id
+    maquina.delete()
+    return maquina_id

@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
 {% block extra_css %}
@@ -16,7 +16,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
 <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <div class="onb-wrap">
     {% if form.non_field_errors %}
         <div class="onb-error-box">

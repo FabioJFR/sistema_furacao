@@ -47,6 +47,24 @@ def _adicionar_erro_valor_negativo(form, campo_nome, valor, mensagem="O valor n�
         form.add_error(campo_nome, mensagem)
 
 
+def _validar_inclinacao_por_tipo(form, cleaned_data):
+    tipo = (cleaned_data.get("tipo") or "").strip().lower()
+    if tipo != "superficie":
+        return
+
+    regras = [
+        ("inclinacao_planeada_inicial", "Para furos de Superfície, a inclinação não pode ser positiva."),
+        ("inclinacao_planeada_atual", "Para furos de Superfície, a inclinação não pode ser positiva."),
+        ("inclinacao_real_atual", "Para furos de Superfície, a inclinação não pode ser positiva."),
+    ]
+    for campo, mensagem in regras:
+        if campo not in cleaned_data:
+            continue
+        valor = cleaned_data.get(campo)
+        if valor is not None and valor > 0:
+            form.add_error(campo, mensagem)
+
+
 class BaseFuroForm(forms.ModelForm):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -154,6 +172,7 @@ class FuroForm(BaseFuroForm):
         cleaned = super().clean()
         projeto = cleaned.get("projeto")
         self._validar_empresa_projeto(projeto)
+        _validar_inclinacao_por_tipo(self, cleaned)
 
         pi = cleaned.get("profundidade_inicial")
         pai = cleaned.get("profundidade_alvo_inicial")
@@ -247,6 +266,7 @@ class FuroCreateForm(BaseFuroForm):
         cleaned = super().clean()
         projeto = cleaned.get("projeto")
         self._validar_empresa_projeto(projeto)
+        _validar_inclinacao_por_tipo(self, cleaned)
 
         pi = cleaned.get("profundidade_inicial")
         pai = cleaned.get("profundidade_alvo_inicial")

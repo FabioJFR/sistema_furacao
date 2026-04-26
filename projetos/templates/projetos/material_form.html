@@ -1,5 +1,5 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -52,11 +52,11 @@
             <div class="mf-actions">
 
                 <button type="submit" class="mf-btn mf-btn-save">
-                    💾 Salvar
+                    💾 {% trans "Salvar" %}
                 </button>
 
                 <a href="{% url 'projetos:material_list' %}" class="mf-btn mf-btn-back">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
 
             </div>

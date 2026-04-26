@@ -11,14 +11,17 @@
     }
 
     const furoPlaceholder = config.dataset.furoPlaceholder || "00000000-0000-0000-0000-000000000000";
+    const furoSlugPlaceholder = config.dataset.furoSlugPlaceholder || "furo-slug-placeholder";
     const furoDetailBaseUrl = config.dataset.furoDetailBaseUrl || "";
     const projetoMapa = JSON.parse(projetoDataNode.textContent || "{}");
     const furos = JSON.parse(furosDataNode.textContent || "[]")
         .map((furo) => ({ ...furo, lat: Number(furo.lat), lon: Number(furo.lon) }))
         .filter((furo) => Number.isFinite(furo.lat) && Number.isFinite(furo.lon));
 
-    function furoDetailUrl(id) {
-        return furoDetailBaseUrl.replace(furoPlaceholder, String(id));
+    function furoDetailUrl(id, slug) {
+        return furoDetailBaseUrl
+            .replace(furoPlaceholder, String(id))
+            .replace(furoSlugPlaceholder, String(slug || id));
     }
 
     let centroLat = Number(projetoMapa.lat);
@@ -70,7 +73,7 @@
 
         marker.on("click", () => selecionarFuro(index, true));
         marker.on("dblclick", () => {
-            window.location.href = furoDetailUrl(furo.id);
+            window.location.href = furoDetailUrl(furo.id, furo.slug);
         });
 
         furo.marker = marker;
@@ -158,7 +161,8 @@
 
     abrirBtn?.addEventListener("click", () => {
         if (!furos.length) return;
-        window.location.href = furoDetailUrl(furos[furoIndex].id);
+        const furo = furos[furoIndex];
+        window.location.href = furoDetailUrl(furo.id, furo.slug);
     });
 
     if (furos.length > 0) {

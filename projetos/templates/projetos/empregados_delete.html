@@ -1,26 +1,26 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Excluir Empregado{% endblock %}
+{% block title %}{% trans "Excluir Empregado" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/empregados_delete.css' %}">
 {% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
+<section class="sf-page p-6">
     <div class="ed-wrap">
-        <h2 class="ed-title">Excluir Empregado</h2>
-        <p>Tem certeza que deseja excluir o empregado <strong>{{ empregado.nome }}</strong>?</p>
+        <h2 class="ed-title">{% trans "Excluir Empregado" %}</h2>
+        <p>{% blocktrans with nome=empregado.nome %}Tem certeza que deseja excluir o empregado <strong>{{ nome }}</strong>?{% endblocktrans %}</p>
 
         <form method="POST" class="ed-form">
             {% csrf_token %}
             <button type="submit" class="ed-btn ed-btn-delete">
-                🗑️ Excluir
+                🗑️ {% trans "Excluir" %}
             </button>
 
             <a href="{% url 'projetos:empregados_list' %}" class="ed-btn ed-btn-cancel">
-                🔙 Cancelar
+                🔙 {% trans "Cancelar" %}
             </a>
         </form>
     </div>

@@ -1,30 +1,32 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static i18n %}
 <!-- projetos/templates/projetos/furo_delete.html -->
 
-{% block title %}Apagar Furo{% endblock %}
+{% block title %}{% trans "Apagar Furo" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/furo_delete.css' %}">
 {% endblock %}
 
 {% block content %}
+<section class="sf-page p-6">
 <div class="fd-wrap">
-    <h2>⚠️ Confirmação de Exclusão</h2>
-    <p>Tem certeza que deseja apagar o furo <strong>{{ furo.nome }}</strong>?</p>
-    <p>Esta ação não pode ser desfeita!</p>
+    <h2>⚠️ {% trans "Confirmação de Exclusão" %}</h2>
+    <p>{% blocktrans with furo_nome=furo.nome %}Tem certeza que deseja apagar o furo <strong>{{ furo_nome }}</strong>?{% endblocktrans %}</p>
+    <p>{% trans "Esta ação não pode ser desfeita!" %}</p>
 
     <div class="fd-actions">
         <form method="POST" class="fd-form-inline">
             {% csrf_token %}
             <button type="submit" class="fd-btn fd-btn-delete">
-                🗑️ Apagar
+                🗑️ {% trans "Apagar" %}
             </button>
         </form>
 
         <a href="{% url 'projetos:detail' furo.id %}" class="fd-btn fd-btn-cancel">
-            ❌ Cancelar
+            ❌ {% trans "Cancelar" %}
         </a>
     </div>
 </div>
+</section>
 {% endblock %}

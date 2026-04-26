@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo|default:"Plano" }}{% endblock %}
 {% block extra_css %}
@@ -16,7 +16,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
 <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">Voltar aos planos</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 
 <div class="card">
     <form method="post">

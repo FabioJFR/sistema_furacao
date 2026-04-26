@@ -1,34 +1,35 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Terminar Projeto do Empregado{% endblock %}
+{% block title %}{% trans "Terminar Projeto do Empregado" %}{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+<section class="sf-page p-6">
+    <div class="sf-panel space-y-6">
 
-        <h1 class="text-2xl font-bold text-gray-800">Terminar Projeto do Empregado</h1>
+        <h1 class="text-2xl font-bold text-gray-800">{% trans "Terminar Projeto do Empregado" %}</h1>
 
         <div class="text-gray-700 space-y-2">
-            <p><strong>Empregado:</strong> {{ empregado.nome }}</p>
-            <p><strong>Projeto:</strong> {{ ligacao.projeto.nome }}</p>
-            <p><strong>Início:</strong> {{ ligacao.data_inicio|default:"-" }}</p>
-            <p><strong>Estado atual:</strong> {% if ligacao.ativo %}Ativo{% else %}Concluído{% endif %}</p>
+            <p><strong>{% trans "Empregado:" %}</strong> {{ empregado.nome }}</p>
+            <p><strong>{% trans "Projeto:" %}</strong> {{ ligacao.projeto.nome }}</p>
+            <p><strong>{% trans "Início:" %}</strong> {{ ligacao.data_inicio|default:"-" }}</p>
+            <p><strong>{% trans "Estado atual:" %}</strong> {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Concluído" %}{% endif %}</p>
         </div>
 
         <p class="text-gray-600">
-            Ao confirmar, esta ligação ficará como concluída. Se não houver data de fim, será usada a data de hoje.
+            {% trans "Ao confirmar, esta ligação ficará como concluída. Se não houver data de fim, será usada a data de hoje." %}
         </p>
 
         <form method="post" class="flex gap-3">
             {% csrf_token %}
             <button type="submit"
                     class="bg-red-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
-                ✅ Confirmar
+                ✅ {% trans "Confirmar" %}
             </button>
 
             <a href="{{ empregado.get_absolute_url }}"
                class="bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                Cancelar
+                {% trans "Cancelar" %}
             </a>
         </form>
 

@@ -1,19 +1,20 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Histórico de Configurações do Furo{% endblock %}
+{% block title %}{% trans "Histórico de Configurações do Furo" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
 
     <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🕘 Histórico de Configurações do Furo</h1>
-            <p class="text-gray-500 mt-1">Furo: {{ furo.nome }}</p>
+            <h1 class="text-2xl font-bold text-gray-800">🕘 {% trans "Histórico de Configurações do Furo" %}</h1>
+            <p class="text-gray-500 mt-1">{% trans "Furo:" %} {{ furo.nome }}</p>
         </div>
 
         <a href="{{ furo.get_absolute_url }}"
            class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-            🔙 Voltar ao Furo
+            🔙 {% trans "Voltar ao Furo" %}
         </a>
     </div>
 
@@ -40,7 +41,7 @@
                                 <td class="px-4 py-3">
                                     <a href="{% url 'projetos:historico_detail' h.pk %}"
                                        class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                        Ver detalhe
+                                        {% trans "Ver detalhe" %}
                                     </a>
                                 </td>
                             </tr>
@@ -49,7 +50,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existe histórico para este furo.</p>
+            <p class="text-gray-500">{% trans "Ainda não existe histórico para este furo." %}</p>
         {% endif %}
     </div>
 

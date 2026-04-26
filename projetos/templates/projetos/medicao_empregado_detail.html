@@ -1,16 +1,17 @@
 {% extends 'projetos/base.html' %}
+{% load i18n %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="flex flex-wrap gap-3 mb-6">
-        <a href="{% url 'projetos:medicao_list_empregado' %}" class="btn btn-primary">⬅ Minhas Medições</a>
-        <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-warning">🕳 Ver Furo</a>
-        <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-success">📁 Meus Furos</a>
+        <a href="{% url 'projetos:medicao_list_empregado' %}" class="btn btn-primary">⬅ {% trans "Minhas Medições" %}</a>
+        <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-warning">🕳 {% trans "Ver Furo" %}</a>
+        <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-success">📁 {% trans "Meus Furos" %}</a>
     </div>
 
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="p-6 border-b border-gray-100">
-            <h1 class="text-3xl font-bold text-gray-800">📊 Detalhe da Medição</h1>
+            <h1 class="text-3xl font-bold text-gray-800">📊 {% trans "Detalhe da Medição" %}</h1>
             <p class="text-gray-500 mt-2">
                 {{ medicao.nome_furo_snapshot|default:furo.nome }} · {{ furo.projeto.nome }}
             </p>
@@ -18,48 +19,52 @@
 
         <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
-                <h2 class="text-lg font-semibold text-gray-800">Dados medidos</h2>
-                <p><strong>Profundidade:</strong> {{ medicao.profundidade_medida|default:"-" }} m</p>
-                <p><strong>Inclinação real:</strong> {{ medicao.inclinacao_real_medida|default:"-" }}°</p>
-                <p><strong>Azimute real:</strong> {{ medicao.azimute_real_medido|default:"-" }}°</p>
-                <p><strong>Magnetismo:</strong> {{ medicao.magnetismo|default:"-" }}</p>
-                <p><strong>Altitude:</strong> {{ medicao.altitude|default:"-" }}</p>
-                <p><strong>Latitude:</strong> {{ medicao.latitude|default:"-" }}</p>
-                <p><strong>Longitude:</strong> {{ medicao.longitude|default:"-" }}</p>
+                <h2 class="text-lg font-semibold text-gray-800">{% trans "Dados medidos" %}</h2>
+                <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade_medida|default:"-" }} m</p>
+                <p><strong>{% trans "Inclinação real:" %}</strong> {{ medicao.inclinacao_real_medida|default:"-" }}°</p>
+                <p><strong>{% trans "Azimute real:" %}</strong> {{ medicao.azimute_real_medido|default:"-" }}°</p>
+                <p><strong>{% trans "Magnetismo:" %}</strong> {{ medicao.magnetismo|default:"-" }}</p>
+                <p><strong>{% trans "Altitude:" %}</strong> {{ medicao.altitude|default:"-" }}</p>
+                <p><strong>{% trans "Latitude:" %}</strong> {{ medicao.latitude|default:"-" }}</p>
+                <p><strong>{% trans "Longitude:" %}</strong> {{ medicao.longitude|default:"-" }}</p>
             </div>
 
             <div class="space-y-3">
-                <h2 class="text-lg font-semibold text-gray-800">Contexto do furo</h2>
-                <p><strong>Furo:</strong> {{ furo.nome }}</p>
-                <p><strong>Projeto:</strong> {{ furo.projeto.nome }}</p>
-                <p><strong>Profundidade alvo inicial:</strong> {{ medicao.profundidade_alvo_inicial_furo|default:"-" }}</p>
-                <p><strong>Profundidade alvo atual:</strong> {{ medicao.profundidade_alvo_atual_furo|default:"-" }}</p>
-                <p><strong>Inclinação planeada inicial:</strong> {{ medicao.inclinacao_planeada_inicial_furo|default:"-" }}°</p>
-                <p><strong>Inclinação planeada atual:</strong> {{ medicao.inclinacao_planeada_atual_furo|default:"-" }}°</p>
-                <p><strong>Azimute planeado inicial:</strong> {{ medicao.azimute_planeado_inicial_furo|default:"-" }}°</p>
-                <p><strong>Azimute planeado atual:</strong> {{ medicao.azimute_planeado_atual_furo|default:"-" }}°</p>
+                <h2 class="text-lg font-semibold text-gray-800">{% trans "Contexto do furo" %}</h2>
+                <p><strong>{% trans "Furo:" %}</strong> {{ furo.nome }}</p>
+                <p><strong>{% trans "Projeto:" %}</strong> {{ furo.projeto.nome }}</p>
+                <p><strong>{% trans "Profundidade alvo inicial:" %}</strong> {{ medicao.profundidade_alvo_inicial_furo|default:"-" }}</p>
+                <p><strong>{% trans "Profundidade alvo atual:" %}</strong> {{ medicao.profundidade_alvo_atual_furo|default:"-" }}</p>
+                <p><strong>{% trans "Inclinação planeada inicial:" %}</strong> {{ medicao.inclinacao_planeada_inicial_furo|default:"-" }}°</p>
+                <p><strong>{% trans "Inclinação planeada atual:" %}</strong> {{ medicao.inclinacao_planeada_atual_furo|default:"-" }}°</p>
+                <p><strong>{% trans "Azimute planeado inicial:" %}</strong> {{ medicao.azimute_planeado_inicial_furo|default:"-" }}°</p>
+                <p><strong>{% trans "Azimute planeado atual:" %}</strong> {{ medicao.azimute_planeado_atual_furo|default:"-" }}°</p>
             </div>
         </div>
 
         <div class="p-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
-                <h2 class="text-lg font-semibold text-gray-800">Geologia e observação</h2>
-                <p><strong>Tipo de rocha:</strong> {{ medicao.tipo_rocha|default:"-" }}</p>
-                <p><strong>Cor:</strong> {{ medicao.cor|default:"-" }}</p>
-                <p><strong>Dureza:</strong> {{ medicao.dureza|default:"-" }}</p>
-                <p><strong>Observações:</strong></p>
+                <h2 class="text-lg font-semibold text-gray-800">{% trans "Geologia e observação" %}</h2>
+                <p><strong>{% trans "Tipo de rocha:" %}</strong> {{ medicao.tipo_rocha|default:"-" }}</p>
+                <p><strong>{% trans "Cor:" %}</strong> {{ medicao.cor|default:"-" }}</p>
+                <p><strong>{% trans "Dureza:" %}</strong> {{ medicao.dureza|default:"-" }}</p>
+                <p><strong>{% trans "Observações:" %}</strong></p>
                 <div class="bg-gray-50 rounded-lg p-4 text-gray-700">
-                    {{ medicao.observacoes|default:"Sem observações." }}
+                    {% if medicao.observacoes %}
+                        {{ medicao.observacoes }}
+                    {% else %}
+                        {% trans "Sem observações." %}
+                    {% endif %}
                 </div>
             </div>
 
             <div class="space-y-3">
-                <h2 class="text-lg font-semibold text-gray-800">Histórico</h2>
-                <p><strong>Criada em:</strong> {{ medicao.criado_em|date:"d/m/Y H:i" }}</p>
-                <p><strong>Atualizada em:</strong> {{ medicao.atualizado_em|date:"d/m/Y H:i" }}</p>
+                <h2 class="text-lg font-semibold text-gray-800">{% trans "Histórico" %}</h2>
+                <p><strong>{% trans "Criada em:" %}</strong> {{ medicao.criado_em|date:"d/m/Y H:i" }}</p>
+                <p><strong>{% trans "Atualizada em:" %}</strong> {{ medicao.atualizado_em|date:"d/m/Y H:i" }}</p>
                 {% if medicao.imagem %}
                     <div>
-                        <p class="mb-2"><strong>Imagem:</strong></p>
+                        <p class="mb-2"><strong>{% trans "Imagem:" %}</strong></p>
                         <img src="{{ medicao.imagem.url }}" alt="Imagem da medição" class="rounded-lg shadow max-h-80 object-cover">
                     </div>
                 {% endif %}

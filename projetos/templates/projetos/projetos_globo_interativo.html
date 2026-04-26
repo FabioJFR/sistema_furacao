@@ -1,7 +1,7 @@
 {% extends 'projetos/base.html' %}
-{% load static %}
+{% load static  i18n %}
 
-{% block title %}Globo de Projetos{% endblock %}
+{% block title %}{% trans "Globo de Projetos" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/globo.css' %}">

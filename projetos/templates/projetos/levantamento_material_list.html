@@ -1,17 +1,18 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Meus Levantamentos{% endblock %}
+{% block title %}{% trans "Meus Levantamentos" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">Meus Levantamentos de Material</h1>
+            <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Levantamentos de Material" %}</h1>
 
             <a href="{% url 'projetos:levantamento_create' %}"
                class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
-                ➕ Novo Levantamento
+                ➕ {% trans "Novo Levantamento" %}
             </a>
         </div>
 
@@ -20,12 +21,12 @@
                 <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Data</th>
-                            <th class="text-left px-4 py-3">Material</th>
-                            <th class="text-left px-4 py-3">Quantidade</th>
-                            <th class="text-left px-4 py-3">Projeto</th>
-                            <th class="text-left px-4 py-3">Furo</th>
-                            <th class="text-left px-4 py-3">Observações</th>
+                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Material" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Quantidade" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,7 +56,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-gray-500">Ainda não existem levantamentos registados.</p>
+            <p class="text-gray-500">{% trans "Ainda não existem levantamentos registados." %}</p>
         {% endif %}
 
     </div>

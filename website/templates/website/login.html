@@ -1,46 +1,46 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>{% trans "Login" %}</title>
     <link rel="stylesheet" href="{% static 'css/website/login.css' %}">
 </head>
 <body>
     <div class="container">
-        <h1 class="title">Entrar</h1>
-        <p class="subtitle">Acede à tua conta para continuar</p>
+        <h1 class="title">{% trans "Entrar" %}</h1>
+        <p class="subtitle">{% trans "Acede à tua conta para continuar" %}</p>
         <div class="card">
             {% if form.errors %}
                 <div class="error-box">
-                    Username ou password inválidos.
+                    {% trans "Username ou password inválidos." %}
                 </div>
             {% endif %}
             <form method="post">
                 {% csrf_token %}
                 <div class="row">
-                    <label for="id_username">Utilizador</label>
+                    <label for="id_username">{% trans "Utilizador" %}</label>
                     {{ form.username }}
                 </div>
                 <div class="row">
-                    <label for="id_password">Password</label>
+                    <label for="id_password">{% trans "Password" %}</label>
                     {{ form.password }}
                 </div>
                 <div class="actions">
                     <a href="{% url 'website:home' %}" class="btn btn-secondary">
-                        Voltar
+                        {% trans "Voltar" %}
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        Entrar
+                        {% trans "Entrar" %}
                     </button>
                 </div>
             </form>
             <p class="muted muted-top">
-                Não tens conta? <a href="{% url 'website:registo' %}">Criar conta</a>
+                {% trans "Não tens conta?" %} <a href="{% url 'website:registo' %}">{% trans "Criar conta" %}</a>
             </p>
             <p class="muted">
-                <a href="{% url 'password_reset' %}">Recuperar password</a>
+                <a href="{% url 'password_reset' %}">{% trans "Recuperar password" %}</a>
             </p>
         </div>
     </div>

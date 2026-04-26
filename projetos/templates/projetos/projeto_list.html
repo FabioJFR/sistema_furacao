@@ -1,7 +1,7 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Lista de Projetos{% endblock %}
+{% block title %}{% trans "Lista de Projetos" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/projeto_list.css' %}">
@@ -13,10 +13,10 @@
 
     <!-- CABEÇALHO -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">📂 Projetos</h1>
+        <h1 class="text-3xl font-bold text-gray-800">📂 {% trans "Projetos" %}</h1>
         <a href="{% url 'projetos:projeto_create' %}" 
            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
-           ➕ Criar Projeto
+           ➕ {% trans "Criar Projeto" %}
         </a>
     </div>
 
@@ -26,27 +26,27 @@
         <div id="projeto-{{ forloop.counter0 }}"
              class="projeto-card projeto-card-interactive bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition space-y-2">
             <h2 class="font-bold text-xl text-gray-800">{{ projeto.nome }}</h2>
-            <p><strong>Cliente:</strong> {{ projeto.cliente }}</p>
-            <p><strong>Cidade:</strong> {{ projeto.cidade }}</p>
-            <p><strong>País:</strong> {{ projeto.pais }}</p>
+            <p><strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}</p>
+            <p><strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}</p>
+            <p><strong>{% trans "País:" %}</strong> {{ projeto.pais }}</p>
             <div class="flex gap-2 mt-2">
                 <a href="{% url 'projetos:projeto_detail_legacy' projeto.pk %}" 
                    class="flex-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition text-center">
-                   🔎 Detalhes
+                   🔎 {% trans "Detalhes" %}
                 </a>
                 <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
                    class="flex-1 bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition text-center">
-                   ✏️ Editar
+                   ✏️ {% trans "Editar" %}
                 </a>
             </div>
         </div>
         {% empty %}
-        <p class="text-gray-500 col-span-3">Nenhum projeto encontrado.</p>
+        <p class="text-gray-500 col-span-3">{% trans "Nenhum projeto encontrado." %}</p>
         {% endfor %}
     </div>
 
     <!-- MAPA DE PROJETOS -->
-    <h2 class="mt-12 mb-4 text-2xl font-bold text-gray-800">🗺️ Mapa de Projetos</h2>
+    <h2 class="mt-12 mb-4 text-2xl font-bold text-gray-800">🗺️ {% trans "Mapa de Projetos" %}</h2>
     <div class="projeto-map-shell">
         <div class="projeto-map-toolbar">
             <button id="prevProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-nav">
@@ -58,7 +58,7 @@
             </button>
 
             <div id="projetoInfo" class="projeto-map-info">
-                Nenhum projeto selecionado
+                {% trans "Nenhum projeto selecionado" %}
             </div>
 
             <button id="abrirProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-open">

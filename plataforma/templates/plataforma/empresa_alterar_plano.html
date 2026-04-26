@@ -1,5 +1,5 @@
 {% extends "plataforma/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 {% block extra_css %}
@@ -12,7 +12,7 @@
 Alterar o plano, o período de pagamento e o estado da empresa.
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <div class="card eap-card">
     <p><strong>Empresa:</strong> {{ empresa.nome }}</p>
 

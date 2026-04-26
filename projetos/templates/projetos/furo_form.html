@@ -1,5 +1,5 @@
 {% extends 'projetos/base.html' %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-2xl mx-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg p-8 space-y-6">
@@ -18,8 +18,8 @@
             {% endfor %}
 
             <div class="flex gap-3 mt-4">
-                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 transition text-white font-semibold py-2 rounded-lg shadow">💾 Salvar</button>
-                <a href="{% url 'projetos:furo_list' %}" class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">🔙 Voltar</a>
+                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 transition text-white font-semibold py-2 rounded-lg shadow">💾 {% trans "Salvar" %}</button>
+                <a href="{% url 'projetos:furo_list' %}" class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">🔙 {% trans "Voltar" %}</a>
             </div>
         </form>
     </div>

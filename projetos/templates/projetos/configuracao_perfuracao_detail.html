@@ -1,6 +1,7 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Detalhe da Configuração{% endblock %}
+{% block title %}{% trans "Detalhe da Configuração" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
@@ -9,10 +10,9 @@
 
         <div class="flex justify-between items-center flex-wrap gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">⚙️ Detalhe da Configuração de Perfuração</h1>
+                <h1 class="text-2xl font-bold text-gray-800">⚙️ {% trans "Detalhe da Configuração de Perfuração" %}</h1>
                 <p class="text-gray-500 mt-1">
-                    Empregado: {{ configuracao.empregado.nome }} |
-                    Furo: {{ configuracao.furo.nome }}
+                    {% blocktrans with empregado_nome=configuracao.empregado.nome furo_nome=configuracao.furo.nome %}Empregado: {{ empregado_nome }} | Furo: {{ furo_nome }}{% endblocktrans %}
                 </p>
             </div>
 
@@ -20,79 +20,79 @@
                 {% if modo_admin %}
                     <a href="{% url 'projetos:configuracao_perfuracao_update_admin' configuracao.pk %}"
                        class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
-                        ✏️ Editar
+                        ✏️ {% trans "Editar" %}
                     </a>
 
                     <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' configuracao.pk %}"
                        class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
-                        🗑️ Apagar
+                        🗑️ {% trans "Apagar" %}
                     </a>
 
                     <a href="{% url 'projetos:historico_empregado_admin_list' empregado_obj.pk %}"
                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
-                        🕘 Ver Histórico
+                        🕘 {% trans "Ver Histórico" %}
                     </a>
                 {% else %}
                     <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao.pk %}"
                        class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
-                        ✏️ Editar
+                        ✏️ {% trans "Editar" %}
                     </a>
 
                     <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' configuracao.pk %}"
                        class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
-                        🗑️ Apagar
+                        🗑️ {% trans "Apagar" %}
                     </a>
 
                     <a href="{% url 'projetos:historico_empregado_list' %}"
                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
-                        🕘 Ver Histórico
+                        🕘 {% trans "Ver Histórico" %}
                     </a>
                 {% endif %}
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>Tubo:</strong> {{ configuracao.comprimento_tubo }} m</div>
-            <div><strong>Karoutier:</strong> {{ configuracao.comprimento_karoutier }} m × {{ configuracao.quantidade_karoutier }}</div>
-            <div><strong>Acrescento:</strong> {{ configuracao.comprimento_acrescento }} m × {{ configuracao.quantidade_acrescento }}</div>
-            <div><strong>Calibrador:</strong> {{ configuracao.comprimento_calibrador }} m × {{ configuracao.quantidade_calibrador }}</div>
-            <div><strong>Record:</strong> {{ configuracao.comprimento_record }} m × {{ configuracao.quantidade_record }}</div>
-            <div><strong>Bit:</strong> {{ configuracao.comprimento_bit }} m</div>
-            <div><strong>Caixa de mola:</strong> {{ configuracao.comprimento_caixa_mola }} m</div>
-            <div><strong>Tubo interior:</strong> {{ configuracao.comprimento_tubo_interior }} m × {{ configuracao.quantidade_tubo_interior }}</div>
-            <div><strong>Acrescento do tubo interior:</strong> {{ configuracao.comprimento_acrescento_tubo_interior }} m × {{ configuracao.quantidade_acrescento_tubo_interior }}</div>
-            <div><strong>Cabeça de interior:</strong> {{ configuracao.comprimento_cabeca_interior }} m</div>
-            <div><strong>Total do Conjunto de Fundo:</strong> {{ configuracao.comprimento_total_conjunto_fundo|floatformat:2 }} m</div>
-            <div><strong>Total do Tubo Interior:</strong> {{ configuracao.comprimento_total_tubo_interior|floatformat:2 }} m</div>
+            <div><strong>{% trans "Tubo:" %}</strong> {{ configuracao.comprimento_tubo }} m</div>
+            <div><strong>{% trans "Karoutier:" %}</strong> {{ configuracao.comprimento_karoutier }} m × {{ configuracao.quantidade_karoutier }}</div>
+            <div><strong>{% trans "Acrescento:" %}</strong> {{ configuracao.comprimento_acrescento }} m × {{ configuracao.quantidade_acrescento }}</div>
+            <div><strong>{% trans "Calibrador:" %}</strong> {{ configuracao.comprimento_calibrador }} m × {{ configuracao.quantidade_calibrador }}</div>
+            <div><strong>{% trans "Record:" %}</strong> {{ configuracao.comprimento_record }} m × {{ configuracao.quantidade_record }}</div>
+            <div><strong>{% trans "Bit:" %}</strong> {{ configuracao.comprimento_bit }} m</div>
+            <div><strong>{% trans "Caixa de mola:" %}</strong> {{ configuracao.comprimento_caixa_mola }} m</div>
+            <div><strong>{% trans "Tubo interior:" %}</strong> {{ configuracao.comprimento_tubo_interior }} m × {{ configuracao.quantidade_tubo_interior }}</div>
+            <div><strong>{% trans "Acrescento do tubo interior:" %}</strong> {{ configuracao.comprimento_acrescento_tubo_interior }} m × {{ configuracao.quantidade_acrescento_tubo_interior }}</div>
+            <div><strong>{% trans "Cabeça de interior:" %}</strong> {{ configuracao.comprimento_cabeca_interior }} m</div>
+            <div><strong>{% trans "Total do Conjunto de Fundo:" %}</strong> {{ configuracao.comprimento_total_conjunto_fundo|floatformat:2 }} m</div>
+            <div><strong>{% trans "Total do Tubo Interior:" %}</strong> {{ configuracao.comprimento_total_tubo_interior|floatformat:2 }} m</div>
         </div>
 
         <div class="border-t pt-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Última alteração</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Última alteração" %}</h2>
 
             {% if ultimo_historico %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                    <div><strong>Ação:</strong> {{ ultimo_historico.get_acao_display }}</div>
-                    <div><strong>Data:</strong> {{ ultimo_historico.criado_em }}</div>
-                    <div><strong>Alterado por:</strong> {{ ultimo_historico.alterado_por|default:"-" }}</div>
-                    <div><strong>Observações:</strong> {{ ultimo_historico.observacoes|default:"-" }}</div>
+                    <div><strong>{% trans "Ação:" %}</strong> {{ ultimo_historico.get_acao_display }}</div>
+                    <div><strong>{% trans "Data:" %}</strong> {{ ultimo_historico.criado_em }}</div>
+                    <div><strong>{% trans "Alterado por:" %}</strong> {{ ultimo_historico.alterado_por|default:"-" }}</div>
+                    <div><strong>{% trans "Observações:" %}</strong> {{ ultimo_historico.observacoes|default:"-" }}</div>
                 </div>
             {% else %}
-                <p class="text-gray-500">Ainda não existe histórico associado a esta configuração.</p>
+                <p class="text-gray-500">{% trans "Ainda não existe histórico associado a esta configuração." %}</p>
             {% endif %}
         </div>
 
         <div class="border-t pt-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Últimos registos do histórico</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Últimos registos do histórico" %}</h2>
 
             {% if historicos %}
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="text-left px-4 py-3">Data</th>
-                                <th class="text-left px-4 py-3">Ação</th>
-                                <th class="text-left px-4 py-3">Alterado por</th>
-                                <th class="text-left px-4 py-3">Ações</th>
+                                <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Ação" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Alterado por" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -104,7 +104,7 @@
                                     <td class="px-4 py-3">
                                         <a href="{% url 'projetos:historico_detail' h.pk %}"
                                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                            Ver detalhe
+                                            {% trans "Ver detalhe" %}
                                         </a>
                                     </td>
                                 </tr>
@@ -113,7 +113,7 @@
                     </table>
                 </div>
             {% else %}
-                <p class="text-gray-500">Sem histórico disponível.</p>
+                <p class="text-gray-500">{% trans "Sem histórico disponível." %}</p>
             {% endif %}
         </div>
 
@@ -121,12 +121,12 @@
             {% if modo_admin %}
                 <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}"
                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             {% else %}
                 <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
                    class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             {% endif %}
         </div>

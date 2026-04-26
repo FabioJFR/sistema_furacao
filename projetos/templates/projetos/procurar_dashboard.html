@@ -1,12 +1,13 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Procurar{% endblock %}
+{% block title %}{% trans "Procurar" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
         <div class="flex flex-col gap-2">
-            <h1 class="text-2xl font-bold text-gray-800">🔎 Procurar</h1>
+            <h1 class="text-2xl font-bold text-gray-800">🔎 {% trans "Procurar" %}</h1>
             <p class="text-sm text-gray-600">
                 Pesquisa transversal em projetos, furos, empregados, máquinas, materiais, registos, medições, despesas e eventos da empresa {{ empresa.nome }}.
             </p>
@@ -21,7 +22,7 @@
                 class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             >
             <button type="submit" class="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 transition">
-                Procurar
+                {% trans "Procurar" %}
             </button>
         </form>
 

@@ -1,13 +1,14 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Relatórios e Exportação{% endblock %}
+{% block title %}{% trans "Relatórios e Exportação" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8 space-y-4">
             <div class="space-y-2">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">📤 Relatórios e Exportação</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">📤 {% trans "Relatórios e Exportação" %}</h1>
                 <p class="text-sm md:text-base text-gray-600">
                     Área para descarregar dados operacionais e financeiros da empresa <strong>{{ empresa.nome }}</strong>
                     em formatos úteis para análise interna, partilha com clientes e integração com outras plataformas.
@@ -16,19 +17,19 @@
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                    <div class="text-sm font-semibold text-blue-700">CSV</div>
+                    <div class="text-sm font-semibold text-blue-700">{% trans "CSV" %}</div>
                     <div class="text-sm text-blue-900 mt-1">Ideal para Excel, folhas de cálculo e importação simples.</div>
                 </div>
                 <div class="rounded-xl border border-cyan-100 bg-cyan-50 p-4">
-                    <div class="text-sm font-semibold text-cyan-700">XLSX</div>
+                    <div class="text-sm font-semibold text-cyan-700">{% trans "XLSX" %}</div>
                     <div class="text-sm text-cyan-900 mt-1">Formato Excel pronto a abrir com colunas e folhas organizadas.</div>
                 </div>
                 <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                    <div class="text-sm font-semibold text-emerald-700">JSON</div>
+                    <div class="text-sm font-semibold text-emerald-700">{% trans "JSON" %}</div>
                     <div class="text-sm text-emerald-900 mt-1">Útil para integração com APIs, ETL e outras plataformas.</div>
                 </div>
                 <div class="rounded-xl border border-rose-100 bg-rose-50 p-4">
-                    <div class="text-sm font-semibold text-rose-700">PDF</div>
+                    <div class="text-sm font-semibold text-rose-700">{% trans "PDF" %}</div>
                     <div class="text-sm text-rose-900 mt-1">Formato pronto para enviar como relatório ou arquivo documental.</div>
                 </div>
             </div>

@@ -3,18 +3,16 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 import json
-import re
 
 from core.permissions import admin_required
 from projetos.models import Furo
 
 from . import domain_logic as dl
 from . import workflows as wf
-from .chat_services import construir_resumo_empresa, gerar_resposta_chat, normalizar_json_chat
+from .chat_services import construir_resumo_empresa
 from .forms import AnaliseImagemAIForm
 from .models import AnaliseImagemAI
 from .selectors.analises import (
-    listar_analises_empresa_qs,
     listar_analises_recentes_hub_qs,
     listar_presets_zona_empresa,
     obter_analise_detail_empresa,
@@ -22,11 +20,15 @@ from .selectors.analises import (
     obter_analise_reprocessar_empresa,
 )
 from .selectors.chat import (
-    listar_sessoes_chat_ativas_empresa,
     obter_furo_contexto_chat,
-    obter_sessao_chat_empresa,
 )
-from .services.chat import criar_mensagem_chat, criar_sessao_chat
+from .services.chat import (
+    obter_memoria_furo_contexto_sessao,
+    obter_sessao_e_lista_chatbox,
+    processar_interacao_chat,
+)
+from .services.biblioteca import construir_contexto_biblioteca
+from .services.analises import construir_contexto_analise_detail, construir_contexto_analise_list
 
 def _base_template_inspecao(request):
     return "plataforma/base.html" if request.user.is_superuser else "projetos/base.html"
@@ -36,54 +38,6 @@ def _render_inspecao(request, template_name, context):
     context = dict(context or {})
     context.setdefault("base_template", _base_template_inspecao(request))
     return render(request, template_name, context)
-
-
-def _normalizar_valor_comparacao_ai(valor):
-    return dl.normalizar_valor_comparacao_ai(valor)
-
-
-def _nome_base_analise_reprocessada(nome):
-    return dl.nome_base_analise_reprocessada(nome)
-
-
-def _parse_zone_payload(raw_value, *, single):
-    return dl.parse_zone_payload(raw_value, single=single)
-
-
-def _construir_resumo_validacao_analise(analise):
-    return dl.construir_resumo_validacao_analise(analise)
-
-
-def _construir_sugestoes_reprocessamento(analise, resumo_validacao):
-    return dl.construir_sugestoes_reprocessamento(analise, resumo_validacao)
-
-
-def _construir_resumo_ai_relatorio(analise):
-    return dl.construir_resumo_ai_relatorio(analise)
-
-
-def _construir_dashboard_aprendizagem_ai(analises):
-    return dl.construir_dashboard_aprendizagem_ai(analises)
-
-
-def _filtrar_analises_visiveis(queryset):
-    return dl.filtrar_analises_visiveis(queryset)
-
-
-def _obter_empresa_admin_inspecao(request):
-    return wf.obter_empresa_admin_inspecao(request)
-
-
-def _listar_documentos_biblioteca_base_conhecimento():
-    return wf.listar_documentos_biblioteca_base_conhecimento()
-
-
-def _normalizar_nome_documento(nome_original):
-    return dl.normalizar_nome_documento(nome_original)
-
-
-def _resolver_path_unico(base_dir, base_nome, extensao):
-    return dl.resolver_path_unico(base_dir, base_nome, extensao)
 
 
 @login_required
@@ -148,22 +102,11 @@ def biblioteca_pdf(request):
 
     filtro_leitura = (request.GET.get("leitura") or "todas").strip()
     filtro_extensao = (request.GET.get("extensao") or "todas").strip()
-    documentos_pdf = wf.listar_documentos_biblioteca_base_conhecimento()
-    if filtro_leitura == "direta":
-        documentos_pdf = [item for item in documentos_pdf if item["leitura"] == "direta"]
-    elif filtro_leitura == "txt_auxiliar":
-        documentos_pdf = [item for item in documentos_pdf if item["leitura"] == "txt_auxiliar"]
-    elif filtro_leitura == "nao_preparado":
-        documentos_pdf = [item for item in documentos_pdf if item["leitura"] == "nao_preparado"]
-    if filtro_extensao != "todas":
-        documentos_pdf = [item for item in documentos_pdf if item["extensao"] == filtro_extensao]
-
-    extensoes_disponiveis = sorted(
-        {
-            item["extensao"]
-            for item in wf.listar_documentos_biblioteca_base_conhecimento()
-            if item["extensao"] and item["extensao"] != "(sem extensão)"
-        }
+    documentos_biblioteca = wf.listar_documentos_biblioteca_base_conhecimento()
+    contexto_biblioteca = construir_contexto_biblioteca(
+        documentos=documentos_biblioteca,
+        filtro_leitura=filtro_leitura,
+        filtro_extensao=filtro_extensao,
     )
 
     return _render_inspecao(
@@ -171,25 +114,20 @@ def biblioteca_pdf(request):
         "inspecao_ai/biblioteca_pdf.html",
         {
             "empresa": empresa,
-            "documentos_pdf": documentos_pdf,
+            "documentos_pdf": contexto_biblioteca["documentos"],
             "biblioteca_path": str((wf.KNOWLEDGE_BASE_ROOT / "pdf").resolve()),
             "extensoes_upload_permitidas": ", ".join(sorted(wf.EXTENSOES_BIBLIOTECA_PERMITIDAS)),
-            "filtro_leitura": filtro_leitura,
-            "filtro_extensao": filtro_extensao,
-            "filtro_choices": [
-                ("todas", "Todos"),
-                ("direta", "Leitura direta"),
-                ("txt_auxiliar", "TXT auxiliar"),
-                ("nao_preparado", "Não preparado"),
-            ],
-            "extensao_choices": [("todas", "Todas")] + [(item, item) for item in extensoes_disponiveis],
-            "total_pdfs": sum(1 for item in documentos_pdf if item["extensao"] == ".pdf"),
-            "total_pdfs_com_txt": sum(1 for item in documentos_pdf if item["extensao"] == ".pdf" and item["tem_txt"]),
-            "total_pdfs_sem_txt": sum(1 for item in documentos_pdf if item["extensao"] == ".pdf" and not item["tem_txt"]),
-            "total_documentos": len(documentos_pdf),
-            "total_leitura_direta": sum(1 for item in documentos_pdf if item["leitura"] == "direta"),
-            "total_txt_auxiliar": sum(1 for item in documentos_pdf if item["leitura"] == "txt_auxiliar"),
-            "total_nao_preparado": sum(1 for item in documentos_pdf if item["leitura"] == "nao_preparado"),
+            "filtro_leitura": contexto_biblioteca["filtro_leitura"],
+            "filtro_extensao": contexto_biblioteca["filtro_extensao"],
+            "filtro_choices": contexto_biblioteca["filtro_choices"],
+            "extensao_choices": contexto_biblioteca["extensao_choices"],
+            "total_pdfs": contexto_biblioteca["total_pdfs"],
+            "total_pdfs_com_txt": contexto_biblioteca["total_pdfs_com_txt"],
+            "total_pdfs_sem_txt": contexto_biblioteca["total_pdfs_sem_txt"],
+            "total_documentos": contexto_biblioteca["total_documentos"],
+            "total_leitura_direta": contexto_biblioteca["total_leitura_direta"],
+            "total_txt_auxiliar": contexto_biblioteca["total_txt_auxiliar"],
+            "total_nao_preparado": contexto_biblioteca["total_nao_preparado"],
         },
     )
 
@@ -252,20 +190,17 @@ def analise_list(request):
 
     estado = (request.GET.get("estado") or "").strip()
     tipo_documento = (request.GET.get("tipo_documento") or "").strip()
-    analises_qs = listar_analises_empresa_qs(empresa)
-    if estado:
-        analises_qs = analises_qs.filter(estado=estado)
-    if tipo_documento:
-        analises_qs = analises_qs.filter(tipo_documento=tipo_documento)
-    analises = dl.filtrar_analises_visiveis(list(analises_qs))
+    contexto_lista = construir_contexto_analise_list(
+        empresa=empresa,
+        estado=estado,
+        tipo_documento=tipo_documento,
+    )
 
     return _render_inspecao(
         request,
         "inspecao_ai/analise_list.html",
         {
-            "analises": analises,
-            "estado_atual": estado,
-            "tipo_documento_atual": tipo_documento,
+            **contexto_lista,
             "estado_choices": AnaliseImagemAI.ESTADO_CHOICES,
             "tipo_documento_choices": AnaliseImagemAI.TIPO_DOCUMENTO_CHOICES,
         },
@@ -351,18 +286,10 @@ def analise_detail(request, pk):
         return resposta_erro
 
     analise = obter_analise_detail_empresa(pk=pk, empresa=empresa)
-    resumo_validacao = dl.construir_resumo_validacao_analise(analise)
-    sugestoes_reprocessamento = dl.construir_sugestoes_reprocessamento(analise, resumo_validacao)
-    resumo_ai_relatorio = dl.construir_resumo_ai_relatorio(analise)
     return _render_inspecao(
         request,
         "inspecao_ai/analise_detail.html",
-        {
-            "analise": analise,
-            "resumo_validacao": resumo_validacao,
-            "sugestoes_reprocessamento": sugestoes_reprocessamento,
-            "resumo_ai_relatorio": resumo_ai_relatorio,
-        },
+        construir_contexto_analise_detail(analise=analise),
     )
 
 
@@ -427,41 +354,23 @@ def chatbox(request):
         return resposta_erro
 
     sessao_id = request.GET.get("sessao") or request.POST.get("sessao_id")
-    sessoes = listar_sessoes_chat_ativas_empresa(empresa=empresa, limit=12)
-    sessao = None
-    if sessao_id:
-        sessao = obter_sessao_chat_empresa(sessao_id=sessao_id, empresa=empresa)
-    else:
-        sessao = sessoes[0] if sessoes else None
+    sessao, sessoes = obter_sessao_e_lista_chatbox(empresa=empresa, sessao_id=sessao_id)
 
     if request.method == "POST":
         pergunta = (request.POST.get("pergunta") or "").strip()
         furo_contexto_id = request.POST.get("furo_contexto_id")
         furo_contexto = obter_furo_contexto_chat(empresa=empresa, furo_contexto_id=furo_contexto_id)
-        if not sessao:
-            sessao = criar_sessao_chat(empresa=empresa, utilizador=request.user, pergunta=pergunta)
-        if pergunta:
-            criar_mensagem_chat(sessao=sessao, papel="user", conteudo=pergunta)
-            resposta, metadados = gerar_resposta_chat(empresa=empresa, pergunta=pergunta)
-            criar_mensagem_chat(
-                sessao=sessao,
-                papel="assistant",
-                conteudo=resposta,
-                metadados=normalizar_json_chat(metadados),
-            )
-            if sessao.titulo == "Nova conversa AI":
-                sessao.titulo = pergunta[:80]
-            resumo_contexto = construir_resumo_empresa(empresa)
-            if furo_contexto:
-                resumo_contexto["memoria_furo_contexto"] = dl.construir_memoria_operacional_furo(furo_contexto)
-            sessao.ultimo_resumo_contexto = normalizar_json_chat(resumo_contexto)
-            sessao.save(update_fields=["titulo", "ultimo_resumo_contexto", "atualizado_em"])
+        sessao = processar_interacao_chat(
+            empresa=empresa,
+            utilizador=request.user,
+            sessao=sessao,
+            pergunta=pergunta,
+            furo_contexto=furo_contexto,
+        )
         return redirect(f"{request.path}?sessao={sessao.pk}")
 
     resumo = construir_resumo_empresa(empresa)
-    memoria_furo = None
-    if sessao and sessao.ultimo_resumo_contexto:
-        memoria_furo = sessao.ultimo_resumo_contexto.get("memoria_furo_contexto")
+    memoria_furo = obter_memoria_furo_contexto_sessao(sessao)
     return _render_inspecao(
         request,
         "inspecao_ai/chatbox.html",

@@ -1,33 +1,33 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Comparar Histórico{% endblock %}
+{% block title %}{% trans "Comparar Histórico" %}{% endblock %}
 
 {% block content %}
 <section class="max-w-6xl mx-auto p-6 space-y-6">
 
     <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🆚 Comparação com a Versão Anterior</h1>
+            <h1 class="text-2xl font-bold text-gray-800">🆚 {% trans "Comparação com a Versão Anterior" %}</h1>
             <p class="text-gray-500 mt-1">
-                Empregado: {{ historico.empregado.nome }} |
-                Furo: {{ historico.furo.nome|default:"-" }}
+                {% blocktrans with empregado_nome=historico.empregado.nome furo_nome=historico.furo.nome|default:"-" %}Empregado: {{ empregado_nome }} | Furo: {{ furo_nome }}{% endblocktrans %}
             </p>
         </div>
 
         {% if historico_anterior %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                <div><strong>Versão atual:</strong> {{ historico.criado_em }}</div>
-                <div><strong>Versão anterior:</strong> {{ historico_anterior.criado_em }}</div>
+                <div><strong>{% trans "Versão atual:" %}</strong> {{ historico.criado_em }}</div>
+                <div><strong>{% trans "Versão anterior:" %}</strong> {{ historico_anterior.criado_em }}</div>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3">Campo</th>
-                            <th class="text-left px-4 py-3">Anterior</th>
-                            <th class="text-left px-4 py-3">Atual</th>
-                            <th class="text-left px-4 py-3">Estado</th>
+                            <th class="text-left px-4 py-3">{% trans "Campo" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Anterior" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Atual" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,11 +39,11 @@
                                 <td class="px-4 py-3">
                                     {% if item.alterado %}
                                         <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Alterado
+                                            {% trans "Alterado" %}
                                         </span>
                                     {% else %}
                                         <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Igual
+                                            {% trans "Igual" %}
                                         </span>
                                     {% endif %}
                                 </td>
@@ -54,19 +54,19 @@
             </div>
         {% else %}
             <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 text-blue-800">
-                Esta é a primeira versão registada. Não existe histórico anterior para comparar.
+                {% trans "Esta é a primeira versão registada. Não existe histórico anterior para comparar." %}
             </div>
         {% endif %}
 
         <div class="pt-2 flex gap-3 flex-wrap">
             <a href="{% url 'projetos:historico_detail' historico.pk %}"
                class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow font-semibold">
-                📄 Ver detalhe
+                📄 {% trans "Ver detalhe" %}
             </a>
 
             <a href="{{ historico.furo.get_absolute_url }}"
                class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold inline-block">
-                🔙 Voltar
+                🔙 {% trans "Voltar" %}
             </a>
         </div>
     </div>

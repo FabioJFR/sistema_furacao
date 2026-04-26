@@ -1,15 +1,16 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Entrada de Material{% endblock %}
+{% block title %}{% trans "Entrada de Material" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
 
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">📥 Entrada de Material</h1>
+            <h1 class="text-2xl font-bold text-gray-800">📥 {% trans "Entrada de Material" %}</h1>
             <p class="text-gray-600 mt-1">
-                <strong>Material:</strong> {{ material.nome }}
+                <strong>{% trans "Material:" %}</strong> {{ material.nome }}
             </p>
         </div>
 
@@ -47,11 +48,11 @@
             <div class="flex gap-3 flex-wrap mt-4">
                 <button type="submit"
                         class="flex-1 bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
-                    💾 Registar Entrada
+                    💾 {% trans "Registar Entrada" %}
                 </button>
                 <a href="{% url 'projetos:materiais_list' %}"
                    class="flex-1 bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold text-center">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             </div>
         </form>

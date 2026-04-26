@@ -1,20 +1,21 @@
 {% extends "projetos/base.html" %}
+{% load i18n %}
 
-{% block title %}Apagar Projeto{% endblock %}
+{% block title %}{% trans "Apagar Projeto" %}{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6 flex items-center justify-center min-h-[70vh]">
+<section class="sf-page p-6">
 
-    <div class="max-w-md w-full bg-gray-800 text-gray-100 rounded-xl shadow-xl p-8 border-t-4 border-red-600">
+    <div class="sf-panel bg-gray-800 text-gray-100 border-t-4 border-red-600">
 
         <!-- Título -->
         <h2 class="text-2xl font-bold text-center mb-4">
-            ⚠️ Confirmar Exclusão
+            ⚠️ {% trans "Confirmar Exclusão" %}
         </h2>
 
         <!-- Mensagem -->
         <p class="text-center text-gray-300 mb-6">
-            Tem certeza que deseja apagar o projeto:
+            {% trans "Tem certeza que deseja apagar o projeto:" %}
         </p>
 
         <p class="text-center text-lg font-semibold text-white mb-6">
@@ -22,7 +23,7 @@
         </p>
 
         <p class="text-center text-sm text-red-400 mb-6">
-            Esta ação não pode ser desfeita!
+            {% trans "Esta ação não pode ser desfeita!" %}
         </p>
 
         <!-- FORM -->
@@ -32,13 +33,13 @@
             <!-- Apagar -->
             <button type="submit" 
                 class="flex-1 bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-lg shadow">
-                🗑️ Apagar
+                🗑️ {% trans "Apagar" %}
             </button>
 
             <!-- Cancelar -->
             <a href="{{ projeto.get_absolute_url }}" 
                class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
-                ❌ Cancelar
+                ❌ {% trans "Cancelar" %}
             </a>
 
         </form>

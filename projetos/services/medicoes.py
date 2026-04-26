@@ -160,3 +160,11 @@ def atualizar_medicao(form, empresa=None):
         registar_versao_furo(medicao.furo, origem="medicao")
 
     return medicao
+
+
+@transaction.atomic
+def apagar_medicao(*, medicao, empresa=None):
+    validar_medicao_empresa_existente(medicao, empresa=empresa)
+    medicao_id = medicao.pk
+    medicao.delete()
+    return medicao_id

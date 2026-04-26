@@ -1,14 +1,14 @@
 {% extends 'projetos/base.html' %}
-{% load widget_tweaks %}
+{% load widget_tweaks  i18n %}
 
-{% block title %}Criar Projeto{% endblock %}
+{% block title %}{% trans "Criar Projeto" %}{% endblock %}
 
 {% block content %}
 <section class="container mx-auto p-6">
 
     <div class="max-w-2xl mx-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg p-8 space-y-6">
 
-        <h2 class="text-2xl font-bold text-center">➕ Criar Projeto</h2>
+        <h2 class="text-2xl font-bold text-center">➕ {% trans "Criar Projeto" %}</h2>
 
         <form method="POST" class="space-y-5">
             {% csrf_token %}
@@ -16,33 +16,33 @@
             <div class="space-y-4">
 
                 <div>
-                    <label for="{{ form.nome.id_for_label }}">Nome</label>
+                    <label for="{{ form.nome.id_for_label }}">{% trans "Nome" %}</label>
                     {{ form.nome|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                 </div>
 
                 <div>
-                    <label for="{{ form.cliente.id_for_label }}">Cliente</label>
+                    <label for="{{ form.cliente.id_for_label }}">{% trans "Cliente" %}</label>
                     {{ form.cliente|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="{{ form.cidade.id_for_label }}">Cidade</label>
+                        <label for="{{ form.cidade.id_for_label }}">{% trans "Cidade" %}</label>
                         {{ form.cidade|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                     </div>
                     <div>
-                        <label for="{{ form.pais.id_for_label }}">País</label>
+                        <label for="{{ form.pais.id_for_label }}">{% trans "País" %}</label>
                         {{ form.pais|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                     </div>
                 </div>
 
                 <div>
-                    <label for="{{ form.status.id_for_label }}">Status</label>
+                    <label for="{{ form.status.id_for_label }}">{% trans "Status" %}</label>
                     {{ form.status|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                 </div>
 
                 <div>
-                    <label for="{{ form.notas.id_for_label }}">Notas</label>
+                    <label for="{{ form.notas.id_for_label }}">{% trans "Notas" %}</label>
                     {{ form.notas|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
                 </div>
 
@@ -50,11 +50,11 @@
 
             <div class="flex gap-3">
                 <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg shadow">
-                    💾 Salvar
+                    💾 {% trans "Salvar" %}
                 </button>
                 <a href="{% url 'projetos:projeto_list' %}" 
                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow text-center">
-                    🔙 Voltar
+                    🔙 {% trans "Voltar" %}
                 </a>
             </div>
 

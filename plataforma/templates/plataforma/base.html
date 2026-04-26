@@ -1,114 +1,15 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Plataforma{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'css/plataforma/base.css' %}">
+{% extends "projetos/base.html" %}
+{% load static  i18n %}
+
+{% block title %}{% block plataforma_title %}Plataforma{% endblock %}{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/plataforma/layout.css' %}">
     {% block extra_css %}{% endblock %}
-</head>
-<body>
-    <nav class="navbar">
-        <div class="navbar-inner">
-            <div class="nav-left">
-                <a href="{% url 'plataforma:dashboard' %}" class="brand">⛏ Plataforma</a>
+{% endblock %}
 
-                <div class="nav-item">
-                    <button type="button" class="nav-toggle">🏢 Empresas</button>
-                    <div class="dropdown">
-                        <a href="{% url 'plataforma:onboarding_empresa' %}">Criar nova empresa</a>
-                        <a href="{% url 'plataforma:dashboard' %}">Empresas recentes</a>
-                    </div>
-                </div>
-
-                <div class="nav-item">
-                    <button type="button" class="nav-toggle">💳 Comercial</button>
-                    <div class="dropdown">
-                        <a href="{% url 'plataforma:plano_list' %}">Gerir planos</a>
-                        <a href="{% url 'plataforma:subscricao_list' %}">Gerir subscrições</a>
-                    </div>
-                </div>
-
-                <div class="nav-item">
-                    <button type="button" class="nav-toggle">💰 Finanças</button>
-                    <div class="dropdown">
-                        <a href="{% url 'plataforma:financas_entrada_list' %}">Entrada de valores</a>
-                        <a href="{% url 'plataforma:financas_saida_list' %}">Saída de valores</a>
-                        <a href="{% url 'plataforma:financas_analytics' %}">Analytics</a>
-                    </div>
-                </div>
-
-                <div class="nav-item">
-                    <button type="button" class="nav-toggle">Geologia</button>
-                    <div class="dropdown">
-                        <a href="{% url 'geologia:hub' %}">Interface de geologia</a>
-                        <a href="{% url 'geologia:drone_hub' %}">Interface DJI Mini 4 Pro</a>
-                        <a href="{% url 'geologia:drone_sf_hub' %}">Interface Drone S_F</a>
-                    </div>
-                </div>
-
-                {% if request.user.is_superuser %}
-                    <div class="nav-item">
-                        <button type="button" class="nav-toggle">🤖 AI</button>
-                        <div class="dropdown">
-                            <a href="{% url 'inspecao_ai:hub' %}">AI Visual</a>
-                            <a href="{% url 'inspecao_ai:chatbox' %}">Chatbox</a>
-                            <a href="{% url 'inspecao_ai:biblioteca_pdf' %}">Biblioteca PDF</a>
-                            <a href="{% url 'inspecao_ai:memoria_operacional' %}">Memória Operacional</a>
-                            <a href="{% url 'inspecao_ai:analise_create' %}">Nova análise</a>
-                            <a href="{% url 'inspecao_ai:analise_list' %}">Histórico AI</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item">
-                        <button type="button" class="nav-toggle">📡 Dispositivos</button>
-                        <div class="dropdown">
-                            <a href="{% url 'dispositivos:dashboard' %}">Dashboard de dispositivos</a>
-                            <a href="{% url 'dispositivos:captura' %}">Captura de dispositivo</a>
-                            <a href="{% url 'dispositivos:dispositivo_list' %}">Lista de dispositivos</a>
-                            <a href="{% url 'dispositivos:sessao_list' %}">Sessões</a>
-                            <a href="{% url 'dispositivos:leitura_bruta_list' %}">Leituras brutas</a>
-                            <a href="{% url 'dispositivos:survey_shot_list' %}">Survey shots</a>
-                        </div>
-                    </div>
-
-
-                    <div class="nav-item">
-                        <button type="button" class="nav-toggle">🧰 Úteis</button>
-                        <div class="dropdown">
-                            <a href="{% url 'plataforma:uteis_dashboard' %}">Scripts e dados AI</a>
-                            <a href="{% url 'plataforma:features_dashboard' %}">Gestão de features</a>
-                        </div>
-                    </div>
-                {% endif %}
-
-                <div class="nav-item">
-                    <button type="button" class="nav-toggle">🛠 Sistema</button>
-                    <div class="dropdown">
-                        <a href="{% url 'admin:index' %}">Admin Django</a>
-                        <a href="{% url 'logout' %}">Terminar sessão</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="nav-right">
-                <div class="nav-item nav-user-item">
-                    <button type="button" class="user-box nav-toggle">
-                        <div>
-                            <span class="user-label">Utilizador online</span>
-                            <span class="user-name">{{ request.user.username|default:user.username|default:"Utilizador" }}</span>
-                        </div>
-                    </button>
-                    <div class="dropdown dropdown-right">
-                        <a href="{% url 'logout' %}">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
+{% block content %}
     <div class="wrapper">
         <div class="topbar">
             <div>
@@ -120,22 +21,6 @@
             </div>
         </div>
 
-        {% if messages %}
-            <div class="page-messages">
-                {% for message in messages %}
-                    <div class="page-message page-message--{{ message.tags|default:'info' }}" data-message>
-                        <div class="page-message__content">{{ message }}</div>
-                        <button type="button" class="page-message__close" aria-label="Fechar aviso" data-message-close>
-                            ×
-                        </button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        {% block content %}{% endblock %}
+        {% block plataforma_content %}{% endblock %}
     </div>
-    <script src="{% static 'js/plataforma/base.js' %}"></script>
-    {% block extra_scripts %}{% endblock %}
-</body>
-</html>
+{% endblock %}

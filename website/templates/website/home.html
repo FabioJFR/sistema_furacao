@@ -1,135 +1,135 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Furação</title>
+    <title>{% trans "Sistema de Furação" %}</title>
     <link rel="stylesheet" href="{% static 'css/website/home.css' %}">
 </head>
 <body>
     <div class="container">
         <header class="topbar">
             <a href="/" class="brand">
-                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo Sistema de Furação" class="brand-logo">
+                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="{% trans 'Logo Sistema de Furação' %}" class="brand-logo">
                 <div class="brand-text">
-                    <span class="brand-title">Sistema de Furação</span>
-                    <span class="brand-subtitle">Plataforma para Diamond Drilling</span>
+                    <span class="brand-title">{% trans "Sistema de Furação" %}</span>
+                    <span class="brand-subtitle">{% trans "Plataforma para Diamond Drilling" %}</span>
                 </div>
             </a>
 
             <div class="topbar-actions">
-                <a href="/planos/" class="btn btn-light">Ver planos</a>
-                <a href="/login/" class="btn btn-primary">Entrar</a>
+                <a href="/planos/" class="btn btn-light">{% trans "Ver planos" %}</a>
+                <a href="/login/" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>
         </header>
 
         <section class="hero">
             <div>
-                <span class="hero-badge">Plataforma SaaS para Diamond Drilling</span>
-                <h1>Gestão profissional de operações de furação diamantada</h1>
+                <span class="hero-badge">{% trans "Plataforma SaaS para Diamond Drilling" %}</span>
+                <h1>{% trans "Gestão profissional de operações de furação diamantada" %}</h1>
                 <p>
-                    Centraliza projetos, furos, medições, materiais, produção e operação diária
+                    {% blocktrans %}Centraliza projetos, furos, medições, materiais, produção e operação diária
                     numa plataforma preparada para crescer com dashboards avançados, dispositivos
-                    de campo, IA e relatórios inteligentes.
+                    de campo, IA e relatórios inteligentes.{% endblocktrans %}
                 </p>
 
                 <div class="actions">
-                    <a href="/registo/" class="btn btn-primary">Criar conta</a>
-                    <a href="/planos/" class="btn btn-light">Comparar planos</a>
+                    <a href="/registo/" class="btn btn-primary">{% trans "Criar conta" %}</a>
+                    <a href="/planos/" class="btn btn-light">{% trans "Comparar planos" %}</a>
                 </div>
             </div>
 
             <div class="hero-card">
                 <div class="hero-logo-wrap">
-                    <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo Sistema de Furação" class="hero-logo">
+                    <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="{% trans 'Logo Sistema de Furação' %}" class="hero-logo">
                 </div>
 
-                <h3>Visão rápida da plataforma</h3>
+                <h3>{% trans "Visão rápida da plataforma" %}</h3>
 
                 <div class="metric">
-                    <span>Projetos e furos</span>
-                    <strong>Centralizados</strong>
+                    <span>{% trans "Projetos e furos" %}</span>
+                    <strong>{% trans "Centralizados" %}</strong>
                 </div>
                 <div class="metric">
-                    <span>Controlo por empresa</span>
-                    <strong>Multiempresa</strong>
+                    <span>{% trans "Controlo por empresa" %}</span>
+                    <strong>{% trans "Multiempresa" %}</strong>
                 </div>
                 <div class="metric">
-                    <span>Produção e stock</span>
-                    <strong>Tempo real</strong>
+                    <span>{% trans "Produção e stock" %}</span>
+                    <strong>{% trans "Tempo real" %}</strong>
                 </div>
                 <div class="metric">
-                    <span>Evolução futura</span>
-                    <strong>IA + sensores</strong>
+                    <span>{% trans "Evolução futura" %}</span>
+                    <strong>{% trans "IA + sensores" %}</strong>
                 </div>
             </div>
         </section>
 
         <section class="grid">
             <div class="card">
-                <h3>Operação centralizada</h3>
+                <h3>{% trans "Operação centralizada" %}</h3>
                 <p class="muted">
-                    Projetos, furos, materiais, máquinas, medições e dashboards
-                    no mesmo sistema.
+                    {% blocktrans %}Projetos, furos, materiais, máquinas, medições e dashboards
+                    no mesmo sistema.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="card">
-                <h3>Multiempresa</h3>
+                <h3>{% trans "Multiempresa" %}</h3>
                 <p class="muted">
-                    Cada cliente vê apenas os seus próprios dados,
-                    com isolamento total por empresa.
+                    {% blocktrans %}Cada cliente vê apenas os seus próprios dados,
+                    com isolamento total por empresa.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="card">
-                <h3>Preparado para crescer</h3>
+                <h3>{% trans "Preparado para crescer" %}</h3>
                 <p class="muted">
-                    Base preparada para integração com dispositivos,
-                    IA e relatórios inteligentes.
+                    {% blocktrans %}Base preparada para integração com dispositivos,
+                    IA e relatórios inteligentes.{% endblocktrans %}
                 </p>
             </div>
         </section>
 
-        <h2 class="section-title">O que a plataforma permite</h2>
+        <h2 class="section-title">{% trans "O que a plataforma permite" %}</h2>
 
         <section class="features">
             <div class="feature-box">
-                <h3>Gestão operacional</h3>
+                <h3>{% trans "Gestão operacional" %}</h3>
                 <p class="muted">
-                    Acompanha projetos, furos, equipas, máquinas e materiais
-                    com mais organização e rastreabilidade.
+                    {% blocktrans %}Acompanha projetos, furos, equipas, máquinas e materiais
+                    com mais organização e rastreabilidade.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>Análise e produtividade</h3>
+                <h3>{% trans "Análise e produtividade" %}</h3>
                 <p class="muted">
-                    Consolida registos diários e apoia a análise de produtividade,
-                    desempenho e controlo operacional.
+                    {% blocktrans %}Consolida registos diários e apoia a análise de produtividade,
+                    desempenho e controlo operacional.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>Visão técnica</h3>
+                <h3>{% trans "Visão técnica" %}</h3>
                 <p class="muted">
-                    Inclui estrutura para medições, dados técnicos e evolução
-                    futura para integração com sensores e dispositivos.
+                    {% blocktrans %}Inclui estrutura para medições, dados técnicos e evolução
+                    futura para integração com sensores e dispositivos.{% endblocktrans %}
                 </p>
             </div>
 
             <div class="feature-box">
-                <h3>Escalabilidade</h3>
+                <h3>{% trans "Escalabilidade" %}</h3>
                 <p class="muted">
-                    Pensado para crescer de uma operação local para uma
-                    plataforma completa por empresa ou grupo.
+                    {% blocktrans %}Pensado para crescer de uma operação local para uma
+                    plataforma completa por empresa ou grupo.{% endblocktrans %}
                 </p>
             </div>
         </section>
 
         <footer class="footer">
-            © 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling
+            {% trans "© 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling" %}
         </footer>
     </div>
 </body>

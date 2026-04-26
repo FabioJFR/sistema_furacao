@@ -1,6 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Q
@@ -26,19 +27,18 @@ from ..forms.empregado import (
     EmpregadoRegistroForm,
     EmpregadoUpdateForm,
 )
-from projetos.forms.configuracao_perfuracao import ConfiguracaoPerfuracaoEmpregadoForm
-from projetos.models import ConfiguracaoPerfuracaoEmpregado
 from projetos.selectors.configuracao_perfuracao import (
-    obter_configuracao_perfuracao_admin,
-    obter_configuracao_perfuracao_empregado,
     obter_lista_configuracoes_perfuracao_empregado,
 )
 from projetos.selectors.furos import obter_configuracao_visual_furo
 from projetos.selectors.acesso import (
-    obter_contexto_admin_projetos,
     obter_individual_por_user,
     obter_perfil_ativo_por_user,
     resolver_empregado_por_user_ou_email,
+)
+from projetos.services.acesso_contexto import (
+    obter_empregado_autenticado_contexto,
+    obter_empresa_admin_contexto,
 )
 from projetos.selectors.empregados import (
     empregado_tem_acesso_furo,
@@ -65,11 +65,17 @@ from projetos.selectors.empregados import (
     obter_contexto_materiais_disponiveis_empregado,
 )
 from projetos.services.empregados import (
+    apagar_empregado_admin,
     aprovar_empregado,
-    criar_empregado_com_user_form,
-    empregado_ja_tem_projeto_ativo,
+    construir_resumo_registos_projeto_empregado,
+    criar_empregado_admin,
+    guardar_ficheiro_empregado,
+    guardar_ligacao_projeto_empregado,
     registar_utilizador_e_perfil,
+    rejeitar_empregado_pendente,
+    remover_ficheiro_empregado,
     terminar_ligacao_projeto_empregado,
+    atualizar_empregado_admin,
 )
 from projetos.utils.tragetoria import calcular_linha_planeada
 
@@ -77,48 +83,20 @@ logger = logging.getLogger("core")
 
 
 # ---------------- HELPERS ----------------
-def _obter_contexto_admin_empregados(request):
-    logger.debug(
-        "A resolver contexto administrativo em empregados.py. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-
-    perfil = obter_contexto_admin_projetos(request.user)
-    if perfil:
-        logger.info(
-            "Contexto administrativo resolvido via PerfilPlataforma em empregados.py. user_id=%s, empresa_id=%s, tipo_acesso=%s",
-            request.user.id,
-            perfil.empresa_id,
-            perfil.tipo_acesso,
-        )
-        return perfil
-
-    logger.warning(
-        "Falha ao resolver contexto administrativo em empregados.py. user_id=%s",
-        request.user.id,
-    )
-    return None
-
-
-
 def _obter_empresa_admin_empregados(request):
-    contexto_admin = _obter_contexto_admin_empregados(request)
-    if not contexto_admin:
-        messages.error(request, "Não tens permissão para aceder a esta área.")
-        return None, redirect("projetos:redirect_after_login")
-
-    empresa = getattr(contexto_admin, "empresa", None)
-    empresa_id = getattr(contexto_admin, "empresa_id", None)
-
-    if not empresa_id or not empresa:
+    empresa, resposta_erro = obter_empresa_admin_contexto(
+        request=request,
+        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
+        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
+        redirect_sem_permissao="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:dashboard",
+    )
+    if resposta_erro:
         logger.warning(
-            "Contexto administrativo sem empresa em empregados.py. user_id=%s",
+            "Falha ao resolver empresa administrativa em empregados.py. user_id=%s",
             request.user.id,
         )
-        messages.error(request, "O utilizador administrador não está associado a uma empresa.")
-        return None, redirect("projetos:dashboard")
-
+        return None, resposta_erro
     return empresa, None
 
 
@@ -130,27 +108,29 @@ def _obter_empregado_autenticado(request):
         request.user.username,
     )
 
-    empregado = _resolver_empregado_por_user_ou_email(request.user)
-    if not empregado:
+    empregado, ligado_por_fallback, resposta_erro = obter_empregado_autenticado_contexto(
+        request=request,
+        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
+        redirect_sem_empregado="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:redirect_after_login",
+        vincular_por_email=True,
+    )
+    if resposta_erro:
         logger.warning(
             "Utilizador autenticado sem registo em Empregados em empregados.py. user_id=%s",
             request.user.id,
         )
-        messages.error(
-            request,
-            "A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        )
-        return None, redirect("projetos:redirect_after_login")
+        return None, resposta_erro
 
-    if not empregado.empresa_id:
+    if ligado_por_fallback:
         logger.warning(
-            "Empregado sem empresa associada em empregados.py. user_id=%s, empregado_id=%s",
+            "Ligação automática User -> Empregados executada em empregados.py. user_id=%s, empregado_id=%s, empresa_id=%s, email='%s'",
             request.user.id,
             empregado.id,
+            empregado.empresa_id,
+            getattr(request.user, "email", ""),
         )
-        messages.error(request, "A tua conta não está associada a uma empresa. Contacta o administrador.")
-        return None, redirect("projetos:redirect_after_login")
-
     return empregado, None
 
 
@@ -271,7 +251,7 @@ def empregado_create(request):
 
     if request.method == "POST" and form.is_valid():
         try:
-            user, empregado = criar_empregado_com_user_form(form=form, empresa=empresa)
+            user, empregado = criar_empregado_admin(form=form, empresa=empresa)
             logger.info(
                 "Ligação criada em empregado_create. user_id=%s, empregado_id=%s, empregado_user_id=%s, empresa_id=%s",
                 user.id,
@@ -381,10 +361,7 @@ def empregado_update(request, pk):
             empresa=empresa,
         )
         if form.is_valid():
-            empregado = form.save(commit=False)
-            empregado.empresa = empresa
-            empregado.save()
-            form.save_m2m()
+            empregado = atualizar_empregado_admin(form=form, empresa=empresa)
             logger.info(
                 "Empregado atualizado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
                 request.user.id,
@@ -424,8 +401,7 @@ def empregado_delete(request, pk):
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
-        empregado_id = empregado.id
-        empregado.delete()
+        empregado_id = apagar_empregado_admin(empregado=empregado, empresa=empresa)
         logger.info(
             "Empregado apagado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
             request.user.id,
@@ -460,26 +436,24 @@ def empregado_adicionar_projeto(request, pk):
     if request.method == "POST":
         form = EmpregadoProjetoForm(request.POST, empresa=empresa, empregado=empregado)
         if form.is_valid():
-            ligacao = form.save(commit=False)
-            ligacao.empregado = empregado
-            ligacao.empresa = empresa
-
-            existe_ativa = empregado_ja_tem_projeto_ativo(
-                empregado=empregado,
-                projeto=ligacao.projeto,
-                empresa=empresa,
-            )
-
-            if ligacao.ativo and existe_ativa:
+            try:
+                ligacao = guardar_ligacao_projeto_empregado(
+                    empregado=empregado,
+                    empresa=empresa,
+                    projeto=form.cleaned_data["projeto"],
+                    ativo=form.cleaned_data.get("ativo", True),
+                    data_inicio=form.cleaned_data.get("data_inicio"),
+                    data_fim=form.cleaned_data.get("data_fim"),
+                )
+            except ValidationError as exc:
                 logger.warning(
-                    "Tentativa de associação duplicada ativa em empregado_adicionar_projeto. user_id=%s, empregado_id=%s, projeto_id=%s",
+                    "Tentativa inválida em empregado_adicionar_projeto. user_id=%s, empregado_id=%s, erro=%s",
                     request.user.id,
                     empregado.id,
-                    ligacao.projeto_id,
+                    exc,
                 )
-                form.add_error("projeto", "Este empregado já está associado de forma ativa a este projeto.")
+                form.add_error("projeto", str(exc))
             else:
-                ligacao.save()
                 logger.info(
                     "Projeto associado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
                     request.user.id,
@@ -534,27 +508,25 @@ def empregado_editar_projeto(request, pk, ligacao_id):
             empregado=empregado,
         )
         if form.is_valid():
-            nova_ligacao = form.save(commit=False)
-            nova_ligacao.empregado = empregado
-            nova_ligacao.empresa = empresa
-
-            existe_ativa = empregado_ja_tem_projeto_ativo(
-                empregado=empregado,
-                projeto=nova_ligacao.projeto,
-                excluir_ligacao_id=ligacao.id,
-                empresa=empresa,
-            )
-
-            if nova_ligacao.ativo and existe_ativa:
+            try:
+                nova_ligacao = guardar_ligacao_projeto_empregado(
+                    ligacao=ligacao,
+                    empregado=empregado,
+                    empresa=empresa,
+                    projeto=form.cleaned_data["projeto"],
+                    ativo=form.cleaned_data.get("ativo", ligacao.ativo),
+                    data_inicio=form.cleaned_data.get("data_inicio"),
+                    data_fim=form.cleaned_data.get("data_fim"),
+                )
+            except ValidationError as exc:
                 logger.warning(
-                    "Tentativa de edição com associação ativa duplicada em empregado_editar_projeto. user_id=%s, empregado_id=%s, projeto_id=%s",
+                    "Tentativa inválida em empregado_editar_projeto. user_id=%s, empregado_id=%s, erro=%s",
                     request.user.id,
                     empregado.id,
-                    nova_ligacao.projeto_id,
+                    exc,
                 )
-                form.add_error("projeto", "Este empregado já está associado de forma ativa a este projeto.")
+                form.add_error("projeto", str(exc))
             else:
-                nova_ligacao.save()
                 logger.info(
                     "Ligação projeto/empregado atualizada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
                     request.user.id,
@@ -644,10 +616,11 @@ def empregado_adicionar_ficheiro(request, pk):
     if request.method == "POST":
         form = EmpregadoFicheiroForm(request.POST, request.FILES)
         if form.is_valid():
-            ficheiro = form.save(commit=False)
-            ficheiro.empregado = empregado
-            ficheiro.empresa = empresa
-            ficheiro.save()
+            ficheiro = guardar_ficheiro_empregado(
+                form=form,
+                empregado=empregado,
+                empresa=empresa,
+            )
             logger.info(
                 "Ficheiro adicionado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
                 request.user.id,
@@ -695,10 +668,7 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
     ficheiro = obter_ficheiro_empregado_admin(ficheiro_id, empregado, empresa)
 
     if request.method == "POST":
-        ficheiro_id_removido = ficheiro.id
-        if ficheiro.ficheiro:
-            ficheiro.ficheiro.delete(save=False)
-        ficheiro.delete()
+        ficheiro_id_removido = remover_ficheiro_empregado(ficheiro=ficheiro)
         logger.info(
             "Ficheiro removido do empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
             request.user.id,
@@ -792,21 +762,13 @@ def empregado_rejeitar(request, pk):
     empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
-        user = empregado.user
-        empregado_nome = empregado.nome
-        empregado_id = empregado.id
-
-        if user:
-            user.is_active = False
-            user.save(update_fields=["is_active"])
-
-        empregado.delete()
+        resultado = rejeitar_empregado_pendente(empregado=empregado, empresa=empresa)
         logger.info(
             "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
             request.user.id,
             empresa.id,
-            empregado_id,
-            empregado_nome,
+            resultado["empregado_id"],
+            resultado["empregado_nome"],
         )
         messages.success(request, "Registo do empregado rejeitado com sucesso.")
         return redirect("projetos:empregado_pendentes")
@@ -1093,11 +1055,7 @@ def projeto_detail_empregado(request, pk):
     trabalhadores_envolvidos = obter_trabalhadores_envolvidos_projeto_empregado(empregado, projeto)
 
     registos = obter_registos_projeto_empregado(empregado, projeto)
-
-    total_metros = sum(r.metros_furados or 0 for r in registos)
-    total_horas = sum(r.horas_trabalhadas or 0 for r in registos)
-    total_registos = registos.count()
-    media_metros_hora = round(total_metros / total_horas, 2) if total_horas else 0
+    resumo_registos = construir_resumo_registos_projeto_empregado(registos=registos)
 
     logger.info(
         "View projeto_detail_empregado carregada com sucesso. user_id=%s, empregado_id=%s, projeto_id=%s",
@@ -1110,10 +1068,7 @@ def projeto_detail_empregado(request, pk):
         "projeto": projeto,
         "furos": furos,
         "trabalhadores_envolvidos": trabalhadores_envolvidos,
-        "total_metros": round(total_metros, 2),
-        "total_horas": round(total_horas, 2),
-        "total_registos": total_registos,
-        "media_metros_hora": media_metros_hora,
+        **resumo_registos,
     })
 
 @login_required
@@ -1257,292 +1212,6 @@ def redirect_after_login(request):
 
 def redirect_view(request):
     return redirect_after_login(request)
-
-
-
-# -------- CONFIGURAÇÃO PERFURAÇÃO ------------------
-
-@login_required
-@empregado_required
-def configuracao_perfuracao_list_empregado(request):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_list_empregado. user_id=%s, username='%s'",
-        request.user.id,
-        request.user.username,
-    )
-    empregado, resposta_erro = _obter_empregado_autenticado(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_list_empregado. user_id=%s", request.user.id)
-        return resposta_erro
-
-    configuracoes = obter_lista_configuracoes_perfuracao_empregado(
-        empregado,
-        empresa=empregado.empresa,
-    )
-
-    logger.info(
-        "View configuracao_perfuracao_list_empregado carregada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, total_configuracoes=%s",
-        request.user.id,
-        empregado.id,
-        empregado.empresa_id,
-        configuracoes.count() if hasattr(configuracoes, "count") else "n/a",
-    )
-    return render(request, "projetos/configuracao_perfuracao_list.html", {
-        "empregado": empregado,
-        "configuracoes": configuracoes,
-        "modo_admin": False,
-    })
-
-
-@login_required
-@empregado_required
-def configuracao_perfuracao_create_empregado(request):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_create_empregado. user_id=%s, username='%s', method=%s",
-        request.user.id,
-        request.user.username,
-        request.method,
-    )
-    empregado, resposta_erro = _obter_empregado_autenticado(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_empregado. user_id=%s", request.user.id)
-        return resposta_erro
-
-    if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
-        if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.atualizado_por = request.user
-            configuracao.empresa = empregado.empresa
-            configuracao.save()
-
-            logger.info(
-                "Configuração de perfuração criada com sucesso por empregado. user_id=%s, empregado_id=%s, empresa_id=%s, configuracao_id=%s",
-                request.user.id,
-                empregado.id,
-                empregado.empresa_id,
-                configuracao.id,
-            )
-            messages.success(request, "Configuração de perfuração criada com sucesso.")
-            return redirect("projetos:configuracao_perfuracao_list_empregado")
-
-        logger.warning(
-            "Erro ao criar configuração de perfuração por empregado. user_id=%s, empregado_id=%s, erros=%s",
-            request.user.id,
-            empregado.id,
-            form.errors,
-        )
-        messages.error(request, "Erro ao criar a configuração de perfuração.")
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
-
-    return render(request, "projetos/configuracao_perfuracao_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": "Nova Configuração de Perfuração",
-        "modo_admin": False,
-    })
-
-
-@login_required
-@empregado_required
-def configuracao_perfuracao_update_empregado(request, pk):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_update_empregado. user_id=%s, username='%s', configuracao_pk=%s, method=%s",
-        request.user.id,
-        request.user.username,
-        pk,
-        request.method,
-    )
-    empregado, resposta_erro = _obter_empregado_autenticado(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_empregado. user_id=%s", request.user.id)
-        return resposta_erro
-
-    configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
-
-    if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            request.POST,
-            instance=configuracao,
-            empregado=empregado,
-        )
-        if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.atualizado_por = request.user
-            configuracao.empresa = empregado.empresa
-            configuracao.save()
-
-            logger.info(
-                "Configuração de perfuração atualizada com sucesso por empregado. user_id=%s, empregado_id=%s, empresa_id=%s, configuracao_id=%s",
-                request.user.id,
-                empregado.id,
-                empregado.empresa_id,
-                configuracao.id,
-            )
-            messages.success(request, "Configuração de perfuração atualizada com sucesso.")
-            return redirect("projetos:configuracao_perfuracao_list_empregado")
-
-        logger.warning(
-            "Erro ao atualizar configuração de perfuração por empregado. user_id=%s, configuracao_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
-        )
-        messages.error(request, "Erro ao atualizar a configuração de perfuração.")
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            instance=configuracao,
-            empregado=empregado,
-        )
-
-    return render(request, "projetos/configuracao_perfuracao_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": f"Editar Configuração - {configuracao.furo.nome}",
-        "modo_admin": False,
-    })
-
-
-@login_required
-@admin_required
-def configuracao_perfuracao_list_admin(request, pk):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_list_admin. user_id=%s, username='%s', empregado_pk=%s",
-        request.user.id,
-        request.user.username,
-        pk,
-    )
-    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_list_admin. user_id=%s", request.user.id)
-        return resposta_erro
-
-    empregado = obter_empregado_admin_por_pk(pk, empresa)
-    configuracoes = obter_lista_configuracoes_perfuracao_empregado(
-        empregado,
-        empresa=empresa,
-    )
-
-    logger.info(
-        "View configuracao_perfuracao_list_admin carregada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
-        request.user.id,
-        empresa.id,
-        empregado.id,
-    )
-    return render(request, "projetos/configuracao_perfuracao_list.html", {
-        "empregado": empregado,
-        "configuracoes": configuracoes,
-        "modo_admin": True,
-    })
-
-
-@login_required
-@admin_required
-def configuracao_perfuracao_create_admin(request, pk):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_create_admin. user_id=%s, username='%s', empregado_pk=%s, method=%s",
-        request.user.id,
-        request.user.username,
-        pk,
-        request.method,
-    )
-    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_admin. user_id=%s", request.user.id)
-        return resposta_erro
-
-    empregado = obter_empregado_admin_por_pk(pk, empresa)
-
-    if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
-        if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.atualizado_por = request.user
-            configuracao.empresa = empresa
-            configuracao.save()
-
-            logger.info(
-                "Configuração de perfuração criada com sucesso por admin. user_id=%s, empresa_id=%s, configuracao_id=%s, empregado_id=%s",
-                request.user.id,
-                empresa.id,
-                configuracao.id,
-                empregado.id,
-            )
-            messages.success(request, "Configuração de perfuração criada com sucesso.")
-            return redirect("projetos:configuracao_perfuracao_list_admin", pk=empregado.pk)
-
-        logger.warning("Erro ao criar configuração de perfuração por admin. user_id=%s, erros=%s", request.user.id, form.errors)
-        messages.error(request, "Erro ao criar a configuração de perfuração.")
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
-
-    return render(request, "projetos/configuracao_perfuracao_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": f"Nova Configuração - {empregado.nome}",
-        "modo_admin": True,
-    })
-
-
-@login_required
-@admin_required
-def configuracao_perfuracao_update_admin(request, pk):
-    logger.info(
-        "Entrada na view configuracao_perfuracao_update_admin. user_id=%s, username='%s', configuracao_pk=%s, method=%s",
-        request.user.id,
-        request.user.username,
-        pk,
-        request.method,
-    )
-    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view configuracao_perfuracao_update_admin. user_id=%s", request.user.id)
-        return resposta_erro
-
-    configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
-    empregado = configuracao.empregado
-
-    if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            request.POST,
-            instance=configuracao,
-            empregado=empregado
-        )
-        if form.is_valid():
-            configuracao = form.save(commit=False)
-            configuracao.empregado = empregado
-            configuracao.atualizado_por = request.user
-            configuracao.empresa = empresa
-            configuracao.save()
-
-            logger.info(
-                "Configuração de perfuração atualizada com sucesso por admin. user_id=%s, empresa_id=%s, configuracao_id=%s, empregado_id=%s",
-                request.user.id,
-                empresa.id,
-                configuracao.id,
-                empregado.id,
-            )
-            messages.success(request, "Configuração de perfuração atualizada com sucesso.")
-            return redirect("projetos:configuracao_perfuracao_list_admin", pk=empregado.pk)
-
-        logger.warning("Erro ao atualizar configuração de perfuração por admin. user_id=%s, configuracao_pk=%s, erros=%s", request.user.id, pk, form.errors)
-        messages.error(request, "Erro ao atualizar a configuração de perfuração.")
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            instance=configuracao,
-            empregado=empregado
-        )
-
-    return render(request, "projetos/configuracao_perfuracao_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": f"Editar Configuração - {configuracao.furo.nome}",
-        "modo_admin": True,
-    })
 
 
 # ------ MATERIAIS EMPREGADO ------- # 

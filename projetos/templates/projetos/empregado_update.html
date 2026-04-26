@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load static %}
+{% load static  i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -21,7 +21,7 @@
             {% endif %}
 
             <div>
-                <label for="id_nome" class="block font-semibold mb-1">Nome</label>
+                <label for="id_nome" class="block font-semibold mb-1">{% trans "Nome" %}</label>
                 {{ form.nome }}
                 {% if form.nome.errors %}
                     <div class="eu-errors">{{ form.nome.errors }}</div>
@@ -29,7 +29,7 @@
             </div>
 
             <div>
-                <label for="id_funcao" class="block font-semibold mb-1">Função</label>
+                <label for="id_funcao" class="block font-semibold mb-1">{% trans "Função" %}</label>
                 {{ form.funcao }}
                 {% if form.funcao.errors %}
                     <div class="eu-errors">{{ form.funcao.errors }}</div>
@@ -37,7 +37,7 @@
             </div>
 
             <div>
-                <label for="id_email" class="block font-semibold mb-1">Email</label>
+                <label for="id_email" class="block font-semibold mb-1">{% trans "Email" %}</label>
                 {{ form.email }}
                 {% if form.email.errors %}
                     <div class="eu-errors">{{ form.email.errors }}</div>
@@ -45,7 +45,7 @@
             </div>
 
             <div>
-                <label for="id_data_admissao" class="block font-semibold mb-1">Data de Admissão</label>
+                <label for="id_data_admissao" class="block font-semibold mb-1">{% trans "Data de Admissão" %}</label>
                 {{ form.data_admissao }}
                 {% if form.data_admissao.errors %}
                     <div class="eu-errors">{{ form.data_admissao.errors }}</div>
@@ -53,13 +53,13 @@
             </div>
 
             <button type="submit" class="eu-btn-save">
-                💾 Salvar Alterações
+                💾 {% trans "Salvar Alterações" %}
             </button>
         </form>
 
         <div class="eu-footer">
             <a href="{% url 'projetos:empregados_list' %}" class="eu-link-back">
-                🔙 Voltar à Lista
+                🔙 {% trans "Voltar à Lista" %}
             </a>
         </div>
     </div>

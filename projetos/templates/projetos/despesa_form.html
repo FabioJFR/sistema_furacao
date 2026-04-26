@@ -1,0 +1,85 @@
+{% extends "projetos/base.html" %}
+{% load widget_tweaks  i18n %}
+
+{% block title %}
+    {% if titulo %}
+        {{ titulo }}
+    {% else %}
+        {% trans "Adicionar despesa" %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="sf-page">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            💶
+            {% if titulo %}
+                {{ titulo }}
+            {% else %}
+                {% trans "Adicionar despesa" %}
+            {% endif %}
+        </h1>
+        <p class="text-sm text-gray-600 mt-1">{% trans "Regista uma nova despesa associada ao modelo financeiro." %}</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5 sf-panel">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Categoria" %}</label>
+                {{ form.categoria|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Tipo" %}</label>
+                {{ form.tipo|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Descrição" %}</label>
+                {{ form.descricao|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Valor (€)" %}</label>
+                {{ form.valor|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Data" %}</label>
+                {{ form.data|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Projeto" %}</label>
+                {{ form.projeto|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Furo" %}</label>
+                {{ form.furo|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Máquina" %}</label>
+                {{ form.maquina|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Comprovativo" %}</label>
+                {{ form.comprovativo|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Observações" %}</label>
+                {{ form.observacoes|add_class:"w-full p-2 border rounded bg-white" }}
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+                {% trans "Guardar despesa" %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
