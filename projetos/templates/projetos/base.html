@@ -118,6 +118,9 @@
                             <a href="{% url 'projetos:despesa_create_admin' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
                             <a href="{% url 'projetos:definicoes_financeiras_admin' %}" role="menuitem">⚙️ {% trans "Definições financeiras" %}</a>
                             <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">📊 {% trans "Finanças da Plataforma" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:financas_paypal_config' %}" role="menuitem">🅿️ {% trans "Conta PayPal" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -250,6 +253,9 @@
                             <a href="{% url 'projetos:despesa_list_admin' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
                             <a href="{% url 'projetos:despesa_create_admin' %}" role="menuitem">➕ {% trans "Adicionar despesa" %}</a>
                             <a href="{% url 'projetos:definicoes_financeiras_admin' %}" role="menuitem">⚙️ {% trans "Definições financeiras" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:financas_paypal_config' %}" role="menuitem">🅿️ {% trans "Conta PayPal" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 

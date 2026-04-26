@@ -92,11 +92,6 @@ def alterar_plano_empresa(*, empresa, subscricao_atual, novo_plano, ciclo_subscr
 
     if int(ciclo_subscricao) not in novo_plano.periodos_cobranca_disponiveis_normalizados:
         return ResultadoAlteracaoPlano(ok=False, erro="O plano selecionado não permite esse período de pagamento.")
-    if int(ciclo_subscricao) in [1, 3, 6] and not novo_plano.preco_mensal:
-        return ResultadoAlteracaoPlano(ok=False, erro="O plano selecionado precisa de preço mensal para esse período.")
-    if int(ciclo_subscricao) == 12 and not novo_plano.preco_anual and not novo_plano.preco_mensal:
-        return ResultadoAlteracaoPlano(ok=False, erro="O plano selecionado precisa de preço anual ou mensal para 12 meses.")
-
     empresa.plano = novo_plano
     empresa.status = estado_empresa
     empresa.save(update_fields=["plano", "status", "atualizado_em"])
@@ -132,4 +127,3 @@ def toggle_ativa_empresa(empresa):
 
     empresa.save(update_fields=["ativo", "status", "atualizado_em"])
     return empresa, mensagem
-

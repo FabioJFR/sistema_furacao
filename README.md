@@ -348,10 +348,13 @@ Definir no `.env` de produção (obrigatório):
 - `DJANGO_SECRET_KEY` forte e única
 - `DJANGO_DEBUG=False`
 - `DJANGO_ALLOWED_HOSTS` com domínio/IP real
+- `DJANGO_CSRF_TRUSTED_ORIGINS` com URLs HTTPS reais
 - `DJANGO_SECURE_SSL_REDIRECT=True`
 - `DJANGO_SESSION_COOKIE_SECURE=True`
 - `DJANGO_CSRF_COOKIE_SECURE=True`
 - `DJANGO_SECURE_HSTS_SECONDS=31536000`
+- `DJANGO_USE_X_FORWARDED_PROTO=True`
+- `DJANGO_USE_X_FORWARDED_HOST=True`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
 
 Comandos de validação e preparação:
@@ -368,6 +371,10 @@ Notas importantes:
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`
 - validar uploads, login e páginas críticas após deploy
 - manter backup da base de dados antes de cada atualização
+- ficheiros base para produção no repositório:
+  - `deploy/systemd/sistema_furacao.service`
+  - `deploy/nginx/sistema_furacao.conf.example`
+  - `docs/deploy_producao.md`
 
 ---
 

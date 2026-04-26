@@ -1,0 +1,57 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block page_description %}
+Define os dados da conta PayPal usada para receber pagamentos na plataforma.
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'plataforma:financas_analytics' %}" class="btn btn-light">← Voltar às finanças</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="card">
+    <div class="section-title">
+        <div>
+            <h2>Conta PayPal</h2>
+            <p>Esta área é exclusiva de superuser. Os dados ficam guardados na base de dados da plataforma.</p>
+        </div>
+    </div>
+
+    <form method="post" class="finance-form-grid">
+        {% csrf_token %}
+        <div class="finance-form-field">
+            <label for="{{ form.paypal_email.id_for_label }}">Email PayPal</label>
+            {{ form.paypal_email }}
+            {% if form.paypal_email.errors %}
+                <div class="finance-error">{{ form.paypal_email.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="finance-form-field">
+            <label for="{{ form.paypal_password.id_for_label }}">Palavra-passe PayPal</label>
+            {{ form.paypal_password }}
+            {% if form.paypal_password.errors %}
+                <div class="finance-error">{{ form.paypal_password.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="finance-form-field finance-form-field--full">
+            <label>
+                {{ form.ativo }}
+                Conta PayPal ativa para recebimentos
+            </label>
+            {% if form.ativo.errors %}
+                <div class="finance-error">{{ form.ativo.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="finance-form-actions">
+            <button type="submit" class="btn btn-primary">Guardar configuração</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

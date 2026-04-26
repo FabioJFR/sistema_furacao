@@ -35,13 +35,24 @@ def env_bool(name, default=False):
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def env_list(name, default=""):
+    raw = env(name, default) or ""
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY em falta. Define a variável no ambiente/.env.")
 
 DEBUG = env_bool("DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = [host.strip() for host in env("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+
+if not DEBUG and not ALLOWED_HOSTS:
+    raise RuntimeError(
+        "DJANGO_ALLOWED_HOSTS em falta. Define os hosts válidos no ambiente/.env."
+    )
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -170,6 +181,13 @@ LOGOUT_REDIRECT_URL = '/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@sistemafuracao.local'
 
+# Pagamentos (PayPal) - base de configuração para integração de checkout.
+PAYPAL_ENABLED = env_bool("PAYPAL_ENABLED", False)
+PAYPAL_MODE = env("PAYPAL_MODE", "sandbox")  # sandbox | live
+PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", "")
+PAYPAL_CLIENT_SECRET = env("PAYPAL_CLIENT_SECRET", "")
+PAYPAL_WEBHOOK_ID = env("PAYPAL_WEBHOOK_ID", "")
+
 # Segurança (produção): controlada por variáveis de ambiente para manter
 # desenvolvimento local simples e deploy endurecido.
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
@@ -179,6 +197,9 @@ SECURE_HSTS_SECONDS = int(env("DJANGO_SECURE_HSTS_SECONDS", "0"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
 SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
 SECURE_REFERRER_POLICY = env("DJANGO_SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin")
+if env_bool("DJANGO_USE_X_FORWARDED_PROTO", not DEBUG):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = env_bool("DJANGO_USE_X_FORWARDED_HOST", not DEBUG)
 
 
 LOG_DIR = BASE_DIR / "logs"

@@ -1,5 +1,6 @@
 from .empresa import *
 from .feature_flag import *
+from .configuracao_pagamento import *
 from .perfil_plataforma import *
 from .plano import *
 from .pagamento_empresa import *

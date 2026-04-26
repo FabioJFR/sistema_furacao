@@ -193,18 +193,6 @@ class OnboardingEmpresaForm(forms.Form):
                 "O plano selecionado não permite esse período de cobrança.",
             )
 
-        if criar_subscricao_inicial and plano and int(ciclo_subscricao) in [1, 3, 6] and not plano.preco_mensal:
-            self.add_error(
-                "ciclo_subscricao",
-                "O plano selecionado precisa de preço mensal para períodos de 1, 3 ou 6 meses.",
-            )
-
-        if criar_subscricao_inicial and plano and int(ciclo_subscricao) == 12 and not plano.preco_anual and not plano.preco_mensal:
-            self.add_error(
-                "ciclo_subscricao",
-                "O plano selecionado precisa de preço anual ou mensal para 12 meses.",
-            )
-
         valor_calculado = self._calcular_valor_plano(plano, ciclo_subscricao)
 
         if criar_subscricao_inicial:

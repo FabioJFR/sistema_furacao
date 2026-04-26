@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn - Sistema Furacao
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/var/www/sistema_furacao
+Environment="PATH=/var/www/sistema_furacao/.venv/bin"
+ExecStart=/var/www/sistema_furacao/.venv/bin/gunicorn core.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

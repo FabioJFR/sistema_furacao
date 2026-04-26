@@ -97,16 +97,16 @@ class PlanoForm(forms.ModelForm):
                 "O plano deve permitir pelo menos um período de cobrança."
             )
 
-        if any(periodo in [1, 3, 6] for periodo in periodos) and (preco_mensal is None or preco_mensal <= 0):
+        if any(periodo in [1, 3, 6] for periodo in periodos) and preco_mensal is None:
             self.add_error(
                 "preco_mensal",
-                "Indique um preço mensal válido para planos com cobrança de 1, 3 ou 6 meses.",
+                "Indique um preço mensal (pode ser 0 para plano gratuito) para cobrança de 1, 3 ou 6 meses.",
             )
 
-        if 12 in periodos and (preco_anual is None or preco_anual <= 0) and (preco_mensal is None or preco_mensal <= 0):
+        if 12 in periodos and preco_anual is None and preco_mensal is None:
             self.add_error(
                 "preco_anual",
-                "Indique um preço anual válido para planos de 12 meses, ou pelo menos um preço mensal para calcular o valor.",
+                "Indique preço anual ou mensal (podem ser 0 para plano gratuito) para planos de 12 meses.",
             )
 
         if tipo == "individual":

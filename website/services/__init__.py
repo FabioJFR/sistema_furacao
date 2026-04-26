@@ -81,11 +81,6 @@ def validar_pedido_registo(payload):
             erros.append("O plano escolhido exige conta do tipo individual.")
         if periodo_meses not in plano.periodos_cobranca_disponiveis_normalizados:
             erros.append("Seleciona um período de pagamento válido para o plano escolhido.")
-        if periodo_meses in [1, 3, 6] and not plano.preco_mensal:
-            erros.append("O plano escolhido precisa de preço mensal para esse período.")
-        if periodo_meses == 12 and not plano.preco_anual and not plano.preco_mensal:
-            erros.append("O plano escolhido precisa de preço anual ou mensal para 12 meses.")
-
     if tipo_conta == "empresa" and not nome_empresa:
         erros.append("O nome da empresa é obrigatório para conta empresa.")
 
@@ -206,4 +201,3 @@ def executar_registo(payload):
         )
 
     return ResultadoRegisto(sucesso=True, erros=[], user_id=user.id, tipo_conta=tipo_conta)
-

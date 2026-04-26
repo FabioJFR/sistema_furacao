@@ -48,6 +48,7 @@ class MovimentoFinanceiroPlataforma(models.Model):
 
     METODO_PAGAMENTO_CHOICES = [
         ("manual", "Manual"),
+        ("paypal", "PayPal"),
         ("transferencia", "Transferência"),
         ("referencia", "Referência"),
         ("debito_direto", "Débito direto"),

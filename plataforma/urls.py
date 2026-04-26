@@ -11,7 +11,11 @@ from plataforma.views.planos import plano_list, plano_create, plano_update, plan
 from plataforma.views.subscricoes import subscricao_list
 from plataforma.views.financas import (
     financas_analytics,
+    financas_paypal_cancelado,
     financas_entrada_list,
+    financas_paypal_config,
+    financas_paypal_checkout_pagamento,
+    financas_paypal_retorno,
     financas_saida_list,
 )
 from plataforma.views.features import features_dashboard
@@ -37,6 +41,14 @@ urlpatterns = [
     path("financas/saidas/", financas_saida_list, name="financas_saida_list"),
     path("financas/saidas/<uuid:pk>/editar/", financas_saida_list, name="financas_saida_update"),
     path("financas/analytics/", financas_analytics, name="financas_analytics"),
+    path("financas/paypal/config/", financas_paypal_config, name="financas_paypal_config"),
+    path(
+        "financas/paypal/pagamento/<uuid:pk>/checkout/",
+        financas_paypal_checkout_pagamento,
+        name="financas_paypal_checkout_pagamento",
+    ),
+    path("financas/paypal/retorno/", financas_paypal_retorno, name="financas_paypal_retorno"),
+    path("financas/paypal/cancelado/", financas_paypal_cancelado, name="financas_paypal_cancelado"),
     path("features/", features_dashboard, name="features_dashboard"),
     path("uteis/", uteis_dashboard, name="uteis_dashboard"),
     path("uteis/export-ai/<slug:scope>/", uteis_export_ai_json, name="uteis_export_ai_json"),

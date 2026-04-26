@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db.models import Q, Sum
 
-from plataforma.models import MovimentoFinanceiroPlataforma
+from plataforma.models import ConfiguracaoPagamentoPlataforma, MovimentoFinanceiroPlataforma
 
 
 NATUREZA_ENTRADA = "entrada"
@@ -64,3 +64,8 @@ def obter_metricas_analytics_financas(queryset):
         "movimentos_pendentes": queryset.filter(estado="pendente").count(),
         "movimentos_pagos": queryset.filter(estado="pago").count(),
     }
+
+
+def obter_configuracao_paypal_principal():
+    configuracao, _ = ConfiguracaoPagamentoPlataforma.objects.get_or_create(nome="principal")
+    return configuracao

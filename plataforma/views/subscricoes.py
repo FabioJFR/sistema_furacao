@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from plataforma.decorators import platform_admin_required
-from plataforma.selectors.subscricoes import listar_subscricoes, obter_metricas_subscricoes
+from plataforma.selectors.subscricoes import (
+    listar_subscricoes,
+    mapear_pagamentos_pendentes_por_subscricao,
+    obter_metricas_subscricoes,
+)
 
 
 # TODO futuro:
@@ -18,12 +22,15 @@ from plataforma.selectors.subscricoes import listar_subscricoes, obter_metricas_
 @login_required
 @platform_admin_required
 def subscricao_list(request):
-    subscricoes = listar_subscricoes()
+    subscricoes = list(listar_subscricoes())
+    pagamentos_pendentes = mapear_pagamentos_pendentes_por_subscricao(subscricoes)
+    for subscricao in subscricoes:
+        subscricao.pagamento_pendente = pagamentos_pendentes.get(str(subscricao.pk))
 
     # TODO futuro:
     # - adicionar filtros por estado, plano e intervalo de datas
     # - adicionar pesquisa por empresa
-    metricas = obter_metricas_subscricoes(subscricoes)
+    metricas = obter_metricas_subscricoes(listar_subscricoes())
 
     context = {
         "perfil": request.perfil_plataforma,
