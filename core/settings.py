@@ -209,7 +209,7 @@ if env_bool("DJANGO_USE_X_FORWARDED_PROTO", not DEBUG):
 USE_X_FORWARDED_HOST = env_bool("DJANGO_USE_X_FORWARDED_HOST", not DEBUG)
 
 
-LOG_DIR = BASE_DIR / "logs"
+LOG_DIR = Path(env("DJANGO_LOG_DIR", str(BASE_DIR / "logs")))
 os.makedirs(LOG_DIR, exist_ok=True)
 
 LOGGING = {
