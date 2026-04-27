@@ -11,10 +11,10 @@
     <div class="furo-3d-card">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-slate-50">
+                <h1 class="furo-3d-title">
                     {% blocktrans with nome=furo.nome %}Furo 3D Geológico: {{ nome }}{% endblocktrans %}
                 </h1>
-                <p class="mt-2 text-sm text-slate-300">
+                <p class="furo-3d-subtitle">
                     {% trans "Explora a trajetória real e planeada do furo com filtros visuais, camadas e destaque de dogleg." %}
                 </p>
             </div>
@@ -33,8 +33,8 @@
             <div class="furo-3d-stat"><span>Estado Máximo</span><strong>{{ estado_max }}</strong></div>
         </div>
 
-        <div class="furo-3d-grid">
-            <aside class="furo-3d-panel">
+        <div class="furo-3d-layout">
+            <section class="furo-3d-panel furo-3d-panel-top">
                 <div class="furo-3d-section">
                     <h3>{% trans "Modo de visualização" %}</h3>
                     <div class="furo-3d-control furo-3d-control-block">
@@ -46,6 +46,21 @@
                     </div>
                     <p class="furo-3d-note">
                         Alterna rapidamente entre a execução real, o planeamento e a comparação entre ambos.
+                    </p>
+                </div>
+
+                <div class="furo-3d-section">
+                    <h3>Legenda do gráfico e dogleg</h3>
+                    <div class="furo-3d-legend">
+                        <span class="legend-ok">OK</span>
+                        <span class="legend-warn">Atenção</span>
+                        <span class="legend-critical">Crítico</span>
+                        <span class="legend-plan">Planeado até última medição</span>
+                        <span class="legend-final">Planeado final</span>
+                        <span class="legend-vetores">Vetores de direção</span>
+                    </div>
+                    <p class="furo-3d-note">
+                        O dogleg está representado por cores nos pontos da trajetória real (verde → amarelo → vermelho).
                     </p>
                 </div>
 
@@ -98,7 +113,60 @@
                         Limita a visualização a um troço específico da profundidade real e planeada do furo.
                     </p>
                 </div>
+            </section>
 
+            <section class="furo-3d-main">
+                <div class="furo-3d-plot-wrap">
+                    <div class="furo-3d-camera-overlay">
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="iso">Isométrica</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="top">Topo</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="side">Lateral</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="front">Frontal</button>
+                    </div>
+                    <div id="grafico" class="furo-3d-plot">
+                        {% if graph %}
+                            {{ graph|safe }}
+                        {% else %}
+                            <div class="text-center py-16">
+                                <h3 class="text-2xl font-bold text-gray-900">Sem dados suficientes</h3>
+                                <p class="mt-3 text-gray-600">Adiciona medições para visualizar o furo em 3D.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="furo-3d-info-grid">
+                    <div class="furo-3d-info-box">
+                        <h4>Top 5 doglegs</h4>
+                        <div id="topDoglegsList" class="text-sm text-gray-600">
+                            <div class="text-sm text-gray-600">Sem dados suficientes.</div>
+                        </div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Planeamento Inicial</h4>
+                        <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
+                        <div><strong>Inclinação inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
+                        <div><strong>Azimute inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Planeamento Atual</h4>
+                        <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
+                        <div><strong>Inclinação atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
+                        <div><strong>Azimute atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
+                    </div>
+                    <div class="furo-3d-info-box">
+                        <h4>Estado Real Atual</h4>
+                        <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
+                        <div><strong>Inclinação real:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
+                        <div><strong>Azimute real:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
+                    </div>
+                </div>
+                <p class="furo-3d-note furo-3d-note-top">
+                    O quadro de doglegs mostra os pontos mais críticos do furo dentro do intervalo atualmente visível.
+                </p>
+            </section>
+
+            <section class="furo-3d-panel furo-3d-panel-bottom">
                 <div class="furo-3d-section">
                     <h3>Exportação rápida</h3>
                     <div class="furo-3d-control furo-3d-control-block">
@@ -147,66 +215,7 @@
                 </div>
 
                 <div class="furo-3d-alert" id="estadoAviso"></div>
-            </aside>
-
-            <div class="furo-3d-main">
-                <div class="furo-3d-plot-wrap">
-                    <div class="furo-3d-camera-overlay">
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="iso">Isométrica</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="top">Topo</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="side">Lateral</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="front">Frontal</button>
-                    </div>
-                    <div id="grafico" class="furo-3d-plot">
-                        {% if graph %}
-                            {{ graph|safe }}
-                        {% else %}
-                            <div class="text-center py-16">
-                                <h3 class="text-2xl font-bold text-slate-100">Sem dados suficientes</h3>
-                                <p class="mt-3 text-slate-300">Adiciona medições para visualizar o furo em 3D.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="furo-3d-legend">
-                    <span class="legend-ok">OK</span>
-                    <span class="legend-warn">Atenção</span>
-                    <span class="legend-critical">Crítico</span>
-                    <span class="legend-plan">Planeado até última medição</span>
-                    <span class="legend-final">Planeado final</span>
-                </div>
-
-                <div class="furo-3d-info-grid">
-                    <div class="furo-3d-info-box">
-                        <h4>Top 5 doglegs</h4>
-                        <div id="topDoglegsList" class="text-sm text-slate-300">
-                            <div class="text-sm text-slate-300">Sem dados suficientes.</div>
-                        </div>
-                    </div>
-                    <div class="furo-3d-info-box">
-                        <h4>Planeamento Inicial</h4>
-                        <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
-                        <div><strong>Inclinação inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
-                        <div><strong>Azimute inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
-                    </div>
-                    <div class="furo-3d-info-box">
-                        <h4>Planeamento Atual</h4>
-                        <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
-                        <div><strong>Inclinação atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
-                        <div><strong>Azimute atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
-                    </div>
-                    <div class="furo-3d-info-box">
-                        <h4>Estado Real Atual</h4>
-                        <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
-                        <div><strong>Inclinação real:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
-                        <div><strong>Azimute real:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
-                    </div>
-                </div>
-                <p class="furo-3d-note furo-3d-note-top">
-                    O quadro de doglegs mostra os pontos mais críticos do furo dentro do intervalo atualmente visível.
-                </p>
-            </div>
+            </section>
         </div>
 
         <div id="modal" class="furo-3d-modal">

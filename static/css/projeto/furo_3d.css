@@ -1,40 +1,64 @@
 .furo-3d-shell {
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 1.5rem;
+    max-width: none;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 1rem;
+    background: #f3f4f6;
+    min-height: calc(100vh - 64px);
 }
 
 .furo-3d-card {
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    color: #e2e8f0;
-    border-radius: 24px;
-    padding: 1.5rem;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    background: transparent;
+    color: #111827;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
 }
 
-.furo-3d-grid {
+.furo-3d-title {
+    margin: 0;
+    font-size: 1.85rem;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.furo-3d-subtitle {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.furo-3d-layout {
     display: grid;
-    grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
-    gap: 1.25rem;
-    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 1rem;
 }
 
 .furo-3d-panel,
 .furo-3d-main {
-    background: rgba(15, 23, 42, 0.48);
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 20px;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
 .furo-3d-panel {
     padding: 1rem;
-    position: sticky;
-    top: 90px;
+}
+
+.furo-3d-panel-top,
+.furo-3d-panel-bottom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.9rem;
+    align-items: start;
 }
 
 .furo-3d-main {
     padding: 1rem;
+    width: 100%;
 }
 
 .furo-3d-stats {
@@ -45,8 +69,8 @@
 }
 
 .furo-3d-stat {
-    background: rgba(30, 41, 59, 0.72);
-    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 0.9rem 1rem;
 }
@@ -54,7 +78,7 @@
 .furo-3d-stat span {
     display: block;
     font-size: 0.78rem;
-    color: #94a3b8;
+    color: #64748b;
     margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -62,19 +86,20 @@
 
 .furo-3d-stat strong {
     font-size: 1.1rem;
-    color: #f8fafc;
+    color: #0f172a;
 }
 
-.furo-3d-section + .furo-3d-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(148, 163, 184, 0.14);
+.furo-3d-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.9rem;
 }
 
 .furo-3d-section h3 {
     margin: 0 0 0.8rem;
     font-size: 0.95rem;
-    color: #f8fafc;
+    color: #0f172a;
 }
 
 .furo-3d-control {
@@ -84,7 +109,7 @@
     gap: 0.75rem;
     margin-bottom: 0.7rem;
     font-size: 0.92rem;
-    color: #cbd5e1;
+    color: #1f2937;
 }
 
 .furo-3d-control-block {
@@ -110,9 +135,9 @@
 .furo-3d-control select {
     width: 100%;
     border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    background: rgba(15, 23, 42, 0.7);
-    color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #111827;
     padding: 0.7rem 0.8rem;
 }
 
@@ -142,11 +167,11 @@
 }
 
 .furo-3d-btn-blue {
-    background: #2563eb;
+    background: #3f566d;
 }
 
 .furo-3d-btn-green {
-    background: #16a34a;
+    background: #59684d;
 }
 
 .furo-3d-btn-slate {
@@ -154,16 +179,16 @@
 }
 
 .furo-3d-btn-purple {
-    background: #7c3aed;
+    background: #4a617f;
 }
 
 .furo-3d-btn-red {
-    background: #dc2626;
+    background: #8f4a4f;
 }
 
 .furo-3d-note {
     font-size: 0.84rem;
-    color: #94a3b8;
+    color: #64748b;
     line-height: 1.45;
 }
 
@@ -175,9 +200,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem 1rem;
-    margin-top: 1rem;
+    margin-top: 0.4rem;
     font-size: 0.88rem;
-    color: #cbd5e1;
+    color: #334155;
 }
 
 .furo-3d-legend span::before {
@@ -210,8 +235,13 @@
     background: #94a3b8;
 }
 
+.legend-vetores::before {
+    background: #38bdf8;
+}
+
 .furo-3d-plot {
-    min-height: 780px;
+    min-height: 72vh;
+    width: 100%;
 }
 
 .furo-3d-plot-wrap {
@@ -230,14 +260,14 @@
 }
 
 .furo-3d-camera-btn {
-    border: 1px solid rgba(148, 163, 184, 0.24);
+    border: 1px solid #cbd5e1;
     border-radius: 999px;
     padding: 0.45rem 0.75rem;
     font-size: 0.8rem;
     line-height: 1;
-    background: rgba(15, 23, 42, 0.78);
-    color: #e2e8f0;
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    backdrop-filter: blur(4px);
 }
 
 .furo-3d-alert {
@@ -256,21 +286,21 @@
 }
 
 .furo-3d-info-box {
-    background: rgba(30, 41, 59, 0.72);
+    background: #ffffff;
     border-radius: 16px;
     padding: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    border: 1px solid #e2e8f0;
 }
 
 .furo-3d-info-box h4 {
     margin: 0 0 0.55rem;
     font-size: 0.92rem;
-    color: #f8fafc;
+    color: #0f172a;
 }
 
 .furo-3d-info-box div {
     font-size: 0.88rem;
-    color: #cbd5e1;
+    color: #334155;
     margin-bottom: 0.32rem;
 }
 
@@ -280,22 +310,22 @@
 
 .furo-3d-topdogleg-item + .furo-3d-topdogleg-item {
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    border-top: 1px solid #e2e8f0;
 }
 
 .furo-3d-topdogleg-title {
     font-weight: 700;
-    color: #f8fafc;
+    color: #0f172a;
 }
 
 .furo-3d-topdogleg-sub {
     font-size: 0.86rem;
-    color: #cbd5e1;
+    color: #334155;
 }
 
 .furo-3d-topdogleg-meta {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .furo-3d-modal {
@@ -323,12 +353,64 @@
     height: auto;
 }
 
-@media (max-width: 1100px) {
-    .furo-3d-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 768px) {
+    .furo-3d-shell {
+        max-width: 100%;
+        margin: 0;
+        padding: 0.5rem;
+    }
+
+    .furo-3d-card {
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .furo-3d-layout {
+        gap: 0.65rem;
+    }
+
+    .furo-3d-main {
+        padding: 0.5rem;
+        border-radius: 14px;
     }
 
     .furo-3d-panel {
-        position: static;
+        padding: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .furo-3d-panel-top,
+    .furo-3d-panel-bottom {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+    }
+
+    .furo-3d-plot-wrap {
+        margin: 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .furo-3d-plot {
+        min-height: 72vh;
+        width: 100%;
+    }
+
+    .furo-3d-camera-overlay {
+        top: calc(0.9rem + 15px);
+        left: 0.45rem;
+        right: 0.45rem;
+        max-width: none;
+        gap: 0.35rem;
+    }
+
+    .furo-3d-camera-btn {
+        padding: 0.38rem 0.62rem;
+        font-size: 0.75rem;
+    }
+
+    .furo-3d-info-grid {
+        grid-template-columns: 1fr;
     }
 }

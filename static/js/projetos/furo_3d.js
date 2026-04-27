@@ -44,6 +44,8 @@
     let originalCustomdata = [];
     let originalRealTrace = null;
     let plotInitialized = false;
+    let lastSceneCamera = null;
+    let restoringSceneCamera = false;
     const originalTraceStore = {};
     const originalTraceStoreByIndex = {};
     const cameraToggleState = {
@@ -67,6 +69,30 @@
     function refreshPlotReference() {
         plot = document.querySelector("#grafico .js-plotly-plot, #grafico .plotly-graph-div");
         return !!(plot && Array.isArray(plot.data));
+    }
+
+    function cloneCamera(camera) {
+        if (!camera || typeof camera !== "object") return null;
+        try {
+            return JSON.parse(JSON.stringify(camera));
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function readCurrentCamera() {
+        if (!refreshPlotReference()) return null;
+        const camera = plot?.layout?.scene?.camera;
+        return cloneCamera(camera);
+    }
+
+    function restoreCameraIfNeeded() {
+        if (!refreshPlotReference() || !lastSceneCamera || restoringSceneCamera) return;
+        restoringSceneCamera = true;
+        window.Plotly.relayout(plot, { "scene.camera": cloneCamera(lastSceneCamera) })
+            .finally(() => {
+                restoringSceneCamera = false;
+            });
     }
 
     function findTraceIndexesByName(name) {
@@ -222,6 +248,7 @@
 
     function applyDepthAndDataFilters() {
         if (!refreshPlotReference() || realTraceIndex === null) return null;
+        const cameraBefore = readCurrentCamera();
         const filtered = getRealFilteredData();
         window.Plotly.restyle(plot, {
             x: [filtered.x],
@@ -253,6 +280,10 @@
         toggleTrace("Planeado até última medição", true);
         toggleTrace("Planeado final", true);
         toggleTrace("Origem", getCheckboxValueByTrace("Origem"));
+        if (cameraBefore) {
+            lastSceneCamera = cloneCamera(cameraBefore);
+            restoreCameraIfNeeded();
+        }
         if (doglegThresholdValue) doglegThresholdValue.textContent = filtered.threshold.toFixed(2);
         if (depthMinValue) depthMinValue.textContent = filtered.minDepth.toFixed(2);
         if (depthMaxValue) depthMaxValue.textContent = filtered.maxDepth.toFixed(2);
@@ -269,7 +300,7 @@
             window.Plotly.restyle(plot, {
                 "marker.color": [resolved.colors],
                 "marker.colorscale": [[[0, "green"], [0.5, "yellow"], [1, "red"]]],
-                "marker.showscale": true,
+                "marker.showscale": false,
             }, [realTraceIndex]);
         } else {
             window.Plotly.restyle(plot, {
@@ -366,6 +397,21 @@
     function initializePlotState() {
         if (plotInitialized) return true;
         if (!refreshPlotReference()) return false;
+        lastSceneCamera = readCurrentCamera();
+
+        // Defesa extra: garante que nenhum trace mostra colorbar lateral.
+        const tracesWithMarker = [];
+        plot.data.forEach((trace, index) => {
+            if (trace && trace.marker) {
+                tracesWithMarker.push(index);
+            }
+        });
+        if (tracesWithMarker.length) {
+            window.Plotly.restyle(plot, {
+                "marker.showscale": false,
+                "marker.colorbar": null
+            }, tracesWithMarker);
+        }
 
         realTraceIndex = plot.data.findIndex((trace) => trace.name === "Trajetória real");
         if (realTraceIndex >= 0) {
@@ -401,6 +447,22 @@
             });
             applyDoglegStyles();
         }
+
+        plot.on("plotly_relayouting", (eventData) => {
+            if (eventData && eventData["scene.camera"]) {
+                lastSceneCamera = cloneCamera(eventData["scene.camera"]);
+            }
+        });
+
+        plot.on("plotly_relayout", (eventData) => {
+            if (eventData && eventData["scene.camera"]) {
+                lastSceneCamera = cloneCamera(eventData["scene.camera"]);
+                return;
+            }
+            if (eventData && eventData["scene.dragmode"]) {
+                restoreCameraIfNeeded();
+            }
+        });
 
         plot.on("plotly_click", (data) => {
             const ponto = data.points[0];

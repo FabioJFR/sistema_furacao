@@ -127,7 +127,7 @@
                                 {% trans "Ver Detalhes" %}
                             </a>
 
-                            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}"
+                            <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}"
                                class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
                                 {% trans "Ver 3D" %}
                             </a>

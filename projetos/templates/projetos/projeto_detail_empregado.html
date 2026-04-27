@@ -98,7 +98,7 @@
                             <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-primary">
                                 👁️ {% trans "Detalhes" %}
                             </a>
-                            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-warning">
+                            <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-warning">
                                 🌐 {% trans "Ver 3D" %}
                             </a>
                         </div>

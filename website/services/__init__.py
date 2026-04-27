@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from plataforma.models import (
     Empresa,
@@ -69,32 +70,32 @@ def validar_pedido_registo(payload):
     erros = []
 
     if not username:
-        erros.append("O username é obrigatório.")
+        erros.append(_("O username é obrigatório."))
     if User.objects.filter(username=username).exists():
-        erros.append("Já existe um utilizador com esse username.")
+        erros.append(_("Já existe um utilizador com esse username."))
     if email and User.objects.filter(email=email).exists():
-        erros.append("Já existe um utilizador com esse email.")
+        erros.append(_("Já existe um utilizador com esse email."))
     if not email:
-        erros.append("O email é obrigatório para confirmares a conta.")
+        erros.append(_("O email é obrigatório para confirmares a conta."))
 
     if not password1 or not password2:
-        erros.append("A password é obrigatória.")
+        erros.append(_("A password é obrigatória."))
     elif password1 != password2:
-        erros.append("As passwords não coincidem.")
+        erros.append(_("As passwords não coincidem."))
 
     plano = selectors.obter_plano_ativo_por_id(plano_id)
     if not plano:
-        erros.append("Seleciona um plano válido.")
+        erros.append(_("Seleciona um plano válido."))
     else:
         periodo_meses = normalizar_periodo_cobranca(ciclo_subscricao)
         if plano.tipo == "empresa" and tipo_conta != "empresa":
-            erros.append("O plano escolhido exige conta do tipo empresa.")
+            erros.append(_("O plano escolhido exige conta do tipo empresa."))
         if plano.tipo == "individual" and tipo_conta != "individual":
-            erros.append("O plano escolhido exige conta do tipo individual.")
+            erros.append(_("O plano escolhido exige conta do tipo individual."))
         if periodo_meses not in plano.periodos_cobranca_disponiveis_normalizados:
-            erros.append("Seleciona um período de pagamento válido para o plano escolhido.")
+            erros.append(_("Seleciona um período de pagamento válido para o plano escolhido."))
     if tipo_conta == "empresa" and not nome_empresa:
-        erros.append("O nome da empresa é obrigatório para conta empresa.")
+        erros.append(_("O nome da empresa é obrigatório para conta empresa."))
 
     return {"erros": erros, "plano": plano}
 
@@ -135,13 +136,13 @@ def enviar_email_confirmacao_conta(*, user, request=None):
             protocolo = "https" if not settings.DEBUG else "http"
             url_confirmacao = f"{protocolo}://{dominio}{caminho}"
 
-    assunto = "Confirmação de conta - Sistema Furação"
+    assunto = _("Confirmação de conta - Sistema Furação")
     mensagem = (
-        "Olá!\n\n"
-        "Obrigado por criares conta no Sistema Furação.\n"
-        "Para ativares o acesso, confirma o teu email no link abaixo:\n\n"
-        f"{url_confirmacao}\n\n"
-        "Se não foste tu, ignora esta mensagem."
+        _("Olá!\n\n")
+        + _("Obrigado por criares conta no Sistema Furação.\n")
+        + _("Para ativares o acesso, confirma o teu email no link abaixo:\n\n")
+        + f"{url_confirmacao}\n\n"
+        + _("Se não foste tu, ignora esta mensagem.")
     )
 
     send_mail(
@@ -290,7 +291,7 @@ def executar_registo(payload, request=None):
         return ResultadoRegisto(
             sucesso=False,
             erros=[
-                "Não foi possível enviar o email de confirmação. Verifica a configuração de email e tenta novamente."
+                _("Não foi possível enviar o email de confirmação. Verifica a configuração de email e tenta novamente.")
             ],
         )
 

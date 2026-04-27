@@ -20,7 +20,7 @@
             <div class="flex gap-2 flex-wrap">
                 <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">⬅ {% trans "Meus Furos" %}</a>
                 <a href="{% url 'projetos:area_empregado' %}" class="btn btn-warning">🏠 {% trans "Painel" %}</a>
-                <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-success">🌐 {% trans "Ver 3D" %}</a>
+                <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-success">🌐 {% trans "Ver 3D" %}</a>
             </div>
         </div>
     </div>
@@ -90,7 +90,7 @@
     <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-gray-800">📏 {% trans "Medições" %}</h2>
-            <a href="{% url 'projetos:furo_3d_empregado' furo.id %}" class="btn btn-warning">🌐 {% trans "Abrir 3D" %}</a>
+            <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-warning">🌐 {% trans "Abrir 3D" %}</a>
         </div>
 
         {% if medicoes %}

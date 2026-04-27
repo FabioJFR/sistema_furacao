@@ -12,6 +12,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from core.permissions import user_is_empresa_admin
+from core.permissions import user_is_global_admin
 from ..decorators import admin_required, empregado_required
 from ..forms.furo import FuroCreateForm, FuroForm
 from ..utils.tragetoria import calcular_linha_planeada, construir_segmentos_tubos
@@ -27,6 +28,7 @@ from projetos.selectors.furos import (
     obter_lista_furos,
 )
 from projetos.selectors.acesso import obter_perfil_ativo_por_user
+from projetos.selectors.forms import listar_furos_empregado_qs, listar_projetos_empregado_qs
 from projetos.services.furo_3d_io import (
     dados_completos_furo as dados_completos_furo_service,
     dados_exportacao_furo_3d as dados_exportacao_furo_3d_service,
@@ -411,9 +413,21 @@ def furo_create(request):
         logger.warning("Acesso bloqueado na view furo_create. user_id=%s", request.user.id)
         return resposta_erro
 
+    empregado_contexto = None
+    if not user_is_empresa_admin(request.user):
+        empregado_contexto, resposta_empregado = _obter_empregado_autenticado_furos(request)
+        if resposta_empregado:
+            logger.warning("Acesso bloqueado por contexto de empregado na view furo_create. user_id=%s", request.user.id)
+            return resposta_empregado
+
     memoria_zona_alerta = []
     if request.method == "POST":
         form = FuroCreateForm(request.POST, empresa=empresa_id)
+        if empregado_contexto is not None:
+            form.fields["projeto"].queryset = listar_projetos_empregado_qs(
+                empregado_contexto,
+                empresa=empresa_id,
+            )
         memoria_zona_alerta = _obter_memoria_zona_furos(
             empresa_id=empresa_id,
             latitude=_parse_float_or_none(request.POST.get("latitude")),
@@ -439,6 +453,11 @@ def furo_create(request):
         messages.error(request, "Erro ao criar o furo. Verifique os dados.")
     else:
         form = FuroCreateForm(empresa=empresa_id)
+        if empregado_contexto is not None:
+            form.fields["projeto"].queryset = listar_projetos_empregado_qs(
+                empregado_contexto,
+                empresa=empresa_id,
+            )
 
     return render(request, "projetos/form.html", {
         "form": form,
@@ -522,7 +541,14 @@ def furo_list(request):
         logger.warning("Acesso bloqueado na view furo_list. user_id=%s", request.user.id)
         return resposta_erro
 
-    furos = obter_lista_furos(empresa=empresa_id)
+    if not user_is_empresa_admin(request.user):
+        empregado_contexto, resposta_empregado = _obter_empregado_autenticado_furos(request)
+        if resposta_empregado:
+            logger.warning("Acesso bloqueado por contexto de empregado na view furo_list. user_id=%s", request.user.id)
+            return resposta_empregado
+        furos = listar_furos_empregado_qs(empregado_contexto, empresa=empresa_id)
+    else:
+        furos = obter_lista_furos(empresa=empresa_id)
     logger.info(
         "View furo_list carregada com sucesso. user_id=%s, empresa_id=%s, total_furos=%s",
         request.user.id,
@@ -614,7 +640,8 @@ def furo_delete(request, pk):
 
 
 @login_required
-def furo_3d_geologico(request, furo_id):
+def furo_3d_geologico(request, furo_id=None, pk=None, slug=None):
+    furo_id = furo_id or pk
     logger.info(
         "Entrada na view furo_3d_geologico. user_id=%s, username='%s', furo_id=%s",
         request.user.id,
@@ -626,7 +653,9 @@ def furo_3d_geologico(request, furo_id):
     perfil = obter_perfil_ativo_por_user(request.user)
     acesso_individual = bool(perfil and perfil.tipo_acesso == "individual")
 
-    if user_is_empresa_admin(request.user) or acesso_individual:
+    if user_is_global_admin(request.user):
+        furo = obter_furo(furo_id, empresa=None)
+    elif user_is_empresa_admin(request.user) or acesso_individual:
         empresa, _acesso_individual_resolvido, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
         if resposta_erro:
             logger.warning("Acesso bloqueado na view furo_3d_geologico. user_id=%s", request.user.id)
@@ -643,8 +672,12 @@ def furo_3d_geologico(request, furo_id):
         furo = obter_furo(furo_id, empresa=empregado.empresa_id)
 
         trabalhou_no_furo = empregado_trabalhou_no_furo(empregado, furo)
+        tem_furo_nos_projetos = listar_furos_empregado_qs(
+            empregado,
+            empresa=empregado.empresa_id,
+        ).filter(pk=furo.pk).exists()
 
-        if not trabalhou_no_furo:
+        if not (trabalhou_no_furo or tem_furo_nos_projetos):
             logger.warning(
                 "Empregado sem permissão para furo_3d_geologico. user_id=%s, empregado_id=%s, furo_id=%s",
                 request.user.id,
@@ -711,29 +744,21 @@ def furo_3d_geologico(request, furo_id):
 
         fig = go.Figure(data=trace_planeado + [trace_origem])
         fig.update_layout(
+            uirevision=f"furo-3d-{furo.pk}",
             scene=dict(
                 xaxis_title="Este (m)",
                 yaxis_title="Norte (m)",
                 zaxis_title="TVD / Profundidade Vertical (m)",
                 zaxis=dict(autorange="reversed"),
+                uirevision=f"furo-3d-scene-{furo.pk}",
                 aspectmode="manual",
                 aspectratio=dict(x=1, y=1, z=0.7),
                 camera=dict(
                     eye=dict(x=1.8, y=1.8, z=1.2),
                 ),
             ),
-            legend=dict(
-                orientation="v",
-                yanchor="top",
-                y=0.95,
-                xanchor="left",
-                x=1.02,
-                bgcolor="rgba(255,255,255,0.85)",
-                bordercolor="lightgray",
-                borderwidth=1,
-                font=dict(size=11),
-            ),
-            margin=dict(l=0, r=140, t=20, b=0),
+            showlegend=False,
+            margin=dict(l=0, r=20, t=20, b=0),
             height=800,
         )
         graph = fig.to_html(
@@ -914,14 +939,7 @@ def furo_3d_geologico(request, furo_id):
                 [0.5, "yellow"],
                 [1, "red"],
             ],
-            colorbar=dict(
-                title="Dogleg",
-                len=0.6,
-                thickness=12,
-                x=1.08,
-                y=0.45,
-            ),
-            showscale=True,
+            showscale=False,
         ),
         customdata=customdata,
         hovertemplate=(
@@ -1043,30 +1061,22 @@ def furo_3d_geologico(request, furo_id):
     profundidade_visual_max = max(float(profundidade_final or 0.0), float(profundidade_planeada_final or 0.0))
 
     fig.update_layout(
+        uirevision=f"furo-3d-{furo.pk}",
         scene=dict(
             xaxis_title="Este (m)",
             yaxis_title="Norte (m)",
             zaxis_title="TVD / Profundidade Vertical (m)",
             zaxis=dict(autorange="reversed"),
             dragmode="orbit",
+            uirevision=f"furo-3d-scene-{furo.pk}",
             aspectmode="manual",
             aspectratio=dict(x=1, y=1, z=0.7),
             camera=dict(
                 eye=dict(x=1.45, y=1.45, z=1.0),
             ),
         ),
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=0.95,
-            xanchor="left",
-            x=1.02,
-            bgcolor="rgba(255,255,255,0.85)",
-            bordercolor="lightgray",
-            borderwidth=1,
-            font=dict(size=11),
-        ),
-        margin=dict(l=0, r=140, t=20, b=0),
+        showlegend=False,
+        margin=dict(l=0, r=20, t=20, b=0),
         height=800,
     )
 

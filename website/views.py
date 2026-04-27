@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
+from django.utils.translation import gettext as _
 
 from website import selectors
 from website import services
@@ -53,7 +54,7 @@ def registo(request):
 
         messages.success(
             request,
-            "Conta criada com sucesso. Enviámos um email para confirmares a conta antes do primeiro login.",
+            _("Conta criada com sucesso. Enviámos um email para confirmares a conta antes do primeiro login."),
         )
         return redirect("login")
 
@@ -80,20 +81,20 @@ def confirmar_conta(request, uidb64, token):
         user = None
 
     if not user:
-        messages.error(request, "Link de confirmação inválido.")
+        messages.error(request, _("Link de confirmação inválido."))
         return redirect("login")
 
     if user.is_active:
-        messages.info(request, "A tua conta já está confirmada. Podes iniciar sessão.")
+        messages.info(request, _("A tua conta já está confirmada. Podes iniciar sessão."))
         return redirect("login")
 
     if not default_token_generator.check_token(user, token):
-        messages.error(request, "Este link de confirmação é inválido ou já expirou.")
+        messages.error(request, _("Este link de confirmação é inválido ou já expirou."))
         return redirect("login")
 
     user.is_active = True
     user.save(update_fields=["is_active"])
-    messages.success(request, "Conta confirmada com sucesso. Já podes iniciar sessão.")
+    messages.success(request, _("Conta confirmada com sucesso. Já podes iniciar sessão."))
     return redirect("login")
 
 
@@ -103,7 +104,7 @@ def reenviar_confirmacao(request):
 
     email = (request.POST.get("email") or "").strip()
     if not email:
-        messages.error(request, "Indica o email para reenviar a confirmação.")
+        messages.error(request, _("Indica o email para reenviar a confirmação."))
         return redirect("login")
 
     try:
@@ -111,12 +112,12 @@ def reenviar_confirmacao(request):
     except Exception:
         messages.error(
             request,
-            "Não foi possível reenviar o email de confirmação neste momento. Tenta novamente.",
+            _("Não foi possível reenviar o email de confirmação neste momento. Tenta novamente."),
         )
         return redirect("login")
 
     messages.success(
         request,
-        "Se existir uma conta pendente com esse email, enviámos um novo link de confirmação.",
+        _("Se existir uma conta pendente com esse email, enviámos um novo link de confirmação."),
     )
     return redirect("login")

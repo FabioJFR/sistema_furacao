@@ -4,16 +4,16 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from plataforma.decorators import platform_admin_required
 from plataforma.forms.plano import PlanoForm
 from plataforma.selectors.planos import listar_planos_dashboard, obter_plano_por_pk
-from plataforma.services.planos import alternar_plano_ativo
-
-# TODO futuro:
-# - aplicar services layer para gestão de planos
-# - separar lógica de negócio (criação/edição) das views
-# - validar impacto de alterações de plano em empresas ativas
+from plataforma.services.planos import (
+    alternar_plano_ativo,
+    atualizar_plano_via_form,
+    criar_plano_via_form,
+)
 
 
 # ---------------- LISTAR PLANOS ----------------
@@ -39,18 +39,18 @@ def plano_create(request):
     if request.method == "POST":
         form = PlanoForm(request.POST)
         if form.is_valid():
-            plano = form.save()
+            plano = criar_plano_via_form(form=form)
 
-            messages.success(request, f"Plano '{plano.nome}' criado com sucesso.")
+            messages.success(request, _("Plano '%(nome)s' criado com sucesso.") % {"nome": plano.nome})
             return redirect("plataforma:plano_list")
 
-        messages.error(request, "Erro ao criar plano. Verifique os dados.")
+        messages.error(request, _("Erro ao criar plano. Verifique os dados."))
     else:
         form = PlanoForm()
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,
-        "titulo": "Novo Plano",
+        "titulo": _("Novo Plano"),
     })
 
 
@@ -63,18 +63,18 @@ def plano_update(request, pk):
     if request.method == "POST":
         form = PlanoForm(request.POST, instance=plano)
         if form.is_valid():
-            plano = form.save()
+            plano = atualizar_plano_via_form(form=form)
 
-            messages.success(request, "Plano atualizado com sucesso.")
+            messages.success(request, _("Plano atualizado com sucesso."))
             return redirect("plataforma:plano_list")
 
-        messages.error(request, "Erro ao atualizar plano.")
+        messages.error(request, _("Erro ao atualizar plano."))
     else:
         form = PlanoForm(instance=plano)
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,
-        "titulo": f"Editar Plano - {plano.nome}",
+        "titulo": _("Editar Plano - %(nome)s") % {"nome": plano.nome},
         "plano": plano,
     })
 
@@ -86,7 +86,7 @@ def plano_toggle_ativo(request, pk):
     plano = obter_plano_por_pk(pk)
     plano = alternar_plano_ativo(plano)
 
-    messages.success(request, f"Plano '{plano.nome}' atualizado.")
+    messages.success(request, _("Plano '%(nome)s' atualizado.") % {"nome": plano.nome})
     return redirect("plataforma:plano_list")
 
 

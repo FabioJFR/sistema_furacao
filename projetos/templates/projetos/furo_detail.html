@@ -117,7 +117,7 @@
             <div id="map"></div>
         </div>
         <div class="furo-actions">
-            <a href="{% url 'projetos:furo_3d' furo.id %}" class="furo-action-btn btn-3d">{% trans "Ver Trajetória 3D" %}</a>
+            <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="furo-action-btn btn-3d">{% trans "Ver Trajetória 3D" %}</a>
             <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ {% trans "Adicionar Trabalhador ao Furo" %}</a>
             <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 {% trans "Histórico de Configurações" %}</a>
             <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 {% trans "Adicionar Medição" %}</a>

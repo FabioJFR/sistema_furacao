@@ -87,7 +87,7 @@ def obter_empresa_contexto_gestao_furos(
         return empresa, False, None
 
     perfil = obter_perfil_ativo_por_user(request.user)
-    if perfil and perfil.tipo_acesso == "individual":
+    if perfil is None or perfil.tipo_acesso in {"individual", "empregado"}:
         empregado, _ligado_por_fallback, resposta_erro = obter_empregado_autenticado_contexto(
             request=request,
             mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
@@ -96,9 +96,8 @@ def obter_empresa_contexto_gestao_furos(
             redirect_sem_empresa=redirect_sem_permissao,
             vincular_por_email=True,
         )
-        if resposta_erro:
-            return None, True, resposta_erro
-        return empregado.empresa, True, None
+        if resposta_erro is None and empregado is not None:
+            return empregado.empresa, True, None
 
     messages.error(request, mensagem_sem_permissao)
     return None, False, redirect(redirect_sem_permissao)

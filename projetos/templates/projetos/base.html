@@ -329,10 +329,8 @@
                             ⚙️ {% trans "Operação" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
-                            {% if perfil_tipo == "individual" %}
-                                <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
-                                <a href="{% url 'projetos:furo_create' %}" role="menuitem">➕ {% trans "Novo Furo" %}</a>
-                            {% endif %}
+                            <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
+                            <a href="{% url 'projetos:furo_create' %}" role="menuitem">➕ {% trans "Novo Furo" %}</a>
                             <a href="{% url 'projetos:medicao_list_empregado' %}" role="menuitem">📊 {% trans "Medições" %}</a>
                             <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
                             <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
@@ -382,6 +380,44 @@
 
                     {% endwith %}
                 {% endif %}
+
+                <div class="nav-item nav-mobile-user">
+                    <button
+                        type="button"
+                        class="nav-link"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-label="{% trans 'Abrir menu do utilizador' %}"
+                        data-dropdown-toggle
+                    >
+                        👤 {% trans "Utilizador online" %} ▾
+                    </button>
+                    <div class="dropdown" role="menu" aria-label="{% trans 'Menu do utilizador' %}">
+                        {% if is_platform_admin %}
+                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças" %}</a>
+                            <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
+                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
+                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:todo_dashboard' %}" role="menuitem">🗂️ TO DO</a>
+                                <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
+                            {% endif %}
+                        {% endif %}
+                        {% if is_admin_user %}
+                            <a href="{% url 'projetos:procurar_dashboard' %}" role="menuitem">🔎 {% trans "Procurar" %}</a>
+                            <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
+                            <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
+                        {% endif %}
+                        {% if is_empregado_user %}
+                            <a href="{% url 'projetos:meus_dados_empregado' %}" role="menuitem">👤 {% trans "Meus Dados" %}</a>
+                            <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
+                            <a href="{% url 'projetos:definicoes' %}" role="menuitem">🛠️ {% trans "Definições" %}</a>
+                        {% endif %}
+                        <a href="{% url 'projetos:sugestoes_plataforma' %}" role="menuitem">💡 {% trans "Sugestões" %}</a>
+                        <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
+                    </div>
+                </div>
             </nav>
 
             <div class="nav-right">
