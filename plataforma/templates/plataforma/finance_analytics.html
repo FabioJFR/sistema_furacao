@@ -5,37 +5,37 @@
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block page_description %}
-Resumo financeiro da plataforma com entradas, saídas e movimentos recentes.
+{% trans "Resumo financeiro da plataforma com entradas, saídas e movimentos recentes." %}
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← {% trans "Voltar à dashboard" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
 <div class="grid-cards">
     <div class="card">
-        <div class="metric-label">Total de movimentos</div>
+        <div class="metric-label">{% trans "Total de movimentos" %}</div>
         <div class="metric-value">{{ total_movimentos }}</div>
     </div>
     <div class="card">
-        <div class="metric-label">Entradas</div>
+        <div class="metric-label">{% trans "Entradas" %}</div>
         <div class="metric-value">{{ total_entradas }}€</div>
     </div>
     <div class="card">
-        <div class="metric-label">Saídas</div>
+        <div class="metric-label">{% trans "Saídas" %}</div>
         <div class="metric-value">{{ total_saidas }}€</div>
     </div>
     <div class="card">
-        <div class="metric-label">Saldo</div>
+        <div class="metric-label">{% trans "Saldo" %}</div>
         <div class="metric-value">{{ saldo }}€</div>
     </div>
     <div class="card">
-        <div class="metric-label">Pendentes</div>
+        <div class="metric-label">{% trans "Pendentes" %}</div>
         <div class="metric-value">{{ movimentos_pendentes }}</div>
     </div>
     <div class="card">
-        <div class="metric-label">Pagos</div>
+        <div class="metric-label">{% trans "Pagos" %}</div>
         <div class="metric-value">{{ movimentos_pagos }}</div>
     </div>
 </div>
@@ -43,8 +43,8 @@ Resumo financeiro da plataforma com entradas, saídas e movimentos recentes.
 <div class="card">
     <div class="section-title">
         <div>
-            <h2>Últimos movimentos</h2>
-            <p>Visão rápida dos registos financeiros mais recentes.</p>
+                    <h2>{% trans "Últimos movimentos" %}</h2>
+                    <p>{% trans "Visão rápida dos registos financeiros mais recentes." %}</p>
         </div>
     </div>
 
@@ -52,12 +52,12 @@ Resumo financeiro da plataforma com entradas, saídas e movimentos recentes.
         <table>
             <thead>
                 <tr>
-                    <th>Destino</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Valor</th>
-                    <th>Plano</th>
-                    <th>Vencimento</th>
+                    <th>{% trans "Destino" %}</th>
+                    <th>{% trans "Tipo" %}</th>
+                    <th>{% trans "Estado" %}</th>
+                    <th>{% trans "Valor" %}</th>
+                    <th>{% trans "Plano" %}</th>
+                    <th>{% trans "Vencimento" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,7 +76,7 @@ Resumo financeiro da plataforma com entradas, saídas e movimentos recentes.
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="6">Ainda não existem movimentos financeiros registados.</td>
+                        <td colspan="6">{% trans "Ainda não existem movimentos financeiros registados." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

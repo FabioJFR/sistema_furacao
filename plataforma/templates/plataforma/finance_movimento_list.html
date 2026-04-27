@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← {% trans "Voltar à dashboard" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
@@ -17,12 +17,12 @@
     <div class="card card-mb-24">
         <div class="section-title">
             <div>
-                <h2>{% if movimento_edicao %}Editar despesa{% else %}Adicionar despesa{% endif %}</h2>
+                <h2>{% if movimento_edicao %}{% trans "Editar despesa" %}{% else %}{% trans "Adicionar despesa" %}{% endif %}</h2>
                 <p>
                     {% if movimento_edicao %}
-                        Estás a editar uma despesa já registada da plataforma.
+                        {% trans "Estás a editar uma despesa já registada da plataforma." %}
                     {% else %}
-                        Regista custos de alojamento, publicidade, domínio, HTTPS e outras despesas da plataforma.
+                        {% trans "Regista custos de alojamento, publicidade, domínio, HTTPS e outras despesas da plataforma." %}
                     {% endif %}
                 </p>
             </div>
@@ -46,9 +46,9 @@
                 </div>
             {% endfor %}
             <div class="finance-form-actions">
-                <button type="submit" class="btn btn-primary">{% if movimento_edicao %}Guardar alterações{% else %}Guardar despesa{% endif %}</button>
+                <button type="submit" class="btn btn-primary">{% if movimento_edicao %}{% trans "Guardar alterações" %}{% else %}{% trans "Guardar despesa" %}{% endif %}</button>
                 {% if movimento_edicao %}
-                    <a href="{% url 'plataforma:financas_saida_list' %}" class="btn btn-light">Cancelar edição</a>
+                    <a href="{% url 'plataforma:financas_saida_list' %}" class="btn btn-light">{% trans "Cancelar edição" %}</a>
                 {% endif %}
             </div>
         </form>
@@ -57,19 +57,19 @@
 
 <div class="grid-cards grid-cards-four">
     <div class="card">
-        <div class="metric-label">Total de movimentos</div>
+        <div class="metric-label">{% trans "Total de movimentos" %}</div>
         <div class="metric-value">{{ total_movimentos }}</div>
     </div>
     <div class="card">
-        <div class="metric-label">Valor total</div>
+        <div class="metric-label">{% trans "Valor total" %}</div>
         <div class="metric-value">{{ total_valor }}€</div>
     </div>
     <div class="card">
-        <div class="metric-label">Pagos</div>
+        <div class="metric-label">{% trans "Pagos" %}</div>
         <div class="metric-value">{{ total_pagos }}</div>
     </div>
     <div class="card">
-        <div class="metric-label">Pendentes</div>
+        <div class="metric-label">{% trans "Pendentes" %}</div>
         <div class="metric-value">{{ total_pendentes }}</div>
     </div>
 </div>
@@ -78,7 +78,7 @@
     <div class="section-title">
         <div>
             <h2>{{ titulo }}</h2>
-            <p>Consulta os registos financeiros mais recentes desta categoria.</p>
+            <p>{% trans "Consulta os registos financeiros mais recentes desta categoria." %}</p>
         </div>
     </div>
 
@@ -86,16 +86,16 @@
         <table>
             <thead>
                 <tr>
-                    <th>Destino</th>
-                    <th>Categoria</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Plano</th>
-                    <th>Valor</th>
-                    <th>Competência</th>
-                    <th>Vencimento</th>
-                    <th>Descrição</th>
-                    {% if tipo_pagina == "saida" %}<th>Ações</th>{% endif %}
+                    <th>{% trans "Destino" %}</th>
+                    <th>{% trans "Categoria" %}</th>
+                    <th>{% trans "Tipo" %}</th>
+                    <th>{% trans "Estado" %}</th>
+                    <th>{% trans "Plano" %}</th>
+                    <th>{% trans "Valor" %}</th>
+                    <th>{% trans "Competência" %}</th>
+                    <th>{% trans "Vencimento" %}</th>
+                    <th>{% trans "Descrição" %}</th>
+                    {% if tipo_pagina == "saida" %}<th>{% trans "Ações" %}</th>{% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -104,10 +104,10 @@
                         <td>
                             {% if movimento.empresa_id %}
                                 <span class="empresa-nome">{{ movimento.empresa.nome }}</span>
-                                <span class="empresa-meta">Empresa</span>
+                                <span class="empresa-meta">{% trans "Empresa" %}</span>
                             {% elif movimento.perfil_plataforma_id %}
                                 <span class="empresa-nome">{{ movimento.perfil_plataforma.user.username }}</span>
-                                <span class="empresa-meta">Individual</span>
+                                <span class="empresa-meta">{% trans "Individual" %}</span>
                             {% else %}
                                 —
                             {% endif %}
@@ -125,12 +125,12 @@
                         <td>{{ movimento.data_vencimento|default:"—" }}</td>
                         <td>{{ movimento.descricao|default:"—" }}</td>
                         {% if tipo_pagina == "saida" %}
-                            <td><a href="{% url 'plataforma:financas_saida_list' %}?editar={{ movimento.pk }}" class="btn btn-light">Editar</a></td>
+                            <td><a href="{% url 'plataforma:financas_saida_list' %}?editar={{ movimento.pk }}" class="btn btn-light">{% trans "Editar" %}</a></td>
                         {% endif %}
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="{% if tipo_pagina == "saida" %}10{% else %}9{% endif %}">Ainda não existem movimentos registados nesta área.</td>
+                        <td colspan="{% if tipo_pagina == "saida" %}10{% else %}9{% endif %}">{% trans "Ainda não existem movimentos registados nesta área." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

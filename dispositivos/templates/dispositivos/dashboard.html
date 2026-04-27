@@ -2,16 +2,16 @@
 {% load i18n %}
 <!-- templates/dispositivos/dashboard.html-->
 
-{% block title %}Dispositivos{% endblock %}
+{% block title %}{% trans "Dispositivos" %}{% endblock %}
 
 {% block content %}
 <section class="device-shell max-w-7xl mx-auto p-6 space-y-6">
 
     <!-- HEADER -->
     <div class="device-panel bg-white rounded-xl shadow p-6">
-        <h1 class="text-3xl font-bold text-gray-800">📡 Dashboard de Dispositivos</h1>
+        <h1 class="text-3xl font-bold text-gray-800">📡 {% trans "Dashboard de Dispositivos" %}</h1>
         <p class="text-gray-500 mt-2">
-            Centro de monitorização e testes dos dispositivos (MagCruiser e outros).
+            {% trans "Centro de monitorização e testes dos dispositivos (MagCruiser e outros)." %}
         </p>
     </div>
 
@@ -19,27 +19,27 @@
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 device-metric-grid">
 
         <div class="device-panel device-metric bg-white rounded-xl shadow p-4">
-            <div class="text-sm text-gray-500">Dispositivos</div>
+            <div class="text-sm text-gray-500">{% trans "Dispositivos" %}</div>
             <div class="text-2xl font-bold text-gray-800">{{ total_dispositivos }}</div>
         </div>
 
         <div class="device-panel device-metric bg-white rounded-xl shadow p-4">
-            <div class="text-sm text-gray-500">Ativos</div>
+            <div class="text-sm text-gray-500">{% trans "Ativos" %}</div>
             <div class="text-2xl font-bold text-green-700">{{ total_ativos }}</div>
         </div>
 
         <div class="device-panel device-metric bg-white rounded-xl shadow p-4">
-            <div class="text-sm text-gray-500">Sessões</div>
+            <div class="text-sm text-gray-500">{% trans "Sessões" %}</div>
             <div class="text-2xl font-bold text-blue-700">{{ total_sessoes }}</div>
         </div>
 
         <div class="device-panel device-metric bg-white rounded-xl shadow p-4">
-            <div class="text-sm text-gray-500">Leituras Brutas</div>
+            <div class="text-sm text-gray-500">{% trans "Leituras Brutas" %}</div>
             <div class="text-2xl font-bold text-orange-700">{{ total_leituras_brutas }}</div>
         </div>
 
         <div class="device-panel device-metric bg-white rounded-xl shadow p-4">
-            <div class="text-sm text-gray-500">Survey Shots</div>
+            <div class="text-sm text-gray-500">{% trans "Survey Shots" %}</div>
             <div class="text-2xl font-bold text-purple-700">{{ total_shots }}</div>
         </div>
 
@@ -50,45 +50,45 @@
 
         <!-- ÚLTIMA SESSÃO -->
         <div class="device-panel bg-white rounded-xl shadow p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">Última Sessão</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-3">{% trans "Última Sessão" %}</h2>
 
             {% if ultima_sessao %}
-                <p><strong>Dispositivo:</strong> {{ ultima_sessao.dispositivo.nome }}</p>
-                <p><strong>Status:</strong> {{ ultima_sessao.get_status_display }}</p>
-                <p><strong>Furo:</strong> {{ ultima_sessao.furo.nome|default:"-" }}</p>
-                <p><strong>Início:</strong> {{ ultima_sessao.iniciado_em }}</p>
+                <p><strong>{% trans "Dispositivo:" %}</strong> {{ ultima_sessao.dispositivo.nome }}</p>
+                <p><strong>{% trans "Status:" %}</strong> {{ ultima_sessao.get_status_display }}</p>
+                <p><strong>{% trans "Furo:" %}</strong> {{ ultima_sessao.furo.nome|default:"-" }}</p>
+                <p><strong>{% trans "Início:" %}</strong> {{ ultima_sessao.iniciado_em }}</p>
             {% else %}
-                <p class="text-gray-500">Sem sessões registadas.</p>
+                <p class="text-gray-500">{% trans "Sem sessões registadas." %}</p>
             {% endif %}
         </div>
 
         <!-- ÚLTIMA LEITURA -->
         <div class="device-panel bg-white rounded-xl shadow p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">Última Leitura Bruta</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-3">{% trans "Última Leitura Bruta" %}</h2>
 
             {% if ultima_leitura_bruta %}
-                <p><strong>Sessão:</strong> {{ ultima_leitura_bruta.sessao_id }}</p>
-                <p><strong>Sequência:</strong> {{ ultima_leitura_bruta.sequencia }}</p>
-                <p><strong>Recebido em:</strong> {{ ultima_leitura_bruta.recebido_em }}</p>
+                <p><strong>{% trans "Sessão:" %}</strong> {{ ultima_leitura_bruta.sessao_id }}</p>
+                <p><strong>{% trans "Sequência:" %}</strong> {{ ultima_leitura_bruta.sequencia }}</p>
+                <p><strong>{% trans "Recebido em:" %}</strong> {{ ultima_leitura_bruta.recebido_em }}</p>
                 <p class="text-xs text-gray-500 mt-2">
                     {{ ultima_leitura_bruta.payload_texto|truncatechars:80 }}
                 </p>
             {% else %}
-                <p class="text-gray-500">Sem leituras.</p>
+                <p class="text-gray-500">{% trans "Sem leituras." %}</p>
             {% endif %}
         </div>
 
         <!-- ÚLTIMO SHOT -->
         <div class="device-panel bg-white rounded-xl shadow p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">Último Survey Shot</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-3">{% trans "Último Survey Shot" %}</h2>
 
             {% if ultimo_shot %}
-                <p><strong>Furo:</strong> {{ ultimo_shot.furo.nome }}</p>
-                <p><strong>Profundidade:</strong> {{ ultimo_shot.profundidade }}</p>
-                <p><strong>Inclinação:</strong> {{ ultimo_shot.inclinacao }}</p>
-                <p><strong>Azimute:</strong> {{ ultimo_shot.azimute }}</p>
+                <p><strong>{% trans "Furo:" %}</strong> {{ ultimo_shot.furo.nome }}</p>
+                <p><strong>{% trans "Profundidade:" %}</strong> {{ ultimo_shot.profundidade }}</p>
+                <p><strong>{% trans "Inclinação:" %}</strong> {{ ultimo_shot.inclinacao }}</p>
+                <p><strong>{% trans "Azimute:" %}</strong> {{ ultimo_shot.azimute }}</p>
             {% else %}
-                <p class="text-gray-500">Sem dados.</p>
+                <p class="text-gray-500">{% trans "Sem dados." %}</p>
             {% endif %}
         </div>
 

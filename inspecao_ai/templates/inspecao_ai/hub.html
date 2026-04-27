@@ -1,7 +1,7 @@
 {% extends base_template %}
 {% load static i18n %}
 
-{% block title %}AI Visual{% endblock %}
+{% block title %}{% trans "AI Visual" %}{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
 {% endblock %}
@@ -10,45 +10,44 @@
 <div class="ai-mobile-scale">
 <div class="page-header mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900">AI Visual</h1>
+        <h1 class="text-3xl font-bold text-slate-900">{% trans "AI Visual" %}</h1>
         <p class="text-slate-600 mt-2">
-            Espaço para analisar fotografias de telemóvel, localizar texto a marcador em caixas cilíndricas
-            e preparar a base para OCR de relatórios manuscritos.
+            {% trans "Espaço para analisar fotografias de telemóvel, localizar texto a marcador em caixas cilíndricas e preparar a base para OCR de relatórios manuscritos." %}
         </p>
     </div>
     <div class="mt-4 flex gap-3 flex-wrap">
-        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">Abrir Chatbox</a>
-        <a href="{% url 'inspecao_ai:biblioteca_pdf' %}" class="btn btn-secondary">Biblioteca PDF</a>
-        <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="btn btn-secondary">Memória Operacional</a>
-        <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">Nova análise</a>
-        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">Ver histórico</a>
+        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">{% trans "Abrir Chatbox" %}</a>
+        <a href="{% url 'inspecao_ai:biblioteca_pdf' %}" class="btn btn-secondary">{% trans "Biblioteca PDF" %}</a>
+        <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="btn btn-secondary">{% trans "Memória Operacional" %}</a>
+        <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">{% trans "Nova análise" %}</a>
+        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Ver histórico" %}</a>
     </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="text-sm uppercase tracking-wide text-slate-500">Total</div>
+        <div class="text-sm uppercase tracking-wide text-slate-500">{% trans "Total" %}</div>
         <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_analises }}</div>
-        <div class="text-slate-600 mt-2">Análises guardadas na empresa.</div>
+        <div class="text-slate-600 mt-2">{% trans "Análises guardadas na empresa." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="text-sm uppercase tracking-wide text-emerald-600">Concluídas</div>
+        <div class="text-sm uppercase tracking-wide text-emerald-600">{% trans "Concluídas" %}</div>
         <div class="text-3xl font-bold text-emerald-700 mt-2">{{ total_concluidas }}</div>
-        <div class="text-slate-600 mt-2">Deteções visuais concluídas automaticamente.</div>
+        <div class="text-slate-600 mt-2">{% trans "Deteções visuais concluídas automaticamente." %}</div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 bg-amber-50/40">
-        <div class="text-sm uppercase tracking-wide text-amber-700">Revisão manual</div>
+        <div class="text-sm uppercase tracking-wide text-amber-700">{% trans "Revisão manual" %}</div>
         <div class="text-3xl font-bold text-amber-700 mt-2">{{ total_revisao }}</div>
-        <div class="text-slate-600 mt-2">Casos a confirmar antes de integrar OCR completo.</div>
+        <div class="text-slate-600 mt-2">{% trans "Casos a confirmar antes de integrar OCR completo." %}</div>
     </div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
     <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="text-xl font-semibold text-slate-900">Aprendizagem da AI</h2>
+            <h2 class="text-xl font-semibold text-slate-900">{% trans "Aprendizagem da AI" %}</h2>
             <p class="text-slate-600 mt-1">
-                Resumo das validações manuais feitas nos campos extraídos.
+                {% trans "Resumo das validações manuais feitas nos campos extraídos." %}
             </p>
         </div>
     </div>
@@ -80,7 +79,7 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div class="rounded-2xl border border-slate-200 p-4">
-            <h3 class="text-lg font-semibold text-slate-900 mb-3">Por tipo de documento</h3>
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Por tipo de documento" %}</h3>
             {% if dashboard_aprendizagem.por_tipo %}
                 <div class="space-y-3">
                     {% for item in dashboard_aprendizagem.por_tipo %}
@@ -96,11 +95,11 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-slate-500">Ainda não existem validações suficientes para resumir por tipo de documento.</div>
+                <div class="text-slate-500">{% trans "Ainda não existem validações suficientes para resumir por tipo de documento." %}</div>
             {% endif %}
         </div>
         <div class="rounded-2xl border border-slate-200 p-4">
-            <h3 class="text-lg font-semibold text-slate-900 mb-3">Por campo</h3>
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Por campo" %}</h3>
             {% if dashboard_aprendizagem.por_campo %}
                 <div class="space-y-3">
                     {% for item in dashboard_aprendizagem.por_campo %}
@@ -116,14 +115,14 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-slate-500">Ainda não existem validações suficientes para resumir por campo.</div>
+                <div class="text-slate-500">{% trans "Ainda não existem validações suficientes para resumir por campo." %}</div>
             {% endif %}
         </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         <div class="rounded-2xl border border-slate-200 p-4">
-            <h3 class="text-lg font-semibold text-slate-900 mb-3">Campos mais problemáticos</h3>
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Campos mais problemáticos" %}</h3>
             {% if dashboard_aprendizagem.ranking_problematicos %}
                 <div class="space-y-3">
                     {% for item in dashboard_aprendizagem.ranking_problematicos %}
@@ -138,11 +137,11 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-slate-500">Ainda não existem campos com falhas validadas.</div>
+                <div class="text-slate-500">{% trans "Ainda não existem campos com falhas validadas." %}</div>
             {% endif %}
         </div>
         <div class="rounded-2xl border border-slate-200 p-4">
-            <h3 class="text-lg font-semibold text-slate-900 mb-3">Últimas validações</h3>
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Últimas validações" %}</h3>
             {% if dashboard_aprendizagem.ultimas_validacoes %}
                 <div class="space-y-3 max-h-[380px] overflow-y-auto">
                     {% for item in dashboard_aprendizagem.ultimas_validacoes %}
@@ -153,20 +152,20 @@
                                     <div class="text-sm text-slate-500 mt-1">{{ item.analise_nome }} · {{ item.tipo_documento }}</div>
                                 </div>
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold {% if item.estado == 'acertou' %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
-                                    {% if item.estado == "acertou" %}Acertou{% else %}Falhou{% endif %}
+                                    {% if item.estado == "acertou" %}{% trans "Acertou" %}{% else %}{% trans "Falhou" %}{% endif %}
                                 </span>
                             </div>
                             <div class="text-sm text-slate-700 mt-3">
-                                AI: <strong>{{ item.valor_ai }}</strong>
+                                {% trans "AI:" %} <strong>{{ item.valor_ai }}</strong>
                             </div>
                             <div class="text-sm text-slate-700 mt-1">
-                                Validado: <strong>{{ item.valor_validado }}</strong>
+                                {% trans "Validado:" %} <strong>{{ item.valor_validado }}</strong>
                             </div>
                         </a>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-slate-500">Ainda não existem validações recentes para mostrar.</div>
+                <div class="text-slate-500">{% trans "Ainda não existem validações recentes para mostrar." %}</div>
             {% endif %}
         </div>
     </div>
@@ -174,8 +173,8 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
     <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
-        <h2 class="text-xl font-semibold text-slate-900">Análises recentes</h2>
-        <a href="{% url 'inspecao_ai:analise_list' %}" class="text-sky-700 hover:text-sky-900 font-medium">Abrir histórico completo</a>
+        <h2 class="text-xl font-semibold text-slate-900">{% trans "Análises recentes" %}</h2>
+        <a href="{% url 'inspecao_ai:analise_list' %}" class="text-sky-700 hover:text-sky-900 font-medium">{% trans "Abrir histórico completo" %}</a>
     </div>
 
     {% if analises_recentes %}
@@ -196,9 +195,9 @@
                         </span>
                     </div>
                     <div class="mt-3 text-sm text-slate-600">
-                        Marcador: <strong>{{ analise.get_marcador_predominante_display }}</strong>
+                        {% trans "Marcador:" %} <strong>{{ analise.get_marcador_predominante_display }}</strong>
                         {% if analise.confianca_media %}
-                            · Confiança: <strong>{{ analise.confianca_media|floatformat:2 }}</strong>
+                            · {% trans "Confiança:" %} <strong>{{ analise.confianca_media|floatformat:2 }}</strong>
                         {% endif %}
                     </div>
                 </a>
@@ -206,7 +205,7 @@
         </div>
     {% else %}
         <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-slate-600">
-            Ainda não existem análises AI nesta empresa. Começa por enviar uma fotografia de uma caixa cilíndrica.
+            {% trans "Ainda não existem análises AI nesta empresa. Começa por enviar uma fotografia de uma caixa cilíndrica." %}
         </div>
     {% endif %}
 </div>

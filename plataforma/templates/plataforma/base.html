@@ -1,7 +1,7 @@
 {% extends "projetos/base.html" %}
 {% load static  i18n %}
 
-{% block title %}{% block plataforma_title %}Plataforma{% endblock %}{% endblock %}
+{% block title %}{% block plataforma_title %}{% trans "Plataforma" %}{% endblock %}{% endblock %}
 
 {% block extra_head %}
     {{ block.super }}
@@ -13,8 +13,8 @@
     <div class="wrapper">
         <div class="topbar">
             <div>
-                <h1>{% block page_title %}Plataforma{% endblock %}</h1>
-                <p>{% block page_description %}Área de gestão da plataforma.{% endblock %}</p>
+                <h1>{% block page_title %}{% trans "Plataforma" %}{% endblock %}</h1>
+                <p>{% block page_description %}{% trans "Área de gestão da plataforma." %}{% endblock %}</p>
             </div>
             <div class="topbar-actions">
                 {% block page_actions %}{% endblock %}

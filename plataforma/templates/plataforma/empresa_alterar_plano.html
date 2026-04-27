@@ -9,19 +9,19 @@
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block page_description %}
-Alterar o plano, o período de pagamento e o estado da empresa.
+{% trans "Alterar o plano, o período de pagamento e o estado da empresa." %}
 {% endblock %}
 
 {% block plataforma_content %}
 <div class="card eap-card">
-    <p><strong>Empresa:</strong> {{ empresa.nome }}</p>
+    <p><strong>{% trans "Empresa:" %}</strong> {{ empresa.nome }}</p>
 
     <form method="post">
         {% csrf_token %}
 
         <div class="eap-field">
             <label class="eap-label">
-                Selecionar plano:
+                {% trans "Selecionar plano:" %}
             </label>
 
             <select name="plano" required class="eap-select">
@@ -29,7 +29,7 @@ Alterar o plano, o período de pagamento e o estado da empresa.
                     <option value="{{ plano.id }}"
                         data-periodos="{{ plano.periodos_cobranca_disponiveis_normalizados|join:',' }}"
                         {% if empresa.plano and plano.id == empresa.plano.id %}selected{% endif %}>
-                        {{ plano.nome }} - {{ plano.preco_mensal }}€/mês{% if plano.preco_anual %} - {{ plano.preco_anual }}€/ano{% endif %}
+                        {{ plano.nome }} - {{ plano.preco_mensal }}€/{% trans "mês" %}{% if plano.preco_anual %} - {{ plano.preco_anual }}€/{% trans "ano" %}{% endif %}
                     </option>
                 {% endfor %}
             </select>
@@ -37,28 +37,28 @@ Alterar o plano, o período de pagamento e o estado da empresa.
 
         <div class="eap-field">
             <label for="ciclo_subscricao" class="eap-label">
-                Período de pagamento:
+                {% trans "Período de pagamento:" %}
             </label>
 
             <select name="ciclo_subscricao" id="ciclo_subscricao" required class="eap-select">
                 <option value="1" {% if not subscricao_atual or subscricao_atual.periodo_cobranca_meses == 1 %}selected{% endif %}>
-                    1 mês
+                    {% trans "1 mês" %}
                 </option>
                 <option value="3" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 3 %}selected{% endif %}>
-                    3 meses
+                    {% trans "3 meses" %}
                 </option>
                 <option value="6" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 6 %}selected{% endif %}>
-                    6 meses
+                    {% trans "6 meses" %}
                 </option>
                 <option value="12" {% if subscricao_atual and subscricao_atual.periodo_cobranca_meses == 12 %}selected{% endif %}>
-                    12 meses
+                    {% trans "12 meses" %}
                 </option>
             </select>
         </div>
 
         <div class="eap-field">
             <label for="estado_empresa" class="eap-label">
-                Estado da empresa:
+                {% trans "Estado da empresa:" %}
             </label>
 
             <select name="estado_empresa" id="estado_empresa" required class="eap-select">
@@ -72,20 +72,20 @@ Alterar o plano, o período de pagamento e o estado da empresa.
 
         {% if subscricao_atual %}
             <div class="eap-info">
-                <div class="eap-info-row"><strong>Subscrição atual:</strong> {{ subscricao_atual.plano.nome }}</div>
-                <div class="eap-info-row"><strong>Período atual:</strong> {{ subscricao_atual.periodo_cobranca_label }}</div>
-                <div class="eap-info-row"><strong>Estado atual da empresa:</strong> {{ empresa.get_status_display }}</div>
-                <div class="eap-info-row"><strong>Próxima renovação:</strong> {{ subscricao_atual.proxima_renovacao|default:"—" }}</div>
+                <div class="eap-info-row"><strong>{% trans "Subscrição atual:" %}</strong> {{ subscricao_atual.plano.nome }}</div>
+                <div class="eap-info-row"><strong>{% trans "Período atual:" %}</strong> {{ subscricao_atual.periodo_cobranca_label }}</div>
+                <div class="eap-info-row"><strong>{% trans "Estado atual da empresa:" %}</strong> {{ empresa.get_status_display }}</div>
+                <div class="eap-info-row"><strong>{% trans "Próxima renovação:" %}</strong> {{ subscricao_atual.proxima_renovacao|default:"—" }}</div>
                 {% if subscricao_atual.renovacao_definida_manualmente %}
-                    <div class="eap-note"><strong>Nota:</strong> a próxima renovação foi definida manualmente e não será recalculada automaticamente ao mudar o ciclo.</div>
+                    <div class="eap-note"><strong>{% trans "Nota:" %}</strong> {% trans "a próxima renovação foi definida manualmente e não será recalculada automaticamente ao mudar o ciclo." %}</div>
                 {% endif %}
             </div>
         {% endif %}
 
         <div class="eap-actions">
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" class="btn btn-primary">{% trans "Guardar" %}</button>
             <a href="{% url 'plataforma:empresa_detail' empresa.id %}" class="btn btn-light">
-                Voltar
+                {% trans "Voltar" %}
             </a>
         </div>
     </form>

@@ -1,39 +1,39 @@
 {% extends base_template %}
 {% load i18n %}
 
-{% block title %}Histórico AI{% endblock %}
+{% block title %}{% trans "Histórico AI" %}{% endblock %}
 
 {% block content %}
 <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900">Histórico de análises AI</h1>
-        <p class="text-slate-600 mt-2">Lista de fotografias analisadas, com estados, deteções e contexto operacional.</p>
+        <h1 class="text-3xl font-bold text-slate-900">{% trans "Histórico de análises AI" %}</h1>
+        <p class="text-slate-600 mt-2">{% trans "Lista de fotografias analisadas, com estados, deteções e contexto operacional." %}</p>
     </div>
-    <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">Nova análise</a>
+    <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">{% trans "Nova análise" %}</a>
 </div>
 
 <form method="get" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
     <div>
-        <label class="form-label">Estado</label>
+        <label class="form-label">{% trans "Estado" %}</label>
         <select name="estado" class="form-control">
-            <option value="">Todos</option>
+            <option value="">{% trans "Todos" %}</option>
             {% for value, label in estado_choices %}
                 <option value="{{ value }}" {% if estado_atual == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
-        <label class="form-label">Tipo de documento</label>
+        <label class="form-label">{% trans "Tipo de documento" %}</label>
         <select name="tipo_documento" class="form-control">
-            <option value="">Todos</option>
+            <option value="">{% trans "Todos" %}</option>
             {% for value, label in tipo_documento_choices %}
                 <option value="{{ value }}" {% if tipo_documento_atual == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
     </div>
     <div class="flex items-end gap-3">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">Limpar</a>
+        <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Limpar" %}</a>
     </div>
 </form>
 
@@ -42,13 +42,13 @@
         <table class="min-w-full text-sm">
             <thead class="bg-slate-50 text-slate-600 uppercase tracking-wide text-xs">
                 <tr>
-                    <th class="px-4 py-3 text-left">Análise</th>
-                    <th class="px-4 py-3 text-left">Documento</th>
-                    <th class="px-4 py-3 text-left">Projeto / Furo</th>
-                    <th class="px-4 py-3 text-left">Estado</th>
-                    <th class="px-4 py-3 text-left">Marcador</th>
-                    <th class="px-4 py-3 text-left">Confiança</th>
-                    <th class="px-4 py-3 text-left">Ações</th>
+                    <th class="px-4 py-3 text-left">{% trans "Análise" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Documento" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Projeto / Furo" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Estado" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Marcador" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Confiança" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,13 +70,13 @@
                             {% if analise.confianca_media %}{{ analise.confianca_media|floatformat:2 }}{% else %}-{% endif %}
                         </td>
                         <td class="px-4 py-3">
-                            <a href="{% url 'inspecao_ai:analise_detail' analise.pk %}" class="btn btn-sm btn-secondary">Abrir</a>
+                            <a href="{% url 'inspecao_ai:analise_detail' analise.pk %}" class="btn btn-sm btn-secondary">{% trans "Abrir" %}</a>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
                         <td colspan="7" class="px-4 py-10 text-center text-slate-500">
-                            Ainda não existem análises com estes filtros.
+                            {% trans "Ainda não existem análises com estes filtros." %}
                         </td>
                     </tr>
                 {% endfor %}

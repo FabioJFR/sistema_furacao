@@ -1,11 +1,11 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Centro Drone DJI{% endblock %}
-{% block page_title %}Centro Drone DJI Mini 4 Pro{% endblock %}
-{% block page_description %}Importacao operacional de voos, acesso rapido aos furos e acompanhamento das missoes da geologia.{% endblock %}
+{% block title %}{% trans "Centro Drone DJI" %}{% endblock %}
+{% block page_title %}{% trans "Centro Drone DJI Mini 4 Pro" %}{% endblock %}
+{% block page_description %}{% trans "Importação operacional de voos, acesso rápido aos furos e acompanhamento das missões da geologia." %}{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar a geologia</a>
+    <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">{% trans "Voltar a geologia" %}</a>
 {% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/geologia/drone_ui.css' %}">
@@ -28,40 +28,40 @@
     {% if contexto_geologia.is_global %}
     <form method="get" class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm mb-8 flex flex-col md:flex-row md:items-end gap-4">
         <div class="flex-1">
-            <label for="id_empresa_dji" class="block text-sm font-semibold text-amber-900 mb-1">Empresa para operar o drone</label>
+            <label for="id_empresa_dji" class="block text-sm font-semibold text-amber-900 mb-1">{% trans "Empresa para operar o drone" %}</label>
             <select id="id_empresa_dji" name="empresa" class="border rounded px-3 py-2 w-full bg-white">
-                <option value="">Seleciona uma empresa</option>
+                <option value="">{% trans "Seleciona uma empresa" %}</option>
                 {% for empresa_item in contexto_geologia.empresas_disponiveis %}
                     <option value="{{ empresa_item.id }}" {% if empresa_geologia and empresa_item.id == empresa_geologia.id %}selected{% endif %}>{{ empresa_item }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="px-4 py-2 rounded bg-amber-600 text-white font-semibold">Usar empresa</button>
+        <button type="submit" class="px-4 py-2 rounded bg-amber-600 text-white font-semibold">{% trans "Usar empresa" %}</button>
     </form>
     {% endif %}
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div class="rounded-xl border border-sky-100 bg-sky-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-sky-900">Furos com geologia</div>
+            <div class="text-sm font-semibold text-sky-900">{% trans "Furos com geologia" %}</div>
             <div class="text-3xl font-bold text-sky-950 mt-2">{{ total_furos }}</div>
         </div>
         <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-emerald-900">Missões registadas</div>
+            <div class="text-sm font-semibold text-emerald-900">{% trans "Missões registadas" %}</div>
             <div class="text-3xl font-bold text-emerald-950 mt-2">{{ total_missoes }}</div>
         </div>
         <div class="rounded-xl border border-amber-100 bg-amber-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-amber-900">Missões importadas</div>
+            <div class="text-sm font-semibold text-amber-900">{% trans "Missões importadas" %}</div>
             <div class="text-3xl font-bold text-amber-950 mt-2">{{ total_importadas }}</div>
         </div>
     </div>
 
     <nav class="sticky top-4 z-10 mb-8 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-sm">
         <div class="flex flex-wrap gap-3 text-sm">
-            <a href="#sec-live" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Live</a>
-            <a href="#sec-mapa" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Mapa</a>
-            <a href="#sec-bridge" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Bridge</a>
-            <a href="#sec-comandos" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Comandos</a>
-            <a href="#sec-missoes" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Missões</a>
+            <a href="#sec-live" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Live" %}</a>
+            <a href="#sec-mapa" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Mapa" %}</a>
+            <a href="#sec-bridge" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Bridge" %}</a>
+            <a href="#sec-comandos" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Comandos" %}</a>
+            <a href="#sec-missoes" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Missões" %}</a>
         </div>
     </nav>
 

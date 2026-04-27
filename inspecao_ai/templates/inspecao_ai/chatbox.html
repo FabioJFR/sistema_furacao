@@ -2,7 +2,7 @@
 {% load static  i18n %}
 {% load inspecao_ai_extras %}
 
-{% block title %}Chatbox AI{% endblock %}
+{% block title %}{% trans "Chatbox AI" %}{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/inspecao_ai/chatbox.css' %}">
 {% endblock %}
@@ -10,37 +10,36 @@
 {% block content %}
 <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900">Chatbox AI</h1>
+        <h1 class="text-3xl font-bold text-slate-900">{% trans "Chatbox AI" %}</h1>
         <p class="text-slate-600 mt-2">
-            Assistente contextual da empresa. Responde com base nos dados de furos, despesas, máquinas,
-            materiais, empregados, eventos e também faz cálculo matemático.
+            {% trans "Assistente contextual da empresa. Responde com base nos dados de furos, despesas, máquinas, materiais, empregados, eventos e também faz cálculo matemático." %}
         </p>
     </div>
-    <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">Voltar à AI</a>
+    <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">{% trans "Voltar à AI" %}</a>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)] gap-6">
     <aside class="space-y-6">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-lg font-semibold text-slate-900 mb-3">Resumo atual</h2>
+            <h2 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Resumo atual" %}</h2>
             <div class="space-y-2 text-sm text-slate-700">
-                <div><strong>Projetos:</strong> {{ resumo_chat.total_projetos }}</div>
-                <div><strong>Furos ativos:</strong> {{ resumo_chat.furos_ativos }}</div>
-                <div><strong>Furos concluídos:</strong> {{ resumo_chat.furos_concluidos }}</div>
-                <div><strong>Empregados:</strong> {{ resumo_chat.total_empregados }}</div>
-                <div><strong>Máquinas:</strong> {{ resumo_chat.total_maquinas }}</div>
-                <div><strong>Materiais:</strong> {{ resumo_chat.total_materiais }}</div>
-                <div><strong>Despesas:</strong> {{ resumo_chat.total_despesas|floatformat:2 }} €</div>
+                <div><strong>{% trans "Projetos:" %}</strong> {{ resumo_chat.total_projetos }}</div>
+                <div><strong>{% trans "Furos ativos:" %}</strong> {{ resumo_chat.furos_ativos }}</div>
+                <div><strong>{% trans "Furos concluídos:" %}</strong> {{ resumo_chat.furos_concluidos }}</div>
+                <div><strong>{% trans "Empregados:" %}</strong> {{ resumo_chat.total_empregados }}</div>
+                <div><strong>{% trans "Máquinas:" %}</strong> {{ resumo_chat.total_maquinas }}</div>
+                <div><strong>{% trans "Materiais:" %}</strong> {{ resumo_chat.total_materiais }}</div>
+                <div><strong>{% trans "Despesas:" %}</strong> {{ resumo_chat.total_despesas|floatformat:2 }} €</div>
             </div>
         </div>
 
         {% if memoria_furo_contexto and memoria_furo_contexto.furo_referencia %}
             <div class="bg-amber-50 rounded-2xl shadow-sm border border-amber-200 p-5">
-                <h2 class="text-lg font-semibold text-amber-900 mb-3">Memória da zona em foco</h2>
+                <h2 class="text-lg font-semibold text-amber-900 mb-3">{% trans "Memória da zona em foco" %}</h2>
                 <div class="space-y-2 text-sm text-amber-900">
-                    <div><strong>Furo:</strong> {{ memoria_furo_contexto.furo_referencia.nome }}</div>
-                    <div><strong>Projeto:</strong> {{ memoria_furo_contexto.furo_referencia.projeto }}</div>
-                    <div><strong>Estado:</strong> {{ memoria_furo_contexto.furo_referencia.estado }}</div>
+                    <div><strong>{% trans "Furo:" %}</strong> {{ memoria_furo_contexto.furo_referencia.nome }}</div>
+                    <div><strong>{% trans "Projeto:" %}</strong> {{ memoria_furo_contexto.furo_referencia.projeto }}</div>
+                    <div><strong>{% trans "Estado:" %}</strong> {{ memoria_furo_contexto.furo_referencia.estado }}</div>
                 </div>
                 {% if memoria_furo_contexto.relacionados %}
                     <div class="mt-4 space-y-2">
@@ -55,7 +54,7 @@
         {% endif %}
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-lg font-semibold text-slate-900 mb-3">Conversas</h2>
+            <h2 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Conversas" %}</h2>
             <div class="space-y-2">
                 {% for item in sessoes %}
                     <a href="?sessao={{ item.pk }}" class="block rounded-xl border px-3 py-2 {% if sessao and item.pk == sessao.pk %}border-sky-300 bg-sky-50 text-sky-900{% else %}border-slate-200 text-slate-700 hover:border-slate-300{% endif %}">
@@ -63,7 +62,7 @@
                         <div class="text-xs text-slate-500 mt-1">{{ item.atualizado_em|date:"d/m/Y H:i" }}</div>
                     </a>
                 {% empty %}
-                    <div class="text-sm text-slate-500">Ainda não tens conversas guardadas.</div>
+                    <div class="text-sm text-slate-500">{% trans "Ainda não tens conversas guardadas." %}</div>
                 {% endfor %}
             </div>
         </div>
@@ -72,11 +71,10 @@
     <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden ai-chat-shell">
         <div class="p-5 border-b border-slate-200">
             <h2 class="text-xl font-semibold text-slate-900">
-                {% if sessao %}{{ sessao.titulo }}{% else %}Nova conversa{% endif %}
+                {% if sessao %}{{ sessao.titulo }}{% else %}{% trans "Nova conversa" %}{% endif %}
             </h2>
             <p class="text-sm text-slate-600 mt-1">
-                Exemplos: "quais são os alertas atuais?", "quanto já gastámos?", "que furos estão em curso?",
-                "calcula sqrt(144) + 3^2".
+                {% trans 'Exemplos: "quais são os alertas atuais?", "quanto já gastámos?", "que furos estão em curso?", "calcula sqrt(144) + 3^2".' %}
             </p>
         </div>
 
@@ -86,7 +84,7 @@
                     <div class="{% if mensagem.papel == 'user' %}flex justify-end{% else %}flex justify-start{% endif %}">
                         <div class="max-w-4xl rounded-2xl px-4 py-3 shadow-sm {% if mensagem.papel == 'user' %}bg-sky-600 text-white{% else %}bg-white border border-slate-200 text-slate-800{% endif %}">
                             <div class="text-[11px] uppercase tracking-wide font-semibold mb-3 {% if mensagem.papel == 'user' %}text-sky-100{% else %}text-slate-500{% endif %}">
-                                {% if mensagem.papel == 'user' %}Pergunta{% else %}Resposta AI{% endif %}
+                                {% if mensagem.papel == 'user' %}{% trans "Pergunta" %}{% else %}{% trans "Resposta AI" %}{% endif %}
                             </div>
                             {% if mensagem.papel == 'assistant' %}
                                 <div class="space-y-2">
@@ -97,14 +95,14 @@
                                     {% endfor %}
                                 </div>
                                 {% if mensagem.metadados.sugestoes %}
-                                    <div class="ai-chat-sugestoes-header mt-3">Próximas ações</div>
+                                    <div class="ai-chat-sugestoes-header mt-3">{% trans "Próximas ações" %}</div>
                                     <div class="ai-chat-sugestoes mt-2">
                                         {% for item in mensagem.metadados.sugestoes %}
                                             <button
                                                 type="button"
                                                 class="ai-chat-sugestao-btn"
                                                 data-chat-prompt="{{ item.prompt|escape }}"
-                                                title="Enviar pergunta sugerida"
+                                                title="{% trans 'Enviar pergunta sugerida' %}"
                                             >
                                                 {{ item.label }}
                                             </button>
@@ -122,8 +120,7 @@
                 {% endfor %}
             {% else %}
                 <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-slate-600">
-                    A conversa ainda está vazia. Pergunta sobre furos, despesas, alertas, stock, eventos, máquinas,
-                    empregados ou faz um cálculo.
+                    {% trans "A conversa ainda está vazia. Pergunta sobre furos, despesas, alertas, stock, eventos, máquinas, empregados ou faz um cálculo." %}
                 </div>
             {% endif %}
         </div>
@@ -136,16 +133,16 @@
             {% if memoria_furo_contexto and memoria_furo_contexto.furo_referencia %}
                 <input type="hidden" name="furo_contexto_id" value="{{ memoria_furo_contexto.furo_referencia.id }}">
             {% endif %}
-            <label for="id_pergunta" class="sr-only">Pergunta</label>
+            <label for="id_pergunta" class="sr-only">{% trans "Pergunta" %}</label>
             <textarea
                 id="id_pergunta"
                 name="pergunta"
                 rows="2"
                 class="form-control w-full resize-y ai-chat-input"
-                placeholder="Escreve aqui a tua pergunta sobre a operação, despesas, alertas, furos, materiais, máquinas ou cálculo..."
+                placeholder="{% trans 'Escreve aqui a tua pergunta sobre a operação, despesas, alertas, furos, materiais, máquinas ou cálculo...' %}"
             ></textarea>
             <div class="flex flex-wrap gap-3 mt-3 ai-chat-actions">
-                <button type="submit" class="btn btn-primary ai-chat-submit">Enviar para a Chatbox</button>
+                <button type="submit" class="btn btn-primary ai-chat-submit">{% trans "Enviar para a Chatbox" %}</button>
             </div>
         </form>
     </section>

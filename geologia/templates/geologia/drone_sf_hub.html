@@ -1,25 +1,25 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Interface Drone S_F{% endblock %}
-{% block page_title %}Interface Drone S_F{% endblock %}
+{% block title %}{% trans "Interface Drone S_F" %}{% endblock %}
+{% block page_title %}{% trans "Interface Drone S_F" %}{% endblock %}
 {% block page_description %}
     {% if contexto_geologia.is_global %}
-    Área nova para o drone próprio S_F, separada da integração DJI e preparada para arquitetura aberta, sensores e software embarcado.
+    {% trans "Área nova para o drone próprio S_F, separada da integração DJI e preparada para arquitetura aberta, sensores e software embarcado." %}
     {% else %}
-    Centro operacional do Drone S_F da empresa, pensado para hardware próprio, sensores modulares e integração nativa com a plataforma.
+    {% trans "Centro operacional do Drone S_F da empresa, pensado para hardware próprio, sensores modulares e integração nativa com a plataforma." %}
     {% endif %}
 {% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar a geologia</a>
-    <a href="{% url 'geologia:drone_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Abrir interface DJI</a>
+    <a href="{% url 'geologia:hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">{% trans "Voltar a geologia" %}</a>
+    <a href="{% url 'geologia:drone_hub' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Abrir interface DJI" %}</a>
     {% if empresa_geologia %}
     <form method="post" action="{% url 'geologia:drone_sf_demo_create' %}?empresa={{ empresa_geologia.id }}" class="drone-inline-form">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Criar drone demo</button>
+        <button type="submit" class="btn btn-primary">{% trans "Criar drone demo" %}</button>
     </form>
     {% endif %}
-    <a href="{% url 'geologia:drone_sf_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">Novo Drone S_F</a>
+    <a href="{% url 'geologia:drone_sf_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-primary">{% trans "Novo Drone S_F" %}</a>
 {% endblock %}
 
 {% block extra_css %}
@@ -31,32 +31,31 @@
     {% if contexto_geologia.is_global %}
     <form method="get" class="rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 shadow-sm mb-8 flex flex-col md:flex-row md:items-end gap-4">
         <div class="flex-1">
-            <label for="id_empresa_drone_sf" class="block text-sm font-semibold text-orange-900 mb-1">Empresa para operar o Drone S_F</label>
+            <label for="id_empresa_drone_sf" class="block text-sm font-semibold text-orange-900 mb-1">{% trans "Empresa para operar o Drone S_F" %}</label>
             <select id="id_empresa_drone_sf" name="empresa" class="border rounded px-3 py-2 w-full bg-white">
-                <option value="">Seleciona uma empresa</option>
+                <option value="">{% trans "Seleciona uma empresa" %}</option>
                 {% for empresa_item in contexto_geologia.empresas_disponiveis %}
                     <option value="{{ empresa_item.id }}" {% if empresa_geologia and empresa_item.id == empresa_geologia.id %}selected{% endif %}>{{ empresa_item }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="px-4 py-2 rounded bg-orange-600 text-white font-semibold">Usar empresa</button>
+        <button type="submit" class="px-4 py-2 rounded bg-orange-600 text-white font-semibold">{% trans "Usar empresa" %}</button>
     </form>
     {% endif %}
 
     <div class="rounded-3xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 text-white shadow-xl mb-8">
         <div class="px-8 py-8 md:px-10 md:py-10">
             <div class="max-w-4xl">
-                <div class="text-xs uppercase tracking-[0.24em] text-cyan-300">S_F Platform</div>
-                <h2 class="mt-3 text-3xl md:text-4xl font-bold">Arquitetura aberta para o drone próprio da plataforma</h2>
+                <div class="text-xs uppercase tracking-[0.24em] text-cyan-300">{% trans "S_F Platform" %}</div>
+                <h2 class="mt-3 text-3xl md:text-4xl font-bold">{% trans "Arquitetura aberta para o drone próprio da plataforma" %}</h2>
                 <p class="mt-4 text-sm md:text-base text-slate-300">
-                    Esta área é exclusiva para o Drone S_F e não interfere com a secção DJI. Aqui vamos preparar hardware, sensores,
-                    software embarcado, missões futuras e integração nativa com geologia, AI e base documental.
+                    {% trans "Esta área é exclusiva para o Drone S_F e não interfere com a secção DJI. Aqui vamos preparar hardware, sensores, software embarcado, missões futuras e integração nativa com geologia, AI e base documental." %}
                 </p>
                 <div class="mt-6 flex flex-wrap gap-3 text-sm">
-                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Telemetria aberta</span>
-                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Sensores modulares</span>
-                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Software embarcado</span>
-                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">Integração nativa com a plataforma</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">{% trans "Telemetria aberta" %}</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">{% trans "Sensores modulares" %}</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">{% trans "Software embarcado" %}</span>
+                    <span class="rounded-full bg-white/10 px-4 py-2 border border-white/10">{% trans "Integração nativa com a plataforma" %}</span>
                 </div>
             </div>
         </div>

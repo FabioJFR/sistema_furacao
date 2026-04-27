@@ -1,43 +1,43 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Subscrições{% endblock %}
+{% block title %}{% trans "Subscrições" %}{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/plataforma/subscricao_list.css' %}">
 {% endblock %}
 
-{% block page_title %}Subscrições{% endblock %}
+{% block page_title %}{% trans "Subscrições" %}{% endblock %}
 
 {% block page_description %}
-Gestão de subscrições das empresas na plataforma.
+{% trans "Gestão de subscrições das empresas na plataforma." %}
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← {% trans "Voltar" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
-<h1>Subscrições</h1>
+<h1>{% trans "Subscrições" %}</h1>
 
 <div class="grid">
     <div class="card">
-        <div class="card-title">Total</div>
+        <div class="card-title">{% trans "Total" %}</div>
         <div class="card-value">{{ total_subscricoes }}</div>
     </div>
     <div class="card">
-        <div class="card-title">Ativas</div>
+        <div class="card-title">{% trans "Ativas" %}</div>
         <div class="card-value">{{ subscricoes_ativas }}</div>
     </div>
     <div class="card">
-        <div class="card-title">Pendentes</div>
+        <div class="card-title">{% trans "Pendentes" %}</div>
         <div class="card-value">{{ subscricoes_pendentes }}</div>
     </div>
     <div class="card">
-        <div class="card-title">Expiradas</div>
+        <div class="card-title">{% trans "Expiradas" %}</div>
         <div class="card-value">{{ subscricoes_expiradas }}</div>
     </div>
     <div class="card">
-        <div class="card-title">Canceladas</div>
+        <div class="card-title">{% trans "Canceladas" %}</div>
         <div class="card-value">{{ subscricoes_canceladas }}</div>
     </div>
 </div>
@@ -45,14 +45,14 @@ Gestão de subscrições das empresas na plataforma.
 <table>
     <thead>
         <tr>
-            <th>Empresa</th>
-            <th>Plano</th>
-            <th>Período</th>
-            <th>Estado</th>
-            <th>Valor</th>
-            <th>Início</th>
-            <th>Próxima renovação</th>
-            <th>Ações</th>
+            <th>{% trans "Empresa" %}</th>
+            <th>{% trans "Plano" %}</th>
+            <th>{% trans "Período" %}</th>
+            <th>{% trans "Estado" %}</th>
+            <th>{% trans "Valor" %}</th>
+            <th>{% trans "Início" %}</th>
+            <th>{% trans "Próxima renovação" %}</th>
+            <th>{% trans "Ações" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -70,23 +70,23 @@ Gestão de subscrições das empresas na plataforma.
                 <td>{{ s.data_inicio }}</td>
                 <td>{{ s.proxima_renovacao|default:s.data_fim }}</td>
                 <td>
-                    <a href="{% url 'plataforma:empresa_detail' s.empresa.pk %}">Ver empresa</a>
+                    <a href="{% url 'plataforma:empresa_detail' s.empresa.pk %}">{% trans "Ver empresa" %}</a>
                     |
-                    <a href="{% url 'plataforma:empresa_alterar_plano' s.empresa.pk %}">Editar subscrição</a>
+                    <a href="{% url 'plataforma:empresa_alterar_plano' s.empresa.pk %}">{% trans "Editar subscrição" %}</a>
                     {% if request.user.is_superuser and s.pagamento_pendente %}
                         {% if s.pagamento_pendente.valor > 0 %}
                             |
-                            <a href="{% url 'plataforma:financas_paypal_checkout_pagamento' s.pagamento_pendente.pk %}">Pagar com PayPal</a>
+                            <a href="{% url 'plataforma:financas_paypal_checkout_pagamento' s.pagamento_pendente.pk %}">{% trans "Pagar com PayPal" %}</a>
                         {% else %}
                             |
-                            <span>Plano gratuito</span>
+                            <span>{% trans "Plano gratuito" %}</span>
                         {% endif %}
                     {% endif %}
                 </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="8">Sem subscrições</td>
+                <td colspan="8">{% trans "Sem subscrições" %}</td>
             </tr>
         {% endfor %}
     </tbody>

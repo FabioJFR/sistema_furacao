@@ -1,7 +1,7 @@
 {% extends base_template %}
 {% load static i18n %}
 
-{% block title %}Memória Operacional AI{% endblock %}
+{% block title %}{% trans "Memória Operacional AI" %}{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
 {% endblock %}
@@ -10,40 +10,40 @@
 <div class="ai-mobile-scale">
 <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900">Memória Operacional</h1>
+        <h1 class="text-3xl font-bold text-slate-900">{% trans "Memória Operacional" %}</h1>
         <p class="text-slate-600 mt-2">
-            Consulta rápida da memória dos furos por zona, localização e histórico operacional.
+            {% trans "Consulta rápida da memória dos furos por zona, localização e histórico operacional." %}
         </p>
     </div>
     <div class="flex gap-3 flex-wrap">
-        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">Abrir Chatbox</a>
-        <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">Voltar à AI</a>
+        <a href="{% url 'inspecao_ai:chatbox' %}" class="btn btn-secondary">{% trans "Abrir Chatbox" %}</a>
+        <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">{% trans "Voltar à AI" %}</a>
     </div>
 </div>
 
 <form method="get" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto] gap-4">
         <div>
-            <label class="form-label">Pesquisar por furo, projeto ou localização</label>
+            <label class="form-label">{% trans "Pesquisar por furo, projeto ou localização" %}</label>
             <input
                 type="text"
                 name="q"
                 value="{{ termo }}"
                 class="form-control"
-                placeholder="Ex.: Furo 12, Plataforma 3, Setor Norte"
+                placeholder="{% trans 'Ex.: Furo 12, Plataforma 3, Setor Norte' %}"
             >
         </div>
         <div>
-            <label class="form-label">Estado</label>
+            <label class="form-label">{% trans "Estado" %}</label>
             <select name="estado" class="form-control">
-                <option value="">Todos</option>
+                <option value="">{% trans "Todos" %}</option>
                 {% for value, label in estado_choices %}
                     <option value="{{ value }}" {% if estado == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
         <div>
-            <label class="form-label">Ordenar por</label>
+            <label class="form-label">{% trans "Ordenar por" %}</label>
             <select name="ordenar" class="form-control">
                 {% for value, label in ordenacao_choices %}
                     <option value="{{ value }}" {% if ordenar == value %}selected{% endif %}>{{ label }}</option>
@@ -51,19 +51,19 @@
             </select>
         </div>
         <div class="flex items-end gap-3">
-            <button type="submit" class="btn btn-primary">Pesquisar</button>
-            <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="btn btn-secondary">Limpar</a>
+            <button type="submit" class="btn btn-primary">{% trans "Pesquisar" %}</button>
+            <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="btn btn-secondary">{% trans "Limpar" %}</a>
         </div>
     </div>
 
     <div class="mt-4 flex flex-wrap gap-6">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" name="com_coordenadas" value="1" {% if com_coordenadas %}checked{% endif %}>
-            Só com coordenadas
+            {% trans "Só com coordenadas" %}
         </label>
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" name="despesas_altas" value="1" {% if despesas_altas %}checked{% endif %}>
-            Com despesas diretas altas (>= 1000 €)
+            {% trans "Com despesas diretas altas (>= 1000 €)" %}
         </label>
     </div>
 </form>
@@ -92,7 +92,7 @@
                 {% endif %}
 
                 <div class="mt-5">
-                    <div class="text-sm font-semibold text-amber-800 mb-3">Furos relacionados na mesma zona</div>
+                    <div class="text-sm font-semibold text-amber-800 mb-3">{% trans "Furos relacionados na mesma zona" %}</div>
                     {% if memoria.relacionados %}
                         <div class="space-y-2">
                             {% for item in memoria.relacionados %}
@@ -103,7 +103,7 @@
                         </div>
                     {% else %}
                         <div class="rounded-xl border border-dashed border-slate-300 px-3 py-4 text-sm text-slate-500">
-                            Ainda não encontrei outros furos relacionados com esta zona.
+                            {% trans "Ainda não encontrei outros furos relacionados com esta zona." %}
                         </div>
                     {% endif %}
                 </div>
@@ -112,7 +112,7 @@
     </div>
 {% else %}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-slate-600">
-        Não encontrei memória operacional para esse filtro. Tenta pesquisar por nome do furo, projeto ou localização.
+        {% trans "Não encontrei memória operacional para esse filtro. Tenta pesquisar por nome do furo, projeto ou localização." %}
     </div>
 {% endif %}
 </div>

@@ -1,19 +1,19 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
+{% block title %}{% if titulo %}{{ titulo }}{% else %}{% trans "Onboarding de Empresa" %}{% endif %}{% endblock %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/plataforma/onboardiing_empresa.css' %}">
 {% endblock %}
 
-{% block page_title %}{{ titulo|default:"Onboarding de Empresa" }}{% endblock %}
+{% block page_title %}{% if titulo %}{{ titulo }}{% else %}{% trans "Onboarding de Empresa" %}{% endif %}{% endblock %}
 
 {% block page_description %}
-Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a subscrição inicial.
+{% trans "Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a subscrição inicial." %}
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← Voltar à dashboard</a>
+<a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">← {% trans "Voltar à dashboard" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
@@ -28,7 +28,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
         {% csrf_token %}
 
         <div class="onb-card">
-            <h2>Empresa</h2>
+            <h2>{% trans "Empresa" %}</h2>
 
             {% for field in form %}
                 {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes" %}
@@ -47,7 +47,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
         </div>
 
         <div class="onb-card">
-            <h2>Administrador inicial</h2>
+            <h2>{% trans "Administrador inicial" %}</h2>
 
             {% for field in form %}
                 {% if field.name in "nome_admin username_admin email_admin password_admin tipo_acesso" %}
@@ -66,7 +66,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
         </div>
 
         <div class="onb-card onb-card-full">
-            <h2>Plano e faturação inicial</h2>
+            <h2>{% trans "Plano e faturação inicial" %}</h2>
 
             {% for field in form %}
                 {% if field.name in "plano ciclo_subscricao estado_empresa criar_subscricao_inicial valor_subscricao" %}
@@ -86,7 +86,7 @@ Cria uma nova empresa na plataforma, o administrador inicial e, opcionalmente, a
 
         <div class="onb-actions">
             <button type="submit" class="onb-submit">
-                Criar empresa
+                {% trans "Criar empresa" %}
             </button>
         </div>
     </form>

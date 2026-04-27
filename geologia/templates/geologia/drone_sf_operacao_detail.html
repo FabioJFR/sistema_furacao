@@ -1,11 +1,11 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Operação S_F · {{ drone.nome }}{% endblock %}
-{% block page_title %}Operação S_F · {{ drone.nome }}{% endblock %}
-{% block page_description %}Camada própria de operação em tempo real do Drone S_F, separada da integração DJI.{% endblock %}
+{% block title %}{% trans "Operação S_F" %} · {{ drone.nome }}{% endblock %}
+{% block page_title %}{% trans "Operação S_F" %} · {{ drone.nome }}{% endblock %}
+{% block page_description %}{% trans "Camada própria de operação em tempo real do Drone S_F, separada da integração DJI." %}{% endblock %}
 {% block page_actions %}
-    <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">Voltar ao Drone S_F</a>
+    <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="btn btn-light">{% trans "Voltar ao Drone S_F" %}</a>
 {% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/geologia/drone_ui.css' %}">
@@ -21,31 +21,31 @@
 <div class="max-w-7xl mx-auto px-6 py-8" data-drone-sf-operacao-root data-estado-url="{% url 'geologia:api_drone_sf_estado' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}">
     <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="rounded-xl border border-cyan-100 bg-cyan-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-cyan-900">Estado</div>
+            <div class="text-sm font-semibold text-cyan-900">{% trans "Estado" %}</div>
             <div id="sf-estado-label" class="text-3xl font-bold text-cyan-950 mt-2">{{ operacao.get_estado_display }}</div>
         </div>
         <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-emerald-900">Bridge</div>
-            <div id="sf-estado-atual" class="text-3xl font-bold text-emerald-950 mt-2">{% if operacao.bridge_ativa %}Ativa{% else %}Desligada{% endif %}</div>
+            <div class="text-sm font-semibold text-emerald-900">{% trans "Bridge" %}</div>
+            <div id="sf-estado-atual" class="text-3xl font-bold text-emerald-950 mt-2">{% if operacao.bridge_ativa %}{% trans "Ativa" %}{% else %}{% trans "Desligada" %}{% endif %}</div>
         </div>
         <div class="rounded-xl border border-amber-100 bg-amber-50 px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-amber-900">Último heartbeat</div>
+            <div class="text-sm font-semibold text-amber-900">{% trans "Último heartbeat" %}</div>
             <div id="sf-ultimo-heartbeat-recebido" class="text-sm font-bold text-amber-950 mt-2">{% if operacao.ultimo_heartbeat %}{{ operacao.ultimo_heartbeat|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-            <div class="text-sm font-semibold text-slate-500">Comandos na fila</div>
+            <div class="text-sm font-semibold text-slate-500">{% trans "Comandos na fila" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ comandos_recentes|length }}</div>
         </div>
     </section>
 
     <nav class="sticky top-4 z-10 mb-8 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-sm">
         <div class="flex flex-wrap gap-3 text-sm">
-            <a href="#sec-live" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Live</a>
-            <a href="#sec-mapa" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Mapa</a>
-            <a href="#sec-bridge" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Bridge</a>
-            <a href="#sec-operacao" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Operação</a>
-            <a href="#sec-missoes" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Missões</a>
-            <a href="#sec-comandos" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">Comandos</a>
+            <a href="#sec-live" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Live" %}</a>
+            <a href="#sec-mapa" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Mapa" %}</a>
+            <a href="#sec-bridge" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Bridge" %}</a>
+            <a href="#sec-operacao" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Operação" %}</a>
+            <a href="#sec-missoes" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Missões" %}</a>
+            <a href="#sec-comandos" class="px-3 py-2 rounded-full bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">{% trans "Comandos" %}</a>
         </div>
     </nav>
 

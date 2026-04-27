@@ -1,19 +1,19 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}{{ titulo|default:"Plano" }}{% endblock %}
+{% block title %}{% if titulo %}{{ titulo }}{% else %}{% trans "Plano" %}{% endif %}{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/plataforma/plano_form.css' %}">
 {% endblock %}
 
-{% block page_title %}{{ titulo|default:"Plano" }}{% endblock %}
+{% block page_title %}{% if titulo %}{{ titulo }}{% else %}{% trans "Plano" %}{% endif %}{% endblock %}
 
 {% block page_description %}
-Criação e edição de planos comerciais, limites e permissões da plataforma.
+{% trans "Criação e edição de planos comerciais, limites e permissões da plataforma." %}
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">Voltar aos planos</a>
+<a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">{% trans "Voltar aos planos" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
@@ -28,7 +28,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
             </div>
         {% endif %}
 
-        <h2 class="section-title">Informação base</h2>
+        <h2 class="section-title">{% trans "Informação base" %}</h2>
         <div class="form-grid">
             <div class="field">
                 <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
@@ -49,7 +49,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
             </div>
         </div>
 
-        <h2 class="section-title plano-section-spacing">Preços</h2>
+        <h2 class="section-title plano-section-spacing">{% trans "Preços" %}</h2>
         <div class="form-grid">
             <div class="field" data-price-field="mensal">
                 <label for="{{ form.preco_mensal.id_for_label }}">{{ form.preco_mensal.label }}</label>
@@ -64,7 +64,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
             </div>
         </div>
 
-        <h2 class="section-title plano-section-spacing">Períodos de cobrança permitidos</h2>
+        <h2 class="section-title plano-section-spacing">{% trans "Períodos de cobrança permitidos" %}</h2>
         <div class="checkbox-group checkbox-group--periodos">
             <div class="checkbox-item checkbox-item--list">
                 {{ form.periodos_cobranca_disponiveis }}
@@ -72,7 +72,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
             </div>
         </div>
 
-        <h2 class="section-title plano-section-spacing">Limites</h2>
+        <h2 class="section-title plano-section-spacing">{% trans "Limites" %}</h2>
         <div class="form-grid">
             <div class="field" data-company-only-field>
                 <label for="{{ form.limite_empregados.id_for_label }}">{{ form.limite_empregados.label }}</label>
@@ -99,7 +99,7 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
             </div>
         </div>
 
-        <h2 class="section-title plano-section-spacing">Permissões e comportamento</h2>
+        <h2 class="section-title plano-section-spacing">{% trans "Permissões e comportamento" %}</h2>
         <div class="checkbox-group">
             <label class="checkbox-item" data-company-only-field>
                 {{ form.permite_multiplos_utilizadores }}
@@ -123,8 +123,8 @@ Criação e edição de planos comerciais, limites e permissões da plataforma.
         </div>
 
         <div class="actions">
-            <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Guardar plano</button>
+            <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
+            <button type="submit" class="btn btn-primary">{% trans "Guardar plano" %}</button>
         </div>
     </form>
 </div>

@@ -1,56 +1,56 @@
 {% extends "plataforma/base.html" %}
 {% load static  i18n %}
 
-{% block title %}Dashboard da Plataforma{% endblock %}
+{% block title %}{% trans "Dashboard da Plataforma" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/plataforma/dashboard.css' %}">
 {% endblock %}
 
 
-{% block page_title %}Dashboard da Plataforma{% endblock %}
+{% block page_title %}{% trans "Dashboard da Plataforma" %}{% endblock %}
 
 {% block page_description %}
-    Visão global da plataforma, empresas registadas e estado atual do ecossistema.
+    {% trans "Visão global da plataforma, empresas registadas e estado atual do ecossistema." %}
 {% endblock %}
 
 {% block page_actions %}
-    <a href="{% url 'plataforma:onboarding_empresa' %}" class="btn btn-primary">Criar nova empresa</a>
-    <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">Gerir planos</a>
-    <a href="{% url 'dispositivos:dashboard' %}" class="btn btn-light">Dispositivos</a>
+    <a href="{% url 'plataforma:onboarding_empresa' %}" class="btn btn-primary">{% trans "Criar nova empresa" %}</a>
+    <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">{% trans "Gerir planos" %}</a>
+    <a href="{% url 'dispositivos:dashboard' %}" class="btn btn-light">{% trans "Dispositivos" %}</a>
 {% endblock %}
 
 {% block plataforma_content %}
     <div class="grid-cards">
         <div class="card">
-            <div class="metric-label">Total de empresas</div>
+            <div class="metric-label">{% trans "Total de empresas" %}</div>
             <div class="metric-value">{{ total_empresas }}</div>
-            <div class="metric-note">Base atual da plataforma.</div>
+            <div class="metric-note">{% trans "Base atual da plataforma." %}</div>
         </div>
         <div class="card">
-            <div class="metric-label">Empresas ativas</div>
+            <div class="metric-label">{% trans "Empresas ativas" %}</div>
             <div class="metric-value">{{ empresas_ativas }}</div>
-            <div class="metric-note">Clientes em operação normal.</div>
+            <div class="metric-note">{% trans "Clientes em operação normal." %}</div>
         </div>
         <div class="card">
-            <div class="metric-label">Empresas em teste</div>
+            <div class="metric-label">{% trans "Empresas em teste" %}</div>
             <div class="metric-value">{{ empresas_teste }}</div>
-            <div class="metric-note">Contas em fase de onboarding ou validação.</div>
+            <div class="metric-note">{% trans "Contas em fase de onboarding ou validação." %}</div>
         </div>
         <div class="card">
-            <div class="metric-label">Empresas suspensas</div>
+            <div class="metric-label">{% trans "Empresas suspensas" %}</div>
             <div class="metric-value">{{ empresas_suspensas }}</div>
-            <div class="metric-note">Contas temporariamente limitadas.</div>
+            <div class="metric-note">{% trans "Contas temporariamente limitadas." %}</div>
         </div>
         <div class="card">
-            <div class="metric-label">Empresas canceladas</div>
+            <div class="metric-label">{% trans "Empresas canceladas" %}</div>
             <div class="metric-value">{{ empresas_canceladas }}</div>
-            <div class="metric-note">Histórico de contas encerradas.</div>
+            <div class="metric-note">{% trans "Histórico de contas encerradas." %}</div>
         </div>
         <div class="card">
-            <div class="metric-label">Planos ativos</div>
+            <div class="metric-label">{% trans "Planos ativos" %}</div>
             <div class="metric-value">{{ planos_ativos|default:0 }}</div>
-            <div class="metric-note">Planos comerciais disponíveis para subscrição.</div>
+            <div class="metric-note">{% trans "Planos comerciais disponíveis para subscrição." %}</div>
         </div>
     </div>
 
@@ -58,8 +58,8 @@
         <div class="card">
             <div class="section-title">
                 <div>
-                    <h2>Empresas recentes</h2>
-                    <p>Últimas empresas registadas na plataforma.</p>
+                    <h2>{% trans "Empresas recentes" %}</h2>
+                    <p>{% trans "Últimas empresas registadas na plataforma." %}</p>
                 </div>
             </div>
 
@@ -68,12 +68,12 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Empresa</th>
-                                <th>Plano</th>
-                                <th>Estado</th>
-                                <th>Ativa</th>
-                                <th>Criada em</th>
-                                <th>Ações</th>
+                                <th>{% trans "Empresa" %}</th>
+                                <th>{% trans "Plano" %}</th>
+                                <th>{% trans "Estado" %}</th>
+                                <th>{% trans "Ativa" %}</th>
+                                <th>{% trans "Criada em" %}</th>
+                                <th>{% trans "Ações" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,15 +99,15 @@
                                     </td>
                                     <td>
                                         {% if empresa.ativo %}
-                                            Sim
+                                            {% trans "Sim" %}
                                         {% else %}
-                                            Não
+                                            {% trans "Não" %}
                                         {% endif %}
                                     </td>
                                     <td>{{ empresa.criado_em|date:"d/m/Y H:i" }}</td>
                                     <td>
                                         <div class="acoes">
-                                            <a href="{% url 'plataforma:empresa_detail' empresa.pk %}" class="mini-btn">Ver</a>
+                                            <a href="{% url 'plataforma:empresa_detail' empresa.pk %}" class="mini-btn">{% trans "Ver" %}</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -117,7 +117,7 @@
                 </div>
             {% else %}
                 <div class="empty">
-                    Ainda não existem empresas registadas na plataforma.
+                    {% trans "Ainda não existem empresas registadas na plataforma." %}
                 </div>
             {% endif %}
         </div>
@@ -125,72 +125,72 @@
         <div class="card">
             <div class="section-title">
                 <div>
-                    <h2>Ações rápidas</h2>
-                    <p>Atalhos para gestão inicial da plataforma.</p>
+                    <h2>{% trans "Ações rápidas" %}</h2>
+                    <p>{% trans "Atalhos para gestão inicial da plataforma." %}</p>
                 </div>
             </div>
 
             <div class="panel-list">
                 <a href="{% url 'plataforma:onboarding_empresa' %}" class="quick-link">
-                    <strong>Onboarding de empresa</strong>
-                    <span>Criar nova empresa e respetivo administrador inicial.</span>
+                    <strong>{% trans "Onboarding de empresa" %}</strong>
+                    <span>{% trans "Criar nova empresa e respetivo administrador inicial." %}</span>
                 </a>
                 <a href="{% url 'plataforma:subscricao_list' %}" class="quick-link">
-                    <strong>Subscrições</strong>
-                    <span>Gerir subscrições das empresas</span>
+                    <strong>{% trans "Subscrições" %}</strong>
+                    <span>{% trans "Gerir subscrições das empresas" %}</span>
                 </a>
                 <a href="{% url 'plataforma:plano_list' %}" class="quick-link">
-                    <strong>Gerir planos</strong>
-                    <span>Criar, editar e ativar planos comerciais da plataforma.</span>
+                    <strong>{% trans "Gerir planos" %}</strong>
+                    <span>{% trans "Criar, editar e ativar planos comerciais da plataforma." %}</span>
                 </a>
                 <a href="{% url 'dispositivos:dashboard' %}" class="quick-link">
-                    <strong>Dispositivos</strong>
-                    <span>Aceder ao centro de monitorização e testes dos aparelhos.</span>
+                    <strong>{% trans "Dispositivos" %}</strong>
+                    <span>{% trans "Aceder ao centro de monitorização e testes dos aparelhos." %}</span>
                 </a>
                 <a href="{% url 'geologia:hub' %}" class="quick-link">
-                    <strong>Geologia</strong>
-                    <span>Aceder ao centro de geologia, logs do furo e visao operacional da area.</span>
+                    <strong>{% trans "Geologia" %}</strong>
+                    <span>{% trans "Aceder ao centro de geologia, logs do furo e visão operacional da área." %}</span>
                 </a>
                 <a href="{% url 'geologia:drone_hub' %}" class="quick-link">
                     <strong>DJI Mini 4 Pro</strong>
-                    <span>Aceder a interface DJI dentro da app geologia.</span>
+                    <span>{% trans "Aceder à interface DJI dentro da app geologia." %}</span>
                 </a>
                 {% if request.user.is_superuser %}
                     <a href="{% url 'inspecao_ai:hub' %}" class="quick-link">
                         <strong>AI Visual</strong>
-                        <span>Aceder ao centro principal da AI visual.</span>
+                        <span>{% trans "Aceder ao centro principal da AI visual." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:chatbox' %}" class="quick-link">
                         <strong>Chatbox AI</strong>
-                        <span>Usar a interface conversacional da AI.</span>
+                        <span>{% trans "Usar a interface conversacional da AI." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="quick-link">
                         <strong>Memória Operacional AI</strong>
-                        <span>Consultar o histórico operacional ligado a furos e zonas.</span>
+                        <span>{% trans "Consultar o histórico operacional ligado a furos e zonas." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:analise_create' %}" class="quick-link">
                         <strong>Nova análise AI</strong>
-                        <span>Criar uma nova análise visual de relatório ou caixa.</span>
+                        <span>{% trans "Criar uma nova análise visual de relatório ou caixa." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:analise_list' %}" class="quick-link">
                         <strong>Histórico AI</strong>
-                        <span>Rever análises anteriores e reprocessar com o motor atual.</span>
+                        <span>{% trans "Rever análises anteriores e reprocessar com o motor atual." %}</span>
                     </a>
                     <a href="{% url 'plataforma:features_dashboard' %}" class="quick-link">
                         <strong>Gestão de features</strong>
-                        <span>Controlar funcionalidades ativas por empresa e por conta individual.</span>
+                        <span>{% trans "Controlar funcionalidades ativas por empresa e por conta individual." %}</span>
                     </a>
                 {% endif %}
                 <a href="{% url 'admin:index' %}" class="quick-link">
                     <strong>Admin Django</strong>
-                    <span>Gerir modelos, dados internos e operações técnicas.</span>
+                    <span>{% trans "Gerir modelos, dados internos e operações técnicas." %}</span>
                 </a>
             </div>
 
             <div class="section-title section-title-spaced">
                 <div>
-                    <h2>Alertas de renovação</h2>
-                    <p>Empresas com renovação próxima ou vencida.</p>
+                    <h2>{% trans "Alertas de renovação" %}</h2>
+                    <p>{% trans "Empresas com renovação próxima ou vencida." %}</p>
                 </div>
             </div>
 
@@ -208,7 +208,7 @@
                 </div>
             {% else %}
                 <div class="empty">
-                    Não existem alertas de renovação neste momento.
+                    {% trans "Não existem alertas de renovação neste momento." %}
                 </div>
             {% endif %}
         </div>
