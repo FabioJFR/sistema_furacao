@@ -43,6 +43,21 @@ def serializar_estado_operacao(operacao):
     }
 
 
+def atualizar_operacao_drone_from_form(*, form):
+    if not form.is_valid():
+        return None
+    operacao = form.save(commit=False)
+    operacao.ultimo_heartbeat = timezone.now()
+    operacao.save()
+    return operacao
+
+
+def guardar_form_missao_drone(form):
+    if not form.is_valid():
+        return None
+    return form.save()
+
+
 def criar_comando_drone_from_form(*, form, operacao, empresa, user):
     comando = form.save(commit=False)
     comando.operacao = operacao

@@ -170,6 +170,18 @@ def executar_missao_programada_sf(*, operacao, missao, utilizador):
     return comando
 
 
+def atualizar_estado_missao_programada_sf(*, missao, ativa):
+    missao.ativa = bool(ativa)
+    missao.save(update_fields=["ativa", "atualizado_em"])
+    return missao
+
+
+def remover_missao_programada_sf(*, missao):
+    nome_missao = missao.nome
+    missao.delete()
+    return nome_missao
+
+
 def calcular_proxima_execucao_missao(missao):
     if not missao or not missao.ativa or not missao.hora_execucao:
         return None
@@ -245,6 +257,12 @@ def processar_acao_operacao_detail_sf(*, action, operacao_form, missao_programad
         }
 
     return {"handled": False}
+
+
+def guardar_form_modelo_sf(form):
+    if not form.is_valid():
+        return None
+    return form.save()
 
 
 def serializar_estado_operacao_sf(operacao):

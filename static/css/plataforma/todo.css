@@ -1,0 +1,66 @@
+.todo-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.todo-note-card,
+.todo-card,
+.todo-section-card {
+    background: var(--panel-bg, #ffffff);
+    border: 1px solid var(--border-color, #d7dee8);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.todo-note-card h2,
+.todo-section-card h2 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-strong, #1b365d);
+}
+
+.todo-note-card p {
+    margin: 0;
+    color: var(--text-soft, #3f566f);
+}
+
+.todo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.todo-card h3 {
+    margin: 0 0 0.55rem;
+    font-size: 1.06rem;
+    color: var(--text-strong, #173e66);
+}
+
+.todo-card p {
+    margin: 0 0 0.7rem;
+    color: var(--text-soft, #42566f);
+}
+
+.todo-status {
+    padding: 0.6rem;
+    background: var(--surface-soft, #f5f8fb);
+    border-radius: 10px;
+}
+
+.todo-sections {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.todo-section-card ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--text-soft, #3e5470);
+}
+
+.todo-section-card li + li {
+    margin-top: 0.45rem;
+}

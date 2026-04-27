@@ -41,6 +41,7 @@ from projetos.services.furo_memoria import (
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
+from projetos.services.acesso_contexto import obter_empresa_contexto_gestao_furos
 from projetos.services.furos import apagar_furo, atualizar_furo, criar_furo
 from projetos.utils.tragetoria import calcular_trajetoria_min_curv
 
@@ -347,21 +348,7 @@ def _obter_empregado_autenticado_furos(request):
 
 
 def _obter_empresa_contexto_gestao_furos(request):
-    if user_is_empresa_admin(request.user):
-        empresa, resposta_erro = _obter_empresa_admin_furos(request)
-        if resposta_erro:
-            return None, False, resposta_erro
-        return empresa, False, None
-
-    perfil = obter_perfil_ativo_por_user(request.user)
-    if perfil and perfil.tipo_acesso == "individual":
-        empregado, resposta_erro = _obter_empregado_autenticado_furos(request)
-        if resposta_erro:
-            return None, True, resposta_erro
-        return empregado.empresa, True, None
-
-    messages.error(request, "Não tens permissão para gerir furos.")
-    return None, False, redirect("projetos:redirect_after_login")
+    return obter_empresa_contexto_gestao_furos(request=request)
 
 
 

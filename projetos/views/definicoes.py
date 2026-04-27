@@ -58,6 +58,7 @@ def definicoes(request):
         request.method,
     )
     empregado, resposta_erro = _obter_empregado_autenticado_definicoes(request)
+    empregado_id = getattr(empregado, "id", None)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view definicoes. user_id=%s", request.user.id)
         return resposta_erro
@@ -84,7 +85,7 @@ def definicoes(request):
             logger.info(
                 "Definições atualizadas com sucesso. user_id=%s, empregado_id=%s",
                 request.user.id,
-                empregado.id,
+                empregado_id,
             )
             messages.success(request, "Definições guardadas com sucesso.")
             return redirect("projetos:definicoes")
@@ -92,7 +93,7 @@ def definicoes(request):
         logger.warning(
             "Erro ao guardar definições. user_id=%s, empregado_id=%s, erros=%s",
             request.user.id,
-            empregado.id,
+            empregado_id,
             form.errors,
         )
         messages.error(request, "Erro ao guardar definições.")

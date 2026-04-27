@@ -22,7 +22,7 @@ from projetos.services.opcoes import (
     guardar_preferencias_admin,
     obter_empresa_admin_opcoes,
 )
-from projetos.services.sugestoes import enviar_sugestao_para_superusers
+from projetos.services.sugestoes import guardar_e_notificar_sugestao
 from projetos.selectors.opcoes import (
     listar_furos_filtro_exportacao,
     listar_projetos_filtro_exportacao,
@@ -200,55 +200,31 @@ def relatorios_download_tudo(request, formato):
 def sugestoes_plataforma(request):
     if request.method == "POST":
         form = SugestaoPlataformaForm(request.POST)
-        form.instance.user = request.user
-        if form.is_valid():
-            try:
-                sugestao = form.save(commit=False)
-                try:
-                    enviado, email_destino, diagnostico_envio = enviar_sugestao_para_superusers(sugestao=sugestao)
-                except Exception:
-                    logger.exception(
-                        "Falha ao enviar sugestão por email. user_id=%s",
-                        request.user.id,
-                    )
-                    enviado = False
-                    email_destino = ""
-                    diagnostico_envio = "Falha técnica no envio de email."
-
-                sugestao.enviado_por_email = enviado
-                sugestao.email_destino = email_destino
-                sugestao.save()
-
-                if diagnostico_envio:
-                    logger.warning(
-                        "Sugestão sem entrega por email. user_id=%s, destino=%s, diagnostico=%s",
-                        request.user.id,
-                        email_destino or "-",
-                        diagnostico_envio,
-                    )
-
-                if enviado:
-                    messages.success(
-                        request,
-                        "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
-                    )
-                else:
-                    messages.warning(
-                        request,
-                        f"Sugestão guardada com sucesso. Não foi possível enviar o email neste momento. {diagnostico_envio}",
-                    )
-                return redirect("projetos:sugestoes_plataforma")
-            except Exception:
-                logger.exception(
-                    "Erro ao processar sugestão na plataforma. user_id=%s",
-                    request.user.id,
-                )
-                messages.error(
+        resultado = guardar_e_notificar_sugestao(
+            form=form,
+            user=request.user,
+            logger=logger,
+        )
+        if resultado["estado"] == "ok":
+            if resultado["enviado"]:
+                messages.success(
                     request,
-                    "Ocorreu um erro ao enviar a sugestão. Tenta novamente em instantes.",
+                    "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
                 )
-        else:
+            else:
+                messages.warning(
+                    request,
+                    "Sugestão guardada com sucesso. Não foi possível enviar o email neste momento. "
+                    f"{resultado['diagnostico_envio']}",
+                )
+            return redirect("projetos:sugestoes_plataforma")
+        if resultado["estado"] == "invalid":
             messages.error(request, "Corrige os campos assinalados para enviar a sugestão.")
+        else:
+            messages.error(
+                request,
+                "Ocorreu um erro ao enviar a sugestão. Tenta novamente em instantes.",
+            )
     else:
         form = SugestaoPlataformaForm()
 

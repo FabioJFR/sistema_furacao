@@ -1,7 +1,6 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
 from core.permissions import admin_required
@@ -35,10 +34,10 @@ from projetos.services.stock import (
     apagar_material_admin,
     atualizar_material_admin,
     criar_material_admin,
-    criar_devolucao_material,
-    criar_levantamento_material,
-    registrar_entrada_material,
-    registrar_saida_material,
+    processar_devolucao_material_form,
+    processar_entrada_material_form,
+    processar_levantamento_material_form,
+    processar_saida_material_form,
 )
 
 logger = logging.getLogger("core")
@@ -118,30 +117,26 @@ def entrada_material_view(request, material_id):
 
     if request.method == "POST":
         form = EntradaMaterialForm(request.POST)
-
-        if form.is_valid():
-            try:
-                registrar_entrada_material(
-                    material=material,
-                    quantidade=form.cleaned_data["quantidade"],
-                )
-                logger.info(
-                    "Entrada de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    material.id,
-                )
-                messages.success(request, "Entrada de material registada com sucesso.")
-                return redirect("projetos:material_list")
-
-            except ValidationError as e:
-                logger.warning(
-                    "Erro de validação em entrada_material_view. user_id=%s, material_id=%s, erro=%s",
-                    request.user.id,
-                    material.id,
-                    e,
-                )
-                form.add_error(None, e)
+        _material_atualizado, erro = processar_entrada_material_form(
+            form=form,
+            material=material,
+            empresa=empresa,
+        )
+        if erro is None:
+            logger.info(
+                "Entrada de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+                request.user.id,
+                empresa.id,
+                material.id,
+            )
+            messages.success(request, "Entrada de material registada com sucesso.")
+            return redirect("projetos:material_list")
+        if erro == "validacao":
+            logger.warning(
+                "Erro de validação em entrada_material_view. user_id=%s, material_id=%s",
+                request.user.id,
+                material.id,
+            )
     else:
         form = EntradaMaterialForm()
 
@@ -171,30 +166,26 @@ def saida_material_view(request, material_id):
 
     if request.method == "POST":
         form = SaidaMaterialForm(request.POST)
-
-        if form.is_valid():
-            try:
-                registrar_saida_material(
-                    material=material,
-                    quantidade=form.cleaned_data["quantidade"],
-                )
-                logger.info(
-                    "Saída de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    material.id,
-                )
-                messages.success(request, "Saída de material registada com sucesso.")
-                return redirect("projetos:material_list")
-
-            except ValidationError as e:
-                logger.warning(
-                    "Erro de validação em saida_material_view. user_id=%s, material_id=%s, erro=%s",
-                    request.user.id,
-                    material.id,
-                    e,
-                )
-                form.add_error(None, e)
+        _material_atualizado, erro = processar_saida_material_form(
+            form=form,
+            material=material,
+            empresa=empresa,
+        )
+        if erro is None:
+            logger.info(
+                "Saída de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+                request.user.id,
+                empresa.id,
+                material.id,
+            )
+            messages.success(request, "Saída de material registada com sucesso.")
+            return redirect("projetos:material_list")
+        if erro == "validacao":
+            logger.warning(
+                "Erro de validação em saida_material_view. user_id=%s, material_id=%s",
+                request.user.id,
+                material.id,
+            )
     else:
         form = SaidaMaterialForm()
 
@@ -456,33 +447,23 @@ def levantamento_material_create(request):
         form = LevantamentoMaterialForm(request.POST, empregado=empregado)
         form.instance.empregado = empregado
         form.instance.empresa = empregado.empresa
-
-        if form.is_valid():
-            try:
-                levantamento = criar_levantamento_material(form=form, empregado=empregado)
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo if campo in form.fields else None, erro)
-                elif hasattr(e, "messages"):
-                    for erro in e.messages:
-                        form.add_error(None, erro)
-                else:
-                    form.add_error(None, str(e))
-            else:
-                logger.info(
-                    "Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
-                    request.user.id,
-                    empregado.id,
-                    empregado.empresa_id,
-                    levantamento.id,
-                    levantamento.material_id,
-                    levantamento.quantidade,
-                )
-                messages.success(request, "Levantamento registado com sucesso.")
-                return redirect("projetos:levantamento_list")
-        else:
+        levantamento, erro = processar_levantamento_material_form(
+            form=form,
+            empregado=empregado,
+        )
+        if erro is None:
+            logger.info(
+                "Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
+                request.user.id,
+                empregado.id,
+                empregado.empresa_id,
+                levantamento.id,
+                levantamento.material_id,
+                levantamento.quantidade,
+            )
+            messages.success(request, "Levantamento registado com sucesso.")
+            return redirect("projetos:levantamento_list")
+        if erro == "form_invalido":
             logger.warning(
                 "Erro ao registar levantamento. user_id=%s, empregado_id=%s, erros=%s",
                 request.user.id,
@@ -595,33 +576,23 @@ def devolucao_material_create(request):
         form = DevolucaoMaterialForm(request.POST, empregado=empregado)
         form.instance.empregado = empregado
         form.instance.empresa = empregado.empresa
-
-        if form.is_valid():
-            try:
-                devolucao = criar_devolucao_material(form=form, empregado=empregado)
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo if campo in form.fields else None, erro)
-                elif hasattr(e, "messages"):
-                    for erro in e.messages:
-                        form.add_error(None, erro)
-                else:
-                    form.add_error(None, str(e))
-            else:
-                logger.info(
-                    "Devolução registada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, devolucao_id=%s, material_id=%s, quantidade=%s",
-                    request.user.id,
-                    empregado.id,
-                    empregado.empresa_id,
-                    devolucao.id,
-                    devolucao.material_id,
-                    devolucao.quantidade,
-                )
-                messages.success(request, "Devolução registada com sucesso.")
-                return redirect("projetos:devolucao_material_list")
-        else:
+        devolucao, erro = processar_devolucao_material_form(
+            form=form,
+            empregado=empregado,
+        )
+        if erro is None:
+            logger.info(
+                "Devolução registada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, devolucao_id=%s, material_id=%s, quantidade=%s",
+                request.user.id,
+                empregado.id,
+                empregado.empresa_id,
+                devolucao.id,
+                devolucao.material_id,
+                devolucao.quantidade,
+            )
+            messages.success(request, "Devolução registada com sucesso.")
+            return redirect("projetos:devolucao_material_list")
+        if erro == "form_invalido":
             logger.warning(
                 "Erro ao registar devolução. user_id=%s, empregado_id=%s, erros=%s",
                 request.user.id,

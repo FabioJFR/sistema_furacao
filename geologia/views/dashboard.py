@@ -18,6 +18,7 @@ from geologia.forms import (
 from geologia.services.drone_sf_dashboard import (
     bridge_logs_context_sf,
     bridge_status_summary_sf,
+    atualizar_estado_missao_programada_sf,
     construir_missoes_programadas_contexto,
     confirmar_comando_bridge_sf,
     criar_comando_drone_sf_from_form,
@@ -29,6 +30,8 @@ from geologia.services.drone_sf_dashboard import (
     processar_comandos_pendentes_bridge_sf,
     processar_ingest_estado_bridge_sf,
     processar_log_event_bridge_sf,
+    remover_missao_programada_sf,
+    guardar_form_modelo_sf,
     serializar_estado_operacao_sf,
 )
 from geologia.selectors.dashboard import (
@@ -135,8 +138,8 @@ def drone_sf_create(request):
 
     form = DroneSFForm(request.POST or None, empresa=empresa)
     if request.method == "POST":
-        if form.is_valid():
-            drone = form.save()
+        drone = guardar_form_modelo_sf(form)
+        if drone is not None:
             messages.success(request, "Drone S_F criado com sucesso.")
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
         messages.error(request, "Não foi possível criar o Drone S_F.")
@@ -169,8 +172,8 @@ def drone_sf_detail(request, pk):
         empresa=drone.empresa,
     )
     if request.method == "POST":
-        if config_form.is_valid():
-            config_form.save()
+        configuracao_guardada = guardar_form_modelo_sf(config_form)
+        if configuracao_guardada is not None:
             messages.success(request, "Configuração do Drone S_F atualizada.")
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
         messages.error(request, "Não foi possível atualizar a configuração do Drone S_F.")
@@ -197,8 +200,8 @@ def drone_sf_modulo_create(request, drone_id):
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = ModuloDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
     if request.method == "POST":
-        if form.is_valid():
-            form.save()
+        modulo = guardar_form_modelo_sf(form)
+        if modulo is not None:
             messages.success(request, "Módulo do Drone S_F criado com sucesso.")
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
         messages.error(request, "Não foi possível criar o módulo do Drone S_F.")
@@ -227,8 +230,8 @@ def drone_sf_sensor_create(request, drone_id):
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = SensorDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
     if request.method == "POST":
-        if form.is_valid():
-            form.save()
+        sensor = guardar_form_modelo_sf(form)
+        if sensor is not None:
             messages.success(request, "Sensor do Drone S_F criado com sucesso.")
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
         messages.error(request, "Não foi possível criar o sensor do Drone S_F.")
@@ -362,8 +365,7 @@ def drone_sf_missao_programada_toggle(request, drone_id, missao_id):
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
 
     novo_estado = request.POST.get("ativa") == "1"
-    missao.ativa = novo_estado
-    missao.save(update_fields=["ativa", "atualizado_em"])
+    atualizar_estado_missao_programada_sf(missao=missao, ativa=novo_estado)
 
     if novo_estado:
         messages.success(request, "Repetição automática da missão ativada.")
@@ -399,8 +401,7 @@ def drone_sf_missao_programada_delete(request, drone_id, missao_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
-    nome_missao = missao.nome
-    missao.delete()
+    nome_missao = remover_missao_programada_sf(missao=missao)
     messages.success(request, f"Missão programada '{nome_missao}' removida com sucesso.")
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 

@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
@@ -26,9 +25,11 @@ from geologia.selectors.drone import (
     obter_ou_criar_operacao_empresa,
 )
 from geologia.services.drone_dashboard import (
+    atualizar_operacao_drone_from_form,
     colocar_drone_em_procura,
     confirmar_comando_bridge,
     criar_comando_drone_from_form,
+    guardar_form_missao_drone,
     parse_payload_json_request,
     processar_comandos_pendentes_bridge,
     processar_ingest_estado_bridge,
@@ -79,8 +80,8 @@ def drone_hub(request):
 
     if request.method == "POST" and request.POST.get("drone_action") == "importar_missao":
         form = ImportarMissaoDroneForm(request.POST, request.FILES, empresa=empresa)
-        if form.is_valid():
-            missao = form.save()
+        missao = guardar_form_missao_drone(form)
+        if missao is not None:
             messages.success(request, "Missao DJI importada com sucesso.")
             return redirect("geologia:missao_detail", pk=missao.pk)
         messages.error(request, "Nao foi possivel importar a missao DJI.")
@@ -123,12 +124,10 @@ def drone_controle_update(request):
         empresa=empresa,
         prefix="operacao",
     )
-    if request.method == "POST" and form.is_valid():
-        operacao = form.save(commit=False)
-        operacao.ultimo_heartbeat = timezone.now()
-        operacao.save()
+    operacao_atualizada = atualizar_operacao_drone_from_form(form=form) if request.method == "POST" else None
+    if operacao_atualizada is not None:
         messages.success(request, "Centro de controlo do drone atualizado.")
-    else:
+    elif request.method == "POST":
         messages.error(request, "Nao foi possivel atualizar o centro de controlo do drone.")
     return redirect("geologia:drone_hub")
 
@@ -292,8 +291,8 @@ def missao_drone_create(request, furo_id):
 
     if request.method == "POST":
         form = MissaoDroneFuroForm(request.POST, request.FILES, furo=furo, empresa=empresa)
-        if form.is_valid():
-            form.save()
+        missao = guardar_form_missao_drone(form)
+        if missao is not None:
             messages.success(request, "Missao do drone registada com sucesso.")
             return redirect("geologia:furo_dashboard", furo_id=furo.pk)
         messages.error(request, "Nao foi possivel guardar a missao do drone.")
@@ -349,8 +348,8 @@ def missao_drone_update(request, pk):
             furo=missao.furo,
             empresa=empresa,
         )
-        if form.is_valid():
-            form.save()
+        missao_guardada = guardar_form_missao_drone(form)
+        if missao_guardada is not None:
             messages.success(request, "Missao do drone atualizada com sucesso.")
             return redirect("geologia:missao_detail", pk=missao.pk)
         messages.error(request, "Nao foi possivel atualizar a missao do drone.")

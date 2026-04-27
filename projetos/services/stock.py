@@ -34,6 +34,22 @@ def _normalizar_quantidade(quantidade, campo="quantidade"):
     return quantidade
 
 
+def aplicar_erros_validacao_no_form(form, erro):
+    if hasattr(erro, "message_dict"):
+        for campo, erros in erro.message_dict.items():
+            destino = campo if campo in form.fields else None
+            for mensagem in erros:
+                form.add_error(destino, mensagem)
+        return
+
+    if hasattr(erro, "messages"):
+        for mensagem in erro.messages:
+            form.add_error(None, mensagem)
+        return
+
+    form.add_error(None, str(erro))
+
+
 
 def validar_material_empresa(material, empresa=None):
     if not material:
@@ -146,6 +162,36 @@ def registrar_saida_material(material, quantidade, empresa=None):
     return _atualizar_quantidade_material(material, -quantidade)
 
 
+def processar_entrada_material_form(*, form, material, empresa=None):
+    if not form.is_valid():
+        return None, "form_invalido"
+    try:
+        material_atualizado = registrar_entrada_material(
+            material=material,
+            quantidade=form.cleaned_data["quantidade"],
+            empresa=empresa,
+        )
+        return material_atualizado, None
+    except ValidationError as erro:
+        aplicar_erros_validacao_no_form(form, erro)
+        return None, "validacao"
+
+
+def processar_saida_material_form(*, form, material, empresa=None):
+    if not form.is_valid():
+        return None, "form_invalido"
+    try:
+        material_atualizado = registrar_saida_material(
+            material=material,
+            quantidade=form.cleaned_data["quantidade"],
+            empresa=empresa,
+        )
+        return material_atualizado, None
+    except ValidationError as erro:
+        aplicar_erros_validacao_no_form(form, erro)
+        return None, "validacao"
+
+
 def _preparar_movimento_contexto(movimento):
     if movimento.furo and not movimento.projeto:
         movimento.projeto = movimento.furo.projeto
@@ -185,6 +231,17 @@ def criar_levantamento_material(form, empregado):
     return levantamento
 
 
+def processar_levantamento_material_form(*, form, empregado):
+    if not form.is_valid():
+        return None, "form_invalido"
+    try:
+        levantamento = criar_levantamento_material(form=form, empregado=empregado)
+        return levantamento, None
+    except ValidationError as erro:
+        aplicar_erros_validacao_no_form(form, erro)
+        return None, "validacao"
+
+
 
 @transaction.atomic
 def criar_devolucao_material(form, empregado):
@@ -212,6 +269,17 @@ def criar_devolucao_material(form, empregado):
     recalcular_resumo_empregado(empregado)
 
     return devolucao
+
+
+def processar_devolucao_material_form(*, form, empregado):
+    if not form.is_valid():
+        return None, "form_invalido"
+    try:
+        devolucao = criar_devolucao_material(form=form, empregado=empregado)
+        return devolucao, None
+    except ValidationError as erro:
+        aplicar_erros_validacao_no_form(form, erro)
+        return None, "validacao"
 
 
 

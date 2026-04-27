@@ -156,6 +156,10 @@
                     <span>{% trans "Aceder à interface DJI dentro da app geologia." %}</span>
                 </a>
                 {% if request.user.is_superuser %}
+                    <a href="{% url 'plataforma:todo_dashboard' %}" class="quick-link">
+                        <strong>TO DO</strong>
+                        <span>{% trans "Acompanhar roadmap e estado de evolução por app." %}</span>
+                    </a>
                     <a href="{% url 'inspecao_ai:hub' %}" class="quick-link">
                         <strong>AI Visual</strong>
                         <span>{% trans "Aceder ao centro principal da AI visual." %}</span>

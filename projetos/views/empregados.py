@@ -1,7 +1,6 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Q
@@ -13,7 +12,6 @@ from projetos.models import (
     Projeto,
     Furo,
     Material,
-    Individual,
     EmpregadoFuro,
     EmpregadoProjeto,
     EmpregadoFicheiro,
@@ -67,13 +65,14 @@ from projetos.selectors.empregados import (
 )
 from projetos.services.empregados import (
     apagar_empregado_admin,
-    aprovar_empregado,
     construir_resumo_registos_projeto_empregado,
     criar_empregado_admin,
-    guardar_ficheiro_empregado,
-    guardar_ligacao_projeto_empregado,
-    registar_utilizador_e_perfil,
-    rejeitar_empregado_pendente,
+    garantir_individual_para_user,
+    processar_guardar_ligacao_projeto_form,
+    processar_guardar_ficheiro_empregado_form,
+    processar_aprovacao_empregado,
+    processar_registo_empregado_form,
+    processar_rejeicao_empregado_pendente,
     remover_ficheiro_empregado,
     terminar_ligacao_projeto_empregado,
     atualizar_empregado_admin,
@@ -163,24 +162,10 @@ def registo_empregado(request):
     )
     if request.method == "POST":
         form = EmpregadoRegistroForm(request.POST)
-        if form.is_valid():
+        resultado = processar_registo_empregado_form(form=form)
+        if resultado["estado"] == "ok":
             logger.info("Formulário de registo de empregado válido. email='%s'", form.cleaned_data.get("email"))
-            user = form.save(commit=False)
-            user.email = form.cleaned_data["email"]
-            tipo_conta = form.cleaned_data["tipo_conta"]
-            user.is_active = tipo_conta == "individual"
-            user.save()
-            resultado_registo = registar_utilizador_e_perfil(
-                user=user,
-                tipo_conta=tipo_conta,
-                nome=form.cleaned_data["nome"],
-                email=form.cleaned_data["email"],
-                telefone=form.cleaned_data.get("telefone"),
-                funcao=form.cleaned_data.get("funcao"),
-                especialidade=form.cleaned_data.get("especialidade"),
-                empresa=getattr(form, "empresa_resolvida", None),
-            )
-
+            resultado_registo = resultado["resultado_registo"]
             if resultado_registo == "individual":
                 messages.success(
                     request,
@@ -436,34 +421,27 @@ def empregado_adicionar_projeto(request, pk):
 
     if request.method == "POST":
         form = EmpregadoProjetoForm(request.POST, empresa=empresa, empregado=empregado)
-        if form.is_valid():
-            try:
-                ligacao = guardar_ligacao_projeto_empregado(
-                    empregado=empregado,
-                    empresa=empresa,
-                    projeto=form.cleaned_data["projeto"],
-                    ativo=form.cleaned_data.get("ativo", True),
-                    data_inicio=form.cleaned_data.get("data_inicio"),
-                    data_fim=form.cleaned_data.get("data_fim"),
-                )
-            except ValidationError as exc:
-                logger.warning(
-                    "Tentativa inválida em empregado_adicionar_projeto. user_id=%s, empregado_id=%s, erro=%s",
-                    request.user.id,
-                    empregado.id,
-                    exc,
-                )
-                form.add_error("projeto", str(exc))
-            else:
-                logger.info(
-                    "Projeto associado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    empregado.id,
-                    ligacao.id,
-                )
-                messages.success(request, "Projeto associado ao empregado com sucesso.")
-                return redirect(empregado)
+        ligacao, erro = processar_guardar_ligacao_projeto_form(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+        )
+        if erro is None:
+            logger.info(
+                "Projeto associado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
+                request.user.id,
+                empresa.id,
+                empregado.id,
+                ligacao.id,
+            )
+            messages.success(request, "Projeto associado ao empregado com sucesso.")
+            return redirect(empregado)
+        if erro == "validacao":
+            logger.warning(
+                "Tentativa inválida em empregado_adicionar_projeto. user_id=%s, empregado_id=%s",
+                request.user.id,
+                empregado.id,
+            )
         else:
             logger.warning(
                 "Erro ao associar projeto ao empregado. user_id=%s, empregado_pk=%s, erros=%s",
@@ -508,35 +486,28 @@ def empregado_editar_projeto(request, pk, ligacao_id):
             empresa=empresa,
             empregado=empregado,
         )
-        if form.is_valid():
-            try:
-                nova_ligacao = guardar_ligacao_projeto_empregado(
-                    ligacao=ligacao,
-                    empregado=empregado,
-                    empresa=empresa,
-                    projeto=form.cleaned_data["projeto"],
-                    ativo=form.cleaned_data.get("ativo", ligacao.ativo),
-                    data_inicio=form.cleaned_data.get("data_inicio"),
-                    data_fim=form.cleaned_data.get("data_fim"),
-                )
-            except ValidationError as exc:
-                logger.warning(
-                    "Tentativa inválida em empregado_editar_projeto. user_id=%s, empregado_id=%s, erro=%s",
-                    request.user.id,
-                    empregado.id,
-                    exc,
-                )
-                form.add_error("projeto", str(exc))
-            else:
-                logger.info(
-                    "Ligação projeto/empregado atualizada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    empregado.id,
-                    nova_ligacao.id,
-                )
-                messages.success(request, "Ligação projeto/empregado atualizada com sucesso.")
-                return redirect(empregado)
+        nova_ligacao, erro = processar_guardar_ligacao_projeto_form(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+            ligacao=ligacao,
+        )
+        if erro is None:
+            logger.info(
+                "Ligação projeto/empregado atualizada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
+                request.user.id,
+                empresa.id,
+                empregado.id,
+                nova_ligacao.id,
+            )
+            messages.success(request, "Ligação projeto/empregado atualizada com sucesso.")
+            return redirect(empregado)
+        if erro == "validacao":
+            logger.warning(
+                "Tentativa inválida em empregado_editar_projeto. user_id=%s, empregado_id=%s",
+                request.user.id,
+                empregado.id,
+            )
         else:
             logger.warning(
                 "Erro ao atualizar ligação projeto/empregado. user_id=%s, empregado_pk=%s, ligacao_id=%s, erros=%s",
@@ -616,12 +587,12 @@ def empregado_adicionar_ficheiro(request, pk):
 
     if request.method == "POST":
         form = EmpregadoFicheiroForm(request.POST, request.FILES)
-        if form.is_valid():
-            ficheiro = guardar_ficheiro_empregado(
-                form=form,
-                empregado=empregado,
-                empresa=empresa,
-            )
+        ficheiro, erro = processar_guardar_ficheiro_empregado_form(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+        )
+        if erro is None:
             logger.info(
                 "Ficheiro adicionado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
                 request.user.id,
@@ -730,7 +701,7 @@ def empregado_aprovar(request, pk):
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
-        aprovar_empregado(empregado, empresa=empresa)
+        processar_aprovacao_empregado(empregado=empregado, empresa=empresa)
         logger.info(
             "Empregado aprovado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
             request.user.id,
@@ -763,7 +734,7 @@ def empregado_rejeitar(request, pk):
     empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
-        resultado = rejeitar_empregado_pendente(empregado=empregado, empresa=empresa)
+        resultado = processar_rejeicao_empregado_pendente(empregado=empregado, empresa=empresa)
         logger.info(
             "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
             request.user.id,
@@ -1082,20 +1053,8 @@ def area_empregado(request):
     )
     perfil = obter_perfil_ativo_por_user(request.user)
     if perfil and perfil.tipo_acesso == "individual":
-        individual = _resolver_individual_por_user(request.user)
-        if not individual:
-            nome = (
-                request.user.get_full_name().strip()
-                or request.user.username
-                or request.user.email
-                or "Conta Individual"
-            )
-            individual = Individual.objects.create(
-                user=request.user,
-                nome=nome,
-                email=request.user.email or "",
-                ativo=True,
-            )
+        individual, foi_criado = garantir_individual_para_user(request.user)
+        if foi_criado:
             messages.info(
                 request,
                 "A tua conta individual foi reparada automaticamente. Já podes continuar.",

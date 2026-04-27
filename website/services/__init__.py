@@ -99,6 +99,15 @@ def validar_pedido_registo(payload):
     return {"erros": erros, "plano": plano}
 
 
+def _resolver_from_email():
+    backend = (getattr(settings, "EMAIL_BACKEND", "") or "").strip()
+    email_host_user = (getattr(settings, "EMAIL_HOST_USER", "") or "").strip()
+    default_from_email = (getattr(settings, "DEFAULT_FROM_EMAIL", "") or "").strip()
+    if backend == "django.core.mail.backends.smtp.EmailBackend" and email_host_user:
+        return email_host_user
+    return default_from_email or email_host_user or "noreply@sistemafuracao.local"
+
+
 def enviar_email_confirmacao_conta(*, user, request=None):
     backend_email = (getattr(settings, "EMAIL_BACKEND", "") or "").strip()
     if (not settings.DEBUG) and backend_email in {
@@ -138,7 +147,7 @@ def enviar_email_confirmacao_conta(*, user, request=None):
     send_mail(
         subject=assunto,
         message=mensagem,
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=_resolver_from_email(),
         recipient_list=[user.email],
         fail_silently=False,
     )

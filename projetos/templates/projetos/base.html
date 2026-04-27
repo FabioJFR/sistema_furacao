@@ -58,6 +58,7 @@
                             <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
                             <a href="{% url 'dispositivos:dashboard' %}" role="menuitem">📡 {% trans "Dispositivos" %}</a>
                             {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:todo_dashboard' %}" role="menuitem">🗂️ TO DO</a>
                                 <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
                             {% endif %}
                         </div>
@@ -407,6 +408,7 @@
                             <a href="{% url 'projetos:relatorios_exportacao' %}" role="menuitem">📤 {% trans "Relatórios" %}</a>
                             <a href="{% url 'projetos:definicoes_admin' %}" role="menuitem">⚙️ {% trans "Definições" %}</a>
                             {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:todo_dashboard' %}" role="menuitem">🗂️ TO DO</a>
                                 <a href="{% url 'plataforma:uteis_dashboard' %}" role="menuitem">🧰 {% trans "Úteis" %}</a>
                             {% endif %}
                         {% endif %}

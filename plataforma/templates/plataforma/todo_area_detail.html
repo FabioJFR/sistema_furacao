@@ -1,0 +1,64 @@
+{% extends "plataforma/base.html" %}
+{% load static i18n %}
+
+{% block title %}TO DO · {{ area.nome }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/todo.css' %}">
+{% endblock %}
+
+{% block page_title %}TO DO · {{ area.nome }}{% endblock %}
+
+{% block page_description %}
+    {{ area.descricao }}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'plataforma:todo_dashboard' %}" class="btn btn-light">{% trans "Voltar ao TO DO" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+    <section class="todo-sections">
+        <article class="todo-section-card">
+            <h2>{% trans "Já foi feito" %}</h2>
+            <ul>
+                {% for item in area.feito %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+
+        <article class="todo-section-card">
+            <h2>{% trans "Próximos passos" %}</h2>
+            <ul>
+                {% for item in area.proximos_passos %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+
+        <article class="todo-section-card">
+            <h2>{% trans "O que falta fazer" %}</h2>
+            <ul>
+                {% for item in area.falta_fazer %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+    </section>
+
+    <section class="todo-notes">
+        <article class="todo-note-card">
+            <h2>{% trans "Estado da lógica nesta app" %}</h2>
+            <p>{{ area.estado_logica }}</p>
+        </article>
+        <article class="todo-note-card">
+            <h2>{% trans "Nota de tradução" %}</h2>
+            <p>{{ notas.traducao }}</p>
+        </article>
+        <article class="todo-note-card">
+            <h2>{% trans "Nota de arquitetura" %}</h2>
+            <p>{{ notas.selectors_services }}</p>
+        </article>
+    </section>
+{% endblock %}

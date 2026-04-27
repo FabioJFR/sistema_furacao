@@ -351,6 +351,56 @@ def registar_utilizador_e_perfil(*, user, tipo_conta, nome, email, telefone=None
 
 
 @transaction.atomic
+def processar_registo_empregado_form(*, form):
+    if not form.is_valid():
+        return {"estado": "form_invalido"}
+
+    user = form.save(commit=False)
+    user.email = form.cleaned_data["email"]
+    tipo_conta = form.cleaned_data["tipo_conta"]
+    user.is_active = tipo_conta == "individual"
+    user.save()
+
+    resultado_registo = registar_utilizador_e_perfil(
+        user=user,
+        tipo_conta=tipo_conta,
+        nome=form.cleaned_data["nome"],
+        email=form.cleaned_data["email"],
+        telefone=form.cleaned_data.get("telefone"),
+        funcao=form.cleaned_data.get("funcao"),
+        especialidade=form.cleaned_data.get("especialidade"),
+        empresa=getattr(form, "empresa_resolvida", None),
+    )
+
+    return {
+        "estado": "ok",
+        "resultado_registo": resultado_registo,
+        "user": user,
+    }
+
+
+@transaction.atomic
+def garantir_individual_para_user(user):
+    individual = Individual.objects.filter(user=user).first()
+    if individual:
+        return individual, False
+
+    nome = (
+        user.get_full_name().strip()
+        or user.username
+        or user.email
+        or "Conta Individual"
+    )
+    individual = Individual.objects.create(
+        user=user,
+        nome=nome,
+        email=user.email or "",
+        ativo=True,
+    )
+    return individual, True
+
+
+@transaction.atomic
 def guardar_ligacao_projeto_empregado(
     *,
     empregado,
@@ -389,6 +439,31 @@ def guardar_ligacao_projeto_empregado(
     return ligacao
 
 
+def processar_guardar_ligacao_projeto_form(
+    *,
+    form,
+    empregado,
+    empresa,
+    ligacao=None,
+):
+    if not form.is_valid():
+        return None, "form_invalido"
+    try:
+        ligacao_guardada = guardar_ligacao_projeto_empregado(
+            ligacao=ligacao,
+            empregado=empregado,
+            empresa=empresa,
+            projeto=form.cleaned_data["projeto"],
+            ativo=form.cleaned_data.get("ativo", ligacao.ativo if ligacao else True),
+            data_inicio=form.cleaned_data.get("data_inicio"),
+            data_fim=form.cleaned_data.get("data_fim"),
+        )
+        return ligacao_guardada, None
+    except ValidationError as erro:
+        form.add_error("projeto", str(erro))
+        return None, "validacao"
+
+
 @transaction.atomic
 def guardar_ficheiro_empregado(*, form, empregado, empresa):
     validar_empregado_empresa(empregado, empresa=empresa)
@@ -399,6 +474,17 @@ def guardar_ficheiro_empregado(*, form, empregado, empresa):
     return ficheiro
 
 
+def processar_guardar_ficheiro_empregado_form(*, form, empregado, empresa):
+    if not form.is_valid():
+        return None, "form_invalido"
+    ficheiro = guardar_ficheiro_empregado(
+        form=form,
+        empregado=empregado,
+        empresa=empresa,
+    )
+    return ficheiro, None
+
+
 @transaction.atomic
 def remover_ficheiro_empregado(*, ficheiro):
     ficheiro_id = ficheiro.id
@@ -406,6 +492,10 @@ def remover_ficheiro_empregado(*, ficheiro):
         ficheiro.ficheiro.delete(save=False)
     ficheiro.delete()
     return ficheiro_id
+
+
+def processar_aprovacao_empregado(*, empregado, empresa=None):
+    return aprovar_empregado(empregado, empresa=empresa)
 
 
 @transaction.atomic
@@ -424,6 +514,10 @@ def rejeitar_empregado_pendente(*, empregado, empresa=None):
         "empregado_id": empregado_id,
         "empregado_nome": empregado_nome,
     }
+
+
+def processar_rejeicao_empregado_pendente(*, empregado, empresa=None):
+    return rejeitar_empregado_pendente(empregado=empregado, empresa=empresa)
 
 
 def construir_resumo_registos_projeto_empregado(*, registos):

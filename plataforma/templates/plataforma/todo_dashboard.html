@@ -1,0 +1,44 @@
+{% extends "plataforma/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "TO DO da Plataforma" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/todo.css' %}">
+{% endblock %}
+
+{% block page_title %}{% trans "TO DO" %}{% endblock %}
+
+{% block page_description %}
+    {% trans "Plano de evolução por app: progresso atual, próximos passos e pendências." %}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">{% trans "Voltar ao Dashboard" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+    <section class="todo-notes">
+        <article class="todo-note-card">
+            <h2>{% trans "Estado Global (Selectors/Services)" %}</h2>
+            <p>{{ notas.selectors_services }}</p>
+        </article>
+        <article class="todo-note-card">
+            <h2>{% trans "Estado Global (Traduções)" %}</h2>
+            <p>{{ notas.traducao }}</p>
+        </article>
+    </section>
+
+    <section class="todo-grid">
+        {% for area in areas %}
+            <article class="todo-card">
+                <h3>{{ area.nome }}</h3>
+                <p>{{ area.descricao }}</p>
+                <p class="todo-status"><strong>{% trans "Estado da lógica" %}:</strong> {{ area.estado_logica }}</p>
+                <a href="{% url 'plataforma:todo_area_detail' area.slug %}" class="btn btn-primary">
+                    {% trans "Abrir detalhes" %}
+                </a>
+            </article>
+        {% endfor %}
+    </section>
+{% endblock %}

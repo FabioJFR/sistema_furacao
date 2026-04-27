@@ -1,13 +1,10 @@
-from decimal import Decimal
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from plataforma.decorators import platform_admin_required
 from plataforma.forms import ConfiguracaoPaypalForm, EntradaValorForm, SaidaValorForm
-from plataforma.models import PagamentoEmpresa
 from plataforma.selectors.financas import (
     NATUREZA_ENTRADA,
     NATUREZA_SAIDA,
@@ -19,11 +16,11 @@ from plataforma.selectors.financas import (
     obter_movimento_saida_por_pk,
 )
 from plataforma.services.financas import (
+    confirmar_checkout_paypal_pagamento,
     guardar_configuracao_paypal,
     guardar_movimento_saida,
-    marcar_pagamento_como_pago,
+    iniciar_checkout_paypal_pagamento,
 )
-from plataforma.services.paypal import PaypalServiceError, capturar_ordem_paypal, criar_ordem_paypal
 
 
 @login_required
@@ -134,46 +131,36 @@ def financas_paypal_checkout_pagamento(request, pk):
         messages.error(request, "Esta ação está reservada ao superuser.")
         return redirect("plataforma:subscricao_list")
 
-    pagamento = get_object_or_404(PagamentoEmpresa.objects.select_related("empresa", "subscricao"), pk=pk)
-    if pagamento.estado != "pendente":
-        messages.info(request, "Este pagamento já não está pendente.")
-        return redirect("plataforma:subscricao_list")
-
-    if Decimal(pagamento.valor or 0) <= 0:
-        marcar_pagamento_como_pago(pagamento, referencia_externa="PAYPAL-GRATUITO")
-        messages.success(request, "Pagamento gratuito marcado automaticamente como pago.")
-        return redirect("plataforma:subscricao_list")
-
-    configuracao = obter_configuracao_paypal_principal()
-    if not configuracao.ativo or not configuracao.paypal_email:
-        messages.error(request, "Configuração PayPal incompleta ou inativa.")
-        return redirect("plataforma:financas_paypal_config")
-
     return_url = (
         request.build_absolute_uri(reverse("plataforma:financas_paypal_retorno"))
-        + f"?pagamento={pagamento.pk}"
+        + f"?pagamento={pk}"
     )
     cancel_url = (
         request.build_absolute_uri(reverse("plataforma:financas_paypal_cancelado"))
-        + f"?pagamento={pagamento.pk}"
+        + f"?pagamento={pk}"
+    )
+    resultado = iniciar_checkout_paypal_pagamento(
+        pagamento_pk=pk,
+        return_url=return_url,
+        cancel_url=cancel_url,
     )
 
-    try:
-        ordem = criar_ordem_paypal(
-            referencia_local=str(pagamento.pk),
-            valor=f"{Decimal(pagamento.valor):.2f}",
-            moeda="EUR",
-            descricao=f"Pagamento subscrição {pagamento.empresa.nome}",
-            return_url=return_url,
-            cancel_url=cancel_url,
-        )
-    except PaypalServiceError as exc:
-        messages.error(request, f"Erro ao iniciar checkout PayPal: {exc}")
+    if resultado["estado"] in {"invalido", "ja_processado"}:
+        messages.info(request, "Este pagamento já não está pendente.")
+        return redirect("plataforma:subscricao_list")
+    if resultado["estado"] == "gratuito_pago":
+        messages.success(request, "Pagamento gratuito marcado automaticamente como pago.")
+        return redirect("plataforma:subscricao_list")
+    if resultado["estado"] == "config_incompleta":
+        messages.error(request, "Configuração PayPal incompleta ou inativa.")
         return redirect("plataforma:financas_paypal_config")
-
-    pagamento.referencia = ordem["order_id"]
-    pagamento.save(update_fields=["referencia", "atualizado_em"])
-    return redirect(ordem["approve_url"])
+    if resultado["estado"] == "erro_checkout":
+        messages.error(request, f"Erro ao iniciar checkout PayPal: {resultado.get('erro', '')}")
+        return redirect("plataforma:financas_paypal_config")
+    if resultado["estado"] == "checkout_criado":
+        return redirect(resultado["approve_url"])
+    messages.error(request, "Não foi possível iniciar o checkout PayPal.")
+    return redirect("plataforma:subscricao_list")
 
 
 @login_required
@@ -185,24 +172,21 @@ def financas_paypal_retorno(request):
 
     pagamento_id = (request.GET.get("pagamento") or "").strip()
     token = (request.GET.get("token") or "").strip()
+    resultado = confirmar_checkout_paypal_pagamento(
+        pagamento_pk=pagamento_id,
+        token=token,
+    )
 
-    if not pagamento_id or not token:
+    if resultado["estado"] in {"retorno_invalido", "invalido"}:
         messages.error(request, "Retorno PayPal inválido.")
         return redirect("plataforma:subscricao_list")
-
-    pagamento = get_object_or_404(PagamentoEmpresa.objects.select_related("subscricao"), pk=pagamento_id)
-    if pagamento.estado != "pendente":
+    if resultado["estado"] == "ja_processado":
         messages.info(request, "Pagamento já processado.")
         return redirect("plataforma:subscricao_list")
-
-    try:
-        captura = capturar_ordem_paypal(token)
-    except PaypalServiceError as exc:
-        messages.error(request, f"Erro na confirmação PayPal: {exc}")
+    if resultado["estado"] == "erro_confirmacao":
+        messages.error(request, f"Erro na confirmação PayPal: {resultado.get('erro', '')}")
         return redirect("plataforma:subscricao_list")
-
-    if captura.get("status") == "COMPLETED":
-        marcar_pagamento_como_pago(pagamento, referencia_externa=token)
+    if resultado["estado"] == "confirmado":
         messages.success(request, "Pagamento PayPal confirmado e registado como pago.")
     else:
         messages.warning(request, "O pagamento PayPal ainda não ficou concluído.")
