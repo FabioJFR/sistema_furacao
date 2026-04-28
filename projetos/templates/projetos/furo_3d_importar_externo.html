@@ -9,6 +9,7 @@
 
 {% block content %}
 <section class="sf-page px-4 py-6 sm:px-6 lg:px-8">
+    {% trans "Importada" as traj_importada_label %}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900">📥 {% trans "Importar Trajetória 3D" %}</h1>
@@ -96,15 +97,15 @@
 
             <div class="rounded-xl border border-dashed border-gray-300 bg-white p-4 text-sm text-gray-600 space-y-2">
                 <div><strong>{% trans "Formatos suportados:" %}</strong> CSV, JSON, GeoJSON</div>
-                <div><strong>CSV:</strong> colunas `x`, `y`, `z`</div>
-                <div><strong>JSON:</strong> objeto com `points` ou `FeatureCollection`</div>
-                <div><strong>GeoJSON:</strong> `LineString` com coordenadas 3D</div>
-                <div><strong>Origem do registo:</strong> ao guardar, fica marcado como importação vinda de outra aplicação.</div>
+                <div><strong>{% trans "CSV:" %}</strong> {% trans "colunas `x`, `y`, `z`" %}</div>
+                <div><strong>{% trans "JSON:" %}</strong> {% trans "objeto com `points` ou `FeatureCollection`" %}</div>
+                <div><strong>{% trans "GeoJSON:" %}</strong> {% trans "`LineString` com coordenadas 3D" %}</div>
+                <div><strong>{% trans "Origem do registo:" %}</strong> {% trans "ao guardar, fica marcado como importação vinda de outra aplicação." %}</div>
             </div>
 
             {% if imported_trace %}
                 <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-                    <div><strong>{% trans "Trajetória:" %}</strong> {{ trace_name|default:"Importada" }}</div>
+                    <div><strong>{% trans "Trajetória:" %}</strong> {{ trace_name|default:traj_importada_label }}</div>
                     <div><strong>{% trans "Pontos:" %}</strong> {{ total_pontos }}</div>
                 </div>
             {% endif %}
@@ -120,7 +121,7 @@
                         </p>
                     </div>
                     <button type="button" id="exportPngBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition">
-                        🖼️ PNG
+                        🖼️ {% trans "PNG" %}
                     </button>
                 </div>
                 <div id="plot-3d" class="furo-3d-import-plot"></div>

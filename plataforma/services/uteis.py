@@ -9,6 +9,15 @@ from django.db import transaction
 from plataforma.selectors.uteis import AI_DELETE_MODELS_BY_GROUP
 
 
+def normalizar_opcoes_preenchimento(*, empresa_param, raio_metros, forcar_furos, simular):
+    return {
+        "empresa": (empresa_param or "").strip(),
+        "raio_metros": (raio_metros or "250").strip() or "250",
+        "forcar_furos": bool(forcar_furos),
+        "simular": bool(simular),
+    }
+
+
 def executar_preenchimento_furos_materiais(*, empresa_param, raio_metros, forcar_furos, simular):
     stdout_buffer = StringIO()
     call_kwargs = {
@@ -22,6 +31,35 @@ def executar_preenchimento_furos_materiais(*, empresa_param, raio_metros, forcar
 
     call_command("preencher_furos_e_materiais_base", **call_kwargs)
     return stdout_buffer.getvalue()
+
+
+def executar_fluxo_preenchimento_furos_materiais(*, empresa_param, raio_metros, forcar_furos, simular):
+    opcoes = normalizar_opcoes_preenchimento(
+        empresa_param=empresa_param,
+        raio_metros=raio_metros,
+        forcar_furos=forcar_furos,
+        simular=simular,
+    )
+    try:
+        saida_seed = executar_preenchimento_furos_materiais(
+            empresa_param=opcoes["empresa"],
+            raio_metros=opcoes["raio_metros"],
+            forcar_furos=opcoes["forcar_furos"],
+            simular=opcoes["simular"],
+        )
+    except Exception as exc:
+        return {
+            "ok": False,
+            "erro": str(exc),
+            "saida_seed": "",
+            "opcoes": opcoes,
+        }
+    return {
+        "ok": True,
+        "erro": "",
+        "saida_seed": saida_seed,
+        "opcoes": opcoes,
+    }
 
 
 def construir_zip_exportacao_ai(*, payload, archive_file):

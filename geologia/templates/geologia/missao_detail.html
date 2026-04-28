@@ -13,7 +13,7 @@
 
 {% block content %}
 {% trans "Sem objetivo definido." as sem_objetivo %}
-{% trans "Sem observacoes." as sem_observacoes %}
+{% trans "Sem observações." as sem_observacoes %}
 <div class="max-w-6xl mx-auto px-6 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -22,19 +22,19 @@
                 <div><strong>{% trans "Status:" %}</strong> {{ missao.get_status_display }}</div>
                 <div><strong>{% trans "Data:" %}</strong> {{ missao.data_voo|date:"d/m/Y" }}</div>
                 <div><strong>{% trans "Piloto:" %}</strong> {{ missao.piloto_nome|default:"-" }}</div>
-                <div><strong>{% trans "Tipo de missao:" %}</strong> {{ missao.tipo_missao|default:"-" }}</div>
+                <div><strong>{% trans "Tipo de missão:" %}</strong> {{ missao.tipo_missao|default:"-" }}</div>
                 <div><strong>{% trans "Modo de captura:" %}</strong> {{ missao.modo_captura|default:"-" }}</div>
-                <div><strong>{% trans "Duracao:" %}</strong> {{ missao.duracao_minutos|default:"0" }} min</div>
-                <div><strong>{% trans "Altitude maxima:" %}</strong> {{ missao.altitude_maxima_m|default:"-" }} m</div>
+                <div><strong>{% trans "Duração:" %}</strong> {{ missao.duracao_minutos|default:"0" }} min</div>
+                <div><strong>{% trans "Altitude máxima:" %}</strong> {{ missao.altitude_maxima_m|default:"-" }} m</div>
                 <div><strong>{% trans "Altitude RTH:" %}</strong> {{ missao.altitude_rth_m|default:"-" }} m</div>
-                <div><strong>{% trans "Velocidade maxima:" %}</strong> {{ missao.velocidade_max_ms|default:"-" }} m/s</div>
-                <div><strong>{% trans "Area coberta:" %}</strong> {{ missao.area_coberta_m2|default:"-" }} m2</div>
+                <div><strong>{% trans "Velocidade máxima:" %}</strong> {{ missao.velocidade_max_ms|default:"-" }} m/s</div>
+                <div><strong>{% trans "Área coberta:" %}</strong> {{ missao.area_coberta_m2|default:"-" }} m2</div>
                 <div><strong>{% trans "Fotos:" %}</strong> {{ missao.numero_fotos }}</div>
-                <div><strong>{% trans "Videos:" %}</strong> {{ missao.numero_videos }}</div>
-                <div><strong>{% trans "Bateria inicio:" %}</strong> {{ missao.bateria_inicio_percent|default:"-" }}{% if missao.bateria_inicio_percent != None %}%{% endif %}</div>
+                <div><strong>{% trans "Vídeos:" %}</strong> {{ missao.numero_videos }}</div>
+                <div><strong>{% trans "Bateria início:" %}</strong> {{ missao.bateria_inicio_percent|default:"-" }}{% if missao.bateria_inicio_percent != None %}%{% endif %}</div>
                 <div><strong>{% trans "Bateria fim:" %}</strong> {{ missao.bateria_fim_percent|default:"-" }}{% if missao.bateria_fim_percent != None %}%{% endif %}</div>
-                <div><strong>Firmware:</strong> {{ missao.firmware|default:"-" }}</div>
-                <div><strong>App:</strong> {{ missao.app_origem|default:"-" }}</div>
+                <div><strong>{% trans "Firmware:" %}</strong> {{ missao.firmware|default:"-" }}</div>
+                <div><strong>{% trans "App:" %}</strong> {{ missao.app_origem|default:"-" }}</div>
                 <div><strong>{% trans "Centro:" %}</strong> {{ missao.latitude_centro|default:"-" }}, {{ missao.longitude_centro|default:"-" }}</div>
                 <div><strong>{% trans "Descolagem:" %}</strong> {{ missao.ponto_descolagem_lat|default:"-" }}, {{ missao.ponto_descolagem_lon|default:"-" }}</div>
             </div>
@@ -43,7 +43,7 @@
                 <p class="text-gray-700 whitespace-pre-line">{{ missao.objetivo|default:sem_objetivo }}</p>
             </div>
             <div class="mt-4">
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Observacoes" %}</h3>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Observações" %}</h3>
                 <p class="text-gray-700 whitespace-pre-line">{{ missao.observacoes|default:sem_observacoes }}</p>
             </div>
             <div class="mt-4 rounded-xl border border-sky-100 bg-sky-50 px-4 py-4">
@@ -52,7 +52,7 @@
                     <div><strong>{% trans "Origem:" %}</strong> {{ missao.app_origem|default:"DJI RC 2 / Pos-voo" }}</div>
                     <div><strong>{% trans "Status:" %}</strong> {{ missao.get_status_display }}</div>
                     <div><strong>{% trans "Metadados importados:" %}</strong> {{ missao.metadados_voo|length }}</div>
-                    <div><strong>{% trans "Produtos anexados:" %}</strong> {% if missao.tem_produtos_processados or missao.log_voo %}{% trans "Sim" %}{% else %}{% trans "Nao" %}{% endif %}</div>
+                    <div><strong>{% trans "Produtos anexados:" %}</strong> {% if missao.tem_produtos_processados or missao.log_voo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
                 </div>
             </div>
         </section>
@@ -63,14 +63,14 @@
                 {% if missao.ortomosaico %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.ortomosaico.url }}">{% trans "Abrir ortomosaico" %}</a>{% endif %}
                 {% if missao.modelo_3d %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.modelo_3d.url }}">{% trans "Abrir modelo 3D" %}</a>{% endif %}
                 {% if missao.log_voo %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.log_voo.url }}">{% trans "Abrir log de voo" %}</a>{% endif %}
-                {% if missao.relatorio_processamento %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.relatorio_processamento.url }}">{% trans "Abrir relatorio de processamento" %}</a>{% endif %}
+                {% if missao.relatorio_processamento %}<a class="block rounded-lg border border-gray-200 p-3 hover:border-sky-300 hover:bg-sky-50" href="{{ missao.relatorio_processamento.url }}">{% trans "Abrir relatório de processamento" %}</a>{% endif %}
                 {% if not missao.tem_produtos_processados and not missao.log_voo %}
-                <p class="text-gray-500">{% trans "Ainda nao existem ficheiros anexados a esta missao." %}</p>
+                <p class="text-gray-500">{% trans "Ainda não existem ficheiros anexados a esta missão." %}</p>
                 {% endif %}
             </div>
 
             <div class="mt-8">
-                <h3 class="font-semibold text-gray-900 mb-3">{% trans "Logs geologicos relacionados" %}</h3>
+                <h3 class="font-semibold text-gray-900 mb-3">{% trans "Logs geológicos relacionados" %}</h3>
                 <div class="space-y-2">
                     {% for log in logs_relacionados %}
                     <a href="{% url 'geologia:log_detail' log.id %}" class="block rounded-lg border border-gray-200 p-3 hover:border-emerald-300 hover:bg-emerald-50">
@@ -78,7 +78,7 @@
                         <div class="text-sm text-gray-500">{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m · {{ log.litologia_principal }}</div>
                     </a>
                     {% empty %}
-                    <p class="text-gray-500">{% trans "Ainda nao existem logs geologicos associados a esta missao." %}</p>
+                    <p class="text-gray-500">{% trans "Ainda não existem logs geológicos associados a esta missão." %}</p>
                     {% endfor %}
                 </div>
             </div>

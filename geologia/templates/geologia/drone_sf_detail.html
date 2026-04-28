@@ -35,11 +35,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div><strong>{% trans "Status:" %}</strong> {{ drone.get_status_display }}</div>
                 <div><strong>{% trans "Código:" %}</strong> {{ drone.codigo|default:"-" }}</div>
-                <div><strong>Frame:</strong> {{ drone.frame_modelo|default:"-" }}</div>
+                <div><strong>{% trans "Frame:" %}</strong> {{ drone.frame_modelo|default:"-" }}</div>
                 <div><strong>{% trans "Controlador de voo:" %}</strong> {{ drone.controlador_voo|default:"-" }}</div>
-                <div><strong>Firmware:</strong> {{ drone.firmware_voo|default:"-" }}</div>
+                <div><strong>{% trans "Firmware:" %}</strong> {{ drone.firmware_voo|default:"-" }}</div>
                 <div><strong>{% trans "Telemetria:" %}</strong> {{ drone.protocolo_telemetria|default:"-" }}</div>
-                <div><strong>Companion computer:</strong> {{ drone.companion_computer|default:"-" }}</div>
+                <div><strong>{% trans "Companion computer:" %}</strong> {{ drone.companion_computer|default:"-" }}</div>
                 <div><strong>{% trans "Autonomia alvo:" %}</strong> {{ drone.autonomia_alvo_min|default:"0" }} min</div>
                 <div><strong>{% trans "Payload alvo:" %}</strong> {{ drone.payload_alvo_kg|default:"0" }} kg</div>
                 <div><strong>{% trans "Peso estimado:" %}</strong> {{ drone.peso_estimado_kg|default:"0" }} kg</div>

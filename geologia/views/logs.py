@@ -4,13 +4,19 @@ from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 
 from core.permissions import admin_required
-from geologia.forms import AnexoLogGeologicoForm, LogGeologicoFuroForm
 from geologia.selectors.logs import (
     obter_anexos_log,
     obter_furo_log_geologico,
     obter_log_geologico,
 )
-from geologia.services.logs import guardar_anexo_log_form, guardar_log_geologico_form
+from geologia.services.logs import (
+    construir_form_anexo_log,
+    construir_form_log_create,
+    construir_form_log_update,
+    processar_anexo_log_create,
+    processar_log_create,
+    processar_log_update,
+)
 
 from .common import obter_empresa_admin_geologia
 
@@ -25,21 +31,22 @@ def log_geologico_create(request, furo_id):
     furo = obter_furo_log_geologico(furo_id, empresa=empresa)
 
     if request.method == "POST":
-        form = LogGeologicoFuroForm(request.POST, request.FILES, furo=furo, empresa=empresa)
-        if form.is_valid():
-            log = guardar_log_geologico_form(form=form)
+        resultado = processar_log_create(
+            request_post=request.POST,
+            request_files=request.FILES,
+            furo=furo,
+            empresa=empresa,
+        )
+        form = resultado["form"]
+        if resultado["ok"]:
+            log = resultado["log"]
             messages.success(request, _("Log geológico registado com sucesso."))
             return redirect("geologia:log_detail", pk=log.pk)
         messages.error(request, _("Não foi possível guardar o log geológico."))
     else:
-        profundidade_atual = float(furo.profundidade_atual or 0.0)
-        form = LogGeologicoFuroForm(
+        form = construir_form_log_create(
             furo=furo,
             empresa=empresa,
-            initial={
-                "intervalo_de": profundidade_atual,
-                "intervalo_ate": profundidade_atual,
-            },
         )
 
     return render(
@@ -84,20 +91,19 @@ def log_geologico_update(request, pk):
     log = obter_log_geologico(pk, empresa=empresa)
 
     if request.method == "POST":
-        form = LogGeologicoFuroForm(
-            request.POST,
-            request.FILES,
-            instance=log,
-            furo=log.furo,
+        resultado = processar_log_update(
+            request_post=request.POST,
+            request_files=request.FILES,
+            log=log,
             empresa=empresa,
         )
-        if form.is_valid():
-            guardar_log_geologico_form(form=form)
+        form = resultado["form"]
+        if resultado["ok"]:
             messages.success(request, _("Log geológico atualizado com sucesso."))
             return redirect("geologia:log_detail", pk=log.pk)
         messages.error(request, _("Não foi possível atualizar o log geológico."))
     else:
-        form = LogGeologicoFuroForm(instance=log, furo=log.furo, empresa=empresa)
+        form = construir_form_log_update(log=log, empresa=empresa)
 
     return render(
         request,
@@ -121,14 +127,18 @@ def anexo_log_create(request, pk):
     log = obter_log_geologico(pk, empresa=empresa)
 
     if request.method == "POST":
-        form = AnexoLogGeologicoForm(request.POST, request.FILES)
-        if form.is_valid():
-            guardar_anexo_log_form(form=form, log=log)
+        resultado = processar_anexo_log_create(
+            request_post=request.POST,
+            request_files=request.FILES,
+            log=log,
+        )
+        form = resultado["form"]
+        if resultado["ok"]:
             messages.success(request, _("Anexo adicionado com sucesso."))
             return redirect("geologia:log_detail", pk=log.pk)
         messages.error(request, _("Não foi possível adicionar o anexo."))
     else:
-        form = AnexoLogGeologicoForm()
+        form = construir_form_anexo_log()
 
     return render(
         request,

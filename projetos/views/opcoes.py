@@ -16,13 +16,13 @@ from projetos.services.opcoes_exportacao import (
     obter_dataset_exportacao as obter_dataset_exportacao_service,
 )
 from projetos.services.opcoes import (
-    TIPOS_REGISTO_CHOICES_EXPORTACAO,
+    construir_contexto_relatorios_exportacao,
     construir_filtros_exportacao,
     guardar_definicoes_financeiras_admin,
     guardar_preferencias_admin,
     obter_empresa_admin_opcoes,
 )
-from projetos.services.sugestoes import guardar_e_notificar_sugestao
+from projetos.services.sugestoes import processar_submissao_sugestao
 from projetos.selectors.opcoes import (
     listar_furos_filtro_exportacao,
     listar_projetos_filtro_exportacao,
@@ -32,8 +32,6 @@ from projetos.selectors.preferencias import (
     garantir_preferencias_empresa,
     obter_ou_criar_preferencias_user,
 )
-from projetos.models import Despesa
-
 logger = logging.getLogger("core")
 
 
@@ -141,23 +139,16 @@ def relatorios_exportacao(request):
     if resposta_erro:
         return resposta_erro
 
-    filtros = construir_filtros_exportacao(request=request, empresa=empresa)
-    datasets = construir_cards_datasets(empresa, filtros)
-
     return render(
         request,
         "projetos/relatorios_exportacao.html",
-        {
-            "empresa": empresa,
-            "datasets": datasets,
-            "projetos_filtro": listar_projetos_filtro_exportacao(empresa),
-            "furos_filtro": listar_furos_filtro_exportacao(empresa=empresa, projeto=filtros.get("projeto")),
-            "tipos_registo": [
-                *TIPOS_REGISTO_CHOICES_EXPORTACAO,
-            ],
-            "categorias_despesa": [("", "Todas as categorias"), *Despesa.CATEGORIA_CHOICES],
-            "filtros": filtros,
-        },
+        construir_contexto_relatorios_exportacao(
+            request=request,
+            empresa=empresa,
+            listar_projetos_fn=listar_projetos_filtro_exportacao,
+            listar_furos_fn=listar_furos_filtro_exportacao,
+            construir_cards_fn=construir_cards_datasets,
+        ),
     )
 
 
@@ -200,31 +191,18 @@ def relatorios_download_tudo(request, formato):
 def sugestoes_plataforma(request):
     if request.method == "POST":
         form = SugestaoPlataformaForm(request.POST)
-        resultado = guardar_e_notificar_sugestao(
+        resultado = processar_submissao_sugestao(
             form=form,
             user=request.user,
             logger=logger,
         )
         if resultado["estado"] == "ok":
-            if resultado["enviado"]:
-                messages.success(
-                    request,
-                    "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
-                )
+            if resultado["message_level"] == "success":
+                messages.success(request, resultado["message_text"])
             else:
-                messages.warning(
-                    request,
-                    "Sugestão guardada com sucesso. Não foi possível enviar o email neste momento. "
-                    f"{resultado['diagnostico_envio']}",
-                )
+                messages.warning(request, resultado["message_text"])
             return redirect("projetos:sugestoes_plataforma")
-        if resultado["estado"] == "invalid":
-            messages.error(request, "Corrige os campos assinalados para enviar a sugestão.")
-        else:
-            messages.error(
-                request,
-                "Ocorreu um erro ao enviar a sugestão. Tenta novamente em instantes.",
-            )
+        messages.error(request, resultado["message_text"])
     else:
         form = SugestaoPlataformaForm()
 

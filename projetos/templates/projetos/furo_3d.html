@@ -26,11 +26,11 @@
         </div>
 
         <div class="furo-3d-stats">
-            <div class="furo-3d-stat"><span>Medições</span><strong>{{ numero_medicoes }}</strong></div>
-            <div class="furo-3d-stat"><span>Profundidade Atual</span><strong>{{ profundidade_final|floatformat:2 }} m</strong></div>
-            <div class="furo-3d-stat"><span>Profundidade Alvo</span><strong>{{ furo.profundidade_alvo_atual|default:0|floatformat:2 }} m</strong></div>
-            <div class="furo-3d-stat"><span>Dogleg Máx.</span><strong>{{ dogleg_max|floatformat:2 }} °/30m</strong></div>
-            <div class="furo-3d-stat"><span>Estado Máximo</span><strong>{{ estado_max }}</strong></div>
+            <div class="furo-3d-stat"><span>{% trans "Medições" %}</span><strong>{{ numero_medicoes }}</strong></div>
+            <div class="furo-3d-stat"><span>{% trans "Profundidade Atual" %}</span><strong>{{ profundidade_final|floatformat:2 }} m</strong></div>
+            <div class="furo-3d-stat"><span>{% trans "Profundidade Alvo" %}</span><strong>{{ furo.profundidade_alvo_atual|default:0|floatformat:2 }} m</strong></div>
+            <div class="furo-3d-stat"><span>{% trans "Dogleg Máx." %}</span><strong>{{ dogleg_max|floatformat:2 }} °/30m</strong></div>
+            <div class="furo-3d-stat"><span>{% trans "Estado Máximo" %}</span><strong>{{ estado_max }}</strong></div>
         </div>
 
         <div class="furo-3d-layout">
@@ -50,67 +50,67 @@
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Legenda do gráfico e dogleg</h3>
+                    <h3>{% trans "Legenda do gráfico e dogleg" %}</h3>
                     <div class="furo-3d-legend">
-                        <span class="legend-ok">OK</span>
-                        <span class="legend-warn">Atenção</span>
-                        <span class="legend-critical">Crítico</span>
-                        <span class="legend-plan">Planeado até última medição</span>
-                        <span class="legend-final">Planeado final</span>
-                        <span class="legend-vetores">Vetores de direção</span>
+                        <span class="legend-ok">{% trans "OK" %}</span>
+                        <span class="legend-warn">{% trans "Atenção" %}</span>
+                        <span class="legend-critical">{% trans "Crítico" %}</span>
+                        <span class="legend-plan">{% trans "Planeado até última medição" %}</span>
+                        <span class="legend-final">{% trans "Planeado final" %}</span>
+                        <span class="legend-vetores">{% trans "Vetores de direção" %}</span>
                     </div>
                     <p class="furo-3d-note">
-                        O dogleg está representado por cores nos pontos da trajetória real (verde → amarelo → vermelho).
+                        {% trans "O dogleg está representado por cores nos pontos da trajetória real (verde → amarelo → vermelho)." %}
                     </p>
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Camadas do gráfico</h3>
-                    <label class="furo-3d-control"><span>Trajetória real</span><input type="checkbox" data-trace-name="Trajetória real" checked></label>
-                    <label class="furo-3d-control"><span>Pontos de medição</span><input type="checkbox" id="toggleMarkers" checked></label>
-                    <label class="furo-3d-control"><span>Tubo do furo</span><input type="checkbox" data-trace-name="Tubo do furo" checked></label>
-                    <label class="furo-3d-control"><span>Origem</span><input type="checkbox" data-trace-name="Origem" checked></label>
-                    <label class="furo-3d-control"><span>Vetores de direção</span><input type="checkbox" data-trace-name="Vetores de direção" checked></label>
+                    <h3>{% trans "Camadas do gráfico" %}</h3>
+                    <label class="furo-3d-control"><span>{% trans "Trajetória real" %}</span><input type="checkbox" data-trace-name="Trajetória real" checked></label>
+                    <label class="furo-3d-control"><span>{% trans "Pontos de medição" %}</span><input type="checkbox" id="toggleMarkers" checked></label>
+                    <label class="furo-3d-control"><span>{% trans "Tubo do furo" %}</span><input type="checkbox" data-trace-name="Tubo do furo" checked></label>
+                    <label class="furo-3d-control"><span>{% trans "Origem" %}</span><input type="checkbox" data-trace-name="Origem" checked></label>
+                    <label class="furo-3d-control"><span>{% trans "Vetores de direção" %}</span><input type="checkbox" data-trace-name="Vetores de direção" checked></label>
                     <p class="furo-3d-note">
-                        As linhas tracejadas do planeamento ficam sempre visíveis como referência do trajeto esperado do furo.
+                        {% trans "As linhas tracejadas do planeamento ficam sempre visíveis como referência do trajeto esperado do furo." %}
                     </p>
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Dogleg e alertas</h3>
+                    <h3>{% trans "Dogleg e alertas" %}</h3>
                     <label class="furo-3d-control">
-                        <span>Destacar dogleg</span>
+                        <span>{% trans "Destacar dogleg" %}</span>
                         <input type="checkbox" id="toggleDogleg" {% if numero_medicoes %}checked{% endif %} {% if not numero_medicoes %}disabled{% endif %}>
                     </label>
                     <div class="furo-3d-control furo-3d-control-block">
-                        <span class="furo-3d-control-title">Filtro mínimo de dogleg: <strong id="doglegThresholdValue">0.00</strong> °/30m</span>
+                        <span class="furo-3d-control-title">{% trans "Filtro mínimo de dogleg:" %} <strong id="doglegThresholdValue">0.00</strong> °/30m</span>
                         <input type="range" id="doglegThreshold" min="0" max="{{ dogleg_max|floatformat:2|default:'0' }}" step="0.1" value="0" {% if not numero_medicoes %}disabled{% endif %}>
                     </div>
                     <div class="furo-3d-control furo-3d-control-block">
-                        <span class="furo-3d-control-title">Mostrar pontos por estado</span>
+                        <span class="furo-3d-control-title">{% trans "Mostrar pontos por estado" %}</span>
                         <select id="alertFilter" {% if not numero_medicoes %}disabled{% endif %}>
-                            <option value="todos">Todos</option>
-                            <option value="atencao">Atenção + Crítico</option>
-                            <option value="critico">Só Crítico</option>
+                            <option value="todos">{% trans "Todos" %}</option>
+                            <option value="atencao">{% trans "Atenção + Crítico" %}</option>
+                            <option value="critico">{% trans "Só Crítico" %}</option>
                         </select>
                     </div>
                     <p class="furo-3d-note">
-                        Usa estes controlos para reduzir ruído visual e focar apenas os segmentos mais críticos do furo.
+                        {% trans "Usa estes controlos para reduzir ruído visual e focar apenas os segmentos mais críticos do furo." %}
                     </p>
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Intervalo de profundidade</h3>
+                    <h3>{% trans "Intervalo de profundidade" %}</h3>
                     <div class="furo-3d-control furo-3d-control-block">
-                        <span class="furo-3d-control-title">Profundidade mínima visível: <strong id="depthMinValue">0.00</strong> m</span>
+                        <span class="furo-3d-control-title">{% trans "Profundidade mínima visível:" %} <strong id="depthMinValue">0.00</strong> m</span>
                         <input type="range" id="depthMin" min="0" max="{{ profundidade_visual_max|default:0|floatformat:2 }}" step="1" value="0" {% if not numero_medicoes %}disabled{% endif %}>
                     </div>
                     <div class="furo-3d-control furo-3d-control-block">
-                        <span class="furo-3d-control-title">Profundidade máxima visível: <strong id="depthMaxValue">{{ profundidade_visual_max|default:0|floatformat:2 }}</strong> m</span>
+                        <span class="furo-3d-control-title">{% trans "Profundidade máxima visível:" %} <strong id="depthMaxValue">{{ profundidade_visual_max|default:0|floatformat:2 }}</strong> m</span>
                         <input type="range" id="depthMax" min="0" max="{{ profundidade_visual_max|default:0|floatformat:2 }}" step="1" value="{{ profundidade_visual_max|default:0|floatformat:2 }}" {% if not numero_medicoes %}disabled{% endif %}>
                     </div>
                     <p class="furo-3d-note">
-                        Limita a visualização a um troço específico da profundidade real e planeada do furo.
+                        {% trans "Limita a visualização a um troço específico da profundidade real e planeada do furo." %}
                     </p>
                 </div>
             </section>
@@ -118,18 +118,18 @@
             <section class="furo-3d-main">
                 <div class="furo-3d-plot-wrap">
                     <div class="furo-3d-camera-overlay">
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="iso">Isométrica</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="top">Topo</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="side">Lateral</button>
-                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="front">Frontal</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="iso">{% trans "Isométrica" %}</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="top">{% trans "Topo" %}</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="side">{% trans "Lateral" %}</button>
+                        <button type="button" class="furo-3d-btn furo-3d-camera-btn" data-camera="front">{% trans "Frontal" %}</button>
                     </div>
                     <div id="grafico" class="furo-3d-plot">
                         {% if graph %}
                             {{ graph|safe }}
                         {% else %}
                             <div class="text-center py-16">
-                                <h3 class="text-2xl font-bold text-gray-900">Sem dados suficientes</h3>
-                                <p class="mt-3 text-gray-600">Adiciona medições para visualizar o furo em 3D.</p>
+                                <h3 class="text-2xl font-bold text-gray-900">{% trans "Sem dados suficientes" %}</h3>
+                                <p class="mt-3 text-gray-600">{% trans "Adiciona medições para visualizar o furo em 3D." %}</p>
                             </div>
                         {% endif %}
                     </div>
@@ -137,80 +137,80 @@
 
                 <div class="furo-3d-info-grid">
                     <div class="furo-3d-info-box">
-                        <h4>Top 5 doglegs</h4>
+                        <h4>{% trans "Top 5 doglegs" %}</h4>
                         <div id="topDoglegsList" class="text-sm text-gray-600">
-                            <div class="text-sm text-gray-600">Sem dados suficientes.</div>
+                            <div class="text-sm text-gray-600">{% trans "Sem dados suficientes." %}</div>
                         </div>
                     </div>
                     <div class="furo-3d-info-box">
-                        <h4>Planeamento Inicial</h4>
-                        <div><strong>Prof. alvo inicial:</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
-                        <div><strong>Inclinação inicial:</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
-                        <div><strong>Azimute inicial:</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
+                        <h4>{% trans "Planeamento Inicial" %}</h4>
+                        <div><strong>{% trans "Prof. alvo inicial:" %}</strong> {{ furo.profundidade_alvo_inicial|default:"-" }} m</div>
+                        <div><strong>{% trans "Inclinação inicial:" %}</strong> {{ furo.inclinacao_planeada_inicial|default:"-" }}°</div>
+                        <div><strong>{% trans "Azimute inicial:" %}</strong> {{ furo.azimute_planeado_inicial|default:"-" }}°</div>
                     </div>
                     <div class="furo-3d-info-box">
-                        <h4>Planeamento Atual</h4>
-                        <div><strong>Prof. alvo atual:</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
-                        <div><strong>Inclinação atual:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
-                        <div><strong>Azimute atual:</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
+                        <h4>{% trans "Planeamento Atual" %}</h4>
+                        <div><strong>{% trans "Prof. alvo atual:" %}</strong> {{ furo.profundidade_alvo_atual|default:"-" }} m</div>
+                        <div><strong>{% trans "Inclinação atual:" %}</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}°</div>
+                        <div><strong>{% trans "Azimute atual:" %}</strong> {{ furo.azimute_planeado_atual|default:"-" }}°</div>
                     </div>
                     <div class="furo-3d-info-box">
-                        <h4>Estado Real Atual</h4>
-                        <div><strong>Profundidade atual:</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
-                        <div><strong>Inclinação real:</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
-                        <div><strong>Azimute real:</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
+                        <h4>{% trans "Estado Real Atual" %}</h4>
+                        <div><strong>{% trans "Profundidade atual:" %}</strong> {{ furo.profundidade_atual|default:"-" }} m</div>
+                        <div><strong>{% trans "Inclinação real:" %}</strong> {{ furo.inclinacao_real_atual|default:"-" }}°</div>
+                        <div><strong>{% trans "Azimute real:" %}</strong> {{ furo.azimute_real_atual|default:"-" }}°</div>
                     </div>
                 </div>
                 <p class="furo-3d-note furo-3d-note-top">
-                    O quadro de doglegs mostra os pontos mais críticos do furo dentro do intervalo atualmente visível.
+                    {% trans "O quadro de doglegs mostra os pontos mais críticos do furo dentro do intervalo atualmente visível." %}
                 </p>
             </section>
 
             <section class="furo-3d-panel furo-3d-panel-bottom">
                 <div class="furo-3d-section">
-                    <h3>Exportação rápida</h3>
+                    <h3>{% trans "Exportação rápida" %}</h3>
                     <div class="furo-3d-control furo-3d-control-block">
                         <select id="quickExportSelect">
-                            <option value="png">🖼️ Imagem PNG do gráfico</option>
-                            <option value="pdf">📄 Relatório PDF do furo</option>
+                            <option value="png">🖼️ {% trans "Imagem PNG do gráfico" %}</option>
+                            <option value="pdf">📄 {% trans "Relatório PDF do furo" %}</option>
                         </select>
                     </div>
                     <div class="furo-3d-actions furo-3d-actions-single">
-                        <button type="button" id="quickExportBtn" class="furo-3d-btn furo-3d-btn-blue">Descarregar seleção</button>
+                        <button type="button" id="quickExportBtn" class="furo-3d-btn furo-3d-btn-blue">{% trans "Descarregar seleção" %}</button>
                     </div>
                     <p class="furo-3d-note">
-                        Exporta rapidamente a vista do gráfico ou um resumo do furo em PDF.
+                        {% trans "Exporta rapidamente a vista do gráfico ou um resumo do furo em PDF." %}
                     </p>
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Interoperabilidade 3D</h3>
+                    <h3>{% trans "Interoperabilidade 3D" %}</h3>
                     <div class="furo-3d-control furo-3d-control-block">
                         <select id="interopSelect">
-                            <option value="zip">📦 Pacote completo do furo</option>
-                            <option value="csv">CSV 3D</option>
-                            <option value="json">JSON 3D</option>
-                            <option value="geojson">GeoJSON 3D</option>
-                            <option value="importar">📥 Página de importação externa</option>
+                            <option value="zip">📦 {% trans "Pacote completo do furo" %}</option>
+                            <option value="csv">{% trans "CSV 3D" %}</option>
+                            <option value="json">{% trans "JSON 3D" %}</option>
+                            <option value="geojson">{% trans "GeoJSON 3D" %}</option>
+                            <option value="importar">📥 {% trans "Página de importação externa" %}</option>
                         </select>
                     </div>
                     <div class="furo-3d-actions furo-3d-actions-single">
-                        <button type="button" id="interopActionBtn" class="furo-3d-btn furo-3d-btn-green">Abrir / descarregar seleção</button>
+                        <button type="button" id="interopActionBtn" class="furo-3d-btn furo-3d-btn-green">{% trans "Abrir / descarregar seleção" %}</button>
                     </div>
                     <p class="furo-3d-note">
-                        Aqui retiras todos os dados 3D e os restantes dados do furo. A leitura de dados externos ficou numa página própria do menu 3D.
+                        {% trans "Aqui retiras todos os dados 3D e os restantes dados do furo. A leitura de dados externos ficou numa página própria do menu 3D." %}
                     </p>
                 </div>
 
                 <div class="furo-3d-section">
-                    <h3>Comparação final</h3>
+                    <h3>{% trans "Comparação final" %}</h3>
                     <div class="furo-3d-info-box">
-                        <div><strong>Desvio final:</strong> <span id="finalOffsetValue">-</span></div>
-                        <div><strong>Dif. inclinação:</strong> <span id="finalIncDiffValue">-</span></div>
-                        <div><strong>Dif. azimute:</strong> <span id="finalAziDiffValue">-</span></div>
+                        <div><strong>{% trans "Desvio final:" %}</strong> <span id="finalOffsetValue">-</span></div>
+                        <div><strong>{% trans "Dif. inclinação:" %}</strong> <span id="finalIncDiffValue">-</span></div>
+                        <div><strong>{% trans "Dif. azimute:" %}</strong> <span id="finalAziDiffValue">-</span></div>
                     </div>
                     <p class="furo-3d-note">
-                        Resume a distância e a diferença angular entre a trajetória real e a planeada no ponto mais fundo visível.
+                        {% trans "Resume a distância e a diferença angular entre a trajetória real e a planeada no ponto mais fundo visível." %}
                     </p>
                 </div>
 
@@ -222,7 +222,7 @@
             <div class="furo-3d-modal-card">
                 <img id="imagem_rocha" width="400" class="furo-3d-modal-image">
                 <br><br>
-                <button id="furo-3d-modal-close" class="furo-3d-btn furo-3d-btn-red">Fechar</button>
+                <button id="furo-3d-modal-close" class="furo-3d-btn furo-3d-btn-red">{% trans "Fechar" %}</button>
             </div>
         </div>
     </div>
@@ -235,6 +235,16 @@
     data-report-pdf-url="{% url 'projetos:relatorios_download' 'furos' 'pdf' %}?furo={{ furo.pk }}"
     data-import-url="{% url 'projetos:furo_3d_importar_externo' %}"
     data-export-base-url="{% url 'projetos:furo_3d_export' furo.pk 'zip' %}"
+    data-msg-no-points-visible="{% trans 'Sem pontos visíveis no intervalo atual.' %}"
+    data-msg-dogleg-critical="{% trans '⚠️ Dogleg crítico neste ponto.' %}"
+    data-msg-dogleg-warning="{% trans '⚠️ Dogleg em atenção neste ponto.' %}"
+    data-msg-dogleg-ok="{% trans '✅ Ponto dentro dos limites esperados.' %}"
+    data-msg-rotation-start="{% trans '▶️ Rotação' %}"
+    data-msg-rotation-stop="{% trans '⏸️ Parar rotação' %}"
+    data-msg-top-item-prefix="{% trans 'MD' %}"
+    data-msg-top-item-dogleg="{% trans 'Dogleg' %}"
+    data-msg-top-item-inc="{% trans 'Inc' %}"
+    data-msg-top-item-azi="{% trans 'Azi' %}"
 ></div>
 
 {% block extra_scripts %}

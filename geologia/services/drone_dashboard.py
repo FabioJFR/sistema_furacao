@@ -4,6 +4,7 @@ import urllib.error
 from django.http import JsonResponse
 from django.utils import timezone
 
+from geologia.forms import DroneComandoOperacaoForm, ImportarMissaoDroneForm, MissaoDroneFuroForm
 from geologia.models import DroneComandoOperacao
 from geologia.selectors.drone import obter_comandos_pendentes_ou_enviados_operacao
 from geologia.services.drone_bridge import (
@@ -56,6 +57,90 @@ def guardar_form_missao_drone(form):
     if not form.is_valid():
         return None
     return form.save()
+
+
+def construir_form_importar_missao(*, request_post=None, request_files=None, empresa=None):
+    if request_post is not None:
+        return ImportarMissaoDroneForm(request_post, request_files, empresa=empresa)
+    return ImportarMissaoDroneForm(empresa=empresa)
+
+
+def processar_importacao_missao(*, request_post, request_files, empresa=None):
+    form = construir_form_importar_missao(
+        request_post=request_post,
+        request_files=request_files,
+        empresa=empresa,
+    )
+    missao = guardar_form_missao_drone(form)
+    return {"ok": missao is not None, "form": form, "missao": missao}
+
+
+def construir_form_missao_create(*, request_post=None, request_files=None, furo, empresa):
+    if request_post is not None:
+        return MissaoDroneFuroForm(request_post, request_files, furo=furo, empresa=empresa)
+    return MissaoDroneFuroForm(
+        furo=furo,
+        empresa=empresa,
+        initial={"titulo": f"Levantamento DJI Mini 4 Pro - {furo.nome}"},
+    )
+
+
+def processar_missao_create(*, request_post, request_files, furo, empresa):
+    form = construir_form_missao_create(
+        request_post=request_post,
+        request_files=request_files,
+        furo=furo,
+        empresa=empresa,
+    )
+    missao = guardar_form_missao_drone(form)
+    return {"ok": missao is not None, "form": form, "missao": missao}
+
+
+def construir_form_missao_update(*, request_post=None, request_files=None, missao, empresa):
+    if request_post is not None:
+        return MissaoDroneFuroForm(
+            request_post,
+            request_files,
+            instance=missao,
+            furo=missao.furo,
+            empresa=empresa,
+        )
+    return MissaoDroneFuroForm(instance=missao, furo=missao.furo, empresa=empresa)
+
+
+def processar_missao_update(*, request_post, request_files, missao, empresa):
+    form = construir_form_missao_update(
+        request_post=request_post,
+        request_files=request_files,
+        missao=missao,
+        empresa=empresa,
+    )
+    missao_guardada = guardar_form_missao_drone(form)
+    return {"ok": missao_guardada is not None, "form": form, "missao": missao_guardada}
+
+
+def construir_form_comando(*, request_post=None, operacao, empresa):
+    if request_post is not None:
+        return DroneComandoOperacaoForm(
+            request_post,
+            prefix="comando",
+            operacao=operacao,
+            empresa=empresa,
+        )
+    return DroneComandoOperacaoForm(
+        prefix="comando",
+        initial={"altitude_alvo_m": operacao.alvo_altitude_m or 35.0},
+        operacao=operacao,
+        empresa=empresa,
+    )
+
+
+def processar_comando_create(*, request_post, operacao, empresa, user):
+    form = construir_form_comando(request_post=request_post, operacao=operacao, empresa=empresa)
+    if form.is_valid():
+        comando = criar_comando_drone_from_form(form=form, operacao=operacao, empresa=empresa, user=user)
+        return {"ok": True, "form": form, "comando": comando}
+    return {"ok": False, "form": form, "comando": None}
 
 
 def criar_comando_drone_from_form(*, form, operacao, empresa, user):

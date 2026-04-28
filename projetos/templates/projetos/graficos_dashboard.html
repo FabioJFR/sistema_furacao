@@ -26,19 +26,19 @@
             </div>
 
             <div>
-                <label class="gkd-label">Data início</label>
+                <label class="gkd-label">{% trans "Data início" %}</label>
                 <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full p-2 border rounded">
             </div>
 
             <div>
-                <label class="gkd-label">Data fim</label>
+                <label class="gkd-label">{% trans "Data fim" %}</label>
                 <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
             </div>
 
             <div>
-                <label class="gkd-label">Projeto</label>
+                <label class="gkd-label">{% trans "Projeto" %}</label>
                 <select name="projeto" class="w-full p-2 border rounded">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for p in projetos_filtro %}
                         <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
                     {% endfor %}
@@ -46,9 +46,9 @@
             </div>
 
             <div>
-                <label class="gkd-label">Empregado</label>
+                <label class="gkd-label">{% trans "Empregado" %}</label>
                 <select name="empregado" class="w-full p-2 border rounded">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for e in empregados_filtro %}
                         <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>{{ e.nome }}</option>
                     {% endfor %}
@@ -64,82 +64,82 @@
 
     <div class="gkd-range-note">
         {% if filtros.periodo == "hoje" %}
-            A mostrar dados de: Hoje
+            {% trans "A mostrar dados de: Hoje" %}
         {% elif filtros.periodo == "7_dias" %}
-            A mostrar dados de: Últimos 7 dias
+            {% trans "A mostrar dados de: Últimos 7 dias" %}
         {% elif filtros.periodo == "30_dias" %}
-            A mostrar dados de: Últimos 30 dias
+            {% trans "A mostrar dados de: Últimos 30 dias" %}
         {% elif filtros.periodo == "mes" %}
-            A mostrar dados de: Mês atual
+            {% trans "A mostrar dados de: Mês atual" %}
         {% elif filtros.periodo == "personalizado" %}
-            A mostrar dados de: {{ filtros.data_inicio|default:"-" }} até {{ filtros.data_fim|default:"-" }}
+            {% blocktrans with data_inicio=filtros.data_inicio|default:"-" data_fim=filtros.data_fim|default:"-" %}A mostrar dados de: {{ data_inicio }} até {{ data_fim }}{% endblocktrans %}
         {% endif %}
     </div>
 
     <div class="gkd-section-intro gkd-section-operacao">
-        <h2>Operação</h2>
+        <h2>{% trans "Operação" %}</h2>
         <p>
-            Acompanha produção, atividade da equipa, alertas e estrutura da operação. Os gráficos operacionais aparecem logo abaixo desta secção para facilitar a leitura.
+            {% trans "Acompanha produção, atividade da equipa, alertas e estrutura da operação. Os gráficos operacionais aparecem logo abaixo desta secção para facilitar a leitura." %}
         </p>
     </div>
 
     <div class="gkd-grid-metrics">
         <div class="gkd-card gkd-accent-blue">
-            <div class="gkd-card-title">Metros no período</div>
+            <div class="gkd-card-title">{% trans "Metros no período" %}</div>
             <div class="gkd-card-value gkd-value-blue">{{ total_metros }}</div>
         </div>
         <div class="gkd-card gkd-accent-green">
-            <div class="gkd-card-title">Horas no período</div>
+            <div class="gkd-card-title">{% trans "Horas no período" %}</div>
             <div class="gkd-card-value gkd-value-green">{{ total_horas }}</div>
         </div>
         <div class="gkd-card gkd-accent-amber">
-            <div class="gkd-card-title">Produtividade média</div>
+            <div class="gkd-card-title">{% trans "Produtividade média" %}</div>
             <div class="gkd-card-value gkd-value-amber">{{ produtividade_media }}</div>
         </div>
         <div class="gkd-card gkd-accent-purple">
-            <div class="gkd-card-title">Empregados ativos</div>
+            <div class="gkd-card-title">{% trans "Empregados ativos" %}</div>
             <div class="gkd-card-value gkd-value-purple">{{ empregados_ativos }}</div>
         </div>
         <div class="gkd-card gkd-accent-red">
-            <div class="gkd-card-title">Furos ativos</div>
+            <div class="gkd-card-title">{% trans "Furos ativos" %}</div>
             <div class="gkd-card-value gkd-value-red">{{ furos_ativos }}</div>
         </div>
         <div class="gkd-card gkd-accent-cyan">
-            <div class="gkd-card-title">Projetos ativos</div>
+            <div class="gkd-card-title">{% trans "Projetos ativos" %}</div>
             <div class="gkd-card-value gkd-value-cyan">{{ projetos_ativos }}</div>
         </div>
     </div>
 
     <div class="gkd-grid-summary">
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Projetos totais</div>
+            <div class="gkd-card-title">{% trans "Projetos totais" %}</div>
             <div class="gkd-summary-value">{{ total_projetos }}</div>
         </div>
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Furos totais</div>
+            <div class="gkd-card-title">{% trans "Furos totais" %}</div>
             <div class="gkd-summary-value">{{ total_furos }}</div>
         </div>
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Empregados totais</div>
+            <div class="gkd-card-title">{% trans "Empregados totais" %}</div>
             <div class="gkd-summary-value">{{ total_empregados }}</div>
         </div>
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Máquinas totais</div>
+            <div class="gkd-card-title">{% trans "Máquinas totais" %}</div>
             <div class="gkd-summary-value">{{ total_maquinas }}</div>
         </div>
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Materiais totais</div>
+            <div class="gkd-card-title">{% trans "Materiais totais" %}</div>
             <div class="gkd-summary-value">{{ total_materiais }}</div>
         </div>
         <div class="gkd-summary-card">
-            <div class="gkd-card-title">Registos no período</div>
+            <div class="gkd-card-title">{% trans "Registos no período" %}</div>
             <div class="gkd-summary-value">{{ total_registos }}</div>
         </div>
     </div>
 
     <div class="gkd-grid-alerts">
         <div class="gkd-alert-card">
-            <h3 class="gkd-alert-title gkd-alert-title-red">⚠️ Stock Baixo</h3>
+            <h3 class="gkd-alert-title gkd-alert-title-red">⚠️ {% trans "Stock Baixo" %}</h3>
             {% if materiais_stock_baixo %}
                 <ul class="gkd-alert-list">
                     {% for m in materiais_stock_baixo|slice:":5" %}
@@ -150,12 +150,12 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="gkd-muted">Sem alertas de stock.</p>
+                <p class="gkd-muted">{% trans "Sem alertas de stock." %}</p>
             {% endif %}
         </div>
 
         <div class="gkd-alert-card">
-            <h3 class="gkd-alert-title gkd-alert-title-amber">⚙️ Máquinas em Alerta</h3>
+            <h3 class="gkd-alert-title gkd-alert-title-amber">⚙️ {% trans "Máquinas em Alerta" %}</h3>
             {% if maquinas_alerta %}
                 <ul class="gkd-alert-list">
                     {% for maq in maquinas_alerta|slice:":5" %}
@@ -166,12 +166,12 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="gkd-muted">Tudo operacional.</p>
+                <p class="gkd-muted">{% trans "Tudo operacional." %}</p>
             {% endif %}
         </div>
 
         <div class="gkd-alert-card">
-            <h3 class="gkd-alert-title gkd-alert-title-dark">🐢 Furos com baixa produção</h3>
+            <h3 class="gkd-alert-title gkd-alert-title-dark">🐢 {% trans "Furos com baixa produção" %}</h3>
             {% if furos_baixa_producao %}
                 <ul class="gkd-alert-list">
                     {% for furo in furos_baixa_producao %}
@@ -179,102 +179,102 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="gkd-muted">Sem alertas de baixa produção.</p>
+                <p class="gkd-muted">{% trans "Sem alertas de baixa produção." %}</p>
             {% endif %}
         </div>
     </div>
 
     <div class="gkd-section-intro gkd-section-white">
-        <h3>Gráficos Operacionais</h3>
+        <h3>{% trans "Gráficos Operacionais" %}</h3>
         <p>
-            Estes gráficos ajudam a perceber ritmo, distribuição de produção e concentração de metros ao longo do período filtrado.
+            {% trans "Estes gráficos ajudam a perceber ritmo, distribuição de produção e concentração de metros ao longo do período filtrado." %}
         </p>
     </div>
 
     <div class="gkd-grid-charts">
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">📈 Produção por Dia</h3>
-            <p class="gkd-chart-desc">Compara a evolução diária de metros e horas.</p>
+            <h3 class="gkd-chart-title">📈 {% trans "Produção por Dia" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Compara a evolução diária de metros e horas." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoDia"></canvas></div>
         </div>
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">👷 Produção por Empregado</h3>
-            <p class="gkd-chart-desc">Mostra quem mais produziu no período.</p>
+            <h3 class="gkd-chart-title">👷 {% trans "Produção por Empregado" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Mostra quem mais produziu no período." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoEmpregados"></canvas></div>
         </div>
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">🕳 Produção por Furo</h3>
-            <p class="gkd-chart-desc">Ajuda a identificar os furos com maior avanço.</p>
+            <h3 class="gkd-chart-title">🕳 {% trans "Produção por Furo" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Ajuda a identificar os furos com maior avanço." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoFuros"></canvas></div>
         </div>
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">📁 Produção por Projeto</h3>
-            <p class="gkd-chart-desc">Resume a distribuição de metros entre projetos.</p>
+            <h3 class="gkd-chart-title">📁 {% trans "Produção por Projeto" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Resume a distribuição de metros entre projetos." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoProjetos"></canvas></div>
         </div>
     </div>
 
     <div class="gkd-section-intro gkd-section-financeiro">
-        <h2>Financeiro</h2>
+        <h2>{% trans "Financeiro" %}</h2>
         <p>
-            Esta secção ajuda a controlar custos, ganhos e margens. Primeiro aparecem os indicadores de topo, depois os quadros financeiros e finalmente os gráficos de despesas.
+            {% trans "Esta secção ajuda a controlar custos, ganhos e margens. Primeiro aparecem os indicadores de topo, depois os quadros financeiros e finalmente os gráficos de despesas." %}
         </p>
     </div>
 
     <div class="gkd-grid-metrics">
         <div class="gkd-card gkd-accent-dark-red">
-            <div class="gkd-card-title">Despesas no período</div>
+            <div class="gkd-card-title">{% trans "Despesas no período" %}</div>
             <div class="gkd-card-value gkd-value-dark-red">{{ total_despesas }} €</div>
         </div>
         <div class="gkd-card gkd-accent-orange">
-            <div class="gkd-card-title">Média diária de despesas</div>
+            <div class="gkd-card-title">{% trans "Média diária de despesas" %}</div>
             <div class="gkd-card-value gkd-value-orange">{{ media_despesa_diaria }} €</div>
         </div>
         <div class="gkd-card gkd-accent-teal">
-            <div class="gkd-card-title">Custo por metro cliente</div>
+            <div class="gkd-card-title">{% trans "Custo por metro cliente" %}</div>
             <div class="gkd-card-value gkd-value-teal">{{ custo_por_metro_cliente }} €</div>
         </div>
         <div class="gkd-card gkd-accent-brown">
-            <div class="gkd-card-title">Custo por metro empresa</div>
+            <div class="gkd-card-title">{% trans "Custo por metro empresa" %}</div>
             <div class="gkd-card-value gkd-value-brown">{{ custo_por_metro_empresa }} €</div>
         </div>
         <div class="gkd-card gkd-accent-blue">
-            <div class="gkd-card-title">Valor total cobrado ao cliente</div>
+            <div class="gkd-card-title">{% trans "Valor total cobrado ao cliente" %}</div>
             <div class="gkd-card-value gkd-value-indigo">{{ valor_total_cobrado_cliente }} €</div>
         </div>
     </div>
 
     <div class="gkd-grid-summary">
         <div class="gkd-summary-card gkd-mini-orange">
-            <div class="gkd-card-title">Gasto associado a projetos</div>
+            <div class="gkd-card-title">{% trans "Gasto associado a projetos" %}</div>
             <div class="gkd-summary-value gkd-value-brown">{{ valor_total_gasto_projeto }} €</div>
         </div>
         <div class="gkd-summary-card gkd-mini-red">
-            <div class="gkd-card-title">Gasto associado a furos</div>
+            <div class="gkd-card-title">{% trans "Gasto associado a furos" %}</div>
             <div class="gkd-summary-value gkd-value-dark-red">{{ valor_total_gasto_furo }} €</div>
         </div>
         <div class="gkd-summary-card gkd-mini-cyan">
-            <div class="gkd-card-title">Ganho total associado a furos</div>
+            <div class="gkd-card-title">{% trans "Ganho total associado a furos" %}</div>
             <div class="gkd-summary-value gkd-value-teal">{{ valor_total_ganho_furo }} €</div>
         </div>
         <div class="gkd-summary-card gkd-mini-green">
-            <div class="gkd-card-title">Gasto total em materiais</div>
+            <div class="gkd-card-title">{% trans "Gasto total em materiais" %}</div>
             <div class="gkd-summary-value gkd-value-green">{{ valor_total_gasto_materias }} €</div>
         </div>
         <div class="gkd-summary-card gkd-mini-blue">
-            <div class="gkd-card-title">Gasto total em máquinas</div>
+            <div class="gkd-card-title">{% trans "Gasto total em máquinas" %}</div>
             <div class="gkd-summary-value gkd-value-indigo">{{ valor_total_gasto_maquinas }} €</div>
         </div>
         <div class="gkd-summary-card gkd-mini-slate">
-            <div class="gkd-card-title">Outros valores gastos associados</div>
+            <div class="gkd-card-title">{% trans "Outros valores gastos associados" %}</div>
             <div class="gkd-summary-value gkd-value-slate">{{ outros_valores_gastos_associados }} €</div>
         </div>
     </div>
 
     <div class="gkd-section-intro gkd-section-white">
-        <h3>Quadros Financeiros</h3>
+        <h3>{% trans "Quadros Financeiros" %}</h3>
         <p>
-            Os quadros abaixo mostram custo, ganho e margem por projeto e por furo. Usa os botões para ver só linhas negativas, margens baixas ou resultados saudáveis.
+            {% trans "Os quadros abaixo mostram custo, ganho e margem por projeto e por furo. Usa os botões para ver só linhas negativas, margens baixas ou resultados saudáveis." %}
         </p>
     </div>
 
@@ -282,29 +282,29 @@
         <div class="gkd-table-card">
             <div class="gkd-table-head">
                 <div>
-                    <h3>📁 Quadro Financeiro por Projeto</h3>
-                    <p>Compara custo, ganho e margem entre projetos.</p>
+                    <h3>📁 {% trans "Quadro Financeiro por Projeto" %}</h3>
+                    <p>{% trans "Compara custo, ganho e margem entre projetos." %}</p>
                 </div>
                 <div class="gkd-table-actions">
-                    <button type="button" class="btn btn-warning" data-table-filter="projetos" data-filter="todos">Todos</button>
-                    <button type="button" class="btn btn-danger" data-table-filter="projetos" data-filter="negativos">Negativos</button>
-                    <button type="button" class="btn btn-secondary" data-table-filter="projetos" data-filter="baixos">Margem baixa</button>
-                    <button type="button" class="btn btn-success" data-table-filter="projetos" data-filter="positivos">Saudáveis</button>
+                    <button type="button" class="btn btn-warning" data-table-filter="projetos" data-filter="todos">{% trans "Todos" %}</button>
+                    <button type="button" class="btn btn-danger" data-table-filter="projetos" data-filter="negativos">{% trans "Negativos" %}</button>
+                    <button type="button" class="btn btn-secondary" data-table-filter="projetos" data-filter="baixos">{% trans "Margem baixa" %}</button>
+                    <button type="button" class="btn btn-success" data-table-filter="projetos" data-filter="positivos">{% trans "Saudáveis" %}</button>
                 </div>
             </div>
             <table data-sortable-table="projetos" class="gkd-table gkd-table-projetos">
                 <thead>
                     <tr>
-                        <th>Projeto</th>
-                        <th data-sort-type="number">Metros ↕</th>
-                        <th data-sort-type="number">Gasto ↕</th>
-                        <th data-sort-type="number">Materiais ↕</th>
-                        <th data-sort-type="number">Máquinas ↕</th>
-                        <th data-sort-type="number">Ganho ↕</th>
-                        <th data-sort-type="number">Margem total ↕</th>
-                        <th data-sort-type="number">Margem % ↕</th>
-                        <th data-sort-type="number">Margem/metro ↕</th>
-                        <th data-sort-type="number">Custo/metro ↕</th>
+                        <th>{% trans "Projeto" %}</th>
+                        <th data-sort-type="number">{% trans "Metros" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Gasto" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Materiais" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Máquinas" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Ganho" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem total" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem %" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem/metro" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Custo/metro" %} ↕</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -322,7 +322,7 @@
                             <td>{{ item.custo_metro }} €</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="10" class="gkd-empty-cell">Sem dados financeiros por projeto neste filtro.</td></tr>
+                        <tr><td colspan="10" class="gkd-empty-cell">{% trans "Sem dados financeiros por projeto neste filtro." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -331,30 +331,30 @@
         <div class="gkd-table-card">
             <div class="gkd-table-head">
                 <div>
-                    <h3>🕳 Quadro Financeiro por Furo</h3>
-                    <p>Detalha a rentabilidade furo a furo.</p>
+                    <h3>🕳 {% trans "Quadro Financeiro por Furo" %}</h3>
+                    <p>{% trans "Detalha a rentabilidade furo a furo." %}</p>
                 </div>
                 <div class="gkd-table-actions">
-                    <button type="button" class="btn btn-warning" data-table-filter="furos" data-filter="todos">Todos</button>
-                    <button type="button" class="btn btn-danger" data-table-filter="furos" data-filter="negativos">Negativos</button>
-                    <button type="button" class="btn btn-secondary" data-table-filter="furos" data-filter="baixos">Margem baixa</button>
-                    <button type="button" class="btn btn-success" data-table-filter="furos" data-filter="positivos">Saudáveis</button>
+                    <button type="button" class="btn btn-warning" data-table-filter="furos" data-filter="todos">{% trans "Todos" %}</button>
+                    <button type="button" class="btn btn-danger" data-table-filter="furos" data-filter="negativos">{% trans "Negativos" %}</button>
+                    <button type="button" class="btn btn-secondary" data-table-filter="furos" data-filter="baixos">{% trans "Margem baixa" %}</button>
+                    <button type="button" class="btn btn-success" data-table-filter="furos" data-filter="positivos">{% trans "Saudáveis" %}</button>
                 </div>
             </div>
             <table data-sortable-table="furos" class="gkd-table gkd-table-furos">
                 <thead>
                     <tr>
-                        <th>Furo</th>
-                        <th>Projeto</th>
-                        <th data-sort-type="number">Metros ↕</th>
-                        <th data-sort-type="number">Gasto ↕</th>
-                        <th data-sort-type="number">Materiais ↕</th>
-                        <th data-sort-type="number">Máquinas ↕</th>
-                        <th data-sort-type="number">Ganho ↕</th>
-                        <th data-sort-type="number">Margem total ↕</th>
-                        <th data-sort-type="number">Margem % ↕</th>
-                        <th data-sort-type="number">Margem/metro ↕</th>
-                        <th data-sort-type="number">Custo/metro ↕</th>
+                        <th>{% trans "Furo" %}</th>
+                        <th>{% trans "Projeto" %}</th>
+                        <th data-sort-type="number">{% trans "Metros" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Gasto" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Materiais" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Máquinas" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Ganho" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem total" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem %" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Margem/metro" %} ↕</th>
+                        <th data-sort-type="number">{% trans "Custo/metro" %} ↕</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -373,7 +373,7 @@
                             <td>{{ item.custo_metro }} €</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="11" class="gkd-empty-cell">Sem dados financeiros por furo neste filtro.</td></tr>
+                        <tr><td colspan="11" class="gkd-empty-cell">{% trans "Sem dados financeiros por furo neste filtro." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -381,26 +381,26 @@
     </div>
 
     <div class="gkd-section-intro gkd-section-white">
-        <h3>Gráficos Financeiros</h3>
+        <h3>{% trans "Gráficos Financeiros" %}</h3>
         <p>
-            Estes gráficos mostram a evolução das despesas, o peso por categoria e a concentração de custos por projeto.
+            {% trans "Estes gráficos mostram a evolução das despesas, o peso por categoria e a concentração de custos por projeto." %}
         </p>
     </div>
 
     <div class="gkd-grid-charts">
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">💸 Despesas por Dia</h3>
-            <p class="gkd-chart-desc">Mostra o ritmo de saída de dinheiro ao longo do período selecionado.</p>
+            <h3 class="gkd-chart-title">💸 {% trans "Despesas por Dia" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Mostra o ritmo de saída de dinheiro ao longo do período selecionado." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoDespesasDia"></canvas></div>
         </div>
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">🧾 Despesas por Categoria</h3>
-            <p class="gkd-chart-desc">Ajuda a perceber em que tipos de despesa estás a gastar mais.</p>
+            <h3 class="gkd-chart-title">🧾 {% trans "Despesas por Categoria" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Ajuda a perceber em que tipos de despesa estás a gastar mais." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoDespesasCategoria"></canvas></div>
         </div>
         <div class="gkd-chart-card">
-            <h3 class="gkd-chart-title">📁 Despesas por Projeto</h3>
-            <p class="gkd-chart-desc">Mostra quais os projetos com maior peso financeiro.</p>
+            <h3 class="gkd-chart-title">📁 {% trans "Despesas por Projeto" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Mostra quais os projetos com maior peso financeiro." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoDespesasProjeto"></canvas></div>
         </div>
     </div>

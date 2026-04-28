@@ -7,10 +7,6 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_GET, require_POST
 from dispositivos.services.serial_service import (
     capturar_leitura_serial_para_sessao,
-    capturar_preview_serial_da_porta,
-    capturar_preview_serial_do_dispositivo,
-    inspecionar_dispositivo_bluetooth,
-    listar_dispositivos_bluetooth,
     listar_portas_seriais,
 )
 from dispositivos.selectors.dashboard import (
@@ -26,7 +22,14 @@ from dispositivos.selectors.dashboard import (
     obter_shots_qs,
     resolver_empresa_para_registo_por_furo,
 )
-from dispositivos.services.dashboard import criar_sessao_dispositivo, guardar_dispositivo_detectado
+from dispositivos.services.dashboard import (
+    processar_criacao_sessao_captura,
+    processar_escuta_dispositivo_detectado,
+    processar_inspecao_bluetooth_detectado,
+    processar_procura_dispositivos_bluetooth,
+    processar_registo_dispositivo_detectado,
+    processar_teste_leitura_usb,
+)
 
 
 from django.http import JsonResponse
@@ -98,119 +101,37 @@ def api_procurar_portas_usb(request):
 @require_GET
 def api_procurar_dispositivos_bluetooth(request):
     _garantir_admin_api(request)
-
-    try:
-        dispositivos = listar_dispositivos_bluetooth()
-        candidatos = sum(
-            1 for dispositivo in dispositivos
-            if dispositivo.get("tipo_detectado") == "candidato_medicao"
-        )
-        eventos = [
-            {"tipo": "info", "mensagem": "A procurar dispositivos Bluetooth visíveis..."},
-            {"tipo": "info", "mensagem": f"Foram encontrados {len(dispositivos)} dispositivos Bluetooth."},
-        ]
-        if candidatos:
-            eventos.append(
-                {
-                    "tipo": "sucesso",
-                    "mensagem": f"Foram identificados {candidatos} candidatos a aparelho de medidas.",
-                }
-            )
-        else:
-            eventos.append(
-                {
-                    "tipo": "info",
-                    "mensagem": "Nenhum dispositivo foi identificado como candidato claro a aparelho de medidas.",
-                }
-            )
-        return JsonResponse(
-            {
-                "ok": True,
-                "eventos": eventos,
-                "dispositivos": dispositivos,
-            }
-        )
-    except Exception as exc:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [
-                    {"tipo": "erro", "mensagem": f"Erro ao procurar dispositivos Bluetooth: {exc}"}
-                ],
-                "dispositivos": [],
-            },
-            status=400,
-        )
+    resultado = processar_procura_dispositivos_bluetooth()
+    return JsonResponse(
+        {
+            "ok": resultado["ok"],
+            "eventos": resultado["eventos"],
+            "dispositivos": resultado["dispositivos"],
+        },
+        status=200 if resultado["ok"] else resultado.get("status", 400),
+    )
 
 
 @login_required
 @require_POST
 def api_testar_leitura_usb(request):
     _garantir_admin_api(request)
-
-    dispositivo_id = request.POST.get("dispositivo_id")
-    if not dispositivo_id:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [
-                    {"tipo": "erro", "mensagem": "Selecione um dispositivo antes de testar a leitura."}
-                ],
-            },
-            status=400,
-        )
-
-    dispositivo = obter_dispositivo_ativo(dispositivo_id)
-
-    eventos = [
-        {"tipo": "info", "mensagem": f"Dispositivo selecionado: {dispositivo.nome}."},
-        {"tipo": "info", "mensagem": "A validar configuração USB/Serial..."},
-    ]
-
-    try:
-        eventos.append(
-            {
-                "tipo": "info",
-                "mensagem": f"A ligar à porta {dispositivo.porta or '-'} com baudrate {dispositivo.baudrate}.",
-            }
-        )
-        eventos.append(
-            {
-                "tipo": "info",
-                "mensagem": "Ligado. A procurar dados enviados pelo aparelho...",
-            }
-        )
-
-        leitura = capturar_preview_serial_do_dispositivo(dispositivo)
-
-        eventos.append(
-            {
-                "tipo": "sucesso",
-                "mensagem": f"Dados recebidos com sucesso. Total de bytes: {leitura['total_bytes']}.",
-            }
-        )
-
+    resultado = processar_teste_leitura_usb(dispositivo_id=request.POST.get("dispositivo_id"))
+    if resultado["ok"]:
         return JsonResponse(
             {
                 "ok": True,
-                "eventos": eventos,
-                "leitura": leitura,
+                "eventos": resultado["eventos"],
+                "leitura": resultado["leitura"],
             }
         )
-    except Exception as exc:
-        eventos.append(
-            {
-                "tipo": "erro",
-                "mensagem": f"Erro durante a leitura: {exc}",
-            }
-        )
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": eventos,
-            },
-            status=400,
-        )
+    return JsonResponse(
+        {
+            "ok": False,
+            "eventos": resultado["eventos"],
+        },
+        status=resultado.get("status", 400),
+    )
 
 
 @login_required
@@ -220,61 +141,22 @@ def api_inspecionar_dispositivo_bluetooth(request):
 
     address = (request.POST.get("address") or "").strip()
     name = (request.POST.get("name") or "").strip()
-
-    if not address:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [
-                    {"tipo": "erro", "mensagem": "É necessário indicar o endereço Bluetooth para inspeção."}
-                ],
-            },
-            status=400,
-        )
-
-    eventos = [
-        {"tipo": "info", "mensagem": f"A preparar inspeção Bluetooth para {name or address}."},
-        {"tipo": "info", "mensagem": "A tentar ligar ao dispositivo para recolher serviços BLE..."},
-    ]
-
-    try:
-        inspecao = inspecionar_dispositivo_bluetooth(address)
-        total_services = len(inspecao.get("services") or [])
-        total_characteristics = sum(
-            len(service.get("characteristics") or [])
-            for service in inspecao.get("services") or []
-        )
-        eventos.append(
-            {
-                "tipo": "sucesso",
-                "mensagem": (
-                    f"Inspeção concluída. Serviços: {total_services}. "
-                    f"Características: {total_characteristics}."
-                ),
-            }
-        )
-
+    resultado = processar_inspecao_bluetooth_detectado(address=address, name=name)
+    if resultado["ok"]:
         return JsonResponse(
             {
                 "ok": True,
-                "eventos": eventos,
-                "inspecao": inspecao,
+                "eventos": resultado["eventos"],
+                "inspecao": resultado["inspecao"],
             }
         )
-    except Exception as exc:
-        eventos.append(
-            {
-                "tipo": "erro",
-                "mensagem": f"Não foi possível inspecionar o dispositivo Bluetooth: {exc}",
-            }
-        )
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": eventos,
-            },
-            status=400,
-        )
+    return JsonResponse(
+        {
+            "ok": False,
+            "eventos": resultado["eventos"],
+        },
+        status=resultado.get("status", 400),
+    )
 
 
 @login_required
@@ -288,27 +170,9 @@ def api_guardar_dispositivo_detectado(request):
     descricao = (request.POST.get("description") or "").strip()
     baudrate = int((request.POST.get("baudrate") or "115200").strip() or 115200)
 
-    if canal not in {"usb_serial", "bluetooth"}:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [{"tipo": "erro", "mensagem": "Canal do dispositivo não suportado para registo."}],
-            },
-            status=400,
-        )
-
-    if not identificador:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [{"tipo": "erro", "mensagem": "Falta o identificador físico do dispositivo encontrado."}],
-            },
-            status=400,
-        )
-
     try:
         empresa = _resolver_empresa_para_registo(request)
-        dispositivo, _created, eventos = guardar_dispositivo_detectado(
+        resultado = processar_registo_dispositivo_detectado(
             empresa=empresa,
             canal=canal,
             nome=nome,
@@ -316,6 +180,16 @@ def api_guardar_dispositivo_detectado(request):
             descricao=descricao,
             baudrate=baudrate,
         )
+        if not resultado["ok"]:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "eventos": [{"tipo": "erro", "mensagem": resultado["erro"]}],
+                },
+                status=resultado.get("status", 400),
+            )
+        dispositivo = resultado["dispositivo"]
+        eventos = resultado["eventos"]
 
         return JsonResponse(
             {
@@ -349,93 +223,29 @@ def api_escutar_dispositivo_detectado(request):
     nome = (request.POST.get("name") or "").strip() or identificador or "Dispositivo"
     baudrate = int((request.POST.get("baudrate") or "115200").strip() or 115200)
 
-    if canal == "usb_serial":
-        if not identificador:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "eventos": [{"tipo": "erro", "mensagem": "É necessário indicar a porta USB/Serial."}],
-                },
-                status=400,
-            )
-
-        eventos = [
-            {"tipo": "info", "mensagem": f"A escutar a porta {identificador} do dispositivo {nome}."},
-            {"tipo": "info", "mensagem": "A procurar bytes enviados pelo aparelho..."},
-        ]
-        try:
-            leitura = capturar_preview_serial_da_porta(identificador, baudrate=baudrate)
-            eventos.append(
-                {
-                    "tipo": "sucesso",
-                    "mensagem": f"Foram recebidos {leitura['total_bytes']} bytes pela porta serial.",
-                }
-            )
-            if leitura.get("parece_csv"):
-                eventos.append(
-                    {
-                        "tipo": "sucesso",
-                        "mensagem": "O conteúdo recebido parece estar em formato CSV.",
-                    }
-                )
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "eventos": eventos,
-                    "leitura": leitura,
-                    "modo": "usb_serial",
-                }
-            )
-        except Exception as exc:
-            eventos.append({"tipo": "erro", "mensagem": f"Erro ao escutar a porta serial: {exc}"})
-            return JsonResponse({"ok": False, "eventos": eventos}, status=400)
-
-    if canal == "bluetooth":
-        if not identificador:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "eventos": [{"tipo": "erro", "mensagem": "É necessário indicar o endereço Bluetooth."}],
-                },
-                status=400,
-            )
-        eventos = [
-            {"tipo": "info", "mensagem": f"A tentar escutar o dispositivo Bluetooth {nome}."},
-            {"tipo": "info", "mensagem": "A recolher serviços e características BLE disponíveis..."},
-        ]
-        try:
-            inspecao = inspecionar_dispositivo_bluetooth(identificador)
-            total_services = len(inspecao.get("services") or [])
-            eventos.append(
-                {
-                    "tipo": "sucesso",
-                    "mensagem": f"Foram encontrados {total_services} serviços BLE durante a escuta.",
-                }
-            )
-            eventos.append(
-                {
-                    "tipo": "info",
-                    "mensagem": "A escuta Bluetooth genérica mostra metadados e serviços; streaming contínuo depende do protocolo do aparelho.",
-                }
-            )
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "eventos": eventos,
-                    "inspecao": inspecao,
-                    "modo": "bluetooth",
-                }
-            )
-        except Exception as exc:
-            eventos.append({"tipo": "erro", "mensagem": f"Erro ao escutar Bluetooth: {exc}"})
-            return JsonResponse({"ok": False, "eventos": eventos}, status=400)
-
+    resultado = processar_escuta_dispositivo_detectado(
+        canal=canal,
+        identificador=identificador,
+        nome=nome,
+        baudrate=baudrate,
+    )
+    if resultado["ok"]:
+        response = {
+            "ok": True,
+            "eventos": resultado["eventos"],
+            "modo": resultado["modo"],
+        }
+        if resultado.get("leitura") is not None:
+            response["leitura"] = resultado["leitura"]
+        if resultado.get("inspecao") is not None:
+            response["inspecao"] = resultado["inspecao"]
+        return JsonResponse(response)
     return JsonResponse(
         {
             "ok": False,
-            "eventos": [{"tipo": "erro", "mensagem": "Canal não suportado para escuta."}],
+            "eventos": resultado["eventos"],
         },
-        status=400,
+        status=resultado.get("status", 400),
     )
 
 @login_required
@@ -589,22 +399,17 @@ def captura_dispositivo(request):
     sessoes_recentes = sessoes_recentes.select_related("dispositivo", "furo", "empregado").order_by("-iniciado_em")[:10]
 
     if request.method == "POST":
-        dispositivo_id = request.POST.get("dispositivo_id")
-        furo_id = request.POST.get("furo_id")
-
-        if not dispositivo_id or not furo_id:
-            messages.error(request, "Selecione um dispositivo e um furo para iniciar a sessão.")
+        resultado = processar_criacao_sessao_captura(
+            empresa_id=empresa_id,
+            empregado=empregado,
+            dispositivo_id=request.POST.get("dispositivo_id"),
+            furo_id=request.POST.get("furo_id"),
+        )
+        if not resultado["ok"]:
+            messages.error(request, resultado["erro"])
             return redirect("dispositivos:captura")
 
-        dispositivo = obter_dispositivo_ativo(dispositivo_id, empresa_id=empresa_id)
-        furo = obter_furo(furo_id, empresa_id=empresa_id)
-
-        if dispositivo.empresa_id != furo.empresa_id:
-            messages.error(request, "O dispositivo e o furo têm de pertencer à mesma empresa.")
-            return redirect("dispositivos:captura")
-
-        sessao = criar_sessao_dispositivo(dispositivo=dispositivo, furo=furo, empregado=empregado)
-
+        sessao = resultado["sessao"]
         messages.success(request, "Sessão criada com sucesso.")
         return redirect("dispositivos:sessao_detail", pk=sessao.pk)
 

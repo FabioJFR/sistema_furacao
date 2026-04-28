@@ -13,37 +13,37 @@
 {% endblock %}
 
 {% block content %}
-{% trans "Sem observacoes." as sem_observacoes %}
+{% trans "Sem observações." as sem_observacoes %}
 <div class="max-w-6xl mx-auto px-6 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Descricao geologica" %}</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Descrição geológica" %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div><strong>{% trans "Litologia principal:" %}</strong> {{ log.litologia_principal }}</div>
-                <div><strong>{% trans "Litologia secundaria:" %}</strong> {{ log.litologia_secundaria|default:"-" }}</div>
+                <div><strong>{% trans "Litologia secundária:" %}</strong> {{ log.litologia_secundaria|default:"-" }}</div>
                 <div><strong>{% trans "Cor:" %}</strong> {{ log.cor|default:"-" }}</div>
                 <div><strong>{% trans "Granulometria:" %}</strong> {{ log.granulometria|default:"-" }}</div>
-                <div><strong>{% trans "Alteracao:" %}</strong> {{ log.alteracao|default:"-" }}</div>
-                <div><strong>{% trans "Mineralizacao:" %}</strong> {{ log.mineralizacao|default:"-" }}</div>
+                <div><strong>{% trans "Alteração:" %}</strong> {{ log.alteracao|default:"-" }}</div>
+                <div><strong>{% trans "Mineralização:" %}</strong> {{ log.mineralizacao|default:"-" }}</div>
                 <div><strong>{% trans "Estrutura:" %}</strong> {{ log.estrutura|default:"-" }}</div>
                 <div><strong>{% trans "Densidade de fraturas:" %}</strong> {{ log.densidade_fraturas|default:"-" }}</div>
-                <div><strong>RQD:</strong> {{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</div>
-                <div><strong>{% trans "Recuperacao:" %}</strong> {{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</div>
-                <div><strong>{% trans "Nivel de agua:" %}</strong> {{ log.nivel_agua_m|default:"-" }}{% if log.nivel_agua_m %} m{% endif %}</div>
-                <div><strong>{% trans "Medicao tecnica:" %}</strong> {{ log.medicao|default:"-" }}</div>
-                <div class="md:col-span-2"><strong>{% trans "Missao drone:" %}</strong> {{ log.missao_drone|default:"-" }}</div>
+                <div><strong>{% trans "RQD:" %}</strong> {{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</div>
+                <div><strong>{% trans "Recuperação:" %}</strong> {{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</div>
+                <div><strong>{% trans "Nível de água:" %}</strong> {{ log.nivel_agua_m|default:"-" }}{% if log.nivel_agua_m %} m{% endif %}</div>
+                <div><strong>{% trans "Medição técnica:" %}</strong> {{ log.medicao|default:"-" }}</div>
+                <div class="md:col-span-2"><strong>{% trans "Missão drone:" %}</strong> {{ log.missao_drone|default:"-" }}</div>
             </div>
             <div class="mt-6">
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Observacoes" %}</h3>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Observações" %}</h3>
                 <p class="text-gray-700 whitespace-pre-line">{{ log.observacoes|default:sem_observacoes }}</p>
             </div>
         </section>
 
         <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Anexos e referencia" %}</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Anexos e referência" %}</h2>
             {% if log.imagem_referencia %}
                 <div class="mb-4">
-                    <img src="{{ log.imagem_referencia.url }}" alt="{% trans 'Imagem de referencia' %}" class="w-full rounded-lg border border-gray-200">
+                    <img src="{{ log.imagem_referencia.url }}" alt="{% trans 'Imagem de referência' %}" class="w-full rounded-lg border border-gray-200">
                 </div>
             {% endif %}
 
@@ -54,7 +54,7 @@
                         <div class="text-sm text-gray-500">{{ anexo.get_tipo_display }} · {{ anexo.criado_em|date:"d/m/Y H:i" }}</div>
                     </a>
                 {% empty %}
-                    <p class="text-gray-500">{% trans "Ainda nao existem anexos para este log." %}</p>
+                    <p class="text-gray-500">{% trans "Ainda não existem anexos para este log." %}</p>
                 {% endfor %}
             </div>
         </section>

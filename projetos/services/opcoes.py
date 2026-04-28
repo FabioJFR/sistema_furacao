@@ -58,6 +58,19 @@ def construir_filtros_exportacao(*, request, empresa):
     }
 
 
+def construir_contexto_relatorios_exportacao(*, request, empresa, listar_projetos_fn, listar_furos_fn, construir_cards_fn):
+    filtros = construir_filtros_exportacao(request=request, empresa=empresa)
+    return {
+        "empresa": empresa,
+        "datasets": construir_cards_fn(empresa, filtros),
+        "projetos_filtro": listar_projetos_fn(empresa),
+        "furos_filtro": listar_furos_fn(empresa=empresa, projeto=filtros.get("projeto")),
+        "tipos_registo": [*TIPOS_REGISTO_CHOICES_EXPORTACAO],
+        "categorias_despesa": [("", "Todas as categorias"), *Despesa.CATEGORIA_CHOICES],
+        "filtros": filtros,
+    }
+
+
 @transaction.atomic
 def guardar_preferencias_admin(*, form, user, empresa):
     preferencias = form.save(commit=False)

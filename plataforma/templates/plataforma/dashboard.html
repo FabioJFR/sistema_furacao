@@ -152,41 +152,41 @@
                     <span>{% trans "Aceder ao centro de geologia, logs do furo e visão operacional da área." %}</span>
                 </a>
                 <a href="{% url 'geologia:drone_hub' %}" class="quick-link">
-                    <strong>DJI Mini 4 Pro</strong>
+                    <strong>{% trans "DJI Mini 4 Pro" %}</strong>
                     <span>{% trans "Aceder à interface DJI dentro da app geologia." %}</span>
                 </a>
                 {% if request.user.is_superuser %}
                     <a href="{% url 'plataforma:todo_dashboard' %}" class="quick-link">
-                        <strong>TO DO</strong>
+                        <strong>{% trans "TO DO" %}</strong>
                         <span>{% trans "Acompanhar roadmap e estado de evolução por app." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:hub' %}" class="quick-link">
-                        <strong>AI Visual</strong>
+                        <strong>{% trans "AI Visual" %}</strong>
                         <span>{% trans "Aceder ao centro principal da AI visual." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:chatbox' %}" class="quick-link">
-                        <strong>Chatbox AI</strong>
+                        <strong>{% trans "Chatbox AI" %}</strong>
                         <span>{% trans "Usar a interface conversacional da AI." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="quick-link">
-                        <strong>Memória Operacional AI</strong>
+                        <strong>{% trans "Memória Operacional AI" %}</strong>
                         <span>{% trans "Consultar o histórico operacional ligado a furos e zonas." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:analise_create' %}" class="quick-link">
-                        <strong>Nova análise AI</strong>
+                        <strong>{% trans "Nova análise AI" %}</strong>
                         <span>{% trans "Criar uma nova análise visual de relatório ou caixa." %}</span>
                     </a>
                     <a href="{% url 'inspecao_ai:analise_list' %}" class="quick-link">
-                        <strong>Histórico AI</strong>
+                        <strong>{% trans "Histórico AI" %}</strong>
                         <span>{% trans "Rever análises anteriores e reprocessar com o motor atual." %}</span>
                     </a>
                     <a href="{% url 'plataforma:features_dashboard' %}" class="quick-link">
-                        <strong>Gestão de features</strong>
+                        <strong>{% trans "Gestão de features" %}</strong>
                         <span>{% trans "Controlar funcionalidades ativas por empresa e por conta individual." %}</span>
                     </a>
                 {% endif %}
                 <a href="{% url 'admin:index' %}" class="quick-link">
-                    <strong>Admin Django</strong>
+                    <strong>{% trans "Admin Django" %}</strong>
                     <span>{% trans "Gerir modelos, dados internos e operações técnicas." %}</span>
                 </a>
             </div>

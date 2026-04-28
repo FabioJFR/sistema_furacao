@@ -18,7 +18,7 @@
                 <div class="bg-white rounded-xl shadow p-5 border border-gray-200">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-800">{{ furo.nome }}</h2>
+                            <h2 class="text-xl font-bold text-gray-800 sf-break-word">{{ furo.nome }}</h2>
                             <p class="text-sm text-gray-500">
                                 {% trans "Projeto" %}: {{ furo.projeto.nome|default:"-" }}
                             </p>
@@ -38,11 +38,11 @@
 
                     <div class="flex flex-wrap gap-2">
                         <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="btn btn-primary">
-                            👁️ Ver Detalhes
+                            👁️ {% trans "Ver Detalhes" %}
                         </a>
 
                         <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-warning">
-                            🌐 Ver 3D
+                            🌐 {% trans "Ver 3D" %}
                         </a>
                     </div>
                 </div>

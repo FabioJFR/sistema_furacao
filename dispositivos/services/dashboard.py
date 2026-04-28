@@ -1,45 +1,37 @@
-from dispositivos.models import Dispositivo, SessaoDispositivo
+"""
+Camada de compatibilidade para serviços de dashboard de dispositivos.
 
+Este módulo mantém os imports antigos estáveis enquanto a implementação
+foi dividida por responsabilidade:
+- registry: registo/normalização de dispositivos detectados
+- capture: criação de sessões e teste de leitura USB
+- discovery: escuta/inspeção de dispositivos USB/Bluetooth
+"""
 
-def guardar_dispositivo_detectado(*, empresa, canal, nome, identificador, descricao="", baudrate=115200):
-    defaults = {
-        "empresa": empresa,
-        "nome": nome[:120],
-        "tipo": "magcruiser",
-        "canal": canal,
-        "numero_serie": "",
-        "identificador_fisico": identificador[:120],
-        "ativo": True,
-    }
-    if canal == "usb_serial":
-        defaults["porta"] = identificador[:120]
-        defaults["baudrate"] = baudrate
-        dispositivo, created = Dispositivo.objects.update_or_create(
-            empresa=empresa,
-            porta=identificador[:120],
-            defaults=defaults,
-        )
-    else:
-        defaults["mac_address"] = identificador[:120]
-        dispositivo, created = Dispositivo.objects.update_or_create(
-            empresa=empresa,
-            mac_address=identificador[:120],
-            defaults=defaults,
-        )
-    eventos = [
-        {"tipo": "sucesso", "mensagem": f"Dispositivo {'criado' if created else 'atualizado'} com sucesso."},
-        {"tipo": "info", "mensagem": f"Empresa associada: {empresa}."},
-    ]
-    if descricao:
-        eventos.append({"tipo": "info", "mensagem": f"Descrição detetada: {descricao}."})
-    return dispositivo, created, eventos
+from dispositivos.services.dashboard_capture import (
+    criar_sessao_dispositivo,
+    processar_criacao_sessao_captura,
+    processar_teste_leitura_usb,
+)
+from dispositivos.services.dashboard_discovery import (
+    processar_procura_dispositivos_bluetooth,
+    processar_escuta_dispositivo_detectado,
+    processar_inspecao_bluetooth_detectado,
+)
+from dispositivos.services.dashboard_registry import (
+    guardar_dispositivo_detectado,
+    processar_registo_dispositivo_detectado,
+    validar_parametros_dispositivo_detectado,
+)
 
-
-def criar_sessao_dispositivo(*, dispositivo, furo, empregado=None):
-    return SessaoDispositivo.objects.create(
-        dispositivo=dispositivo,
-        empresa=dispositivo.empresa,
-        empregado=empregado,
-        furo=furo,
-        status="criada",
-    )
+__all__ = [
+    "criar_sessao_dispositivo",
+    "guardar_dispositivo_detectado",
+    "processar_criacao_sessao_captura",
+    "processar_escuta_dispositivo_detectado",
+    "processar_inspecao_bluetooth_detectado",
+    "processar_procura_dispositivos_bluetooth",
+    "processar_registo_dispositivo_detectado",
+    "processar_teste_leitura_usb",
+    "validar_parametros_dispositivo_detectado",
+]

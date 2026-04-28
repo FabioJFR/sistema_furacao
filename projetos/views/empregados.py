@@ -56,6 +56,10 @@ from projetos.selectors.empregados import (
     obter_ligacao_projeto_empregado_admin,
     obter_lista_empregados,
     obter_projeto_empregado,
+    obter_levantamentos_furo_empresa,
+    obter_levantamentos_furo_empregado,
+    obter_devolucoes_furo_empresa,
+    obter_devolucoes_furo_empregado,
     obter_registos_furo_empregado,
     obter_registos_projeto_empregado,
     obter_resumo_registos_projetos_empregado,
@@ -801,6 +805,10 @@ def furo_detail_empregado(request, pk):
 
     medicoes = obter_medicoes_furo_empregado(empregado, furo)
     registos = obter_registos_furo_empregado(empregado, furo)
+    levantamentos = obter_levantamentos_furo_empregado(empregado, furo)
+    levantamentos_furo = obter_levantamentos_furo_empresa(empregado, furo)
+    devolucoes = obter_devolucoes_furo_empregado(empregado, furo)
+    devolucoes_furo = obter_devolucoes_furo_empresa(empregado, furo)
 
     logger.info(
         "View furo_detail_empregado carregada com sucesso. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -813,6 +821,10 @@ def furo_detail_empregado(request, pk):
         "furo": furo,
         "medicoes": medicoes,
         "registos": registos,
+        "levantamentos": levantamentos,
+        "levantamentos_furo": levantamentos_furo,
+        "devolucoes": devolucoes,
+        "devolucoes_furo": devolucoes_furo,
     })
 
 @login_required

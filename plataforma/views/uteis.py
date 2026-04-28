@@ -17,7 +17,7 @@ from plataforma.selectors.uteis import (
 )
 from plataforma.services.uteis import (
     construir_zip_exportacao_ai,
-    executar_preenchimento_furos_materiais,
+    executar_fluxo_preenchimento_furos_materiais,
     limpar_dados_ai_por_scope,
 )
 
@@ -45,41 +45,27 @@ def uteis_dashboard(request):
         return acesso
 
     if request.method == "POST" and request.POST.get("action") == "preencher_furos_materiais":
-        empresa_param = (request.POST.get("empresa") or "").strip()
-        raio_metros = (request.POST.get("raio_metros") or "250").strip()
-        forcar_furos = request.POST.get("forcar_furos") == "on"
-        simular = request.POST.get("simular") == "on"
+        resultado = executar_fluxo_preenchimento_furos_materiais(
+            empresa_param=request.POST.get("empresa"),
+            raio_metros=request.POST.get("raio_metros"),
+            forcar_furos=request.POST.get("forcar_furos") == "on",
+            simular=request.POST.get("simular") == "on",
+        )
+        opcoes = resultado["opcoes"]
+        saida_seed = resultado["saida_seed"]
 
-        try:
-            saida_seed = executar_preenchimento_furos_materiais(
-                empresa_param=empresa_param,
-                raio_metros=raio_metros,
-                forcar_furos=forcar_furos,
-                simular=simular,
-            )
-            if simular:
-                messages.success(
-                    request,
-                    "Simulação executada com sucesso. Nenhum dado foi gravado.",
-                )
+        if resultado["ok"]:
+            if opcoes["simular"]:
+                messages.success(request, "Simulação executada com sucesso. Nenhum dado foi gravado.")
             else:
-                messages.success(
-                    request,
-                    "Preenchimento de coordenadas e reforço de materiais executado com sucesso.",
-                )
-        except Exception as exc:
+                messages.success(request, "Preenchimento de coordenadas e reforço de materiais executado com sucesso.")
+        else:
             messages.error(
                 request,
-                f"Erro ao executar o reforço de furos e materiais: {exc}",
+                f"Erro ao executar o reforço de furos e materiais: {resultado['erro']}",
             )
-            saida_seed = ""
         request.session["uteis_last_seed_output"] = saida_seed
-        request.session["uteis_last_seed_options"] = {
-            "empresa": empresa_param,
-            "raio_metros": raio_metros or "250",
-            "forcar_furos": forcar_furos,
-            "simular": simular,
-        }
+        request.session["uteis_last_seed_options"] = opcoes
         return redirect("plataforma:uteis_dashboard")
 
     counts_by_key = obter_counts_datasets_ai()

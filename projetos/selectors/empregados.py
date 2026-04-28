@@ -177,6 +177,52 @@ def obter_registos_furo_empregado(empregado, furo):
     ).select_related("projeto", "furo").order_by("-data", "-criado_em")
 
 
+def obter_levantamentos_furo_empregado(empregado, furo):
+    return (
+        LevantamentoMaterial.objects.filter(
+            empregado=empregado,
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .select_related("material", "projeto", "furo")
+        .order_by("-data", "-criado_em")
+    )
+
+
+def obter_levantamentos_furo_empresa(empregado, furo):
+    return (
+        LevantamentoMaterial.objects.filter(
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .select_related("empregado", "material", "projeto", "furo")
+        .order_by("-data", "-criado_em")
+    )
+
+
+def obter_devolucoes_furo_empregado(empregado, furo):
+    return (
+        DevolucaoMaterial.objects.filter(
+            empregado=empregado,
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .select_related("material", "projeto", "furo")
+        .order_by("-data", "-criado_em")
+    )
+
+
+def obter_devolucoes_furo_empresa(empregado, furo):
+    return (
+        DevolucaoMaterial.objects.filter(
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .select_related("empregado", "material", "projeto", "furo")
+        .order_by("-data", "-criado_em")
+    )
+
+
 def obter_lista_furos_empregado(empregado):
     furo_ids_associados = EmpregadoFuro.objects.filter(
         empregado=empregado,

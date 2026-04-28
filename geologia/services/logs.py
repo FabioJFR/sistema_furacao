@@ -1,3 +1,6 @@
+from geologia.forms import AnexoLogGeologicoForm, LogGeologicoFuroForm
+
+
 def guardar_log_geologico_form(*, form):
     return form.save()
 
@@ -8,3 +11,70 @@ def guardar_anexo_log_form(*, form, log):
     anexo.empresa = log.empresa
     anexo.save()
     return anexo
+
+
+def construir_form_log_create(*, request_post=None, request_files=None, furo, empresa):
+    if request_post is not None:
+        return LogGeologicoFuroForm(request_post, request_files, furo=furo, empresa=empresa)
+
+    profundidade_atual = float(furo.profundidade_atual or 0.0)
+    return LogGeologicoFuroForm(
+        furo=furo,
+        empresa=empresa,
+        initial={
+            "intervalo_de": profundidade_atual,
+            "intervalo_ate": profundidade_atual,
+        },
+    )
+
+
+def processar_log_create(*, request_post, request_files, furo, empresa):
+    form = construir_form_log_create(
+        request_post=request_post,
+        request_files=request_files,
+        furo=furo,
+        empresa=empresa,
+    )
+    if form.is_valid():
+        log = guardar_log_geologico_form(form=form)
+        return {"ok": True, "form": form, "log": log}
+    return {"ok": False, "form": form, "log": None}
+
+
+def construir_form_log_update(*, request_post=None, request_files=None, log, empresa):
+    if request_post is not None:
+        return LogGeologicoFuroForm(
+            request_post,
+            request_files,
+            instance=log,
+            furo=log.furo,
+            empresa=empresa,
+        )
+    return LogGeologicoFuroForm(instance=log, furo=log.furo, empresa=empresa)
+
+
+def processar_log_update(*, request_post, request_files, log, empresa):
+    form = construir_form_log_update(
+        request_post=request_post,
+        request_files=request_files,
+        log=log,
+        empresa=empresa,
+    )
+    if form.is_valid():
+        log = guardar_log_geologico_form(form=form)
+        return {"ok": True, "form": form, "log": log}
+    return {"ok": False, "form": form, "log": log}
+
+
+def construir_form_anexo_log(*, request_post=None, request_files=None):
+    if request_post is not None:
+        return AnexoLogGeologicoForm(request_post, request_files)
+    return AnexoLogGeologicoForm()
+
+
+def processar_anexo_log_create(*, request_post, request_files, log):
+    form = construir_form_anexo_log(request_post=request_post, request_files=request_files)
+    if form.is_valid():
+        anexo = guardar_anexo_log_form(form=form, log=log)
+        return {"ok": True, "form": form, "anexo": anexo}
+    return {"ok": False, "form": form, "anexo": None}

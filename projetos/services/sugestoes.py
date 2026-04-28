@@ -112,3 +112,35 @@ def guardar_e_notificar_sugestao(*, form, user, logger):
             user.id,
         )
         return {"estado": "erro"}
+
+
+def processar_submissao_sugestao(*, form, user, logger):
+    resultado = guardar_e_notificar_sugestao(form=form, user=user, logger=logger)
+    if resultado["estado"] == "ok":
+        if resultado["enviado"]:
+            return {
+                "estado": "ok",
+                "message_level": "success",
+                "message_text": "Sugestão enviada com sucesso. Obrigado pelo teu contributo.",
+                "diagnostico_envio": resultado.get("diagnostico_envio", ""),
+            }
+        return {
+            "estado": "ok",
+            "message_level": "warning",
+            "message_text": (
+                "Sugestão guardada com sucesso. Não foi possível enviar o email neste momento. "
+                f"{resultado.get('diagnostico_envio', '')}"
+            ),
+            "diagnostico_envio": resultado.get("diagnostico_envio", ""),
+        }
+    if resultado["estado"] == "invalid":
+        return {
+            "estado": "invalid",
+            "message_level": "error",
+            "message_text": "Corrige os campos assinalados para enviar a sugestão.",
+        }
+    return {
+        "estado": "erro",
+        "message_level": "error",
+        "message_text": "Ocorreu um erro ao enviar a sugestão. Tenta novamente em instantes.",
+    }

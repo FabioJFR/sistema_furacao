@@ -1,14 +1,15 @@
 {% extends "projetos/base.html" %}
+{% load static %}
 {% load i18n %}
 
 {% block title %}{{ furo.nome }}{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto">
+<section class="w-full px-4 md:px-6">
     <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
         <div class="flex flex-wrap justify-between items-start gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">🕳 {{ furo.nome }}</h1>
+                <h1 class="text-3xl font-bold text-gray-800 sf-break-word">🕳 {{ furo.nome }}</h1>
                 <p class="text-gray-600 mt-2">
                     <strong>{% trans "Projeto" %}:</strong> {{ furo.projeto.nome|default:"-" }}
                 </p>
@@ -155,5 +156,153 @@
             <p class="text-gray-500">{% trans "Ainda não tens registos neste furo." %}</p>
         {% endif %}
     </div>
+
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mt-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">🧰 {% trans "Materiais usados" %}</h2>
+        <div class="flex gap-2 flex-wrap mb-4">
+            <button type="button" id="tab-meus-levantamentos" class="btn btn-primary">{% trans "Meus levantamentos" %}</button>
+            <button type="button" id="tab-todos-levantamentos" class="btn btn-secondary">{% trans "Todos os levantamentos do furo" %}</button>
+        </div>
+
+        <div id="painel-meus-levantamentos">
+        {% if levantamentos %}
+            <div class="overflow-x-auto mb-3">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Material" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Quantidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Projeto" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Observações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for levantamento in levantamentos %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ levantamento.data|date:"d/m/Y" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.material.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.quantidade|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.projeto.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.observacoes|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem levantamentos de material neste furo." %}</p>
+        {% endif %}
+        </div>
+
+        <div id="painel-todos-levantamentos" class="hidden">
+        {% if levantamentos_furo %}
+            <div class="overflow-x-auto mb-3">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Empregado" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Material" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Quantidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Projeto" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Observações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for levantamento in levantamentos_furo %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ levantamento.data|date:"d/m/Y" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.empregado.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.material.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.quantidade|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.projeto.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ levantamento.observacoes|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem levantamentos registados neste furo." %}</p>
+        {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mt-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">↩️ {% trans "Devoluções de materiais" %}</h2>
+        <div class="flex gap-2 flex-wrap mb-4">
+            <button type="button" id="tab-minhas-devolucoes" class="btn btn-primary">{% trans "Minhas devoluções" %}</button>
+            <button type="button" id="tab-todas-devolucoes" class="btn btn-secondary">{% trans "Todas as devoluções do furo" %}</button>
+        </div>
+
+        <div id="painel-minhas-devolucoes">
+        {% if devolucoes %}
+            <div class="overflow-x-auto mb-3">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Material" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Quantidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Projeto" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Observações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for devolucao in devolucoes %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ devolucao.data|date:"d/m/Y" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.material.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.quantidade|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.projeto.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.observacoes|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem devoluções de material neste furo." %}</p>
+        {% endif %}
+        </div>
+
+        <div id="painel-todas-devolucoes" class="hidden">
+        {% if devolucoes_furo %}
+            <div class="overflow-x-auto mb-3">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-600">
+                            <th class="text-left py-3 pr-4">{% trans "Data" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Empregado" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Material" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Quantidade" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Projeto" %}</th>
+                            <th class="text-left py-3 pr-4">{% trans "Observações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for devolucao in devolucoes_furo %}
+                            <tr class="border-b">
+                                <td class="py-3 pr-4">{{ devolucao.data|date:"d/m/Y" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.empregado.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.material.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.quantidade|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.projeto.nome|default:"-" }}</td>
+                                <td class="py-3 pr-4">{{ devolucao.observacoes|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem devoluções registadas neste furo." %}</p>
+        {% endif %}
+        </div>
+    </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/projetos/furo_detail_empregado.js' %}"></script>
 {% endblock %}

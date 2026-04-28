@@ -4,7 +4,7 @@
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 {% block page_description %}
-{% blocktrans with nome=furo.nome %}Preparado para operacao com DJI Mini 4 Pro no furo {{ nome }}.{% endblocktrans %}
+{% blocktrans with nome=furo.nome %}Preparado para operação com DJI Mini 4 Pro no furo {{ nome }}.{% endblocktrans %}
 {% endblock %}
 {% block page_actions %}
     <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">{% trans "Voltar ao furo" %}</a>
@@ -33,7 +33,7 @@
         {% endfor %}
 
         <div class="flex flex-wrap gap-3 pt-2">
-            <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Guardar missao" %}</button>
+            <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Guardar missão" %}</button>
             {% if missao %}
             <a href="{% url 'geologia:missao_detail' missao.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Ver detalhe" %}</a>
             {% endif %}

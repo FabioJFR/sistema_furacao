@@ -224,14 +224,14 @@
     <div class="bg-white rounded-2xl shadow-sm border border-cyan-200 p-5 mb-6">
         <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Resumo AI do relatório" %}</h2>
         <div class="text-sm text-slate-500 mb-4">{% trans "Resumo estruturado do que a AI conseguiu identificar entre campos impressos e preenchimento manual do trabalhador." %}</div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 mb-4">
-            <strong>{% trans "Furo associado ao relatório:" %}</strong>
-            {% if analise.furo %}
-                {{ analise.furo.nome }}
-                {% if analise.projeto %} · Projeto {{ analise.projeto.nome }}{% endif %}
-            {% else %}
-                {% trans "Ainda sem furo associado" %}
-            {% endif %}
+            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 mb-4">
+                <strong>{% trans "Furo associado ao relatório:" %}</strong>
+                {% if analise.furo %}
+                    {{ analise.furo.nome }}
+                    {% if analise.projeto %} · {% trans "Projeto" %} {{ analise.projeto.nome }}{% endif %}
+                {% else %}
+                    {% trans "Ainda sem furo associado" %}
+                {% endif %}
             <div class="mt-2 text-slate-500">
                 {% trans "Esta associação é importante para interpretar o relatório no contexto certo e guardar depois a leitura final no furo correspondente." %}
             </div>
@@ -256,26 +256,26 @@
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-slate-500">Campos validados</div>
+                    <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Campos validados" %}</div>
                     <div class="mt-2 text-2xl font-bold text-slate-900">{{ resumo_validacao.total_validados }}</div>
                 </div>
                 <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-emerald-700">AI acertou</div>
+                    <div class="text-xs uppercase tracking-wide text-emerald-700">{% trans "AI acertou" %}</div>
                     <div class="mt-2 text-2xl font-bold text-emerald-900">{{ resumo_validacao.total_acertos }}</div>
                 </div>
                 <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-rose-700">AI falhou</div>
+                    <div class="text-xs uppercase tracking-wide text-rose-700">{% trans "AI falhou" %}</div>
                     <div class="mt-2 text-2xl font-bold text-rose-900">{{ resumo_validacao.total_falhas }}</div>
                 </div>
                 <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-sky-700">Taxa de acerto</div>
+                    <div class="text-xs uppercase tracking-wide text-sky-700">{% trans "Taxa de acerto" %}</div>
                     <div class="mt-2 text-2xl font-bold text-sky-900">
                         {% if resumo_validacao.taxa_acerto != None %}{{ resumo_validacao.taxa_acerto }}%{% else %}-{% endif %}
                     </div>
                 </div>
             </div>
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                Podes validar manualmente o valor correto de cada campo. Isto ajuda a rever a análise e prepara dados úteis para a AI aprender mais tarde.
+                {% trans "Podes validar manualmente o valor correto de cada campo. Isto ajuda a rever a análise e prepara dados úteis para a AI aprender mais tarde." %}
             </div>
             {% for campo in resumo_validacao.campos %}
                 <div class="rounded-xl border p-4 {% if campo.comparacao_estado == 'acertou' %}border-emerald-200 bg-emerald-50/40{% elif campo.comparacao_estado == 'falhou' %}border-rose-200 bg-rose-50/40{% else %}border-slate-200{% endif %}">
@@ -288,33 +288,33 @@
                     {% endif %}
                     {% if campo.valor_preenchido_trabalhador %}
                         <div class="text-sm text-violet-700 mt-2">
-                            Valor escrito pelo trabalhador: <strong>{{ campo.valor_preenchido_trabalhador }}</strong>
+                            {% trans "Valor escrito pelo trabalhador:" %} <strong>{{ campo.valor_preenchido_trabalhador }}</strong>
                         </div>
                     {% endif %}
                     <div class="mt-3">
                         {% if campo.comparacao_estado == "acertou" %}
-                            <span class="inline-flex rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">AI acertou</span>
+                            <span class="inline-flex rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">{% trans "AI acertou" %}</span>
                         {% elif campo.comparacao_estado == "falhou" %}
-                            <span class="inline-flex rounded-full bg-rose-100 text-rose-800 text-xs font-semibold px-3 py-1">AI falhou</span>
+                            <span class="inline-flex rounded-full bg-rose-100 text-rose-800 text-xs font-semibold px-3 py-1">{% trans "AI falhou" %}</span>
                         {% else %}
-                            <span class="inline-flex rounded-full bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1">Sem validação</span>
+                            <span class="inline-flex rounded-full bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1">{% trans "Sem validação" %}</span>
                         {% endif %}
                     </div>
                     {% if campo.campo_semantico %}
-                        <div class="text-sm text-sky-700 mt-2">Campo interpretado: <strong>{{ campo.campo_semantico }}</strong></div>
+                        <div class="text-sm text-sky-700 mt-2">{% trans "Campo interpretado:" %} <strong>{{ campo.campo_semantico }}</strong></div>
                     {% endif %}
                     {% if campo.valor_metrico_estimado %}
-                        <div class="text-sm text-emerald-700 mt-2">Medida estimada: <strong>{{ campo.valor_metrico_estimado }}</strong></div>
+                        <div class="text-sm text-emerald-700 mt-2">{% trans "Medida estimada:" %} <strong>{{ campo.valor_metrico_estimado }}</strong></div>
                     {% endif %}
                     {% if campo.origem_valor_metrico %}
-                        <div class="text-sm text-amber-700 mt-2">Origem da medida: <strong>{{ campo.origem_valor_metrico }}</strong>{% if campo.passo_metrico_estimado %} · passo estimado: <strong>{{ campo.passo_metrico_estimado }}</strong>{% endif %}</div>
+                        <div class="text-sm text-amber-700 mt-2">{% trans "Origem da medida:" %} <strong>{{ campo.origem_valor_metrico }}</strong>{% if campo.passo_metrico_estimado %} · {% trans "passo estimado:" %} <strong>{{ campo.passo_metrico_estimado }}</strong>{% endif %}</div>
                     {% endif %}
                     <div class="text-sm text-slate-500 mt-2">
-                        Leitura: estimada ·
-                        {% if campo.ocr_aceite %}OCR: aceite ·{% else %}OCR: não fiável ·{% endif %}
-                        {% if campo.tipo_conteudo %}Tipo: {{ campo.tipo_conteudo }} · {% endif %}
-                        {% if campo.tipo_zona %}Zona: {{ campo.tipo_zona }} · {% endif %}
-                        Confiança: {{ campo.confianca|floatformat:2 }}
+                        {% trans "Leitura: estimada" %} ·
+                        {% if campo.ocr_aceite %}{% trans "OCR: aceite" %} ·{% else %}{% trans "OCR: não fiável" %} ·{% endif %}
+                        {% if campo.tipo_conteudo %}{% trans "Tipo:" %} {{ campo.tipo_conteudo }} · {% endif %}
+                        {% if campo.tipo_zona %}{% trans "Zona:" %} {{ campo.tipo_zona }} · {% endif %}
+                        {% trans "Confiança:" %} {{ campo.confianca|floatformat:2 }}
                     </div>
                     <div class="mt-4">
                         <label class="form-label">{% trans "Valor validado pelo utilizador" %}</label>

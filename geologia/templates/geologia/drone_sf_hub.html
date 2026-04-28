@@ -63,24 +63,24 @@
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">Furos disponíveis</div>
+            <div class="text-sm text-slate-500">{% trans "Furos disponíveis" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_furos }}</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">Missões de geologia</div>
+            <div class="text-sm text-slate-500">{% trans "Missões de geologia" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_missoes }}</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">Documentos técnicos</div>
+            <div class="text-sm text-slate-500">{% trans "Documentos técnicos" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ documentos_drone|length }}</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">Drones S_F</div>
+            <div class="text-sm text-slate-500">{% trans "Drones S_F" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ total_drones_sf }}</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">Estado desta área</div>
-            <div class="text-xl font-bold text-cyan-700 mt-2">Em preparação</div>
+            <div class="text-sm text-slate-500">{% trans "Estado desta área" %}</div>
+            <div class="text-xl font-bold text-cyan-700 mt-2">{% trans "Em preparação" %}</div>
         </div>
     </div>
 
@@ -89,49 +89,49 @@
         <form method="post" action="{% url 'geologia:drone_sf_demo_create' %}?empresa={{ empresa_geologia.id }}" class="rounded-2xl border border-violet-200 bg-violet-50 p-5 shadow-sm hover:border-violet-300 hover:bg-violet-100">
             {% csrf_token %}
             <button type="submit" class="w-full text-left">
-                <div class="text-sm font-semibold text-violet-950">Atalho: criar drone demo</div>
-                <p class="mt-2 text-sm text-violet-900">Gera automaticamente um Drone S_F com módulos, sensores, configuração, operação e fila de comandos base.</p>
+                <div class="text-sm font-semibold text-violet-950">{% trans "Atalho: criar drone demo" %}</div>
+                <p class="mt-2 text-sm text-violet-900">{% trans "Gera automaticamente um Drone S_F com módulos, sensores, configuração, operação e fila de comandos base." %}</p>
             </button>
         </form>
         {% endif %}
         <a href="{% url 'geologia:drone_sf_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm hover:border-cyan-300 hover:bg-cyan-100">
-            <div class="text-sm font-semibold text-cyan-950">Atalho: novo Drone S_F</div>
-            <p class="mt-2 text-sm text-cyan-900">Criar a base do hardware próprio, com frame, controlador, autonomia e computação embarcada.</p>
+            <div class="text-sm font-semibold text-cyan-950">{% trans "Atalho: novo Drone S_F" %}</div>
+            <p class="mt-2 text-sm text-cyan-900">{% trans "Criar a base do hardware próprio, com frame, controlador, autonomia e computação embarcada." %}</p>
         </a>
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-            <div class="text-sm font-semibold text-emerald-950">Atalho: módulos</div>
-            <p class="mt-2 text-sm text-emerald-900">Os módulos representam blocos do drone, como propulsão, estrutura, energia, controlo de voo e comunicação.</p>
+            <div class="text-sm font-semibold text-emerald-950">{% trans "Atalho: módulos" %}</div>
+            <p class="mt-2 text-sm text-emerald-900">{% trans "Os módulos representam blocos do drone, como propulsão, estrutura, energia, controlo de voo e comunicação." %}</p>
         </div>
         <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-            <div class="text-sm font-semibold text-amber-950">Atalho: sensores</div>
-            <p class="mt-2 text-sm text-amber-900">Os sensores representam leitura e perceção, como proximidade, som, RGB, térmico e sensores geológicos futuros.</p>
+            <div class="text-sm font-semibold text-amber-950">{% trans "Atalho: sensores" %}</div>
+            <p class="mt-2 text-sm text-amber-900">{% trans "Os sensores representam leitura e perceção, como proximidade, som, RGB, térmico e sensores geológicos futuros." %}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
-            <div class="text-sm font-semibold text-slate-950">Atalho: telemetria S_F</div>
-            <p class="mt-2 text-sm text-slate-700">A operação em tempo real do Drone S_F vai viver numa área própria, separada da bridge e telemetria DJI.</p>
+            <div class="text-sm font-semibold text-slate-950">{% trans "Atalho: telemetria S_F" %}</div>
+            <p class="mt-2 text-sm text-slate-700">{% trans "A operação em tempo real do Drone S_F vai viver numa área própria, separada da bridge e telemetria DJI." %}</p>
         </div>
     </section>
 
     <div class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
         <section class="space-y-6">
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 class="text-xl font-semibold text-slate-900">Objetivos da Interface Drone S_F</h3>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Objetivos da Interface Drone S_F" %}</h3>
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div class="rounded-xl border border-cyan-100 bg-cyan-50 p-4">
-                        <div class="font-semibold text-cyan-950">Hardware próprio</div>
-                        <p class="mt-2 text-cyan-900">Estrutura modular, sensores de proximidade, som, computação embarcada e crescimento controlado.</p>
+                        <div class="font-semibold text-cyan-950">{% trans "Hardware próprio" %}</div>
+                        <p class="mt-2 text-cyan-900">{% trans "Estrutura modular, sensores de proximidade, som, computação embarcada e crescimento controlado." %}</p>
                     </div>
                     <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                        <div class="font-semibold text-emerald-950">Integração com a plataforma</div>
-                        <p class="mt-2 text-emerald-900">Geologia, IA, base de conhecimento, telemetria, missões e processamento pós-voo.</p>
+                        <div class="font-semibold text-emerald-950">{% trans "Integração com a plataforma" %}</div>
+                        <p class="mt-2 text-emerald-900">{% trans "Geologia, IA, base de conhecimento, telemetria, missões e processamento pós-voo." %}</p>
                     </div>
                     <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
-                        <div class="font-semibold text-amber-950">Software embarcado</div>
-                        <p class="mt-2 text-amber-900">Instalação de serviços próprios, automação, leitura de sensores e ligação futura à bridge S_F.</p>
+                        <div class="font-semibold text-amber-950">{% trans "Software embarcado" %}</div>
+                        <p class="mt-2 text-amber-900">{% trans "Instalação de serviços próprios, automação, leitura de sensores e ligação futura à bridge S_F." %}</p>
                     </div>
                     <div class="rounded-xl border border-rose-100 bg-rose-50 p-4">
-                        <div class="font-semibold text-rose-950">Fases seguintes</div>
-                        <p class="mt-2 text-rose-900">Modelos Django do drone S_F, sensores, missões, telemetria e painéis de operação próprios.</p>
+                        <div class="font-semibold text-rose-950">{% trans "Fases seguintes" %}</div>
+                        <p class="mt-2 text-rose-900">{% trans "Modelos Django do drone S_F, sensores, missões, telemetria e painéis de operação próprios." %}</p>
                     </div>
                 </div>
             </article>
@@ -139,8 +139,8 @@
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-xl font-semibold text-slate-900">Drones S_F registados</h3>
-                        <p class="text-sm text-slate-500 mt-1">Base de hardware, sensores e configuração modular do drone próprio.</p>
+                        <h3 class="text-xl font-semibold text-slate-900">{% trans "Drones S_F registados" %}</h3>
+                        <p class="text-sm text-slate-500 mt-1">{% trans "Base de hardware, sensores e configuração modular do drone próprio." %}</p>
                     </div>
                 </div>
                 <div class="mt-5 space-y-3">
@@ -149,26 +149,32 @@
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <div class="font-semibold text-slate-900">{{ drone.nome }}</div>
-                                <div class="text-sm text-slate-600 mt-1">{{ drone.frame_modelo|default:"Sem frame definido" }}</div>
+                                <div class="text-sm text-slate-600 mt-1">
+                                    {% if drone.frame_modelo %}
+                                        {{ drone.frame_modelo }}
+                                    {% else %}
+                                        {% trans "Sem frame definido" %}
+                                    {% endif %}
+                                </div>
                                 <div class="text-xs text-slate-500 mt-2">
-                                    Módulos: {{ drone.modulos.count }} · Sensores: {{ drone.sensores.count }} · Telemetria: {{ drone.protocolo_telemetria|default:"-" }}
+                                    {% blocktrans with modulos=drone.modulos.count sensores=drone.sensores.count telemetria=drone.protocolo_telemetria|default:"-" %}Módulos: {{ modulos }} · Sensores: {{ sensores }} · Telemetria: {{ telemetria }}{% endblocktrans %}
                                 </div>
                             </div>
                             <span class="text-xs uppercase tracking-wide rounded-full bg-cyan-100 text-cyan-800 px-3 py-1">{{ drone.get_status_display }}</span>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-2 text-xs">
-                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Abrir detalhe técnico</span>
-                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Gerir módulos</span>
-                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Gerir sensores</span>
-                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">Operação em tempo real S_F</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">{% trans "Abrir detalhe técnico" %}</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">{% trans "Gerir módulos" %}</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">{% trans "Gerir sensores" %}</span>
+                            <span class="rounded-full bg-white px-3 py-1 border border-slate-200 text-slate-700">{% trans "Operação em tempo real S_F" %}</span>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-3">
-                            <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">Abrir detalhe</a>
-                            <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-800">Abrir operação</a>
+                            <a href="{% url 'geologia:drone_sf_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">{% trans "Abrir detalhe" %}</a>
+                            <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="inline-flex items-center rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-800">{% trans "Abrir operação" %}</a>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-slate-500">Ainda não existem drones S_F registados.</div>
+                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-slate-500">{% trans "Ainda não existem drones S_F registados." %}</div>
                     {% endfor %}
                 </div>
             </article>
@@ -176,8 +182,8 @@
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-xl font-semibold text-slate-900">Furos e contexto geológico</h3>
-                        <p class="text-sm text-slate-500 mt-1">Base operacional onde o Drone S_F deverá atuar no futuro.</p>
+                        <h3 class="text-xl font-semibold text-slate-900">{% trans "Furos e contexto geológico" %}</h3>
+                        <p class="text-sm text-slate-500 mt-1">{% trans "Base operacional onde o Drone S_F deverá atuar no futuro." %}</p>
                     </div>
                 </div>
                 <div class="mt-5 divide-y divide-slate-100">
@@ -186,14 +192,14 @@
                         <div>
                             <div class="font-semibold text-slate-900">{{ furo.nome }}</div>
                             <div class="text-sm text-slate-600 mt-1">{{ furo.projeto.nome }}</div>
-                            <div class="text-xs text-slate-500 mt-1">Profundidade atual: {{ furo.profundidade_atual|default:"0" }} m</div>
+                            <div class="text-xs text-slate-500 mt-1">{% blocktrans with profundidade=furo.profundidade_atual|default:"0" %}Profundidade atual: {{ profundidade }} m{% endblocktrans %}</div>
                         </div>
                         <div class="flex flex-wrap gap-3">
-                            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-slate-300 text-slate-700 font-semibold">Abrir geologia</a>
+                            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-slate-300 text-slate-700 font-semibold">{% trans "Abrir geologia" %}</a>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="py-8 text-center text-slate-500">Ainda não existem furos disponíveis para ligar ao Drone S_F.</div>
+                    <div class="py-8 text-center text-slate-500">{% trans "Ainda não existem furos disponíveis para ligar ao Drone S_F." %}</div>
                     {% endfor %}
                 </div>
             </article>
@@ -201,8 +207,8 @@
 
         <section class="space-y-6">
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 class="text-xl font-semibold text-slate-900">Base documental S_F</h3>
-                <p class="text-sm text-slate-500 mt-1">Documentos técnicos guardados na raiz do projeto para consulta futura pela AI.</p>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Base documental S_F" %}</h3>
+                <p class="text-sm text-slate-500 mt-1">{% trans "Documentos técnicos guardados na raiz do projeto para consulta futura pela AI." %}</p>
                 <div class="mt-4 space-y-3">
                     {% for doc in documentos_drone %}
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -210,46 +216,46 @@
                         <div class="text-xs text-slate-500 mt-1">{{ doc.relativo }}</div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem documentos técnicos guardados para o Drone S_F.</div>
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem documentos técnicos guardados para o Drone S_F." %}</div>
                     {% endfor %}
                 </div>
             </article>
 
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 class="text-xl font-semibold text-slate-900">Roadmap imediato</h3>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Roadmap imediato" %}</h3>
                 <div class="mt-4 space-y-3 text-sm text-slate-700">
-                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 1.</strong> Modelos do Drone S_F, sensores e configuração modular.</div>
-                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 2.</strong> Missões e telemetria próprias, sem mexer na secção DJI.</div>
-                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 3.</strong> Ligação a AI e documentos técnicos da base de conhecimento.</div>
-                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>Fase 4.</strong> Interface operacional do Drone S_F com sensores, estado e comandos próprios.</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>{% trans "Fase 1." %}</strong> {% trans "Modelos do Drone S_F, sensores e configuração modular." %}</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>{% trans "Fase 2." %}</strong> {% trans "Missões e telemetria próprias, sem mexer na secção DJI." %}</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>{% trans "Fase 3." %}</strong> {% trans "Ligação a AI e documentos técnicos da base de conhecimento." %}</div>
+                    <div class="rounded-xl border border-slate-200 px-4 py-3"><strong>{% trans "Fase 4." %}</strong> {% trans "Interface operacional do Drone S_F com sensores, estado e comandos próprios." %}</div>
                 </div>
             </article>
 
             <article class="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
-                <h3 class="text-xl font-semibold text-amber-950">Estado Atual e Continuação</h3>
+                <h3 class="text-xl font-semibold text-amber-950">{% trans "Estado Atual e Continuação" %}</h3>
                 <p class="text-sm text-amber-900 mt-2">
-                    Esta frente fica preparada para continuar mais tarde. Como ainda não temos o drone físico, o foco imediato da plataforma passa para
-                    <strong>Projetos</strong> e <strong>IA</strong>.
+                    {% trans "Esta frente fica preparada para continuar mais tarde. Como ainda não temos o drone físico, o foco imediato da plataforma passa para" %}
+                    <strong>{% trans "Projetos" %}</strong> {% trans "e" %} <strong>{% trans "IA" %}</strong>.
                 </p>
                 <div class="mt-4 space-y-3 text-sm text-amber-950">
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
-                        <strong>Já feito:</strong> interface própria, bridge S_F, operação S_F, mapa, comandos, missões programadas e motor automático base.
+                        <strong>{% trans "Já feito:" %}</strong> {% trans "interface própria, bridge S_F, operação S_F, mapa, comandos, missões programadas e motor automático base." %}
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
-                        <strong>Fica para retoma futura:</strong> telemetria real, sensores reais, vídeo real, testes com hardware e segurança operacional.
+                        <strong>{% trans "Fica para retoma futura:" %}</strong> {% trans "telemetria real, sensores reais, vídeo real, testes com hardware e segurança operacional." %}
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
-                        <strong>Documento de referência:</strong><br>
+                        <strong>{% trans "Documento de referência:" %}</strong><br>
                         <span class="text-xs text-amber-800">knowledge_base/drone/drone_sf_roadmap.md</span>
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-3">
-                        <strong>Ponto de retoma:</strong> `Interface Drone S_F` → `Operação S_F` → `bridge S_F` → telemetria e sensores reais.
+                        <strong>{% trans "Ponto de retoma:" %}</strong> {% trans "`Interface Drone S_F` → `Operação S_F` → `bridge S_F` → telemetria e sensores reais." %}
                     </div>
                 </div>
             </article>
 
             <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 class="text-xl font-semibold text-slate-900">Missões recentes ligadas à geologia</h3>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Missões recentes ligadas à geologia" %}</h3>
                 <div class="mt-4 space-y-3">
                     {% for missao in missoes_recentes %}
                     <div class="rounded-xl border border-slate-200 px-4 py-3">
@@ -258,7 +264,7 @@
                         <div class="text-xs text-slate-500 mt-1">{{ missao.resumo_captura }}</div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem missões recentes para usar como referência do Drone S_F.</div>
+                    <div class="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem missões recentes para usar como referência do Drone S_F." %}</div>
                     {% endfor %}
                 </div>
             </article>

@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.shortcuts import get_object_or_404
 
 from projetos.models import ConfiguracaoPerfuracaoEmpregado, Furo, Medicao
@@ -35,13 +33,6 @@ def _formatar_horas_furo(total_horas_float):
     if not total_horas_float:
         return "-"
     return f"{float(total_horas_float):.2f} h"
-
-
-def _total_horas_float_from_duration(duration_value):
-    if not duration_value:
-        return 0.0
-    return round(duration_value.total_seconds() / 3600, 2)
-
 
 
 def _obter_queryset_base_furos():
@@ -165,12 +156,6 @@ def obter_contexto_detalhe_furo(pk, empresa=None):
         sum(float(registo.horas_trabalhadas or 0) for registo in registos),
         2,
     )
-    total_horas_persistidas = _total_horas_float_from_duration(furo.total_horas)
-
-    if total_horas_registos != total_horas_persistidas:
-        furo.total_horas = timedelta(hours=total_horas_registos)
-        furo.save(update_fields=["total_horas"])
-
     return {
         "furo": furo,
         "medicoes": medicoes,

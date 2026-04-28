@@ -9,7 +9,9 @@
         <div class="flex flex-col gap-2">
             <h1 class="text-2xl font-bold text-gray-800">🔎 {% trans "Procurar" %}</h1>
             <p class="text-sm text-gray-600">
-                Pesquisa transversal em projetos, furos, empregados, máquinas, materiais, registos, medições, despesas e eventos da empresa {{ empresa.nome }}.
+                {% blocktrans with empresa_nome=empresa.nome %}
+                Pesquisa transversal em projetos, furos, empregados, máquinas, materiais, registos, medições, despesas e eventos da empresa {{ empresa_nome }}.
+                {% endblocktrans %}
             </p>
         </div>
 
@@ -18,7 +20,7 @@
                 type="text"
                 name="q"
                 value="{{ termo }}"
-                placeholder="Procurar por empregado, máquina, material, furo, registo, evento..."
+                placeholder="{% trans 'Procurar por empregado, máquina, material, furo, registo, evento...' %}"
                 class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             >
             <button type="submit" class="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 transition">
@@ -29,139 +31,139 @@
         {% if termo %}
             <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                 <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                    <div class="text-sm text-blue-700 font-semibold">Projetos</div>
+                    <div class="text-sm text-blue-700 font-semibold">{% trans "Projetos" %}</div>
                     <div class="text-2xl font-bold text-blue-900">{{ totais.projetos }}</div>
                 </div>
                 <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-                    <div class="text-sm text-indigo-700 font-semibold">Furos</div>
+                    <div class="text-sm text-indigo-700 font-semibold">{% trans "Furos" %}</div>
                     <div class="text-2xl font-bold text-indigo-900">{{ totais.furos }}</div>
                 </div>
                 <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                    <div class="text-sm text-emerald-700 font-semibold">Empregados</div>
+                    <div class="text-sm text-emerald-700 font-semibold">{% trans "Empregados" %}</div>
                     <div class="text-2xl font-bold text-emerald-900">{{ totais.empregados }}</div>
                 </div>
                 <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
-                    <div class="text-sm text-amber-700 font-semibold">Materiais</div>
+                    <div class="text-sm text-amber-700 font-semibold">{% trans "Materiais" %}</div>
                     <div class="text-2xl font-bold text-amber-900">{{ totais.materiais }}</div>
                 </div>
                 <div class="rounded-xl border border-rose-100 bg-rose-50 p-4">
-                    <div class="text-sm text-rose-700 font-semibold">Eventos</div>
+                    <div class="text-sm text-rose-700 font-semibold">{% trans "Eventos" %}</div>
                     <div class="text-2xl font-bold text-rose-900">{{ totais.eventos }}</div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">📁 Projetos</h2>
+                    <h2 class="text-lg font-bold text-gray-800">📁 {% trans "Projetos" %}</h2>
                     {% for projeto in resultados.projetos %}
                         <a href="{{ projeto.get_absolute_url }}" class="block rounded-lg border border-gray-200 p-3 hover:border-blue-300 hover:bg-blue-50 transition">
-                            <div class="font-semibold text-gray-800">{{ projeto.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ projeto.nome }}</div>
                             <div class="text-sm text-gray-600">{{ projeto.cliente|default:"Sem cliente" }} · {{ projeto.cidade|default:"-" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em projetos.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em projetos." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">🕳 Furos</h2>
+                    <h2 class="text-lg font-bold text-gray-800">🕳 {% trans "Furos" %}</h2>
                     {% for furo in resultados.furos %}
                         <a href="{{ furo.get_absolute_url }}" class="block rounded-lg border border-gray-200 p-3 hover:border-indigo-300 hover:bg-indigo-50 transition">
-                            <div class="font-semibold text-gray-800">{{ furo.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ furo.nome }}</div>
                             <div class="text-sm text-gray-600">{{ furo.projeto.nome }} · {{ furo.local_sondagem|default:furo.localizacao|default:"Sem localização" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em furos.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em furos." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">👷 Empregados</h2>
+                    <h2 class="text-lg font-bold text-gray-800">👷 {% trans "Empregados" %}</h2>
                     {% for empregado in resultados.empregados %}
                         <a href="{{ empregado.get_absolute_url }}" class="block rounded-lg border border-gray-200 p-3 hover:border-emerald-300 hover:bg-emerald-50 transition">
-                            <div class="font-semibold text-gray-800">{{ empregado.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ empregado.nome }}</div>
                             <div class="text-sm text-gray-600">{{ empregado.get_funcao_display|default:"Sem função" }} · {{ empregado.email|default:"Sem email" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em empregados.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em empregados." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">⚙️ Máquinas</h2>
+                    <h2 class="text-lg font-bold text-gray-800">⚙️ {% trans "Máquinas" %}</h2>
                     {% for maquina in resultados.maquinas %}
                         <a href="{% url 'projetos:maquina_detail' maquina.pk %}" class="block rounded-lg border border-gray-200 p-3 hover:border-slate-300 hover:bg-slate-50 transition">
-                            <div class="font-semibold text-gray-800">{{ maquina.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ maquina.nome }}</div>
                             <div class="text-sm text-gray-600">{{ maquina.marca|default:"-" }} {{ maquina.modelo|default:"" }} · {{ maquina.matricula|default:"Sem matrícula" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em máquinas.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em máquinas." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">📦 Materiais</h2>
+                    <h2 class="text-lg font-bold text-gray-800">📦 {% trans "Materiais" %}</h2>
                     {% for material in resultados.materiais %}
                         <a href="{% url 'projetos:material_detail' material.pk %}" class="block rounded-lg border border-gray-200 p-3 hover:border-amber-300 hover:bg-amber-50 transition">
-                            <div class="font-semibold text-gray-800">{{ material.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ material.nome }}</div>
                             <div class="text-sm text-gray-600">{{ material.tipo|default:"Sem tipo" }} · {{ material.furo.nome|default:material.projeto.nome|default:"Sem contexto" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em materiais.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em materiais." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">📋 Registos</h2>
+                    <h2 class="text-lg font-bold text-gray-800">📋 {% trans "Registos" %}</h2>
                     {% for registo in resultados.registos %}
                         <div class="block rounded-lg border border-gray-200 p-3 bg-gray-50">
-                            <div class="font-semibold text-gray-800">{{ registo.empregado.nome }} · {{ registo.data|date:"d/m/Y" }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ registo.empregado.nome }} · {{ registo.data|date:"d/m/Y" }}</div>
                             <div class="text-sm text-gray-600">{{ registo.furo.nome|default:"Sem furo" }} · {{ registo.metros_furados|floatformat:2 }} m</div>
                         </div>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em registos.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em registos." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">📏 Medições</h2>
+                    <h2 class="text-lg font-bold text-gray-800">📏 {% trans "Medições" %}</h2>
                     {% for medicao in resultados.medicoes %}
                         <a href="{% url 'projetos:medicao_list' %}" class="block rounded-lg border border-gray-200 p-3 hover:border-violet-300 hover:bg-violet-50 transition">
-                            <div class="font-semibold text-gray-800">{{ medicao.nome_furo_snapshot|default:medicao.furo.nome }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ medicao.nome_furo_snapshot|default:medicao.furo.nome }}</div>
                             <div class="text-sm text-gray-600">{{ medicao.profundidade_medida|default:"-" }} m · {{ medicao.tipo_rocha|default:"Sem rocha" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em medições.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em medições." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3">
-                    <h2 class="text-lg font-bold text-gray-800">💸 Despesas</h2>
+                    <h2 class="text-lg font-bold text-gray-800">💸 {% trans "Despesas" %}</h2>
                     {% for despesa in resultados.despesas %}
                         <div class="block rounded-lg border border-gray-200 p-3 bg-gray-50">
-                            <div class="font-semibold text-gray-800">{{ despesa.descricao }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ despesa.descricao }}</div>
                             <div class="text-sm text-gray-600">{{ despesa.tipo }} · {{ despesa.valor|floatformat:2 }} €</div>
                         </div>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em despesas.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em despesas." %}</p>
                     {% endfor %}
                 </div>
 
                 <div class="rounded-xl border border-gray-200 p-5 space-y-3 xl:col-span-2">
-                    <h2 class="text-lg font-bold text-gray-800">🧾 Eventos e alterações</h2>
+                    <h2 class="text-lg font-bold text-gray-800">🧾 {% trans "Eventos e alterações" %}</h2>
                     {% for evento in resultados.eventos %}
                         <a href="{% url 'projetos:analytics_eventos' %}?entidade_tipo={{ evento.entidade_tipo|urlencode }}" class="block rounded-lg border border-gray-200 p-3 hover:border-gray-400 hover:bg-gray-50 transition">
-                            <div class="font-semibold text-gray-800">{{ evento.entidade_label|default:evento.entidade_tipo }}</div>
+                            <div class="font-semibold text-gray-800 sf-break-word">{{ evento.entidade_label|default:evento.entidade_tipo }}</div>
                             <div class="text-sm text-gray-600">{{ evento.get_tipo_evento_display }} · {{ evento.criado_em|date:"d/m/Y H:i" }} · {{ evento.actor_username|default:"sistema" }}</div>
                         </a>
                     {% empty %}
-                        <p class="text-sm text-gray-500">Sem resultados em eventos.</p>
+                        <p class="text-sm text-gray-500">{% trans "Sem resultados em eventos." %}</p>
                     {% endfor %}
                 </div>
             </div>
         {% else %}
             <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-600">
-                Introduz um termo para procurar informação operacional da empresa em toda a área de projetos.
+                {% trans "Introduz um termo para procurar informação operacional da empresa em toda a área de projetos." %}
             </div>
         {% endif %}
     </div>

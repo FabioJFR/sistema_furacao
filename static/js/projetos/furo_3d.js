@@ -35,6 +35,16 @@
     const reportPdfUrl = config.dataset.reportPdfUrl || "";
     const importUrl = config.dataset.importUrl || "";
     const exportBaseUrl = config.dataset.exportBaseUrl || "";
+    const msgNoPointsVisible = config.dataset.msgNoPointsVisible || "Sem pontos visíveis no intervalo atual.";
+    const msgDoglegCritical = config.dataset.msgDoglegCritical || "⚠️ Dogleg crítico neste ponto.";
+    const msgDoglegWarning = config.dataset.msgDoglegWarning || "⚠️ Dogleg em atenção neste ponto.";
+    const msgDoglegOk = config.dataset.msgDoglegOk || "✅ Ponto dentro dos limites esperados.";
+    const msgRotationStart = config.dataset.msgRotationStart || "▶️ Rotação";
+    const msgRotationStop = config.dataset.msgRotationStop || "⏸️ Parar rotação";
+    const msgTopItemPrefix = config.dataset.msgTopItemPrefix || "MD";
+    const msgTopItemDogleg = config.dataset.msgTopItemDogleg || "Dogleg";
+    const msgTopItemInc = config.dataset.msgTopItemInc || "Inc";
+    const msgTopItemAzi = config.dataset.msgTopItemAzi || "Azi";
 
     let rotacionando = false;
     let angulo = 0;
@@ -371,7 +381,7 @@
     function updateTopDoglegs(filteredCustomdata) {
         if (!topDoglegsList) return;
         if (!filteredCustomdata.length) {
-            topDoglegsList.innerHTML = '<div class="text-sm text-slate-300">Sem pontos visíveis no intervalo atual.</div>';
+            topDoglegsList.innerHTML = `<div class="text-sm text-slate-300">${msgNoPointsVisible}</div>`;
             return;
         }
         const topItems = filteredCustomdata
@@ -387,9 +397,9 @@
 
         topDoglegsList.innerHTML = topItems.map((item, index) => `
             <div class="furo-3d-topdogleg-item">
-                <div class="furo-3d-topdogleg-title">#${index + 1} · MD ${item.md.toFixed(2)} m</div>
-                <div class="furo-3d-topdogleg-sub">Dogleg ${item.dogleg.toFixed(2)} °/30m · ${item.estado}</div>
-                <div class="furo-3d-topdogleg-meta">Inc ${item.inc.toFixed(2)}° · Azi ${item.azi.toFixed(2)}°</div>
+                <div class="furo-3d-topdogleg-title">#${index + 1} · ${msgTopItemPrefix} ${item.md.toFixed(2)} m</div>
+                <div class="furo-3d-topdogleg-sub">${msgTopItemDogleg} ${item.dogleg.toFixed(2)} °/30m · ${item.estado}</div>
+                <div class="furo-3d-topdogleg-meta">${msgTopItemInc} ${item.inc.toFixed(2)}° · ${msgTopItemAzi} ${item.azi.toFixed(2)}°</div>
             </div>
         `).join("");
     }
@@ -481,15 +491,15 @@
             if (estado === "CRÍTICO") {
                 aviso.style.background = "#ef4444";
                 aviso.style.color = "white";
-                aviso.innerText = "⚠️ Dogleg crítico neste ponto.";
+                aviso.innerText = msgDoglegCritical;
             } else if (estado === "ATENÇÃO") {
                 aviso.style.background = "#facc15";
                 aviso.style.color = "#1e293b";
-                aviso.innerText = "⚠️ Dogleg em atenção neste ponto.";
+                aviso.innerText = msgDoglegWarning;
             } else {
                 aviso.style.background = "#22c55e";
                 aviso.style.color = "white";
-                aviso.innerText = "✅ Ponto dentro dos limites esperados.";
+                aviso.innerText = msgDoglegOk;
             }
         });
 
@@ -574,7 +584,7 @@
         botaoRotacao.addEventListener("click", () => {
             if (!refreshPlotReference()) return;
             rotacionando = !rotacionando;
-            botaoRotacao.textContent = rotacionando ? "⏸️ Parar rotação" : "▶️ Rotação";
+            botaoRotacao.textContent = rotacionando ? msgRotationStop : msgRotationStart;
             if (rotacionando) {
                 rotacaoInterval = window.setInterval(() => {
                     angulo += 1;

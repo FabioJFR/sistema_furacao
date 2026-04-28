@@ -55,11 +55,11 @@
                 <div class="rounded-xl border border-gray-200 bg-slate-950 p-4" id="sec-live">
                     <div class="flex items-center justify-between gap-4 mb-3">
                         <div>
-                            <h2 class="text-xl font-semibold text-white">Live view / feed S_F</h2>
-                            <p class="text-sm text-slate-400 mt-1">Janela principal para ver o feed ou snapshot que a bridge S_F estiver a publicar.</p>
+                            <h2 class="text-xl font-semibold text-white">{% trans "Live view / feed S_F" %}</h2>
+                            <p class="text-sm text-slate-400 mt-1">{% trans "Janela principal para ver o feed ou snapshot que a bridge S_F estiver a publicar." %}</p>
                         </div>
                         <div id="sf-bridge-mode-badge" class="inline-flex items-center rounded-full px-3 py-1 font-semibold {% if operacao.metadados.bridge_payload_mais_recente.source_mode == 'webhook' %}bg-emerald-100 text-emerald-800{% elif operacao.metadados.bridge_payload_mais_recente.source_mode == 'mock' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700{% endif %}">
-                            Modo: {{ operacao.metadados.bridge_payload_mais_recente.source_mode|default:"indefinido" }}
+                            {% blocktrans with modo=operacao.metadados.bridge_payload_mais_recente.source_mode|default:"indefinido" %}Modo: {{ modo }}{% endblocktrans %}
                         </div>
                     </div>
                     <div class="rounded-xl border border-slate-800 bg-slate-900 p-3">
@@ -67,9 +67,9 @@
                             {% if operacao.live_view_url %}
                                 <iframe id="sf-live-frame" src="{{ operacao.live_view_url }}" class="w-full h-[320px] xl:h-[360px] border-0" loading="lazy"></iframe>
                             {% elif operacao.frame_snapshot_url %}
-                                <img id="sf-snapshot-image" src="{{ operacao.frame_snapshot_url }}" alt="Snapshot Drone S_F" class="w-full h-[320px] xl:h-[360px] object-cover">
+                                <img id="sf-snapshot-image" src="{{ operacao.frame_snapshot_url }}" alt="{% trans 'Snapshot Drone S_F' %}" class="w-full h-[320px] xl:h-[360px] object-cover">
                             {% else %}
-                                <div id="sf-live-empty" class="text-sm text-slate-400 px-6 text-center">Ainda não existe feed ativo da bridge S_F. Assim que a bridge publicar `live_view_url` ou `frame_snapshot_url`, esta área passa a mostrar o estado visual do drone.</div>
+                                <div id="sf-live-empty" class="text-sm text-slate-400 px-6 text-center">{% trans "Ainda não existe feed ativo da bridge S_F. Assim que a bridge publicar `live_view_url` ou `frame_snapshot_url`, esta área passa a mostrar o estado visual do drone." %}</div>
                             {% endif %}
                         </div>
                     </div>
@@ -79,28 +79,28 @@
                     <div class="rounded-xl border border-gray-200 bg-white p-4">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <h3 class="font-semibold text-gray-900">Estado operacional</h3>
-                                <p class="text-sm text-gray-500 mt-1">Resumo rápido da telemetria, da bridge e dos últimos comandos.</p>
+                                <h3 class="font-semibold text-gray-900">{% trans "Estado operacional" %}</h3>
+                                <p class="text-sm text-gray-500 mt-1">{% trans "Resumo rápido da telemetria, da bridge e dos últimos comandos." %}</p>
                             </div>
                             <span class="text-xs uppercase tracking-wide rounded-full bg-slate-100 text-slate-700 px-3 py-1">{{ operacao.get_estado_display }}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Bateria</div><div id="sf-bateria" class="font-semibold text-slate-900">{{ operacao.bateria_percent|default:"-" }}%</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Sinal</div><div id="sf-sinal" class="font-semibold text-slate-900">{{ operacao.sinal_percent|default:"-" }}%</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Altitude</div><div id="sf-altitude" class="font-semibold text-slate-900">{{ operacao.altitude_atual_m|default:"-" }} m</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Velocidade</div><div id="sf-velocidade" class="font-semibold text-slate-900">{{ operacao.velocidade_atual_ms|default:"-" }} m/s</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Latitude</div><div id="sf-latitude" class="font-semibold text-slate-900">{{ operacao.latitude_atual|default:"-" }}</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Longitude</div><div id="sf-longitude" class="font-semibold text-slate-900">{{ operacao.longitude_atual|default:"-" }}</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Heading</div><div id="sf-heading" class="font-semibold text-slate-900">{{ operacao.heading_graus|default:"-" }}°</div></div>
-                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Bridge</div><div class="font-semibold text-slate-900">{% if operacao.bridge_ativa %}Ativa{% else %}Desligada{% endif %}</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Bateria" %}</div><div id="sf-bateria" class="font-semibold text-slate-900">{{ operacao.bateria_percent|default:"-" }}%</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Sinal" %}</div><div id="sf-sinal" class="font-semibold text-slate-900">{{ operacao.sinal_percent|default:"-" }}%</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Altitude" %}</div><div id="sf-altitude" class="font-semibold text-slate-900">{{ operacao.altitude_atual_m|default:"-" }} m</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Velocidade" %}</div><div id="sf-velocidade" class="font-semibold text-slate-900">{{ operacao.velocidade_atual_ms|default:"-" }} m/s</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Latitude" %}</div><div id="sf-latitude" class="font-semibold text-slate-900">{{ operacao.latitude_atual|default:"-" }}</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Longitude" %}</div><div id="sf-longitude" class="font-semibold text-slate-900">{{ operacao.longitude_atual|default:"-" }}</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Heading" %}</div><div id="sf-heading" class="font-semibold text-slate-900">{{ operacao.heading_graus|default:"-" }}°</div></div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Bridge" %}</div><div class="font-semibold text-slate-900">{% if operacao.bridge_ativa %}{% trans "Ativa" %}{% else %}{% trans "Desligada" %}{% endif %}</div></div>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-slate-200 bg-slate-950 p-4">
                         <div class="flex items-center justify-between gap-4 mb-3">
                             <div>
-                                <h3 class="font-semibold text-white">Histórico da bridge S_F</h3>
-                                <p class="text-sm text-slate-400 mt-1">Eventos recentes do live view, snapshot, heartbeat e confirmação de comandos.</p>
+                                <h3 class="font-semibold text-white">{% trans "Histórico da bridge S_F" %}</h3>
+                                <p class="text-sm text-slate-400 mt-1">{% trans "Eventos recentes do live view, snapshot, heartbeat e confirmação de comandos." %}</p>
                             </div>
                         </div>
                         <div id="sf-bridge-history-log" class="space-y-2 text-sm max-h-[260px] overflow-y-auto pr-1">
@@ -110,7 +110,7 @@
                                     <div class="text-xs opacity-80 mt-1">{{ log.timestamp|default:"-" }}</div>
                                 </div>
                             {% empty %}
-                                <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">Ainda não existem eventos recentes da bridge S_F.</div>
+                                <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">{% trans "Ainda não existem eventos recentes da bridge S_F." %}</div>
                             {% endfor %}
                         </div>
                     </div>
@@ -121,8 +121,8 @@
                 <div class="rounded-xl border border-gray-200 bg-white p-4 xl:col-span-2" id="sec-mapa">
                     <div class="flex items-center justify-between gap-4 mb-3">
                         <div>
-                            <h3 class="font-semibold text-gray-900">Mapa operacional S_F</h3>
-                            <p class="text-sm text-gray-500">Visualização da posição atual do drone e do alvo configurado na operação S_F.</p>
+                            <h3 class="font-semibold text-gray-900">{% trans "Mapa operacional S_F" %}</h3>
+                            <p class="text-sm text-gray-500">{% trans "Visualização da posição atual do drone e do alvo configurado na operação S_F." %}</p>
                         </div>
                     </div>
                     <div
@@ -135,27 +135,27 @@
                     ></div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-sm">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                            <div class="text-slate-500">Posição atual</div>
+                            <div class="text-slate-500">{% trans "Posição atual" %}</div>
                             <div id="sf-mapa-posicao" class="font-medium text-slate-900">{{ operacao.latitude_atual|default:"-" }}, {{ operacao.longitude_atual|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                            <div class="text-slate-500">Alvo atual</div>
+                            <div class="text-slate-500">{% trans "Alvo atual" %}</div>
                             <div id="sf-mapa-alvo" class="font-medium text-slate-900">{{ operacao.alvo_latitude|default:"-" }}, {{ operacao.alvo_longitude|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                            <div class="text-slate-500">Altitude alvo</div>
+                            <div class="text-slate-500">{% trans "Altitude alvo" %}</div>
                             <div id="sf-mapa-altitude-alvo" class="font-medium text-slate-900">{{ operacao.alvo_altitude_m|default:"35" }} m</div>
                         </div>
                     </div>
                     <div class="mt-4 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-4">
                         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                             <div>
-                                <div class="text-sm font-semibold text-cyan-950">Ponto clicado no mapa</div>
-                                <div id="sf-mapa-ponto-clicado" class="mt-1 text-sm text-cyan-900">Ainda não escolheste um ponto.</div>
-                                <div class="mt-1 text-xs text-cyan-800">Clica no mapa para preencher o alvo da operação e preparar rapidamente um comando `goto`.</div>
+                                <div class="text-sm font-semibold text-cyan-950">{% trans "Ponto clicado no mapa" %}</div>
+                                <div id="sf-mapa-ponto-clicado" class="mt-1 text-sm text-cyan-900">{% trans "Ainda não escolheste um ponto." %}</div>
+                                <div class="mt-1 text-xs text-cyan-800">{% trans "Clica no mapa para preencher o alvo da operação e preparar rapidamente um comando `goto`." %}</div>
                             </div>
                             <button type="button" id="sf-map-goto-btn" class="px-4 py-2 rounded bg-cyan-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                Criar comando goto com este ponto
+                                {% trans "Criar comando goto com este ponto" %}
                             </button>
                         </div>
                     </div>
@@ -164,55 +164,55 @@
                 <div class="rounded-xl border border-gray-200 bg-white p-4">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <h3 class="font-semibold text-gray-900">Bridge S_F</h3>
-                            <p class="text-sm text-gray-500 mt-1">Integração própria para heartbeat, vídeo, snapshot e receção de comandos do drone construído por nós.</p>
+                            <h3 class="font-semibold text-gray-900">{% trans "Bridge S_F" %}</h3>
+                            <p class="text-sm text-gray-500 mt-1">{% trans "Integração própria para heartbeat, vídeo, snapshot e receção de comandos do drone construído por nós." %}</p>
                         </div>
                         <span class="text-xs uppercase tracking-wide rounded-full px-3 py-1 {% if operacao.bridge_ativa %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-700{% endif %}">
-                            {% if operacao.bridge_ativa %}Bridge ativa{% else %}Bridge desligada{% endif %}
+                            {% if operacao.bridge_ativa %}{% trans "Bridge ativa" %}{% else %}{% trans "Bridge desligada" %}{% endif %}
                         </span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Nome da bridge</div>
+                            <div class="text-slate-500">{% trans "Nome da bridge" %}</div>
                             <div class="font-semibold text-slate-900 mt-1">{{ operacao.bridge_nome|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Modo de origem</div>
+                            <div class="text-slate-500">{% trans "Modo de origem" %}</div>
                             <div class="font-semibold text-slate-900 mt-1">{{ operacao.metadados.bridge_payload_mais_recente.source_mode|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 md:col-span-2">
-                            <div class="text-slate-500">Endpoint base</div>
+                            <div class="text-slate-500">{% trans "Endpoint base" %}</div>
                             <div class="font-semibold text-slate-900 mt-1 break-all">{{ operacao.bridge_base_url|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Último estado da bridge</div>
+                            <div class="text-slate-500">{% trans "Último estado da bridge" %}</div>
                             <div class="font-semibold text-slate-900 mt-1">{{ operacao.bridge_ultimo_estado|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Último erro</div>
+                            <div class="text-slate-500">{% trans "Último erro" %}</div>
                             <div id="sf-ultimo-erro" class="font-semibold mt-1 {% if bridge_status_summary.ultimo_erro_bridge %}text-rose-700{% else %}text-emerald-700{% endif %}">{{ bridge_status_summary.ultimo_erro_bridge|default:"-" }}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="rounded-xl border border-gray-200 bg-white p-4">
-                    <h3 class="font-semibold text-gray-900">Estado da bridge</h3>
-                    <p class="text-sm text-gray-500 mt-1">Últimos eventos de comando e sincronização da bridge S_F.</p>
+                    <h3 class="font-semibold text-gray-900">{% trans "Estado da bridge" %}</h3>
+                    <p class="text-sm text-gray-500 mt-1">{% trans "Últimos eventos de comando e sincronização da bridge S_F." %}</p>
                     <div class="mt-4 space-y-3 text-sm">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Último comando recebido</div>
+                            <div class="text-slate-500">{% trans "Último comando recebido" %}</div>
                             <div id="sf-ultimo-comando-recebido" class="font-semibold text-slate-900 mt-1">{% if bridge_status_summary.ultimo_comando_recebido %}{{ bridge_status_summary.ultimo_comando_recebido.tipo }} · {{ bridge_status_summary.ultimo_comando_recebido.status }}{% else %}-{% endif %}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Último comando executado</div>
+                            <div class="text-slate-500">{% trans "Último comando executado" %}</div>
                             <div id="sf-ultimo-comando-executado" class="font-semibold mt-1 {% if bridge_status_summary.ultimo_comando_executado and bridge_status_summary.ultimo_comando_executado.status|lower == 'executado' %}text-emerald-700{% elif bridge_status_summary.ultimo_comando_executado %}text-amber-700{% else %}text-slate-900{% endif %}">{% if bridge_status_summary.ultimo_comando_executado %}{{ bridge_status_summary.ultimo_comando_executado.tipo }} · {{ bridge_status_summary.ultimo_comando_executado.status }}{% else %}-{% endif %}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Hora da última confirmação</div>
+                            <div class="text-slate-500">{% trans "Hora da última confirmação" %}</div>
                             <div id="sf-hora-ultima-confirmacao" class="font-semibold text-slate-900 mt-1">{{ bridge_status_summary.hora_ultima_confirmacao|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Último heartbeat recebido</div>
+                            <div class="text-slate-500">{% trans "Último heartbeat recebido" %}</div>
                             <div id="sf-ultimo-heartbeat-recebido" class="font-semibold mt-1 {% if bridge_status_summary.ultimo_heartbeat_recebido %}text-emerald-700{% else %}text-slate-900{% endif %}">{{ bridge_status_summary.ultimo_heartbeat_recebido|default:"-" }}</div>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="sec-operacao">
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Painel de controlo S_F</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Painel de controlo S_F" %}</h3>
                     <form method="post" class="space-y-4">
                         {% csrf_token %}
                         <input type="hidden" name="sf_action" value="guardar_operacao">
@@ -238,21 +238,21 @@
                             {% endfor %}
                         </div>
                         <div class="pt-3">
-                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">Guardar operação S_F</button>
+                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Guardar operação S_F" %}</button>
                         </div>
                     </form>
                 </article>
 
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Endpoints da bridge S_F</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Endpoints da bridge S_F" %}</h3>
                     <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-700">
-                        <div><strong>Ingestão:</strong></div>
+                        <div><strong>{% trans "Ingestão:" %}</strong></div>
                         <div class="font-mono break-all mt-1">{{ request.scheme }}://{{ request.get_host }}{% url 'geologia:api_drone_sf_bridge_ingest_estado' %}</div>
-                        <div class="mt-3"><strong>Logs:</strong></div>
+                        <div class="mt-3"><strong>{% trans "Logs:" %}</strong></div>
                         <div class="font-mono break-all mt-1">{{ request.scheme }}://{{ request.get_host }}{% url 'geologia:api_drone_sf_bridge_log_event' %}</div>
-                        <div class="mt-3"><strong>Comandos pendentes:</strong></div>
+                        <div class="mt-3"><strong>{% trans "Comandos pendentes:" %}</strong></div>
                         <div class="font-mono break-all mt-1">{{ request.scheme }}://{{ request.get_host }}{% url 'geologia:api_drone_sf_bridge_comandos_pendentes' %}</div>
-                        <div class="mt-3 text-slate-600">A bridge S_F deve usar `X-Bridge-Key` com a chave configurada nesta operação.</div>
+                        <div class="mt-3 text-slate-600">{% trans "A bridge S_F deve usar `X-Bridge-Key` com a chave configurada nesta operação." %}</div>
                     </div>
                 </article>
             </div>
@@ -261,17 +261,17 @@
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900">{% if missao_edicao %}Editar missão programada S_F{% else %}Nova missão programada S_F{% endif %}</h3>
-                            <p class="text-sm text-gray-500 mt-1">{% if missao_edicao %}Ajusta a missão selecionada e guarda as alterações.{% else %}Define hora, localização e checklist operacional para o Drone S_F.{% endif %}</p>
+                            <h3 class="text-lg font-semibold text-gray-900">{% if missao_edicao %}{% trans "Editar missão programada S_F" %}{% else %}{% trans "Nova missão programada S_F" %}{% endif %}</h3>
+                            <p class="text-sm text-gray-500 mt-1">{% if missao_edicao %}{% trans "Ajusta a missão selecionada e guarda as alterações." %}{% else %}{% trans "Define hora, localização e checklist operacional para o Drone S_F." %}{% endif %}</p>
                         </div>
                         <div class="flex flex-wrap gap-2 justify-end">
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="sf_action" value="processar_missoes_programadas">
-                                <button type="submit" class="px-3 py-2 rounded bg-cyan-700 text-white font-semibold whitespace-nowrap">Processar missões agora</button>
+                                <button type="submit" class="px-3 py-2 rounded bg-cyan-700 text-white font-semibold whitespace-nowrap">{% trans "Processar missões agora" %}</button>
                             </form>
                             {% if missao_edicao %}
-                            <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="px-3 py-2 rounded bg-slate-100 text-slate-700 font-semibold whitespace-nowrap">Cancelar edição</a>
+                            <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="px-3 py-2 rounded bg-slate-100 text-slate-700 font-semibold whitespace-nowrap">{% trans "Cancelar edição" %}</a>
                             {% endif %}
                         </div>
                     </div>
@@ -290,7 +290,7 @@
                             </div>
                         {% endfor %}
                         <div class="pt-2">
-                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% if missao_edicao %}Atualizar missão programada{% else %}Guardar missão programada{% endif %}</button>
+                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% if missao_edicao %}{% trans "Atualizar missão programada" %}{% else %}{% trans "Guardar missão programada" %}{% endif %}</button>
                         </div>
                     </form>
                 </article>
@@ -299,52 +299,52 @@
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Estado do motor de missões</h3>
-                            <p class="text-sm text-gray-500 mt-1">Resumo da última corrida automática ou manual do motor das missões S_F.</p>
+                            <h3 class="text-lg font-semibold text-gray-900">{% trans "Estado do motor de missões" %}</h3>
+                            <p class="text-sm text-gray-500 mt-1">{% trans "Resumo da última corrida automática ou manual do motor das missões S_F." %}</p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 min-w-[320px]">
                             <div>
-                                <label for="sf-motor-origin-filter" class="block text-xs font-medium text-slate-500 mb-1">Origem</label>
+                                <label for="sf-motor-origin-filter" class="block text-xs font-medium text-slate-500 mb-1">{% trans "Origem" %}</label>
                                 <select id="sf-motor-origin-filter" class="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm">
-                                    <option value="all">Tudo</option>
-                                    <option value="Automática">Só automático</option>
-                                    <option value="Manual">Só manual</option>
+                                    <option value="all">{% trans "Tudo" %}</option>
+                                    <option value="Automática">{% trans "Só automático" %}</option>
+                                    <option value="Manual">{% trans "Só manual" %}</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="sf-motor-time-filter" class="block text-xs font-medium text-slate-500 mb-1">Janela temporal</label>
+                                <label for="sf-motor-time-filter" class="block text-xs font-medium text-slate-500 mb-1">{% trans "Janela temporal" %}</label>
                                 <select id="sf-motor-time-filter" class="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm">
-                                    <option value="all">Tudo</option>
-                                    <option value="today">Hoje</option>
-                                    <option value="1h">Última hora</option>
-                                    <option value="24h">Últimas 24h</option>
+                                    <option value="all">{% trans "Tudo" %}</option>
+                                    <option value="today">{% trans "Hoje" %}</option>
+                                    <option value="1h">{% trans "Última hora" %}</option>
+                                    <option value="24h">{% trans "Últimas 24h" %}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 text-sm">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Última execução</div>
+                            <div class="text-slate-500">{% trans "Última execução" %}</div>
                             <div id="sf-motor-ultima-execucao" class="font-semibold text-slate-900 mt-1">{{ motor_missoes_summary.ultima_execucao_em|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Executadas</div>
+                            <div class="text-slate-500">{% trans "Executadas" %}</div>
                             <div id="sf-motor-executadas" class="font-semibold text-emerald-700 mt-1">{{ motor_missoes_summary.executadas|default:"0" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Ignoradas</div>
+                            <div class="text-slate-500">{% trans "Ignoradas" %}</div>
                             <div id="sf-motor-ignoradas" class="font-semibold text-amber-700 mt-1">{{ motor_missoes_summary.ignoradas|default:"0" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                            <div class="text-slate-500">Sem operação</div>
+                            <div class="text-slate-500">{% trans "Sem operação" %}</div>
                             <div id="sf-motor-sem-operacao" class="font-semibold text-slate-900 mt-1">{{ motor_missoes_summary.sem_operacao|default:"0" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 col-span-2">
-                            <div class="text-slate-500">Último erro</div>
+                            <div class="text-slate-500">{% trans "Último erro" %}</div>
                             <div id="sf-motor-ultimo-erro" class="font-semibold mt-1 {% if motor_missoes_summary.ultimo_erro %}text-rose-700{% else %}text-emerald-700{% endif %}">{{ motor_missoes_summary.ultimo_erro|default:"-" }}</div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 col-span-2">
-                            <div class="text-slate-500 mb-2">Últimas missões disparadas</div>
+                            <div class="text-slate-500 mb-2">{% trans "Últimas missões disparadas" %}</div>
                             <div id="sf-motor-ultimas-missoes" class="space-y-2">
                                 {% for item in motor_missoes_summary.ultimas_missoes_disparadas %}
                                 <div class="rounded bg-white border border-slate-200 px-3 py-2">
@@ -357,12 +357,12 @@
                                     <div class="text-xs text-slate-500 mt-1">{{ item.timestamp|default:"-" }}</div>
                                 </div>
                                 {% empty %}
-                                <div class="text-sm text-slate-500">Ainda não há missões disparadas pelo motor.</div>
+                                <div class="text-sm text-slate-500">{% trans "Ainda não há missões disparadas pelo motor." %}</div>
                                 {% endfor %}
                             </div>
                         </div>
                         <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3 col-span-2">
-                            <div class="text-slate-500 mb-2">Últimos comandos gerados pelo motor</div>
+                            <div class="text-slate-500 mb-2">{% trans "Últimos comandos gerados pelo motor" %}</div>
                             <div id="sf-motor-ultimos-comandos" class="space-y-2">
                                 {% for item in motor_missoes_summary.ultimos_comandos_gerados %}
                                 <div class="rounded bg-white border border-slate-200 px-3 py-2">
@@ -375,7 +375,7 @@
                                     <div class="text-xs text-slate-500 mt-1">{{ item.timestamp|default:"-" }}</div>
                                 </div>
                                 {% empty %}
-                                <div class="text-sm text-slate-500">Ainda não há comandos gerados pelo motor.</div>
+                                <div class="text-sm text-slate-500">{% trans "Ainda não há comandos gerados pelo motor." %}</div>
                                 {% endfor %}
                             </div>
                         </div>
@@ -385,8 +385,8 @@
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Missões guardadas</h3>
-                            <p class="text-sm text-gray-500 mt-1">Missões ativas entram no motor automático; podes editar, executar já ou desligar a repetição.</p>
+                            <h3 class="text-lg font-semibold text-gray-900">{% trans "Missões guardadas" %}</h3>
+                            <p class="text-sm text-gray-500 mt-1">{% trans "Missões ativas entram no motor automático; podes editar, executar já ou desligar a repetição." %}</p>
                         </div>
                     </div>
                     <div class="space-y-3 max-h-[620px] overflow-y-auto pr-1">
@@ -400,7 +400,7 @@
                                 </div>
                                 <div class="flex flex-col items-end gap-2">
                                     <span class="text-xs uppercase tracking-wide rounded-full px-2 py-1 {% if missao.ativa %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-700{% endif %}">
-                                        {% if missao.ativa %}Ativa{% else %}Inativa{% endif %}
+                                        {% if missao.ativa %}{% trans "Ativa" %}{% else %}{% trans "Inativa" %}{% endif %}
                                     </span>
                                     <span class="text-xs uppercase tracking-wide rounded-full px-2 py-1 {% if estado_agenda.tone == 'emerald' %}bg-emerald-50 text-emerald-700{% elif estado_agenda.tone == 'amber' %}bg-amber-50 text-amber-700{% else %}bg-slate-100 text-slate-700{% endif %}">
                                         {{ estado_agenda.label }}
@@ -408,18 +408,18 @@
                                 </div>
                             </div>
                             <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-600">
-                                <div>Alvo: {{ missao.latitude_alvo }}, {{ missao.longitude_alvo }}</div>
-                                <div>Altitude: {{ missao.altitude_alvo_m }} m</div>
-                                <div>Vídeo: {% if missao.gravar_video %}Sim{% else %}Não{% endif %}</div>
-                                <div>Foto: {% if missao.captar_foto %}Sim{% else %}Não{% endif %}</div>
-                                <div>Pairar: {% if missao.pairar_no_destino %}Sim{% else %}Não{% endif %}</div>
-                                <div>Regressar: {% if missao.regressar_base %}Sim{% else %}Não{% endif %}</div>
+                                <div>{% blocktrans with lat=missao.latitude_alvo lon=missao.longitude_alvo %}Alvo: {{ lat }}, {{ lon }}{% endblocktrans %}</div>
+                                <div>{% blocktrans with altitude=missao.altitude_alvo_m %}Altitude: {{ altitude }} m{% endblocktrans %}</div>
+                                <div>{% trans "Vídeo:" %} {% if missao.gravar_video %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
+                                <div>{% trans "Foto:" %} {% if missao.captar_foto %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
+                                <div>{% trans "Pairar:" %} {% if missao.pairar_no_destino %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
+                                <div>{% trans "Regressar:" %} {% if missao.regressar_base %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
                             </div>
                             <div class="mt-2 text-xs text-slate-500">
-                                Última execução: {% if missao.ultima_execucao_em %}{{ missao.ultima_execucao_em|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
+                                {% trans "Última execução:" %} {% if missao.ultima_execucao_em %}{{ missao.ultima_execucao_em|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
                             </div>
                             <div class="mt-1 text-xs text-slate-500">
-                                Próxima execução prevista: {% if proxima_execucao %}{{ proxima_execucao|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
+                                {% trans "Próxima execução prevista:" %} {% if proxima_execucao %}{{ proxima_execucao|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
                             </div>
                             <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <form method="post" action="{% url 'geologia:drone_sf_missao_programada_toggle' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="flex items-center gap-3">
@@ -427,25 +427,25 @@
                                     <input type="hidden" name="ativa" value="0">
                                     <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
                                         <input type="checkbox" name="ativa" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-700" {% if missao.ativa %}checked{% endif %} data-auto-submit-on-change>
-                                        Repetir automaticamente
+                                        {% trans "Repetir automaticamente" %}
                                     </label>
                                 </form>
                                 <div class="flex flex-wrap gap-2">
-                                    <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}?empresa={{ empresa_geologia.id }}&editar_missao={{ missao.id }}" class="px-4 py-2 rounded bg-slate-100 text-slate-700 font-semibold">Editar</a>
+                                    <a href="{% url 'geologia:drone_sf_operacao_detail' drone.id %}?empresa={{ empresa_geologia.id }}&editar_missao={{ missao.id }}" class="px-4 py-2 rounded bg-slate-100 text-slate-700 font-semibold">{% trans "Editar" %}</a>
                                     <form method="post" action="{% url 'geologia:drone_sf_missao_programada_executar' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="px-4 py-2 rounded bg-cyan-700 text-white font-semibold">Executar agora</button>
+                                        <button type="submit" class="px-4 py-2 rounded bg-cyan-700 text-white font-semibold">{% trans "Executar agora" %}</button>
                                     </form>
-                                    <form method="post" action="{% url 'geologia:drone_sf_missao_programada_delete' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" data-confirm-submit="Apagar esta missão programada?">
+                                    <form method="post" action="{% url 'geologia:drone_sf_missao_programada_delete' drone.id missao.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" data-confirm-submit="{% trans 'Apagar esta missão programada?' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="px-4 py-2 rounded bg-rose-600 text-white font-semibold">Apagar</button>
+                                        <button type="submit" class="px-4 py-2 rounded bg-rose-600 text-white font-semibold">{% trans "Apagar" %}</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                         {% endwith %}
                         {% empty %}
-                        <div class="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem missões programadas guardadas para este Drone S_F.</div>
+                        <div class="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem missões programadas guardadas para este Drone S_F." %}</div>
                         {% endfor %}
                     </div>
                 </article>
@@ -454,7 +454,7 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="sec-comandos">
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Novo comando S_F</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Novo comando S_F" %}</h3>
                     <form method="post" action="{% url 'geologia:drone_sf_comando_create' drone.id %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="space-y-4">
                         {% csrf_token %}
                         {% for field in comando_form %}
@@ -465,13 +465,13 @@
                             </div>
                         {% endfor %}
                         <div class="pt-2">
-                            <button type="submit" class="w-full px-4 py-2 rounded bg-cyan-700 text-white font-semibold">Enviar comando</button>
+                            <button type="submit" class="w-full px-4 py-2 rounded bg-cyan-700 text-white font-semibold">{% trans "Enviar comando" %}</button>
                         </div>
                     </form>
                 </article>
 
                 <article class="rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Fila de comandos</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Fila de comandos" %}</h3>
                     <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                         {% for comando in comandos_recentes %}
                         <div class="rounded-lg border border-slate-200 px-3 py-3 text-sm">
@@ -481,14 +481,14 @@
                             </div>
                             <div class="text-slate-500 mt-2">
                                 {% if comando.latitude_alvo and comando.longitude_alvo %}
-                                    Alvo: {{ comando.latitude_alvo }}, {{ comando.longitude_alvo }} · {{ comando.altitude_alvo_m|default:"-" }} m
+                                    {% blocktrans with lat=comando.latitude_alvo lon=comando.longitude_alvo altitude=comando.altitude_alvo_m|default:"-" %}Alvo: {{ lat }}, {{ lon }} · {{ altitude }} m{% endblocktrans %}
                                 {% else %}
-                                    Sem coordenadas alvo
+                                    {% trans "Sem coordenadas alvo" %}
                                 {% endif %}
                             </div>
                         </div>
                         {% empty %}
-                        <div class="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ainda não existem comandos na fila do Drone S_F.</div>
+                        <div class="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{% trans "Ainda não existem comandos na fila do Drone S_F." %}</div>
                         {% endfor %}
                     </div>
                 </article>

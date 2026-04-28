@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.utils import timezone
 
+from geologia.forms import ComandoDroneSFOperacaoForm
 from geologia.services.drone_sf_missoes import processar_missoes_programadas_drone_sf
 from geologia.models import (
     ComandoDroneSFOperacao,
@@ -144,6 +145,38 @@ def criar_comando_drone_sf_from_form(*, form, operacao, utilizador):
     return comando
 
 
+def construir_form_comando_sf(*, request_post=None, operacao, empresa):
+    if request_post is not None:
+        return ComandoDroneSFOperacaoForm(
+            request_post,
+            prefix="comando_sf",
+            operacao=operacao,
+            empresa=empresa,
+        )
+    return ComandoDroneSFOperacaoForm(
+        prefix="comando_sf",
+        operacao=operacao,
+        empresa=empresa,
+        initial={"altitude_alvo_m": operacao.alvo_altitude_m or 35.0},
+    )
+
+
+def processar_comando_sf_create(*, request_post, operacao, empresa, utilizador):
+    form = construir_form_comando_sf(
+        request_post=request_post,
+        operacao=operacao,
+        empresa=empresa,
+    )
+    if form.is_valid():
+        comando = criar_comando_drone_sf_from_form(
+            form=form,
+            operacao=operacao,
+            utilizador=utilizador,
+        )
+        return {"ok": True, "form": form, "comando": comando}
+    return {"ok": False, "form": form, "comando": None}
+
+
 def executar_missao_programada_sf(*, operacao, missao, utilizador):
     comando = ComandoDroneSFOperacao.objects.create(
         operacao=operacao,
@@ -180,6 +213,29 @@ def remover_missao_programada_sf(*, missao):
     nome_missao = missao.nome
     missao.delete()
     return nome_missao
+
+
+def processar_toggle_missao_programada_sf(*, missao, ativa):
+    atualizar_estado_missao_programada_sf(missao=missao, ativa=ativa)
+    if ativa:
+        return {"ok": True, "mensagem": "Repetição automática da missão ativada."}
+    return {"ok": True, "mensagem": "Repetição automática da missão desativada."}
+
+
+def processar_execucao_missao_programada_sf(*, operacao, missao, utilizador):
+    executar_missao_programada_sf(operacao=operacao, missao=missao, utilizador=utilizador)
+    return {
+        "ok": True,
+        "mensagem": "Missão programada enviada para execução imediata na fila do Drone S_F.",
+    }
+
+
+def processar_remocao_missao_programada_sf(*, missao):
+    nome_missao = remover_missao_programada_sf(missao=missao)
+    return {
+        "ok": True,
+        "mensagem": f"Missão programada '{nome_missao}' removida com sucesso.",
+    }
 
 
 def calcular_proxima_execucao_missao(missao):
@@ -265,6 +321,21 @@ def guardar_form_modelo_sf(form):
     return form.save()
 
 
+def processar_form_modelo_sf(*, form, mensagem_sucesso, mensagem_erro):
+    objeto = guardar_form_modelo_sf(form)
+    if objeto is None:
+        return {
+            "ok": False,
+            "objeto": None,
+            "mensagem": mensagem_erro,
+        }
+    return {
+        "ok": True,
+        "objeto": objeto,
+        "mensagem": mensagem_sucesso,
+    }
+
+
 def serializar_estado_operacao_sf(operacao):
     return {
         "estado": operacao.estado,
@@ -296,6 +367,22 @@ def parse_payload_json_request_sf(request):
         return json.loads(request.body.decode("utf-8") or "{}"), None
     except json.JSONDecodeError as exc:
         return None, JsonResponse({"ok": False, "erro": f"JSON inválido: {exc.msg}"}, status=400)
+
+
+def resolver_operacao_bridge_sf(request, *, obter_operacao_por_bridge_key_fn, metodo="POST"):
+    if metodo == "GET":
+        bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
+    else:
+        bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key") or request.GET.get("bridge_key")
+
+    if not bridge_key:
+        return {"ok": False, "operacao": None, "erro_response": JsonResponse({"ok": False, "erro": "Bridge key em falta."}, status=403)}
+
+    operacao = obter_operacao_por_bridge_key_fn(bridge_key)
+    if operacao is None:
+        return {"ok": False, "operacao": None, "erro_response": JsonResponse({"ok": False, "erro": "Bridge S_F não autorizada."}, status=403)}
+
+    return {"ok": True, "operacao": operacao, "erro_response": None}
 
 
 def serializar_comandos_bridge_sf(comandos_values):

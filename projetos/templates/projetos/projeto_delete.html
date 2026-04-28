@@ -7,19 +7,19 @@
 <section class="sf-page p-6">
 
     <!-- CARD DE CONFIRMAÇÃO -->
-    <div class="sf-panel bg-red-600 text-white text-center">
+    <div class="sf-panel text-center border-t-4 border-red-500">
 
         <h2 class="text-2xl font-bold mb-4">⚠️ {% trans "Confirmação de Exclusão" %}</h2>
         <p class="mb-2">
             {% blocktrans with nome=projeto.nome %}Tem certeza que deseja apagar o projeto <strong>{{ nome }}</strong>?{% endblocktrans %}
         </p>
-        <p class="text-sm opacity-90 mb-6">{% trans "Esta ação não pode ser desfeita!" %}</p>
+        <p class="text-sm text-red-600 mb-6">{% trans "Esta ação não pode ser desfeita!" %}</p>
 
         <form method="POST" class="flex justify-center gap-4">
             {% csrf_token %}
 
             <button type="submit" 
-                    class="bg-white text-red-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition shadow">
+                    class="bg-red-600 text-white font-bold px-5 py-2 rounded-lg hover:bg-red-700 transition shadow">
                 🗑️ {% trans "Apagar" %}
             </button>
 

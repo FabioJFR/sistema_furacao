@@ -6,7 +6,7 @@
 {% block content %}
 <section class="sf-page p-6">
 
-    <div class="sf-panel bg-gray-800 text-gray-100 border-t-4 border-red-600">
+    <div class="sf-panel border-t-4 border-red-500">
 
         <!-- Título -->
         <h2 class="text-2xl font-bold text-center mb-4">
@@ -14,15 +14,15 @@
         </h2>
 
         <!-- Mensagem -->
-        <p class="text-center text-gray-300 mb-6">
+        <p class="text-center text-gray-600 mb-6">
             {% trans "Tem certeza que deseja apagar o projeto:" %}
         </p>
 
-        <p class="text-center text-lg font-semibold text-white mb-6">
+        <p class="text-center text-lg font-semibold text-gray-900 mb-6">
             {{ projeto.nome }}
         </p>
 
-        <p class="text-center text-sm text-red-400 mb-6">
+        <p class="text-center text-sm text-red-600 mb-6">
             {% trans "Esta ação não pode ser desfeita!" %}
         </p>
 
@@ -38,7 +38,7 @@
 
             <!-- Cancelar -->
             <a href="{{ projeto.get_absolute_url }}" 
-               class="flex-1 bg-gray-600 hover:bg-gray-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
+               class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
                 ❌ {% trans "Cancelar" %}
             </a>
 

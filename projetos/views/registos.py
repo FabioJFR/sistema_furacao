@@ -20,10 +20,10 @@ from projetos.selectors.registos import (
     obter_registos_empregado,
 )
 from projetos.services.registos import (
-    anexar_fotos_amostra,
-    atualizar_registo_diario,
-    atualizar_registo_diario_empregado,
-    criar_registo_diario,
+    preparar_form_registo_empregado,
+    processar_submissao_registo_admin_update,
+    processar_submissao_registo_empregado_create,
+    processar_submissao_registo_empregado_update,
 )
 from projetos.services.acesso_contexto import (
     obter_empregado_autenticado_contexto,
@@ -141,21 +141,18 @@ def registo_diario_create(request):
         return resposta_erro
 
     if request.method == "POST":
-        form = RegistoDiarioEmpregadoForm(
-            request.POST,
-            request.FILES,
+        form = preparar_form_registo_empregado(
+            form_class=RegistoDiarioEmpregadoForm,
+            request=request,
             empregado=empregado,
         )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-
-        if form.is_valid():
-            registo = criar_registo_diario(form=form, empregado=empregado)
-            anexar_fotos_amostra(
-                registo=registo,
-                empresa=empregado.empresa,
-                fotos=request.FILES.getlist("fotos_amostra"),
-            )
+        resultado = processar_submissao_registo_empregado_create(
+            form=form,
+            empregado=empregado,
+            fotos=request.FILES.getlist("fotos_amostra"),
+        )
+        if resultado["ok"]:
+            registo = resultado["registo"]
 
             logger.info(
                 "Registo diário criado com sucesso. user_id=%s, empregado_id=%s, registo_id=%s",
@@ -174,12 +171,12 @@ def registo_diario_create(request):
         )
         messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
     else:
-        form = RegistoDiarioEmpregadoForm(
+        form = preparar_form_registo_empregado(
+            form_class=RegistoDiarioEmpregadoForm,
+            request=request,
             empregado=empregado,
             initial={"data": timezone.now().date()},
         )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
 
     return render(
         request,
@@ -210,22 +207,20 @@ def registo_diario_update(request, pk):
     registo = obter_registo_empregado(empregado, pk)
 
     if request.method == "POST":
-        form = RegistoDiarioEmpregadoForm(
-            request.POST,
-            request.FILES,
+        form = preparar_form_registo_empregado(
+            form_class=RegistoDiarioEmpregadoForm,
+            request=request,
             instance=registo,
             empregado=empregado,
         )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-
-        if form.is_valid():
-            registo = atualizar_registo_diario_empregado(registo, form)
-            anexar_fotos_amostra(
-                registo=registo,
-                empresa=empregado.empresa_id,
-                fotos=request.FILES.getlist("fotos_amostra"),
-            )
+        resultado = processar_submissao_registo_empregado_update(
+            form=form,
+            registo=registo,
+            empregado=empregado,
+            fotos=request.FILES.getlist("fotos_amostra"),
+        )
+        if resultado["ok"]:
+            registo = resultado["registo"]
 
             logger.info(
                 "Registo diário atualizado com sucesso por empregado. user_id=%s, empregado_id=%s, registo_id=%s",
@@ -244,9 +239,12 @@ def registo_diario_update(request, pk):
         )
         messages.error(request, "Erro ao atualizar o registo diário.")
     else:
-        form = RegistoDiarioEmpregadoForm(instance=registo, empregado=empregado)
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
+        form = preparar_form_registo_empregado(
+            form_class=RegistoDiarioEmpregadoForm,
+            request=request,
+            instance=registo,
+            empregado=empregado,
+        )
 
     return render(
         request,
@@ -327,14 +325,13 @@ def registo_admin_update(request, pk):
             request.FILES,
             instance=registo,
         )
-
-        if form.is_valid():
-            atualizar_registo_diario(registo, form)
-            anexar_fotos_amostra(
-                registo=registo,
-                empresa=empresa,
-                fotos=request.FILES.getlist("fotos_amostra"),
-            )
+        resultado = processar_submissao_registo_admin_update(
+            form=form,
+            registo=registo,
+            empresa=empresa,
+            fotos=request.FILES.getlist("fotos_amostra"),
+        )
+        if resultado["ok"]:
 
             logger.info(
                 "Registo corrigido com sucesso por admin. user_id=%s, empresa_id=%s, registo_id=%s",

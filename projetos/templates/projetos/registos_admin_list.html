@@ -15,9 +15,9 @@
         <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
             <div>
-                <label class="block text-sm font-semibold mb-1">Empregado</label>
+                <label class="block text-sm font-semibold mb-1">{% trans "Empregado" %}</label>
                 <select name="empregado" class="w-full p-2 border rounded">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for e in empregados %}
                         <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
                             {{ e.nome }}
@@ -27,9 +27,9 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold mb-1">Projeto</label>
+                <label class="block text-sm font-semibold mb-1">{% trans "Projeto" %}</label>
                 <select name="projeto" class="w-full p-2 border rounded">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for p in projetos %}
                         <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
                             {{ p.nome }}
@@ -39,9 +39,9 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold mb-1">Furo</label>
+                <label class="block text-sm font-semibold mb-1">{% trans "Furo" %}</label>
                 <select name="furo" class="w-full p-2 border rounded">
-                    <option value="">Todos</option>
+                    <option value="">{% trans "Todos" %}</option>
                     {% for f in furos %}
                         <option value="{{ f.id }}" {% if filtros.furo == f.id|stringformat:"s" %}selected{% endif %}>
                             {{ f.nome }}
@@ -51,12 +51,12 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold mb-1">Data início</label>
+                <label class="block text-sm font-semibold mb-1">{% trans "Data início" %}</label>
                 <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full p-2 border rounded">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold mb-1">Data fim</label>
+                <label class="block text-sm font-semibold mb-1">{% trans "Data fim" %}</label>
                 <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
             </div>
 
@@ -70,17 +70,17 @@
     <!-- TOTAIS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">Total de Horas</div>
+            <div class="text-gray-500 text-sm">{% trans "Total de Horas" %}</div>
             <div class="text-2xl font-bold">{{ total_horas|floatformat:2 }}</div>
         </div>
 
         <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">Total de Metros</div>
+            <div class="text-gray-500 text-sm">{% trans "Total de Metros" %}</div>
             <div class="text-2xl font-bold">{{ total_metros|floatformat:2 }} m</div>
         </div>
 
         <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">Total de Paragem</div>
+            <div class="text-gray-500 text-sm">{% trans "Total de Paragem" %}</div>
             <div class="text-2xl font-bold">{{ total_paragem|floatformat:2 }} h</div>
         </div>
     </div>
@@ -90,21 +90,21 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="text-left border-b">
-                    <th class="py-2">Ações</th>
-                    <th class="py-2">Data</th>
-                    <th class="py-2">Empregado</th>
-                    <th class="py-2">Projeto</th>
-                    <th class="py-2">Furo</th>
-                    <th class="py-2">Início</th>
-                    <th class="py-2">Início Pausa</th>
-                    <th class="py-2">Fim Pausa</th>
-                    <th class="py-2">Fim</th>
-                    <th class="py-2">Horas</th>
-                    <th class="py-2">Paragem</th>
-                    <th class="py-2">Tipo Paragem</th>
-                    <th class="py-2">Metros</th>
-                    <th class="py-2">Foto</th>
-                    <th class="py-2">Observações</th>
+                    <th class="py-2">{% trans "Ações" %}</th>
+                    <th class="py-2">{% trans "Data" %}</th>
+                    <th class="py-2">{% trans "Empregado" %}</th>
+                    <th class="py-2">{% trans "Projeto" %}</th>
+                    <th class="py-2">{% trans "Furo" %}</th>
+                    <th class="py-2">{% trans "Início" %}</th>
+                    <th class="py-2">{% trans "Início Pausa" %}</th>
+                    <th class="py-2">{% trans "Fim Pausa" %}</th>
+                    <th class="py-2">{% trans "Fim" %}</th>
+                    <th class="py-2">{% trans "Horas" %}</th>
+                    <th class="py-2">{% trans "Paragem" %}</th>
+                    <th class="py-2">{% trans "Tipo Paragem" %}</th>
+                    <th class="py-2">{% trans "Metros" %}</th>
+                    <th class="py-2">{% trans "Foto" %}</th>
+                    <th class="py-2">{% trans "Observações" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -113,7 +113,7 @@
                     <td class="py-2">
                         <a href="{% url 'projetos:registo_admin_update' r.id %}"
                            class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
-                            Corrigir
+                            {% trans "Corrigir" %}
                         </a>
                     </td>
                     <td class="py-2">{{ r.data }}</td>

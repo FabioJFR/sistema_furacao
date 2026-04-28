@@ -160,3 +160,62 @@ def atualizar_registo_diario_empregado(registo, form):
     registo.editado_por_empregado = True
     registo.editado_em = timezone.now()
     return atualizar_registo_diario(registo, form)
+
+
+def preparar_form_registo_empregado(*, form_class, request, empregado, instance=None, initial=None):
+    if request.method == "POST":
+        form = form_class(
+            request.POST,
+            request.FILES,
+            instance=instance,
+            empregado=empregado,
+        )
+    else:
+        form = form_class(
+            instance=instance,
+            empregado=empregado,
+            initial=initial or {},
+        )
+
+    form.instance.empregado = empregado
+    form.instance.empresa = empregado.empresa
+    return form
+
+
+def processar_submissao_registo_empregado_create(*, form, empregado, fotos):
+    if not form.is_valid():
+        return {"ok": False, "registo": None}
+
+    registo = criar_registo_diario(form=form, empregado=empregado)
+    anexar_fotos_amostra(
+        registo=registo,
+        empresa=empregado.empresa,
+        fotos=fotos,
+    )
+    return {"ok": True, "registo": registo}
+
+
+def processar_submissao_registo_empregado_update(*, form, registo, empregado, fotos):
+    if not form.is_valid():
+        return {"ok": False, "registo": None}
+
+    registo = atualizar_registo_diario_empregado(registo, form)
+    anexar_fotos_amostra(
+        registo=registo,
+        empresa=empregado.empresa_id,
+        fotos=fotos,
+    )
+    return {"ok": True, "registo": registo}
+
+
+def processar_submissao_registo_admin_update(*, form, registo, empresa, fotos):
+    if not form.is_valid():
+        return {"ok": False, "registo": None}
+
+    atualizar_registo_diario(registo, form)
+    anexar_fotos_amostra(
+        registo=registo,
+        empresa=empresa,
+        fotos=fotos,
+    )
+    return {"ok": True, "registo": registo}

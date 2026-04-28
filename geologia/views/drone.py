@@ -7,10 +7,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.permissions import admin_required
 from geologia.forms import (
-    DroneComandoOperacaoForm,
     DroneOperacaoTempoRealForm,
-    ImportarMissaoDroneForm,
-    MissaoDroneFuroForm,
 )
 from geologia.selectors.drone import (
     obter_comando_operacao_drone,
@@ -28,12 +25,18 @@ from geologia.services.drone_dashboard import (
     atualizar_operacao_drone_from_form,
     colocar_drone_em_procura,
     confirmar_comando_bridge,
-    criar_comando_drone_from_form,
-    guardar_form_missao_drone,
+    construir_form_comando,
+    construir_form_importar_missao,
+    construir_form_missao_create,
+    construir_form_missao_update,
     parse_payload_json_request,
+    processar_comando_create,
     processar_comandos_pendentes_bridge,
+    processar_importacao_missao,
     processar_ingest_estado_bridge,
     processar_log_event_bridge,
+    processar_missao_create,
+    processar_missao_update,
     serializar_estado_operacao,
     testar_ligacao_drone,
 )
@@ -68,25 +71,25 @@ def drone_hub(request):
             empresa=empresa,
             prefix="operacao",
         )
-        comando_form = DroneComandoOperacaoForm(
-            prefix="comando",
-            initial={"altitude_alvo_m": operacao.alvo_altitude_m or 35.0},
-            operacao=operacao,
-            empresa=empresa,
-        )
+        comando_form = construir_form_comando(operacao=operacao, empresa=empresa)
         comandos_recentes = obter_comandos_recentes_operacao_drone(operacao, limit=10)
     else:
         estado_operacao = {}
 
     if request.method == "POST" and request.POST.get("drone_action") == "importar_missao":
-        form = ImportarMissaoDroneForm(request.POST, request.FILES, empresa=empresa)
-        missao = guardar_form_missao_drone(form)
-        if missao is not None:
+        resultado = processar_importacao_missao(
+            request_post=request.POST,
+            request_files=request.FILES,
+            empresa=empresa,
+        )
+        form = resultado["form"]
+        if resultado["ok"]:
+            missao = resultado["missao"]
             messages.success(request, "Missao DJI importada com sucesso.")
             return redirect("geologia:missao_detail", pk=missao.pk)
         messages.error(request, "Nao foi possivel importar a missao DJI.")
     else:
-        form = ImportarMissaoDroneForm(empresa=empresa)
+        form = construir_form_importar_missao(empresa=empresa)
 
     context = {
         "form": form,
@@ -143,12 +146,17 @@ def drone_comando_create(request):
         return redirect("geologia:drone_hub")
 
     operacao = obter_operacao_empresa(empresa)
-    form = DroneComandoOperacaoForm(request.POST or None, prefix="comando", operacao=operacao, empresa=empresa)
-    if request.method == "POST" and form.is_valid():
-        criar_comando_drone_from_form(form=form, operacao=operacao, empresa=empresa, user=request.user)
-        messages.success(request, "Comando colocado na fila do drone.")
-    else:
-        messages.error(request, "Nao foi possivel criar o comando do drone.")
+    if request.method == "POST":
+        resultado = processar_comando_create(
+            request_post=request.POST,
+            operacao=operacao,
+            empresa=empresa,
+            user=request.user,
+        )
+        if resultado["ok"]:
+            messages.success(request, "Comando colocado na fila do drone.")
+        else:
+            messages.error(request, "Nao foi possivel criar o comando do drone.")
     return redirect("geologia:drone_hub")
 
 
@@ -290,14 +298,20 @@ def missao_drone_create(request, furo_id):
     furo = obter_furo_drone(furo_id, empresa=empresa)
 
     if request.method == "POST":
-        form = MissaoDroneFuroForm(request.POST, request.FILES, furo=furo, empresa=empresa)
-        missao = guardar_form_missao_drone(form)
-        if missao is not None:
+        resultado = processar_missao_create(
+            request_post=request.POST,
+            request_files=request.FILES,
+            furo=furo,
+            empresa=empresa,
+        )
+        form = resultado["form"]
+        if resultado["ok"]:
+            missao = resultado["missao"]
             messages.success(request, "Missao do drone registada com sucesso.")
             return redirect("geologia:furo_dashboard", furo_id=furo.pk)
         messages.error(request, "Nao foi possivel guardar a missao do drone.")
     else:
-        form = MissaoDroneFuroForm(furo=furo, empresa=empresa, initial={"titulo": f"Levantamento DJI Mini 4 Pro - {furo.nome}"})
+        form = construir_form_missao_create(furo=furo, empresa=empresa)
 
     return render(
         request,
@@ -341,20 +355,19 @@ def missao_drone_update(request, pk):
     missao = obter_missao_drone(pk, empresa=empresa)
 
     if request.method == "POST":
-        form = MissaoDroneFuroForm(
-            request.POST,
-            request.FILES,
-            instance=missao,
-            furo=missao.furo,
+        resultado = processar_missao_update(
+            request_post=request.POST,
+            request_files=request.FILES,
+            missao=missao,
             empresa=empresa,
         )
-        missao_guardada = guardar_form_missao_drone(form)
-        if missao_guardada is not None:
+        form = resultado["form"]
+        if resultado["ok"]:
             messages.success(request, "Missao do drone atualizada com sucesso.")
             return redirect("geologia:missao_detail", pk=missao.pk)
         messages.error(request, "Nao foi possivel atualizar a missao do drone.")
     else:
-        form = MissaoDroneFuroForm(instance=missao, furo=missao.furo, empresa=empresa)
+        form = construir_form_missao_update(missao=missao, empresa=empresa)
 
     return render(
         request,

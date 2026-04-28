@@ -70,13 +70,13 @@
             <article class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Centro de controlo em tempo real</h2>
-                        <p class="text-sm text-gray-500 mt-1">Base operacional para live view, estado do drone, alvo no mapa e fila de comandos.</p>
+                        <h2 class="text-xl font-semibold text-gray-900">{% trans "Centro de controlo em tempo real" %}</h2>
+                        <p class="text-sm text-gray-500 mt-1">{% trans "Base operacional para live view, estado do drone, alvo no mapa e fila de comandos." %}</p>
                     </div>
                     {% if operacao %}
                         <span class="text-xs uppercase tracking-wide rounded-full bg-sky-100 text-sky-800 px-3 py-1">{{ operacao.get_estado_conexao_display }}</span>
                     {% else %}
-                        <span class="text-xs uppercase tracking-wide rounded-full bg-amber-100 text-amber-800 px-3 py-1">Vista global</span>
+                        <span class="text-xs uppercase tracking-wide rounded-full bg-amber-100 text-amber-800 px-3 py-1">{% trans "Vista global" %}</span>
                     {% endif %}
                 </div>
 
@@ -85,18 +85,18 @@
                     <div class="grid grid-cols-1 xl:grid-cols-[1.35fr_0.65fr] gap-6">
                         <div class="rounded-xl border border-gray-200 bg-slate-950 p-4" id="sec-live">
                             <div class="flex items-center justify-between gap-4 mb-3">
-                                <h3 class="font-semibold text-white">Live view / feed do drone</h3>
+                                <h3 class="font-semibold text-white">{% trans "Live view / feed do drone" %}</h3>
                                 {% if operacao.live_view_url %}
-                                    <a href="{{ operacao.live_view_url }}" target="_blank" rel="noopener" class="text-sm text-sky-300 hover:text-sky-100">Abrir stream</a>
+                                    <a href="{{ operacao.live_view_url }}" target="_blank" rel="noopener" class="text-sm text-sky-300 hover:text-sky-100">{% trans "Abrir stream" %}</a>
                                 {% endif %}
                             </div>
                             {% if operacao.live_view_url %}
                                 <iframe src="{{ operacao.live_view_url }}" class="w-full rounded-lg bg-black border border-slate-800 drone-live-frame" allowfullscreen></iframe>
                             {% elif operacao.frame_snapshot_url %}
-                                <img src="{{ operacao.frame_snapshot_url }}" alt="Frame atual do drone" class="w-full rounded-lg border border-slate-800 drone-snapshot-image">
+                                <img src="{{ operacao.frame_snapshot_url }}" alt="{% trans 'Frame atual do drone' %}" class="w-full rounded-lg border border-slate-800 drone-snapshot-image">
                             {% else %}
                                 <div class="rounded-lg border border-dashed border-slate-700 text-slate-300 px-6 py-16 text-center">
-                                    Ainda não existe stream configurado. Já podes definir a URL do live view no painel ao lado.
+                                    {% trans "Ainda não existe stream configurado. Já podes definir a URL do live view no painel ao lado." %}
                                 </div>
                             {% endif %}
                         </div>
@@ -104,8 +104,8 @@
                             <div class="rounded-xl border border-gray-200 bg-white p-4">
                                 <div class="flex items-start justify-between gap-4">
                                     <div>
-                                        <h3 class="font-semibold text-gray-900">Estado de ligação</h3>
-                                        <p class="text-sm text-gray-500 mt-1">Ligação atual, heartbeat, feed e ações rápidas.</p>
+                                        <h3 class="font-semibold text-gray-900">{% trans "Estado de ligação" %}</h3>
+                                        <p class="text-sm text-gray-500 mt-1">{% trans "Ligação atual, heartbeat, feed e ações rápidas." %}</p>
                                     </div>
                                     <span class="text-xs uppercase tracking-wide rounded-full px-3 py-1
                                         {% if operacao.estado_conexao == 'pronto' %}bg-emerald-100 text-emerald-700
@@ -118,24 +118,24 @@
                                 </div>
                                 <div class="mt-3 flex flex-wrap items-start gap-2 text-xs">
                                     <span id="bridge-source-label" class="inline-flex items-center rounded-full px-3 py-1 font-semibold {% if operacao.bridge_ativa %}bg-sky-100 text-sky-800{% else %}bg-slate-100 text-slate-700{% endif %}">
-                                        Fonte de dados: {{ operacao.bridge_ultimo_estado|default:operacao.bridge_nome|default:"local" }}
+                                        {% blocktrans with fonte=operacao.bridge_ultimo_estado|default:operacao.bridge_nome|default:"local" %}Fonte de dados: {{ fonte }}{% endblocktrans %}
                                     </span>
                                     <span id="bridge-source-badge" class="inline-flex items-center rounded-full px-3 py-1 font-semibold {% if operacao.metadados.bridge_payload_mais_recente.source_mode == 'webhook' %}bg-emerald-100 text-emerald-800{% elif operacao.metadados.bridge_payload_mais_recente.source_mode == 'mock' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700{% endif %}">
-                                        Modo: {{ operacao.metadados.bridge_payload_mais_recente.source_mode|default:"indefinido" }}
+                                        {% blocktrans with modo=operacao.metadados.bridge_payload_mais_recente.source_mode|default:"indefinido" %}Modo: {{ modo }}{% endblocktrans %}
                                     </span>
                                     <details class="group rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
-                                        <summary class="list-none cursor-pointer px-3 py-1 font-semibold select-none">Ajuda rápida</summary>
+                                        <summary class="list-none cursor-pointer px-3 py-1 font-semibold select-none">{% trans "Ajuda rápida" %}</summary>
                                         <div class="absolute z-10 mt-2 w-[28rem] max-w-[calc(100vw-4rem)] rounded-2xl border border-slate-200 bg-white p-4 text-left text-slate-700 shadow-xl">
-                                            <div class="text-sm font-semibold text-slate-900">Como usar cada modo</div>
+                                            <div class="text-sm font-semibold text-slate-900">{% trans "Como usar cada modo" %}</div>
                                             <div class="mt-3 space-y-3 text-xs">
                                                 <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                                                    <div class="font-semibold text-slate-900">Modo mock</div>
-                                                    <div class="mt-1 text-slate-600">Para testar o painel completo sem fonte externa.</div>
+                                                    <div class="font-semibold text-slate-900">{% trans "Modo mock" %}</div>
+                                                    <div class="mt-1 text-slate-600">{% trans "Para testar o painel completo sem fonte externa." %}</div>
                                                     <pre class="mt-2 overflow-x-auto rounded bg-slate-950 px-3 py-2 text-[11px] text-slate-100">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json</pre>
                                                 </div>
                                                 <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                                                    <div class="font-semibold text-slate-900">Modo webhook</div>
-                                                    <div class="mt-1 text-slate-600">Para receber telemetria vinda de um processo externo ou do emissor de exemplo.</div>
+                                                    <div class="font-semibold text-slate-900">{% trans "Modo webhook" %}</div>
+                                                    <div class="mt-1 text-slate-600">{% trans "Para receber telemetria vinda de um processo externo ou do emissor de exemplo." %}</div>
                                                     <pre class="mt-2 overflow-x-auto rounded bg-slate-950 px-3 py-2 text-[11px] text-slate-100">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json
 python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0.1:8787/webhook</pre>
                                                 </div>
@@ -145,44 +145,44 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-sm">
                                     <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                        <div class="text-slate-500">Ligação atual</div>
+                                        <div class="text-slate-500">{% trans "Ligação atual" %}</div>
                                         <div class="font-semibold text-slate-900 mt-1">{{ operacao.get_estado_conexao_display }}</div>
                                     </div>
                                     <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                        <div class="text-slate-500">Último heartbeat</div>
+                                        <div class="text-slate-500">{% trans "Último heartbeat" %}</div>
                                         <div class="font-semibold text-slate-900 mt-1">
                                             {% if operacao.ultimo_heartbeat %}{{ operacao.ultimo_heartbeat|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
                                         </div>
                                     </div>
                                     <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                        <div class="text-slate-500">Feed disponível</div>
+                                        <div class="text-slate-500">{% trans "Feed disponível" %}</div>
                                         <div class="font-semibold text-slate-900 mt-1">
-                                            {% if operacao.live_view_url or operacao.frame_snapshot_url %}Sim{% else %}Não{% endif %}
+                                            {% if operacao.live_view_url or operacao.frame_snapshot_url %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 flex flex-wrap gap-3">
                                     <button type="button" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold" id="btn-drone-testar-ligacao">
-                                        Testar ligação
+                                        {% trans "Testar ligação" %}
                                     </button>
                                     <button type="button" class="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 font-semibold" id="btn-drone-procurar">
-                                        Procurar drone
+                                        {% trans "Procurar drone" %}
                                     </button>
                                     <button type="button" class="px-4 py-2 rounded border border-slate-300 text-slate-700 font-semibold" id="btn-drone-sincronizar">
-                                        Atualizar estado
+                                        {% trans "Atualizar estado" %}
                                     </button>
                                 </div>
                             </div>
 
                             <div class="rounded-xl border border-slate-200 bg-slate-950 p-4">
                                 <div class="flex items-center justify-between gap-4 mb-3">
-                                    <h4 class="font-semibold text-white">Monitor de ligação</h4>
+                                    <h4 class="font-semibold text-white">{% trans "Monitor de ligação" %}</h4>
                                     <span id="drone-link-chip" class="text-xs uppercase tracking-wide rounded-full bg-slate-800 text-slate-200 px-3 py-1">
                                         {{ operacao.get_estado_conexao_display }}
                                     </span>
                                 </div>
                                 <div id="drone-debug-log" class="space-y-2 text-sm text-slate-200 max-h-[220px] overflow-y-auto pr-1">
-                                    <div class="rounded-lg bg-slate-900 px-3 py-2">Sistema pronto para testar a ligação ao drone.</div>
+                                    <div class="rounded-lg bg-slate-900 px-3 py-2">{% trans "Sistema pronto para testar a ligação ao drone." %}</div>
                                 </div>
                             </div>
                         </div>
@@ -191,8 +191,8 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                     <div class="rounded-xl border border-gray-200 bg-white p-4" id="sec-mapa">
                         <div class="flex items-center justify-between gap-4 mb-3">
                             <div>
-                                <h3 class="font-semibold text-gray-900">Mapa operacional</h3>
-                                <p class="text-sm text-gray-500">Clica no mapa para definir o alvo do drone e gerar o comando "Ir para ponto".</p>
+                                <h3 class="font-semibold text-gray-900">{% trans "Mapa operacional" %}</h3>
+                                <p class="text-sm text-gray-500">{% trans "Clica no mapa para definir o alvo do drone e gerar o comando \"Ir para ponto\"." %}</p>
                             </div>
                         </div>
                         <div
@@ -205,15 +205,15 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         ></div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-sm">
                             <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                                <div class="text-slate-500">Posição atual</div>
+                                <div class="text-slate-500">{% trans "Posição atual" %}</div>
                                 <div class="font-medium text-slate-900">{{ operacao.latitude_atual|default:"-" }}, {{ operacao.longitude_atual|default:"-" }}</div>
                             </div>
                             <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                                <div class="text-slate-500">Alvo atual</div>
+                                <div class="text-slate-500">{% trans "Alvo atual" %}</div>
                                 <div class="font-medium text-slate-900">{{ operacao.alvo_latitude|default:"-" }}, {{ operacao.alvo_longitude|default:"-" }}</div>
                             </div>
                             <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
-                                <div class="text-slate-500">Altitude alvo</div>
+                                <div class="text-slate-500">{% trans "Altitude alvo" %}</div>
                                 <div class="font-medium text-slate-900">{{ operacao.alvo_altitude_m|default:"35" }} m</div>
                             </div>
                         </div>
@@ -223,45 +223,45 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         <div class="rounded-xl border border-gray-200 bg-white p-4">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <h3 class="font-semibold text-gray-900">Bridge DJI RC 2</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Integração externa para o DJI RC 2 enviar heartbeat, telemetria, snapshot e link de vídeo para a plataforma.</p>
+                                    <h3 class="font-semibold text-gray-900">{% trans "Bridge DJI RC 2" %}</h3>
+                                    <p class="text-sm text-gray-500 mt-1">{% trans "Integração externa para o DJI RC 2 enviar heartbeat, telemetria, snapshot e link de vídeo para a plataforma." %}</p>
                                 </div>
                                 <span class="text-xs uppercase tracking-wide rounded-full px-3 py-1 {% if operacao.bridge_ativa %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-700{% endif %}">
-                                    {% if operacao.bridge_ativa %}Bridge ativa{% else %}Bridge desligada{% endif %}
+                                    {% if operacao.bridge_ativa %}{% trans "Bridge ativa" %}{% else %}{% trans "Bridge desligada" %}{% endif %}
                                 </span>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm">
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Nome da bridge</div>
+                                    <div class="text-slate-500">{% trans "Nome da bridge" %}</div>
                                     <div class="font-semibold text-slate-900 mt-1">{{ operacao.bridge_nome|default:"-" }}</div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Modo de origem</div>
+                                    <div class="text-slate-500">{% trans "Modo de origem" %}</div>
                                     <div id="bridge-source-mode" class="font-semibold text-slate-900 mt-1">{{ operacao.metadados.bridge_payload_mais_recente.source_mode|default:"-" }}</div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Endpoint base</div>
+                                    <div class="text-slate-500">{% trans "Endpoint base" %}</div>
                                     <div class="font-semibold text-slate-900 mt-1 break-all">{{ operacao.bridge_base_url|default:"-" }}</div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Último estado da bridge</div>
+                                    <div class="text-slate-500">{% trans "Último estado da bridge" %}</div>
                                     <div class="font-semibold text-slate-900 mt-1">{{ operacao.bridge_ultimo_estado|default:"-" }}</div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Última sincronização</div>
+                                    <div class="text-slate-500">{% trans "Última sincronização" %}</div>
                                     <div class="font-semibold text-slate-900 mt-1">
                                         {% if operacao.bridge_ultima_sincronizacao %}{{ operacao.bridge_ultima_sincronizacao|date:"d/m/Y H:i:s" }}{% else %}-{% endif %}
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                                <div><strong>Endpoint de ingestão da plataforma:</strong></div>
+                                <div><strong>{% trans "Endpoint de ingestão da plataforma:" %}</strong></div>
                                 <div class="font-mono break-all mt-1">{{ request.scheme }}://{{ request.get_host }}{% url 'geologia:api_bridge_ingest_estado' %}</div>
-                                <div class="mt-3"><strong>Endpoint para comandos pendentes:</strong></div>
+                                <div class="mt-3"><strong>{% trans "Endpoint para comandos pendentes:" %}</strong></div>
                                 <div class="font-mono break-all mt-1">{{ request.scheme }}://{{ request.get_host }}{% url 'geologia:api_bridge_comandos_pendentes' %}</div>
-                                <div class="mt-2">A bridge deve enviar `POST JSON` com header `X-Bridge-Key` igual à chave configurada.</div>
+                                <div class="mt-2">{% trans "A bridge deve enviar `POST JSON` com header `X-Bridge-Key` igual à chave configurada." %}</div>
                                 {% if operacao.bridge_ultimo_erro %}
-                                    <div class="mt-3 text-rose-700"><strong>Último erro:</strong> {{ operacao.bridge_ultimo_erro }}</div>
+                                    <div class="mt-3 text-rose-700"><strong>{% trans "Último erro:" %}</strong> {{ operacao.bridge_ultimo_erro }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -269,8 +269,8 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         <div class="rounded-xl border border-gray-200 bg-slate-950 p-4">
                             <div class="flex items-center justify-between gap-4 mb-3">
                                 <div>
-                                    <h3 class="font-semibold text-white">Histórico da bridge</h3>
-                                    <p class="text-sm text-slate-400 mt-1">Eventos recentes do live view, frame, heartbeat e comandos confirmados.</p>
+                                    <h3 class="font-semibold text-white">{% trans "Histórico da bridge" %}</h3>
+                                    <p class="text-sm text-slate-400 mt-1">{% trans "Eventos recentes do live view, frame, heartbeat e comandos confirmados." %}</p>
                                 </div>
                             </div>
                             <div class="space-y-2 text-sm max-h-[320px] overflow-y-auto pr-1" id="bridge-history-log">
@@ -280,7 +280,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                         <div class="text-xs opacity-80 mt-1">{{ log.timestamp|default:"-" }}</div>
                                     </div>
                                 {% empty %}
-                                    <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">Ainda não existem eventos recentes da bridge.</div>
+                                    <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">{% trans "Ainda não existem eventos recentes da bridge." %}</div>
                                 {% endfor %}
                             </div>
                         </div>
@@ -288,22 +288,22 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
 
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6" id="sec-comandos">
                         <article class="rounded-xl border border-gray-200 bg-white p-5">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado do drone</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Estado do drone" %}</h3>
                             <div class="grid grid-cols-2 gap-3 text-sm">
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Bateria</div><div class="font-semibold text-slate-900">{{ operacao.bateria_percent|default:"-" }}%</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Sinal</div><div class="font-semibold text-slate-900">{{ operacao.sinal_percent|default:"-" }}%</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Satélites</div><div class="font-semibold text-slate-900">{{ operacao.satelites_gps|default:"-" }}</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Altura</div><div class="font-semibold text-slate-900">{{ operacao.altitude_atual_m|default:"-" }} m</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Velocidade</div><div class="font-semibold text-slate-900">{{ operacao.velocidade_atual_ms|default:"-" }} m/s</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">Heading</div><div class="font-semibold text-slate-900">{{ operacao.heading_graus|default:"-" }}°</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Bateria" %}</div><div class="font-semibold text-slate-900">{{ operacao.bateria_percent|default:"-" }}%</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Sinal" %}</div><div class="font-semibold text-slate-900">{{ operacao.sinal_percent|default:"-" }}%</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Satélites" %}</div><div class="font-semibold text-slate-900">{{ operacao.satelites_gps|default:"-" }}</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Altura" %}</div><div class="font-semibold text-slate-900">{{ operacao.altitude_atual_m|default:"-" }} m</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Velocidade" %}</div><div class="font-semibold text-slate-900">{{ operacao.velocidade_atual_ms|default:"-" }} m/s</div></div>
+                                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2"><div class="text-slate-500">{% trans "Heading" %}</div><div class="font-semibold text-slate-900">{{ operacao.heading_graus|default:"-" }}°</div></div>
                             </div>
                         </article>
 
                         <article class="rounded-xl border border-gray-200 bg-white p-5">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado operacional</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Estado operacional" %}</h3>
                             <div class="space-y-3 text-sm">
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Último comando recebido</div>
+                                    <div class="text-slate-500">{% trans "Último comando recebido" %}</div>
                                     <div id="bridge-ultimo-comando-recebido" class="font-semibold text-slate-900 mt-1">
                                         {% if bridge_status_summary.ultimo_comando_recebido %}
                                             {{ bridge_status_summary.ultimo_comando_recebido.tipo }} · {{ bridge_status_summary.ultimo_comando_recebido.status }}
@@ -311,7 +311,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     </div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Último comando executado</div>
+                                    <div class="text-slate-500">{% trans "Último comando executado" %}</div>
                                     <div
                                         id="bridge-ultimo-comando-executado"
                                         class="font-semibold mt-1 {% if bridge_status_summary.ultimo_comando_executado and bridge_status_summary.ultimo_comando_executado.status|lower == 'executado' %}text-emerald-700{% elif bridge_status_summary.ultimo_comando_executado %}text-amber-700{% else %}text-slate-900{% endif %}"
@@ -322,11 +322,11 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     </div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Hora da última confirmação</div>
+                                    <div class="text-slate-500">{% trans "Hora da última confirmação" %}</div>
                                     <div id="bridge-hora-ultima-confirmacao" class="font-semibold text-slate-900 mt-1">{{ bridge_status_summary.hora_ultima_confirmacao|default:"-" }}</div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Último heartbeat recebido</div>
+                                    <div class="text-slate-500">{% trans "Último heartbeat recebido" %}</div>
                                     <div
                                         id="bridge-ultimo-heartbeat-recebido"
                                         class="font-semibold mt-1 {% if bridge_status_summary.ultimo_heartbeat_recebido %}text-emerald-700{% else %}text-slate-900{% endif %}"
@@ -335,7 +335,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     </div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Estado atual da bridge</div>
+                                    <div class="text-slate-500">{% trans "Estado atual da bridge" %}</div>
                                     <div
                                         id="bridge-estado-atual"
                                         class="font-semibold mt-1 {% if operacao.bridge_ultimo_estado and operacao.bridge_ultimo_estado|lower != 'online' and operacao.bridge_ultimo_estado|lower != 'ok' and operacao.bridge_ultimo_estado|lower != 'ready' %}text-amber-700{% else %}text-emerald-700{% endif %}"
@@ -344,7 +344,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     </div>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-                                    <div class="text-slate-500">Último erro da bridge</div>
+                                    <div class="text-slate-500">{% trans "Último erro da bridge" %}</div>
                                     <div
                                         id="bridge-ultimo-erro"
                                         class="font-semibold mt-1 {% if bridge_status_summary.ultimo_erro_bridge %}text-rose-700{% else %}text-emerald-700{% endif %}"
@@ -356,7 +356,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         </article>
 
                         <article class="rounded-xl border border-gray-200 bg-white p-5 xl:col-span-1">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Painel do controlo</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Painel do controlo" %}</h3>
                             <form method="post" action="{% url 'geologia:drone_controle_update' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="space-y-4">
                                 {% csrf_token %}
                                 {% if empresa_geologia %}
@@ -372,13 +372,13 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     {% endfor %}
                                 </div>
                                 <div class="pt-3">
-                                    <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">Atualizar controlo</button>
+                                    <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Atualizar controlo" %}</button>
                                 </div>
                             </form>
                         </article>
 
                         <article class="rounded-xl border border-gray-200 bg-white p-5 xl:col-span-1">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Fila de comandos</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Fila de comandos" %}</h3>
                             <form method="post" action="{% url 'geologia:drone_comando_create' %}{% if empresa_geologia %}?empresa={{ empresa_geologia.id }}{% endif %}" class="space-y-4" id="droneCommandForm">
                                 {% csrf_token %}
                                 {% if empresa_geologia %}
@@ -392,8 +392,8 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     </div>
                                 {% endfor %}
                                 <div class="grid grid-cols-2 gap-3">
-                                    <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">Criar comando</button>
-                                    <button type="button" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold" data-drone-quick-command="rth">Criar RTH</button>
+                                    <button type="submit" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Criar comando" %}</button>
+                                    <button type="button" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold" data-drone-quick-command="rth">{% trans "Criar RTH" %}</button>
                                 </div>
                             </form>
                             <div class="mt-5 space-y-3 max-h-[420px] overflow-y-auto pr-1">
@@ -405,14 +405,14 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                         </div>
                                         <div class="text-slate-500 mt-2">
                                             {% if comando.latitude_alvo and comando.longitude_alvo %}
-                                                Alvo: {{ comando.latitude_alvo }}, {{ comando.longitude_alvo }} · {{ comando.altitude_alvo_m|default:"-" }} m
+                                                {% blocktrans with lat=comando.latitude_alvo lon=comando.longitude_alvo altitude=comando.altitude_alvo_m|default:"-" %}Alvo: {{ lat }}, {{ lon }} · {{ altitude }} m{% endblocktrans %}
                                             {% else %}
-                                                Sem coordenadas alvo
+                                                {% trans "Sem coordenadas alvo" %}
                                             {% endif %}
                                         </div>
                                     </div>
                                 {% empty %}
-                                    <div class="text-sm text-gray-500">Ainda não existem comandos na fila.</div>
+                                    <div class="text-sm text-gray-500">{% trans "Ainda não existem comandos na fila." %}</div>
                                 {% endfor %}
                             </div>
                         </article>
@@ -420,7 +420,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                 </div>
                 {% else %}
                 <div class="p-6 text-sm text-gray-600">
-                    O controlo em tempo real do drone está disponível ao nível de empresa. Seleciona uma empresa no topo para abrir o painel completo com live view, mapa clicável, bridge e fila de comandos.
+                    {% trans "O controlo em tempo real do drone está disponível ao nível de empresa. Seleciona uma empresa no topo para abrir o painel completo com live view, mapa clicável, bridge e fila de comandos." %}
                 </div>
                 {% endif %}
             </article>
@@ -428,8 +428,8 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-100">
-                        <h2 class="text-xl font-semibold text-gray-900">Importar voo DJI</h2>
-                        <p class="text-sm text-gray-500 mt-1">Fluxo pós-voo para DJI RC 2: importa metadados e anexa logo os ficheiros mais importantes da missão.</p>
+                        <h2 class="text-xl font-semibold text-gray-900">{% trans "Importar voo DJI" %}</h2>
+                        <p class="text-sm text-gray-500 mt-1">{% trans "Fluxo pós-voo para DJI RC 2: importa metadados e anexa logo os ficheiros mais importantes da missão." %}</p>
                     </div>
                     <form method="post" enctype="multipart/form-data" class="p-6 space-y-5" data-geologia-drone-import-form>
                         {% csrf_token %}
@@ -439,17 +439,17 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                         {% endif %}
 
                         <div class="rounded-xl border border-sky-100 bg-sky-50 px-4 py-4 text-sm text-sky-900">
-                            <div class="font-semibold">Fluxo recomendado para o teu setup atual</div>
+                            <div class="font-semibold">{% trans "Fluxo recomendado para o teu setup atual" %}</div>
                             <div class="mt-2 space-y-1 text-sky-800">
-                                <div>1. Termina o voo no DJI RC 2 e exporta os metadados/logs disponíveis.</div>
-                                <div>2. Importa aqui o ficheiro principal do voo e, se já existirem, anexa também ortomosaico, modelo 3D e relatório.</div>
-                                <div>3. A missão fica criada no furo e passa a alimentar geologia, histórico e produtos pós-processados.</div>
+                                <div>{% trans "1. Termina o voo no DJI RC 2 e exporta os metadados/logs disponíveis." %}</div>
+                                <div>{% trans "2. Importa aqui o ficheiro principal do voo e, se já existirem, anexa também ortomosaico, modelo 3D e relatório." %}</div>
+                                <div>{% trans "3. A missão fica criada no furo e passa a alimentar geologia, histórico e produtos pós-processados." %}</div>
                             </div>
                         </div>
 
                         <div class="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                            <strong>Resumo da importação:</strong>
-                            <span data-drone-import-summary>Aguardando selecao de furo e ficheiro.</span>
+                            <strong>{% trans "Resumo da importação:" %}</strong>
+                            <span data-drone-import-summary>{% trans "Aguardando seleção de furo e ficheiro." %}</span>
                         </div>
 
                         {% for field in form %}
@@ -461,15 +461,15 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                             </div>
                         {% endfor %}
 
-                        <button type="submit" class="w-full px-4 py-2 rounded bg-sky-700 text-white font-semibold">Importar missao</button>
+                        <button type="submit" class="w-full px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Importar missão" %}</button>
                     </form>
                 </section>
 
                 <article class="rounded-xl border border-gray-200 bg-white shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Furos para operação</h2>
-                            <p class="text-sm text-gray-500 mt-1">Entrada direta na geologia e na criação de missões por furo.</p>
+                            <h2 class="text-xl font-semibold text-gray-900">{% trans "Furos para operação" %}</h2>
+                            <p class="text-sm text-gray-500 mt-1">{% trans "Entrada direta na geologia e na criação de missões por furo." %}</p>
                         </div>
                     </div>
                     <div class="divide-y divide-gray-100 max-h-[560px] overflow-auto">
@@ -478,15 +478,15 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                             <div>
                                 <h3 class="font-semibold text-gray-900">{{ furo.nome }}</h3>
                                 <p class="text-sm text-gray-600 mt-1">{{ furo.projeto.nome }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Profundidade atual: {{ furo.profundidade_atual|default:"0" }} m</p>
+                                <p class="text-xs text-gray-500 mt-1">{% blocktrans with profundidade=furo.profundidade_atual|default:"0" %}Profundidade atual: {{ profundidade }} m{% endblocktrans %}</p>
                             </div>
                             <div class="flex flex-wrap gap-3">
-                                <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">Abrir geologia</a>
-                                <a href="{% url 'geologia:missao_create' furo.id %}" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">Nova missao</a>
+                                <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Abrir geologia" %}</a>
+                                <a href="{% url 'geologia:missao_create' furo.id %}" class="px-4 py-2 rounded bg-sky-700 text-white font-semibold">{% trans "Nova missão" %}</a>
                             </div>
                         </div>
                         {% empty %}
-                        <div class="px-6 py-8 text-center text-gray-500">Nao existem furos disponiveis para esta empresa.</div>
+                        <div class="px-6 py-8 text-center text-gray-500">{% trans "Não existem furos disponíveis para esta empresa." %}</div>
                         {% endfor %}
                     </div>
                 </article>
@@ -494,8 +494,8 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
 
             <article class="rounded-xl border border-gray-200 bg-white shadow-sm" id="sec-missoes">
                 <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-xl font-semibold text-gray-900">Missoes recentes</h2>
-                    <p class="text-sm text-gray-500 mt-1">Acompanhamento rapido das ultimas operacoes importadas ou executadas.</p>
+                    <h2 class="text-xl font-semibold text-gray-900">{% trans "Missões recentes" %}</h2>
+                    <p class="text-sm text-gray-500 mt-1">{% trans "Acompanhamento rápido das últimas operações importadas ou executadas." %}</p>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% for missao in missoes_recentes %}
@@ -509,45 +509,44 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                             </div>
                             <span class="text-xs uppercase tracking-wide rounded-full bg-sky-100 text-sky-800 px-3 py-1">{{ missao.get_status_display }}</span>
                         </div>
-                        <p class="text-sm text-gray-600 mt-3">Data: {{ missao.data_voo|date:"d/m/Y" }}</p>
-                        <p class="text-sm text-gray-600 mt-1">Captura: {{ missao.resumo_captura }}</p>
-                        <p class="text-sm text-gray-600 mt-1">Piloto: {{ missao.piloto_nome|default:"-" }}</p>
+                        <p class="text-sm text-gray-600 mt-3">{% blocktrans with data=missao.data_voo|date:"d/m/Y" %}Data: {{ data }}{% endblocktrans %}</p>
+                        <p class="text-sm text-gray-600 mt-1">{% trans "Captura:" %} {{ missao.resumo_captura }}</p>
+                        <p class="text-sm text-gray-600 mt-1">{% trans "Piloto:" %} {{ missao.piloto_nome|default:"-" }}</p>
                     </article>
                     {% empty %}
-                    <p class="text-gray-500">Ainda nao existem missoes registadas.</p>
+                    <p class="text-gray-500">{% trans "Ainda não existem missões registadas." %}</p>
                     {% endfor %}
                 </div>
             </article>
 
             <article class="rounded-xl border border-amber-200 bg-amber-50 shadow-sm">
                 <div class="px-6 py-4 border-b border-amber-200">
-                    <h2 class="text-xl font-semibold text-amber-950">Estado Atual e Continuação da Área DJI</h2>
+                    <h2 class="text-xl font-semibold text-amber-950">{% trans "Estado Atual e Continuação da Área DJI" %}</h2>
                     <p class="text-sm text-amber-900 mt-1">
-                        Esta frente fica preparada para continuar mais tarde. Como o setup atual depende de `DJI RC 2` e de uma ponte externa,
-                        o foco imediato da plataforma passa para <strong>Projetos</strong> e <strong>IA</strong>.
+                        {% trans "Esta frente fica preparada para continuar mais tarde. Como o setup atual depende de `DJI RC 2` e de uma ponte externa, o foco imediato da plataforma passa para" %} <strong>{% trans "Projetos" %}</strong> {% trans "e" %} <strong>{% trans "IA" %}</strong>.
                     </p>
                 </div>
                 <div class="p-6 grid grid-cols-1 xl:grid-cols-2 gap-4 text-sm">
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-4">
-                        <div class="font-semibold text-amber-950">Já estabilizado</div>
+                        <div class="font-semibold text-amber-950">{% trans "Já estabilizado" %}</div>
                         <p class="mt-2 text-amber-900">
-                            Interface DJI, bridge externa, estado operacional, live view, mapa, comandos e fluxo pós-voo já ficaram montados.
+                            {% trans "Interface DJI, bridge externa, estado operacional, live view, mapa, comandos e fluxo pós-voo já ficaram montados." %}
                         </p>
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-4">
-                        <div class="font-semibold text-amber-950">Limitação atual</div>
+                        <div class="font-semibold text-amber-950">{% trans "Limitação atual" %}</div>
                         <p class="mt-2 text-amber-900">
-                            Sem uma fonte externa real ligada ao ecossistema DJI, a plataforma não recebe telemetria real de forma nativa.
+                            {% trans "Sem uma fonte externa real ligada ao ecossistema DJI, a plataforma não recebe telemetria real de forma nativa." %}
                         </p>
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-4">
-                        <div class="font-semibold text-amber-950">Documento de referência</div>
+                        <div class="font-semibold text-amber-950">{% trans "Documento de referência" %}</div>
                         <p class="mt-2 text-xs text-amber-800">knowledge_base/drone/dji_roadmap.md</p>
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-white/70 px-4 py-4">
-                        <div class="font-semibold text-amber-950">Ponto de retoma</div>
+                        <div class="font-semibold text-amber-950">{% trans "Ponto de retoma" %}</div>
                         <p class="mt-2 text-amber-900">
-                            `Centro Drone DJI Mini 4 Pro` -> bridge externa -> fonte real de dados DJI -> validação operacional em campo.
+                            {% trans "`Centro Drone DJI Mini 4 Pro` -> bridge externa -> fonte real de dados DJI -> validação operacional em campo." %}
                         </p>
                     </div>
                 </div>

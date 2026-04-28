@@ -6,7 +6,7 @@
 {% block content %}
 <section class="container mx-auto p-6">
 
-    <div class="max-w-2xl mx-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg p-8 space-y-6">
+    <div class="max-w-2xl mx-auto sf-panel space-y-6">
 
         <h2 class="text-2xl font-bold text-center">➕ {% trans "Criar Projeto" %}</h2>
 
@@ -17,33 +17,33 @@
 
                 <div>
                     <label for="{{ form.nome.id_for_label }}">{% trans "Nome" %}</label>
-                    {{ form.nome|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    {{ form.nome|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                 </div>
 
                 <div>
                     <label for="{{ form.cliente.id_for_label }}">{% trans "Cliente" %}</label>
-                    {{ form.cliente|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    {{ form.cliente|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="{{ form.cidade.id_for_label }}">{% trans "Cidade" %}</label>
-                        {{ form.cidade|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                        {{ form.cidade|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                     </div>
                     <div>
                         <label for="{{ form.pais.id_for_label }}">{% trans "País" %}</label>
-                        {{ form.pais|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                        {{ form.pais|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                     </div>
                 </div>
 
                 <div>
                     <label for="{{ form.status.id_for_label }}">{% trans "Status" %}</label>
-                    {{ form.status|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    {{ form.status|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                 </div>
 
                 <div>
                     <label for="{{ form.notas.id_for_label }}">{% trans "Notas" %}</label>
-                    {{ form.notas|attr:"class:w-full p-2 rounded bg-gray-700 text-white border border-gray-600" }}
+                    {{ form.notas|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
                 </div>
 
             </div>

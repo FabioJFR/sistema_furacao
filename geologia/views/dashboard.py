@@ -7,7 +7,6 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.permissions import admin_required
 from geologia.forms import (
-    ComandoDroneSFOperacaoForm,
     ConfiguracaoDroneSFForm,
     DroneSFForm,
     MissaoProgramadaDroneSFForm,
@@ -18,20 +17,21 @@ from geologia.forms import (
 from geologia.services.drone_sf_dashboard import (
     bridge_logs_context_sf,
     bridge_status_summary_sf,
-    atualizar_estado_missao_programada_sf,
     construir_missoes_programadas_contexto,
     confirmar_comando_bridge_sf,
-    criar_comando_drone_sf_from_form,
+    construir_form_comando_sf,
     criar_ou_obter_drone_sf_demo,
-    executar_missao_programada_sf,
     motor_missoes_summary_sf,
     parse_payload_json_request_sf,
     processar_acao_operacao_detail_sf,
     processar_comandos_pendentes_bridge_sf,
     processar_ingest_estado_bridge_sf,
     processar_log_event_bridge_sf,
-    remover_missao_programada_sf,
-    guardar_form_modelo_sf,
+    processar_form_modelo_sf,
+    processar_execucao_missao_programada_sf,
+    processar_remocao_missao_programada_sf,
+    processar_toggle_missao_programada_sf,
+    resolver_operacao_bridge_sf,
     serializar_estado_operacao_sf,
 )
 from geologia.selectors.dashboard import (
@@ -138,11 +138,15 @@ def drone_sf_create(request):
 
     form = DroneSFForm(request.POST or None, empresa=empresa)
     if request.method == "POST":
-        drone = guardar_form_modelo_sf(form)
-        if drone is not None:
-            messages.success(request, "Drone S_F criado com sucesso.")
-            return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, "Não foi possível criar o Drone S_F.")
+        resultado = processar_form_modelo_sf(
+            form=form,
+            mensagem_sucesso="Drone S_F criado com sucesso.",
+            mensagem_erro="Não foi possível criar o Drone S_F.",
+        )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
+            return redirect("geologia:drone_sf_detail", pk=resultado["objeto"].pk)
+        messages.error(request, resultado["mensagem"])
 
     return render(
         request,
@@ -172,11 +176,15 @@ def drone_sf_detail(request, pk):
         empresa=drone.empresa,
     )
     if request.method == "POST":
-        configuracao_guardada = guardar_form_modelo_sf(config_form)
-        if configuracao_guardada is not None:
-            messages.success(request, "Configuração do Drone S_F atualizada.")
+        resultado = processar_form_modelo_sf(
+            form=config_form,
+            mensagem_sucesso="Configuração do Drone S_F atualizada.",
+            mensagem_erro="Não foi possível atualizar a configuração do Drone S_F.",
+        )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, "Não foi possível atualizar a configuração do Drone S_F.")
+        messages.error(request, resultado["mensagem"])
 
     return render(
         request,
@@ -200,11 +208,15 @@ def drone_sf_modulo_create(request, drone_id):
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = ModuloDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
     if request.method == "POST":
-        modulo = guardar_form_modelo_sf(form)
-        if modulo is not None:
-            messages.success(request, "Módulo do Drone S_F criado com sucesso.")
+        resultado = processar_form_modelo_sf(
+            form=form,
+            mensagem_sucesso="Módulo do Drone S_F criado com sucesso.",
+            mensagem_erro="Não foi possível criar o módulo do Drone S_F.",
+        )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, "Não foi possível criar o módulo do Drone S_F.")
+        messages.error(request, resultado["mensagem"])
 
     return render(
         request,
@@ -230,11 +242,15 @@ def drone_sf_sensor_create(request, drone_id):
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = SensorDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
     if request.method == "POST":
-        sensor = guardar_form_modelo_sf(form)
-        if sensor is not None:
-            messages.success(request, "Sensor do Drone S_F criado com sucesso.")
+        resultado = processar_form_modelo_sf(
+            form=form,
+            mensagem_sucesso="Sensor do Drone S_F criado com sucesso.",
+            mensagem_erro="Não foi possível criar o sensor do Drone S_F.",
+        )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
             return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, "Não foi possível criar o sensor do Drone S_F.")
+        messages.error(request, resultado["mensagem"])
 
     return render(
         request,
@@ -270,11 +286,9 @@ def drone_sf_operacao_detail(request, drone_id):
         empresa=drone.empresa,
         prefix="operacao_sf",
     )
-    comando_form = ComandoDroneSFOperacaoForm(
-        prefix="comando_sf",
+    comando_form = construir_form_comando_sf(
         operacao=operacao,
         empresa=drone.empresa,
-        initial={"altitude_alvo_m": operacao.alvo_altitude_m or 35.0},
     )
     missao_programada_form = MissaoProgramadaDroneSFForm(
         request.POST or None,
@@ -343,10 +357,14 @@ def drone_sf_comando_create(request, drone_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     operacao = obter_operacao_drone_sf(drone)
-    form = ComandoDroneSFOperacaoForm(request.POST or None, prefix="comando_sf", operacao=operacao, empresa=drone.empresa)
     if request.method == "POST":
-        if form.is_valid():
-            criar_comando_drone_sf_from_form(form=form, operacao=operacao, utilizador=request.user)
+        resultado = processar_comando_sf_create(
+            request_post=request.POST,
+            operacao=operacao,
+            empresa=drone.empresa,
+            utilizador=request.user,
+        )
+        if resultado["ok"]:
             messages.success(request, "Comando do Drone S_F colocado na fila.")
         else:
             messages.error(request, "Não foi possível criar o comando do Drone S_F.")
@@ -365,12 +383,8 @@ def drone_sf_missao_programada_toggle(request, drone_id, missao_id):
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
 
     novo_estado = request.POST.get("ativa") == "1"
-    atualizar_estado_missao_programada_sf(missao=missao, ativa=novo_estado)
-
-    if novo_estado:
-        messages.success(request, "Repetição automática da missão ativada.")
-    else:
-        messages.success(request, "Repetição automática da missão desativada.")
+    resultado = processar_toggle_missao_programada_sf(missao=missao, ativa=novo_estado)
+    messages.success(request, resultado["mensagem"])
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
 
@@ -386,8 +400,12 @@ def drone_sf_missao_programada_executar(request, drone_id, missao_id):
     operacao = obter_operacao_drone_sf(drone)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
 
-    executar_missao_programada_sf(operacao=operacao, missao=missao, utilizador=request.user)
-    messages.success(request, "Missão programada enviada para execução imediata na fila do Drone S_F.")
+    resultado = processar_execucao_missao_programada_sf(
+        operacao=operacao,
+        missao=missao,
+        utilizador=request.user,
+    )
+    messages.success(request, resultado["mensagem"])
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
 
@@ -401,21 +419,22 @@ def drone_sf_missao_programada_delete(request, drone_id, missao_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
-    nome_missao = remover_missao_programada_sf(missao=missao)
-    messages.success(request, f"Missão programada '{nome_missao}' removida com sucesso.")
+    resultado = processar_remocao_missao_programada_sf(missao=missao)
+    messages.success(request, resultado["mensagem"])
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
 
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_ingest_estado(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
-    if not bridge_key:
-        return JsonResponse({"ok": False, "erro": "Bridge key em falta."}, status=403)
-
-    operacao = obter_operacao_sf_por_bridge_key(bridge_key)
-    if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge S_F não autorizada."}, status=403)
+    acesso = resolver_operacao_bridge_sf(
+        request,
+        obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
+        metodo="POST",
+    )
+    if not acesso["ok"]:
+        return acesso["erro_response"]
+    operacao = acesso["operacao"]
 
     payload, erro_response = parse_payload_json_request_sf(request)
     if erro_response is not None:
@@ -437,10 +456,14 @@ def api_drone_sf_bridge_ingest_estado(request):
 @csrf_exempt
 @require_GET
 def api_drone_sf_bridge_comandos_pendentes(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
-    operacao = obter_operacao_sf_por_bridge_key(bridge_key)
-    if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge S_F não autorizada."}, status=403)
+    acesso = resolver_operacao_bridge_sf(
+        request,
+        obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
+        metodo="GET",
+    )
+    if not acesso["ok"]:
+        return acesso["erro_response"]
+    operacao = acesso["operacao"]
 
     comandos = processar_comandos_pendentes_bridge_sf(operacao)
     return JsonResponse({"ok": True, "comandos": comandos})
@@ -449,10 +472,14 @@ def api_drone_sf_bridge_comandos_pendentes(request):
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_confirmar_comando(request, comando_id):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
-    operacao = obter_operacao_sf_por_bridge_key(bridge_key)
-    if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge S_F não autorizada."}, status=403)
+    acesso = resolver_operacao_bridge_sf(
+        request,
+        obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
+        metodo="POST",
+    )
+    if not acesso["ok"]:
+        return acesso["erro_response"]
+    operacao = acesso["operacao"]
 
     comando = obter_comando_sf_operacao(operacao=operacao, comando_id=comando_id)
     payload, erro_response = parse_payload_json_request_sf(request)
@@ -468,10 +495,14 @@ def api_drone_sf_bridge_confirmar_comando(request, comando_id):
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_log_event(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
-    operacao = obter_operacao_sf_por_bridge_key(bridge_key)
-    if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge S_F não autorizada."}, status=403)
+    acesso = resolver_operacao_bridge_sf(
+        request,
+        obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
+        metodo="POST",
+    )
+    if not acesso["ok"]:
+        return acesso["erro_response"]
+    operacao = acesso["operacao"]
 
     payload, erro_response = parse_payload_json_request_sf(request)
     if erro_response is not None:

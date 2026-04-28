@@ -89,7 +89,7 @@
                     <tbody>
                         {% for material in materiais %}
                             <tr class="border-b">
-                                <td class="py-3 pr-4 font-semibold text-gray-800">{{ material.nome }}</td>
+                                <td class="py-3 pr-4 font-semibold text-gray-800 sf-break-word">{{ material.nome }}</td>
                                 <td class="py-3 pr-4">{{ material.projeto.nome|default:"-" }}</td>
                                 <td class="py-3 pr-4">{{ material.quantidade|default:"0" }}</td>
                                 <td class="py-3 pr-4">{{ material.stock_minimo|default:"0" }}</td>

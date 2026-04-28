@@ -54,19 +54,19 @@
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div class="text-xs uppercase tracking-wide text-slate-500">Campos validados</div>
+            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Campos validados" %}</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ dashboard_aprendizagem.total_validados }}</div>
         </div>
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div class="text-xs uppercase tracking-wide text-emerald-700">Acertos</div>
+            <div class="text-xs uppercase tracking-wide text-emerald-700">{% trans "Acertos" %}</div>
             <div class="text-3xl font-bold text-emerald-900 mt-2">{{ dashboard_aprendizagem.total_acertos }}</div>
         </div>
         <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-            <div class="text-xs uppercase tracking-wide text-rose-700">Falhas</div>
+            <div class="text-xs uppercase tracking-wide text-rose-700">{% trans "Falhas" %}</div>
             <div class="text-3xl font-bold text-rose-900 mt-2">{{ dashboard_aprendizagem.total_falhas }}</div>
         </div>
         <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-            <div class="text-xs uppercase tracking-wide text-sky-700">Taxa global</div>
+            <div class="text-xs uppercase tracking-wide text-sky-700">{% trans "Taxa global" %}</div>
             <div class="text-3xl font-bold text-sky-900 mt-2">
                 {% if dashboard_aprendizagem.taxa_acerto_global != None %}
                     {{ dashboard_aprendizagem.taxa_acerto_global }}%
@@ -86,10 +86,10 @@
                         <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                             <div class="font-medium text-slate-900">{{ item.label }}</div>
                             <div class="text-sm text-slate-600 mt-2">
-                                Validados: <strong>{{ item.total_validados }}</strong> ·
-                                Acertos: <strong>{{ item.total_acertos }}</strong> ·
-                                Falhas: <strong>{{ item.total_falhas }}</strong> ·
-                                Taxa: <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
+                                {% trans "Validados:" %} <strong>{{ item.total_validados }}</strong> ·
+                                {% trans "Acertos:" %} <strong>{{ item.total_acertos }}</strong> ·
+                                {% trans "Falhas:" %} <strong>{{ item.total_falhas }}</strong> ·
+                                {% trans "Taxa:" %} <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
                             </div>
                         </div>
                     {% endfor %}
@@ -106,10 +106,10 @@
                         <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                             <div class="font-medium text-slate-900">{{ item.label }}</div>
                             <div class="text-sm text-slate-600 mt-2">
-                                Validados: <strong>{{ item.total_validados }}</strong> ·
-                                Acertos: <strong>{{ item.total_acertos }}</strong> ·
-                                Falhas: <strong>{{ item.total_falhas }}</strong> ·
-                                Taxa: <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
+                                {% trans "Validados:" %} <strong>{{ item.total_validados }}</strong> ·
+                                {% trans "Acertos:" %} <strong>{{ item.total_acertos }}</strong> ·
+                                {% trans "Falhas:" %} <strong>{{ item.total_falhas }}</strong> ·
+                                {% trans "Taxa:" %} <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
                             </div>
                         </div>
                     {% endfor %}
@@ -129,9 +129,9 @@
                         <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
                             <div class="font-medium text-rose-900">{{ item.label }}</div>
                             <div class="text-sm text-rose-800 mt-2">
-                                Falhas: <strong>{{ item.total_falhas }}</strong> ·
-                                Acertos: <strong>{{ item.total_acertos }}</strong> ·
-                                Taxa: <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
+                                {% trans "Falhas:" %} <strong>{{ item.total_falhas }}</strong> ·
+                                {% trans "Acertos:" %} <strong>{{ item.total_acertos }}</strong> ·
+                                {% trans "Taxa:" %} <strong>{% if item.taxa_acerto != None %}{{ item.taxa_acerto }}%{% else %}-{% endif %}</strong>
                             </div>
                         </div>
                     {% endfor %}

@@ -24,12 +24,12 @@
         <span class="mx-2">/</span>
         <a href="{% url 'projetos:furo_list' %}" class="hover:text-gray-700">{% trans "Furos" %}</a>
         <span class="mx-2">/</span>
-        <span class="text-gray-700 font-semibold">{{ furo.nome }}</span>
+        <span class="text-gray-700 font-semibold sf-break-word">{{ furo.nome }}</span>
     </nav>
 
     <div class="furo-header">
         <div class="furo-title-wrap">
-            <h1>{% blocktrans with nome=furo.nome %}Furo {{ nome }}{% endblocktrans %}</h1>
+            <h1 class="sf-break-word">{% blocktrans with nome=furo.nome %}Furo {{ nome }}{% endblocktrans %}</h1>
             <p class="furo-subtitle">{% blocktrans with projeto_nome=furo.projeto.nome %}Projeto {{ projeto_nome }} · acompanhamento técnico, equipa e produção do furo.{% endblocktrans %}</p>
         </div>
         <div class="furo-status-badge">
@@ -58,10 +58,10 @@
 
     {% if memoria_zona_alerta %}
     <section class="furo-section">
-        <h2 class="furo-section-title">Memória Operacional da Zona</h2>
+        <h2 class="furo-section-title">{% trans "Memória Operacional da Zona" %}</h2>
         <div class="furo-memory-box">
             <p class="furo-memory-intro">
-                A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto.
+                {% trans "A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto." %}
             </p>
             <div class="furo-grid">
                 {% for item in memoria_zona_alerta %}
@@ -69,14 +69,14 @@
                         <span class="furo-stat-label">{{ item.nome }}</span>
                         <span class="furo-stat-value">{{ item.projeto }}</span>
                         <div class="furo-memory-meta">
-                            Estado: <strong>{{ item.estado }}</strong><br>
-                            Profundidade máxima: <strong>{{ item.profundidade_maxima_atingida }} m</strong><br>
-                            Metros furados: <strong>{{ item.metros_furados }} m</strong><br>
-                            Medições: <strong>{{ item.total_medicoes }}</strong> · Registos: <strong>{{ item.total_registos }}</strong><br>
-                            Despesa direta: <strong>{{ item.total_despesas }} €</strong><br>
-                            {% if item.distancia_km is not None %}Distância: <strong>{{ item.distancia_km }} km</strong><br>{% endif %}
-                            {% if item.mesma_localizacao_textual %}<strong>Mesma localização textual</strong><br>{% endif %}
-                            Localização: <strong>{{ item.localizacao }}</strong>
+                            {% trans "Estado:" %} <strong>{{ item.estado }}</strong><br>
+                            {% trans "Profundidade máxima:" %} <strong>{{ item.profundidade_maxima_atingida }} m</strong><br>
+                            {% trans "Metros furados:" %} <strong>{{ item.metros_furados }} m</strong><br>
+                            {% trans "Medições:" %} <strong>{{ item.total_medicoes }}</strong> · {% trans "Registos:" %} <strong>{{ item.total_registos }}</strong><br>
+                            {% trans "Despesa direta:" %} <strong>{{ item.total_despesas }} €</strong><br>
+                            {% if item.distancia_km is not None %}{% trans "Distância:" %} <strong>{{ item.distancia_km }} km</strong><br>{% endif %}
+                            {% if item.mesma_localizacao_textual %}<strong>{% trans "Mesma localização textual" %}</strong><br>{% endif %}
+                            {% trans "Localização:" %} <strong>{{ item.localizacao }}</strong>
                         </div>
                     </div>
                 {% endfor %}
@@ -248,7 +248,7 @@
                         <th>{% trans "Data" %}</th>
                         <th>{% trans "Intervalo" %}</th>
                         <th>{% trans "Litologia" %}</th>
-                        <th>RQD</th>
+                        <th>{% trans "RQD" %}</th>
                         <th>{% trans "Recuperação" %}</th>
                         <th>{% trans "Drone" %}</th>
                         <th>{% trans "Ações" %}</th>

@@ -129,6 +129,22 @@
             color: var(--text);
         }
 
+        .sf-break-word {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .content-wrap :where(
+            h1, h2, h3, h4, h5, h6,
+            p, span, strong, small,
+            td, th, li, div, a
+        ) {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
         .navbar {
             position: sticky;
             top: 0;
