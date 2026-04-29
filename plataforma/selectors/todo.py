@@ -10,6 +10,7 @@ _AREAS_TODO = {
             "Gestão de planos/subscrições com fluxo de cobrança e configuração PayPal.",
             "Controlo de features por entidade (empresa/individual) com painel dedicado.",
             "Área de úteis para exportação/limpeza de dados de IA e tarefas técnicas.",
+            "Arquivo técnico de furos terminado já disponível em `Úteis`, com detalhe de snapshot para consulta histórica por superuser.",
             "Dashboard TO DO com visão por app e detalhe de progresso já operacional para superuser.",
             "Revisão global dos templates com cobertura de tradução consolidada em toda a navegação principal.",
         ],
@@ -56,10 +57,14 @@ _AREAS_TODO = {
             "Várias rotas já migradas para services/selectors (empregados, stock, acesso contextual, sugestões).",
             "Suporte a contas individual e empregado com regras específicas de acesso.",
             "Refatorações de UI/UX em páginas de furo 3D e detalhe, incluindo melhorias mobile.",
+            "Fluxo de avarias de máquinas com atribuição de responsável, atualização por responsável e notificações por email para envolvidos.",
+            "Lista de despesas da empresa evoluída com ações por registo (ver, editar e apagar), incluindo detalhe e confirmação de remoção.",
+            "Formulário de despesa atualizado com botão de voltar sem gravar.",
             "Tradução i18n avançada em múltiplos templates operacionais e dashboards.",
             "Revisão final de tradução nos principais templates de detalhe, listagens, exportação e dashboards.",
             "Nova camada de separação em furos concluída: contexto de detalhe, resolução de acesso 3D, fluxos create/list/update, delete e importação 3D externa movidos para services.",
             "Lógica pesada do gráfico 3D de furos extraída para service dedicado (`furo_3d_chart`), reduzindo significativamente a complexidade da view.",
+            "Uniformização visual em curso: várias páginas críticas já migradas para paleta de botões consistente e menos saturada.",
         ],
         "proximos_passos": [
             "Continuar migração de lógica restante de views para camadas dedicadas.",
@@ -67,6 +72,7 @@ _AREAS_TODO = {
             "Reforçar testes de regressão para permissões entre superuser/admin/empregado/individual.",
             "Fechar i18n residual em mensagens transversais e textos técnicos específicos.",
             "Aplicar o mesmo padrão de orquestração por fluxos nas views restantes de operações e registos técnicos.",
+            "Concluir varredura visual final para remover estilos legacy com cores vivas remanescentes em templates menos usados.",
         ],
         "falta_fazer": [
             "API versionada para mobile/sensores/drones com contratos estáveis.",
@@ -154,7 +160,7 @@ def obter_notas_transversais_todo():
     return {
         "selectors_services": (
             "Estamos a retirar lógica solta para selectors/services em todas as apps. "
-            "A base já está bem estruturada e houve avanço forte em Projetos/Furos, mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
+            "A base já está bem estruturada e houve avanço forte em Projetos/Furos/Despesas/Avarias, mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
         ),
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "

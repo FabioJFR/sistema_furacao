@@ -46,6 +46,11 @@ Principais evoluções consolidadas nesta versão:
 - secção `Úteis` com exportação/limpeza de dados AI e operacionais
 - reforço de higiene técnica: redução de URLs hardcoded, migração contínua de CSS/JS para `static/`, e avanço na separação de `selectors/` e `services/`
 - melhorias de prontidão para deploy: hardening de `settings` por variáveis de ambiente, `STATIC_ROOT`, e limpeza de configuração de static em URL de app
+- fluxo de avarias de máquinas evoluído com atribuição de responsável, atualização de estado por responsável e notificações por email para intervenientes
+- novo arquivo técnico de furos terminados na área de plataforma (`Úteis > Arquivo de Furos`) para consulta histórica por superuser
+- lista de despesas da empresa com ações completas por registo: ver detalhe, editar e apagar
+- formulário de despesa com opção explícita de voltar sem gravar
+- uniformização visual progressiva de botões/listagens para paleta profissional em vez de cores vivas dispersas
 
 ---
 
