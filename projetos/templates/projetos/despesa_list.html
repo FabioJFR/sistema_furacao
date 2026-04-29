@@ -25,17 +25,19 @@
     </div>
 
     {% if despesas %}
-        <div class="sf-panel">
-            <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
             <table class="min-w-full text-sm">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
                         <th class="px-4 py-3 text-left">{% trans "Data" %}</th>
                         <th class="px-4 py-3 text-left">{% trans "Categoria" %}</th>
                         <th class="px-4 py-3 text-left">{% trans "Tipo" %}</th>
-                        <th class="px-4 py-3 text-left">{% trans "Descrição" %}</th>
+                        <th class="px-4 py-3 text-left w-1/4">{% trans "Descrição" %}</th>
                         <th class="px-4 py-3 text-left">{% trans "Projeto/Furo/Máquina" %}</th>
                         <th class="px-4 py-3 text-right">{% trans "Valor (€)" %}</th>
+                        {% if is_admin_user %}
+                            <th class="px-4 py-3 text-right w-56">{% trans "Ações" %}</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -44,7 +46,7 @@
                             <td class="px-4 py-3">{{ despesa.data|date:"d/m/Y" }}</td>
                             <td class="px-4 py-3">{{ despesa.get_categoria_display }}</td>
                             <td class="px-4 py-3">{{ despesa.get_tipo_display }}</td>
-                            <td class="px-4 py-3">{{ despesa.descricao }}</td>
+                            <td class="px-4 py-3 max-w-xs sf-break-word">{{ despesa.descricao }}</td>
                             <td class="px-4 py-3">
                                 {% if despesa.projeto %}{% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}{% endif %}
                                 {% if despesa.furo %}{% blocktrans with nome=despesa.furo.nome %}Furo: {{ nome }}{% endblocktrans %}{% endif %}
@@ -52,11 +54,25 @@
                                 {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}{% trans "Geral" %}{% endif %}
                             </td>
                             <td class="px-4 py-3 text-right font-semibold">{{ despesa.valor|floatformat:2 }}</td>
+                            {% if is_admin_user %}
+                                <td class="px-4 py-3 w-56">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{% url 'projetos:despesa_detail_admin' despesa.id %}" class="btn btn-primary text-xs px-3 py-1.5">
+                                            {% trans "Ver" %}
+                                        </a>
+                                        <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="btn btn-warning text-xs px-3 py-1.5">
+                                            {% trans "Editar" %}
+                                        </a>
+                                        <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="btn btn-danger text-xs px-3 py-1.5">
+                                            {% trans "Apagar" %}
+                                        </a>
+                                    </div>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            </div>
         </div>
     {% else %}
         <div class="sf-panel text-gray-600">

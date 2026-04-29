@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from projetos.models import Despesa, EmpregadoProjeto
 
@@ -32,4 +33,12 @@ def obter_lista_despesas_empregado(*, empregado):
         .select_related("projeto", "furo", "maquina")
         .distinct()
         .order_by("-data", "-criado_em")
+    )
+
+
+def obter_despesa_admin(*, empresa, despesa_id):
+    return get_object_or_404(
+        Despesa.objects.select_related("projeto", "furo", "maquina"),
+        pk=despesa_id,
+        empresa=empresa,
     )

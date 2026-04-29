@@ -76,6 +76,11 @@
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
+            {% if voltar_url %}
+                <a href="{% url voltar_url %}" class="btn btn-light">
+                    {% trans "Voltar sem gravar" %}
+                </a>
+            {% endif %}
             <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
                 {% trans "Guardar despesa" %}
             </button>

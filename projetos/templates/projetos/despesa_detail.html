@@ -1,0 +1,42 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Detalhes da despesa" %}{% endblock %}
+
+{% block content %}
+<div class="sf-page">
+    <div class="sf-panel max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">💶 {% trans "Detalhes da despesa" %}</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div><strong>{% trans "Data" %}:</strong> {{ despesa.data|date:"d/m/Y" }}</div>
+            <div><strong>{% trans "Categoria" %}:</strong> {{ despesa.get_categoria_display }}</div>
+            <div><strong>{% trans "Tipo" %}:</strong> {{ despesa.get_tipo_display }}</div>
+            <div><strong>{% trans "Valor (€)" %}:</strong> {{ despesa.valor|floatformat:2 }}</div>
+            <div class="md:col-span-2"><strong>{% trans "Descrição" %}:</strong> {{ despesa.descricao }}</div>
+            <div class="md:col-span-2">
+                <strong>{% trans "Projeto/Furo/Máquina" %}:</strong>
+                {% if despesa.projeto %}{% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}{% endif %}
+                {% if despesa.furo %}{% blocktrans with nome=despesa.furo.nome %} Furo: {{ nome }}{% endblocktrans %}{% endif %}
+                {% if despesa.maquina %}{% blocktrans with nome=despesa.maquina.nome %} Máquina: {{ nome }}{% endblocktrans %}{% endif %}
+                {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}{% trans "Geral" %}{% endif %}
+            </div>
+            {% if despesa.observacoes %}
+                <div class="md:col-span-2"><strong>{% trans "Observações" %}:</strong> {{ despesa.observacoes }}</div>
+            {% endif %}
+            {% if despesa.comprovativo %}
+                <div class="md:col-span-2">
+                    <strong>{% trans "Comprovativo" %}:</strong>
+                    <a href="{{ despesa.comprovativo.url }}" target="_blank" class="underline">{% trans "Abrir ficheiro" %}</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 flex gap-2 flex-wrap">
+            <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="btn btn-warning">{% trans "Editar" %}</a>
+            <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+            <a href="{% url 'projetos:despesa_list_admin' %}" class="btn btn-primary">{% trans "Voltar" %}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
