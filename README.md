@@ -51,6 +51,11 @@ Principais evoluções consolidadas nesta versão:
 - lista de despesas da empresa com ações completas por registo: ver detalhe, editar e apagar
 - formulário de despesa com opção explícita de voltar sem gravar
 - uniformização visual progressiva de botões/listagens para paleta profissional em vez de cores vivas dispersas
+- conector inicial MagCruiser com importação de ficheiros `CSV/LAS`, pré-visualização e gravação direta de medições
+- deteção de nome de furo nas linhas importadas para mapeamento automático com furos da empresa
+- modos de aplicação de importação: todas as medições, apenas última por furo, ou criação automática de furos em falta
+- relatório de importação com totais (gravadas/ignoradas/criadas), detalhe por furo e exportação em CSV
+- histórico de importações de dispositivo por empresa para rastreabilidade operacional
 
 ---
 
@@ -104,6 +109,16 @@ Principais evoluções consolidadas nesta versão:
 - chatbox com contexto real da empresa
 - base documental para apoiar respostas futuras
 - biblioteca documental com ficheiros textuais e PDFs com apoio por `.txt`
+
+### Dispositivos (MagCruiser)
+
+- suporte operacional inicial para fluxo MagCruiser por ficheiro (`CSV` e `LAS`)
+- preview antes de gravar para validação de profundidade/inclinação/azimute
+- reconhecimento de nome de furo por linha (`hole`, `hole_name`, `furo`, etc.)
+- associação automática ao furo existente da empresa quando há correspondência
+- opção de criação automática de furos em falta durante a importação
+- gravação estruturada para leituras brutas, survey shots e medições associadas ao furo correto
+- relatório final de importação e histórico persistido para auditoria
 
 ---
 

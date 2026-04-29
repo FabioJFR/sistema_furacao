@@ -17,6 +17,7 @@ urlpatterns = [
     path("leituras-brutas/<uuid:pk>/", views.leitura_bruta_detail, name="leitura_bruta_detail"),
 
     path("captura/", views.captura_dispositivo, name="captura"),
+    path("importacoes/<uuid:pk>/csv/", views.importacao_historico_csv, name="importacao_historico_csv"),
 
     path("shots/", views.survey_shot_list, name="survey_shot_list"),
     

@@ -5,6 +5,7 @@ from dispositivos.models import (
     LeituraDispositivoMedicaoLink,
     SessaoDispositivo,
     SurveyShot,
+    ImportacaoDispositivoHistorico,
 )
 
 
@@ -15,5 +16,5 @@ DISPOSITIVOS_MODEL_MAP = {
     "LeituraDispositivo": LeituraDispositivo,
     "SurveyShot": SurveyShot,
     "LeituraDispositivoMedicaoLink": LeituraDispositivoMedicaoLink,
+    "ImportacaoDispositivoHistorico": ImportacaoDispositivoHistorico,
 }
-

@@ -43,7 +43,7 @@ from projetos.models import Medicao
 
 
 @transaction.atomic
-def guardar_leitura_dispositivo(*, sessao, raw_payload: str):
+def guardar_leitura_dispositivo(*, sessao, raw_payload: str, furo=None):
     sessao = (
         sessao.__class__.objects.select_for_update()
         .select_related("empresa", "furo")
@@ -51,6 +51,11 @@ def guardar_leitura_dispositivo(*, sessao, raw_payload: str):
     )
 
     dados = parse_magcruiser_payload(raw_payload)
+    furo_destino = furo or sessao.furo
+    if not furo_destino:
+        raise ValueError("A sessão não tem furo associado e não foi indicado furo de destino.")
+    if furo_destino.empresa_id != sessao.empresa_id:
+        raise ValueError("O furo de destino deve pertencer à mesma empresa da sessão.")
 
     ultima_seq = (
         LeituraBrutaDispositivo.objects.filter(sessao=sessao)
@@ -69,7 +74,7 @@ def guardar_leitura_dispositivo(*, sessao, raw_payload: str):
     shot = SurveyShot.objects.create(
         sessao=sessao,
         empresa=sessao.empresa,
-        furo=sessao.furo,
+        furo=furo_destino,
         profundidade=dados["profundidade"],
         inclinacao=dados["inclinacao"],
         azimute=dados["azimute"],
@@ -80,7 +85,7 @@ def guardar_leitura_dispositivo(*, sessao, raw_payload: str):
 
     medicao = Medicao.objects.create(
         empresa=sessao.empresa,
-        furo=sessao.furo,
+        furo=furo_destino,
         profundidade_medida=dados["profundidade"],
         inclinacao_real_medida=dados["inclinacao"],
         azimute_real_medido=dados["azimute"],

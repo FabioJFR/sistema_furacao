@@ -98,6 +98,11 @@
     <div class="device-panel bg-white rounded-xl shadow p-6">
         <div class="flex flex-wrap gap-3 device-header-actions">
 
+            <a href="{% url 'dispositivos:captura' %}"
+               class="device-btn device-btn--primary bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition">
+                🔎 {% trans "Captura USB/Bluetooth" %}
+            </a>
+
             <a href="{% url 'dispositivos:dispositivo_list' %}"
                class="device-btn device-btn--primary bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                 📡 Dispositivos

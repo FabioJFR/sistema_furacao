@@ -30,11 +30,27 @@ from dispositivos.services.dashboard import (
     processar_registo_dispositivo_detectado,
     processar_teste_leitura_usb,
 )
+from dispositivos.services.magcruiser_import import (
+    gravar_importacao_magcruiser,
+    parse_magcruiser_file,
+)
+from dispositivos.services.importacao_historico import (
+    criar_historico_importacao,
+    render_historico_importacao_csv,
+)
+from dispositivos.selectors.importacao_historico import (
+    listar_historico_importacoes_qs,
+    obter_historico_importacao,
+)
+from projetos.models import Furo
 
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import random
 import time
+
+MAGCRUISER_PREVIEW_SESSION_KEY = "magcruiser_import_preview"
+MAGCRUISER_REPORT_SESSION_KEY = "magcruiser_import_report"
 
 
 def _obter_empresa_id_utilizador(request):
@@ -392,13 +408,148 @@ def captura_dispositivo(request):
     furos = obter_furos_qs(empresa_id).select_related("projeto")
     sessoes_ativas = obter_sessoes_qs(empresa_id).filter(status__in=["criada", "ligando", "ligado"])
     sessoes_recentes = obter_sessoes_qs(empresa_id)
+    sessoes_importacao = obter_sessoes_qs(empresa_id).filter(furo__isnull=False)
 
     dispositivos = dispositivos.order_by("nome")
     furos = furos.order_by("nome")
     sessoes_ativas = sessoes_ativas.select_related("dispositivo", "furo", "empregado").order_by("-iniciado_em")
     sessoes_recentes = sessoes_recentes.select_related("dispositivo", "furo", "empregado").order_by("-iniciado_em")[:10]
+    sessoes_importacao = sessoes_importacao.select_related("dispositivo", "furo").order_by("-iniciado_em")[:30]
+
+    preview_data = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
+    report_data = request.session.get(MAGCRUISER_REPORT_SESSION_KEY)
+    if preview_data:
+        preview_sessao = None
+        sessao_id = preview_data.get("sessao_id")
+        if sessao_id:
+            try:
+                preview_sessao = obter_sessao_detail(pk=sessao_id, empresa_id=empresa_id)
+            except Exception:
+                preview_sessao = None
+        preview_data["sessao"] = preview_sessao
+    historico_importacoes = listar_historico_importacoes_qs(empresa_id=empresa_id).order_by("-criado_em")[:20]
 
     if request.method == "POST":
+        action = (request.POST.get("action") or "create_session").strip()
+        if action == "preview_import":
+            sessao_id = request.POST.get("sessao_importacao_id")
+            ficheiro = request.FILES.get("magcruiser_file")
+            try:
+                sessao = obter_sessao_detail(pk=sessao_id, empresa_id=empresa_id)
+                resultado = parse_magcruiser_file(ficheiro)
+                nomes_furo_detetados = sorted(
+                    {str(row.get("hole_name", "")).strip() for row in resultado["rows"] if row.get("hole_name")}
+                )
+                furos_existentes = {
+                    nome
+                    for nome in Furo.objects.filter(
+                        empresa_id=sessao.empresa_id,
+                        nome__in=nomes_furo_detetados,
+                    ).values_list("nome", flat=True)
+                }
+                furos_em_falta = [nome for nome in nomes_furo_detetados if nome not in furos_existentes]
+                request.session[MAGCRUISER_PREVIEW_SESSION_KEY] = {
+                    "sessao_id": str(sessao.pk),
+                    "filename": resultado["filename"],
+                    "formato": resultado["formato"],
+                    "total_linhas": resultado["total_linhas"],
+                    "nomes_furo_detetados": nomes_furo_detetados,
+                    "furos_existentes": sorted(furos_existentes),
+                    "furos_em_falta": furos_em_falta,
+                    "preview_rows": [
+                        {k: str(v) if v is not None else "" for k, v in row.items()}
+                        for row in resultado["preview_rows"]
+                    ],
+                    "rows": [
+                        {k: str(v) if v is not None else "" for k, v in row.items()}
+                        for row in resultado["rows"]
+                    ],
+                }
+                request.session.modified = True
+                messages.success(
+                    request,
+                    f"Pré-visualização carregada: {resultado['total_linhas']} linhas do ficheiro {resultado['filename']}.",
+                )
+            except Exception as exc:
+                messages.error(request, f"Não foi possível preparar a importação: {exc}")
+            return redirect("dispositivos:captura")
+
+        if action == "save_import":
+            preview_guardado = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
+            if not preview_guardado:
+                messages.error(request, "Não existe pré-visualização para gravar. Faça primeiro a pré-visualização.")
+                return redirect("dispositivos:captura")
+            try:
+                sessao = obter_sessao_detail(pk=preview_guardado.get("sessao_id"), empresa_id=empresa_id)
+                modo_aplicacao = (request.POST.get("modo_aplicacao") or "all_existing").strip()
+                rows = [
+                    {
+                        "depth": row.get("depth"),
+                        "inc": row.get("inc"),
+                        "azi": row.get("azi"),
+                        "mag": row.get("mag") or None,
+                        "temp": row.get("temp") or None,
+                        "hole_name": row.get("hole_name") or None,
+                    }
+                    for row in preview_guardado.get("rows", [])
+                ]
+                resultado = gravar_importacao_magcruiser(
+                    sessao=sessao,
+                    rows=rows,
+                    modo_aplicacao=modo_aplicacao,
+                )
+                missing = resultado.get("furos_sem_match", [])
+                missing_txt = f" Furos sem correspondência: {', '.join(missing)}." if missing else ""
+                messages.success(
+                    request,
+                    (
+                        f"Foram gravadas {resultado['total_gravadas']} medições. "
+                        f"Ignoradas: {resultado.get('total_ignoradas', 0)}. "
+                        f"Furos criados: {resultado.get('furos_criados', 0)}."
+                        f"{missing_txt}"
+                    ),
+                )
+                request.session[MAGCRUISER_REPORT_SESSION_KEY] = {
+                    "sessao_id": str(sessao.pk),
+                    "modo_aplicacao": modo_aplicacao,
+                    "total_gravadas": resultado.get("total_gravadas", 0),
+                    "total_ignoradas": resultado.get("total_ignoradas", 0),
+                    "furos_criados": resultado.get("furos_criados", 0),
+                    "furos_sem_match": resultado.get("furos_sem_match", []),
+                    "resumo_por_furo": resultado.get("resumo_por_furo", {}),
+                }
+                criar_historico_importacao(
+                    empresa=sessao.empresa,
+                    sessao=sessao,
+                    utilizador=request.user,
+                    nome_ficheiro=preview_guardado.get("filename"),
+                    formato=preview_guardado.get("formato"),
+                    modo_aplicacao=modo_aplicacao,
+                    total_linhas=len(rows),
+                    total_gravadas=resultado.get("total_gravadas", 0),
+                    total_ignoradas=resultado.get("total_ignoradas", 0),
+                    furos_criados=resultado.get("furos_criados", 0),
+                    furos_sem_match=resultado.get("furos_sem_match", []),
+                    resumo_por_furo=resultado.get("resumo_por_furo", {}),
+                )
+                request.session.pop(MAGCRUISER_PREVIEW_SESSION_KEY, None)
+                request.session.modified = True
+            except Exception as exc:
+                messages.error(request, f"Erro ao gravar importação: {exc}")
+            return redirect("dispositivos:captura")
+
+        if action == "clear_import":
+            request.session.pop(MAGCRUISER_PREVIEW_SESSION_KEY, None)
+            request.session.modified = True
+            messages.info(request, "Pré-visualização removida.")
+            return redirect("dispositivos:captura")
+
+        if action == "clear_import_report":
+            request.session.pop(MAGCRUISER_REPORT_SESSION_KEY, None)
+            request.session.modified = True
+            messages.info(request, "Relatório de importação removido.")
+            return redirect("dispositivos:captura")
+
         resultado = processar_criacao_sessao_captura(
             empresa_id=empresa_id,
             empregado=empregado,
@@ -418,4 +569,19 @@ def captura_dispositivo(request):
         "furos": furos,
         "sessoes_ativas": sessoes_ativas,
         "sessoes_recentes": sessoes_recentes,
+        "sessoes_importacao": sessoes_importacao,
+        "magcruiser_preview": preview_data,
+        "magcruiser_report": report_data,
+        "historico_importacoes": historico_importacoes,
     })
+
+
+@login_required
+@require_GET
+def importacao_historico_csv(request, pk):
+    empresa_id = _obter_empresa_id_utilizador(request)
+    historico = obter_historico_importacao(pk=pk, empresa_id=empresa_id)
+    csv_content = render_historico_importacao_csv(historico)
+    response = HttpResponse(csv_content, content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="importacao-magcruiser-{historico.pk}.csv"'
+    return response

@@ -7,6 +7,7 @@ from dispositivos.models import (
     LeituraDispositivoMedicaoLink,
     SessaoDispositivo,
     SurveyShot,
+    ImportacaoDispositivoHistorico,
 )
 
 
@@ -98,4 +99,24 @@ class SurveyShotAdmin(admin.ModelAdmin):
     )
     list_filter = ("empresa", "valido", "origem", "criado_em")
     search_fields = ("id", "sessao__id", "furo__nome")
+    ordering = ("-criado_em",)
+
+
+@admin.register(ImportacaoDispositivoHistorico)
+class ImportacaoDispositivoHistoricoAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "empresa",
+        "sessao",
+        "nome_ficheiro",
+        "formato",
+        "modo_aplicacao",
+        "total_linhas",
+        "total_gravadas",
+        "total_ignoradas",
+        "furos_criados",
+        "criado_em",
+    )
+    list_filter = ("empresa", "formato", "modo_aplicacao", "criado_em")
+    search_fields = ("id", "nome_ficheiro", "sessao__id")
     ordering = ("-criado_em",)

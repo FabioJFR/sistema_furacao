@@ -36,18 +36,25 @@ _AREAS_TODO = {
             "Terceira camada aplicada: teste de leitura USB (`api_testar_leitura_usb`) movido para service com orquestração de eventos.",
             "Refatoração estrutural concluída: `dispositivos/services/dashboard.py` passou a fachada e a implementação foi dividida em `dashboard_registry`, `dashboard_capture` e `dashboard_discovery`.",
             "Revisão curta final: procura Bluetooth também movida para service e validações duplicadas removidas das views.",
+            "Conector inicial MagCruiser implementado com importação por ficheiro (`CSV/LAS`) e pré-visualização antes de gravar.",
+            "Deteção de nome de furo nas medições importadas (ex.: `hole`, `hole_name`, `furo`) com mapeamento automático para furos da empresa.",
+            "Modos de aplicação da importação entregues: todas as medições, apenas última por furo, e criação automática de furos em falta.",
+            "Relatório de importação já operacional com totais (gravadas/ignoradas/criadas), detalhe por furo e opção de descarregar CSV.",
+            "Histórico de importações por empresa guardado em base de dados, visível na página de captura.",
         ],
         "proximos_passos": [
             "Uniformizar todos os fluxos de escrita em services (criação/edição/ações).",
             "Adicionar validações de consistência para entradas de telemetria em lote.",
             "Extrair e consolidar fluxos de teste/leitura e ingestão para reduzir duplicação de mensagens/eventos nas views.",
             "Organizar `dispositivos/services/dashboard.py` em submódulos por responsabilidade para evitar ficheiro monolítico.",
+            "Adicionar importação dedicada para `XLSX` mantendo o mesmo fluxo (preview -> validação -> gravação).",
+            "Melhorar reconciliação automática de nomes de furo com regras de normalização/fuzzy matching configurável por empresa.",
         ],
         "falta_fazer": [
             "API pública para ingestão externa com autenticação forte e versionamento.",
             "Observabilidade detalhada por dispositivo (latência, erro, disponibilidade).",
         ],
-        "estado_logica": "Intermédio em evolução: principais fluxos operacionais já extraídos para services; próximo passo é refino modular interno dos próprios services.",
+        "estado_logica": "Boa evolução: fluxo MagCruiser já funcional com serviços dedicados e histórico de importação; continuam pendências de expansão para mais formatos e API externa.",
     },
     "projetos": {
         "nome": "Projetos",
@@ -160,7 +167,7 @@ def obter_notas_transversais_todo():
     return {
         "selectors_services": (
             "Estamos a retirar lógica solta para selectors/services em todas as apps. "
-            "A base já está bem estruturada e houve avanço forte em Projetos/Furos/Despesas/Avarias, mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
+            "A base já está bem estruturada e houve avanço forte em Projetos/Furos/Despesas/Avarias e agora também em Dispositivos (importação MagCruiser com histórico), mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
         ),
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "

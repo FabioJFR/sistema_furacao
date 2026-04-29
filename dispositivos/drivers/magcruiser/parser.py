@@ -20,5 +20,6 @@ def parse_magcruiser_payload(raw: str) -> dict:
         "azimute": Decimal(partes["azi"]),
         "magnetismo": Decimal(partes["mag"]) if "mag" in partes else None,
         "temperatura": Decimal(partes["temp"]) if "temp" in partes else None,
+        "nome_furo": partes.get("hole") or partes.get("hole_name") or partes.get("furo"),
         "payload_texto": raw,
     }

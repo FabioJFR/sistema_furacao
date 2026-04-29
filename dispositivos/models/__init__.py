@@ -10,6 +10,7 @@ from .leitura_dispositivo import LeituraDispositivo
 # Domínio técnico
 from .survey_shot import SurveyShot
 from .leitura_medicao_link import LeituraDispositivoMedicaoLink
+from .importacao_historico import ImportacaoDispositivoHistorico
 
 __all__ = [
     "Dispositivo",
@@ -18,4 +19,5 @@ __all__ = [
     "LeituraDispositivo",
     "SurveyShot",
     "LeituraDispositivoMedicaoLink",
+    "ImportacaoDispositivoHistorico",
 ]
