@@ -10,6 +10,8 @@ class FuroVersao(models.Model):
         ("atualizado", "Atualizado"),
         ("medicao", "Medição"),
         ("recalculo", "Recalculo"),
+        ("concluido", "Concluído"),
+        ("reativado", "Reativado"),
         ("migracao", "Migração"),
     ]
 
@@ -62,4 +64,3 @@ class FuroVersao(models.Model):
 
     def __str__(self):
         return f"{self.furo.nome} v{self.versao_numero}"
-

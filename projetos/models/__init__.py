@@ -28,6 +28,7 @@ from .medicao import Medicao
 # EQUIPAMENTOS E MATERIAIS
 # ===============================
 from .maquina import Maquina
+from .maquina_historico import MaquinaAvaria, MaquinaEventoOperacional
 from .material import (
     Material,
     LevantamentoMaterial,

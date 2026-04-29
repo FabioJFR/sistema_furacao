@@ -22,6 +22,17 @@
                 <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">⬅ {% trans "Meus Furos" %}</a>
                 <a href="{% url 'projetos:area_empregado' %}" class="btn btn-warning">🏠 {% trans "Painel" %}</a>
                 <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-success">🌐 {% trans "Ver 3D" %}</a>
+                {% if furo.estado != "concluido" %}
+                <form method="post" action="{% url 'projetos:furo_terminar' furo.id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">✅ {% trans "Terminar Furo" %}</button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'projetos:furo_reativar' furo.id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">♻️ {% trans "Reativar Furo" %}</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -64,6 +75,10 @@
                     <p><strong>{% trans "Profundidade Máxima" %}:</strong> {{ furo.profundidade_maxima_atingida|default:"0" }} m</p>
                     <p><strong>{% trans "Inclinação Planeada" %}:</strong> {{ furo.inclinacao_planeada_atual|default:"-" }}</p>
                     <p><strong>{% trans "Azimute Planeado" %}:</strong> {{ furo.azimute_planeado_atual|default:"-" }}</p>
+                    <p><strong>{% trans "Início real do furo (1.º relatório)" %}:</strong> {% if data_inicio_real_furo %}{{ data_inicio_real_furo|date:"d/m/Y" }}{% else %}-{% endif %}</p>
+                    <p><strong>{% trans "Data de criação (sistema)" %}:</strong> {{ furo.data|date:"d/m/Y H:i" }}</p>
+                    <p><strong>{% trans "Data fim da operação" %}:</strong> {% if furo.data_fim_operacao %}{{ furo.data_fim_operacao|date:"d/m/Y" }}{% else %}-{% endif %}</p>
+                    <p><strong>{% trans "Média de metros por dia" %}:</strong> {{ media_metros_por_dia_furo|default:"0" }} m/dia</p>
                 </div>
             </div>
         </div>

@@ -2,8 +2,9 @@
     width: 100%;
     margin: 0;
     padding: 30px;
-    background: #e74c3c;
-    color: #fff;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     text-align: center;
@@ -27,7 +28,7 @@
 }
 
 .ed-btn-delete {
-    background: #c0392b;
+    background: var(--btn-danger);
     color: #fff;
     padding: 10px 20px;
     border: none;
@@ -35,17 +36,17 @@
 }
 
 .ed-btn-delete:hover {
-    background: #e74c3c;
+    background: var(--btn-danger-hover);
 }
 
 .ed-btn-cancel {
     display: inline-block;
-    background: #2980b9;
+    background: #64748b;
     color: #fff;
     padding: 10px 15px;
     text-decoration: none;
 }
 
 .ed-btn-cancel:hover {
-    background: #3498db;
+    background: #475569;
 }

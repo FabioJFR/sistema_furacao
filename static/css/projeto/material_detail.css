@@ -36,27 +36,27 @@
 }
 
 .mdt-btn-edit {
-    background: #f39c12;
+    background: var(--btn-industrial);
 }
 
 .mdt-btn-edit:hover {
-    background: #f1c40f;
+    background: var(--btn-industrial-hover);
 }
 
 .mdt-btn-delete {
-    background: #c0392b;
+    background: var(--btn-danger);
 }
 
 .mdt-btn-delete:hover {
-    background: #e74c3c;
+    background: var(--btn-danger-hover);
 }
 
 .mdt-btn-back {
-    background: #2980b9;
+    background: var(--btn-industrial);
 }
 
 .mdt-btn-back:hover {
-    background: #3498db;
+    background: var(--btn-industrial-hover);
 }
 
 .mdt-grid {
@@ -67,7 +67,7 @@
 }
 
 .mdt-link {
-    color: #2980b9;
+    color: var(--primary);
     text-decoration: none;
     font-weight: 700;
 }
@@ -80,15 +80,15 @@
 }
 
 .mdt-stock-ok {
-    background: #2ecc71;
+    background: var(--btn-industrial);
 }
 
 .mdt-stock-low {
-    background: #f39c12;
+    background: #64748b;
 }
 
 .mdt-stock-zero {
-    background: #e74c3c;
+    background: var(--btn-danger);
 }
 
 .mdt-section {

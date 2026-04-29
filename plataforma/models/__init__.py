@@ -6,3 +6,4 @@ from .plano import *
 from .pagamento_empresa import *
 from .subscricao_empresa import *
 from .movimento_financeiro import *
+from .furo_arquivado import *

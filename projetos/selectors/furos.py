@@ -35,6 +35,13 @@ def _formatar_horas_furo(total_horas_float):
     return f"{float(total_horas_float):.2f} h"
 
 
+def _obter_data_registo_referencia(registo):
+    if getattr(registo, "data", None):
+        return registo.data
+    criado_em = getattr(registo, "criado_em", None)
+    return criado_em.date() if criado_em else None
+
+
 def _obter_queryset_base_furos():
     return Furo.objects.select_related("projeto")
 
@@ -152,10 +159,19 @@ def obter_contexto_detalhe_furo(pk, empresa=None):
         registos = registos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
         levantamentos = levantamentos.filter(empresa_id=empresa_id, furo__empresa_id=empresa_id)
 
+    registos_lista = list(registos)
     total_horas_registos = round(
-        sum(float(registo.horas_trabalhadas or 0) for registo in registos),
+        sum(float(registo.horas_trabalhadas or 0) for registo in registos_lista),
         2,
     )
+    total_metros_registos = round(
+        sum(float(registo.metros_furados or 0) for registo in registos_lista),
+        2,
+    )
+    datas_registo = [d for d in (_obter_data_registo_referencia(r) for r in registos_lista) if d is not None]
+    data_inicio_real = min(datas_registo) if datas_registo else (furo.data_inicio_operacao or None)
+    dias_com_registo = len(set(datas_registo))
+    media_metros_por_dia = round(total_metros_registos / dias_com_registo, 2) if dias_com_registo else 0.0
     return {
         "furo": furo,
         "medicoes": medicoes,
@@ -164,6 +180,10 @@ def obter_contexto_detalhe_furo(pk, empresa=None):
         "furo_mapa": _serializar_furo_mapa(furo),
         "total_horas_registos": round(total_horas_registos, 2),
         "total_horas_registos_display": _formatar_horas_furo(total_horas_registos),
+        "total_metros_registos": total_metros_registos,
+        "data_inicio_real_furo": data_inicio_real,
+        "dias_com_registo_furo": dias_com_registo,
+        "media_metros_por_dia_furo": media_metros_por_dia,
     }
 
 

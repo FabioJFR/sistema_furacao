@@ -308,7 +308,7 @@ def empregado_detail(request, pk, slug):
         logger.warning("Acesso bloqueado na view empregado_detail. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = obter_empregado_admin_por_pk(pk, empresa)
+    empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
     if slug != empregado.slug_url:
         return redirect(empregado)
 

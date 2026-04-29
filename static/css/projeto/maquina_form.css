@@ -1,11 +1,12 @@
 .mqf-wrap {
     max-width: 900px;
     margin: 40px auto;
-    background: #34495e;
+    background: var(--card);
+    border: 1px solid var(--border);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-    color: #ecf0f1;
+    color: var(--text);
 }
 
 .mqf-title {
@@ -20,7 +21,8 @@
 }
 
 .mqf-global-errors {
-    background: #e74c3c;
+    background: #fee2e2;
+    color: #991b1b;
     padding: 10px;
     border-radius: 6px;
 }
@@ -29,18 +31,18 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
-    color: #000;
+    color: var(--text);
 }
 
 .mqf-label {
     font-weight: 700;
     margin-bottom: 4px;
     display: block;
-    color: aliceblue;
+    color: var(--text);
 }
 
 .mqf-errors {
-    color: #ff6b6b;
+    color: #b91c1c;
     font-size: 13px;
     margin-top: 4px;
 }
@@ -61,23 +63,23 @@
 }
 
 .mqf-btn-save {
-    background-color: #27ae60;
+    background-color: var(--btn-industrial);
     color: #fff;
     border: none;
     cursor: pointer;
 }
 
 .mqf-btn-save:hover {
-    background: #2ecc71;
+    background: var(--btn-industrial-hover);
 }
 
 .mqf-btn-back {
-    background-color: #2980b9;
+    background-color: #64748b;
     color: #fff;
     text-decoration: none;
     text-align: center;
 }
 
 .mqf-btn-back:hover {
-    background: #3498db;
+    background: #475569;
 }

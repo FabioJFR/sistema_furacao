@@ -30,6 +30,11 @@
             <div class="dsh-value-soft dsh-value-pending">{{ total_empregados_pendentes }}</div>
         </div>
 
+        <div class="dsh-card-soft dsh-card-soft-warn">
+            <div class="dsh-label-soft">{% trans "Avarias de máquinas abertas" %}</div>
+            <div class="dsh-value-soft dsh-value-pending">{{ total_avarias_maquinas_abertas|default:0 }}</div>
+        </div>
+
         <div class="dsh-card-soft">
             <div class="dsh-label-soft">{% trans "Máquinas totais" %}</div>
             <div class="dsh-value-soft">{{ total_maquinas }}</div>
@@ -55,6 +60,18 @@
             </div>
         </div>
         <a href="{% url 'projetos:empregado_pendentes' %}" class="dsh-pendentes-link">{% trans "Ver pendentes" %}</a>
+    </div>
+    {% endif %}
+
+    {% if total_avarias_maquinas_abertas %}
+    <div class="dsh-pendentes-banner">
+        <div>
+            <strong>{% blocktrans with total=total_avarias_maquinas_abertas %}Existem {{ total }} avaria(s) de máquina em aberto.{% endblocktrans %}</strong>
+            <div class="dsh-pendentes-sub">
+                {% trans "Valida os registos enviados pelos trabalhadores e atualiza o estado para reparação/resolvida." %}
+            </div>
+        </div>
+        <a href="{% url 'projetos:avaria_maquina_list_admin' %}" class="dsh-pendentes-link">{% trans "Ver avarias" %}</a>
     </div>
     {% endif %}
 

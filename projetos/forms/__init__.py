@@ -19,6 +19,7 @@ from .configuracao_perfuracao import *
 # Recursos
 from .material import *
 from .maquina import *
+from .maquina_avaria import *
 from .medicao import *
 from .despesa import *
 from .sugestao import SugestaoPlataformaForm

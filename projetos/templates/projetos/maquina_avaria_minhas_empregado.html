@@ -1,0 +1,52 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Minhas Avarias de Máquina" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_avarias.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="mav-wrap">
+    <div class="mav-card">
+        <h1 class="mav-title text-2xl">{% trans "Minhas Avarias de Máquina" %}</h1>
+        <p class="mav-subtitle text-sm mt-1">{% trans "Avarias onde foste definido como responsável." %}</p>
+
+        {% if avarias %}
+            <div class="mav-table-wrap">
+                <table class="mav-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Máquina" %}</th>
+                            <th>{% trans "Estado" %}</th>
+                            <th>{% trans "Projeto" %}</th>
+                            <th>{% trans "Furo" %}</th>
+                            <th>{% trans "Descrição" %}</th>
+                            <th>{% trans "Ação" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for avaria in avarias %}
+                            <tr>
+                                <td>{{ avaria.data_inicio|date:"d/m/Y H:i" }}</td>
+                                <td>{{ avaria.maquina.nome }}</td>
+                                <td>{{ avaria.get_status_display }}</td>
+                                <td>{{ avaria.projeto.nome|default:"-" }}</td>
+                                <td>{{ avaria.furo.nome|default:"-" }}</td>
+                                <td class="sf-break-word">{{ avaria.descricao }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:avaria_maquina_update_empregado' avaria.pk %}" class="btn btn-light">{% trans "Atualizar estado" %}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="mav-empty text-sm">{% trans "Não tens avarias atribuídas neste momento." %}</div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from plataforma.models import Empresa, Plano, SubscricaoEmpresa
+from plataforma.models import Empresa, FuroArquivadoPlataforma, Plano, SubscricaoEmpresa
 
 
 def obter_empresas_dashboard_qs():
@@ -24,6 +24,7 @@ def obter_alertas_renovacao_qs():
 
 
 def obter_metricas_empresas_dashboard(empresas_qs):
+    furos_arquivados_qs = FuroArquivadoPlataforma.objects.values("furo_id_origem").distinct()
     return {
         "total_empresas": empresas_qs.count(),
         "empresas_ativas": empresas_qs.filter(status="ativa").count(),
@@ -31,4 +32,5 @@ def obter_metricas_empresas_dashboard(empresas_qs):
         "empresas_suspensas": empresas_qs.filter(status="suspensa").count(),
         "empresas_canceladas": empresas_qs.filter(status="cancelada").count(),
         "planos_ativos": Plano.objects.filter(ativo=True).count(),
+        "total_furos_arquivados_plataforma": furos_arquivados_qs.count(),
     }

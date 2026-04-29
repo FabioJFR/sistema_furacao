@@ -19,7 +19,13 @@ from plataforma.views.financas import (
     financas_saida_list,
 )
 from plataforma.views.features import features_dashboard
-from plataforma.views.uteis import uteis_dashboard, uteis_export_ai_json, uteis_clear_scope
+from plataforma.views.uteis import (
+    uteis_arquivo_furos,
+    uteis_arquivo_furo_detail,
+    uteis_dashboard,
+    uteis_export_ai_json,
+    uteis_clear_scope,
+)
 from plataforma.views.todo import todo_dashboard, todo_area_detail
 
 app_name = "plataforma"
@@ -54,6 +60,8 @@ urlpatterns = [
     path("todo/", todo_dashboard, name="todo_dashboard"),
     path("todo/<slug:area_slug>/", todo_area_detail, name="todo_area_detail"),
     path("uteis/", uteis_dashboard, name="uteis_dashboard"),
+    path("uteis/arquivo-furos/", uteis_arquivo_furos, name="uteis_arquivo_furos"),
+    path("uteis/arquivo-furos/<uuid:pk>/", uteis_arquivo_furo_detail, name="uteis_arquivo_furo_detail"),
     path("uteis/export-ai/<slug:scope>/", uteis_export_ai_json, name="uteis_export_ai_json"),
     path("uteis/clear/<slug:scope>/", uteis_clear_scope, name="uteis_clear_scope"),
     path("dispositivos/", include("dispositivos.urls")),

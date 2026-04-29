@@ -1,0 +1,42 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Atualizar Estado da Avaria" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_avarias.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="mav-wrap">
+    <div class="mav-card">
+        <h1 class="mav-title text-2xl">{% trans "Atualizar Estado da Avaria" %}</h1>
+        <p class="mav-subtitle text-sm mt-1">
+            {% blocktrans with maquina=avaria.maquina.nome data=avaria.data_inicio|date:"d/m/Y H:i" %}Avaria da máquina {{ maquina }} reportada em {{ data }}.{% endblocktrans %}
+        </p>
+
+        <div class="mav-inline-box text-sm">
+            <strong>{% trans "Descrição:" %}</strong> {{ avaria.descricao }}
+        </div>
+
+        <form method="post" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.status.label }}</label>
+                {{ form.status }}
+                {{ form.status.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.solucao.label }}</label>
+                {{ form.solucao }}
+                {{ form.solucao.errors }}
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">💾 {% trans "Guardar" %}</button>
+                <a href="{% url 'projetos:avaria_maquina_minhas_empregado' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

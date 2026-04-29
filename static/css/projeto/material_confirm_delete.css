@@ -1,8 +1,9 @@
 .mtd-wrap {
     width: 100%;
     margin: 0;
-    background: #34495e;
-    color: #ecf0f1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -25,22 +26,22 @@
 }
 
 .mtd-btn-delete {
-    background-color: #c0392b;
+    background-color: var(--btn-danger);
     color: #fff;
     border: none;
     cursor: pointer;
 }
 
 .mtd-btn-delete:hover {
-    background: #e74c3c;
+    background: var(--btn-danger-hover);
 }
 
 .mtd-btn-cancel {
-    background-color: #2980b9;
+    background-color: #64748b;
     color: #fff;
     text-decoration: none;
 }
 
 .mtd-btn-cancel:hover {
-    background: #3498db;
+    background: #475569;
 }

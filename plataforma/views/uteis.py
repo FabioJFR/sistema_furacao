@@ -1,6 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from plataforma.models import Empresa
+from plataforma.selectors.furo_arquivado import (
+    listar_estados_arquivo_furos,
+    listar_furos_arquivados_com_filtros,
+    obter_furo_arquivado,
+)
 from plataforma.services.uteis import (
     construir_contexto_dashboard_uteis,
     construir_resposta_download_json,
@@ -68,3 +74,49 @@ def uteis_clear_scope(request, scope):
     else:
         messages.error(request, resultado["mensagem"])
     return redirect("plataforma:uteis_dashboard")
+
+
+@login_required
+def uteis_arquivo_furos(request):
+    acesso = garantir_acesso_superuser(request)
+    if acesso:
+        return acesso
+
+    empresa_id = (request.GET.get("empresa") or "").strip()
+    nome_furo = (request.GET.get("nome_furo") or "").strip()
+    estado = (request.GET.get("estado") or "").strip()
+    page = request.GET.get("page") or 1
+
+    registos_page = listar_furos_arquivados_com_filtros(
+        empresa_id=empresa_id or None,
+        nome_furo=nome_furo,
+        estado=estado,
+        page=page,
+        per_page=20,
+    )
+
+    context = {
+        "registos_page": registos_page,
+        "empresas": Empresa.objects.order_by("nome"),
+        "estados_arquivo": listar_estados_arquivo_furos(),
+        "filtros": {
+            "empresa": empresa_id,
+            "nome_furo": nome_furo,
+            "estado": estado,
+        },
+    }
+    return render(request, "plataforma/uteis_arquivo_furos.html", context)
+
+
+@login_required
+def uteis_arquivo_furo_detail(request, pk):
+    acesso = garantir_acesso_superuser(request)
+    if acesso:
+        return acesso
+
+    registo = obter_furo_arquivado(pk)
+    return render(
+        request,
+        "plataforma/uteis_arquivo_furo_detail.html",
+        {"registo": registo},
+    )

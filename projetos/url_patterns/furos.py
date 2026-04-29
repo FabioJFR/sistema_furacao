@@ -10,6 +10,8 @@ urlpatterns = [
     # ---------------- FUROS ----------------
     path("", views.furo_list, name="furo_list"),
     path("novo/", views.furo_create, name="furo_create"),
+    path("<uuid:pk>/terminar/", views.furo_terminar, name="furo_terminar"),
+    path("<uuid:pk>/reativar/", views.furo_reativar, name="furo_reativar"),
     path("<uuid:pk>/", views.furo_detail_legacy, name="furo_detail_legacy"),
     path("<uuid:pk>/<slug:slug>/", views.furo_detail, name="furo_detail"),
     path("<uuid:pk>/<slug:slug>/3d/", views.furo_3d_geologico, name="furo_3d_detail"),

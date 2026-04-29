@@ -118,6 +118,20 @@ class EmpregadoFuro(models.Model):
                     "empregado": "Este empregado já está associado a este furo."
                 })
 
+        # Regra operacional:
+        # Furo concluído não aceita novas associações de trabalhadores.
+        # Em edição, permite manter a ligação já existente ao mesmo furo.
+        if self.furo and self.furo.estado == "concluido":
+            if not self.pk:
+                raise ValidationError({
+                    "furo": "Este furo está terminado e já não aceita novos trabalhadores."
+                })
+            original = EmpregadoFuro.objects.filter(pk=self.pk).only("furo_id").first()
+            if original and original.furo_id != self.furo_id:
+                raise ValidationError({
+                    "furo": "Este furo está terminado e já não aceita novos trabalhadores."
+                })
+
         if self.data_inicio and self.data_fim and self.data_fim < self.data_inicio:
             raise ValidationError({
                 "data_fim": "A data de fim não pode ser anterior à data de início."

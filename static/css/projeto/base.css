@@ -295,6 +295,22 @@
             background: var(--bg);
         }
 
+        .sf-menu-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #dc2626;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
         .nav-right {
             display: flex;
             align-items: center;
@@ -426,12 +442,12 @@
         }
 
         .btn-primary {
-            background: #2563eb;
+            background: var(--btn-industrial);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
+            background: var(--btn-industrial-hover);
         }
 
         .btn-success {
@@ -459,6 +475,45 @@
 
         .btn-danger:hover {
             background: var(--btn-danger-hover);
+        }
+
+        /* Global button color normalization across legacy templates/CSS */
+        :is(a, button, input[type="submit"])[class*="btn-"],
+        :is(a, button, input[type="submit"])[class*="-btn"],
+        :is(a, button, input[type="submit"])[class*="action-"] {
+            background: var(--btn-industrial) !important;
+            border-color: var(--btn-industrial) !important;
+            color: #ffffff !important;
+            border-radius: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.01em;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
+        }
+
+        :is(a, button, input[type="submit"])[class*="btn-"]:hover,
+        :is(a, button, input[type="submit"])[class*="-btn"]:hover,
+        :is(a, button, input[type="submit"])[class*="action-"]:hover {
+            background: var(--btn-industrial-hover) !important;
+            border-color: var(--btn-industrial-hover) !important;
+            color: #ffffff !important;
+        }
+
+        :is(a, button, input[type="submit"])[class*="danger"],
+        :is(a, button, input[type="submit"])[class*="delete"],
+        :is(a, button, input[type="submit"])[class*="remove"],
+        :is(a, button, input[type="submit"])[class*="apagar"] {
+            background: var(--btn-danger) !important;
+            border-color: var(--btn-danger) !important;
+            color: #ffffff !important;
+        }
+
+        :is(a, button, input[type="submit"])[class*="danger"]:hover,
+        :is(a, button, input[type="submit"])[class*="delete"]:hover,
+        :is(a, button, input[type="submit"])[class*="remove"]:hover,
+        :is(a, button, input[type="submit"])[class*="apagar"]:hover {
+            background: var(--btn-danger-hover) !important;
+            border-color: var(--btn-danger-hover) !important;
+            color: #ffffff !important;
         }
 
         /* Normalize Tailwind utility-colored buttons to a more professional palette */

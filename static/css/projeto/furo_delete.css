@@ -1,10 +1,11 @@
 .fd-wrap {
     width: 100%;
     margin: 0;
-    background: #e74c3c;
+    background: var(--card);
+    border: 1px solid var(--border);
     padding: 30px;
     border-radius: 10px;
-    color: #fff;
+    color: var(--text);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     text-align: center;
 }
@@ -28,22 +29,22 @@
 }
 
 .fd-btn-delete {
-    background: #fff;
-    color: #e74c3c;
+    background: var(--btn-danger);
+    color: #fff;
     border: none;
     cursor: pointer;
 }
 
 .fd-btn-delete:hover {
-    background: #f2f2f2;
+    background: var(--btn-danger-hover);
 }
 
 .fd-btn-cancel {
-    background: #2980b9;
+    background: #64748b;
     color: #fff;
     text-decoration: none;
 }
 
 .fd-btn-cancel:hover {
-    background: #3498db;
+    background: #475569;
 }

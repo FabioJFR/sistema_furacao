@@ -150,9 +150,15 @@ def criar_empregado_com_utilizador(empregado, empresa=None):
 def aprovar_empregado(empregado, empresa=None):
     validar_empregado_empresa(empregado, empresa=empresa)
 
+    # Aprovação deve funcionar mesmo quando existem dados legados com validações
+    # de modelo que não estão diretamente ligadas a este fluxo.
+    data_aprovacao = timezone.now()
+    Empregados.objects.filter(pk=empregado.pk).update(
+        aprovado=True,
+        data_aprovacao=data_aprovacao,
+    )
     empregado.aprovado = True
-    empregado.data_aprovacao = timezone.now()
-    empregado.save(update_fields=["aprovado", "data_aprovacao"])
+    empregado.data_aprovacao = data_aprovacao
 
     if empregado.user:
         empregado.user.is_active = True

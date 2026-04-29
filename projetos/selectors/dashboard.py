@@ -12,6 +12,7 @@ from projetos.models import (
     Furo,
     LevantamentoMaterial,
     Maquina,
+    MaquinaAvaria,
     Material,
     Projeto,
     RegistoDiarioEmpregado,
@@ -427,12 +428,17 @@ def obter_cards_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id=N
     empregados_qs = _filtrar_por_empresa(Empregados.objects.all(), empresa)
     maquinas_qs = _filtrar_por_empresa(Maquina.objects.all(), empresa)
     materiais_qs = _filtrar_por_empresa(Material.objects.all(), empresa)
+    avarias_abertas_qs = _filtrar_por_empresa(
+        MaquinaAvaria.objects.filter(status__in=["aberta", "em_reparacao"]),
+        empresa,
+    )
 
     return {
         "total_projetos": projetos_qs.count(),
         "total_furos": furos_qs.count(),
         "total_empregados": empregados_qs.count(),
         "total_empregados_pendentes": empregados_qs.filter(aprovado=False).count(),
+        "total_avarias_maquinas_abertas": avarias_abertas_qs.count(),
         "total_maquinas": maquinas_qs.count(),
         "total_materiais": materiais_qs.count(),
         "total_metros": round(float(total_metros), 2),

@@ -14,6 +14,10 @@
         <h1>{{ maquina.nome }}</h1>
 
         <div class="mqd-actions">
+            <a href="{% url 'projetos:avaria_maquina_create_admin' %}?maquina={{ maquina.id }}" class="mqd-btn mqd-btn-alert">
+                🚨 {% trans "Registar avaria" %}
+            </a>
+
             <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mqd-btn mqd-btn-edit">
                 ✏️ {% trans "Editar" %}
             </a>
@@ -50,6 +54,8 @@
             <p><strong>{% trans "Seguro:" %}</strong> {{ maquina.seguro|default:"-" }}</p>
             <p><strong>{% trans "Validade Seguro:" %}</strong> {{ maquina.data_seguro|default:"-" }}</p>
             <p><strong>{% trans "Validade IUC:" %}</strong> {{ maquina.data_iuc|default:"-" }}</p>
+            <p><strong>{% trans "Total de metros realizados:" %}</strong> {{ total_metros_realizados_maquina }} m</p>
+            <p><strong>{% trans "Trabalhadores que já operaram:" %}</strong> {{ total_trabalhadores_maquina }}</p>
         </div>
     </div>
 
@@ -93,6 +99,43 @@
             </div>
         {% else %}
             <p class="mqd-soft-text">{% trans "Sem furos associados." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="mqd-section">
+        <h3>{% trans "Avarias da máquina" %}</h3>
+        {% if avarias %}
+            <div class="mqd-pill-wrap">
+                {% for avaria in avarias %}
+                    <div class="mqd-soft-card">
+                        <strong>{{ avaria.get_status_display }}</strong> · {{ avaria.data_inicio|date:"d/m/Y H:i" }}
+                        {% if avaria.data_fim %} → {{ avaria.data_fim|date:"d/m/Y H:i" }}{% endif %}
+                        <div class="mqd-soft-text">{{ avaria.descricao }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mqd-soft-text">{% trans "Sem avarias registadas." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="mqd-section">
+        <h3>{% trans "Histórico operacional da máquina" %}</h3>
+        {% if eventos_operacionais %}
+            <div class="mqd-pill-wrap">
+                {% for evento in eventos_operacionais %}
+                    <div class="mqd-soft-card">
+                        <strong>{{ evento.get_tipo_evento_display }}</strong>
+                        · {{ evento.data_evento|date:"d/m/Y" }}
+                        {% if evento.projeto %} · {% trans "Projeto" %}: {{ evento.projeto.nome }}{% endif %}
+                        {% if evento.furo %} · {% trans "Furo" %}: {{ evento.furo.nome }}{% endif %}
+                        {% if evento.empregado %} · {% trans "Empregado" %}: {{ evento.empregado.nome }}{% endif %}
+                        {% if evento.metros_furados %} · {{ evento.metros_furados }} m{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mqd-soft-text">{% trans "Sem histórico operacional registado." %}</p>
         {% endif %}
     </div>
 

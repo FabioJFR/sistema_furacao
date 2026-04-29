@@ -52,7 +52,10 @@
             <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Longitude" %}</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Altitude" %}</span><span class="furo-stat-value">{{ furo.altitude|default:"-" }}</span></div>
             <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Sistema de coordenadas" %}</span><span class="furo-stat-value">{{ furo.get_sistema_coordenadas_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data de criação" %}</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data de criação (sistema)" %}</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Início real do furo (1.º relatório)" %}</span><span class="furo-stat-value">{% if data_inicio_real_furo %}{{ data_inicio_real_furo|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Média de metros por dia" %}</span><span class="furo-stat-value">{{ media_metros_por_dia_furo|default:"0" }} m/dia</span></div>
+            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data fim da operação" %}</span><span class="furo-stat-value">{% if furo.data_fim_operacao %}{{ furo.data_fim_operacao|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
         </div>
     </section>
 
@@ -122,6 +125,17 @@
             <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 {% trans "Histórico de Configurações" %}</a>
             <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 {% trans "Adicionar Medição" %}</a>
             <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="furo-action-btn btn-team">{% trans "Geologia e Drone" %}</a>
+            {% if furo.estado != "concluido" %}
+            <form method="post" action="{% url 'projetos:furo_terminar' furo.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="furo-action-btn btn-history">{% trans "Terminar Furo" %}</button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'projetos:furo_reativar' furo.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="furo-action-btn btn-team">{% trans "Reativar Furo" %}</button>
+            </form>
+            {% endif %}
         </div>
     </section>
 

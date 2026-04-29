@@ -1,11 +1,12 @@
 .eu-shell {
     max-width: 600px;
     margin: 0 auto;
-    background: #34495e;
+    background: var(--card);
+    border: 1px solid var(--border);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    color: #ecf0f1;
+    color: var(--text);
 }
 
 .eu-title {
@@ -20,19 +21,19 @@
 }
 
 .eu-global-errors {
-    background: #e74c3c;
-    color: #fff;
+    background: #fee2e2;
+    color: #991b1b;
     padding: 10px;
     border-radius: 6px;
 }
 
 .eu-errors {
-    color: #ff6b6b;
+    color: #b91c1c;
     font-size: 13px;
 }
 
 .eu-btn-save {
-    background: #27ae60;
+    background: var(--btn-industrial);
     color: #fff;
     padding: 10px 15px;
     border: none;
@@ -43,7 +44,7 @@
 }
 
 .eu-btn-save:hover {
-    background: #2ecc71;
+    background: var(--btn-industrial-hover);
 }
 
 .eu-footer {
@@ -53,7 +54,7 @@
 
 .eu-link-back {
     display: inline-block;
-    background: #2980b9;
+    background: #64748b;
     color: #fff;
     padding: 10px 15px;
     border-radius: 5px;
@@ -63,5 +64,5 @@
 }
 
 .eu-link-back:hover {
-    background: #3498db;
+    background: #475569;
 }

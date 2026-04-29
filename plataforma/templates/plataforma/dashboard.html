@@ -52,6 +52,13 @@
             <div class="metric-value">{{ planos_ativos|default:0 }}</div>
             <div class="metric-note">{% trans "Planos comerciais disponíveis para subscrição." %}</div>
         </div>
+        {% if request.user.is_superuser %}
+        <div class="card">
+            <div class="metric-label">{% trans "Furos arquivados (base plataforma)" %}</div>
+            <div class="metric-value">{{ total_furos_arquivados_plataforma|default:0 }}</div>
+            <div class="metric-note">{% trans "Furos terminados com snapshot técnico completo para consulta de plataforma." %}</div>
+        </div>
+        {% endif %}
     </div>
 
     <div class="layout">

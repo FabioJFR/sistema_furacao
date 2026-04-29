@@ -1,0 +1,54 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Avarias de Máquinas" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_avarias.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="mav-wrap">
+    <div class="mav-card">
+        <h1 class="mav-title text-2xl">{% trans "Avarias de Máquinas" %}</h1>
+        <p class="mav-subtitle text-sm mt-1">{% trans "Alertas e registos de avarias comunicados pelos trabalhadores." %}</p>
+
+        {% if avarias %}
+            <div class="mav-table-wrap">
+                <table class="mav-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Máquina" %}</th>
+                            <th>{% trans "Estado" %}</th>
+                            <th>{% trans "Empregado" %}</th>
+                            <th>{% trans "Responsável" %}</th>
+                            <th>{% trans "Furo" %}</th>
+                            <th>{% trans "Descrição" %}</th>
+                            <th>{% trans "Ação" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for avaria in avarias %}
+                            <tr>
+                                <td>{{ avaria.data_inicio|date:"d/m/Y H:i" }}</td>
+                                <td>{{ avaria.maquina.nome }}</td>
+                                <td>{{ avaria.get_status_display }}</td>
+                                <td>{{ avaria.reportado_por.nome|default:"-" }}</td>
+                                <td>{{ avaria.responsavel_empregado.nome|default:"-" }}</td>
+                                <td>{{ avaria.furo.nome|default:"-" }}</td>
+                                <td class="sf-break-word">{{ avaria.descricao }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:avaria_maquina_update_admin' avaria.pk %}" class="btn btn-light">{% trans "Gerir" %}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="mav-empty text-sm">{% trans "Sem avarias registadas." %}</div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

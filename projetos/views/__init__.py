@@ -15,3 +15,4 @@ from .definicoes import *
 from .analytics import *
 from .opcoes import *
 from .despesas import *
+from .maquina_avarias import *

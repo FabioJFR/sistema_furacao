@@ -1,6 +1,6 @@
 .ml-wrap {
-    max-width: 1100px;
-    margin: 40px auto;
+    width: 100%;
+    margin: 20px 0;
 }
 
 .ml-top {
@@ -14,7 +14,7 @@
 
 .ml-top h1 {
     margin: 0;
-    color: #2c3e50;
+    color: #0f172a;
 }
 
 .ml-btn {
@@ -26,12 +26,12 @@
 }
 
 .ml-btn-add {
-    background-color: #2980b9;
+    background-color: #0f766e;
     padding: 12px 25px;
 }
 
 .ml-btn-add:hover {
-    background: #3498db;
+    background: #115e59;
 }
 
 .ml-filter-card {
@@ -75,7 +75,7 @@
 }
 
 .ml-btn-filter {
-    background-color: #2980b9;
+    background-color: #0f766e;
     color: #fff;
     padding: 10px 18px;
     border: none;
@@ -84,13 +84,21 @@
     cursor: pointer;
 }
 
+.ml-btn-filter:hover {
+    background: #115e59;
+}
+
 .ml-btn-clear {
-    background-color: #f39c12;
+    background-color: #475569;
     color: #fff;
     padding: 10px 18px;
     border-radius: 8px;
     text-decoration: none;
     font-weight: 700;
+}
+
+.ml-btn-clear:hover {
+    background: #334155;
 }
 
 .ml-grid {
@@ -100,7 +108,8 @@
 }
 
 .ml-card {
-    background: #f4f4f4;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     padding: 25px;
@@ -111,7 +120,7 @@
 
 .ml-card h2 {
     margin-top: 0;
-    color: #2c3e50;
+    color: #0f172a;
 }
 
 .ml-card-actions {
@@ -133,27 +142,27 @@
 }
 
 .ml-action-view {
-    background-color: #27ae60;
+    background-color: #0f766e;
 }
 
 .ml-action-view:hover {
-    background: #2ecc71;
+    background: #115e59;
 }
 
 .ml-action-edit {
-    background-color: #f39c12;
+    background-color: #334155;
 }
 
 .ml-action-edit:hover {
-    background: #f1c40f;
+    background: #1f2937;
 }
 
 .ml-action-delete {
-    background-color: #c0392b;
+    background-color: #64748b;
 }
 
 .ml-action-delete:hover {
-    background: #e74c3c;
+    background: #475569;
 }
 
 .ml-empty {

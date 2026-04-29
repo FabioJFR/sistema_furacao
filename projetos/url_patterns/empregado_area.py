@@ -31,4 +31,7 @@ urlpatterns = [
     # ---------------- MATERIAIS ----------------
     path("materiais-disponiveis/", views.materiais_disponiveis_empregado, name="materiais_disponiveis_empregado"),
     path("materiais/novo/", views.material_create_empregado, name="material_create_empregado"),
+    path("maquinas/avarias/nova/", views.avaria_maquina_create_empregado, name="avaria_maquina_create_empregado"),
+    path("maquinas/avarias/", views.avaria_maquina_minhas_empregado, name="avaria_maquina_minhas_empregado"),
+    path("maquinas/avarias/<uuid:pk>/editar/", views.avaria_maquina_update_empregado, name="avaria_maquina_update_empregado"),
 ]

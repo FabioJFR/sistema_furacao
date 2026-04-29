@@ -13,6 +13,7 @@ from core.permissions import user_is_empresa_admin
 from core.permissions import user_is_global_admin
 from ..decorators import admin_required, empregado_required
 from projetos.selectors.furos import (
+    empregado_trabalhou_no_furo,
     obter_furo,
     obter_lista_furos,
     obter_medicoes_furo_para_empregado,
@@ -40,6 +41,7 @@ from projetos.services.furo_fluxos import (
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
 from projetos.services.acesso_contexto import obter_empresa_contexto_gestao_furos
+from projetos.services.furos import terminar_furo, reativar_furo
 
 logger = logging.getLogger("core")
 
@@ -145,6 +147,16 @@ def furo_detail_empregado(request, pk):
 
     registos_furo = obter_registos_furo_para_empregado(empregado, furo)
     medicoes_furo = obter_medicoes_furo_para_empregado(empregado, furo)
+    registos_lista = list(registos_furo)
+    datas_registo = [
+        registo.data or (registo.criado_em.date() if registo.criado_em else None)
+        for registo in registos_lista
+    ]
+    datas_registo = [d for d in datas_registo if d is not None]
+    data_inicio_real = min(datas_registo) if datas_registo else (furo.data_inicio_operacao or None)
+    dias_com_registo = len(set(datas_registo))
+    total_metros_registos = round(sum(float(r.metros_furados or 0) for r in registos_lista), 2)
+    media_metros_por_dia = round(total_metros_registos / dias_com_registo, 2) if dias_com_registo else 0.0
 
     logger.info(
         "View furo_detail_empregado carregada com sucesso em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -157,6 +169,10 @@ def furo_detail_empregado(request, pk):
         "furo": furo,
         "registos_furo": registos_furo,
         "medicoes_furo": medicoes_furo,
+        "data_inicio_real_furo": data_inicio_real,
+        "dias_com_registo_furo": dias_com_registo,
+        "total_metros_registos": total_metros_registos,
+        "media_metros_por_dia_furo": media_metros_por_dia,
     })
 
 
@@ -258,6 +274,38 @@ def furo_detail(request, pk, slug):
         furo.pk,
     )
     return render(request, "projetos/furo_detail.html", context)
+
+
+@login_required
+def furo_terminar(request, pk):
+    if request.method != "POST":
+        return redirect("projetos:furo_detail_legacy", pk=pk)
+
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        return resposta_erro
+
+    furo = obter_furo(pk, empresa=empresa_id)
+    terminar_furo(furo=furo, empresa=empresa_id, terminado_por=request.user)
+    messages.success(request, "Furo terminado com sucesso.")
+    return redirect(furo)
+
+
+@login_required
+def furo_reativar(request, pk):
+    if request.method != "POST":
+        return redirect("projetos:furo_detail_legacy", pk=pk)
+
+    empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if resposta_erro:
+        return resposta_erro
+
+    furo = obter_furo(pk, empresa=empresa_id)
+    reativar_furo(furo=furo, empresa=empresa_id)
+    messages.success(request, "Furo reativado com sucesso.")
+    return redirect(furo)
 
 # Multiempresa: o administrador só pode listar e gerir furos da sua própria empresa.
 @login_required

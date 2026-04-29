@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
@@ -113,6 +114,8 @@ class Furo(models.Model):
     # ------------------------
     metros_furados = models.FloatField(default=0.0)
     total_horas = models.DurationField(null=True, blank=True)
+    data_inicio_operacao = models.DateField(null=True, blank=True)
+    data_fim_operacao = models.DateField(null=True, blank=True)
 
     # ------------------------
     # INFORMAÇÃO EXTRA
@@ -229,6 +232,15 @@ class Furo(models.Model):
                     raise ValidationError({
                         "projeto": "Não é permitido mover um furo para um projeto de outra empresa."
                     })
+
+        if self.data_inicio_operacao and self.data_fim_operacao:
+            if self.data_fim_operacao < self.data_inicio_operacao:
+                raise ValidationError({
+                    "data_fim_operacao": "A data de fim da operação não pode ser anterior à data de início da operação."
+                })
+
+        if self.estado == "concluido" and not self.data_fim_operacao:
+            self.data_fim_operacao = timezone.now().date()
 
     def save(self, *args, **kwargs):
         if self.projeto and self.projeto.empresa_id:

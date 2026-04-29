@@ -1,4 +1,5 @@
 from core.permissions import user_is_empresa_admin, user_is_empregado, user_is_platform_admin
+from projetos.models import MaquinaAvaria
 from projetos.selectors.acesso import obter_empregado_por_user, obter_perfil_ativo_por_user
 from projetos.selectors.preferencias import obter_ou_criar_preferencias_user
 
@@ -30,6 +31,22 @@ def menu_context(request):
 
     is_admin_user = is_empresa_admin
     is_empregado_user = user_is_empregado(user)
+    total_avarias_maquinas_abertas_menu = 0
+    total_minhas_avarias_maquinas_abertas_menu = 0
+
+    empresa_id_menu = getattr(perfil, "empresa_id", None) or getattr(empregado_menu_obj, "empresa_id", None)
+    if is_admin_user and empresa_id_menu:
+        total_avarias_maquinas_abertas_menu = MaquinaAvaria.objects.filter(
+            empresa_id=empresa_id_menu,
+            status__in=["aberta", "em_reparacao"],
+        ).count()
+    if is_empregado_user and empregado_menu_obj and empregado_menu_obj.empresa_id:
+        total_minhas_avarias_maquinas_abertas_menu = MaquinaAvaria.objects.filter(
+            empresa_id=empregado_menu_obj.empresa_id,
+            responsavel_empregado_id=empregado_menu_obj.id,
+            status__in=["aberta", "em_reparacao"],
+        ).count()
+
     preferencias = getattr(request, "sf_preferencias", None)
     if preferencias is None:
         preferencias, _ = obter_ou_criar_preferencias_user(user)
@@ -42,5 +59,7 @@ def menu_context(request):
         "is_empresa_admin": is_empresa_admin,
         "perfil_plataforma": perfil,
         "empregado_menu_obj": empregado_menu_obj,
+        "total_avarias_maquinas_abertas_menu": total_avarias_maquinas_abertas_menu,
+        "total_minhas_avarias_maquinas_abertas_menu": total_minhas_avarias_maquinas_abertas_menu,
         "tamanho_texto": getattr(preferencias, "tamanho_texto", "normal"),
     }

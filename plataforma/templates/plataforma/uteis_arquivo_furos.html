@@ -1,0 +1,119 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Arquivo de Furos" %}{% endblock %}
+{% block page_title %}{% trans "Arquivo de Furos" %}{% endblock %}
+{% block page_description %}{% trans "Consulta de snapshots dos furos arquivados para histórico técnico futuro (superuser)." %}{% endblock %}
+
+{% block plataforma_content %}
+<div class="space-y-6">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="text-xl font-semibold text-slate-900">{% trans "Filtros" %}</h2>
+            <a href="{% url 'plataforma:uteis_dashboard' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                {% trans "Voltar a Úteis" %}
+            </a>
+        </div>
+        <form method="get" class="mt-4 grid gap-4 md:grid-cols-4">
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-slate-700">{% trans "Empresa" %}</span>
+                <select name="empresa" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900">
+                    <option value="">{% trans "Todas" %}</option>
+                    {% for empresa in empresas %}
+                        <option value="{{ empresa.id }}" {% if filtros.empresa == empresa.id|stringformat:"s" %}selected{% endif %}>
+                            {{ empresa.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-slate-700">{% trans "Nome do furo" %}</span>
+                <input type="text" name="nome_furo" value="{{ filtros.nome_furo }}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900">
+            </label>
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-slate-700">{% trans "Estado/Origem" %}</span>
+                <select name="estado" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for st in estados_arquivo %}
+                        <option value="{{ st }}" {% if filtros.estado == st %}selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="inline-flex items-center rounded-xl bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+                    {% trans "Filtrar" %}
+                </button>
+                <a href="{% url 'plataforma:uteis_arquivo_furos' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                    {% trans "Limpar" %}
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-xl font-semibold text-slate-900">
+            {% trans "Registos arquivados" %} ({{ registos_page.paginator.count }})
+        </h2>
+        {% if registos_page %}
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full min-w-[920px] text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-left text-slate-600">
+                            <th class="py-2 pr-3">{% trans "Data arquivo" %}</th>
+                            <th class="py-2 pr-3">{% trans "Empresa" %}</th>
+                            <th class="py-2 pr-3">{% trans "Furo" %}</th>
+                            <th class="py-2 pr-3">{% trans "Origem" %}</th>
+                            <th class="py-2 pr-3">{% trans "Versão" %}</th>
+                            <th class="py-2 pr-3">{% trans "Terminado por" %}</th>
+                            <th class="py-2 pr-3">{% trans "Ações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in registos_page %}
+                            <tr class="border-b border-slate-100 align-top">
+                                <td class="py-2 pr-3 text-slate-700">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                                <td class="py-2 pr-3 text-slate-700">{{ item.empresa.nome|default:"-" }}</td>
+                                <td class="py-2 pr-3 text-slate-900 sf-break-word">{{ item.nome_furo|default:item.furo_id_origem }}</td>
+                                <td class="py-2 pr-3 text-slate-700">{{ item.estado_no_arquivo }}</td>
+                                <td class="py-2 pr-3 text-slate-700">{{ item.versao_arquivo }}</td>
+                                <td class="py-2 pr-3 text-slate-700">{{ item.terminado_por.username|default:"-" }}</td>
+                                <td class="py-2 pr-3 text-slate-700">
+                                    <a href="{% url 'plataforma:uteis_arquivo_furo_detail' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
+                                        {% trans "Ver snapshot" %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 flex items-center gap-2 text-sm">
+                {% if registos_page.has_previous %}
+                    <a
+                        href="?page={{ registos_page.previous_page_number }}&empresa={{ filtros.empresa }}&nome_furo={{ filtros.nome_furo }}&estado={{ filtros.estado }}"
+                        class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-slate-700 hover:bg-slate-200"
+                    >
+                        {% trans "Anterior" %}
+                    </a>
+                {% endif %}
+                <span class="text-slate-600">
+                    {% blocktrans with page=registos_page.number total=registos_page.paginator.num_pages %}Página {{ page }} de {{ total }}{% endblocktrans %}
+                </span>
+                {% if registos_page.has_next %}
+                    <a
+                        href="?page={{ registos_page.next_page_number }}&empresa={{ filtros.empresa }}&nome_furo={{ filtros.nome_furo }}&estado={{ filtros.estado }}"
+                        class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-slate-700 hover:bg-slate-200"
+                    >
+                        {% trans "Seguinte" %}
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                {% trans "Ainda não existem furos arquivados com estes filtros." %}
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

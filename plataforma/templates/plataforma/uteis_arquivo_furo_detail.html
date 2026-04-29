@@ -1,0 +1,30 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Snapshot de Furo Arquivado" %}{% endblock %}
+{% block page_title %}{% trans "Snapshot de Furo Arquivado" %}{% endblock %}
+{% block page_description %}{% trans "Detalhe técnico completo do registo arquivado." %}{% endblock %}
+
+{% block plataforma_content %}
+<div class="space-y-6">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="text-xl font-semibold text-slate-900 sf-break-word">{{ registo.nome_furo|default:registo.furo_id_origem }}</h2>
+            <a href="{% url 'plataforma:uteis_arquivo_furos' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                {% trans "Voltar ao Arquivo de Furos" %}
+            </a>
+        </div>
+        <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4 text-sm text-slate-700">
+            <div><strong>{% trans "Data arquivo:" %}</strong> {{ registo.criado_em|date:"d/m/Y H:i" }}</div>
+            <div><strong>{% trans "Empresa:" %}</strong> {{ registo.empresa.nome|default:"-" }}</div>
+            <div><strong>{% trans "Origem:" %}</strong> {{ registo.estado_no_arquivo }}</div>
+            <div><strong>{% trans "Versão:" %}</strong> {{ registo.versao_arquivo }}</div>
+        </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-slate-900">{% trans "JSON completo do snapshot" %}</h3>
+        <pre class="mt-4 max-h-[70vh] overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-800">{{ registo.dados_snapshot|pprint }}</pre>
+    </section>
+</div>
+{% endblock %}

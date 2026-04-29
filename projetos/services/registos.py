@@ -7,6 +7,7 @@ from django.utils import timezone
 from projetos.models import Furo, RegistoDiarioFotoAmostra
 from projetos.services.empregados import recalcular_resumo_empregado
 from projetos.services.furos import recalcular_resumo_furo
+from projetos.services.maquina_historico import registar_operacao_maquinas_por_registo
 
 
 
@@ -71,6 +72,8 @@ def _preparar_registo_para_guardar(registo, empregado):
         return None
 
     furo = _obter_furo_para_registo(registo.furo_id, empregado)
+    if furo.estado == "concluido" and not registo.pk:
+        raise ValidationError("Este furo está terminado e não aceita novos relatórios.")
     _validar_registo_multiempresa(registo, empregado, furo=furo)
     _preencher_snapshot_furo_no_registo(registo, furo)
     return furo
@@ -88,11 +91,17 @@ def _atualizar_resumo_furo_com_registo(furo, registo):
     horas_registo = registo.horas_trabalhadas_furo or timedelta()
     furo.total_horas = total_horas_atual + horas_registo
 
+    data_registo = registo.data or (registo.criado_em.date() if registo.criado_em else None)
+    if data_registo:
+        if not furo.data_inicio_operacao or data_registo < furo.data_inicio_operacao:
+            furo.data_inicio_operacao = data_registo
+
     furo.save(
         update_fields=[
             "profundidade_atual",
             "profundidade_maxima_atingida",
             "total_horas",
+            "data_inicio_operacao",
         ]
     )
 
@@ -118,6 +127,7 @@ def criar_registo_diario(form, empregado):
 
     if furo:
         _atualizar_resumo_furo_com_registo(furo, registo)
+        registar_operacao_maquinas_por_registo(registo=registo, empregado=empregado)
 
     _recalcular_dependencias_registo(empregado, furo_novo=registo.furo)
     return registo

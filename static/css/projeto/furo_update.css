@@ -1,5 +1,5 @@
 .fu-shell {
-    background: #34495e;
+    background: var(--bg);
     min-height: 100vh;
     padding: 40px;
 }
@@ -55,28 +55,28 @@
 }
 
 .fu-btn-save {
-    background: #27ae60;
+    background: var(--btn-industrial);
     border: none;
     cursor: pointer;
 }
 
 .fu-btn-save:hover {
-    background: #2ecc71;
+    background: var(--btn-industrial-hover);
 }
 
 .fu-btn-cancel {
     display: inline-block;
-    background: #e74c3c;
+    background: var(--btn-danger);
     text-decoration: none;
 }
 
 .fu-btn-cancel:hover {
-    background: #c0392b;
+    background: var(--btn-danger-hover);
 }
 
 .fu-form-errors {
-    background: #e74c3c;
-    color: #fff;
+    background: #fee2e2;
+    color: #991b1b;
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 20px;

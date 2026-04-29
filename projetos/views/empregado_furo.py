@@ -55,6 +55,9 @@ def furo_adicionar_empregado(request, furo_id):
         return resposta_erro
 
     furo = obter_furo_admin_por_pk_empresa(furo_id, empresa)
+    if furo.estado == "concluido":
+        messages.error(request, "Este furo está terminado e já não aceita novos trabalhadores.")
+        return redirect(furo)
 
     if request.method == "POST":
         form = EmpregadoFuroForm(request.POST, empresa=empresa, furo=furo)

@@ -1,6 +1,6 @@
 .mql-wrap {
-    max-width: 1100px;
-    margin: 30px auto;
+    width: 100%;
+    margin: 20px 0;
 }
 
 .mql-top {
@@ -17,7 +17,7 @@
 }
 
 .mql-btn-add {
-    background-color: #27ae60;
+    background-color: #0f766e;
     color: #fff;
     padding: 10px 20px;
     border-radius: 8px;
@@ -27,7 +27,7 @@
 }
 
 .mql-btn-add:hover {
-    background: #2ecc71;
+    background: #115e59;
 }
 
 .mql-grid {
@@ -37,24 +37,31 @@
 }
 
 .mql-card {
-    background: #34495e;
+    background: #ffffff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    color: #ecf0f1;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    color: #0f172a;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .mql-card:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
 }
 
 .mql-card h2 {
     margin-top: 0;
     margin-bottom: 12px;
+    color: #0f172a;
+}
+
+.mql-card p {
+    color: #334155;
 }
 
 .mql-actions {
@@ -74,27 +81,27 @@
 }
 
 .mql-action-view {
-    background: #2980b9;
+    background: #0f766e;
 }
 
 .mql-action-view:hover {
-    background: #3498db;
+    background: #115e59;
 }
 
 .mql-action-edit {
-    background: #f39c12;
+    background: #334155;
 }
 
 .mql-action-edit:hover {
-    background: #f1c40f;
+    background: #1f2937;
 }
 
 .mql-action-delete {
-    background: #c0392b;
+    background: #64748b;
 }
 
 .mql-action-delete:hover {
-    background: #e74c3c;
+    background: #475569;
 }
 
 .mql-empty {

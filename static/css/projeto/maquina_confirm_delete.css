@@ -1,11 +1,12 @@
 .mcd-wrap {
     width: 100%;
     margin: 0;
-    background: #34495e;
+    background: var(--card);
+    border: 1px solid var(--border);
     padding: 30px;
     border-radius: 12px;
     text-align: center;
-    color: #ecf0f1;
+    color: var(--text);
 }
 
 .mcd-title {
@@ -34,14 +35,14 @@
 }
 
 .mcd-btn-delete {
-    background: #c0392b;
+    background: var(--btn-danger);
     color: #fff;
     border: none;
     cursor: pointer;
 }
 
 .mcd-btn-cancel {
-    background: #2980b9;
+    background: #64748b;
     color: #fff;
     text-decoration: none;
 }

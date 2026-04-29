@@ -1,4 +1,6 @@
 from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Min
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -180,10 +182,15 @@ def recalcular_resumo_furo(furo):
     profundidade_corrente = furo.profundidade_inicial or 0.0
     profundidade_maxima = profundidade_corrente
     total_horas = timedelta()
+    data_inicio_operacao = None
 
     registos_para_atualizar = []
 
     for registo in registos:
+        data_ref = registo.data or (registo.criado_em.date() if registo.criado_em else None)
+        if data_ref and (data_inicio_operacao is None or data_ref < data_inicio_operacao):
+            data_inicio_operacao = data_ref
+
         metros_turno = registo.metros_furados or 0.0
 
         profundidade_antes = profundidade_corrente
@@ -218,14 +225,51 @@ def recalcular_resumo_furo(furo):
     furo.profundidade_atual = profundidade_corrente
     furo.profundidade_maxima_atingida = profundidade_maxima
     furo.total_horas = total_horas
+    if data_inicio_operacao:
+        furo.data_inicio_operacao = data_inicio_operacao
 
     furo.save(
         update_fields=[
             "profundidade_atual",
             "profundidade_maxima_atingida",
             "total_horas",
+            "data_inicio_operacao",
         ]
     )
     registar_versao_furo(furo, origem="recalculo")
 
+    return furo
+
+
+@transaction.atomic
+def terminar_furo(*, furo, empresa=None, terminado_por=None):
+    validar_empresa_furo(furo, empresa=empresa)
+    hoje = timezone.now().date()
+    primeiro_registo = (
+        RegistoDiarioEmpregado.objects.filter(furo=furo, empresa_id=furo.empresa_id)
+        .aggregate(data_min=Min("data"))
+        .get("data_min")
+    )
+    data_inicio_operacao = primeiro_registo or furo.data_inicio_operacao
+
+    Furo.objects.filter(pk=furo.pk).update(
+        estado="concluido",
+        data_inicio_operacao=data_inicio_operacao,
+        data_fim_operacao=hoje,
+    )
+    furo.refresh_from_db()
+    registar_versao_furo(furo, origem="concluido", criado_por=terminado_por)
+    return furo
+
+
+@transaction.atomic
+def reativar_furo(*, furo, empresa=None):
+    validar_empresa_furo(furo, empresa=empresa)
+
+    Furo.objects.filter(pk=furo.pk).update(
+        estado="ativo",
+        data_fim_operacao=None,
+    )
+    furo.refresh_from_db()
+    registar_versao_furo(furo, origem="reativado")
     return furo

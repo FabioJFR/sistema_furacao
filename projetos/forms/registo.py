@@ -316,6 +316,9 @@ class RegistoDiarioEmpregadoForm(BaseRegistoDiarioModelForm):
                 empresa=empresa_id if self.empresa is not None else None,
             )
 
+        if not self.instance.pk:
+            self.fields["furo"].queryset = self.fields["furo"].queryset.exclude(estado="concluido")
+
 
 class RegistoDiarioEmpregadoAdminForm(BaseRegistoDiarioModelForm):
     class Meta(BaseRegistoDiarioModelForm.Meta):
@@ -349,3 +352,6 @@ class RegistoDiarioEmpregadoAdminForm(BaseRegistoDiarioModelForm):
             self.fields["empregado"].queryset = listar_empregados_empresa_qs(empresa_id)
             self.fields["projeto"].queryset = listar_projetos_empresa_qs(empresa_id)
             self.fields["furo"].queryset = listar_furos_empresa_qs(empresa_id)
+
+        if not self.instance.pk:
+            self.fields["furo"].queryset = self.fields["furo"].queryset.exclude(estado="concluido")

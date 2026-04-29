@@ -4,6 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from projetos.models import FuroVersao
+from plataforma.services.furo_arquivado import arquivar_furo_na_plataforma
 
 
 def _serialize_json(value):
@@ -86,5 +87,11 @@ def registar_versao_furo(furo, *, origem="atualizado", criado_por=None, observac
         criado_por=criado_por,
         observacoes=observacoes or "",
     )
+    arquivar_furo_na_plataforma(
+        furo=furo,
+        terminado_por=criado_por,
+        versao_arquivo=versao.versao_numero,
+        snapshot_override=snapshot,
+        estado_no_arquivo=origem,
+    )
     return versao
-

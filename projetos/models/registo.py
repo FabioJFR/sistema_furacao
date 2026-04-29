@@ -184,6 +184,20 @@ class RegistoDiarioEmpregado(models.Model):
                 "furo": "O furo selecionado não pertence ao projeto escolhido."
             })
 
+        # Regra operacional:
+        # Furo concluído não aceita novos registos.
+        # Em edição, permite guardar se o registo já estava ligado ao mesmo furo.
+        if self.furo and self.furo.estado == "concluido":
+            if not self.pk:
+                raise ValidationError({
+                    "furo": "Este furo está terminado e já não aceita novos relatórios."
+                })
+            original = RegistoDiarioEmpregado.objects.filter(pk=self.pk).only("furo_id").first()
+            if original and original.furo_id != self.furo_id:
+                raise ValidationError({
+                    "furo": "Este furo está terminado e já não aceita novos relatórios."
+                })
+
         if self.metros_furados is not None and self.metros_furados < 0:
             raise ValidationError({
                 "metros_furados": "Os metros furados não podem ser negativos."

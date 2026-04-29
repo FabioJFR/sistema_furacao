@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from django.core.files.base import File
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from inspecao_ai.models import AnaliseImagemAI, ChatMensagemAI, ChatSessaoAI, DeteccaoImagemAI
@@ -17,12 +17,14 @@ from projetos.models import (
     Furo,
     LevantamentoMaterial,
     Maquina,
+    MaquinaAvaria,
     Material,
     Medicao,
     Projeto,
     RegistoDiarioEmpregado,
 )
 from projetos.request_context import get_current_user
+from projetos.services.maquina_historico import criar_evento_operacional_maquina
 
 
 TRACKED_MODELS = (
@@ -36,6 +38,7 @@ TRACKED_MODELS = (
     LevantamentoMaterial,
     DevolucaoMaterial,
     Maquina,
+    MaquinaAvaria,
     Despesa,
     AnaliseImagemAI,
     DeteccaoImagemAI,
@@ -187,3 +190,58 @@ def analytics_pre_delete(sender, instance, **kwargs):
         return
     instance._analytics_snapshot_antes = _snapshot(instance)
     _criar_evento(instance, "delete")
+
+
+@receiver(m2m_changed, sender=Maquina.projetos.through)
+def maquina_projetos_m2m_changed(sender, instance, action, pk_set, **kwargs):
+    if action != "post_add" or not pk_set:
+        return
+    for projeto in instance.projetos.filter(pk__in=pk_set):
+        criar_evento_operacional_maquina(
+            maquina=instance,
+            tipo_evento="alocacao_projeto",
+            projeto=projeto,
+            observacoes="Associação de máquina ao projeto.",
+        )
+
+
+@receiver(m2m_changed, sender=Maquina.furos.through)
+def maquina_furos_m2m_changed(sender, instance, action, pk_set, **kwargs):
+    if action != "post_add" or not pk_set:
+        return
+    for furo in instance.furos.filter(pk__in=pk_set):
+        criar_evento_operacional_maquina(
+            maquina=instance,
+            tipo_evento="alocacao_furo",
+            projeto=furo.projeto if getattr(furo, "projeto_id", None) else None,
+            furo=furo,
+            observacoes="Associação de máquina ao furo.",
+        )
+
+
+@receiver(post_save, sender=MaquinaAvaria)
+def maquina_avaria_post_save(sender, instance, created, **kwargs):
+    if created:
+        criar_evento_operacional_maquina(
+            maquina=instance.maquina,
+            tipo_evento="avaria_reportada",
+            projeto=instance.projeto,
+            furo=instance.furo,
+            empregado=instance.reportado_por,
+            data_inicio=instance.data_inicio,
+            data_fim=instance.data_fim,
+            observacoes=instance.descricao or "",
+        )
+        return
+
+    if instance.status == "resolvida" and instance.data_fim:
+        criar_evento_operacional_maquina(
+            maquina=instance.maquina,
+            tipo_evento="avaria_resolvida",
+            projeto=instance.projeto,
+            furo=instance.furo,
+            empregado=instance.reportado_por,
+            data_inicio=instance.data_inicio,
+            data_fim=instance.data_fim,
+            observacoes=instance.solucao or instance.descricao or "",
+        )
