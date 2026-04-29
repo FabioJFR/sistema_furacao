@@ -57,14 +57,14 @@
                                         <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}" class="inline">
                                             {% csrf_token %}
                                             <button type="submit"
-                                                class="inline-flex items-center justify-center bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition whitespace-nowrap">
+                                                class="inline-flex items-center justify-center bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition whitespace-nowrap">
                                                 ✔ {% trans "Aprovar" %}
                                             </button>
                                         </form>
                                         <form method="post" action="{% url 'projetos:empregado_rejeitar' empregado.id %}" class="inline">
                                             {% csrf_token %}
                                             <button type="submit"
-                                                class="inline-flex items-center justify-center bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition whitespace-nowrap">
+                                                class="inline-flex items-center justify-center bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-rose-700 transition whitespace-nowrap">
                                                 ✖ {% trans "Rejeitar" %}
                                             </button>
                                         </form>

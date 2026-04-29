@@ -30,7 +30,7 @@
 
             <div class="flex gap-3 flex-wrap">
                 <a href="{% url 'projetos:empregado_adicionar_projeto' empregado.id %}" 
-                   class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
                     ➕ {% trans "Associar Projeto" %}
                 </a>
                 {% if not empregado.aprovado %}
@@ -43,12 +43,12 @@
                     </form>
                 {% endif %}
                 <a href="{% url 'projetos:empregado_update' empregado.id %}" 
-                   class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                   class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
                     ✏️ {% trans "Editar" %}
                 </a>
 
                 <a href="{% url 'projetos:empregado_delete' empregado.id %}" 
-                   class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                   class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
                     🗑️ {% trans "Apagar" %}
                 </a>
             </div>
@@ -165,13 +165,13 @@
                                     <td class="px-4 py-3">
                                         <div class="flex gap-2 flex-wrap">
                                             <a href="{% url 'projetos:empregado_editar_projeto' empregado.id ligacao.id %}"
-                                            class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                            class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
                                                 {% trans "Editar" %}
                                             </a>
 
                                             {% if ligacao.ativo %}
                                                 <a href="{% url 'projetos:empregado_terminar_projeto' empregado.id ligacao.id %}"
-                                                class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                                class="inline-block bg-rose-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-rose-600 transition">
                                                     {% trans "Terminar" %}
                                                 </a>
                                             {% endif %}
@@ -277,12 +277,12 @@
                                     <td class="px-4 py-3">
                                         <div class="flex gap-2 flex-wrap">
                                             <a href="{{ ficheiro.ficheiro.url }}" target="_blank"
-                                            class="inline-block bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                            class="inline-block bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
                                                 {% trans "Ver" %}
                                             </a>
 
                                             <a href="{% url 'projetos:empregado_apagar_ficheiro' empregado.id ficheiro.id %}"
-                                            class="inline-block bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                            class="inline-block bg-rose-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-rose-600 transition">
                                                 {% trans "Apagar" %}
                                             </a>
                                         </div>

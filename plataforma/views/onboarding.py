@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from plataforma.decorators import platform_admin_required
-from plataforma.forms.onboarding import OnboardingEmpresaForm
 from plataforma.selectors.planos import construir_planos_periodos_precos, listar_planos_ativos
-from plataforma.services.onboarding import criar_empresa_com_admin
+from plataforma.services.onboarding import (
+    construir_form_onboarding_empresa,
+    processar_submissao_onboarding_empresa,
+)
 
 
 logger = logging.getLogger("core")
@@ -29,8 +31,6 @@ def onboarding_empresa(request):
     )
 
     if request.method == "POST":
-        form = OnboardingEmpresaForm(request.POST)
-
         logger.info(
             "POST recebido em onboarding_empresa. nome_empresa=%r, email_admin=%r, tipo_acesso=%r, criar_subscricao_inicial=%r",
             request.POST.get("nome_empresa"),
@@ -38,73 +38,19 @@ def onboarding_empresa(request):
             request.POST.get("tipo_acesso"),
             request.POST.get("criar_subscricao_inicial"),
         )
+        resultado = processar_submissao_onboarding_empresa(
+            post_data=request.POST,
+            actor_user_id=getattr(request.user, "id", None),
+        )
+        form = resultado["form"]
 
-        if form.is_valid():
-            logger.info(
-                "Formulário de onboarding_empresa válido. user_id=%s, nome_empresa=%r, email_admin=%r",
-                getattr(request.user, "id", None),
-                form.cleaned_data.get("nome_empresa"),
-                form.cleaned_data.get("email_admin"),
-            )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem_sucesso"])
+            return redirect("plataforma:onboarding_empresa")
 
-            try:
-                resultado = criar_empresa_com_admin(
-                    nome_empresa=form.cleaned_data["nome_empresa"],
-                    nome_admin=form.cleaned_data["nome_admin"],
-                    email_admin=form.cleaned_data["email_admin"],
-                    password_admin=form.cleaned_data["password_admin"],
-                    username_admin=form.cleaned_data.get("username_admin"),
-                    nif=form.cleaned_data.get("nif"),
-                    telefone=form.cleaned_data.get("telefone"),
-                    morada=form.cleaned_data.get("morada"),
-                    pais=form.cleaned_data.get("pais"),
-                    cidade=form.cleaned_data.get("cidade"),
-                    observacoes=form.cleaned_data.get("observacoes"),
-                    plano=form.cleaned_data.get("plano"),
-                    ciclo_subscricao=form.cleaned_data.get("ciclo_subscricao") or "mensal",
-                    tipo_acesso=form.cleaned_data.get("tipo_acesso") or "empresa_admin",
-                    estado_empresa=form.cleaned_data.get("estado_empresa") or "teste",
-                    ativa=True,
-                    criar_subscricao_inicial=form.cleaned_data.get("criar_subscricao_inicial") or False,
-                    valor_subscricao=form.cleaned_data.get("valor_subscricao"),
-                    criar_pagamento_inicial=False,
-                    valor_pagamento=None,
-                )
-
-                empresa = resultado["empresa"]
-                user_admin = resultado["user_admin"]
-
-                logger.info(
-                    "Onboarding de empresa concluído com sucesso. empresa_id=%s, empresa_nome=%r, user_admin_id=%s, user_admin_username=%r",
-                    getattr(empresa, "id", None),
-                    getattr(empresa, "nome", None),
-                    getattr(user_admin, "id", None),
-                    getattr(user_admin, "username", None),
-                )
-
-                messages.success(
-                    request,
-                    f"Empresa '{empresa.nome}' criada com sucesso. Administrador inicial: {user_admin.username}"
-                )
-                return redirect("plataforma:onboarding_empresa")
-
-            except Exception as e:
-                logger.error(
-                    "Erro ao criar empresa no onboarding. user_id=%s, erro=%s",
-                    getattr(request.user, "id", None),
-                    e,
-                    exc_info=True,
-                )
-                messages.error(request, f"Erro ao criar empresa: {e}")
-        else:
-            logger.warning(
-                "Formulário onboarding_empresa inválido. user_id=%s, erros=%s",
-                getattr(request.user, "id", None),
-                form.errors.as_json(),
-            )
-            messages.error(request, "Existem erros no formulário. Verifique os campos.")
+        messages.error(request, resultado["mensagem_erro"])
     else:
-        form = OnboardingEmpresaForm()
+        form = construir_form_onboarding_empresa()
         logger.debug(
             "Formulário onboarding_empresa aberto em GET. user_id=%s",
             getattr(request.user, "id", None),

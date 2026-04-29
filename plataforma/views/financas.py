@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from plataforma.decorators import platform_admin_required
-from plataforma.forms import ConfiguracaoPaypalForm, EntradaValorForm, SaidaValorForm
+from plataforma.forms import ConfiguracaoPaypalForm, EntradaValorForm
 from plataforma.selectors.financas import (
     NATUREZA_ENTRADA,
     NATUREZA_SAIDA,
@@ -13,13 +13,17 @@ from plataforma.selectors.financas import (
     obter_configuracao_paypal_principal,
     obter_metricas_analytics_financas,
     obter_metricas_movimentos,
-    obter_movimento_saida_por_pk,
 )
 from plataforma.services.financas import (
     confirmar_checkout_paypal_pagamento,
+    construir_form_saida_valor,
     guardar_configuracao_paypal,
-    guardar_movimento_saida,
     iniciar_checkout_paypal_pagamento,
+    obter_movimento_edicao_saida,
+    processar_submissao_saida_financeira,
+    resolver_resultado_checkout_paypal,
+    resolver_resultado_retorno_paypal,
+    validar_acesso_superuser_para_financas,
 )
 
 
@@ -43,24 +47,18 @@ def financas_entrada_list(request):
 @login_required
 @platform_admin_required
 def financas_saida_list(request):
-    edicao_id = (request.GET.get("editar") or "").strip()
-    movimento_edicao = obter_movimento_saida_por_pk(edicao_id) if edicao_id else None
+    movimento_edicao = obter_movimento_edicao_saida(edicao_id=request.GET.get("editar"))
 
     if request.method == "POST":
-        edicao_id_post = (request.POST.get("movimento_id") or "").strip()
-        movimento_edicao = obter_movimento_saida_por_pk(edicao_id_post) if edicao_id_post else None
-
-        form = SaidaValorForm(request.POST, instance=movimento_edicao)
-        if form.is_valid():
-            guardar_movimento_saida(form)
-            if movimento_edicao:
-                messages.success(request, "Despesa atualizada com sucesso.")
-            else:
-                messages.success(request, "Despesa registada com sucesso.")
+        resultado = processar_submissao_saida_financeira(post_data=request.POST)
+        form = resultado["form"]
+        movimento_edicao = resultado["movimento_edicao"]
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
             return redirect("plataforma:financas_saida_list")
-        messages.error(request, "Erro ao registar despesa. Verifique os dados.")
+        messages.error(request, resultado["mensagem"])
     else:
-        form = SaidaValorForm(instance=movimento_edicao)
+        form = construir_form_saida_valor(movimento_edicao=movimento_edicao)
 
     movimentos = listar_movimentos_financeiros(natureza_fluxo=NATUREZA_SAIDA)
     metricas = obter_metricas_movimentos(movimentos)
@@ -98,8 +96,9 @@ def financas_analytics(request):
 @login_required
 @platform_admin_required
 def financas_paypal_config(request):
-    if not request.user.is_superuser:
-        messages.error(request, "Esta configuração está reservada ao superuser.")
+    acesso = validar_acesso_superuser_para_financas(user=request.user)
+    if not acesso["ok"]:
+        messages.error(request, acesso["mensagem"])
         return redirect("plataforma:financas_analytics")
 
     configuracao = obter_configuracao_paypal_principal()
@@ -127,8 +126,9 @@ def financas_paypal_config(request):
 @login_required
 @platform_admin_required
 def financas_paypal_checkout_pagamento(request, pk):
-    if not request.user.is_superuser:
-        messages.error(request, "Esta ação está reservada ao superuser.")
+    acesso = validar_acesso_superuser_para_financas(user=request.user)
+    if not acesso["ok"]:
+        messages.error(request, acesso["mensagem"])
         return redirect("plataforma:subscricao_list")
 
     return_url = (
@@ -144,30 +144,24 @@ def financas_paypal_checkout_pagamento(request, pk):
         return_url=return_url,
         cancel_url=cancel_url,
     )
-
-    if resultado["estado"] in {"invalido", "ja_processado"}:
-        messages.info(request, "Este pagamento já não está pendente.")
-        return redirect("plataforma:subscricao_list")
-    if resultado["estado"] == "gratuito_pago":
-        messages.success(request, "Pagamento gratuito marcado automaticamente como pago.")
-        return redirect("plataforma:subscricao_list")
-    if resultado["estado"] == "config_incompleta":
-        messages.error(request, "Configuração PayPal incompleta ou inativa.")
-        return redirect("plataforma:financas_paypal_config")
-    if resultado["estado"] == "erro_checkout":
-        messages.error(request, f"Erro ao iniciar checkout PayPal: {resultado.get('erro', '')}")
-        return redirect("plataforma:financas_paypal_config")
-    if resultado["estado"] == "checkout_criado":
-        return redirect(resultado["approve_url"])
-    messages.error(request, "Não foi possível iniciar o checkout PayPal.")
-    return redirect("plataforma:subscricao_list")
+    acao = resolver_resultado_checkout_paypal(resultado)
+    if acao["nivel"] == "redirect":
+        return redirect(acao["url"])
+    if acao["nivel"] == "success":
+        messages.success(request, acao["mensagem"])
+    elif acao["nivel"] == "info":
+        messages.info(request, acao["mensagem"])
+    else:
+        messages.error(request, acao["mensagem"])
+    return redirect(acao["destino"])
 
 
 @login_required
 @platform_admin_required
 def financas_paypal_retorno(request):
-    if not request.user.is_superuser:
-        messages.error(request, "Esta ação está reservada ao superuser.")
+    acesso = validar_acesso_superuser_para_financas(user=request.user)
+    if not acesso["ok"]:
+        messages.error(request, acesso["mensagem"])
         return redirect("plataforma:subscricao_list")
 
     pagamento_id = (request.GET.get("pagamento") or "").strip()
@@ -176,29 +170,24 @@ def financas_paypal_retorno(request):
         pagamento_pk=pagamento_id,
         token=token,
     )
-
-    if resultado["estado"] in {"retorno_invalido", "invalido"}:
-        messages.error(request, "Retorno PayPal inválido.")
-        return redirect("plataforma:subscricao_list")
-    if resultado["estado"] == "ja_processado":
-        messages.info(request, "Pagamento já processado.")
-        return redirect("plataforma:subscricao_list")
-    if resultado["estado"] == "erro_confirmacao":
-        messages.error(request, f"Erro na confirmação PayPal: {resultado.get('erro', '')}")
-        return redirect("plataforma:subscricao_list")
-    if resultado["estado"] == "confirmado":
-        messages.success(request, "Pagamento PayPal confirmado e registado como pago.")
+    acao = resolver_resultado_retorno_paypal(resultado)
+    if acao["nivel"] == "success":
+        messages.success(request, acao["mensagem"])
+    elif acao["nivel"] == "info":
+        messages.info(request, acao["mensagem"])
+    elif acao["nivel"] == "warning":
+        messages.warning(request, acao["mensagem"])
     else:
-        messages.warning(request, "O pagamento PayPal ainda não ficou concluído.")
-
+        messages.error(request, acao["mensagem"])
     return redirect("plataforma:subscricao_list")
 
 
 @login_required
 @platform_admin_required
 def financas_paypal_cancelado(request):
-    if not request.user.is_superuser:
-        messages.error(request, "Esta ação está reservada ao superuser.")
+    acesso = validar_acesso_superuser_para_financas(user=request.user)
+    if not acesso["ok"]:
+        messages.error(request, acesso["mensagem"])
     else:
         messages.info(request, "Pagamento PayPal cancelado pelo utilizador.")
     return redirect("plataforma:subscricao_list")

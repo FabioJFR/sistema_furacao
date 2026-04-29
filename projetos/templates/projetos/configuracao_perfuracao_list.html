@@ -46,12 +46,12 @@
                         <td class="px-4 py-3">
                             {% if modo_admin %}
                                     <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
-                                   class="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition">
+                                   class="bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-600 transition">
                                     {% trans "Editar" %}
                                 </a>
                             {% else %}
                                 <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
-                                   class="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition">
+                                   class="bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-600 transition">
                                     {% trans "Editar" %}
                                 </a>
                             {% endif %}

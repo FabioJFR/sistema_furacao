@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from plataforma.forms.onboarding import OnboardingEmpresaForm
 from plataforma.models import (
     Empresa,
     MovimentoFinanceiroPlataforma,
@@ -32,7 +33,6 @@ def _normalizar_username(username, email):
     valor = (username or "").strip()
     if valor:
         return valor
-
     if email:
         return email.strip().lower()
 
@@ -42,6 +42,92 @@ def _normalizar_username(username, email):
     })
 
 
+def construir_form_onboarding_empresa(*, post_data=None):
+    if post_data is not None:
+        return OnboardingEmpresaForm(post_data)
+    return OnboardingEmpresaForm()
+
+
+def processar_submissao_onboarding_empresa(*, post_data, actor_user_id=None):
+    form = construir_form_onboarding_empresa(post_data=post_data)
+    if not form.is_valid():
+        logger.warning(
+            "Formulário onboarding_empresa inválido. actor_user_id=%s, erros=%s",
+            actor_user_id,
+            form.errors.as_json(),
+        )
+        return {
+            "ok": False,
+            "form": form,
+            "mensagem_erro": "Existem erros no formulário. Verifique os campos.",
+            "erro": None,
+            "empresa": None,
+            "user_admin": None,
+        }
+
+    logger.info(
+        "Formulário de onboarding_empresa válido. actor_user_id=%s, nome_empresa=%r, email_admin=%r",
+        actor_user_id,
+        form.cleaned_data.get("nome_empresa"),
+        form.cleaned_data.get("email_admin"),
+    )
+
+    try:
+        resultado = criar_empresa_com_admin(
+            nome_empresa=form.cleaned_data["nome_empresa"],
+            nome_admin=form.cleaned_data["nome_admin"],
+            email_admin=form.cleaned_data["email_admin"],
+            password_admin=form.cleaned_data["password_admin"],
+            username_admin=form.cleaned_data.get("username_admin"),
+            nif=form.cleaned_data.get("nif"),
+            telefone=form.cleaned_data.get("telefone"),
+            morada=form.cleaned_data.get("morada"),
+            pais=form.cleaned_data.get("pais"),
+            cidade=form.cleaned_data.get("cidade"),
+            observacoes=form.cleaned_data.get("observacoes"),
+            plano=form.cleaned_data.get("plano"),
+            ciclo_subscricao=form.cleaned_data.get("ciclo_subscricao") or "mensal",
+            tipo_acesso=form.cleaned_data.get("tipo_acesso") or "empresa_admin",
+            estado_empresa=form.cleaned_data.get("estado_empresa") or "teste",
+            ativa=True,
+            criar_subscricao_inicial=form.cleaned_data.get("criar_subscricao_inicial") or False,
+            valor_subscricao=form.cleaned_data.get("valor_subscricao"),
+            criar_pagamento_inicial=False,
+            valor_pagamento=None,
+        )
+    except Exception as exc:
+        logger.error(
+            "Erro ao criar empresa no onboarding. actor_user_id=%s, erro=%s",
+            actor_user_id,
+            exc,
+            exc_info=True,
+        )
+        return {
+            "ok": False,
+            "form": form,
+            "mensagem_erro": f"Erro ao criar empresa: {exc}",
+            "erro": exc,
+            "empresa": None,
+            "user_admin": None,
+        }
+
+    empresa = resultado["empresa"]
+    user_admin = resultado["user_admin"]
+    logger.info(
+        "Onboarding de empresa concluído com sucesso. empresa_id=%s, empresa_nome=%r, user_admin_id=%s, user_admin_username=%r",
+        getattr(empresa, "id", None),
+        getattr(empresa, "nome", None),
+        getattr(user_admin, "id", None),
+        getattr(user_admin, "username", None),
+    )
+    return {
+        "ok": True,
+        "form": form,
+        "mensagem_sucesso": f"Empresa '{empresa.nome}' criada com sucesso. Administrador inicial: {user_admin.username}",
+        "erro": None,
+        "empresa": empresa,
+        "user_admin": user_admin,
+    }
 
 def _validar_dados_onboarding(
     *,

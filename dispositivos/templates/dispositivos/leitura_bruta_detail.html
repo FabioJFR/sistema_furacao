@@ -96,7 +96,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload Texto" %}</h2>
 
             {% if leitura.payload_texto %}
-                <pre class="device-code device-code--text bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap">{{ leitura.payload_texto }}</pre>
+                <pre class="device-code device-code--text bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap">{{ leitura.payload_texto }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo em texto." %}</p>
             {% endif %}
@@ -106,7 +106,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload Hex" %}</h2>
 
             {% if leitura.payload_hex %}
-                <pre class="device-code device-code--hex bg-slate-900 text-emerald-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_hex }}</pre>
+                <pre class="device-code device-code--hex bg-slate-50 border border-slate-200 text-emerald-700 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_hex }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo hexadecimal." %}</p>
             {% endif %}
@@ -116,7 +116,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Payload JSON" %}</h2>
 
             {% if leitura.payload_json %}
-                <pre class="device-code device-code--json bg-slate-900 text-sky-300 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_json|pprint }}</pre>
+                <pre class="device-code device-code--json bg-slate-50 border border-slate-200 text-sky-700 rounded-xl p-4 overflow-x-auto text-sm whitespace-pre-wrap break-all">{{ leitura.payload_json|pprint }}</pre>
             {% else %}
                 <p class="text-gray-500">{% trans "Sem conteúdo JSON." %}</p>
             {% endif %}

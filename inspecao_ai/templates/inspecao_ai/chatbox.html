@@ -82,8 +82,8 @@
             {% if mensagens %}
                 {% for mensagem in mensagens %}
                     <div class="{% if mensagem.papel == 'user' %}flex justify-end{% else %}flex justify-start{% endif %}">
-                        <div class="max-w-4xl rounded-2xl px-4 py-3 shadow-sm {% if mensagem.papel == 'user' %}bg-sky-600 text-white{% else %}bg-white border border-slate-200 text-slate-800{% endif %}">
-                            <div class="text-[11px] uppercase tracking-wide font-semibold mb-3 {% if mensagem.papel == 'user' %}text-sky-100{% else %}text-slate-500{% endif %}">
+                        <div class="max-w-4xl rounded-2xl px-4 py-3 shadow-sm {% if mensagem.papel == 'user' %}bg-sky-100 border border-sky-200 text-sky-900{% else %}bg-white border border-slate-200 text-slate-800{% endif %}">
+                            <div class="text-[11px] uppercase tracking-wide font-semibold mb-3 {% if mensagem.papel == 'user' %}text-sky-700{% else %}text-slate-500{% endif %}">
                                 {% if mensagem.papel == 'user' %}{% trans "Pergunta" %}{% else %}{% trans "Resposta AI" %}{% endif %}
                             </div>
                             {% if mensagem.papel == 'assistant' %}
@@ -112,7 +112,7 @@
                             {% else %}
                                 <div class="text-sm whitespace-pre-line leading-7">{{ mensagem.conteudo }}</div>
                             {% endif %}
-                            <div class="text-[11px] mt-2 {% if mensagem.papel == 'user' %}text-sky-100{% else %}text-slate-400{% endif %}">
+                            <div class="text-[11px] mt-2 {% if mensagem.papel == 'user' %}text-sky-700{% else %}text-slate-400{% endif %}">
                                 {{ mensagem.criado_em|date:"d/m/Y H:i" }}
                             </div>
                         </div>

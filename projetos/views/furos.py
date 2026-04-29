@@ -14,6 +14,7 @@ from core.permissions import user_is_global_admin
 from ..decorators import admin_required, empregado_required
 from projetos.selectors.furos import (
     obter_furo,
+    obter_lista_furos,
     obter_medicoes_furo_para_empregado,
     obter_registos_furo_para_empregado,
 )

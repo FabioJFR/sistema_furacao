@@ -69,11 +69,11 @@
                 <!-- BOTÕES -->
                 <div class="flex gap-2 mt-5">
                     <a href="{% url 'projetos:medicao_update' medicao.id %}" 
-                       class="flex-1 flex items-center justify-center bg-yellow-400 text-white py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
+                       class="flex-1 flex items-center justify-center bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
                         ✏️ {% trans "Editar" %}
                     </a>
                     <a href="{% url 'projetos:medicao_delete' medicao.id %}" 
-                       class="flex-1 flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm font-semibold">
+                       class="flex-1 flex items-center justify-center bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-600 transition text-sm font-semibold">
                         🗑️ {% trans "Apagar" %}
                     </a>
                 </div>

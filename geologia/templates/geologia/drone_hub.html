@@ -83,9 +83,9 @@
                 {% if operacao %}
                 <div class="p-6 space-y-6">
                     <div class="grid grid-cols-1 xl:grid-cols-[1.35fr_0.65fr] gap-6">
-                        <div class="rounded-xl border border-gray-200 bg-slate-950 p-4" id="sec-live">
+                        <div class="rounded-xl border border-gray-200 bg-white p-4" id="sec-live">
                             <div class="flex items-center justify-between gap-4 mb-3">
-                                <h3 class="font-semibold text-white">{% trans "Live view / feed do drone" %}</h3>
+                                <h3 class="font-semibold text-gray-900">{% trans "Live view / feed do drone" %}</h3>
                                 {% if operacao.live_view_url %}
                                     <a href="{{ operacao.live_view_url }}" target="_blank" rel="noopener" class="text-sm text-sky-300 hover:text-sky-100">{% trans "Abrir stream" %}</a>
                                 {% endif %}
@@ -131,12 +131,12 @@
                                                 <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
                                                     <div class="font-semibold text-slate-900">{% trans "Modo mock" %}</div>
                                                     <div class="mt-1 text-slate-600">{% trans "Para testar o painel completo sem fonte externa." %}</div>
-                                                    <pre class="mt-2 overflow-x-auto rounded bg-slate-950 px-3 py-2 text-[11px] text-slate-100">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json</pre>
+                                                    <pre class="mt-2 overflow-x-auto rounded bg-slate-100 border border-slate-200 px-3 py-2 text-[11px] text-slate-700">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json</pre>
                                                 </div>
                                                 <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
                                                     <div class="font-semibold text-slate-900">{% trans "Modo webhook" %}</div>
                                                     <div class="mt-1 text-slate-600">{% trans "Para receber telemetria vinda de um processo externo ou do emissor de exemplo." %}</div>
-                                                    <pre class="mt-2 overflow-x-auto rounded bg-slate-950 px-3 py-2 text-[11px] text-slate-100">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json
+                                                    <pre class="mt-2 overflow-x-auto rounded bg-slate-100 border border-slate-200 px-3 py-2 text-[11px] text-slate-700">python3 manage.py bridge_dji_rc2_exemplo --config geologia/bridge/bridge_dji_rc2.example.json
 python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0.1:8787/webhook</pre>
                                                 </div>
                                             </div>
@@ -174,15 +174,15 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-slate-200 bg-slate-950 p-4">
+                            <div class="rounded-xl border border-slate-200 bg-white p-4">
                                 <div class="flex items-center justify-between gap-4 mb-3">
-                                    <h4 class="font-semibold text-white">{% trans "Monitor de ligação" %}</h4>
-                                    <span id="drone-link-chip" class="text-xs uppercase tracking-wide rounded-full bg-slate-800 text-slate-200 px-3 py-1">
+                                    <h4 class="font-semibold text-gray-900">{% trans "Monitor de ligação" %}</h4>
+                                    <span id="drone-link-chip" class="text-xs uppercase tracking-wide rounded-full bg-slate-100 text-slate-700 px-3 py-1">
                                         {{ operacao.get_estado_conexao_display }}
                                     </span>
                                 </div>
-                                <div id="drone-debug-log" class="space-y-2 text-sm text-slate-200 max-h-[220px] overflow-y-auto pr-1">
-                                    <div class="rounded-lg bg-slate-900 px-3 py-2">{% trans "Sistema pronto para testar a ligação ao drone." %}</div>
+                                <div id="drone-debug-log" class="space-y-2 text-sm text-slate-700 max-h-[220px] overflow-y-auto pr-1">
+                                    <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">{% trans "Sistema pronto para testar a ligação ao drone." %}</div>
                                 </div>
                             </div>
                         </div>
@@ -266,21 +266,21 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-gray-200 bg-slate-950 p-4">
+                        <div class="rounded-xl border border-gray-200 bg-white p-4">
                             <div class="flex items-center justify-between gap-4 mb-3">
                                 <div>
-                                    <h3 class="font-semibold text-white">{% trans "Histórico da bridge" %}</h3>
-                                    <p class="text-sm text-slate-400 mt-1">{% trans "Eventos recentes do live view, frame, heartbeat e comandos confirmados." %}</p>
+                                    <h3 class="font-semibold text-gray-900">{% trans "Histórico da bridge" %}</h3>
+                                    <p class="text-sm text-slate-500 mt-1">{% trans "Eventos recentes do live view, frame, heartbeat e comandos confirmados." %}</p>
                                 </div>
                             </div>
                             <div class="space-y-2 text-sm max-h-[320px] overflow-y-auto pr-1" id="bridge-history-log">
                                 {% for log in bridge_logs %}
-                                    <div class="rounded-lg px-3 py-2 {% if log.tipo == 'sucesso' %}bg-emerald-900/40 text-emerald-200{% elif log.tipo == 'erro' %}bg-rose-900/40 text-rose-200{% else %}bg-slate-900 text-slate-200{% endif %}">
+                                    <div class="rounded-lg px-3 py-2 {% if log.tipo == 'sucesso' %}bg-emerald-100 text-emerald-800{% elif log.tipo == 'erro' %}bg-rose-100 text-rose-800{% else %}bg-slate-100 text-slate-700{% endif %}">
                                         <div class="font-medium">{{ log.mensagem }}</div>
                                         <div class="text-xs opacity-80 mt-1">{{ log.timestamp|default:"-" }}</div>
                                     </div>
                                 {% empty %}
-                                    <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">{% trans "Ainda não existem eventos recentes da bridge." %}</div>
+                                    <div class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-2 text-slate-700">{% trans "Ainda não existem eventos recentes da bridge." %}</div>
                                 {% endfor %}
                             </div>
                         </div>
@@ -372,7 +372,7 @@ python3 manage.py emitir_telemetria_webhook_exemplo --webhook-url http://127.0.0
                                     {% endfor %}
                                 </div>
                                 <div class="pt-3">
-                                    <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Atualizar controlo" %}</button>
+                                    <button type="submit" class="w-full px-4 py-2 rounded bg-blue-600 text-white font-semibold">{% trans "Atualizar controlo" %}</button>
                                 </div>
                             </form>
                         </article>

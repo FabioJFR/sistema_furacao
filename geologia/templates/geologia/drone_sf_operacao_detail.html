@@ -52,18 +52,18 @@
     <div class="space-y-6">
         <section class="space-y-6">
             <div class="grid grid-cols-1 xl:grid-cols-[1.35fr_0.65fr] gap-6">
-                <div class="rounded-xl border border-gray-200 bg-slate-950 p-4" id="sec-live">
+                <div class="rounded-xl border border-gray-200 bg-white p-4" id="sec-live">
                     <div class="flex items-center justify-between gap-4 mb-3">
                         <div>
-                            <h2 class="text-xl font-semibold text-white">{% trans "Live view / feed S_F" %}</h2>
-                            <p class="text-sm text-slate-400 mt-1">{% trans "Janela principal para ver o feed ou snapshot que a bridge S_F estiver a publicar." %}</p>
+                            <h2 class="text-xl font-semibold text-gray-900">{% trans "Live view / feed S_F" %}</h2>
+                            <p class="text-sm text-slate-500 mt-1">{% trans "Janela principal para ver o feed ou snapshot que a bridge S_F estiver a publicar." %}</p>
                         </div>
                         <div id="sf-bridge-mode-badge" class="inline-flex items-center rounded-full px-3 py-1 font-semibold {% if operacao.metadados.bridge_payload_mais_recente.source_mode == 'webhook' %}bg-emerald-100 text-emerald-800{% elif operacao.metadados.bridge_payload_mais_recente.source_mode == 'mock' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700{% endif %}">
                             {% blocktrans with modo=operacao.metadados.bridge_payload_mais_recente.source_mode|default:"indefinido" %}Modo: {{ modo }}{% endblocktrans %}
                         </div>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-3">
-                        <div id="sf-live-container" class="rounded-lg overflow-hidden bg-slate-900 aspect-[16/9] flex items-center justify-center">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div id="sf-live-container" class="rounded-lg overflow-hidden bg-slate-100 aspect-[16/9] flex items-center justify-center">
                             {% if operacao.live_view_url %}
                                 <iframe id="sf-live-frame" src="{{ operacao.live_view_url }}" class="w-full h-[320px] xl:h-[360px] border-0" loading="lazy"></iframe>
                             {% elif operacao.frame_snapshot_url %}
@@ -96,21 +96,21 @@
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-200 bg-slate-950 p-4">
+                    <div class="rounded-xl border border-slate-200 bg-white p-4">
                         <div class="flex items-center justify-between gap-4 mb-3">
                             <div>
-                                <h3 class="font-semibold text-white">{% trans "Histórico da bridge S_F" %}</h3>
-                                <p class="text-sm text-slate-400 mt-1">{% trans "Eventos recentes do live view, snapshot, heartbeat e confirmação de comandos." %}</p>
+                                <h3 class="font-semibold text-gray-900">{% trans "Histórico da bridge S_F" %}</h3>
+                                <p class="text-sm text-slate-500 mt-1">{% trans "Eventos recentes do live view, snapshot, heartbeat e confirmação de comandos." %}</p>
                             </div>
                         </div>
                         <div id="sf-bridge-history-log" class="space-y-2 text-sm max-h-[260px] overflow-y-auto pr-1">
                             {% for log in bridge_logs %}
-                                <div class="rounded-lg px-3 py-2 {% if log.tipo == 'sucesso' %}bg-emerald-900/40 text-emerald-200{% elif log.tipo == 'erro' %}bg-rose-900/40 text-rose-200{% else %}bg-slate-900 text-slate-200{% endif %}">
+                                <div class="rounded-lg px-3 py-2 {% if log.tipo == 'sucesso' %}bg-emerald-100 text-emerald-800{% elif log.tipo == 'erro' %}bg-rose-100 text-rose-800{% else %}bg-slate-100 text-slate-700{% endif %}">
                                     <div class="font-medium">{{ log.mensagem }}</div>
                                     <div class="text-xs opacity-80 mt-1">{{ log.timestamp|default:"-" }}</div>
                                 </div>
                             {% empty %}
-                                <div class="rounded-lg bg-slate-900 px-3 py-2 text-slate-200">{% trans "Ainda não existem eventos recentes da bridge S_F." %}</div>
+                                <div class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-2 text-slate-700">{% trans "Ainda não existem eventos recentes da bridge S_F." %}</div>
                             {% endfor %}
                         </div>
                     </div>
@@ -238,7 +238,7 @@
                             {% endfor %}
                         </div>
                         <div class="pt-3">
-                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% trans "Guardar operação S_F" %}</button>
+                            <button type="submit" class="w-full px-4 py-2 rounded bg-blue-600 text-white font-semibold">{% trans "Guardar operação S_F" %}</button>
                         </div>
                     </form>
                 </article>
@@ -290,7 +290,7 @@
                             </div>
                         {% endfor %}
                         <div class="pt-2">
-                            <button type="submit" class="w-full px-4 py-2 rounded bg-slate-900 text-white font-semibold">{% if missao_edicao %}{% trans "Atualizar missão programada" %}{% else %}{% trans "Guardar missão programada" %}{% endif %}</button>
+                            <button type="submit" class="w-full px-4 py-2 rounded bg-blue-600 text-white font-semibold">{% if missao_edicao %}{% trans "Atualizar missão programada" %}{% else %}{% trans "Guardar missão programada" %}{% endif %}</button>
                         </div>
                     </form>
                 </article>

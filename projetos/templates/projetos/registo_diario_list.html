@@ -11,7 +11,7 @@
             <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Registos Diários" %}</h1>
 
             <a href="{% url 'projetos:registo_diario_create' %}"
-               class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+               class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
                 ➕ {% trans "Novo Registo" %}
             </a>
         </div>
@@ -61,7 +61,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <a href="{% url 'projetos:registo_diario_update' registo.id %}"
-                                       class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                       class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
                                         {% trans "Editar" %}
                                     </a>
                                 </td>

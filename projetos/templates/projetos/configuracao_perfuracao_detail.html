@@ -19,32 +19,32 @@
             <div class="flex gap-3 flex-wrap">
                 {% if modo_admin %}
                     <a href="{% url 'projetos:configuracao_perfuracao_update_admin' configuracao.pk %}"
-                       class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                       class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
                         ✏️ {% trans "Editar" %}
                     </a>
 
                     <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' configuracao.pk %}"
-                       class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                       class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
                         🗑️ {% trans "Apagar" %}
                     </a>
 
                     <a href="{% url 'projetos:historico_empregado_admin_list' empregado_obj.pk %}"
-                       class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                       class="bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-700 transition shadow">
                         🕘 {% trans "Ver Histórico" %}
                     </a>
                 {% else %}
                     <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao.pk %}"
-                       class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                       class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
                         ✏️ {% trans "Editar" %}
                     </a>
 
                     <a href="{% url 'projetos:configuracao_perfuracao_delete_empregado' configuracao.pk %}"
-                       class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                       class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
                         🗑️ {% trans "Apagar" %}
                     </a>
 
                     <a href="{% url 'projetos:historico_empregado_list' %}"
-                       class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                       class="bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-700 transition shadow">
                         🕘 {% trans "Ver Histórico" %}
                     </a>
                 {% endif %}

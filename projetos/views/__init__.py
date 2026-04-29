@@ -1,5 +1,4 @@
 from .dashboard import *
-from .graficos import *
 from .projetos import *
 from .furos import *
 from .medicoes import *

@@ -7,12 +7,12 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from plataforma.decorators import platform_admin_required
-from plataforma.forms.plano import PlanoForm
 from plataforma.selectors.planos import listar_planos_dashboard, obter_plano_por_pk
 from plataforma.services.planos import (
     alternar_plano_ativo,
-    atualizar_plano_via_form,
-    criar_plano_via_form,
+    construir_form_plano,
+    processar_submissao_plano_create,
+    processar_submissao_plano_update,
 )
 
 
@@ -37,16 +37,14 @@ def plano_list(request):
 @platform_admin_required
 def plano_create(request):
     if request.method == "POST":
-        form = PlanoForm(request.POST)
-        if form.is_valid():
-            plano = criar_plano_via_form(form=form)
-
-            messages.success(request, _("Plano '%(nome)s' criado com sucesso.") % {"nome": plano.nome})
+        resultado = processar_submissao_plano_create(post_data=request.POST)
+        form = resultado["form"]
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem"])
             return redirect("plataforma:plano_list")
-
-        messages.error(request, _("Erro ao criar plano. Verifique os dados."))
+        messages.error(request, resultado["mensagem"])
     else:
-        form = PlanoForm()
+        form = construir_form_plano()
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,
@@ -61,16 +59,15 @@ def plano_update(request, pk):
     plano = obter_plano_por_pk(pk)
 
     if request.method == "POST":
-        form = PlanoForm(request.POST, instance=plano)
-        if form.is_valid():
-            plano = atualizar_plano_via_form(form=form)
-
-            messages.success(request, _("Plano atualizado com sucesso."))
+        resultado = processar_submissao_plano_update(post_data=request.POST, plano=plano)
+        form = resultado["form"]
+        if resultado["ok"]:
+            plano = resultado["plano"]
+            messages.success(request, resultado["mensagem"])
             return redirect("plataforma:plano_list")
-
-        messages.error(request, _("Erro ao atualizar plano."))
+        messages.error(request, resultado["mensagem"])
     else:
-        form = PlanoForm(instance=plano)
+        form = construir_form_plano(instance=plano)
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,

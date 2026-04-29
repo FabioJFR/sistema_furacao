@@ -25,15 +25,15 @@
             <h1 class="text-2xl font-bold text-gray-800 sf-break-word">{{ projeto.nome }}</h1>
             <div class="flex gap-3 flex-wrap">
                 <a href="{% url 'projetos:projeto_3d' projeto.pk %}" 
-                   class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+                   class="bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-700 transition shadow">
                     🖥️ {% trans "Ver 3D" %}
                 </a>
                 <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
-                   class="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition shadow">
+                   class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
                     ✏️ {% trans "Editar" %}
                 </a>
                 <a href="{% url 'projetos:projeto_delete' projeto.pk %}" 
-                   class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow">
+                   class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
                     🗑️ {% trans "Apagar" %}
                 </a>
             </div>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="flex items-end">
                     <button type="submit"
-                            class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow w-full">
+                            class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow w-full">
                         ➕ {% trans "Associar" %}
                     </button>
                 </div>
@@ -159,7 +159,7 @@
                            {% trans "Ver Detalhes" %}
                         </a>
                         <a href="{% url 'projetos:medicao_create' furo.pk %}" 
-                           class="inline-block bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                           class="inline-block bg-violet-600 text-white px-3 py-1 rounded-lg hover:bg-violet-700 transition text-sm font-semibold">
                            {% trans "Nova Medição" %}
                         </a>
                     </div>
@@ -199,7 +199,7 @@
                         </a>
 
                         <a href="{% url 'projetos:maquina_update' maquina.id %}" 
-                        class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
+                        class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
                         {% trans "Editar" %}
                         </a>
                     </div>
@@ -246,7 +246,7 @@
                         </a>
 
                         <a href="{% url 'projetos:material_update' material.id %}" 
-                        class="inline-block bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500 transition text-sm font-semibold">
+                        class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
                         {% trans "Editar" %}
                         </a>
                     </div>

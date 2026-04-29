@@ -8,7 +8,7 @@
     <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
         <h1 class="text-3xl font-bold text-gray-800">👷 {% trans "Lista de Empregados" %}</h1>
 
-        <a href="{% url 'projetos:empregado_create' %}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition shadow font-semibold">
+        <a href="{% url 'projetos:empregado_create' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
             ➕ {% trans "Criar Novo Empregado" %}
         </a>
     </div>
@@ -81,7 +81,7 @@
                                 </a>
 
                                 <a href="{% url 'projetos:empregado_delete' empregado.id %}"
-                                   class="inline-flex items-center justify-center min-w-[92px] bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition shadow-sm">
+                                   class="inline-flex items-center justify-center min-w-[92px] bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-rose-600 transition shadow-sm">
                                     {% trans "Apagar" %}
                                 </a>
                             </div>

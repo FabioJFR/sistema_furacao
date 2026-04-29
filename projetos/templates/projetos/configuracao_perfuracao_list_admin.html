@@ -14,11 +14,11 @@
 
         <div class="flex gap-3 flex-wrap">
             <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado_obj.pk %}"
-               class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow">
+               class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
                 ➕ {% trans "Nova Configuração" %}
             </a>
             <a href="{% url 'projetos:historico_empregado_admin_list' empregado_obj.pk %}"
-            class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow">
+            class="bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-700 transition shadow">
                 🕘 {% trans "Ver Histórico" %}
             </a>
             <a href="{{ empregado_obj.get_absolute_url }}"
@@ -61,11 +61,11 @@
                                             {% trans "Ver" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
-                                        class="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition">
+                                        class="bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
                                             ✏️ {% trans "Editar" %}
                                         </a>
                                         <a href="{% url 'projetos:configuracao_perfuracao_delete_admin' config.pk %}"
-                                        class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                        class="bg-rose-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-rose-600 transition">
                                             🗑️ {% trans "Apagar" %}
                                         </a>
                                     </div>
