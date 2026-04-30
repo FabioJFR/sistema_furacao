@@ -42,6 +42,7 @@ from dispositivos.selectors.importacao_historico import (
     obter_historico_importacao,
 )
 from django.http import JsonResponse, HttpResponse
+from django.db import ProgrammingError
 import random
 import time
 
@@ -386,7 +387,17 @@ def captura_dispositivo(request):
     preview_data = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
     report_data = request.session.get(MAGCRUISER_REPORT_SESSION_KEY)
     preview_data = anexar_sessao_ao_preview(preview_data, empresa_id=empresa_id)
-    historico_importacoes = listar_historico_importacoes_qs(empresa_id=empresa_id).order_by("-criado_em")[:20]
+    try:
+        historico_importacoes = list(
+            listar_historico_importacoes_qs(empresa_id=empresa_id).order_by("-criado_em")[:20]
+        )
+    except ProgrammingError:
+        historico_importacoes = []
+        messages.warning(
+            request,
+            "Histórico de importações ainda não disponível nesta base de dados. "
+            "Aplica as migrations da app Dispositivos.",
+        )
 
     if request.method == "POST":
         action = (request.POST.get("action") or "create_session").strip()

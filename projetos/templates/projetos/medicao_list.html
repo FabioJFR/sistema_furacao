@@ -23,9 +23,9 @@
 
         <!-- CARD -->
         <div class="rounded-xl shadow-md hover:shadow-xl transition duration-200 overflow-hidden border-l-4 
-            {% if medicao.magnetismo > 50 %}
+            {% if medicao.magnetismo|default_if_none:0 > 50 %}
                 border-red-500
-            {% elif medicao.magnetismo > 20 %}
+            {% elif medicao.magnetismo|default_if_none:0 > 20 %}
                 border-yellow-400
             {% else %}
                 border-green-500
@@ -46,22 +46,22 @@
 
                 <!-- DADOS -->
                 <div class="space-y-2 text-sm text-gray-700">
-                    <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade }} m</p>
-                    <p><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao }}°</p>
-                    <p><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute }}°</p>
+                    <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade_medida|default_if_none:"-" }} m</p>
+                    <p><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao_real_medida|default_if_none:"-" }}°</p>
+                    <p><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute_real_medido|default_if_none:"-" }}°</p>
                     <p>
                         <strong>{% trans "Magnetismo:" %}</strong> 
                         <span class="
                             font-semibold
-                            {% if medicao.magnetismo > 50 %}
+                            {% if medicao.magnetismo|default_if_none:0 > 50 %}
                                 text-red-600
-                            {% elif medicao.magnetismo > 20 %}
+                            {% elif medicao.magnetismo|default_if_none:0 > 20 %}
                                 text-yellow-600
                             {% else %}
                                 text-green-600
                             {% endif %}
                         ">
-                            {{ medicao.magnetismo }}
+                            {{ medicao.magnetismo|default_if_none:"-" }}
                         </span>
                     </p>
                 </div>
