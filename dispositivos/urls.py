@@ -29,5 +29,6 @@ urlpatterns = [
     path("api/dispositivos/guardar/", views.api_guardar_dispositivo_detectado, name="api_guardar_dispositivo_detectado"),
     path("api/dispositivos/escutar/", views.api_escutar_dispositivo_detectado, name="api_escutar_dispositivo_detectado"),
     path("api/testar-leitura-usb/", views.api_testar_leitura_usb, name="api_testar_leitura_usb"),
+    path("api/web-bluetooth/preview-import/", views.api_web_bluetooth_preview_import, name="api_web_bluetooth_preview_import"),
     
 ]

@@ -21,6 +21,13 @@
     const statusChip = document.getElementById("device-search-status");
     const bluetoothStatusChip = document.getElementById("device-bluetooth-status");
     const discoveredList = document.getElementById("device-discovered-list");
+    const wbSessaoSelect = document.getElementById("wb_sessao_importacao_id");
+    const wbServiceUuidInput = document.getElementById("wb_service_uuid");
+    const wbCharUuidInput = document.getElementById("wb_char_uuid");
+    const wbDetectBtn = document.getElementById("btn-web-bluetooth-detect");
+    const wbConnectBtn = document.getElementById("btn-web-bluetooth-connect");
+    const wbSendBtn = document.getElementById("btn-web-bluetooth-send");
+    const wbStatus = document.getElementById("wb-status");
     const csrfToken = document.querySelector("#captura-form input[name=csrfmiddlewaretoken]")?.value;
 
     const procurarUsbUrl = root.dataset.apiProcurarUsbUrl || "";
@@ -29,6 +36,7 @@
     const inspecionarBluetoothUrl = root.dataset.apiInspecionarBluetoothUrl || "";
     const guardarDispositivoUrl = root.dataset.apiGuardarDispositivoUrl || "";
     const escutarDispositivoUrl = root.dataset.apiEscutarDispositivoUrl || "";
+    const webBluetoothPreviewUrl = root.dataset.apiWebBluetoothPreviewUrl || "";
 
     if (
         !procurarUsbUrl ||
@@ -48,6 +56,8 @@
     const discoveredDevices = new Map();
     let latestBluetoothDevices = [];
     let highlightedBluetoothAddress = "";
+    let webBluetoothPayloadTexto = "";
+    let webBluetoothFilename = "";
 
     function updateStatus(target, label, tone) {
         target.textContent = label;
@@ -68,6 +78,18 @@
         payloadTexto.textContent = "Sem dados ainda.";
         payloadHex.textContent = "Sem dados ainda.";
         payloadMeta.innerHTML = "";
+    }
+
+    function setWbStatus(message, tone = "info") {
+        if (!wbStatus) {
+            return;
+        }
+        wbStatus.textContent = message;
+        wbStatus.className = tone === "error"
+            ? "text-xs text-red-700 mt-2"
+            : tone === "success"
+                ? "text-xs text-green-700 mt-2"
+                : "text-xs text-gray-500 mt-2";
     }
 
     function renderPorts(portas) {
@@ -582,11 +604,192 @@
         }
     }
 
+    function _formatUuid(input) {
+        const texto = (input || "").trim().toLowerCase();
+        if (!texto) return "";
+        if (texto.length === 4 || texto.length === 8) {
+            return `0000${texto.slice(-4)}-0000-1000-8000-00805f9b34fb`;
+        }
+        return texto;
+    }
+
+    async function detetarUuidsWebBluetooth() {
+        if (!navigator.bluetooth) {
+            appendLog("Web Bluetooth não suportado neste navegador.", "erro");
+            setWbStatus("Web Bluetooth não suportado. Usa Chrome ou Edge em HTTPS.", "error");
+            return;
+        }
+
+        wbDetectBtn.disabled = true;
+        setWbStatus("A tentar detetar UUIDs automaticamente...", "info");
+        appendLog("A abrir seletor Bluetooth para deteção de UUIDs.", "info");
+
+        try {
+            const commonServices = [
+                "device_information",
+                "battery_service",
+                "0000180a-0000-1000-8000-00805f9b34fb",
+                "0000180f-0000-1000-8000-00805f9b34fb",
+            ];
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: commonServices,
+            });
+            const server = await device.gatt.connect();
+            const services = await server.getPrimaryServices();
+
+            if (!services.length) {
+                setWbStatus("Dispositivo ligado, mas sem services acessíveis nesta sessão.", "error");
+                appendLog("Sem services BLE acessíveis. Pode exigir UUIDs específicos do fabricante.", "erro");
+                return;
+            }
+
+            let foundService = "";
+            let foundCharacteristic = "";
+            for (const service of services) {
+                const chars = await service.getCharacteristics();
+                const preferred = chars.find((c) => c.properties.read || c.properties.notify);
+                if (preferred) {
+                    foundService = service.uuid;
+                    foundCharacteristic = preferred.uuid;
+                    break;
+                }
+            }
+
+            if (!foundService || !foundCharacteristic) {
+                setWbStatus("UUIDs não detetados automaticamente. Preenche manualmente.", "error");
+                appendLog("Foram encontrados services, mas nenhuma characteristic legível/notificável.", "erro");
+                return;
+            }
+
+            wbServiceUuidInput.value = foundService;
+            wbCharUuidInput.value = foundCharacteristic;
+            setWbStatus("UUIDs detetados com sucesso. Já podes clicar em ligar.", "success");
+            appendLog(`UUIDs detetados: service ${foundService}, characteristic ${foundCharacteristic}.`, "sucesso");
+        } catch (error) {
+            appendLog(`Falha na deteção automática de UUIDs: ${error}`, "erro");
+            setWbStatus(`Falha ao detetar UUIDs: ${error}`, "error");
+        } finally {
+            wbDetectBtn.disabled = false;
+        }
+    }
+
+    async function lerViaWebBluetooth() {
+        if (!navigator.bluetooth) {
+            appendLog("Este navegador não suporta Web Bluetooth.", "erro");
+            setWbStatus("Web Bluetooth não suportado neste navegador.", "error");
+            return;
+        }
+
+        const serviceUuid = _formatUuid(wbServiceUuidInput?.value);
+        const charUuid = _formatUuid(wbCharUuidInput?.value);
+        if (!serviceUuid || !charUuid) {
+            appendLog("Define Service UUID e Characteristic UUID antes de ligar.", "erro");
+            setWbStatus("Faltam UUIDs BLE para leitura.", "error");
+            return;
+        }
+
+        wbConnectBtn.disabled = true;
+        setWbStatus("A ligar ao dispositivo Bluetooth...", "info");
+        appendLog(`A iniciar Web Bluetooth para service ${serviceUuid}...`, "info");
+
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [serviceUuid],
+            });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService(serviceUuid);
+            const characteristic = await service.getCharacteristic(charUuid);
+            const value = await characteristic.readValue();
+
+            const bytes = new Uint8Array(value.buffer);
+            const decoder = new TextDecoder("utf-8");
+            const texto = decoder.decode(bytes).trim();
+            webBluetoothPayloadTexto = texto;
+            webBluetoothFilename = `webbluetooth_${device.name || "dispositivo"}_${Date.now()}.csv`;
+
+            payloadTextoLabel.textContent = "Web Bluetooth (texto)";
+            payloadHexLabel.textContent = "Web Bluetooth (hex)";
+            payloadTexto.textContent = texto || "Leitura vazia.";
+            payloadHex.textContent = Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join(" ");
+            payloadMeta.innerHTML = `
+                <span class="device-meta-chip">Origem: Web Bluetooth</span>
+                <span class="device-meta-chip">Dispositivo: ${device.name || "Sem nome"}</span>
+                <span class="device-meta-chip">Service: ${serviceUuid}</span>
+                <span class="device-meta-chip">Characteristic: ${charUuid}</span>
+                <span class="device-meta-chip">Bytes: ${bytes.length}</span>
+            `;
+
+            appendLog("Leitura via Web Bluetooth concluída com sucesso.", "sucesso");
+            setWbStatus("Leitura concluída. Podes enviar para pré-visualização.", "success");
+            wbSendBtn.disabled = !texto;
+        } catch (error) {
+            appendLog(`Erro no Web Bluetooth: ${error}`, "erro");
+            setWbStatus(`Falha Web Bluetooth: ${error}`, "error");
+            wbSendBtn.disabled = true;
+        } finally {
+            wbConnectBtn.disabled = false;
+        }
+    }
+
+    async function enviarLeituraWebBluetooth() {
+        if (!webBluetoothPreviewUrl) {
+            setWbStatus("Endpoint de preview indisponível nesta versão do servidor.", "error");
+            appendLog("Endpoint Web Bluetooth preview não configurado no backend.", "erro");
+            return;
+        }
+        const sessaoId = wbSessaoSelect?.value || "";
+        if (!sessaoId) {
+            setWbStatus("Seleciona a sessão de destino.", "error");
+            appendLog("Web Bluetooth: sessão de destino não selecionada.", "erro");
+            return;
+        }
+        if (!webBluetoothPayloadTexto.trim()) {
+            setWbStatus("Não existe leitura para enviar.", "error");
+            appendLog("Web Bluetooth: leitura vazia, nada para enviar.", "erro");
+            return;
+        }
+
+        wbSendBtn.disabled = true;
+        setWbStatus("A enviar leitura para pré-visualização...", "info");
+        try {
+            const formData = new FormData();
+            formData.append("sessao_importacao_id", sessaoId);
+            formData.append("payload_texto", webBluetoothPayloadTexto);
+            formData.append("nome_ficheiro", webBluetoothFilename || `webbluetooth_${Date.now()}.csv`);
+
+            const response = await fetch(webBluetoothPreviewUrl, {
+                method: "POST",
+                headers: { "X-CSRFToken": csrfToken },
+                body: formData,
+            });
+            const data = await response.json();
+            (data.eventos || []).forEach((evento) => appendLog(evento.mensagem, evento.tipo || "info"));
+
+            if (!data.ok) {
+                setWbStatus("Falha ao enviar leitura para pré-visualização.", "error");
+                wbSendBtn.disabled = false;
+                return;
+            }
+
+            setWbStatus("Pré-visualização criada com sucesso. A recarregar página...", "success");
+            window.location.reload();
+        } catch (error) {
+            appendLog(`Erro ao enviar leitura Web Bluetooth: ${error}`, "erro");
+            setWbStatus(`Erro ao enviar: ${error}`, "error");
+            wbSendBtn.disabled = false;
+        }
+    }
+
     btnIniciarProcura?.addEventListener("click", iniciarProcura);
     btnPararProcura?.addEventListener("click", pararProcura);
     btnIniciarBluetooth?.addEventListener("click", iniciarBluetooth);
     btnPararBluetooth?.addEventListener("click", pararBluetooth);
     btnTestar?.addEventListener("click", testarLeitura);
+    wbDetectBtn?.addEventListener("click", detetarUuidsWebBluetooth);
+    wbConnectBtn?.addEventListener("click", lerViaWebBluetooth);
+    wbSendBtn?.addEventListener("click", enviarLeituraWebBluetooth);
 
     bluetoothList?.addEventListener("click", (event) => {
         const button = event.target.closest("[data-action='inspecionar-bluetooth']");

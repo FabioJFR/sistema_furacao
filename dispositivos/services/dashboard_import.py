@@ -4,6 +4,7 @@ from dispositivos.services.magcruiser_import import (
     gravar_importacao_magcruiser,
     parse_magcruiser_file,
 )
+from django.core.files.uploadedfile import SimpleUploadedFile
 from projetos.models import Furo
 
 
@@ -41,6 +42,24 @@ def processar_preview_importacao_magcruiser(*, empresa_id, sessao_id, ficheiro):
         ],
     }
     return preview_data
+
+
+def processar_preview_importacao_magcruiser_texto(*, empresa_id, sessao_id, payload_texto, nome_ficheiro):
+    nome = (nome_ficheiro or "").strip() or "webbluetooth_import.csv"
+    texto = payload_texto or ""
+    if not texto.strip():
+        raise ValueError("Sem dados para importar do Web Bluetooth.")
+
+    ficheiro = SimpleUploadedFile(
+        name=nome,
+        content=texto.encode("utf-8"),
+        content_type="text/plain",
+    )
+    return processar_preview_importacao_magcruiser(
+        empresa_id=empresa_id,
+        sessao_id=sessao_id,
+        ficheiro=ficheiro,
+    )
 
 
 def processar_gravacao_importacao_magcruiser(

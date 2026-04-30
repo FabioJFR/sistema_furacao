@@ -14,6 +14,7 @@
     data-api-inspecionar-bluetooth-url="{% url 'dispositivos:api_inspecionar_dispositivo_bluetooth' %}"
     data-api-guardar-dispositivo-url="{% url 'dispositivos:api_guardar_dispositivo_detectado' %}"
     data-api-escutar-dispositivo-url="{% url 'dispositivos:api_escutar_dispositivo_detectado' %}"
+    data-api-web-bluetooth-preview-url="{% url 'dispositivos:api_web_bluetooth_preview_import' %}"
 >
     <div class="device-shell">
     <div class="device-panel bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
@@ -190,6 +191,46 @@
                     {% trans "Carregue ficheiros exportados do aparelho, valide em pré-visualização e grave as medições no furo da sessão escolhida." %}
                 </p>
             </div>
+        </div>
+
+        <div class="mb-5 p-4 border border-gray-200 rounded-xl bg-gray-50">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">{% trans "Leitura direta via Bluetooth do navegador (beta)" %}</h3>
+            <p class="text-sm text-gray-600 mb-3">
+                {% trans "Usa o Bluetooth deste computador/telemóvel para ler dados do aparelho e enviar para pré-visualização." %}
+            </p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-sm font-semibold mb-1 text-gray-700">{% trans "Sessão de destino" %}</label>
+                    <select id="wb_sessao_importacao_id" class="device-field w-full border rounded-lg px-3 py-2">
+                        <option value="">{% trans "Selecione uma sessão com furo" %}</option>
+                        {% for sessao in sessoes_importacao %}
+                            <option value="{{ sessao.id }}">
+                                {{ sessao.iniciado_em|date:"d/m/Y H:i" }} - {{ sessao.dispositivo.nome }} - {{ sessao.furo.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1 text-gray-700">{% trans "Service UUID (BLE)" %}</label>
+                    <input id="wb_service_uuid" class="device-field w-full border rounded-lg px-3 py-2" placeholder="0000xxxx-0000-1000-8000-00805f9b34fb">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1 text-gray-700">{% trans "Characteristic UUID (BLE)" %}</label>
+                    <input id="wb_char_uuid" class="device-field w-full border rounded-lg px-3 py-2" placeholder="0000xxxx-0000-1000-8000-00805f9b34fb">
+                </div>
+            </div>
+            <div class="mt-3 flex gap-3 flex-wrap">
+                <button type="button" id="btn-web-bluetooth-detect" class="device-btn device-btn--info">
+                    {% trans "Detetar UUIDs automaticamente" %}
+                </button>
+                <button type="button" id="btn-web-bluetooth-connect" class="device-btn device-btn--accent">
+                    {% trans "Ligar e ler via Bluetooth deste dispositivo" %}
+                </button>
+                <button type="button" id="btn-web-bluetooth-send" class="device-btn device-btn--secondary" disabled>
+                    {% trans "Enviar leitura para pré-visualização" %}
+                </button>
+            </div>
+            <p id="wb-status" class="text-xs text-gray-500 mt-2">{% trans "Aguardando leitura Web Bluetooth." %}</p>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="space-y-4">

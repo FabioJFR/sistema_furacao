@@ -36,6 +36,7 @@ from dispositivos.services.importacao_historico import (
 )
 from dispositivos.services.dashboard_import import (
     processar_acao_importacao_magcruiser,
+    processar_preview_importacao_magcruiser_texto,
 )
 from dispositivos.selectors.importacao_historico import (
     listar_historico_importacoes_qs,
@@ -444,6 +445,49 @@ def captura_dispositivo(request):
         "magcruiser_report": report_data,
         "historico_importacoes": historico_importacoes,
     })
+
+
+@login_required
+@require_POST
+def api_web_bluetooth_preview_import(request):
+    _garantir_admin_api(request)
+
+    sessao_id = (request.POST.get("sessao_importacao_id") or "").strip()
+    payload_texto = request.POST.get("payload_texto") or ""
+    nome_ficheiro = (request.POST.get("nome_ficheiro") or "webbluetooth_import.csv").strip()
+    if not sessao_id:
+        return _json_erro("Seleciona uma sessão de destino para a importação.", status=400)
+
+    try:
+        preview_data = processar_preview_importacao_magcruiser_texto(
+            empresa_id=_obter_empresa_id_utilizador(request),
+            sessao_id=sessao_id,
+            payload_texto=payload_texto,
+            nome_ficheiro=nome_ficheiro,
+        )
+        request.session[MAGCRUISER_PREVIEW_SESSION_KEY] = preview_data
+        request.session.modified = True
+    except Exception as exc:
+        return _json_erro(f"Falha ao preparar pré-visualização Web Bluetooth: {exc}", status=400)
+
+    return _json_ok(
+        {
+            "eventos": [
+                {
+                    "tipo": "sucesso",
+                    "mensagem": (
+                        f"Pré-visualização Web Bluetooth carregada: {preview_data['total_linhas']} "
+                        f"linhas em {preview_data['filename']}."
+                    ),
+                }
+            ],
+            "preview": {
+                "filename": preview_data["filename"],
+                "total_linhas": preview_data["total_linhas"],
+                "formato": preview_data["formato"],
+            },
+        }
+    )
 
 
 @login_required
