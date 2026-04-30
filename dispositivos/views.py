@@ -10,6 +10,7 @@ from dispositivos.services.serial_service import (
     listar_portas_seriais,
 )
 from dispositivos.selectors.dashboard import (
+    obter_dispositivos_qs,
     obter_dispositivo_ativo,
     construir_contexto_captura_dispositivo,
     obter_empregado_por_user_empresa,

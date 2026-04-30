@@ -35,7 +35,7 @@ def _obter_empresa_admin_medicoes(request):
             "Falha ao resolver empresa administrativa em medicoes.py. user_id=%s",
             request.user.id,
         )
-    return None, resposta_erro
+        return None, resposta_erro
     return empresa, None
 
 
