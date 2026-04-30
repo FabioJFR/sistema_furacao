@@ -39,6 +39,38 @@ def _obter_empresa_admin_maquinas(request):
     return empresa, None
 
 
+def _render_maquina_form(request, form, titulo, maquina=None):
+    context = {
+        "form": form,
+        "titulo": titulo,
+    }
+    if maquina is not None:
+        context["maquina"] = maquina
+    return render(request, "projetos/maquina_form.html", context)
+
+
+def _processar_form_maquina(
+    *,
+    request,
+    form,
+    empresa,
+    on_success,
+    sucesso_msg,
+    erro_msg,
+    log_sucesso,
+    log_erro,
+):
+    if not form.is_valid():
+        logger.warning(log_erro, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None
+
+    maquina = on_success(form, empresa=empresa)
+    logger.info(log_sucesso, request.user.id, empresa.id, maquina.id)
+    messages.success(request, sucesso_msg)
+    return maquina
+
+
 # Multiempresa: o administrador só pode listar e gerir máquinas da sua própria empresa.
 @login_required
 @admin_required
@@ -105,30 +137,22 @@ def maquina_create(request):
 
     if request.method == "POST":
         form = MaquinaForm(request.POST, empresa=empresa)
-        if form.is_valid():
-            maquina = criar_maquina(form, empresa=empresa)
-            logger.info(
-                "Máquina criada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
-                request.user.id,
-                empresa.id,
-                maquina.id,
-            )
-            messages.success(request, "Máquina criada com sucesso.")
+        maquina = _processar_form_maquina(
+            request=request,
+            form=form,
+            empresa=empresa,
+            on_success=criar_maquina,
+            sucesso_msg="Máquina criada com sucesso.",
+            erro_msg="Erro ao criar a máquina. Verifique os dados.",
+            log_sucesso="Máquina criada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
+            log_erro="Erro ao criar máquina. user_id=%s, erros=%s",
+        )
+        if maquina:
             return redirect("projetos:maquina_detail", maquina_id=maquina.id)
-        else:
-            logger.warning(
-                "Erro ao criar máquina. user_id=%s, erros=%s",
-                request.user.id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao criar a máquina. Verifique os dados.")
     else:
         form = MaquinaForm(empresa=empresa)
 
-    return render(request, 'projetos/maquina_form.html', {
-        'form': form,
-        'titulo': 'Nova Máquina'
-    })
+    return _render_maquina_form(request, form, "Nova Máquina")
 
 
 @login_required
@@ -150,32 +174,22 @@ def maquina_update(request, maquina_id):
 
     if request.method == "POST":
         form = MaquinaForm(request.POST, instance=maquina, empresa=empresa)
-        if form.is_valid():
-            maquina = atualizar_maquina(form, empresa=empresa)
-            logger.info(
-                "Máquina atualizada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
-                request.user.id,
-                empresa.id,
-                maquina.id,
-            )
-            messages.success(request, "Máquina atualizada com sucesso.")
-            return redirect("projetos:maquina_detail", maquina_id=maquina.id)
-        else:
-            logger.warning(
-                "Erro ao atualizar máquina. user_id=%s, maquina_id=%s, erros=%s",
-                request.user.id,
-                maquina_id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao atualizar a máquina. Verifique os dados.")
+        maquina_atualizada = _processar_form_maquina(
+            request=request,
+            form=form,
+            empresa=empresa,
+            on_success=atualizar_maquina,
+            sucesso_msg="Máquina atualizada com sucesso.",
+            erro_msg="Erro ao atualizar a máquina. Verifique os dados.",
+            log_sucesso="Máquina atualizada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
+            log_erro="Erro ao atualizar máquina. user_id=%s, erros=%s",
+        )
+        if maquina_atualizada:
+            return redirect("projetos:maquina_detail", maquina_id=maquina_atualizada.id)
     else:
         form = MaquinaForm(instance=maquina, empresa=empresa)
 
-    return render(request, 'projetos/maquina_form.html', {
-        'form': form,
-        'titulo': 'Editar Máquina',
-        'maquina': maquina
-    })
+    return _render_maquina_form(request, form, "Editar Máquina", maquina=maquina)
 
 
 @login_required

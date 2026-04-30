@@ -49,6 +49,32 @@ def _obter_empresa_admin_projetos(request):
     return empresa, None
 
 
+def _empresa_id(empresa):
+    return getattr(empresa, "pk", empresa) if empresa is not None else None
+
+
+def _processar_form_projeto(
+    *,
+    request,
+    form,
+    empresa,
+    on_success,
+    sucesso_msg,
+    erro_msg,
+    success_log,
+    error_log,
+):
+    if not form.is_valid():
+        logger.warning(error_log, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None
+
+    projeto = on_success(form=form, empresa=_empresa_id(empresa))
+    logger.info(success_log, request.user.id, empresa.id, getattr(projeto, "pk", None))
+    messages.success(request, sucesso_msg)
+    return projeto
+
+
 # ----------------- Globo ------------------------------ #
 @login_required
 @admin_required
@@ -126,7 +152,7 @@ def projeto_update(request, pk):
         request.method,
     )
     empresa, resposta_erro = _obter_empresa_admin_projetos(request)
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
+    empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_update. user_id=%s", request.user.id)
         return resposta_erro
@@ -135,24 +161,18 @@ def projeto_update(request, pk):
     form = ProjetoForm(request.POST or None, instance=projeto, empresa=empresa_id)
 
     if request.method == "POST":
-        if form.is_valid():
-            projeto = atualizar_projeto(form, empresa=empresa_id)
-            logger.info(
-                "Projeto atualizado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
-                request.user.id,
-                empresa.id,
-                projeto.pk,
-            )
-            messages.success(request, "Projeto atualizado com sucesso.")
-            return redirect(projeto)
-
-        logger.warning(
-            "Erro ao atualizar projeto. user_id=%s, projeto_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
+        projeto = _processar_form_projeto(
+            request=request,
+            form=form,
+            empresa=empresa,
+            on_success=atualizar_projeto,
+            sucesso_msg="Projeto atualizado com sucesso.",
+            erro_msg="Erro ao atualizar o projeto. Verifique os dados.",
+            success_log="Projeto atualizado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
+            error_log="Erro ao atualizar projeto. user_id=%s, erros=%s",
         )
-        messages.error(request, "Erro ao atualizar o projeto. Verifique os dados.")
+        if projeto:
+            return redirect(projeto)
 
     return render(request, "projetos/projeto_editar.html", {
         "form": form,
@@ -170,30 +190,25 @@ def projeto_create(request):
         request.method,
     )
     empresa, resposta_erro = _obter_empresa_admin_projetos(request)
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
+    empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_create. user_id=%s", request.user.id)
         return resposta_erro
 
     if request.method == "POST":
         form = ProjetoForm(request.POST, empresa=empresa_id)
-        if form.is_valid():
-            projeto = criar_projeto(form, empresa=empresa_id)
-            logger.info(
-                "Projeto criado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
-                request.user.id,
-                empresa.id,
-                getattr(projeto, "pk", None),
-            )
-            messages.success(request, "Projeto criado com sucesso.")
-            return redirect("projetos:projeto_list")
-
-        logger.warning(
-            "Erro ao criar projeto. user_id=%s, erros=%s",
-            request.user.id,
-            form.errors,
+        projeto = _processar_form_projeto(
+            request=request,
+            form=form,
+            empresa=empresa,
+            on_success=criar_projeto,
+            sucesso_msg="Projeto criado com sucesso.",
+            erro_msg="Erro ao criar o projeto. Verifique os dados.",
+            success_log="Projeto criado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
+            error_log="Erro ao criar projeto. user_id=%s, erros=%s",
         )
-        messages.error(request, "Erro ao criar o projeto. Verifique os dados.")
+        if projeto:
+            return redirect("projetos:projeto_list")
     else:
         form = ProjetoForm(empresa=empresa_id)
 
@@ -292,23 +307,25 @@ def projeto_adicionar_empregado(request, pk):
         return resposta_erro
 
     projeto = obter_projeto(pk, empresa=empresa)
-    form = ProjetoEmpregadoForm(request.POST or None, empresa=empresa, projeto=projeto)
+    if request.method != "POST":
+        messages.error(request, "Método inválido para associar trabalhador ao projeto.")
+        return redirect(projeto)
 
-    if request.method == "POST":
-        if form.is_valid():
-            empregado = form.cleaned_data["empregado"]
-            _, criado = associar_empregado_projeto(
-                empregado=empregado,
-                projeto=projeto,
-                empresa=empresa,
-                data_inicio=form.cleaned_data.get("data_inicio"),
-            )
-            if not criado:
-                messages.warning(request, "Este empregado já está associado a este projeto.")
-            else:
-                messages.success(request, "Empregado associado ao projeto com sucesso.")
+    form = ProjetoEmpregadoForm(request.POST, empresa=empresa, projeto=projeto)
+    if form.is_valid():
+        empregado = form.cleaned_data["empregado"]
+        _, criado = associar_empregado_projeto(
+            empregado=empregado,
+            projeto=projeto,
+            empresa=empresa,
+            data_inicio=form.cleaned_data.get("data_inicio"),
+        )
+        if not criado:
+            messages.warning(request, "Este empregado já está associado a este projeto.")
         else:
-            messages.error(request, "Erro ao associar empregado ao projeto. Verifique os dados.")
+            messages.success(request, "Empregado associado ao projeto com sucesso.")
+    else:
+        messages.error(request, "Erro ao associar empregado ao projeto. Verifique os dados.")
 
     return redirect(projeto)
 
@@ -356,7 +373,7 @@ def projeto_3d(request, pk):
         pk,
     )
     empresa, resposta_erro = _obter_empresa_admin_projetos(request)
-    empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
+    empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_3d. user_id=%s", request.user.id)
         return resposta_erro

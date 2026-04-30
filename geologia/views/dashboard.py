@@ -24,6 +24,7 @@ from geologia.services.drone_sf_dashboard import (
     motor_missoes_summary_sf,
     parse_payload_json_request_sf,
     processar_acao_operacao_detail_sf,
+    processar_comando_sf_create,
     processar_comandos_pendentes_bridge_sf,
     processar_ingest_estado_bridge_sf,
     processar_log_event_bridge_sf,
@@ -55,6 +56,81 @@ from geologia.selectors.dashboard import (
 )
 
 from .common import obter_empresa_admin_geologia
+
+
+def _json_ok(payload=None, *, status=200):
+    data = {"ok": True}
+    if payload:
+        data.update(payload)
+    return JsonResponse(data, status=status)
+
+
+def _json_erro(*, erro, status=400):
+    return JsonResponse({"ok": False, "erro": erro}, status=status)
+
+
+def _processar_post_form_modelo(
+    *,
+    request,
+    form,
+    mensagem_sucesso,
+    mensagem_erro,
+    redirect_name,
+    redirect_kwargs,
+):
+    if request.method != "POST":
+        return None
+    resultado = processar_form_modelo_sf(
+        form=form,
+        mensagem_sucesso=mensagem_sucesso,
+        mensagem_erro=mensagem_erro,
+    )
+    if resultado["ok"]:
+        messages.success(request, resultado["mensagem"])
+        return redirect(redirect_name, **redirect_kwargs)
+    messages.error(request, resultado["mensagem"])
+    return None
+
+
+def _mensagem_sucesso_redirect(*, request, mensagem, redirect_name, **redirect_kwargs):
+    messages.success(request, mensagem)
+    return redirect(redirect_name, **redirect_kwargs)
+
+
+def _processar_acao_operacao_detail_post(*, request, drone, operacao_form, missao_programada_form, missao_edicao):
+    if request.method != "POST":
+        return None
+    resultado_acao = processar_acao_operacao_detail_sf(
+        action=request.POST.get("sf_action"),
+        operacao_form=operacao_form,
+        missao_programada_form=missao_programada_form,
+        missao_edicao=missao_edicao,
+        empresa=drone.empresa,
+        utilizador=request.user,
+    )
+    if not resultado_acao.get("handled"):
+        return None
+    if resultado_acao.get("ok"):
+        messages.success(request, resultado_acao.get("message"))
+        return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
+    messages.error(request, resultado_acao.get("message"))
+    return None
+
+
+def _processar_comando_sf_post(*, request, operacao, empresa, utilizador):
+    if request.method != "POST":
+        return None
+    resultado = processar_comando_sf_create(
+        request_post=request.POST,
+        operacao=operacao,
+        empresa=empresa,
+        utilizador=utilizador,
+    )
+    if resultado["ok"]:
+        messages.success(request, "Comando do Drone S_F colocado na fila.")
+    else:
+        messages.error(request, "Não foi possível criar o comando do Drone S_F.")
+    return True
 
 
 @login_required
@@ -175,16 +251,16 @@ def drone_sf_detail(request, pk):
         drone=drone,
         empresa=drone.empresa,
     )
-    if request.method == "POST":
-        resultado = processar_form_modelo_sf(
-            form=config_form,
-            mensagem_sucesso="Configuração do Drone S_F atualizada.",
-            mensagem_erro="Não foi possível atualizar a configuração do Drone S_F.",
-        )
-        if resultado["ok"]:
-            messages.success(request, resultado["mensagem"])
-            return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, resultado["mensagem"])
+    resposta_post = _processar_post_form_modelo(
+        request=request,
+        form=config_form,
+        mensagem_sucesso="Configuração do Drone S_F atualizada.",
+        mensagem_erro="Não foi possível atualizar a configuração do Drone S_F.",
+        redirect_name="geologia:drone_sf_detail",
+        redirect_kwargs={"pk": drone.pk},
+    )
+    if resposta_post:
+        return resposta_post
 
     return render(
         request,
@@ -207,16 +283,16 @@ def drone_sf_modulo_create(request, drone_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = ModuloDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
-    if request.method == "POST":
-        resultado = processar_form_modelo_sf(
-            form=form,
-            mensagem_sucesso="Módulo do Drone S_F criado com sucesso.",
-            mensagem_erro="Não foi possível criar o módulo do Drone S_F.",
-        )
-        if resultado["ok"]:
-            messages.success(request, resultado["mensagem"])
-            return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, resultado["mensagem"])
+    resposta_post = _processar_post_form_modelo(
+        request=request,
+        form=form,
+        mensagem_sucesso="Módulo do Drone S_F criado com sucesso.",
+        mensagem_erro="Não foi possível criar o módulo do Drone S_F.",
+        redirect_name="geologia:drone_sf_detail",
+        redirect_kwargs={"pk": drone.pk},
+    )
+    if resposta_post:
+        return resposta_post
 
     return render(
         request,
@@ -241,16 +317,16 @@ def drone_sf_sensor_create(request, drone_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     form = SensorDroneSFForm(request.POST or None, drone=drone, empresa=drone.empresa)
-    if request.method == "POST":
-        resultado = processar_form_modelo_sf(
-            form=form,
-            mensagem_sucesso="Sensor do Drone S_F criado com sucesso.",
-            mensagem_erro="Não foi possível criar o sensor do Drone S_F.",
-        )
-        if resultado["ok"]:
-            messages.success(request, resultado["mensagem"])
-            return redirect("geologia:drone_sf_detail", pk=drone.pk)
-        messages.error(request, resultado["mensagem"])
+    resposta_post = _processar_post_form_modelo(
+        request=request,
+        form=form,
+        mensagem_sucesso="Sensor do Drone S_F criado com sucesso.",
+        mensagem_erro="Não foi possível criar o sensor do Drone S_F.",
+        redirect_name="geologia:drone_sf_detail",
+        redirect_kwargs={"pk": drone.pk},
+    )
+    if resposta_post:
+        return resposta_post
 
     return render(
         request,
@@ -311,20 +387,15 @@ def drone_sf_operacao_detail(request, drone_id):
             "usar_live_view": True,
         },
     )
-    if request.method == "POST":
-        resultado_acao = processar_acao_operacao_detail_sf(
-            action=request.POST.get("sf_action"),
-            operacao_form=operacao_form,
-            missao_programada_form=missao_programada_form,
-            missao_edicao=missao_edicao,
-            empresa=drone.empresa,
-            utilizador=request.user,
-        )
-        if resultado_acao.get("handled"):
-            if resultado_acao.get("ok"):
-                messages.success(request, resultado_acao.get("message"))
-                return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
-            messages.error(request, resultado_acao.get("message"))
+    resposta_post = _processar_acao_operacao_detail_post(
+        request=request,
+        drone=drone,
+        operacao_form=operacao_form,
+        missao_programada_form=missao_programada_form,
+        missao_edicao=missao_edicao,
+    )
+    if resposta_post:
+        return resposta_post
 
     missoes_programadas = construir_missoes_programadas_contexto(drone, limit=20)
 
@@ -357,17 +428,12 @@ def drone_sf_comando_create(request, drone_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     operacao = obter_operacao_drone_sf(drone)
-    if request.method == "POST":
-        resultado = processar_comando_sf_create(
-            request_post=request.POST,
-            operacao=operacao,
-            empresa=drone.empresa,
-            utilizador=request.user,
-        )
-        if resultado["ok"]:
-            messages.success(request, "Comando do Drone S_F colocado na fila.")
-        else:
-            messages.error(request, "Não foi possível criar o comando do Drone S_F.")
+    _processar_comando_sf_post(
+        request=request,
+        operacao=operacao,
+        empresa=drone.empresa,
+        utilizador=request.user,
+    )
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
 
@@ -384,8 +450,12 @@ def drone_sf_missao_programada_toggle(request, drone_id, missao_id):
 
     novo_estado = request.POST.get("ativa") == "1"
     resultado = processar_toggle_missao_programada_sf(missao=missao, ativa=novo_estado)
-    messages.success(request, resultado["mensagem"])
-    return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
+    return _mensagem_sucesso_redirect(
+        request=request,
+        mensagem=resultado["mensagem"],
+        redirect_name="geologia:drone_sf_operacao_detail",
+        drone_id=drone.pk,
+    )
 
 
 @login_required
@@ -405,8 +475,12 @@ def drone_sf_missao_programada_executar(request, drone_id, missao_id):
         missao=missao,
         utilizador=request.user,
     )
-    messages.success(request, resultado["mensagem"])
-    return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
+    return _mensagem_sucesso_redirect(
+        request=request,
+        mensagem=resultado["mensagem"],
+        redirect_name="geologia:drone_sf_operacao_detail",
+        drone_id=drone.pk,
+    )
 
 
 @login_required
@@ -420,8 +494,12 @@ def drone_sf_missao_programada_delete(request, drone_id, missao_id):
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
     resultado = processar_remocao_missao_programada_sf(missao=missao)
-    messages.success(request, resultado["mensagem"])
-    return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
+    return _mensagem_sucesso_redirect(
+        request=request,
+        mensagem=resultado["mensagem"],
+        redirect_name="geologia:drone_sf_operacao_detail",
+        drone_id=drone.pk,
+    )
 
 
 @csrf_exempt
@@ -441,14 +519,13 @@ def api_drone_sf_bridge_ingest_estado(request):
         return erro_response
 
     processar_ingest_estado_bridge_sf(operacao, payload)
-    return JsonResponse(
+    return _json_ok(
         {
-            "ok": True,
             "estado": {
                 "estado": operacao.estado,
                 "estado_label": operacao.get_estado_display(),
                 "ultimo_heartbeat": operacao.ultimo_heartbeat.isoformat() if operacao.ultimo_heartbeat else "",
-            },
+            }
         }
     )
 
@@ -466,7 +543,7 @@ def api_drone_sf_bridge_comandos_pendentes(request):
     operacao = acesso["operacao"]
 
     comandos = processar_comandos_pendentes_bridge_sf(operacao)
-    return JsonResponse({"ok": True, "comandos": comandos})
+    return _json_ok({"comandos": comandos})
 
 
 @csrf_exempt
@@ -489,7 +566,7 @@ def api_drone_sf_bridge_confirmar_comando(request, comando_id):
     erro_response = confirmar_comando_bridge_sf(comando=comando, payload=payload)
     if erro_response is not None:
         return erro_response
-    return JsonResponse({"ok": True, "comando_id": str(comando.id), "status": comando.status})
+    return _json_ok({"comando_id": str(comando.id), "status": comando.status})
 
 
 @csrf_exempt
@@ -509,7 +586,7 @@ def api_drone_sf_bridge_log_event(request):
         return erro_response
 
     processar_log_event_bridge_sf(operacao, payload)
-    return JsonResponse({"ok": True})
+    return _json_ok()
 
 
 @login_required
@@ -518,16 +595,11 @@ def api_drone_sf_bridge_log_event(request):
 def api_drone_sf_estado(request, drone_id):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
-        return JsonResponse({"ok": False, "erro": "Sem permissões para consultar o estado do Drone S_F."}, status=403)
+        return _json_erro(erro="Sem permissões para consultar o estado do Drone S_F.", status=403)
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     operacao, _ = obter_ou_criar_operacao_drone_sf(drone)
-    return JsonResponse(
-        {
-            "ok": True,
-            "estado": serializar_estado_operacao_sf(operacao),
-        }
-    )
+    return _json_ok({"estado": serializar_estado_operacao_sf(operacao)})
 
 
 @login_required

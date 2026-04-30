@@ -49,6 +49,38 @@ def _obter_empregado_autenticado_definicoes(request):
 
     return empregado, None
 
+
+def _aplicar_idioma_preferencias(request, preferencias):
+    if preferencias.idioma:
+        translation.activate(preferencias.idioma)
+        request.session["django_language"] = preferencias.idioma
+
+
+def _processar_form_definicoes(request, form, empregado):
+    if not form.is_valid():
+        logger.warning(
+            "Erro ao guardar definições. user_id=%s, empregado_id=%s, erros=%s",
+            request.user.id,
+            getattr(empregado, "id", None),
+            form.errors,
+        )
+        messages.error(request, "Erro ao guardar definições.")
+        return None
+
+    preferencias = guardar_preferencias_utilizador(
+        form=form,
+        user=request.user,
+        empresa=empregado.empresa if empregado and empregado.empresa_id else None,
+    )
+    _aplicar_idioma_preferencias(request, preferencias)
+    logger.info(
+        "Definições atualizadas com sucesso. user_id=%s, empregado_id=%s",
+        request.user.id,
+        getattr(empregado, "id", None),
+    )
+    messages.success(request, "Definições guardadas com sucesso.")
+    return redirect("projetos:definicoes")
+
 @login_required
 def definicoes(request):
     logger.info(
@@ -58,7 +90,6 @@ def definicoes(request):
         request.method,
     )
     empregado, resposta_erro = _obter_empregado_autenticado_definicoes(request)
-    empregado_id = getattr(empregado, "id", None)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view definicoes. user_id=%s", request.user.id)
         return resposta_erro
@@ -69,34 +100,9 @@ def definicoes(request):
 
     if request.method == "POST":
         form = PreferenciasForm(request.POST, instance=preferencias)
-
-        if form.is_valid():
-            preferencias = guardar_preferencias_utilizador(
-                form=form,
-                user=request.user,
-                empresa=empregado.empresa if empregado and empregado.empresa_id else None,
-            )
-
-            # Ativar idioma imediatamente
-            if preferencias.idioma:
-                translation.activate(preferencias.idioma)
-                request.session["django_language"] = preferencias.idioma
-
-            logger.info(
-                "Definições atualizadas com sucesso. user_id=%s, empregado_id=%s",
-                request.user.id,
-                empregado_id,
-            )
-            messages.success(request, "Definições guardadas com sucesso.")
-            return redirect("projetos:definicoes")
-
-        logger.warning(
-            "Erro ao guardar definições. user_id=%s, empregado_id=%s, erros=%s",
-            request.user.id,
-            empregado_id,
-            form.errors,
-        )
-        messages.error(request, "Erro ao guardar definições.")
+        resposta = _processar_form_definicoes(request, form, empregado)
+        if resposta:
+            return resposta
     else:
         form = PreferenciasForm(instance=preferencias)
 

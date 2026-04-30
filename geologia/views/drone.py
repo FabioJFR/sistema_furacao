@@ -43,8 +43,62 @@ from geologia.services.drone_dashboard import (
 
 from .common import obter_empresa_admin_geologia
 
+
+def _json_ok(payload=None, *, status=200):
+    data = {"ok": True}
+    if payload:
+        data.update(payload)
+    return JsonResponse(data, status=status)
+
+
+def _json_erro(*, mensagem=None, erro=None, status=400, eventos=None):
+    data = {"ok": False}
+    if erro is not None:
+        data["erro"] = erro
+    if eventos is not None:
+        data["eventos"] = eventos
+    elif mensagem is not None:
+        data["eventos"] = [{"tipo": "erro", "mensagem": mensagem}]
+    return JsonResponse(data, status=status)
+
+
 def _obter_operacao_por_bridge_key(bridge_key):
     return obter_operacao_por_bridge_key_selector(bridge_key)
+
+
+def _validar_empresa_geologia_necessaria(empresa, mensagem_erro):
+    if empresa is not None:
+        return None
+    return mensagem_erro
+
+
+def _processar_form_missao(
+    *,
+    request,
+    request_post,
+    request_files,
+    processar_fn,
+    construir_form_fn,
+    construir_form_kwargs,
+    processar_kwargs,
+    sucesso_msg,
+    erro_msg,
+):
+    if request.method == "POST":
+        resultado = processar_fn(
+            request_post=request_post,
+            request_files=request_files,
+            **processar_kwargs,
+        )
+        form = resultado["form"]
+        if resultado["ok"]:
+            messages.success(request, sucesso_msg)
+            return form, True
+        messages.error(request, erro_msg)
+        return form, False
+
+    form = construir_form_fn(**construir_form_kwargs)
+    return form, False
 
 
 @login_required
@@ -116,8 +170,12 @@ def drone_controle_update(request):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
         return resposta_erro
-    if empresa is None:
-        messages.error(request, "O controlo em tempo real do drone precisa de uma empresa selecionada.")
+    erro_empresa = _validar_empresa_geologia_necessaria(
+        empresa,
+        "O controlo em tempo real do drone precisa de uma empresa selecionada.",
+    )
+    if erro_empresa:
+        messages.error(request, erro_empresa)
         return redirect("geologia:drone_hub")
 
     operacao = obter_operacao_empresa(empresa)
@@ -141,8 +199,12 @@ def drone_comando_create(request):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
         return resposta_erro
-    if empresa is None:
-        messages.error(request, "Os comandos do drone precisam de uma empresa selecionada.")
+    erro_empresa = _validar_empresa_geologia_necessaria(
+        empresa,
+        "Os comandos do drone precisam de uma empresa selecionada.",
+    )
+    if erro_empresa:
+        messages.error(request, erro_empresa)
         return redirect("geologia:drone_hub")
 
     operacao = obter_operacao_empresa(empresa)
@@ -166,13 +228,15 @@ def drone_comando_create(request):
 def api_testar_ligacao_drone(request):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "Sem permissões para testar a ligação do drone."}]}, status=403)
+        return _json_erro(mensagem="Sem permissões para testar a ligação do drone.", status=403)
     if empresa is None:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "A vista global não permite testar a ligação a um drone específico."}]}, status=400)
+        return _json_erro(mensagem="A vista global não permite testar a ligação a um drone específico.", status=400)
 
     operacao = obter_operacao_empresa(empresa)
     ok, eventos, estado = testar_ligacao_drone(operacao)
-    return JsonResponse({"ok": ok, "eventos": eventos, "estado": estado}, status=200 if ok else 502)
+    if ok:
+        return _json_ok({"eventos": eventos, "estado": estado})
+    return _json_erro(eventos=eventos, status=502)
 
 
 @login_required
@@ -181,20 +245,14 @@ def api_testar_ligacao_drone(request):
 def api_procurar_drone(request):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "Sem permissões para procurar o drone."}]}, status=403)
+        return _json_erro(mensagem="Sem permissões para procurar o drone.", status=403)
     if empresa is None:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "A vista global não permite procurar um drone específico."}]}, status=400)
+        return _json_erro(mensagem="A vista global não permite procurar um drone específico.", status=400)
 
     operacao = obter_operacao_empresa(empresa)
     eventos = colocar_drone_em_procura(operacao)
 
-    return JsonResponse(
-        {
-            "ok": True,
-            "eventos": eventos,
-            "estado": serializar_estado_operacao(operacao),
-        }
-    )
+    return _json_ok({"eventos": eventos, "estado": serializar_estado_operacao(operacao)})
 
 
 @login_required
@@ -203,12 +261,12 @@ def api_procurar_drone(request):
 def api_estado_drone(request):
     empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
     if resposta_erro:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "Sem permissões para consultar o estado do drone."}]}, status=403)
+        return _json_erro(mensagem="Sem permissões para consultar o estado do drone.", status=403)
     if empresa is None:
-        return JsonResponse({"ok": False, "eventos": [{"tipo": "erro", "mensagem": "A vista global não tem estado de drone em tempo real."}]}, status=400)
+        return _json_erro(mensagem="A vista global não tem estado de drone em tempo real.", status=400)
 
     operacao = obter_operacao_empresa(empresa)
-    return JsonResponse({"ok": True, "estado": serializar_estado_operacao(operacao)})
+    return _json_ok({"estado": serializar_estado_operacao(operacao)})
 
 
 @csrf_exempt
@@ -216,25 +274,24 @@ def api_estado_drone(request):
 def api_bridge_ingest_estado(request):
     bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
     if not bridge_key:
-        return JsonResponse({"ok": False, "erro": "Bridge key em falta."}, status=403)
+        return _json_erro(erro="Bridge key em falta.", status=403)
 
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge não autorizada."}, status=403)
+        return _json_erro(erro="Bridge não autorizada.", status=403)
 
     payload, erro_response = parse_payload_json_request(request)
     if erro_response is not None:
         return erro_response
 
     processar_ingest_estado_bridge(operacao, payload)
-    return JsonResponse(
+    return _json_ok(
         {
-            "ok": True,
             "estado": {
                 "estado_conexao": operacao.estado_conexao,
                 "estado_label": operacao.get_estado_conexao_display(),
                 "ultimo_heartbeat": operacao.ultimo_heartbeat.isoformat() if operacao.ultimo_heartbeat else "",
-            },
+            }
         }
     )
 
@@ -245,11 +302,11 @@ def api_bridge_comandos_pendentes(request):
     bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge não autorizada."}, status=403)
+        return _json_erro(erro="Bridge não autorizada.", status=403)
 
     comandos = processar_comandos_pendentes_bridge(operacao)
 
-    return JsonResponse({"ok": True, "comandos": comandos})
+    return _json_ok({"comandos": comandos})
 
 
 @csrf_exempt
@@ -258,7 +315,7 @@ def api_bridge_confirmar_comando(request, comando_id):
     bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge não autorizada."}, status=403)
+        return _json_erro(erro="Bridge não autorizada.", status=403)
 
     comando = obter_comando_operacao_drone(operacao=operacao, comando_id=comando_id)
     payload, erro_response = parse_payload_json_request(request)
@@ -269,7 +326,7 @@ def api_bridge_confirmar_comando(request, comando_id):
     if erro_response is not None:
         return erro_response
 
-    return JsonResponse({"ok": True, "comando_id": str(comando.id), "status": comando.status})
+    return _json_ok({"comando_id": str(comando.id), "status": comando.status})
 
 
 @csrf_exempt
@@ -278,14 +335,14 @@ def api_bridge_log_event(request):
     bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
-        return JsonResponse({"ok": False, "erro": "Bridge não autorizada."}, status=403)
+        return _json_erro(erro="Bridge não autorizada.", status=403)
 
     payload, erro_response = parse_payload_json_request(request)
     if erro_response is not None:
         return erro_response
 
     processar_log_event_bridge(operacao, payload)
-    return JsonResponse({"ok": True})
+    return _json_ok()
 
 
 @login_required
@@ -297,21 +354,19 @@ def missao_drone_create(request, furo_id):
 
     furo = obter_furo_drone(furo_id, empresa=empresa)
 
-    if request.method == "POST":
-        resultado = processar_missao_create(
-            request_post=request.POST,
-            request_files=request.FILES,
-            furo=furo,
-            empresa=empresa,
-        )
-        form = resultado["form"]
-        if resultado["ok"]:
-            missao = resultado["missao"]
-            messages.success(request, "Missao do drone registada com sucesso.")
-            return redirect("geologia:furo_dashboard", furo_id=furo.pk)
-        messages.error(request, "Nao foi possivel guardar a missao do drone.")
-    else:
-        form = construir_form_missao_create(furo=furo, empresa=empresa)
+    form, resposta = _processar_form_missao(
+        request=request,
+        request_post=request.POST,
+        request_files=request.FILES,
+        processar_fn=processar_missao_create,
+        construir_form_fn=construir_form_missao_create,
+        construir_form_kwargs={"furo": furo, "empresa": empresa},
+        processar_kwargs={"furo": furo, "empresa": empresa},
+        sucesso_msg="Missao do drone registada com sucesso.",
+        erro_msg="Nao foi possivel guardar a missao do drone.",
+    )
+    if resposta:
+        return redirect("geologia:furo_dashboard", furo_id=furo.pk)
 
     return render(
         request,
@@ -354,20 +409,19 @@ def missao_drone_update(request, pk):
 
     missao = obter_missao_drone(pk, empresa=empresa)
 
-    if request.method == "POST":
-        resultado = processar_missao_update(
-            request_post=request.POST,
-            request_files=request.FILES,
-            missao=missao,
-            empresa=empresa,
-        )
-        form = resultado["form"]
-        if resultado["ok"]:
-            messages.success(request, "Missao do drone atualizada com sucesso.")
-            return redirect("geologia:missao_detail", pk=missao.pk)
-        messages.error(request, "Nao foi possivel atualizar a missao do drone.")
-    else:
-        form = construir_form_missao_update(missao=missao, empresa=empresa)
+    form, resposta = _processar_form_missao(
+        request=request,
+        request_post=request.POST,
+        request_files=request.FILES,
+        processar_fn=processar_missao_update,
+        construir_form_fn=construir_form_missao_update,
+        construir_form_kwargs={"missao": missao, "empresa": empresa},
+        processar_kwargs={"missao": missao, "empresa": empresa},
+        sucesso_msg="Missao do drone atualizada com sucesso.",
+        erro_msg="Nao foi possivel atualizar a missao do drone.",
+    )
+    if resposta:
+        return redirect("geologia:missao_detail", pk=missao.pk)
 
     return render(
         request,

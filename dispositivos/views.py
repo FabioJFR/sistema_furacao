@@ -11,10 +11,10 @@ from dispositivos.services.serial_service import (
 )
 from dispositivos.selectors.dashboard import (
     obter_dispositivo_ativo,
-    obter_dispositivos_qs,
+    construir_contexto_captura_dispositivo,
     obter_empregado_por_user_empresa,
     obter_furo,
-    obter_furos_qs,
+    anexar_sessao_ao_preview,
     obter_leitura_detail,
     obter_leituras_qs,
     obter_sessao_detail,
@@ -30,21 +30,16 @@ from dispositivos.services.dashboard import (
     processar_registo_dispositivo_detectado,
     processar_teste_leitura_usb,
 )
-from dispositivos.services.magcruiser_import import (
-    gravar_importacao_magcruiser,
-    parse_magcruiser_file,
-)
 from dispositivos.services.importacao_historico import (
-    criar_historico_importacao,
     render_historico_importacao_csv,
+)
+from dispositivos.services.dashboard_import import (
+    processar_acao_importacao_magcruiser,
 )
 from dispositivos.selectors.importacao_historico import (
     listar_historico_importacoes_qs,
     obter_historico_importacao,
 )
-from projetos.models import Furo
-
-
 from django.http import JsonResponse, HttpResponse
 import random
 import time
@@ -64,6 +59,21 @@ def _garantir_admin_api(request):
         raise PermissionDenied("Autenticação obrigatória.")
     if not request.user.is_superuser:
         raise PermissionDenied("A área de dispositivos está disponível apenas para administradores.")
+
+
+def _json_ok(payload=None, *, status=200):
+    data = {"ok": True}
+    if payload:
+        data.update(payload)
+    return JsonResponse(data, status=status)
+
+
+def _json_erro(mensagem, *, status=400, eventos=None):
+    data = {
+        "ok": False,
+        "eventos": eventos or [{"tipo": "erro", "mensagem": mensagem}],
+    }
+    return JsonResponse(data, status=status)
 
 
 def _resolver_empresa_para_registo(request):
@@ -106,11 +116,7 @@ def api_procurar_portas_usb(request):
         {"tipo": "info", "mensagem": f"Foram encontradas {len(portas)} portas."},
     ]
 
-    return JsonResponse({
-        "ok": True,
-        "eventos": eventos,
-        "portas": portas,
-    })
+    return _json_ok({"eventos": eventos, "portas": portas})
 
 
 @login_required
@@ -118,13 +124,14 @@ def api_procurar_portas_usb(request):
 def api_procurar_dispositivos_bluetooth(request):
     _garantir_admin_api(request)
     resultado = processar_procura_dispositivos_bluetooth()
-    return JsonResponse(
-        {
-            "ok": resultado["ok"],
-            "eventos": resultado["eventos"],
-            "dispositivos": resultado["dispositivos"],
-        },
-        status=200 if resultado["ok"] else resultado.get("status", 400),
+    if resultado["ok"]:
+        return _json_ok(
+            {"eventos": resultado["eventos"], "dispositivos": resultado["dispositivos"]}
+        )
+    return _json_erro(
+        "Falha na procura Bluetooth.",
+        status=resultado.get("status", 400),
+        eventos=resultado["eventos"],
     )
 
 
@@ -134,19 +141,11 @@ def api_testar_leitura_usb(request):
     _garantir_admin_api(request)
     resultado = processar_teste_leitura_usb(dispositivo_id=request.POST.get("dispositivo_id"))
     if resultado["ok"]:
-        return JsonResponse(
-            {
-                "ok": True,
-                "eventos": resultado["eventos"],
-                "leitura": resultado["leitura"],
-            }
-        )
-    return JsonResponse(
-        {
-            "ok": False,
-            "eventos": resultado["eventos"],
-        },
+        return _json_ok({"eventos": resultado["eventos"], "leitura": resultado["leitura"]})
+    return _json_erro(
+        "Falha no teste de leitura USB.",
         status=resultado.get("status", 400),
+        eventos=resultado["eventos"],
     )
 
 
@@ -159,19 +158,11 @@ def api_inspecionar_dispositivo_bluetooth(request):
     name = (request.POST.get("name") or "").strip()
     resultado = processar_inspecao_bluetooth_detectado(address=address, name=name)
     if resultado["ok"]:
-        return JsonResponse(
-            {
-                "ok": True,
-                "eventos": resultado["eventos"],
-                "inspecao": resultado["inspecao"],
-            }
-        )
-    return JsonResponse(
-        {
-            "ok": False,
-            "eventos": resultado["eventos"],
-        },
+        return _json_ok({"eventos": resultado["eventos"], "inspecao": resultado["inspecao"]})
+    return _json_erro(
+        "Falha na inspeção Bluetooth.",
         status=resultado.get("status", 400),
+        eventos=resultado["eventos"],
     )
 
 
@@ -197,19 +188,15 @@ def api_guardar_dispositivo_detectado(request):
             baudrate=baudrate,
         )
         if not resultado["ok"]:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "eventos": [{"tipo": "erro", "mensagem": resultado["erro"]}],
-                },
+            return _json_erro(
+                resultado["erro"],
                 status=resultado.get("status", 400),
             )
         dispositivo = resultado["dispositivo"]
         eventos = resultado["eventos"]
 
-        return JsonResponse(
+        return _json_ok(
             {
-                "ok": True,
                 "eventos": eventos,
                 "dispositivo": {
                     "id": str(dispositivo.pk),
@@ -220,13 +207,7 @@ def api_guardar_dispositivo_detectado(request):
             }
         )
     except Exception as exc:
-        return JsonResponse(
-            {
-                "ok": False,
-                "eventos": [{"tipo": "erro", "mensagem": f"Não foi possível guardar o dispositivo: {exc}"}],
-            },
-            status=400,
-        )
+        return _json_erro(f"Não foi possível guardar o dispositivo: {exc}", status=400)
 
 
 @login_required
@@ -247,7 +228,6 @@ def api_escutar_dispositivo_detectado(request):
     )
     if resultado["ok"]:
         response = {
-            "ok": True,
             "eventos": resultado["eventos"],
             "modo": resultado["modo"],
         }
@@ -255,13 +235,11 @@ def api_escutar_dispositivo_detectado(request):
             response["leitura"] = resultado["leitura"]
         if resultado.get("inspecao") is not None:
             response["inspecao"] = resultado["inspecao"]
-        return JsonResponse(response)
-    return JsonResponse(
-        {
-            "ok": False,
-            "eventos": resultado["eventos"],
-        },
+        return _json_ok(response)
+    return _json_erro(
+        "Falha na escuta do dispositivo.",
         status=resultado.get("status", 400),
+        eventos=resultado["eventos"],
     )
 
 @login_required
@@ -404,150 +382,33 @@ def captura_dispositivo(request):
     empresa_id = _obter_empresa_id_utilizador(request)
     empregado = obter_empregado_por_user_empresa(request.user, empresa_id=empresa_id)
 
-    dispositivos = obter_dispositivos_qs(empresa_id).filter(ativo=True)
-    furos = obter_furos_qs(empresa_id).select_related("projeto")
-    sessoes_ativas = obter_sessoes_qs(empresa_id).filter(status__in=["criada", "ligando", "ligado"])
-    sessoes_recentes = obter_sessoes_qs(empresa_id)
-    sessoes_importacao = obter_sessoes_qs(empresa_id).filter(furo__isnull=False)
-
-    dispositivos = dispositivos.order_by("nome")
-    furos = furos.order_by("nome")
-    sessoes_ativas = sessoes_ativas.select_related("dispositivo", "furo", "empregado").order_by("-iniciado_em")
-    sessoes_recentes = sessoes_recentes.select_related("dispositivo", "furo", "empregado").order_by("-iniciado_em")[:10]
-    sessoes_importacao = sessoes_importacao.select_related("dispositivo", "furo").order_by("-iniciado_em")[:30]
-
     preview_data = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
     report_data = request.session.get(MAGCRUISER_REPORT_SESSION_KEY)
-    if preview_data:
-        preview_sessao = None
-        sessao_id = preview_data.get("sessao_id")
-        if sessao_id:
-            try:
-                preview_sessao = obter_sessao_detail(pk=sessao_id, empresa_id=empresa_id)
-            except Exception:
-                preview_sessao = None
-        preview_data["sessao"] = preview_sessao
+    preview_data = anexar_sessao_ao_preview(preview_data, empresa_id=empresa_id)
     historico_importacoes = listar_historico_importacoes_qs(empresa_id=empresa_id).order_by("-criado_em")[:20]
 
     if request.method == "POST":
         action = (request.POST.get("action") or "create_session").strip()
-        if action == "preview_import":
-            sessao_id = request.POST.get("sessao_importacao_id")
-            ficheiro = request.FILES.get("magcruiser_file")
+        if action in {"preview_import", "save_import", "clear_import", "clear_import_report"}:
             try:
-                sessao = obter_sessao_detail(pk=sessao_id, empresa_id=empresa_id)
-                resultado = parse_magcruiser_file(ficheiro)
-                nomes_furo_detetados = sorted(
-                    {str(row.get("hole_name", "")).strip() for row in resultado["rows"] if row.get("hole_name")}
-                )
-                furos_existentes = {
-                    nome
-                    for nome in Furo.objects.filter(
-                        empresa_id=sessao.empresa_id,
-                        nome__in=nomes_furo_detetados,
-                    ).values_list("nome", flat=True)
-                }
-                furos_em_falta = [nome for nome in nomes_furo_detetados if nome not in furos_existentes]
-                request.session[MAGCRUISER_PREVIEW_SESSION_KEY] = {
-                    "sessao_id": str(sessao.pk),
-                    "filename": resultado["filename"],
-                    "formato": resultado["formato"],
-                    "total_linhas": resultado["total_linhas"],
-                    "nomes_furo_detetados": nomes_furo_detetados,
-                    "furos_existentes": sorted(furos_existentes),
-                    "furos_em_falta": furos_em_falta,
-                    "preview_rows": [
-                        {k: str(v) if v is not None else "" for k, v in row.items()}
-                        for row in resultado["preview_rows"]
-                    ],
-                    "rows": [
-                        {k: str(v) if v is not None else "" for k, v in row.items()}
-                        for row in resultado["rows"]
-                    ],
-                }
-                request.session.modified = True
-                messages.success(
-                    request,
-                    f"Pré-visualização carregada: {resultado['total_linhas']} linhas do ficheiro {resultado['filename']}.",
-                )
-            except Exception as exc:
-                messages.error(request, f"Não foi possível preparar a importação: {exc}")
-            return redirect("dispositivos:captura")
-
-        if action == "save_import":
-            preview_guardado = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
-            if not preview_guardado:
-                messages.error(request, "Não existe pré-visualização para gravar. Faça primeiro a pré-visualização.")
-                return redirect("dispositivos:captura")
-            try:
-                sessao = obter_sessao_detail(pk=preview_guardado.get("sessao_id"), empresa_id=empresa_id)
-                modo_aplicacao = (request.POST.get("modo_aplicacao") or "all_existing").strip()
-                rows = [
-                    {
-                        "depth": row.get("depth"),
-                        "inc": row.get("inc"),
-                        "azi": row.get("azi"),
-                        "mag": row.get("mag") or None,
-                        "temp": row.get("temp") or None,
-                        "hole_name": row.get("hole_name") or None,
-                    }
-                    for row in preview_guardado.get("rows", [])
-                ]
-                resultado = gravar_importacao_magcruiser(
-                    sessao=sessao,
-                    rows=rows,
-                    modo_aplicacao=modo_aplicacao,
-                )
-                missing = resultado.get("furos_sem_match", [])
-                missing_txt = f" Furos sem correspondência: {', '.join(missing)}." if missing else ""
-                messages.success(
-                    request,
-                    (
-                        f"Foram gravadas {resultado['total_gravadas']} medições. "
-                        f"Ignoradas: {resultado.get('total_ignoradas', 0)}. "
-                        f"Furos criados: {resultado.get('furos_criados', 0)}."
-                        f"{missing_txt}"
-                    ),
-                )
-                request.session[MAGCRUISER_REPORT_SESSION_KEY] = {
-                    "sessao_id": str(sessao.pk),
-                    "modo_aplicacao": modo_aplicacao,
-                    "total_gravadas": resultado.get("total_gravadas", 0),
-                    "total_ignoradas": resultado.get("total_ignoradas", 0),
-                    "furos_criados": resultado.get("furos_criados", 0),
-                    "furos_sem_match": resultado.get("furos_sem_match", []),
-                    "resumo_por_furo": resultado.get("resumo_por_furo", {}),
-                }
-                criar_historico_importacao(
-                    empresa=sessao.empresa,
-                    sessao=sessao,
+                resultado_acao = processar_acao_importacao_magcruiser(
+                    action=action,
+                    empresa_id=empresa_id,
+                    request_post=request.POST,
+                    request_files=request.FILES,
+                    request_session=request.session,
                     utilizador=request.user,
-                    nome_ficheiro=preview_guardado.get("filename"),
-                    formato=preview_guardado.get("formato"),
-                    modo_aplicacao=modo_aplicacao,
-                    total_linhas=len(rows),
-                    total_gravadas=resultado.get("total_gravadas", 0),
-                    total_ignoradas=resultado.get("total_ignoradas", 0),
-                    furos_criados=resultado.get("furos_criados", 0),
-                    furos_sem_match=resultado.get("furos_sem_match", []),
-                    resumo_por_furo=resultado.get("resumo_por_furo", {}),
+                    preview_session_key=MAGCRUISER_PREVIEW_SESSION_KEY,
+                    report_session_key=MAGCRUISER_REPORT_SESSION_KEY,
                 )
-                request.session.pop(MAGCRUISER_PREVIEW_SESSION_KEY, None)
-                request.session.modified = True
+                if resultado_acao.get("message_level") == "success":
+                    messages.success(request, resultado_acao.get("message"))
+                elif resultado_acao.get("message_level") == "info":
+                    messages.info(request, resultado_acao.get("message"))
+                elif resultado_acao.get("message_level") == "error":
+                    messages.error(request, resultado_acao.get("message"))
             except Exception as exc:
-                messages.error(request, f"Erro ao gravar importação: {exc}")
-            return redirect("dispositivos:captura")
-
-        if action == "clear_import":
-            request.session.pop(MAGCRUISER_PREVIEW_SESSION_KEY, None)
-            request.session.modified = True
-            messages.info(request, "Pré-visualização removida.")
-            return redirect("dispositivos:captura")
-
-        if action == "clear_import_report":
-            request.session.pop(MAGCRUISER_REPORT_SESSION_KEY, None)
-            request.session.modified = True
-            messages.info(request, "Relatório de importação removido.")
+                messages.error(request, f"Erro na ação de importação: {exc}")
             return redirect("dispositivos:captura")
 
         resultado = processar_criacao_sessao_captura(
@@ -564,12 +425,9 @@ def captura_dispositivo(request):
         messages.success(request, "Sessão criada com sucesso.")
         return redirect("dispositivos:sessao_detail", pk=sessao.pk)
 
+    contexto_base = construir_contexto_captura_dispositivo(empresa_id=empresa_id)
     return render(request, "dispositivos/captura.html", {
-        "dispositivos": dispositivos,
-        "furos": furos,
-        "sessoes_ativas": sessoes_ativas,
-        "sessoes_recentes": sessoes_recentes,
-        "sessoes_importacao": sessoes_importacao,
+        **contexto_base,
         "magcruiser_preview": preview_data,
         "magcruiser_report": report_data,
         "historico_importacoes": historico_importacoes,

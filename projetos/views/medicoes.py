@@ -35,8 +35,46 @@ def _obter_empresa_admin_medicoes(request):
             "Falha ao resolver empresa administrativa em medicoes.py. user_id=%s",
             request.user.id,
         )
-        return None, resposta_erro
+    return None, resposta_erro
     return empresa, None
+
+
+def _render_medicao_form(request, form, titulo, furo, medicao=None):
+    context = {
+        "form": form,
+        "titulo": titulo,
+        "furo": furo,
+    }
+    if medicao is not None:
+        context["medicao"] = medicao
+    return render(request, "projetos/medicao_form.html", context)
+
+
+def _processar_form_medicao(
+    *,
+    request,
+    form,
+    sucesso_msg,
+    erro_msg,
+    sucesso_redirect,
+    success_log,
+    error_log,
+):
+    if not form.is_valid():
+        logger.warning(error_log, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None
+
+    try:
+        sucesso_redirect()
+    except ValidationError as erro:
+        form.add_error(None, erro)
+        logger.warning(error_log, request.user.id, erro)
+        messages.error(request, erro_msg)
+        return None
+
+    messages.success(request, sucesso_msg)
+    return True
 
 
 # Multiempresa: o administrador só pode listar e gerir medições da sua própria empresa.
@@ -95,15 +133,6 @@ def medicao_create(request, furo_id):
         if form.is_valid():
             try:
                 criar_medicao(form, furo=furo, empresa=empresa)
-                logger.info(
-                    "Medição criada com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    furo.pk,
-                )
-                messages.success(request, "Medição criada com sucesso.")
-                return redirect(furo)
-
             except ValidationError as e:
                 form.add_error(None, e)
                 logger.warning(
@@ -113,6 +142,15 @@ def medicao_create(request, furo_id):
                     e,
                 )
                 messages.error(request, "Erro ao criar a medição. Verifique os dados.")
+            else:
+                logger.info(
+                    "Medição criada com sucesso. user_id=%s, empresa_id=%s, furo_id=%s",
+                    request.user.id,
+                    empresa.id,
+                    furo.pk,
+                )
+                messages.success(request, "Medição criada com sucesso.")
+                return redirect(furo)
         else:
             logger.warning(
                 "Erro ao criar medição. user_id=%s, furo_id=%s, erros=%s",
@@ -124,15 +162,7 @@ def medicao_create(request, furo_id):
     else:
         form = MedicaoForm(furo=furo, empresa=empresa)
 
-    return render(
-        request,
-        "projetos/medicao_form.html",
-        {
-            "form": form,
-            "titulo": f"Nova Medição - {furo.nome}",
-            "furo": furo,
-        },
-    )
+    return _render_medicao_form(request, form, f"Nova Medição - {furo.nome}", furo=furo)
 
 @login_required
 @admin_required
@@ -162,15 +192,6 @@ def medicao_update(request, pk):
         if form.is_valid():
             try:
                 atualizar_medicao(form, empresa=empresa)
-                logger.info(
-                    "Medição atualizada com sucesso. user_id=%s, empresa_id=%s, medicao_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    medicao.pk,
-                )
-                messages.success(request, "Medição atualizada com sucesso.")
-                return redirect("projetos:medicao_list")
-
             except ValidationError as e:
                 form.add_error(None, e)
                 logger.warning(
@@ -180,6 +201,15 @@ def medicao_update(request, pk):
                     e,
                 )
                 messages.error(request, "Erro ao atualizar a medição. Verifique os dados.")
+            else:
+                logger.info(
+                    "Medição atualizada com sucesso. user_id=%s, empresa_id=%s, medicao_id=%s",
+                    request.user.id,
+                    empresa.id,
+                    medicao.pk,
+                )
+                messages.success(request, "Medição atualizada com sucesso.")
+                return redirect("projetos:medicao_list")
         else:
             logger.warning(
                 "Erro ao atualizar medição. user_id=%s, medicao_pk=%s, erros=%s",
@@ -195,15 +225,12 @@ def medicao_update(request, pk):
             empresa=empresa,
         )
 
-    return render(
+    return _render_medicao_form(
         request,
-        "projetos/medicao_form.html",
-        {
-            "form": form,
-            "titulo": f"Editar Medição - {medicao.furo.nome}",
-            "medicao": medicao,
-            "furo": medicao.furo,
-        },
+        form,
+        f"Editar Medição - {medicao.furo.nome}",
+        furo=medicao.furo,
+        medicao=medicao,
     )
 
 @login_required

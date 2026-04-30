@@ -35,10 +35,40 @@ from projetos.selectors.preferencias import (
 logger = logging.getLogger("core")
 
 
+def _obter_empresa_admin_or_redirect(request):
+    return obter_empresa_admin_opcoes(request=request)
+
+
+def _processar_form_preferencias(request, form, empresa):
+    if not form.is_valid():
+        messages.error(request, "Erro ao guardar preferências.")
+        return None
+
+    preferencias = guardar_preferencias_admin(
+        form=form,
+        user=request.user,
+        empresa=empresa,
+    )
+    if preferencias.idioma:
+        translation.activate(preferencias.idioma)
+        request.session["django_language"] = preferencias.idioma
+    messages.success(request, "Preferências guardadas com sucesso.")
+    return redirect("projetos:definicoes_admin")
+
+
+def _processar_form_financeiro(request, financeiro_form):
+    if not financeiro_form.is_valid():
+        messages.error(request, "Erro ao guardar definições financeiras.")
+        return None
+    guardar_definicoes_financeiras_admin(financeiro_form=financeiro_form)
+    messages.success(request, "Definições financeiras guardadas com sucesso.")
+    return redirect("projetos:definicoes_financeiras_admin")
+
+
 @login_required
 @admin_required
 def definicoes_admin(request):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 
@@ -47,21 +77,9 @@ def definicoes_admin(request):
 
     if request.method == "POST":
         form = PreferenciasForm(request.POST, instance=preferencias, user=request.user, prefix="prefs")
-        if form.is_valid():
-            preferencias = guardar_preferencias_admin(
-                form=form,
-                user=request.user,
-                empresa=empresa,
-            )
-
-            if preferencias.idioma:
-                translation.activate(preferencias.idioma)
-                request.session["django_language"] = preferencias.idioma
-
-            messages.success(request, "Preferências guardadas com sucesso.")
-            return redirect("projetos:definicoes_admin")
-
-        messages.error(request, "Erro ao guardar preferências.")
+        resposta = _processar_form_preferencias(request, form, empresa)
+        if resposta:
+            return resposta
     else:
         form = PreferenciasForm(instance=preferencias, user=request.user, prefix="prefs")
 
@@ -79,20 +97,15 @@ def definicoes_admin(request):
 @login_required
 @admin_required
 def definicoes_financeiras_admin(request):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 
     if request.method == "POST":
         financeiro_form = EmpresaFinanceiraForm(request.POST, instance=empresa, prefix="financeiro")
-        if financeiro_form.is_valid():
-            empresa = guardar_definicoes_financeiras_admin(
-                financeiro_form=financeiro_form,
-            )
-            messages.success(request, "Definições financeiras guardadas com sucesso.")
-            return redirect("projetos:definicoes_financeiras_admin")
-
-        messages.error(request, "Erro ao guardar definições financeiras.")
+        resposta = _processar_form_financeiro(request, financeiro_form)
+        if resposta:
+            return resposta
     else:
         financeiro_form = EmpresaFinanceiraForm(instance=empresa, prefix="financeiro")
 
@@ -113,7 +126,7 @@ def definicoes_financeiras_admin(request):
 @login_required
 @admin_required
 def procurar_dashboard(request):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 
@@ -135,7 +148,7 @@ def procurar_dashboard(request):
 @login_required
 @admin_required
 def relatorios_exportacao(request):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 
@@ -155,7 +168,7 @@ def relatorios_exportacao(request):
 @login_required
 @admin_required
 def relatorios_download(request, dataset, formato):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 
@@ -174,7 +187,7 @@ def relatorios_download(request, dataset, formato):
 @login_required
 @admin_required
 def relatorios_download_tudo(request, formato):
-    empresa, resposta_erro = obter_empresa_admin_opcoes(request=request)
+    empresa, resposta_erro = _obter_empresa_admin_or_redirect(request)
     if resposta_erro:
         return resposta_erro
 

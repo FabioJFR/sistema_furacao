@@ -152,6 +152,28 @@ def _resolver_empregado_por_user_ou_email(user):
 def _resolver_individual_por_user(user):
     return obter_individual_por_user(user)
 
+
+def _success_redirect(request, mensagem, destino):
+    messages.success(request, mensagem)
+    return redirect(destino)
+
+
+def _require_post_or_redirect(request, destino):
+    if request.method != "POST":
+        return redirect(destino)
+    return None
+
+
+def _processar_form_servico(
+    *,
+    form,
+    service_fn,
+    service_kwargs,
+):
+    objeto, erro = service_fn(form=form, **service_kwargs)
+    return objeto, erro
+
+
 # ---------------- EMPREGADOS ----------------
 # TODO futuro:
 # - quando o fluxo multiempresa estiver fechado, associar o registo inicial a uma empresa/contexto controlado
@@ -423,10 +445,13 @@ def empregado_adicionar_projeto(request, pk):
 
     if request.method == "POST":
         form = EmpregadoProjetoForm(request.POST, empresa=empresa, empregado=empregado)
-        ligacao, erro = processar_guardar_ligacao_projeto_form(
+        ligacao, erro = _processar_form_servico(
             form=form,
-            empregado=empregado,
-            empresa=empresa,
+            service_fn=processar_guardar_ligacao_projeto_form,
+            service_kwargs={
+                "empregado": empregado,
+                "empresa": empresa,
+            },
         )
         if erro is None:
             logger.info(
@@ -488,11 +513,14 @@ def empregado_editar_projeto(request, pk, ligacao_id):
             empresa=empresa,
             empregado=empregado,
         )
-        nova_ligacao, erro = processar_guardar_ligacao_projeto_form(
+        nova_ligacao, erro = _processar_form_servico(
             form=form,
-            empregado=empregado,
-            empresa=empresa,
-            ligacao=ligacao,
+            service_fn=processar_guardar_ligacao_projeto_form,
+            service_kwargs={
+                "empregado": empregado,
+                "empresa": empresa,
+                "ligacao": ligacao,
+            },
         )
         if erro is None:
             logger.info(
@@ -561,8 +589,7 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
             empregado.id,
             ligacao.id,
         )
-        messages.success(request, "Projeto encerrado para este empregado com sucesso.")
-        return redirect(empregado)
+        return _success_redirect(request, "Projeto encerrado para este empregado com sucesso.", empregado)
 
     return render(request, "projetos/empregado_projeto_confirm_terminar.html", {
         "empregado": empregado,
@@ -589,10 +616,13 @@ def empregado_adicionar_ficheiro(request, pk):
 
     if request.method == "POST":
         form = EmpregadoFicheiroForm(request.POST, request.FILES)
-        ficheiro, erro = processar_guardar_ficheiro_empregado_form(
+        ficheiro, erro = _processar_form_servico(
             form=form,
-            empregado=empregado,
-            empresa=empresa,
+            service_fn=processar_guardar_ficheiro_empregado_form,
+            service_kwargs={
+                "empregado": empregado,
+                "empresa": empresa,
+            },
         )
         if erro is None:
             logger.info(
@@ -702,20 +732,20 @@ def empregado_aprovar(request, pk):
 
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        processar_aprovacao_empregado(empregado=empregado, empresa=empresa)
-        logger.info(
-            "Empregado aprovado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
-            request.user.id,
-            empresa.id,
-            empregado.id,
-        )
-        messages.success(request, "Empregado aprovado com sucesso.")
-        return redirect(reverse("projetos:empregado_pendentes"))
+    bloqueio_post = _require_post_or_redirect(request, "projetos:empregado_pendentes")
+    if bloqueio_post:
+        if request.method == "GET":
+            return render(request, "projetos/empregado_aprovar_confirm.html", {"empregado": empregado})
+        return bloqueio_post
 
-    return render(request, "projetos/empregado_aprovar_confirm.html", {
-        "empregado": empregado,
-    })
+    processar_aprovacao_empregado(empregado=empregado, empresa=empresa)
+    logger.info(
+        "Empregado aprovado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
+        request.user.id,
+        empresa.id,
+        empregado.id,
+    )
+    return _success_redirect(request, "Empregado aprovado com sucesso.", reverse("projetos:empregado_pendentes"))
 
 
 @login_required
@@ -735,19 +765,19 @@ def empregado_rejeitar(request, pk):
 
     empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        resultado = processar_rejeicao_empregado_pendente(empregado=empregado, empresa=empresa)
-        logger.info(
-            "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
-            request.user.id,
-            empresa.id,
-            resultado["empregado_id"],
-            resultado["empregado_nome"],
-        )
-        messages.success(request, "Registo do empregado rejeitado com sucesso.")
-        return redirect("projetos:empregado_pendentes")
+    bloqueio_post = _require_post_or_redirect(request, "projetos:empregado_pendentes")
+    if bloqueio_post:
+        return bloqueio_post
 
-    return redirect("projetos:empregado_pendentes")
+    resultado = processar_rejeicao_empregado_pendente(empregado=empregado, empresa=empresa)
+    logger.info(
+        "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
+        request.user.id,
+        empresa.id,
+        resultado["empregado_id"],
+        resultado["empregado_nome"],
+    )
+    return _success_redirect(request, "Registo do empregado rejeitado com sucesso.", "projetos:empregado_pendentes")
 
 
 @login_required

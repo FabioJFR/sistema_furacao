@@ -49,6 +49,34 @@ def _obter_empregado_autenticado_maquina_avarias(request):
     return empregado, resposta_erro
 
 
+def _render_form_avaria(request, form, titulo, cancel_url):
+    return render(
+        request,
+        "projetos/maquina_avaria_form_empregado.html",
+        {"form": form, "titulo": titulo, "cancel_url": cancel_url},
+    )
+
+
+def _processar_create_avaria(
+    *,
+    request,
+    form,
+    on_success,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        messages.error(request, erro_msg)
+        return None
+
+    maquina = form.cleaned_data["maquina"]
+    furo = form.cleaned_data.get("furo")
+    descricao = form.cleaned_data.get("descricao")
+    on_success(maquina=maquina, furo=furo, descricao=descricao)
+    messages.success(request, sucesso_msg)
+    return maquina
+
+
 @login_required
 @empregado_required
 def avaria_maquina_create_empregado(request):
@@ -58,26 +86,23 @@ def avaria_maquina_create_empregado(request):
 
     if request.method == "POST":
         form = MaquinaAvariaEmpregadoForm(request.POST, empresa_id=empregado.empresa_id)
-        if form.is_valid():
-            maquina = form.cleaned_data["maquina"]
-            furo = form.cleaned_data.get("furo")
-            descricao = form.cleaned_data.get("descricao")
-            criar_avaria_por_empregado(
-                empregado=empregado,
-                maquina=maquina,
-                furo=furo,
-                descricao=descricao,
-            )
-            messages.success(request, "Avaria registada com sucesso. A empresa foi notificada no painel de avarias.")
+        maquina = _processar_create_avaria(
+            request=request,
+            form=form,
+            on_success=lambda **kwargs: criar_avaria_por_empregado(empregado=empregado, **kwargs),
+            sucesso_msg="Avaria registada com sucesso. A empresa foi notificada no painel de avarias.",
+            erro_msg="Não foi possível registar a avaria. Verifica os dados.",
+        )
+        if maquina:
             return redirect("projetos:area_empregado")
-        messages.error(request, "Não foi possível registar a avaria. Verifica os dados.")
     else:
         form = MaquinaAvariaEmpregadoForm(empresa_id=empregado.empresa_id)
 
-    return render(
+    return _render_form_avaria(
         request,
-        "projetos/maquina_avaria_form_empregado.html",
-        {"form": form, "titulo": "Registar avaria de máquina", "cancel_url": "projetos:area_empregado"},
+        form,
+        "Registar avaria de máquina",
+        "projetos:area_empregado",
     )
 
 
@@ -106,30 +131,23 @@ def avaria_maquina_create_admin(request):
 
     if request.method == "POST":
         form = MaquinaAvariaEmpregadoForm(request.POST, empresa_id=empresa.id)
-        if form.is_valid():
-            maquina = form.cleaned_data["maquina"]
-            furo = form.cleaned_data.get("furo")
-            descricao = form.cleaned_data.get("descricao")
-            criar_avaria_por_admin(
-                empresa=empresa,
-                maquina=maquina,
-                furo=furo,
-                descricao=descricao,
-            )
-            messages.success(request, "Avaria registada com sucesso.")
+        maquina = _processar_create_avaria(
+            request=request,
+            form=form,
+            on_success=lambda **kwargs: criar_avaria_por_admin(empresa=empresa, **kwargs),
+            sucesso_msg="Avaria registada com sucesso.",
+            erro_msg="Não foi possível registar a avaria. Verifica os dados.",
+        )
+        if maquina:
             return redirect("projetos:maquina_detail", maquina_id=maquina.id)
-        messages.error(request, "Não foi possível registar a avaria. Verifica os dados.")
     else:
         form = MaquinaAvariaEmpregadoForm(empresa_id=empresa.id, initial=initial)
 
-    return render(
+    return _render_form_avaria(
         request,
-        "projetos/maquina_avaria_form_empregado.html",
-        {
-            "form": form,
-            "titulo": "Registar avaria de máquina",
-            "cancel_url": "projetos:maquina_list",
-        },
+        form,
+        "Registar avaria de máquina",
+        "projetos:maquina_list",
     )
 
 

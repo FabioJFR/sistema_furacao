@@ -21,6 +21,24 @@ from geologia.services.logs import (
 from .common import obter_empresa_admin_geologia
 
 
+def _processar_post_form(
+    *,
+    request,
+    resultado,
+    mensagem_sucesso,
+    mensagem_erro,
+    redirect_name,
+    redirect_kwargs,
+):
+    if request.method != "POST":
+        return None
+    if resultado.get("ok"):
+        messages.success(request, mensagem_sucesso)
+        return redirect(redirect_name, **redirect_kwargs)
+    messages.error(request, mensagem_erro)
+    return None
+
+
 @login_required
 @admin_required
 def log_geologico_create(request, furo_id):
@@ -38,11 +56,16 @@ def log_geologico_create(request, furo_id):
             empresa=empresa,
         )
         form = resultado["form"]
-        if resultado["ok"]:
-            log = resultado["log"]
-            messages.success(request, _("Log geológico registado com sucesso."))
-            return redirect("geologia:log_detail", pk=log.pk)
-        messages.error(request, _("Não foi possível guardar o log geológico."))
+        resposta_post = _processar_post_form(
+            request=request,
+            resultado=resultado,
+            mensagem_sucesso=_("Log geológico registado com sucesso."),
+            mensagem_erro=_("Não foi possível guardar o log geológico."),
+            redirect_name="geologia:log_detail",
+            redirect_kwargs={"pk": resultado["log"].pk} if resultado.get("ok") else {},
+        )
+        if resposta_post:
+            return resposta_post
     else:
         form = construir_form_log_create(
             furo=furo,
@@ -98,10 +121,16 @@ def log_geologico_update(request, pk):
             empresa=empresa,
         )
         form = resultado["form"]
-        if resultado["ok"]:
-            messages.success(request, _("Log geológico atualizado com sucesso."))
-            return redirect("geologia:log_detail", pk=log.pk)
-        messages.error(request, _("Não foi possível atualizar o log geológico."))
+        resposta_post = _processar_post_form(
+            request=request,
+            resultado=resultado,
+            mensagem_sucesso=_("Log geológico atualizado com sucesso."),
+            mensagem_erro=_("Não foi possível atualizar o log geológico."),
+            redirect_name="geologia:log_detail",
+            redirect_kwargs={"pk": log.pk},
+        )
+        if resposta_post:
+            return resposta_post
     else:
         form = construir_form_log_update(log=log, empresa=empresa)
 
@@ -133,10 +162,16 @@ def anexo_log_create(request, pk):
             log=log,
         )
         form = resultado["form"]
-        if resultado["ok"]:
-            messages.success(request, _("Anexo adicionado com sucesso."))
-            return redirect("geologia:log_detail", pk=log.pk)
-        messages.error(request, _("Não foi possível adicionar o anexo."))
+        resposta_post = _processar_post_form(
+            request=request,
+            resultado=resultado,
+            mensagem_sucesso=_("Anexo adicionado com sucesso."),
+            mensagem_erro=_("Não foi possível adicionar o anexo."),
+            redirect_name="geologia:log_detail",
+            redirect_kwargs={"pk": log.pk},
+        )
+        if resposta_post:
+            return resposta_post
     else:
         form = construir_form_anexo_log()
 

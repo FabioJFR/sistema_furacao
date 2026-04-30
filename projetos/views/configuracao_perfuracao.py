@@ -73,6 +73,67 @@ def _obter_empregado_autenticado_configuracao(request):
     return empregado, None
 
 
+def _aplicar_validation_error_no_form(form, erro):
+    if hasattr(erro, "message_dict"):
+        for campo, erros in erro.message_dict.items():
+            for item in erros:
+                form.add_error(campo, item)
+        return
+    form.add_error(None, erro)
+
+
+def _preparar_form_configuracao(*, request, empregado, empresa, instance=None):
+    form = ConfiguracaoPerfuracaoEmpregadoForm(
+        request.POST if request.method == "POST" else None,
+        instance=instance,
+        empregado=empregado,
+    )
+    form.instance.empregado = empregado
+    form.instance.empresa = empresa
+    form.instance.atualizado_por = request.user
+    return form
+
+
+def _processar_form_configuracao(
+    *,
+    request,
+    form,
+    empregado,
+    empresa,
+    acao_historico,
+    observacoes_historico,
+    sucesso_msg,
+    erro_msg,
+    log_sucesso,
+    log_erro,
+    redirect_name,
+    redirect_kwargs,
+):
+    if not form.is_valid():
+        logger.warning(log_erro, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None
+
+    try:
+        configuracao = guardar_configuracao_perfuracao(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+            atualizado_por=request.user,
+            acao_historico=acao_historico,
+            observacoes_historico=observacoes_historico,
+        )
+    except ValidationError as erro:
+        _aplicar_validation_error_no_form(form, erro)
+        logger.warning(log_erro, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None
+
+    logger.info(log_sucesso, request.user.id, empresa.id, empregado.id, configuracao.id)
+    messages.success(request, sucesso_msg)
+    return redirect(redirect_name, **redirect_kwargs)
+
+
 # ============================================================
 # EMPREGADO
 # ============================================================
@@ -123,45 +184,27 @@ def configuracao_perfuracao_create_empregado(request):
         return resposta_erro
 
     if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-        form.instance.atualizado_por = request.user
-
-        if form.is_valid():
-            try:
-                configuracao = guardar_configuracao_perfuracao(
-                    form=form,
-                    empregado=empregado,
-                    empresa=empregado.empresa,
-                    atualizado_por=request.user,
-                    acao_historico="criado",
-                    observacoes_historico="Configuração criada.",
-                )
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo, erro)
-                else:
-                    form.add_error(None, e)
-            else:
-                logger.info(
-                    "Configuração de perfuração criada com sucesso por empregado. user_id=%s, empregado_id=%s, configuracao_id=%s",
-                    request.user.id,
-                    empregado.id,
-                    configuracao.id,
-                )
-                messages.success(request, "Configuração de perfuração criada com sucesso.")
-                return redirect("projetos:configuracao_perfuracao_list_empregado")
-
-        logger.warning(
-            "Erro ao criar configuração de perfuração por empregado. user_id=%s, empregado_id=%s, erros=%s",
-            request.user.id,
-            empregado.id,
-            form.errors,
+        form = _preparar_form_configuracao(
+            request=request,
+            empregado=empregado,
+            empresa=empregado.empresa,
         )
-        messages.error(request, "Erro ao criar a configuração de perfuração. Verifique os dados.")
+        resposta = _processar_form_configuracao(
+            request=request,
+            form=form,
+            empregado=empregado,
+            empresa=empregado.empresa,
+            acao_historico="criado",
+            observacoes_historico="Configuração criada.",
+            sucesso_msg="Configuração de perfuração criada com sucesso.",
+            erro_msg="Erro ao criar a configuração de perfuração. Verifique os dados.",
+            log_sucesso="Configuração de perfuração criada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
+            log_erro="Erro ao criar configuração de perfuração por empregado. user_id=%s, erros=%s",
+            redirect_name="projetos:configuracao_perfuracao_list_empregado",
+            redirect_kwargs={},
+        )
+        if resposta:
+            return resposta
     else:
         form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
 
@@ -191,49 +234,28 @@ def configuracao_perfuracao_update_empregado(request, pk):
     configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
     if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            request.POST,
+        form = _preparar_form_configuracao(
+            request=request,
+            empregado=empregado,
+            empresa=empregado.empresa,
             instance=configuracao,
-            empregado=empregado
         )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-        form.instance.atualizado_por = request.user
-
-        if form.is_valid():
-            try:
-                configuracao = guardar_configuracao_perfuracao(
-                    form=form,
-                    empregado=empregado,
-                    empresa=empregado.empresa,
-                    atualizado_por=request.user,
-                    acao_historico="editado",
-                    observacoes_historico="Configuração editada.",
-                )
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo, erro)
-                else:
-                    form.add_error(None, e)
-            else:
-                logger.info(
-                    "Configuração de perfuração atualizada com sucesso por empregado. user_id=%s, empregado_id=%s, configuracao_id=%s",
-                    request.user.id,
-                    empregado.id,
-                    configuracao.id,
-                )
-                messages.success(request, "Configuração de perfuração atualizada com sucesso.")
-                return redirect("projetos:configuracao_perfuracao_list_empregado")
-
-        logger.warning(
-            "Erro ao atualizar configuração de perfuração por empregado. user_id=%s, configuracao_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
+        resposta = _processar_form_configuracao(
+            request=request,
+            form=form,
+            empregado=empregado,
+            empresa=empregado.empresa,
+            acao_historico="editado",
+            observacoes_historico="Configuração editada.",
+            sucesso_msg="Configuração de perfuração atualizada com sucesso.",
+            erro_msg="Erro ao atualizar a configuração de perfuração. Verifique os dados.",
+            log_sucesso="Configuração de perfuração atualizada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
+            log_erro="Erro ao atualizar configuração de perfuração por empregado. user_id=%s, erros=%s",
+            redirect_name="projetos:configuracao_perfuracao_list_empregado",
+            redirect_kwargs={},
         )
-        messages.error(request, "Erro ao atualizar a configuração de perfuração. Verifique os dados.")
+        if resposta:
+            return resposta
     else:
         form = ConfiguracaoPerfuracaoEmpregadoForm(
             instance=configuracao,
@@ -343,46 +365,27 @@ def configuracao_perfuracao_create_admin(request, pk):
     empregado = obter_empregado_por_pk_empresa(pk, empresa)
 
     if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(request.POST, empregado=empregado)
-        form.instance.empregado = empregado
-        form.instance.empresa = empresa
-        form.instance.atualizado_por = request.user
-
-        if form.is_valid():
-            try:
-                configuracao = guardar_configuracao_perfuracao(
-                    form=form,
-                    empregado=empregado,
-                    empresa=empresa,
-                    atualizado_por=request.user,
-                    acao_historico="criado",
-                    observacoes_historico="Configuração criada pelo administrador.",
-                )
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo, erro)
-                else:
-                    form.add_error(None, e)
-            else:
-                logger.info(
-                    "Configuração de perfuração criada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    empregado.id,
-                    configuracao.id,
-                )
-                messages.success(request, "Configuração de perfuração criada com sucesso.")
-                return redirect("projetos:configuracao_perfuracao_list_admin", pk=empregado.pk)
-
-        logger.warning(
-            "Erro ao criar configuração de perfuração por admin. user_id=%s, empregado_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
+        form = _preparar_form_configuracao(
+            request=request,
+            empregado=empregado,
+            empresa=empresa,
         )
-        messages.error(request, "Erro ao criar a configuração de perfuração. Verifique os dados.")
+        resposta = _processar_form_configuracao(
+            request=request,
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+            acao_historico="criado",
+            observacoes_historico="Configuração criada pelo administrador.",
+            sucesso_msg="Configuração de perfuração criada com sucesso.",
+            erro_msg="Erro ao criar a configuração de perfuração. Verifique os dados.",
+            log_sucesso="Configuração de perfuração criada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
+            log_erro="Erro ao criar configuração de perfuração por admin. user_id=%s, erros=%s",
+            redirect_name="projetos:configuracao_perfuracao_list_admin",
+            redirect_kwargs={"pk": empregado.pk},
+        )
+        if resposta:
+            return resposta
     else:
         form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
 
@@ -413,50 +416,28 @@ def configuracao_perfuracao_update_admin(request, pk):
     empregado = configuracao.empregado
 
     if request.method == "POST":
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            request.POST,
+        form = _preparar_form_configuracao(
+            request=request,
+            empregado=empregado,
+            empresa=empresa,
             instance=configuracao,
-            empregado=empregado
         )
-        form.instance.empregado = empregado
-        form.instance.empresa = empresa
-        form.instance.atualizado_por = request.user
-
-        if form.is_valid():
-            try:
-                configuracao = guardar_configuracao_perfuracao(
-                    form=form,
-                    empregado=empregado,
-                    empresa=empresa,
-                    atualizado_por=request.user,
-                    acao_historico="editado",
-                    observacoes_historico="Configuração editada pelo administrador.",
-                )
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    for campo, erros in e.message_dict.items():
-                        for erro in erros:
-                            form.add_error(campo, erro)
-                else:
-                    form.add_error(None, e)
-            else:
-                logger.info(
-                    "Configuração de perfuração atualizada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
-                    request.user.id,
-                    empresa.id,
-                    empregado.id,
-                    configuracao.id,
-                )
-                messages.success(request, "Configuração de perfuração atualizada com sucesso.")
-                return redirect("projetos:configuracao_perfuracao_list_admin", pk=empregado.pk)
-
-        logger.warning(
-            "Erro ao atualizar configuração de perfuração por admin. user_id=%s, configuracao_pk=%s, erros=%s",
-            request.user.id,
-            pk,
-            form.errors,
+        resposta = _processar_form_configuracao(
+            request=request,
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+            acao_historico="editado",
+            observacoes_historico="Configuração editada pelo administrador.",
+            sucesso_msg="Configuração de perfuração atualizada com sucesso.",
+            erro_msg="Erro ao atualizar a configuração de perfuração. Verifique os dados.",
+            log_sucesso="Configuração de perfuração atualizada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
+            log_erro="Erro ao atualizar configuração de perfuração por admin. user_id=%s, erros=%s",
+            redirect_name="projetos:configuracao_perfuracao_list_admin",
+            redirect_kwargs={"pk": empregado.pk},
         )
-        messages.error(request, "Erro ao atualizar a configuração de perfuração. Verifique os dados.")
+        if resposta:
+            return resposta
     else:
         form = ConfiguracaoPerfuracaoEmpregadoForm(
             instance=configuracao,

@@ -15,7 +15,7 @@ _AREAS_TODO = {
             "Revisão global dos templates com cobertura de tradução consolidada em toda a navegação principal.",
         ],
         "proximos_passos": [
-            "Consolidar mais regras em services/selectors para reduzir lógica residual nas views.",
+            "Consolidar mais regras em services/selectors para reduzir lógica residual nas views de backoffice.",
             "Fechar ciclo de auditoria de permissões por tipo de conta com cenários automatizados.",
             "Expandir cobertura de internacionalização em mensagens de backend e validações de formulários.",
         ],
@@ -67,6 +67,18 @@ _AREAS_TODO = {
             "Fluxo de avarias de máquinas com atribuição de responsável, atualização por responsável e notificações por email para envolvidos.",
             "Lista de despesas da empresa evoluída com ações por registo (ver, editar e apagar), incluindo detalhe e confirmação de remoção.",
             "Formulário de despesa atualizado com botão de voltar sem gravar.",
+            "Nova camada de separação aplicada em `views/materiais.py`: fluxos de criação/edição e movimentos (levantamento/devolução) consolidados com helpers de orquestração.",
+            "Nova camada de separação aplicada em `views/despesas.py`: resolução de contexto (admin/individual) e submissão de formulários centralizadas.",
+            "Nova camada de separação aplicada em `views/registos.py`: submissões de create/update (empregado/admin) e renderização de formulário padronizadas.",
+            "Nova camada de separação aplicada em `views/configuracao_perfuracao.py`: tratamento de `ValidationError` e pipeline create/update (admin/empregado) unificados.",
+            "Nova camada de separação aplicada em `views/medicoes.py`: render de formulário padronizado e redução de repetição nos fluxos create/update.",
+            "Nova camada de separação aplicada em `views/projetos.py`: helpers para `empresa_id`, fluxo de formulário create/update e simplificação de associação de empregado.",
+            "Nova camada de separação aplicada em `views/empregado_area.py`: renderização de formulários de edição (individual/empregado) padronizada.",
+            "Nova camada de separação aplicada em `views/opcoes.py`: resolução de contexto admin e submissão de preferências/definições financeiras centralizadas.",
+            "Nova camada de separação aplicada em `views/maquina_avarias.py`: criação de avarias (admin/empregado) unificada com helpers de orquestração.",
+            "Nova camada de separação aplicada em `views/definicoes.py`: processamento de preferências e ativação de idioma encapsulados em helpers dedicados.",
+            "Nova camada de separação aplicada em `views/maquinas.py`: criação/edição com pipeline de formulário unificado e renderização de formulário padronizada.",
+            "Nova camada de separação aplicada em `views/empregado_furo.py`: preparação/renderização de formulário de ligação trabalhador-furo extraídas para helpers reutilizáveis.",
             "Tradução i18n avançada em múltiplos templates operacionais e dashboards.",
             "Revisão final de tradução nos principais templates de detalhe, listagens, exportação e dashboards.",
             "Nova camada de separação em furos concluída: contexto de detalhe, resolução de acesso 3D, fluxos create/list/update, delete e importação 3D externa movidos para services.",
@@ -74,7 +86,7 @@ _AREAS_TODO = {
             "Uniformização visual em curso: várias páginas críticas já migradas para paleta de botões consistente e menos saturada.",
         ],
         "proximos_passos": [
-            "Continuar migração de lógica restante de views para camadas dedicadas.",
+            "Continuar migração de lógica restante de views para camadas dedicadas, com foco em módulos ainda densos de operação e registos técnicos.",
             "Unificar validações de domínio críticas (ex.: regras de inclinação por tipo de furo).",
             "Reforçar testes de regressão para permissões entre superuser/admin/empregado/individual.",
             "Fechar i18n residual em mensagens transversais e textos técnicos específicos.",
@@ -85,7 +97,7 @@ _AREAS_TODO = {
             "API versionada para mobile/sensores/drones com contratos estáveis.",
             "Histórico temporal completo de evolução de furo com consultas otimizadas.",
         ],
-        "estado_logica": "Boa e em aceleração: núcleo de furos já muito mais limpo, com transição ativa para arquitetura service/selector e pontos residuais mapeados.",
+        "estado_logica": "Boa e em aceleração: além do núcleo de furos, também materiais, despesas, registos, configuração de perfuração, medições, projetos/opções, definições e avarias já receberam nova camada de separação; restam módulos residuais para fechar o ciclo.",
     },
     "ia": {
         "nome": "IA",
@@ -119,6 +131,8 @@ _AREAS_TODO = {
             "Camada Drone S_F também evoluída: criação de comando passou a usar builders/processadores em service (`drone_sf_dashboard`).",
             "APIs bridge do Drone S_F (ingest/comandos/confirmar/log) agora usam resolução comum de autorização em service, removendo repetição nas views.",
             "Ações de missão programada S_F (toggle/executar/remover) extraídas para service, deixando `dashboard.py` mais focado em HTTP/UI.",
+            "Nova camada de separação aplicada em `geologia/views/drone.py`: validação de empresa necessária e pipeline de formulário de missão (create/update) consolidados em helpers.",
+            "Nova camada de separação aplicada em `geologia/views/dashboard.py`: tratamento de ações POST do detalhe de operação e criação de comando S_F centralizados em helpers.",
         ],
         "proximos_passos": [
             "Migrar restantes ações de escrita e importação para services/selectors.",
@@ -128,7 +142,7 @@ _AREAS_TODO = {
             "API de operações em tempo real com autenticação por dispositivo/operador.",
             "Pipeline de dados espaciais para analytics preditivo.",
         ],
-        "estado_logica": "Intermédio: evolução positiva, ainda com áreas de lógica a consolidar.",
+        "estado_logica": "Intermédio/boa: evolução positiva e consistente, com redução de duplicação em logs/drone e pendências pontuais em fluxos menos centrais.",
     },
     "website": {
         "nome": "Website",
@@ -167,10 +181,10 @@ def obter_notas_transversais_todo():
     return {
         "selectors_services": (
             "Estamos a retirar lógica solta para selectors/services em todas as apps. "
-            "A base já está bem estruturada e houve avanço forte em Projetos/Furos/Despesas/Avarias e agora também em Dispositivos (importação MagCruiser com histórico), mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
+            "A base já está bem estruturada e houve avanço forte em Projetos (agora também materiais, registos, configuração de perfuração e medições), Furos/Despesas/Avarias e também em Dispositivos (importação MagCruiser com histórico), mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
         ),
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "
-            "Pontos pendentes concentram-se sobretudo em mensagens de backend/validação e alguns textos técnicos internos."
+            "Pontos pendentes concentram-se sobretudo em mensagens de backend/validação e alguns textos técnicos internos, não no menu principal."
         ),
     }

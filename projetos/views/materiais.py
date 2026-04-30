@@ -98,6 +98,104 @@ def _conta_individual(user):
     perfil = obter_perfil_ativo_por_user(user)
     return bool(perfil and perfil.tipo_acesso == "individual")
 
+
+def _render_material_form(request, form, titulo, material=None):
+    context = {
+        "form": form,
+        "titulo": titulo,
+    }
+    if material is not None:
+        context["material"] = material
+    return render(request, "projetos/material_form.html", context)
+
+
+def _processar_form_material(
+    *,
+    request,
+    form,
+    empresa,
+    sucesso_redirect,
+    sucesso_msg,
+    erro_msg,
+    log_sucesso,
+    log_erro,
+):
+    if not form.is_valid():
+        logger.warning(log_erro, request.user.id, form.errors)
+        messages.error(request, erro_msg)
+        return None, False
+
+    material = atualizar_material_admin(form=form, empresa=empresa) if form.instance.pk else criar_material_admin(form=form, empresa=empresa)
+    logger.info(log_sucesso, request.user.id, empresa.id, material.id)
+    messages.success(request, sucesso_msg)
+    return redirect(sucesso_redirect, material_id=material.id) if sucesso_redirect == "projetos:material_detail" else redirect(sucesso_redirect), True
+
+
+def _initial_movimento_material(empregado, material_id):
+    initial = {}
+    if not material_id:
+        return initial
+
+    initial["material"] = material_id
+    material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
+    if material_selecionado is not None and getattr(material_selecionado, "projeto_id", None):
+        initial["projeto"] = material_selecionado.projeto_id
+    return initial
+
+
+def _preparar_form_movimento(form, empregado):
+    form.instance.empregado = empregado
+    form.instance.empresa = empregado.empresa
+    return form
+
+
+def _processar_movimento_material(
+    *,
+    request,
+    empregado,
+    form_class,
+    processar_fn,
+    sucesso_msg,
+    erro_msg,
+    redirect_name,
+    template_name,
+    titulo,
+    log_sucesso,
+    log_erro,
+):
+    material_id = request.GET.get("material")
+
+    if request.method == "POST":
+        form = _preparar_form_movimento(form_class(request.POST, empregado=empregado), empregado)
+        movimento, erro = processar_fn(form=form, empregado=empregado)
+        if erro is None:
+            logger.info(
+                log_sucesso,
+                request.user.id,
+                empregado.id,
+                empregado.empresa_id,
+                movimento.id,
+                movimento.material_id,
+                movimento.quantidade,
+            )
+            messages.success(request, sucesso_msg)
+            return redirect(redirect_name)
+        if erro == "form_invalido":
+            logger.warning(log_erro, request.user.id, empregado.id, form.errors)
+            messages.error(request, erro_msg)
+    else:
+        initial = _initial_movimento_material(empregado, material_id)
+        form = _preparar_form_movimento(
+            form_class(empregado=empregado, initial=initial),
+            empregado,
+        )
+
+    return render(request, template_name, {
+        "form": form,
+        "empregado": empregado,
+        "titulo": titulo,
+    })
+
 @login_required
 @admin_required
 def entrada_material_view(request, material_id):
@@ -268,30 +366,22 @@ def material_create(request):
 
     if request.method == "POST":
         form = MaterialForm(request.POST, empresa=empresa)
-        if form.is_valid():
-            material = criar_material_admin(form=form, empresa=empresa)
-            logger.info(
-                "Material criado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-                request.user.id,
-                empresa.id,
-                material.id,
-            )
-            messages.success(request, "Material criado com sucesso.")
-            return redirect("projetos:material_detail", material_id=material.id)
-        else:
-            logger.warning(
-                "Erro ao criar material. user_id=%s, erros=%s",
-                request.user.id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao criar o material. Verifique os dados.")
+        resposta, sucesso = _processar_form_material(
+            request=request,
+            form=form,
+            empresa=empresa,
+            sucesso_redirect="projetos:material_detail",
+            sucesso_msg="Material criado com sucesso.",
+            erro_msg="Erro ao criar o material. Verifique os dados.",
+            log_sucesso="Material criado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+            log_erro="Erro ao criar material. user_id=%s, erros=%s",
+        )
+        if sucesso:
+            return resposta
     else:
         form = MaterialForm(empresa=empresa)
 
-    return render(request, 'projetos/material_form.html', {
-        'form': form,
-        'titulo': 'Novo Material'
-    })
+    return _render_material_form(request, form, "Novo Material")
 
 
 @login_required
@@ -337,10 +427,7 @@ def material_create_empregado(request):
     else:
         form = MaterialForm(empresa=empregado.empresa)
 
-    return render(request, "projetos/material_form.html", {
-        "form": form,
-        "titulo": "Novo Material",
-    })
+    return _render_material_form(request, form, "Novo Material")
 
 
 @login_required
@@ -362,32 +449,22 @@ def material_update(request, material_id):
 
     if request.method == "POST":
         form = MaterialForm(request.POST, instance=material, empresa=empresa)
-        if form.is_valid():
-            material = atualizar_material_admin(form=form, empresa=empresa)
-            logger.info(
-                "Material atualizado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-                request.user.id,
-                empresa.id,
-                material.id,
-            )
-            messages.success(request, "Material atualizado com sucesso.")
-            return redirect("projetos:material_detail", material_id=material.id)
-        else:
-            logger.warning(
-                "Erro ao atualizar material. user_id=%s, material_id=%s, erros=%s",
-                request.user.id,
-                material_id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao atualizar o material. Verifique os dados.")
+        resposta, sucesso = _processar_form_material(
+            request=request,
+            form=form,
+            empresa=empresa,
+            sucesso_redirect="projetos:material_detail",
+            sucesso_msg="Material atualizado com sucesso.",
+            erro_msg="Erro ao atualizar o material. Verifique os dados.",
+            log_sucesso="Material atualizado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+            log_erro="Erro ao atualizar material. user_id=%s, erros=%s",
+        )
+        if sucesso:
+            return resposta
     else:
         form = MaterialForm(instance=material, empresa=empresa)
 
-    return render(request, 'projetos/material_form.html', {
-        'form': form,
-        'titulo': 'Editar Material',
-        'material': material
-    })
+    return _render_material_form(request, form, "Editar Material", material=material)
 
 
 @login_required
@@ -437,60 +514,19 @@ def levantamento_material_create(request):
         logger.warning("Acesso bloqueado na view levantamento_material_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    material_id = request.GET.get("material")
-    material_selecionado = None
-
-    if material_id:
-        material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
-
-    if request.method == "POST":
-        form = LevantamentoMaterialForm(request.POST, empregado=empregado)
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-        levantamento, erro = processar_levantamento_material_form(
-            form=form,
-            empregado=empregado,
-        )
-        if erro is None:
-            logger.info(
-                "Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
-                request.user.id,
-                empregado.id,
-                empregado.empresa_id,
-                levantamento.id,
-                levantamento.material_id,
-                levantamento.quantidade,
-            )
-            messages.success(request, "Levantamento registado com sucesso.")
-            return redirect("projetos:levantamento_list")
-        if erro == "form_invalido":
-            logger.warning(
-                "Erro ao registar levantamento. user_id=%s, empregado_id=%s, erros=%s",
-                request.user.id,
-                empregado.id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao registar levantamento.")
-
-    else:
-        initial = {}
-        if material_id:
-            initial["material"] = material_id
-            if material_selecionado is not None and getattr(material_selecionado, "projeto_id", None):
-                initial["projeto"] = material_selecionado.projeto_id
-
-        form = LevantamentoMaterialForm(
-            empregado=empregado,
-            initial=initial,
-        )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-
-    return render(request, "projetos/levantamento_material_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": "Novo Levantamento de Material",
-    })
+    return _processar_movimento_material(
+        request=request,
+        empregado=empregado,
+        form_class=LevantamentoMaterialForm,
+        processar_fn=processar_levantamento_material_form,
+        sucesso_msg="Levantamento registado com sucesso.",
+        erro_msg="Erro ao registar levantamento.",
+        redirect_name="projetos:levantamento_list",
+        template_name="projetos/levantamento_material_form.html",
+        titulo="Novo Levantamento de Material",
+        log_sucesso="Levantamento registado com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, levantamento_id=%s, material_id=%s, quantidade=%s",
+        log_erro="Erro ao registar levantamento. user_id=%s, empregado_id=%s, erros=%s",
+    )
 
 
 @login_required
@@ -566,59 +602,19 @@ def devolucao_material_create(request):
         logger.warning("Acesso bloqueado na view devolucao_material_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    material_id = request.GET.get("material")
-    material_selecionado = None
-
-    if material_id:
-        material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
-
-    if request.method == "POST":
-        form = DevolucaoMaterialForm(request.POST, empregado=empregado)
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-        devolucao, erro = processar_devolucao_material_form(
-            form=form,
-            empregado=empregado,
-        )
-        if erro is None:
-            logger.info(
-                "Devolução registada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, devolucao_id=%s, material_id=%s, quantidade=%s",
-                request.user.id,
-                empregado.id,
-                empregado.empresa_id,
-                devolucao.id,
-                devolucao.material_id,
-                devolucao.quantidade,
-            )
-            messages.success(request, "Devolução registada com sucesso.")
-            return redirect("projetos:devolucao_material_list")
-        if erro == "form_invalido":
-            logger.warning(
-                "Erro ao registar devolução. user_id=%s, empregado_id=%s, erros=%s",
-                request.user.id,
-                empregado.id,
-                form.errors,
-            )
-            messages.error(request, "Erro ao registar devolução.")
-    else:
-        initial = {}
-        if material_id:
-            initial["material"] = material_id
-            if material_selecionado is not None and getattr(material_selecionado, "projeto_id", None):
-                initial["projeto"] = material_selecionado.projeto_id
-
-        form = DevolucaoMaterialForm(
-            empregado=empregado,
-            initial=initial,
-        )
-        form.instance.empregado = empregado
-        form.instance.empresa = empregado.empresa
-
-    return render(request, "projetos/devolucao_material_form.html", {
-        "form": form,
-        "empregado": empregado,
-        "titulo": "Nova Devolução de Material",
-    })
+    return _processar_movimento_material(
+        request=request,
+        empregado=empregado,
+        form_class=DevolucaoMaterialForm,
+        processar_fn=processar_devolucao_material_form,
+        sucesso_msg="Devolução registada com sucesso.",
+        erro_msg="Erro ao registar devolução.",
+        redirect_name="projetos:devolucao_material_list",
+        template_name="projetos/devolucao_material_form.html",
+        titulo="Nova Devolução de Material",
+        log_sucesso="Devolução registada com sucesso. user_id=%s, empregado_id=%s, empresa_id=%s, devolucao_id=%s, material_id=%s, quantidade=%s",
+        log_erro="Erro ao registar devolução. user_id=%s, empregado_id=%s, erros=%s",
+    )
 
 
 @login_required

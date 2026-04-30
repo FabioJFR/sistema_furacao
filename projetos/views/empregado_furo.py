@@ -38,6 +38,32 @@ def _obter_empresa_admin_empregado_furo(request):
     return empresa, None
 
 
+def _render_form_empregado_furo(request, form, furo, titulo, ligacao=None):
+    context = {
+        "form": form,
+        "furo": furo,
+        "titulo": titulo,
+    }
+    if ligacao is not None:
+        context["ligacao"] = ligacao
+    return render(request, "projetos/furo_adicionar_empregado.html", context)
+
+
+def _preparar_form_empregado_furo(*, request, empresa, furo, instance=None):
+    form = EmpregadoFuroForm(
+        request.POST if request.method == "POST" else None,
+        instance=instance,
+        empresa=empresa,
+        furo=furo,
+    )
+    form.instance.furo = furo
+    form.instance.empresa = empresa
+    empregado_id = request.POST.get("empregado")
+    if empregado_id:
+        form.instance.empregado_id = empregado_id
+    return form
+
+
 # Multiempresa: a gestão de trabalhadores por furo deve acontecer sempre dentro da empresa do administrador.
 @login_required
 @admin_required
@@ -60,12 +86,11 @@ def furo_adicionar_empregado(request, furo_id):
         return redirect(furo)
 
     if request.method == "POST":
-        form = EmpregadoFuroForm(request.POST, empresa=empresa, furo=furo)
-        form.instance.furo = furo
-        form.instance.empresa = empresa
-        empregado_id = request.POST.get("empregado")
-        if empregado_id:
-            form.instance.empregado_id = empregado_id
+        form = _preparar_form_empregado_furo(
+            request=request,
+            empresa=empresa,
+            furo=furo,
+        )
         if form.is_valid():
             empregado = form.cleaned_data["empregado"]
             ligacao = criar_ligacao_empregado_furo(
@@ -110,11 +135,12 @@ def furo_adicionar_empregado(request, furo_id):
     else:
         form = EmpregadoFuroForm(empresa=empresa, furo=furo)
 
-    return render(request, "projetos/furo_adicionar_empregado.html", {
-        "form": form,
-        "furo": furo,
-        "titulo": f"Adicionar Trabalhador ao Furo {furo.nome}"
-    })
+    return _render_form_empregado_furo(
+        request,
+        form,
+        furo,
+        f"Adicionar Trabalhador ao Furo {furo.nome}",
+    )
 
 
 @login_required
@@ -135,17 +161,12 @@ def furo_editar_empregado(request, pk):
     ligacao = obter_ligacao_empregado_furo_admin_por_pk(pk, empresa)
 
     if request.method == "POST":
-        form = EmpregadoFuroForm(
-            request.POST,
-            instance=ligacao,
+        form = _preparar_form_empregado_furo(
+            request=request,
             empresa=empresa,
             furo=ligacao.furo,
+            instance=ligacao,
         )
-        form.instance.furo = ligacao.furo
-        form.instance.empresa = empresa
-        empregado_id = request.POST.get("empregado")
-        if empregado_id:
-            form.instance.empregado_id = empregado_id
         if form.is_valid():
             empregado = form.cleaned_data["empregado"]
             ligacao = atualizar_ligacao_empregado_furo(
@@ -193,12 +214,13 @@ def furo_editar_empregado(request, pk):
             furo=ligacao.furo,
         )
 
-    return render(request, "projetos/furo_adicionar_empregado.html", {
-        "form": form,
-        "furo": ligacao.furo,
-        "ligacao": ligacao,
-        "titulo": f"Editar Trabalhador no Furo {ligacao.furo.nome}"
-    })
+    return _render_form_empregado_furo(
+        request,
+        form,
+        ligacao.furo,
+        f"Editar Trabalhador no Furo {ligacao.furo.nome}",
+        ligacao=ligacao,
+    )
 
 
 @login_required

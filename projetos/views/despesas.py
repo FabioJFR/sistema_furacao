@@ -26,16 +26,56 @@ def _user_conta_individual(user):
     return bool(perfil and perfil.tipo_acesso == "individual")
 
 
-@login_required
-@admin_required
-def despesa_list_admin(request):
-    empresa, resposta_erro = obter_empresa_admin_contexto(
+def _obter_empresa_admin_despesas(request):
+    return obter_empresa_admin_contexto(
         request=request,
         mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
         mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
         redirect_sem_permissao="projetos:redirect_after_login",
         redirect_sem_empresa="projetos:dashboard",
     )
+
+
+def _obter_empregado_individual_despesas(request):
+    if not _user_conta_individual(request.user):
+        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
+        return None, redirect("projetos:area_empregado")
+
+    empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
+        request=request,
+        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
+        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
+        redirect_sem_empregado="projetos:redirect_after_login",
+        redirect_sem_empresa="projetos:redirect_after_login",
+        vincular_por_email=True,
+    )
+    if resposta_erro:
+        return None, resposta_erro
+    return empregado, None
+
+
+def _processar_form_despesa(
+    *,
+    request,
+    form,
+    empresa,
+    sucesso_redirect,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        messages.error(request, erro_msg)
+        return None
+
+    criar_despesa(form=form, empresa=empresa)
+    messages.success(request, sucesso_msg)
+    return redirect(sucesso_redirect)
+
+
+@login_required
+@admin_required
+def despesa_list_admin(request):
+    empresa, resposta_erro = _obter_empresa_admin_despesas(request)
     if resposta_erro:
         return resposta_erro
 
@@ -54,23 +94,22 @@ def despesa_list_admin(request):
 @login_required
 @admin_required
 def despesa_create_admin(request):
-    empresa, resposta_erro = obter_empresa_admin_contexto(
-        request=request,
-        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
-        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
-        redirect_sem_permissao="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:dashboard",
-    )
+    empresa, resposta_erro = _obter_empresa_admin_despesas(request)
     if resposta_erro:
         return resposta_erro
 
     if request.method == "POST":
         form = DespesaForm(request.POST, request.FILES, empresa=empresa)
-        if form.is_valid():
-            criar_despesa(form=form, empresa=empresa)
-            messages.success(request, "Despesa adicionada com sucesso.")
-            return redirect("projetos:despesa_list_admin")
-        messages.error(request, "Erro ao adicionar despesa. Verifica os dados.")
+        resposta = _processar_form_despesa(
+            request=request,
+            form=form,
+            empresa=empresa,
+            sucesso_redirect="projetos:despesa_list_admin",
+            sucesso_msg="Despesa adicionada com sucesso.",
+            erro_msg="Erro ao adicionar despesa. Verifica os dados.",
+        )
+        if resposta:
+            return resposta
     else:
         form = DespesaForm(empresa=empresa)
 
@@ -88,13 +127,7 @@ def despesa_create_admin(request):
 @login_required
 @admin_required
 def despesa_detail_admin(request, despesa_id):
-    empresa, resposta_erro = obter_empresa_admin_contexto(
-        request=request,
-        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
-        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
-        redirect_sem_permissao="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:dashboard",
-    )
+    empresa, resposta_erro = _obter_empresa_admin_despesas(request)
     if resposta_erro:
         return resposta_erro
 
@@ -105,13 +138,7 @@ def despesa_detail_admin(request, despesa_id):
 @login_required
 @admin_required
 def despesa_update_admin(request, despesa_id):
-    empresa, resposta_erro = obter_empresa_admin_contexto(
-        request=request,
-        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
-        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
-        redirect_sem_permissao="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:dashboard",
-    )
+    empresa, resposta_erro = _obter_empresa_admin_despesas(request)
     if resposta_erro:
         return resposta_erro
 
@@ -142,13 +169,7 @@ def despesa_update_admin(request, despesa_id):
 @login_required
 @admin_required
 def despesa_delete_admin(request, despesa_id):
-    empresa, resposta_erro = obter_empresa_admin_contexto(
-        request=request,
-        mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
-        mensagem_sem_empresa="O utilizador administrador não está associado a uma empresa.",
-        redirect_sem_permissao="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:dashboard",
-    )
+    empresa, resposta_erro = _obter_empresa_admin_despesas(request)
     if resposta_erro:
         return resposta_erro
 
@@ -164,18 +185,7 @@ def despesa_delete_admin(request, despesa_id):
 @login_required
 @empregado_required
 def despesa_list_empregado(request):
-    if not _user_conta_individual(request.user):
-        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
-        return redirect("projetos:area_empregado")
-
-    empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
-        request=request,
-        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
-        redirect_sem_empregado="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:redirect_after_login",
-        vincular_por_email=True,
-    )
+    empregado, resposta_erro = _obter_empregado_individual_despesas(request)
     if resposta_erro:
         return resposta_erro
 
@@ -194,18 +204,7 @@ def despesa_list_empregado(request):
 @login_required
 @empregado_required
 def despesa_create_empregado(request):
-    if not _user_conta_individual(request.user):
-        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
-        return redirect("projetos:area_empregado")
-
-    empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
-        request=request,
-        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
-        redirect_sem_empregado="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:redirect_after_login",
-        vincular_por_email=True,
-    )
+    empregado, resposta_erro = _obter_empregado_individual_despesas(request)
     if resposta_erro:
         return resposta_erro
 

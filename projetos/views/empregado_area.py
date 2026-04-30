@@ -74,6 +74,20 @@ def _obter_individual_autenticado_area(request):
     return individual, None
 
 
+def _render_meus_dados_individual_editar(request, individual, form):
+    return render(request, "projetos/meus_dados_individual_editar.html", {
+        "individual": individual,
+        "form": form,
+    })
+
+
+def _render_meus_dados_empregado_editar(request, empregado, form):
+    return render(request, "projetos/meus_dados_empregado_editar.html", {
+        "empregado": empregado,
+        "form": form,
+    })
+
+
 def _normalizar_periodo_meses(ciclo):
     valor = str(ciclo or "").strip().lower()
     if valor == "mensal":
@@ -281,10 +295,7 @@ def meus_dados_empregado_editar(request):
         else:
             form = MeusDadosIndividualForm(instance=individual)
 
-        return render(request, "projetos/meus_dados_individual_editar.html", {
-            "individual": individual,
-            "form": form,
-        })
+        return _render_meus_dados_individual_editar(request, individual, form)
 
     empregado, resposta_erro = _obter_empregado_autenticado_area(request)
     if resposta_erro:
@@ -306,10 +317,7 @@ def meus_dados_empregado_editar(request):
                 )
             except ValidationError:
                 messages.error(request, "Erro ao atualizar os teus dados.")
-                return render(request, "projetos/meus_dados_empregado_editar.html", {
-                    "empregado": empregado,
-                    "form": form,
-                })
+                return _render_meus_dados_empregado_editar(request, empregado, form)
 
             logger.info(
                 "Dados do empregado atualizados com sucesso. user_id=%s, empregado_id=%s",
@@ -329,7 +337,4 @@ def meus_dados_empregado_editar(request):
     else:
         form = MeusDadosEmpregadoForm(instance=empregado)
 
-    return render(request, "projetos/meus_dados_empregado_editar.html", {
-        "empregado": empregado,
-        "form": form,
-    })
+    return _render_meus_dados_empregado_editar(request, empregado, form)
