@@ -41,6 +41,7 @@ _AREAS_TODO = {
             "Modos de aplicação da importação entregues: todas as medições, apenas última por furo, e criação automática de furos em falta.",
             "Relatório de importação já operacional com totais (gravadas/ignoradas/criadas), detalhe por furo e opção de descarregar CSV.",
             "Histórico de importações por empresa guardado em base de dados, visível na página de captura.",
+            "Proteção de fallback aplicada na captura para evitar erro 500 quando a tabela de histórico ainda não existe no ambiente.",
         ],
         "proximos_passos": [
             "Uniformizar todos os fluxos de escrita em services (criação/edição/ações).",
@@ -49,6 +50,7 @@ _AREAS_TODO = {
             "Organizar `dispositivos/services/dashboard.py` em submódulos por responsabilidade para evitar ficheiro monolítico.",
             "Adicionar importação dedicada para `XLSX` mantendo o mesmo fluxo (preview -> validação -> gravação).",
             "Melhorar reconciliação automática de nomes de furo com regras de normalização/fuzzy matching configurável por empresa.",
+            "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],
         "falta_fazer": [
             "API pública para ingestão externa com autenticação forte e versionamento.",
@@ -181,7 +183,8 @@ def obter_notas_transversais_todo():
     return {
         "selectors_services": (
             "Estamos a retirar lógica solta para selectors/services em todas as apps. "
-            "A base já está bem estruturada e houve avanço forte em Projetos (agora também materiais, registos, configuração de perfuração e medições), Furos/Despesas/Avarias e também em Dispositivos (importação MagCruiser com histórico), mas a migração ainda está em curso nas camadas residuais de views/forms/helpers."
+            "A base já está bem estruturada e houve avanço forte em Projetos (agora também materiais, registos, configuração de perfuração e medições), Furos/Despesas/Avarias e também em Dispositivos (importação MagCruiser com histórico), mas a migração ainda está em curso nas camadas residuais de views/forms/helpers. "
+            "No curto prazo, a prioridade operacional em Dispositivos é garantir a migração `0006_importacaodispositivohistorico` aplicada em todos os ambientes para eliminar dependência de fallback."
         ),
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "

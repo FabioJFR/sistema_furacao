@@ -8,7 +8,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 - Versão atual: **v0.9.4**
 - Estado: **desenvolvimento ativo**
-- Foco imediato: **Projetos**, **IA** e **estabilização para produção**
+- Foco imediato: **separação de lógica em services/selectors**, **integração de dispositivos** e **estabilização para produção**
 
 ### Stack principal
 
@@ -56,6 +56,7 @@ Principais evoluções consolidadas nesta versão:
 - modos de aplicação de importação: todas as medições, apenas última por furo, ou criação automática de furos em falta
 - relatório de importação com totais (gravadas/ignoradas/criadas), detalhe por furo e exportação em CSV
 - histórico de importações de dispositivo por empresa para rastreabilidade operacional
+- proteção na captura de dispositivos para evitar erro 500 quando a migração do histórico ainda não foi aplicada
 
 ---
 
@@ -119,6 +120,11 @@ Principais evoluções consolidadas nesta versão:
 - opção de criação automática de furos em falta durante a importação
 - gravação estruturada para leituras brutas, survey shots e medições associadas ao furo correto
 - relatório final de importação e histórico persistido para auditoria
+- fallback seguro na listagem de histórico para não interromper a página quando a tabela ainda não existe
+
+Comando de correção quando faltar a tabela de histórico:
+
+- `python manage.py migrate dispositivos`
 
 ---
 
