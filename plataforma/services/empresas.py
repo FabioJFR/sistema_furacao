@@ -60,6 +60,21 @@ class ResultadoAlteracaoPlano:
     plano: Plano | None = None
 
 
+@dataclass
+class ResultadoRenovacaoSubscricao:
+    ok: bool
+    erro: str | None = None
+    nova_data: date | None = None
+
+
+@dataclass
+class ResultadoSubmissaoAlteracaoPlano:
+    ok: bool
+    erro: str | None = None
+    plano: Plano | None = None
+    ciclo_subscricao: str | None = None
+
+
 @transaction.atomic
 def atualizar_renovacao_subscricao(subscricao_atual, nova_data: date):
     if not subscricao_atual:
@@ -79,6 +94,30 @@ def atualizar_renovacao_subscricao(subscricao_atual, nova_data: date):
         ]
     )
     return subscricao_atual
+
+
+def processar_submissao_renovacao_subscricao(*, subscricao_atual, nova_data_raw):
+    valor = str(nova_data_raw or "").strip()
+    if not valor:
+        return ResultadoRenovacaoSubscricao(
+            ok=False,
+            erro="Indique uma data para a próxima renovação.",
+        )
+
+    try:
+        nova_data = date.fromisoformat(valor)
+    except ValueError:
+        return ResultadoRenovacaoSubscricao(
+            ok=False,
+            erro="A data indicada para a renovação é inválida.",
+        )
+
+    try:
+        atualizar_renovacao_subscricao(subscricao_atual, nova_data)
+    except Exception as exc:
+        return ResultadoRenovacaoSubscricao(ok=False, erro=str(exc))
+
+    return ResultadoRenovacaoSubscricao(ok=True, nova_data=nova_data)
 
 
 @transaction.atomic
@@ -112,6 +151,33 @@ def alterar_plano_empresa(*, empresa, subscricao_atual, novo_plano, ciclo_subscr
         subscricao_atual.save()
 
     return ResultadoAlteracaoPlano(ok=True, empresa=empresa, plano=novo_plano)
+
+
+def processar_submissao_alteracao_plano_empresa(
+    *,
+    empresa,
+    subscricao_atual,
+    plano_id,
+    ciclo_subscricao,
+    estado_empresa,
+    obter_plano_ativo_fn,
+):
+    novo_plano = obter_plano_ativo_fn(plano_id)
+    resultado = alterar_plano_empresa(
+        empresa=empresa,
+        subscricao_atual=subscricao_atual,
+        novo_plano=novo_plano,
+        ciclo_subscricao=ciclo_subscricao,
+        estado_empresa=estado_empresa,
+    )
+    if not resultado.ok:
+        return ResultadoSubmissaoAlteracaoPlano(ok=False, erro=resultado.erro)
+
+    return ResultadoSubmissaoAlteracaoPlano(
+        ok=True,
+        plano=novo_plano,
+        ciclo_subscricao=ciclo_subscricao,
+    )
 
 
 @transaction.atomic

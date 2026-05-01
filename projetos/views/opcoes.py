@@ -18,9 +18,9 @@ from projetos.services.opcoes_exportacao import (
 from projetos.services.opcoes import (
     construir_contexto_relatorios_exportacao,
     construir_filtros_exportacao,
-    guardar_definicoes_financeiras_admin,
-    guardar_preferencias_admin,
     obter_empresa_admin_opcoes,
+    processar_fluxo_financeiro_admin_form,
+    processar_fluxo_preferencias_admin_form,
 )
 from projetos.services.sugestoes import processar_submissao_sugestao
 from projetos.selectors.opcoes import (
@@ -39,16 +39,12 @@ def _obter_empresa_admin_or_redirect(request):
     return obter_empresa_admin_opcoes(request=request)
 
 
-def _processar_form_preferencias(request, form, empresa):
-    if not form.is_valid():
+def _processar_form_preferencias(request, resultado):
+    if not resultado["ok"]:
         messages.error(request, "Erro ao guardar preferências.")
         return None
 
-    preferencias = guardar_preferencias_admin(
-        form=form,
-        user=request.user,
-        empresa=empresa,
-    )
+    preferencias = resultado["preferencias"]
     if preferencias.idioma:
         translation.activate(preferencias.idioma)
         request.session["django_language"] = preferencias.idioma
@@ -56,11 +52,10 @@ def _processar_form_preferencias(request, form, empresa):
     return redirect("projetos:definicoes_admin")
 
 
-def _processar_form_financeiro(request, financeiro_form):
-    if not financeiro_form.is_valid():
+def _processar_form_financeiro(request, resultado):
+    if not resultado["ok"]:
         messages.error(request, "Erro ao guardar definições financeiras.")
         return None
-    guardar_definicoes_financeiras_admin(financeiro_form=financeiro_form)
     messages.success(request, "Definições financeiras guardadas com sucesso.")
     return redirect("projetos:definicoes_financeiras_admin")
 
@@ -75,13 +70,20 @@ def definicoes_admin(request):
     preferencias, _ = obter_ou_criar_preferencias_user(request.user)
     preferencias = garantir_preferencias_empresa(preferencias, empresa)
 
-    if request.method == "POST":
-        form = PreferenciasForm(request.POST, instance=preferencias, user=request.user, prefix="prefs")
-        resposta = _processar_form_preferencias(request, form, empresa)
+    fluxo = processar_fluxo_preferencias_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=PreferenciasForm,
+        preferencias=preferencias,
+        user=request.user,
+        empresa=empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        resposta = _processar_form_preferencias(request, resultado)
         if resposta:
             return resposta
-    else:
-        form = PreferenciasForm(instance=preferencias, user=request.user, prefix="prefs")
 
     return render(
         request,
@@ -101,13 +103,18 @@ def definicoes_financeiras_admin(request):
     if resposta_erro:
         return resposta_erro
 
-    if request.method == "POST":
-        financeiro_form = EmpresaFinanceiraForm(request.POST, instance=empresa, prefix="financeiro")
-        resposta = _processar_form_financeiro(request, financeiro_form)
+    fluxo = processar_fluxo_financeiro_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpresaFinanceiraForm,
+        empresa=empresa,
+    )
+    financeiro_form = fluxo["financeiro_form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        resposta = _processar_form_financeiro(request, resultado)
         if resposta:
             return resposta
-    else:
-        financeiro_form = EmpresaFinanceiraForm(instance=empresa, prefix="financeiro")
 
     financeiro_preview = empresa.recalcular_indicadores_financeiros(guardar=False)
 

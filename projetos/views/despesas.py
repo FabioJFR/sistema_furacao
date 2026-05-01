@@ -11,19 +11,16 @@ from projetos.selectors.despesas import (
     obter_lista_despesas_admin,
     obter_lista_despesas_empregado,
 )
-from projetos.selectors.acesso import obter_perfil_ativo_por_user
 from projetos.services.acesso_contexto import (
     obter_empresa_admin_contexto,
-    obter_empregado_autenticado_contexto,
 )
-from projetos.services.despesas import apagar_despesa, criar_despesa
+from projetos.services.despesas import (
+    processar_acao_apagar_despesa,
+    processar_fluxo_form_despesa,
+    resolver_empregado_individual_para_despesas,
+)
 
 logger = logging.getLogger("core")
-
-
-def _user_conta_individual(user):
-    perfil = obter_perfil_ativo_por_user(user)
-    return bool(perfil and perfil.tipo_acesso == "individual")
 
 
 def _obter_empresa_admin_despesas(request):
@@ -37,39 +34,12 @@ def _obter_empresa_admin_despesas(request):
 
 
 def _obter_empregado_individual_despesas(request):
-    if not _user_conta_individual(request.user):
-        messages.error(request, "A área de Despesas está disponível apenas para contas individuais.")
-        return None, redirect("projetos:area_empregado")
-
-    empregado, _, resposta_erro = obter_empregado_autenticado_contexto(
-        request=request,
-        mensagem_sem_empregado="A tua conta ainda não está ligada a um registo de empregado. Contacta o administrador.",
-        mensagem_sem_empresa="A tua conta não está associada a uma empresa. Contacta o administrador.",
-        redirect_sem_empregado="projetos:redirect_after_login",
-        redirect_sem_empresa="projetos:redirect_after_login",
-        vincular_por_email=True,
-    )
-    if resposta_erro:
-        return None, resposta_erro
-    return empregado, None
-
-
-def _processar_form_despesa(
-    *,
-    request,
-    form,
-    empresa,
-    sucesso_redirect,
-    sucesso_msg,
-    erro_msg,
-):
-    if not form.is_valid():
-        messages.error(request, erro_msg)
-        return None
-
-    criar_despesa(form=form, empresa=empresa)
-    messages.success(request, sucesso_msg)
-    return redirect(sucesso_redirect)
+    resultado = resolver_empregado_individual_para_despesas(request=request)
+    if resultado.get("mensagem_erro"):
+        messages.error(request, resultado["mensagem_erro"])
+    if not resultado["ok"]:
+        return None, resultado["resposta_erro"]
+    return resultado["empregado"], None
 
 
 @login_required
@@ -98,20 +68,23 @@ def despesa_create_admin(request):
     if resposta_erro:
         return resposta_erro
 
-    if request.method == "POST":
-        form = DespesaForm(request.POST, request.FILES, empresa=empresa)
-        resposta = _processar_form_despesa(
-            request=request,
-            form=form,
-            empresa=empresa,
-            sucesso_redirect="projetos:despesa_list_admin",
-            sucesso_msg="Despesa adicionada com sucesso.",
-            erro_msg="Erro ao adicionar despesa. Verifica os dados.",
-        )
-        if resposta:
-            return resposta
-    else:
-        form = DespesaForm(empresa=empresa)
+    fluxo = processar_fluxo_form_despesa(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=DespesaForm,
+        empresa=empresa,
+        sucesso_msg="Despesa adicionada com sucesso.",
+        erro_msg="Erro ao adicionar despesa. Verifica os dados.",
+        acao="create",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem_sucesso"])
+            return redirect("projetos:despesa_list_admin")
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(
         request,
@@ -143,17 +116,24 @@ def despesa_update_admin(request, despesa_id):
         return resposta_erro
 
     despesa = obter_despesa_admin(empresa=empresa, despesa_id=despesa_id)
-    if request.method == "POST":
-        form = DespesaForm(request.POST, request.FILES, instance=despesa, empresa=empresa)
-        if form.is_valid():
-            despesa = form.save(commit=False)
-            despesa.empresa = empresa
-            despesa.save()
-            messages.success(request, "Despesa atualizada com sucesso.")
+    fluxo = processar_fluxo_form_despesa(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=DespesaForm,
+        empresa=empresa,
+        sucesso_msg="Despesa atualizada com sucesso.",
+        erro_msg="Erro ao atualizar despesa. Verifica os dados.",
+        instance=despesa,
+        acao="update",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect("projetos:despesa_list_admin")
-        messages.error(request, "Erro ao atualizar despesa. Verifica os dados.")
-    else:
-        form = DespesaForm(instance=despesa, empresa=empresa)
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(
         request,
@@ -175,8 +155,8 @@ def despesa_delete_admin(request, despesa_id):
 
     despesa = obter_despesa_admin(empresa=empresa, despesa_id=despesa_id)
     if request.method == "POST":
-        apagar_despesa(despesa=despesa)
-        messages.success(request, "Despesa apagada com sucesso.")
+        resultado = processar_acao_apagar_despesa(despesa=despesa)
+        messages.success(request, resultado["mensagem_sucesso"])
         return redirect("projetos:despesa_list_admin")
 
     return render(request, "projetos/despesa_confirm_delete.html", {"despesa": despesa})
@@ -208,20 +188,24 @@ def despesa_create_empregado(request):
     if resposta_erro:
         return resposta_erro
 
-    if request.method == "POST":
-        form = DespesaForm(
-            request.POST,
-            request.FILES,
-            empresa=empregado.empresa,
-            empregado=empregado,
-        )
-        if form.is_valid():
-            criar_despesa(form=form, empresa=empregado.empresa)
-            messages.success(request, "Despesa adicionada com sucesso.")
+    fluxo = processar_fluxo_form_despesa(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=DespesaForm,
+        empresa=empregado.empresa,
+        empregado=empregado,
+        sucesso_msg="Despesa adicionada com sucesso.",
+        erro_msg="Erro ao adicionar despesa. Verifica os dados.",
+        acao="create",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect("projetos:despesa_list_empregado")
-        messages.error(request, "Erro ao adicionar despesa. Verifica os dados.")
-    else:
-        form = DespesaForm(empresa=empregado.empresa, empregado=empregado)
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(
         request,

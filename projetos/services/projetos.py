@@ -83,6 +83,33 @@ def atualizar_projeto(form, empresa=None):
     return projeto
 
 
+def processar_submissao_form_projeto(
+    *,
+    form,
+    empresa=None,
+    on_success,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "projeto": None,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+            "erros": form.errors,
+        }
+
+    projeto = on_success(form=form, empresa=_resolver_empresa_id(empresa))
+    return {
+        "ok": True,
+        "projeto": projeto,
+        "mensagem_sucesso": sucesso_msg,
+        "mensagem_erro": None,
+        "erros": None,
+    }
+
+
 def associar_empregado_projeto(*, empregado, projeto, empresa=None, data_inicio=None):
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id
 
@@ -108,6 +135,52 @@ def associar_empregado_projeto(*, empregado, projeto, empresa=None, data_inicio=
         ativo=True,
     )
     return ligacao, True
+
+
+def processar_acao_associar_empregado_projeto(
+    *,
+    form,
+    projeto,
+    empresa=None,
+):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "mensagem_sucesso": None,
+            "mensagem_erro": "Erro ao associar empregado ao projeto. Verifique os dados.",
+            "mensagem_aviso": None,
+            "ligacao": None,
+            "criado": False,
+            "erros": form.errors,
+        }
+
+    empregado = form.cleaned_data["empregado"]
+    ligacao, criado = associar_empregado_projeto(
+        empregado=empregado,
+        projeto=projeto,
+        empresa=empresa,
+        data_inicio=form.cleaned_data.get("data_inicio"),
+    )
+    if not criado:
+        return {
+            "ok": True,
+            "mensagem_sucesso": None,
+            "mensagem_erro": None,
+            "mensagem_aviso": "Este empregado já está associado a este projeto.",
+            "ligacao": ligacao,
+            "criado": False,
+            "erros": None,
+        }
+
+    return {
+        "ok": True,
+        "mensagem_sucesso": "Empregado associado ao projeto com sucesso.",
+        "mensagem_erro": None,
+        "mensagem_aviso": None,
+        "ligacao": ligacao,
+        "criado": True,
+        "erros": None,
+    }
 
 
 @transaction.atomic

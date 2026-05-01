@@ -10,9 +10,7 @@ from plataforma.decorators import platform_admin_required
 from plataforma.selectors.planos import listar_planos_dashboard, obter_plano_por_pk
 from plataforma.services.planos import (
     alternar_plano_ativo,
-    construir_form_plano,
-    processar_submissao_plano_create,
-    processar_submissao_plano_update,
+    processar_fluxo_form_plano,
 )
 
 
@@ -36,15 +34,18 @@ def plano_list(request):
 @login_required
 @platform_admin_required
 def plano_create(request):
-    if request.method == "POST":
-        resultado = processar_submissao_plano_create(post_data=request.POST)
-        form = resultado["form"]
+    fluxo = processar_fluxo_form_plano(
+        method=request.method,
+        post_data=request.POST,
+        plano=None,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         if resultado["ok"]:
             messages.success(request, resultado["mensagem"])
             return redirect("plataforma:plano_list")
         messages.error(request, resultado["mensagem"])
-    else:
-        form = construir_form_plano()
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,
@@ -58,16 +59,19 @@ def plano_create(request):
 def plano_update(request, pk):
     plano = obter_plano_por_pk(pk)
 
-    if request.method == "POST":
-        resultado = processar_submissao_plano_update(post_data=request.POST, plano=plano)
-        form = resultado["form"]
+    fluxo = processar_fluxo_form_plano(
+        method=request.method,
+        post_data=request.POST,
+        plano=plano,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         if resultado["ok"]:
             plano = resultado["plano"]
             messages.success(request, resultado["mensagem"])
             return redirect("plataforma:plano_list")
         messages.error(request, resultado["mensagem"])
-    else:
-        form = construir_form_plano(instance=plano)
 
     return render(request, "plataforma/plano_form.html", {
         "form": form,

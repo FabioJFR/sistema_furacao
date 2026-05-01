@@ -69,16 +69,14 @@ from projetos.selectors.empregados import (
 from projetos.services.empregados import (
     apagar_empregado_admin,
     construir_resumo_registos_projeto_empregado,
-    criar_empregado_admin,
     garantir_individual_para_user,
-    processar_guardar_ligacao_projeto_form,
-    processar_guardar_ficheiro_empregado_form,
-    processar_aprovacao_empregado,
+    processar_acao_remover_ficheiro_empregado,
+    processar_acao_pendente_empregado,
+    processar_acao_terminar_ligacao_projeto,
+    processar_fluxo_empregado_admin_form,
+    processar_fluxo_ficheiro_empregado_admin_form,
+    processar_fluxo_ligacao_projeto_admin_form,
     processar_registo_empregado_form,
-    processar_rejeicao_empregado_pendente,
-    remover_ficheiro_empregado,
-    terminar_ligacao_projeto_empregado,
-    atualizar_empregado_admin,
 )
 
 logger = logging.getLogger("core")
@@ -164,16 +162,6 @@ def _require_post_or_redirect(request, destino):
     return None
 
 
-def _processar_form_servico(
-    *,
-    form,
-    service_fn,
-    service_kwargs,
-):
-    objeto, erro = service_fn(form=form, **service_kwargs)
-    return objeto, erro
-
-
 # ---------------- EMPREGADOS ----------------
 # TODO futuro:
 # - quando o fluxo multiempresa estiver fechado, associar o registo inicial a uma empresa/contexto controlado
@@ -253,15 +241,21 @@ def empregado_create(request):
         logger.warning("Acesso bloqueado na view empregado_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    form = EmpregadoCreateForm(
-        request.POST or None,
-        request.FILES or None,
+    fluxo = processar_fluxo_empregado_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=EmpregadoCreateForm,
         empresa=empresa,
+        acao="create",
     )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
 
-    if request.method == "POST" and form.is_valid():
-        try:
-            user, empregado = criar_empregado_admin(form=form, empresa=empresa)
+    if resultado:
+        if resultado["ok"]:
+            user = resultado["user"]
+            empregado = resultado["empregado"]
             logger.info(
                 "Ligação criada em empregado_create. user_id=%s, empregado_id=%s, empregado_user_id=%s, empresa_id=%s",
                 user.id,
@@ -269,7 +263,6 @@ def empregado_create(request):
                 empregado.user_id,
                 empregado.empresa_id,
             )
-
             logger.info(
                 "Empregado criado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, novo_username='%s'",
                 request.user.id,
@@ -286,17 +279,22 @@ def empregado_create(request):
                 "O novo empregado ficou pendente. Aprova o registo para lhe dar acesso à plataforma.",
             )
             return redirect(empregado)
-        except Exception as e:
+
+        if resultado.get("erro_tecnico") is not None:
             logger.exception(
                 "Erro ao criar empregado com utilizador. admin_user_id=%s, empresa_id=%s, erro=%s",
                 request.user.id,
                 empresa.id,
-                e,
+                resultado["erro_tecnico"],
             )
             messages.error(request, "Erro ao criar empregado. Verifique os dados e tente novamente.")
-
-    if request.method == "POST":
-        logger.warning("Formulário inválido em empregado_create. user_id=%s, erros=%s", request.user.id, form.errors)
+        else:
+            logger.warning(
+                "Formulário inválido em empregado_create. user_id=%s, erros=%s",
+                request.user.id,
+                resultado.get("erros_form"),
+            )
+            messages.error(request, resultado["mensagem_erro"])
 
     return render(request, "projetos/empregado_form.html", {
         "form": form,
@@ -363,15 +361,21 @@ def empregado_update(request, pk):
 
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        form = EmpregadoUpdateForm(
-            request.POST,
-            request.FILES,
-            instance=empregado,
-            empresa=empresa,
-        )
-        if form.is_valid():
-            empregado = atualizar_empregado_admin(form=form, empresa=empresa)
+    fluxo = processar_fluxo_empregado_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=EmpregadoUpdateForm,
+        empresa=empresa,
+        acao="update",
+        instance=empregado,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            empregado = resultado["empregado"]
             logger.info(
                 "Empregado atualizado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
                 request.user.id,
@@ -381,11 +385,22 @@ def empregado_update(request, pk):
             messages.success(request, "Empregado atualizado com sucesso.")
             return redirect(empregado)
 
-        logger.warning("Erro ao atualizar empregado. user_id=%s, empregado_pk=%s, erros=%s", request.user.id, pk, form.errors)
-        messages.error(request, "Erro ao atualizar empregado. Verifique os dados.")
-    else:
-        form = EmpregadoUpdateForm(instance=empregado, empresa=empresa)
-
+        if resultado.get("erro_tecnico") is not None:
+            logger.exception(
+                "Erro técnico ao atualizar empregado. user_id=%s, empregado_pk=%s, erro=%s",
+                request.user.id,
+                pk,
+                resultado["erro_tecnico"],
+            )
+            messages.error(request, "Erro ao atualizar empregado. Verifique os dados.")
+        else:
+            logger.warning(
+                "Erro ao atualizar empregado. user_id=%s, empregado_pk=%s, erros=%s",
+                request.user.id,
+                pk,
+                resultado.get("erros_form"),
+            )
+            messages.error(request, resultado["mensagem_erro"])
     return render(request, "projetos/empregado_form.html", {
         "form": form,
         "titulo": "Editar Empregado",
@@ -443,17 +458,19 @@ def empregado_adicionar_projeto(request, pk):
 
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        form = EmpregadoProjetoForm(request.POST, empresa=empresa, empregado=empregado)
-        ligacao, erro = _processar_form_servico(
-            form=form,
-            service_fn=processar_guardar_ligacao_projeto_form,
-            service_kwargs={
-                "empregado": empregado,
-                "empresa": empresa,
-            },
-        )
-        if erro is None:
+    fluxo = processar_fluxo_ligacao_projeto_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpregadoProjetoForm,
+        empresa=empresa,
+        empregado=empregado,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            ligacao = resultado["ligacao"]
             logger.info(
                 "Projeto associado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
                 request.user.id,
@@ -463,7 +480,7 @@ def empregado_adicionar_projeto(request, pk):
             )
             messages.success(request, "Projeto associado ao empregado com sucesso.")
             return redirect(empregado)
-        if erro == "validacao":
+        if resultado["erro"] == "validacao":
             logger.warning(
                 "Tentativa inválida em empregado_adicionar_projeto. user_id=%s, empregado_id=%s",
                 request.user.id,
@@ -474,12 +491,9 @@ def empregado_adicionar_projeto(request, pk):
                 "Erro ao associar projeto ao empregado. user_id=%s, empregado_pk=%s, erros=%s",
                 request.user.id,
                 pk,
-                form.errors,
+                resultado.get("erros_form"),
             )
             messages.error(request, "Erro ao associar projeto. Verifique os dados.")
-    else:
-        form = EmpregadoProjetoForm(empresa=empresa, empregado=empregado)
-
     return render(request, "projetos/empregado_projeto_form.html", {
         "form": form,
         "empregado": empregado,
@@ -506,23 +520,20 @@ def empregado_editar_projeto(request, pk, ligacao_id):
     empregado = obter_empregado_admin_por_pk(pk, empresa)
     ligacao = obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa)
 
-    if request.method == "POST":
-        form = EmpregadoProjetoForm(
-            request.POST,
-            instance=ligacao,
-            empresa=empresa,
-            empregado=empregado,
-        )
-        nova_ligacao, erro = _processar_form_servico(
-            form=form,
-            service_fn=processar_guardar_ligacao_projeto_form,
-            service_kwargs={
-                "empregado": empregado,
-                "empresa": empresa,
-                "ligacao": ligacao,
-            },
-        )
-        if erro is None:
+    fluxo = processar_fluxo_ligacao_projeto_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpregadoProjetoForm,
+        empresa=empresa,
+        empregado=empregado,
+        ligacao=ligacao,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            nova_ligacao = resultado["ligacao"]
             logger.info(
                 "Ligação projeto/empregado atualizada com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
                 request.user.id,
@@ -532,7 +543,7 @@ def empregado_editar_projeto(request, pk, ligacao_id):
             )
             messages.success(request, "Ligação projeto/empregado atualizada com sucesso.")
             return redirect(empregado)
-        if erro == "validacao":
+        if resultado["erro"] == "validacao":
             logger.warning(
                 "Tentativa inválida em empregado_editar_projeto. user_id=%s, empregado_id=%s",
                 request.user.id,
@@ -544,16 +555,9 @@ def empregado_editar_projeto(request, pk, ligacao_id):
                 request.user.id,
                 pk,
                 ligacao_id,
-                form.errors,
+                resultado.get("erros_form"),
             )
             messages.error(request, "Erro ao atualizar ligação. Verifique os dados.")
-    else:
-        form = EmpregadoProjetoForm(
-            instance=ligacao,
-            empresa=empresa,
-            empregado=empregado,
-        )
-
     return render(request, "projetos/empregado_projeto_form.html", {
         "form": form,
         "empregado": empregado,
@@ -581,7 +585,7 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
     ligacao = obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa)
 
     if request.method == "POST":
-        terminar_ligacao_projeto_empregado(ligacao, empresa=empresa)
+        processar_acao_terminar_ligacao_projeto(ligacao=ligacao, empresa=empresa)
         logger.info(
             "Projeto encerrado para empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
             request.user.id,
@@ -614,17 +618,19 @@ def empregado_adicionar_ficheiro(request, pk):
 
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        form = EmpregadoFicheiroForm(request.POST, request.FILES)
-        ficheiro, erro = _processar_form_servico(
-            form=form,
-            service_fn=processar_guardar_ficheiro_empregado_form,
-            service_kwargs={
-                "empregado": empregado,
-                "empresa": empresa,
-            },
-        )
-        if erro is None:
+    fluxo = processar_fluxo_ficheiro_empregado_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=EmpregadoFicheiroForm,
+        empregado=empregado,
+        empresa=empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            ficheiro = resultado["ficheiro"]
             logger.info(
                 "Ficheiro adicionado ao empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
                 request.user.id,
@@ -639,11 +645,9 @@ def empregado_adicionar_ficheiro(request, pk):
                 "Erro ao adicionar ficheiro ao empregado. user_id=%s, empregado_pk=%s, erros=%s",
                 request.user.id,
                 pk,
-                form.errors,
+                resultado.get("erros_form"),
             )
             messages.error(request, "Erro ao adicionar ficheiro. Verifique os dados.")
-    else:
-        form = EmpregadoFicheiroForm()
 
     return render(request, "projetos/empregado_ficheiro_form.html", {
         "form": form,
@@ -672,7 +676,8 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
     ficheiro = obter_ficheiro_empregado_admin(ficheiro_id, empregado, empresa)
 
     if request.method == "POST":
-        ficheiro_id_removido = remover_ficheiro_empregado(ficheiro=ficheiro)
+        resultado = processar_acao_remover_ficheiro_empregado(ficheiro=ficheiro)
+        ficheiro_id_removido = resultado["ficheiro_id"]
         logger.info(
             "Ficheiro removido do empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
             request.user.id,
@@ -738,7 +743,7 @@ def empregado_aprovar(request, pk):
             return render(request, "projetos/empregado_aprovar_confirm.html", {"empregado": empregado})
         return bloqueio_post
 
-    processar_aprovacao_empregado(empregado=empregado, empresa=empresa)
+    processar_acao_pendente_empregado(acao="aprovar", empregado=empregado, empresa=empresa)
     logger.info(
         "Empregado aprovado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
         request.user.id,
@@ -769,7 +774,7 @@ def empregado_rejeitar(request, pk):
     if bloqueio_post:
         return bloqueio_post
 
-    resultado = processar_rejeicao_empregado_pendente(empregado=empregado, empresa=empresa)
+    resultado = processar_acao_pendente_empregado(acao="rejeitar", empregado=empregado, empresa=empresa)["resultado"]
     logger.info(
         "Empregado pendente rejeitado/removido com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, empregado_nome='%s'",
         request.user.id,

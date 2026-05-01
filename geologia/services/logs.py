@@ -78,3 +78,50 @@ def processar_anexo_log_create(*, request_post, request_files, log):
         anexo = guardar_anexo_log_form(form=form, log=log)
         return {"ok": True, "form": form, "anexo": anexo}
     return {"ok": False, "form": form, "anexo": None}
+
+
+def processar_fluxo_log_create(*, request_method, request_post, request_files, furo, empresa):
+    if request_method == "POST":
+        resultado = processar_log_create(
+            request_post=request_post,
+            request_files=request_files,
+            furo=furo,
+            empresa=empresa,
+        )
+        return {"form": resultado["form"], "resultado": resultado}
+
+    return {
+        "form": construir_form_log_create(furo=furo, empresa=empresa),
+        "resultado": None,
+    }
+
+
+def processar_fluxo_log_update(*, request_method, request_post, request_files, log, empresa):
+    if request_method == "POST":
+        resultado = processar_log_update(
+            request_post=request_post,
+            request_files=request_files,
+            log=log,
+            empresa=empresa,
+        )
+        return {"form": resultado["form"], "resultado": resultado}
+
+    return {
+        "form": construir_form_log_update(log=log, empresa=empresa),
+        "resultado": None,
+    }
+
+
+def processar_fluxo_anexo_log_create(*, request_method, request_post, request_files, log):
+    if request_method == "POST":
+        resultado = processar_anexo_log_create(
+            request_post=request_post,
+            request_files=request_files,
+            log=log,
+        )
+        return {"form": resultado["form"], "resultado": resultado}
+
+    return {
+        "form": construir_form_anexo_log(),
+        "resultado": None,
+    }

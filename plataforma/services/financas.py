@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.utils import timezone
 
-from plataforma.forms import SaidaValorForm
+from plataforma.forms import ConfiguracaoPaypalForm, SaidaValorForm
 from plataforma.models import MovimentoFinanceiroPlataforma
 from plataforma.selectors.financas import (
     obter_configuracao_paypal_principal,
@@ -18,6 +18,49 @@ def guardar_movimento_saida(form):
 
 def guardar_configuracao_paypal(form):
     return form.save()
+
+
+def construir_form_configuracao_paypal(*, post_data=None, configuracao=None):
+    if post_data is not None:
+        return ConfiguracaoPaypalForm(post_data, instance=configuracao)
+    return ConfiguracaoPaypalForm(instance=configuracao)
+
+
+def processar_submissao_configuracao_paypal(*, post_data, configuracao=None):
+    form = construir_form_configuracao_paypal(
+        post_data=post_data,
+        configuracao=configuracao,
+    )
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "form": form,
+            "mensagem": "Erro ao guardar configuração PayPal.",
+        }
+
+    guardar_configuracao_paypal(form)
+    return {
+        "ok": True,
+        "form": form,
+        "mensagem": "Configuração PayPal atualizada com sucesso.",
+    }
+
+
+def processar_fluxo_configuracao_paypal(*, method, post_data, configuracao=None):
+    if method == "POST":
+        resultado = processar_submissao_configuracao_paypal(
+            post_data=post_data,
+            configuracao=configuracao,
+        )
+        return {
+            "form": resultado["form"],
+            "resultado": resultado,
+        }
+
+    return {
+        "form": construir_form_configuracao_paypal(configuracao=configuracao),
+        "resultado": None,
+    }
 
 
 def marcar_pagamento_como_pago(pagamento, *, referencia_externa=""):
@@ -154,6 +197,23 @@ def resolver_resultado_retorno_paypal(resultado):
     return {"nivel": "warning", "mensagem": "O pagamento PayPal ainda não ficou concluído."}
 
 
+def processar_fluxo_checkout_paypal_pagamento(*, pagamento_pk, return_url, cancel_url):
+    resultado_checkout = iniciar_checkout_paypal_pagamento(
+        pagamento_pk=pagamento_pk,
+        return_url=return_url,
+        cancel_url=cancel_url,
+    )
+    return resolver_resultado_checkout_paypal(resultado_checkout)
+
+
+def processar_fluxo_retorno_paypal(*, pagamento_pk, token):
+    resultado_confirmacao = confirmar_checkout_paypal_pagamento(
+        pagamento_pk=pagamento_pk,
+        token=token,
+    )
+    return resolver_resultado_retorno_paypal(resultado_confirmacao)
+
+
 def obter_movimento_edicao_saida(*, edicao_id):
     valor = (edicao_id or "").strip()
     if not valor:
@@ -184,4 +244,20 @@ def processar_submissao_saida_financeira(*, post_data):
         "form": form,
         "movimento_edicao": movimento_edicao,
         "mensagem": "Despesa atualizada com sucesso." if movimento_edicao else "Despesa registada com sucesso.",
+    }
+
+
+def processar_fluxo_saida_financeira(*, method, post_data, movimento_edicao=None):
+    if method == "POST":
+        resultado = processar_submissao_saida_financeira(post_data=post_data)
+        return {
+            "form": resultado["form"],
+            "movimento_edicao": resultado["movimento_edicao"],
+            "resultado": resultado,
+        }
+
+    return {
+        "form": construir_form_saida_valor(movimento_edicao=movimento_edicao),
+        "movimento_edicao": movimento_edicao,
+        "resultado": None,
     }

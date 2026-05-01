@@ -21,7 +21,12 @@ from projetos.selectors.maquina_avarias import (
     obter_avaria_responsavel,
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto, obter_empregado_autenticado_contexto
-from projetos.services.maquina_avarias import atualizar_avaria, criar_avaria_por_admin, criar_avaria_por_empregado
+from projetos.services.maquina_avarias import (
+    criar_avaria_por_admin,
+    criar_avaria_por_empregado,
+    processar_fluxo_create_avaria_form,
+    processar_fluxo_update_avaria_form,
+)
 
 logger = logging.getLogger("core")
 
@@ -57,26 +62,6 @@ def _render_form_avaria(request, form, titulo, cancel_url):
     )
 
 
-def _processar_create_avaria(
-    *,
-    request,
-    form,
-    on_success,
-    sucesso_msg,
-    erro_msg,
-):
-    if not form.is_valid():
-        messages.error(request, erro_msg)
-        return None
-
-    maquina = form.cleaned_data["maquina"]
-    furo = form.cleaned_data.get("furo")
-    descricao = form.cleaned_data.get("descricao")
-    on_success(maquina=maquina, furo=furo, descricao=descricao)
-    messages.success(request, sucesso_msg)
-    return maquina
-
-
 @login_required
 @empregado_required
 def avaria_maquina_create_empregado(request):
@@ -84,19 +69,21 @@ def avaria_maquina_create_empregado(request):
     if resposta_erro:
         return resposta_erro
 
-    if request.method == "POST":
-        form = MaquinaAvariaEmpregadoForm(request.POST, empresa_id=empregado.empresa_id)
-        maquina = _processar_create_avaria(
-            request=request,
-            form=form,
-            on_success=lambda **kwargs: criar_avaria_por_empregado(empregado=empregado, **kwargs),
-            sucesso_msg="Avaria registada com sucesso. A empresa foi notificada no painel de avarias.",
-            erro_msg="Não foi possível registar a avaria. Verifica os dados.",
-        )
+    fluxo = processar_fluxo_create_avaria_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaAvariaEmpregadoForm,
+        empresa_id=empregado.empresa_id,
+        on_success=lambda **kwargs: criar_avaria_por_empregado(empregado=empregado, **kwargs),
+    )
+    form = fluxo["form"]
+    if fluxo["ok"] is True:
+        maquina = fluxo["maquina"]
+        messages.success(request, "Avaria registada com sucesso. A empresa foi notificada no painel de avarias.")
         if maquina:
             return redirect("projetos:area_empregado")
-    else:
-        form = MaquinaAvariaEmpregadoForm(empresa_id=empregado.empresa_id)
+    elif fluxo["ok"] is False:
+        messages.error(request, "Não foi possível registar a avaria. Verifica os dados.")
 
     return _render_form_avaria(
         request,
@@ -129,19 +116,23 @@ def avaria_maquina_create_admin(request):
             raise Http404("Furo não encontrado para esta empresa.")
         initial["furo"] = furo
 
-    if request.method == "POST":
-        form = MaquinaAvariaEmpregadoForm(request.POST, empresa_id=empresa.id)
-        maquina = _processar_create_avaria(
-            request=request,
-            form=form,
-            on_success=lambda **kwargs: criar_avaria_por_admin(empresa=empresa, **kwargs),
-            sucesso_msg="Avaria registada com sucesso.",
-            erro_msg="Não foi possível registar a avaria. Verifica os dados.",
-        )
+    fluxo = processar_fluxo_create_avaria_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaAvariaEmpregadoForm,
+        empresa_id=empresa.id,
+        on_success=lambda **kwargs: criar_avaria_por_admin(empresa=empresa, **kwargs),
+    )
+    form = fluxo["form"]
+    if request.method != "POST":
+        form = MaquinaAvariaEmpregadoForm(empresa_id=empresa.id, initial=initial)
+    if fluxo["ok"] is True:
+        maquina = fluxo["maquina"]
+        messages.success(request, "Avaria registada com sucesso.")
         if maquina:
             return redirect("projetos:maquina_detail", maquina_id=maquina.id)
-    else:
-        form = MaquinaAvariaEmpregadoForm(empresa_id=empresa.id, initial=initial)
+    elif fluxo["ok"] is False:
+        messages.error(request, "Não foi possível registar a avaria. Verifica os dados.")
 
     return _render_form_avaria(
         request,
@@ -175,21 +166,21 @@ def avaria_maquina_update_admin(request, pk):
 
     avaria = obter_avaria_empresa(pk, empresa.id)
 
-    if request.method == "POST":
-        form = MaquinaAvariaAdminUpdateForm(request.POST, instance=avaria, empresa_id=empresa.id)
-        if form.is_valid():
-            atualizar_avaria(
-                avaria=avaria,
-                status=form.cleaned_data["status"],
-                solucao=form.cleaned_data.get("solucao", ""),
-                responsavel_empregado=form.cleaned_data.get("responsavel_empregado"),
-                ator_nome=request.user.get_username() or "Administrador",
-            )
-            messages.success(request, "Avaria atualizada com sucesso.")
-            return redirect("projetos:avaria_maquina_list_admin")
+    fluxo = processar_fluxo_update_avaria_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaAvariaAdminUpdateForm,
+        avaria=avaria,
+        ator_nome=request.user.get_username() or "Administrador",
+        responsavel_empregado=lambda form: form.cleaned_data.get("responsavel_empregado"),
+        empresa_id=empresa.id,
+    )
+    form = fluxo["form"]
+    if fluxo["ok"] is True:
+        messages.success(request, "Avaria atualizada com sucesso.")
+        return redirect("projetos:avaria_maquina_list_admin")
+    if fluxo["ok"] is False:
         messages.error(request, "Não foi possível atualizar a avaria.")
-    else:
-        form = MaquinaAvariaAdminUpdateForm(instance=avaria, empresa_id=empresa.id)
 
     return render(
         request,
@@ -221,21 +212,20 @@ def avaria_maquina_update_empregado(request, pk):
         return resposta_erro
 
     avaria = obter_avaria_responsavel(pk, empregado.id, empregado.empresa_id)
-    if request.method == "POST":
-        form = MaquinaAvariaEmpregadoUpdateForm(request.POST, instance=avaria)
-        if form.is_valid():
-            atualizar_avaria(
-                avaria=avaria,
-                status=form.cleaned_data["status"],
-                solucao=form.cleaned_data.get("solucao", ""),
-                responsavel_empregado=avaria.responsavel_empregado,
-                ator_nome=empregado.nome or request.user.get_username(),
-            )
-            messages.success(request, "Estado da avaria atualizado com sucesso.")
-            return redirect("projetos:avaria_maquina_minhas_empregado")
+    fluxo = processar_fluxo_update_avaria_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaAvariaEmpregadoUpdateForm,
+        avaria=avaria,
+        ator_nome=empregado.nome or request.user.get_username(),
+        responsavel_empregado=lambda _form: avaria.responsavel_empregado,
+    )
+    form = fluxo["form"]
+    if fluxo["ok"] is True:
+        messages.success(request, "Estado da avaria atualizado com sucesso.")
+        return redirect("projetos:avaria_maquina_minhas_empregado")
+    if fluxo["ok"] is False:
         messages.error(request, "Não foi possível atualizar a avaria.")
-    else:
-        form = MaquinaAvariaEmpregadoUpdateForm(instance=avaria)
 
     return render(
         request,

@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -76,27 +74,17 @@ def atualizar_renovacao_subscricao_empresa(request, pk):
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
-
-    nova_data_raw = (request.POST.get("proxima_renovacao") or "").strip()
-    if not nova_data_raw:
-        messages.error(request, "Indique uma data para a próxima renovação.")
-        return redirect("plataforma:empresa_detail", pk=empresa.pk)
-
-    try:
-        nova_data = date.fromisoformat(nova_data_raw)
-    except ValueError:
-        messages.error(request, "A data indicada para a renovação é inválida.")
-        return redirect("plataforma:empresa_detail", pk=empresa.pk)
-
-    try:
-        empresas_service.atualizar_renovacao_subscricao(subscricao_atual, nova_data)
-    except Exception as exc:
-        messages.error(request, str(exc))
+    resultado = empresas_service.processar_submissao_renovacao_subscricao(
+        subscricao_atual=subscricao_atual,
+        nova_data_raw=request.POST.get("proxima_renovacao"),
+    )
+    if not resultado.ok:
+        messages.error(request, resultado.erro)
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
     messages.success(
         request,
-        f"Próxima renovação da empresa '{empresa.nome}' atualizada para {nova_data.strftime('%d/%m/%Y')}.",
+        f"Próxima renovação da empresa '{empresa.nome}' atualizada para {resultado.nova_data.strftime('%d/%m/%Y')}.",
     )
     return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
@@ -111,17 +99,13 @@ def alterar_plano_empresa(request, pk):
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
 
     if request.method == "POST":
-        plano_id = request.POST.get("plano")
-        ciclo_subscricao = (request.POST.get("ciclo_subscricao") or "1").strip()
-        estado_empresa = (request.POST.get("estado_empresa") or empresa.status or "teste").strip()
-        novo_plano = obter_plano_ativo(plano_id)
-
-        resultado = empresas_service.alterar_plano_empresa(
+        resultado = empresas_service.processar_submissao_alteracao_plano_empresa(
             empresa=empresa,
             subscricao_atual=subscricao_atual,
-            novo_plano=novo_plano,
-            ciclo_subscricao=ciclo_subscricao,
-            estado_empresa=estado_empresa,
+            plano_id=request.POST.get("plano"),
+            ciclo_subscricao=(request.POST.get("ciclo_subscricao") or "1").strip(),
+            estado_empresa=(request.POST.get("estado_empresa") or empresa.status or "teste").strip(),
+            obter_plano_ativo_fn=obter_plano_ativo,
         )
         if not resultado.ok:
             messages.error(request, resultado.erro)
@@ -129,7 +113,7 @@ def alterar_plano_empresa(request, pk):
 
         messages.success(
             request,
-            f"Plano da empresa '{empresa.nome}' alterado para '{novo_plano.nome}' com período de {ciclo_subscricao} mês(es).",
+            f"Plano da empresa '{empresa.nome}' alterado para '{resultado.plano.nome}' com período de {resultado.ciclo_subscricao} mês(es).",
         )
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 

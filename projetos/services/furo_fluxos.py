@@ -8,6 +8,8 @@ from projetos.selectors.furos import (
     obter_furo,
     obter_furo_opcional,
     obter_lista_furos,
+    obter_medicoes_furo_para_empregado,
+    obter_registos_furo_para_empregado,
 )
 from projetos.services.furo_memoria import obter_memoria_zona_furos, parse_float_or_none
 from projetos.services.furo_3d_io import guardar_importacao_externa_3d
@@ -62,6 +64,57 @@ def processar_submissao_furo_create(*, request_post, empresa_id=None, empregado_
     }
 
 
+def processar_fluxo_furo_create(*, request_post, empresa_id=None, empregado_contexto=None):
+    resultado = processar_submissao_furo_create(
+        request_post=request_post,
+        empresa_id=empresa_id,
+        empregado_contexto=empregado_contexto,
+    )
+    if resultado["ok"]:
+        return {
+            **resultado,
+            "mensagem_sucesso": "Furo criado com sucesso.",
+            "mensagem_erro": None,
+            "erros_form": None,
+        }
+    return {
+        **resultado,
+        "mensagem_sucesso": None,
+        "mensagem_erro": "Erro ao criar o furo. Verifique os dados.",
+        "erros_form": resultado["form"].errors,
+    }
+
+
+def processar_fluxo_form_furo_create(
+    *,
+    request_method,
+    request_post,
+    empresa_id=None,
+    empregado_contexto=None,
+):
+    if request_method == "POST":
+        resultado = processar_fluxo_furo_create(
+            request_post=request_post,
+            empresa_id=empresa_id,
+            empregado_contexto=empregado_contexto,
+        )
+        return {
+            "form": resultado["form"],
+            "resultado": resultado,
+            "memoria_zona_alerta": resultado["memoria_zona_alerta"],
+        }
+
+    form = preparar_form_furo_create(
+        empresa_id=empresa_id,
+        empregado_contexto=empregado_contexto,
+    )
+    return {
+        "form": form,
+        "resultado": None,
+        "memoria_zona_alerta": [],
+    }
+
+
 def listar_furos_para_utilizador(*, empresa_id=None, empregado_contexto=None, is_admin=False):
     if is_admin:
         return obter_lista_furos(empresa=empresa_id)
@@ -81,6 +134,58 @@ def processar_submissao_furo_update(*, request_post, pk, empresa_id=None):
         furo = atualizar_furo(form, empresa=empresa_id)
         return {"ok": True, "furo": furo, "form": form}
     return {"ok": False, "furo": furo, "form": form}
+
+
+def processar_fluxo_furo_update(*, request_post, pk, empresa_id=None):
+    resultado = processar_submissao_furo_update(
+        request_post=request_post,
+        pk=pk,
+        empresa_id=empresa_id,
+    )
+    if resultado["ok"]:
+        return {
+            **resultado,
+            "mensagem_sucesso": "Furo atualizado com sucesso.",
+            "mensagem_erro": None,
+            "erros_form": None,
+        }
+    return {
+        **resultado,
+        "mensagem_sucesso": None,
+        "mensagem_erro": "Erro ao atualizar o furo. Verifique os dados.",
+        "erros_form": resultado["form"].errors,
+    }
+
+
+def processar_fluxo_form_furo_update(
+    *,
+    request_method,
+    request_post,
+    pk,
+    empresa_id=None,
+):
+    if request_method == "POST":
+        resultado = processar_fluxo_furo_update(
+            request_post=request_post,
+            pk=pk,
+            empresa_id=empresa_id,
+        )
+        return {
+            "form": resultado["form"],
+            "furo": resultado["furo"],
+            "resultado": resultado,
+        }
+
+    furo = obter_furo(pk, empresa=empresa_id)
+    form = preparar_form_furo_update(
+        furo=furo,
+        empresa_id=empresa_id,
+    )
+    return {
+        "form": form,
+        "furo": furo,
+        "resultado": None,
+    }
 
 
 def construir_contexto_furo_detail(*, pk, empresa_id=None):
@@ -106,6 +211,32 @@ def construir_contexto_furo_detail(*, pk, empresa_id=None):
     )
     context["page_title"] = f"Furo · {furo.nome}"
     return context
+
+
+def construir_contexto_furo_detail_empregado(*, empregado, furo):
+    registos_furo = obter_registos_furo_para_empregado(empregado, furo)
+    medicoes_furo = obter_medicoes_furo_para_empregado(empregado, furo)
+
+    registos_lista = list(registos_furo)
+    datas_registo = [
+        registo.data or (registo.criado_em.date() if registo.criado_em else None)
+        for registo in registos_lista
+    ]
+    datas_registo = [d for d in datas_registo if d is not None]
+
+    data_inicio_real = min(datas_registo) if datas_registo else (furo.data_inicio_operacao or None)
+    dias_com_registo = len(set(datas_registo))
+    total_metros_registos = round(sum(float(r.metros_furados or 0) for r in registos_lista), 2)
+    media_metros_por_dia = round(total_metros_registos / dias_com_registo, 2) if dias_com_registo else 0.0
+
+    return {
+        "registos_furo": registos_furo,
+        "medicoes_furo": medicoes_furo,
+        "data_inicio_real_furo": data_inicio_real,
+        "dias_com_registo_furo": dias_com_registo,
+        "total_metros_registos": total_metros_registos,
+        "media_metros_por_dia_furo": media_metros_por_dia,
+    }
 
 
 def resolver_furo_para_3d(

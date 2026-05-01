@@ -18,6 +18,71 @@ ESTADOS_VALIDOS_MAQUINA = {
 }
 
 
+def processar_submissao_form_maquina(
+    *,
+    form,
+    empresa=None,
+    acao,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "maquina": None,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+            "erros_form": form.errors,
+        }
+
+    if acao == "create":
+        maquina = criar_maquina(form=form, empresa=empresa)
+    elif acao == "update":
+        maquina = atualizar_maquina(form=form, empresa=empresa)
+    else:
+        raise ValidationError("Ação inválida para submissão de máquina.")
+
+    return {
+        "ok": True,
+        "maquina": maquina,
+        "mensagem_sucesso": sucesso_msg,
+        "mensagem_erro": None,
+        "erros_form": None,
+    }
+
+
+def processar_fluxo_form_maquina(
+    *,
+    method,
+    post_data,
+    form_class,
+    empresa,
+    acao,
+    sucesso_msg,
+    erro_msg,
+    instance=None,
+):
+    if method == "POST":
+        form = form_class(post_data, instance=instance, empresa=empresa)
+        resultado = processar_submissao_form_maquina(
+            form=form,
+            empresa=empresa,
+            acao=acao,
+            sucesso_msg=sucesso_msg,
+            erro_msg=erro_msg,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    form = form_class(instance=instance, empresa=empresa)
+    return {
+        "form": form,
+        "resultado": None,
+    }
+
+
 
 def _resolver_empresa_id(empresa):
     return getattr(empresa, "pk", empresa)

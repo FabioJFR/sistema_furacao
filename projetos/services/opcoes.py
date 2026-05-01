@@ -85,3 +85,85 @@ def guardar_definicoes_financeiras_admin(*, financeiro_form):
     empresa = financeiro_form.save()
     empresa.recalcular_indicadores_financeiros()
     return empresa
+
+
+def processar_submissao_preferencias_admin_form(*, form, user, empresa):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "preferencias": None,
+            "erros_form": form.errors,
+        }
+    preferencias = guardar_preferencias_admin(
+        form=form,
+        user=user,
+        empresa=empresa,
+    )
+    return {
+        "ok": True,
+        "preferencias": preferencias,
+        "erros_form": None,
+    }
+
+
+def processar_fluxo_preferencias_admin_form(
+    *,
+    method,
+    post_data,
+    form_class,
+    preferencias,
+    user,
+    empresa,
+):
+    if method == "POST":
+        form = form_class(post_data, instance=preferencias, user=user, prefix="prefs")
+        resultado = processar_submissao_preferencias_admin_form(
+            form=form,
+            user=user,
+            empresa=empresa,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(instance=preferencias, user=user, prefix="prefs"),
+        "resultado": None,
+    }
+
+
+def processar_submissao_financeiro_admin_form(*, financeiro_form):
+    if not financeiro_form.is_valid():
+        return {
+            "ok": False,
+            "empresa": None,
+            "erros_form": financeiro_form.errors,
+        }
+    empresa = guardar_definicoes_financeiras_admin(financeiro_form=financeiro_form)
+    return {
+        "ok": True,
+        "empresa": empresa,
+        "erros_form": None,
+    }
+
+
+def processar_fluxo_financeiro_admin_form(
+    *,
+    method,
+    post_data,
+    form_class,
+    empresa,
+):
+    if method == "POST":
+        financeiro_form = form_class(post_data, instance=empresa, prefix="financeiro")
+        resultado = processar_submissao_financeiro_admin_form(financeiro_form=financeiro_form)
+        return {
+            "financeiro_form": financeiro_form,
+            "resultado": resultado,
+        }
+
+    return {
+        "financeiro_form": form_class(instance=empresa, prefix="financeiro"),
+        "resultado": None,
+    }

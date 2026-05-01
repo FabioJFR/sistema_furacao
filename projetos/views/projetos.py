@@ -20,7 +20,8 @@ from projetos.selectors.projetos import (
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.projetos import (
     apagar_projeto,
-    associar_empregado_projeto,
+    processar_acao_associar_empregado_projeto,
+    processar_submissao_form_projeto,
     atualizar_projeto,
     criar_projeto,
 )
@@ -51,28 +52,6 @@ def _obter_empresa_admin_projetos(request):
 
 def _empresa_id(empresa):
     return getattr(empresa, "pk", empresa) if empresa is not None else None
-
-
-def _processar_form_projeto(
-    *,
-    request,
-    form,
-    empresa,
-    on_success,
-    sucesso_msg,
-    erro_msg,
-    success_log,
-    error_log,
-):
-    if not form.is_valid():
-        logger.warning(error_log, request.user.id, form.errors)
-        messages.error(request, erro_msg)
-        return None
-
-    projeto = on_success(form=form, empresa=_empresa_id(empresa))
-    logger.info(success_log, request.user.id, empresa.id, getattr(projeto, "pk", None))
-    messages.success(request, sucesso_msg)
-    return projeto
 
 
 # ----------------- Globo ------------------------------ #
@@ -161,18 +140,29 @@ def projeto_update(request, pk):
     form = ProjetoForm(request.POST or None, instance=projeto, empresa=empresa_id)
 
     if request.method == "POST":
-        projeto = _processar_form_projeto(
-            request=request,
+        resultado = processar_submissao_form_projeto(
             form=form,
             empresa=empresa,
             on_success=atualizar_projeto,
             sucesso_msg="Projeto atualizado com sucesso.",
             erro_msg="Erro ao atualizar o projeto. Verifique os dados.",
-            success_log="Projeto atualizado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
-            error_log="Erro ao atualizar projeto. user_id=%s, erros=%s",
         )
-        if projeto:
+        if resultado["ok"]:
+            projeto = resultado["projeto"]
+            logger.info(
+                "Projeto atualizado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
+                request.user.id,
+                empresa.id,
+                getattr(projeto, "pk", None),
+            )
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect(projeto)
+        logger.warning(
+            "Erro ao atualizar projeto. user_id=%s, erros=%s",
+            request.user.id,
+            resultado["erros"],
+        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(request, "projetos/projeto_editar.html", {
         "form": form,
@@ -197,18 +187,29 @@ def projeto_create(request):
 
     if request.method == "POST":
         form = ProjetoForm(request.POST, empresa=empresa_id)
-        projeto = _processar_form_projeto(
-            request=request,
+        resultado = processar_submissao_form_projeto(
             form=form,
             empresa=empresa,
             on_success=criar_projeto,
             sucesso_msg="Projeto criado com sucesso.",
             erro_msg="Erro ao criar o projeto. Verifique os dados.",
-            success_log="Projeto criado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
-            error_log="Erro ao criar projeto. user_id=%s, erros=%s",
         )
-        if projeto:
+        if resultado["ok"]:
+            projeto = resultado["projeto"]
+            logger.info(
+                "Projeto criado com sucesso. user_id=%s, empresa_id=%s, projeto_id=%s",
+                request.user.id,
+                empresa.id,
+                getattr(projeto, "pk", None),
+            )
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect("projetos:projeto_list")
+        logger.warning(
+            "Erro ao criar projeto. user_id=%s, erros=%s",
+            request.user.id,
+            resultado["erros"],
+        )
+        messages.error(request, resultado["mensagem_erro"])
     else:
         form = ProjetoForm(empresa=empresa_id)
 
@@ -312,20 +313,17 @@ def projeto_adicionar_empregado(request, pk):
         return redirect(projeto)
 
     form = ProjetoEmpregadoForm(request.POST, empresa=empresa, projeto=projeto)
-    if form.is_valid():
-        empregado = form.cleaned_data["empregado"]
-        _, criado = associar_empregado_projeto(
-            empregado=empregado,
-            projeto=projeto,
-            empresa=empresa,
-            data_inicio=form.cleaned_data.get("data_inicio"),
-        )
-        if not criado:
-            messages.warning(request, "Este empregado já está associado a este projeto.")
-        else:
-            messages.success(request, "Empregado associado ao projeto com sucesso.")
-    else:
-        messages.error(request, "Erro ao associar empregado ao projeto. Verifique os dados.")
+    resultado = processar_acao_associar_empregado_projeto(
+        form=form,
+        projeto=projeto,
+        empresa=empresa,
+    )
+    if resultado["mensagem_sucesso"]:
+        messages.success(request, resultado["mensagem_sucesso"])
+    if resultado["mensagem_aviso"]:
+        messages.warning(request, resultado["mensagem_aviso"])
+    if resultado["mensagem_erro"]:
+        messages.error(request, resultado["mensagem_erro"])
 
     return redirect(projeto)
 

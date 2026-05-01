@@ -14,8 +14,7 @@ from projetos.selectors.maquinas import (
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.maquinas import (
     apagar_maquina,
-    atualizar_maquina,
-    criar_maquina,
+    processar_fluxo_form_maquina,
 )
 
 logger = logging.getLogger("core")
@@ -47,28 +46,6 @@ def _render_maquina_form(request, form, titulo, maquina=None):
     if maquina is not None:
         context["maquina"] = maquina
     return render(request, "projetos/maquina_form.html", context)
-
-
-def _processar_form_maquina(
-    *,
-    request,
-    form,
-    empresa,
-    on_success,
-    sucesso_msg,
-    erro_msg,
-    log_sucesso,
-    log_erro,
-):
-    if not form.is_valid():
-        logger.warning(log_erro, request.user.id, form.errors)
-        messages.error(request, erro_msg)
-        return None
-
-    maquina = on_success(form, empresa=empresa)
-    logger.info(log_sucesso, request.user.id, empresa.id, maquina.id)
-    messages.success(request, sucesso_msg)
-    return maquina
 
 
 # Multiempresa: o administrador só pode listar e gerir máquinas da sua própria empresa.
@@ -135,22 +112,35 @@ def maquina_create(request):
         logger.warning("Acesso bloqueado na view maquina_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = MaquinaForm(request.POST, empresa=empresa)
-        maquina = _processar_form_maquina(
-            request=request,
-            form=form,
-            empresa=empresa,
-            on_success=criar_maquina,
-            sucesso_msg="Máquina criada com sucesso.",
-            erro_msg="Erro ao criar a máquina. Verifique os dados.",
-            log_sucesso="Máquina criada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
-            log_erro="Erro ao criar máquina. user_id=%s, erros=%s",
-        )
-        if maquina:
+    fluxo = processar_fluxo_form_maquina(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaForm,
+        empresa=empresa,
+        acao="create",
+        sucesso_msg="Máquina criada com sucesso.",
+        erro_msg="Erro ao criar a máquina. Verifique os dados.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            maquina = resultado["maquina"]
+            logger.info(
+                "Máquina criada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
+                request.user.id,
+                empresa.id,
+                maquina.id,
+            )
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect("projetos:maquina_detail", maquina_id=maquina.id)
-    else:
-        form = MaquinaForm(empresa=empresa)
+        logger.warning(
+            "Erro ao criar máquina. user_id=%s, erros=%s",
+            request.user.id,
+            resultado.get("erros_form"),
+        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return _render_maquina_form(request, form, "Nova Máquina")
 
@@ -172,22 +162,36 @@ def maquina_update(request, maquina_id):
 
     maquina = obter_maquina(maquina_id, empresa=empresa)
 
-    if request.method == "POST":
-        form = MaquinaForm(request.POST, instance=maquina, empresa=empresa)
-        maquina_atualizada = _processar_form_maquina(
-            request=request,
-            form=form,
-            empresa=empresa,
-            on_success=atualizar_maquina,
-            sucesso_msg="Máquina atualizada com sucesso.",
-            erro_msg="Erro ao atualizar a máquina. Verifique os dados.",
-            log_sucesso="Máquina atualizada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
-            log_erro="Erro ao atualizar máquina. user_id=%s, erros=%s",
-        )
-        if maquina_atualizada:
+    fluxo = processar_fluxo_form_maquina(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaquinaForm,
+        empresa=empresa,
+        acao="update",
+        sucesso_msg="Máquina atualizada com sucesso.",
+        erro_msg="Erro ao atualizar a máquina. Verifique os dados.",
+        instance=maquina,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            maquina_atualizada = resultado["maquina"]
+            logger.info(
+                "Máquina atualizada com sucesso. user_id=%s, empresa_id=%s, maquina_id=%s",
+                request.user.id,
+                empresa.id,
+                maquina_atualizada.id,
+            )
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect("projetos:maquina_detail", maquina_id=maquina_atualizada.id)
-    else:
-        form = MaquinaForm(instance=maquina, empresa=empresa)
+        logger.warning(
+            "Erro ao atualizar máquina. user_id=%s, erros=%s",
+            request.user.id,
+            resultado.get("erros_form"),
+        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return _render_maquina_form(request, form, "Editar Máquina", maquina=maquina)
 

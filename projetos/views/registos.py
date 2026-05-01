@@ -20,10 +20,8 @@ from projetos.selectors.registos import (
     obter_registos_empregado,
 )
 from projetos.services.registos import (
-    preparar_form_registo_empregado,
-    processar_submissao_registo_admin_update,
-    processar_submissao_registo_empregado_create,
-    processar_submissao_registo_empregado_update,
+    processar_fluxo_form_registo_admin,
+    processar_fluxo_form_registo_empregado,
 )
 from projetos.services.acesso_contexto import (
     obter_empregado_autenticado_contexto,
@@ -91,69 +89,6 @@ def _render_registo_form_empregado(request, form, empregado, titulo, registo=Non
     return render(request, "projetos/registo_diario_form.html", context)
 
 
-def _processar_post_registo_empregado(
-    *,
-    request,
-    empregado,
-    form,
-    processar_fn,
-    sucesso_msg,
-    erro_msg,
-    sucesso_redirect,
-    log_sucesso,
-    log_erro,
-    log_erro_identificador,
-):
-    resultado = processar_fn(
-        form=form,
-        empregado=empregado,
-        fotos=request.FILES.getlist("fotos_amostra"),
-    )
-    if resultado["ok"]:
-        registo = resultado["registo"]
-        logger.info(log_sucesso, request.user.id, empregado.id, registo.id)
-        messages.success(request, sucesso_msg)
-        return redirect(sucesso_redirect)
-
-    logger.warning(log_erro, request.user.id, log_erro_identificador, form.errors)
-    messages.error(request, erro_msg)
-    return None
-
-
-def _processar_post_registo_admin(
-    *,
-    request,
-    empresa,
-    registo,
-    form,
-    sucesso_redirect,
-):
-    resultado = processar_submissao_registo_admin_update(
-        form=form,
-        registo=registo,
-        empresa=empresa,
-        fotos=request.FILES.getlist("fotos_amostra"),
-    )
-    if resultado["ok"]:
-        logger.info(
-            "Registo corrigido com sucesso por admin. user_id=%s, empresa_id=%s, registo_id=%s",
-            request.user.id,
-            empresa.id,
-            registo.id,
-        )
-        messages.success(request, "Registo corrigido com sucesso.")
-        return redirect(sucesso_redirect)
-
-    logger.warning(
-        "Erro ao corrigir registo por admin. user_id=%s, registo_pk=%s, erros=%s",
-        request.user.id,
-        registo.pk,
-        form.errors,
-    )
-    messages.error(request, "Erro ao corrigir o registo.")
-    return None
-
-
 @login_required
 @empregado_required
 def criar_registo_view(request):
@@ -214,33 +149,32 @@ def registo_diario_create(request):
         logger.warning("Acesso bloqueado na view registo_diario_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = preparar_form_registo_empregado(
-            form_class=RegistoDiarioEmpregadoForm,
-            request=request,
-            empregado=empregado,
+    fluxo = processar_fluxo_form_registo_empregado(
+        form_class=RegistoDiarioEmpregadoForm,
+        request=request,
+        empregado=empregado,
+        initial={"data": timezone.now().date()},
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            registo = resultado["registo"]
+            logger.info(
+                "Registo diário criado com sucesso. user_id=%s, empregado_id=%s, registo_id=%s",
+                request.user.id,
+                empregado.id,
+                registo.id,
+            )
+            messages.success(request, "Registo diário guardado com sucesso.")
+            return redirect("projetos:area_empregado")
+        logger.warning(
+            "Erro ao guardar registo diário. user_id=%s, empregado_id=%s, erros=%s",
+            request.user.id,
+            empregado.id,
+            resultado.get("erros_form"),
         )
-        resposta = _processar_post_registo_empregado(
-            request=request,
-            empregado=empregado,
-            form=form,
-            processar_fn=processar_submissao_registo_empregado_create,
-            sucesso_msg="Registo diário guardado com sucesso.",
-            erro_msg="Erro ao guardar o registo diário. Verifique os dados.",
-            sucesso_redirect="projetos:area_empregado",
-            log_sucesso="Registo diário criado com sucesso. user_id=%s, empregado_id=%s, registo_id=%s",
-            log_erro="Erro ao guardar registo diário. user_id=%s, empregado_id=%s, erros=%s",
-            log_erro_identificador=empregado.id,
-        )
-        if resposta:
-            return resposta
-    else:
-        form = preparar_form_registo_empregado(
-            form_class=RegistoDiarioEmpregadoForm,
-            request=request,
-            empregado=empregado,
-            initial={"data": timezone.now().date()},
-        )
+        messages.error(request, "Erro ao guardar o registo diário. Verifique os dados.")
 
     return _render_registo_form_empregado(request, form, empregado, "Novo Registo Diário")
 
@@ -262,37 +196,32 @@ def registo_diario_update(request, pk):
 
     registo = obter_registo_empregado(empregado, pk)
 
-    if request.method == "POST":
-        form = preparar_form_registo_empregado(
-            form_class=RegistoDiarioEmpregadoForm,
-            request=request,
-            instance=registo,
-            empregado=empregado,
+    fluxo = processar_fluxo_form_registo_empregado(
+        form_class=RegistoDiarioEmpregadoForm,
+        request=request,
+        empregado=empregado,
+        registo=registo,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            registo_atualizado = resultado["registo"]
+            logger.info(
+                "Registo diário atualizado com sucesso por empregado. user_id=%s, empregado_id=%s, registo_id=%s",
+                request.user.id,
+                empregado.id,
+                registo_atualizado.id,
+            )
+            messages.success(request, "Registo diário atualizado com sucesso.")
+            return redirect("projetos:registo_diario_list")
+        logger.warning(
+            "Erro ao atualizar registo diário por empregado. user_id=%s, registo_pk=%s, erros=%s",
+            request.user.id,
+            pk,
+            resultado.get("erros_form"),
         )
-        resposta = _processar_post_registo_empregado(
-            request=request,
-            empregado=empregado,
-            form=form,
-            processar_fn=lambda **kwargs: processar_submissao_registo_empregado_update(
-                **kwargs,
-                registo=registo,
-            ),
-            sucesso_msg="Registo diário atualizado com sucesso.",
-            erro_msg="Erro ao atualizar o registo diário.",
-            sucesso_redirect="projetos:registo_diario_list",
-            log_sucesso="Registo diário atualizado com sucesso por empregado. user_id=%s, empregado_id=%s, registo_id=%s",
-            log_erro="Erro ao atualizar registo diário por empregado. user_id=%s, registo_pk=%s, erros=%s",
-            log_erro_identificador=pk,
-        )
-        if resposta:
-            return resposta
-    else:
-        form = preparar_form_registo_empregado(
-            form_class=RegistoDiarioEmpregadoForm,
-            request=request,
-            instance=registo,
-            empregado=empregado,
-        )
+        messages.error(request, "Erro ao atualizar o registo diário.")
 
     return _render_registo_form_empregado(request, form, empregado, "Editar Registo Diário", registo=registo)
 
@@ -358,23 +287,31 @@ def registo_admin_update(request, pk):
 
     registo = obter_registo_admin(empresa, pk)
 
-    if request.method == "POST":
-        form = RegistoDiarioEmpregadoAdminForm(
-            request.POST,
-            request.FILES,
-            instance=registo,
+    fluxo = processar_fluxo_form_registo_admin(
+        form_class=RegistoDiarioEmpregadoAdminForm,
+        request=request,
+        registo=registo,
+        empresa=empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            logger.info(
+                "Registo corrigido com sucesso por admin. user_id=%s, empresa_id=%s, registo_id=%s",
+                request.user.id,
+                empresa.id,
+                registo.id,
+            )
+            messages.success(request, "Registo corrigido com sucesso.")
+            return redirect("projetos:registos_admin_list")
+        logger.warning(
+            "Erro ao corrigir registo por admin. user_id=%s, registo_pk=%s, erros=%s",
+            request.user.id,
+            registo.pk,
+            resultado.get("erros_form"),
         )
-        resposta = _processar_post_registo_admin(
-            request=request,
-            empresa=empresa,
-            registo=registo,
-            form=form,
-            sucesso_redirect="projetos:registos_admin_list",
-        )
-        if resposta:
-            return resposta
-    else:
-        form = RegistoDiarioEmpregadoAdminForm(instance=registo)
+        messages.error(request, "Erro ao corrigir o registo.")
 
     return render(
         request,

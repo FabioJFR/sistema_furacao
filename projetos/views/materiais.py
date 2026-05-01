@@ -32,12 +32,11 @@ from projetos.selectors.acesso import obter_perfil_ativo_por_user
 
 from projetos.services.stock import (
     apagar_material_admin,
-    atualizar_material_admin,
-    criar_material_admin,
+    processar_fluxo_movimento_material_form,
     processar_devolucao_material_form,
-    processar_entrada_material_form,
+    processar_fluxo_entrada_saida_material_admin,
+    processar_fluxo_material_admin_form,
     processar_levantamento_material_form,
-    processar_saida_material_form,
 )
 
 logger = logging.getLogger("core")
@@ -109,46 +108,6 @@ def _render_material_form(request, form, titulo, material=None):
     return render(request, "projetos/material_form.html", context)
 
 
-def _processar_form_material(
-    *,
-    request,
-    form,
-    empresa,
-    sucesso_redirect,
-    sucesso_msg,
-    erro_msg,
-    log_sucesso,
-    log_erro,
-):
-    if not form.is_valid():
-        logger.warning(log_erro, request.user.id, form.errors)
-        messages.error(request, erro_msg)
-        return None, False
-
-    material = atualizar_material_admin(form=form, empresa=empresa) if form.instance.pk else criar_material_admin(form=form, empresa=empresa)
-    logger.info(log_sucesso, request.user.id, empresa.id, material.id)
-    messages.success(request, sucesso_msg)
-    return redirect(sucesso_redirect, material_id=material.id) if sucesso_redirect == "projetos:material_detail" else redirect(sucesso_redirect), True
-
-
-def _initial_movimento_material(empregado, material_id):
-    initial = {}
-    if not material_id:
-        return initial
-
-    initial["material"] = material_id
-    material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
-    if material_selecionado is not None and getattr(material_selecionado, "projeto_id", None):
-        initial["projeto"] = material_selecionado.projeto_id
-    return initial
-
-
-def _preparar_form_movimento(form, empregado):
-    form.instance.empregado = empregado
-    form.instance.empresa = empregado.empresa
-    return form
-
-
 def _processar_movimento_material(
     *,
     request,
@@ -163,12 +122,19 @@ def _processar_movimento_material(
     log_sucesso,
     log_erro,
 ):
-    material_id = request.GET.get("material")
-
-    if request.method == "POST":
-        form = _preparar_form_movimento(form_class(request.POST, empregado=empregado), empregado)
-        movimento, erro = processar_fn(form=form, empregado=empregado)
-        if erro is None:
+    fluxo = processar_fluxo_movimento_material_form(
+        method=request.method,
+        post_data=request.POST,
+        material_id=request.GET.get("material"),
+        empregado=empregado,
+        form_class=form_class,
+        processar_fn=processar_fn,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            movimento = resultado["movimento"]
             logger.info(
                 log_sucesso,
                 request.user.id,
@@ -180,15 +146,9 @@ def _processar_movimento_material(
             )
             messages.success(request, sucesso_msg)
             return redirect(redirect_name)
-        if erro == "form_invalido":
-            logger.warning(log_erro, request.user.id, empregado.id, form.errors)
+        if resultado["erro"] == "form_invalido":
+            logger.warning(log_erro, request.user.id, empregado.id, resultado.get("erros_form"))
             messages.error(request, erro_msg)
-    else:
-        initial = _initial_movimento_material(empregado, material_id)
-        form = _preparar_form_movimento(
-            form_class(empregado=empregado, initial=initial),
-            empregado,
-        )
 
     return render(request, template_name, {
         "form": form,
@@ -213,14 +173,18 @@ def entrada_material_view(request, material_id):
 
     material = obter_material_por_id_empresa(material_id, empresa)
 
-    if request.method == "POST":
-        form = EntradaMaterialForm(request.POST)
-        _material_atualizado, erro = processar_entrada_material_form(
-            form=form,
-            material=material,
-            empresa=empresa,
-        )
-        if erro is None:
+    fluxo = processar_fluxo_entrada_saida_material_admin(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EntradaMaterialForm,
+        material=material,
+        empresa=empresa,
+        tipo="entrada",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
             logger.info(
                 "Entrada de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
                 request.user.id,
@@ -229,14 +193,12 @@ def entrada_material_view(request, material_id):
             )
             messages.success(request, "Entrada de material registada com sucesso.")
             return redirect("projetos:material_list")
-        if erro == "validacao":
+        if resultado["erro"] == "validacao":
             logger.warning(
                 "Erro de validação em entrada_material_view. user_id=%s, material_id=%s",
                 request.user.id,
                 material.id,
             )
-    else:
-        form = EntradaMaterialForm()
 
     context = {
         "material": material,
@@ -262,14 +224,18 @@ def saida_material_view(request, material_id):
 
     material = obter_material_por_id_empresa(material_id, empresa)
 
-    if request.method == "POST":
-        form = SaidaMaterialForm(request.POST)
-        _material_atualizado, erro = processar_saida_material_form(
-            form=form,
-            material=material,
-            empresa=empresa,
-        )
-        if erro is None:
+    fluxo = processar_fluxo_entrada_saida_material_admin(
+        method=request.method,
+        post_data=request.POST,
+        form_class=SaidaMaterialForm,
+        material=material,
+        empresa=empresa,
+        tipo="saida",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
             logger.info(
                 "Saída de material registada com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
                 request.user.id,
@@ -278,14 +244,12 @@ def saida_material_view(request, material_id):
             )
             messages.success(request, "Saída de material registada com sucesso.")
             return redirect("projetos:material_list")
-        if erro == "validacao":
+        if resultado["erro"] == "validacao":
             logger.warning(
                 "Erro de validação em saida_material_view. user_id=%s, material_id=%s",
                 request.user.id,
                 material.id,
             )
-    else:
-        form = SaidaMaterialForm()
 
     context = {
         "material": material,
@@ -364,22 +328,28 @@ def material_create(request):
         logger.warning("Acesso bloqueado na view material_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = MaterialForm(request.POST, empresa=empresa)
-        resposta, sucesso = _processar_form_material(
-            request=request,
-            form=form,
-            empresa=empresa,
-            sucesso_redirect="projetos:material_detail",
-            sucesso_msg="Material criado com sucesso.",
-            erro_msg="Erro ao criar o material. Verifique os dados.",
-            log_sucesso="Material criado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-            log_erro="Erro ao criar material. user_id=%s, erros=%s",
-        )
-        if sucesso:
-            return resposta
-    else:
-        form = MaterialForm(empresa=empresa)
+    fluxo = processar_fluxo_material_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaterialForm,
+        empresa=empresa,
+        acao="create",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            material = resultado["material"]
+            logger.info(
+                "Material criado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+                request.user.id,
+                empresa.id,
+                material.id,
+            )
+            messages.success(request, "Material criado com sucesso.")
+            return redirect("projetos:material_detail", material_id=material.id)
+        logger.warning("Erro ao criar material. user_id=%s, erros=%s", request.user.id, resultado.get("erros_form"))
+        messages.error(request, "Erro ao criar o material. Verifique os dados.")
 
     return _render_material_form(request, form, "Novo Material")
 
@@ -405,10 +375,18 @@ def material_create_empregado(request):
         logger.warning("Acesso bloqueado na view material_create_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = MaterialForm(request.POST, empresa=empregado.empresa)
-        if form.is_valid():
-            material = criar_material_admin(form=form, empresa=empregado.empresa)
+    fluxo = processar_fluxo_material_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaterialForm,
+        empresa=empregado.empresa,
+        acao="create",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            material = resultado["material"]
             logger.info(
                 "Material criado por conta individual. user_id=%s, empregado_id=%s, empresa_id=%s, material_id=%s",
                 request.user.id,
@@ -421,11 +399,9 @@ def material_create_empregado(request):
         logger.warning(
             "Erro ao criar material por conta individual. user_id=%s, erros=%s",
             request.user.id,
-            form.errors,
+            resultado.get("erros_form"),
         )
         messages.error(request, "Erro ao criar o material. Verifique os dados.")
-    else:
-        form = MaterialForm(empresa=empregado.empresa)
 
     return _render_material_form(request, form, "Novo Material")
 
@@ -447,22 +423,29 @@ def material_update(request, material_id):
 
     material = obter_material_por_id_empresa(material_id, empresa)
 
-    if request.method == "POST":
-        form = MaterialForm(request.POST, instance=material, empresa=empresa)
-        resposta, sucesso = _processar_form_material(
-            request=request,
-            form=form,
-            empresa=empresa,
-            sucesso_redirect="projetos:material_detail",
-            sucesso_msg="Material atualizado com sucesso.",
-            erro_msg="Erro ao atualizar o material. Verifique os dados.",
-            log_sucesso="Material atualizado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
-            log_erro="Erro ao atualizar material. user_id=%s, erros=%s",
-        )
-        if sucesso:
-            return resposta
-    else:
-        form = MaterialForm(instance=material, empresa=empresa)
+    fluxo = processar_fluxo_material_admin_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=MaterialForm,
+        empresa=empresa,
+        acao="update",
+        instance=material,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            material_atualizado = resultado["material"]
+            logger.info(
+                "Material atualizado com sucesso. user_id=%s, empresa_id=%s, material_id=%s",
+                request.user.id,
+                empresa.id,
+                material_atualizado.id,
+            )
+            messages.success(request, "Material atualizado com sucesso.")
+            return redirect("projetos:material_detail", material_id=material_atualizado.id)
+        logger.warning("Erro ao atualizar material. user_id=%s, erros=%s", request.user.id, resultado.get("erros_form"))
+        messages.error(request, "Erro ao atualizar o material. Verifique os dados.")
 
     return _render_material_form(request, form, "Editar Material", material=material)
 

@@ -192,6 +192,70 @@ def preparar_form_registo_empregado(*, form_class, request, empregado, instance=
     return form
 
 
+def processar_fluxo_form_registo_empregado(
+    *,
+    form_class,
+    request,
+    empregado,
+    registo=None,
+    initial=None,
+):
+    form = preparar_form_registo_empregado(
+        form_class=form_class,
+        request=request,
+        empregado=empregado,
+        instance=registo,
+        initial=initial,
+    )
+    if request.method != "POST":
+        return {
+            "form": form,
+            "resultado": None,
+        }
+
+    resultado = processar_submissao_registo_empregado_form(
+        form=form,
+        empregado=empregado,
+        fotos=request.FILES.getlist("fotos_amostra"),
+        registo=registo,
+    )
+    return {
+        "form": form,
+        "resultado": resultado,
+    }
+
+
+def processar_fluxo_form_registo_admin(
+    *,
+    form_class,
+    request,
+    registo,
+    empresa,
+):
+    if request.method == "POST":
+        form = form_class(
+            request.POST,
+            request.FILES,
+            instance=registo,
+        )
+        resultado = processar_submissao_registo_admin_form(
+            form=form,
+            registo=registo,
+            empresa=empresa,
+            fotos=request.FILES.getlist("fotos_amostra"),
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    form = form_class(instance=registo)
+    return {
+        "form": form,
+        "resultado": None,
+    }
+
+
 def processar_submissao_registo_empregado_create(*, form, empregado, fotos):
     if not form.is_valid():
         return {"ok": False, "registo": None}
@@ -229,3 +293,44 @@ def processar_submissao_registo_admin_update(*, form, registo, empresa, fotos):
         fotos=fotos,
     )
     return {"ok": True, "registo": registo}
+
+
+def processar_submissao_registo_empregado_form(
+    *,
+    form,
+    empregado,
+    fotos,
+    registo=None,
+):
+    if registo is None:
+        resultado = processar_submissao_registo_empregado_create(
+            form=form,
+            empregado=empregado,
+            fotos=fotos,
+        )
+    else:
+        resultado = processar_submissao_registo_empregado_update(
+            form=form,
+            registo=registo,
+            empregado=empregado,
+            fotos=fotos,
+        )
+    return {
+        "ok": resultado["ok"],
+        "registo": resultado.get("registo"),
+        "erros_form": form.errors,
+    }
+
+
+def processar_submissao_registo_admin_form(*, form, registo, empresa, fotos):
+    resultado = processar_submissao_registo_admin_update(
+        form=form,
+        registo=registo,
+        empresa=empresa,
+        fotos=fotos,
+    )
+    return {
+        "ok": resultado["ok"],
+        "registo": resultado.get("registo"),
+        "erros_form": form.errors,
+    }

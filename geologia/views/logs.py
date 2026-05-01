@@ -10,12 +10,9 @@ from geologia.selectors.logs import (
     obter_log_geologico,
 )
 from geologia.services.logs import (
-    construir_form_anexo_log,
-    construir_form_log_create,
-    construir_form_log_update,
-    processar_anexo_log_create,
-    processar_log_create,
-    processar_log_update,
+    processar_fluxo_anexo_log_create,
+    processar_fluxo_log_create,
+    processar_fluxo_log_update,
 )
 
 from .common import obter_empresa_admin_geologia
@@ -48,14 +45,16 @@ def log_geologico_create(request, furo_id):
 
     furo = obter_furo_log_geologico(furo_id, empresa=empresa)
 
-    if request.method == "POST":
-        resultado = processar_log_create(
-            request_post=request.POST,
-            request_files=request.FILES,
-            furo=furo,
-            empresa=empresa,
-        )
-        form = resultado["form"]
+    fluxo = processar_fluxo_log_create(
+        request_method=request.method,
+        request_post=request.POST,
+        request_files=request.FILES,
+        furo=furo,
+        empresa=empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta_post = _processar_post_form(
             request=request,
             resultado=resultado,
@@ -66,11 +65,6 @@ def log_geologico_create(request, furo_id):
         )
         if resposta_post:
             return resposta_post
-    else:
-        form = construir_form_log_create(
-            furo=furo,
-            empresa=empresa,
-        )
 
     return render(
         request,
@@ -113,14 +107,16 @@ def log_geologico_update(request, pk):
 
     log = obter_log_geologico(pk, empresa=empresa)
 
-    if request.method == "POST":
-        resultado = processar_log_update(
-            request_post=request.POST,
-            request_files=request.FILES,
-            log=log,
-            empresa=empresa,
-        )
-        form = resultado["form"]
+    fluxo = processar_fluxo_log_update(
+        request_method=request.method,
+        request_post=request.POST,
+        request_files=request.FILES,
+        log=log,
+        empresa=empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta_post = _processar_post_form(
             request=request,
             resultado=resultado,
@@ -131,8 +127,6 @@ def log_geologico_update(request, pk):
         )
         if resposta_post:
             return resposta_post
-    else:
-        form = construir_form_log_update(log=log, empresa=empresa)
 
     return render(
         request,
@@ -155,13 +149,15 @@ def anexo_log_create(request, pk):
 
     log = obter_log_geologico(pk, empresa=empresa)
 
-    if request.method == "POST":
-        resultado = processar_anexo_log_create(
-            request_post=request.POST,
-            request_files=request.FILES,
-            log=log,
-        )
-        form = resultado["form"]
+    fluxo = processar_fluxo_anexo_log_create(
+        request_method=request.method,
+        request_post=request.POST,
+        request_files=request.FILES,
+        log=log,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta_post = _processar_post_form(
             request=request,
             resultado=resultado,
@@ -172,8 +168,6 @@ def anexo_log_create(request, pk):
         )
         if resposta_post:
             return resposta_post
-    else:
-        form = construir_form_anexo_log()
 
     return render(
         request,

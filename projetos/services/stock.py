@@ -4,6 +4,7 @@ from django.db.models import F
 from django.shortcuts import get_object_or_404
 
 from projetos.models import Material
+from projetos.selectors.material import obter_material_por_id_empresa
 from projetos.services.empregados import recalcular_resumo_empregado
 
 
@@ -192,6 +193,50 @@ def processar_saida_material_form(*, form, material, empresa=None):
         return None, "validacao"
 
 
+def processar_submissao_entrada_saida_form(*, form, material, empresa, tipo):
+    if tipo == "entrada":
+        material_atualizado, erro = processar_entrada_material_form(
+            form=form,
+            material=material,
+            empresa=empresa,
+        )
+    elif tipo == "saida":
+        material_atualizado, erro = processar_saida_material_form(
+            form=form,
+            material=material,
+            empresa=empresa,
+        )
+    else:
+        raise ValidationError("Tipo inválido para movimento de stock.")
+
+    return {
+        "ok": erro is None,
+        "material": material_atualizado,
+        "erro": erro,
+        "erros_form": form.errors,
+    }
+
+
+def processar_fluxo_entrada_saida_material_admin(*, method, post_data, form_class, material, empresa, tipo):
+    if method == "POST":
+        form = form_class(post_data)
+        resultado = processar_submissao_entrada_saida_form(
+            form=form,
+            material=material,
+            empresa=empresa,
+            tipo=tipo,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(),
+        "resultado": None,
+    }
+
+
 def _preparar_movimento_contexto(movimento):
     if movimento.furo and not movimento.projeto:
         movimento.projeto = movimento.furo.projeto
@@ -281,6 +326,124 @@ def processar_devolucao_material_form(*, form, empregado):
         aplicar_erros_validacao_no_form(form, erro)
         return None, "validacao"
 
+
+
+def processar_submissao_material_admin_form(*, form, empresa, acao):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "material": None,
+            "erro": "form_invalido",
+            "erros_form": form.errors,
+        }
+
+    try:
+        if acao == "create":
+            material = criar_material_admin(form=form, empresa=empresa)
+        elif acao == "update":
+            material = atualizar_material_admin(form=form, empresa=empresa)
+        else:
+            raise ValidationError("Ação inválida para submissão de material.")
+        return {
+            "ok": True,
+            "material": material,
+            "erro": None,
+            "erros_form": None,
+        }
+    except ValidationError as erro:
+        aplicar_erros_validacao_no_form(form, erro)
+        return {
+            "ok": False,
+            "material": None,
+            "erro": "validacao",
+            "erros_form": form.errors,
+        }
+
+
+def processar_fluxo_material_admin_form(*, method, post_data, form_class, empresa, acao, instance=None):
+    if method == "POST":
+        form = form_class(post_data, instance=instance, empresa=empresa)
+        resultado = processar_submissao_material_admin_form(
+            form=form,
+            empresa=empresa,
+            acao=acao,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    form = form_class(instance=instance, empresa=empresa)
+    return {
+        "form": form,
+        "resultado": None,
+    }
+
+
+def construir_initial_movimento_material(*, empregado, material_id):
+    initial = {}
+    if not material_id:
+        return initial
+
+    initial["material"] = material_id
+    material_selecionado = obter_material_por_id_empresa(material_id, empregado.empresa)
+    if material_selecionado is not None and getattr(material_selecionado, "projeto_id", None):
+        initial["projeto"] = material_selecionado.projeto_id
+    return initial
+
+
+def preparar_form_movimento_material(*, form, empregado):
+    form.instance.empregado = empregado
+    form.instance.empresa = empregado.empresa
+    return form
+
+
+def processar_fluxo_movimento_material_form(
+    *,
+    method,
+    post_data,
+    material_id,
+    empregado,
+    form_class,
+    processar_fn,
+):
+    if method == "POST":
+        form = preparar_form_movimento_material(
+            form=form_class(post_data, empregado=empregado),
+            empregado=empregado,
+        )
+        resultado = processar_submissao_movimento_material_form(
+            form=form,
+            empregado=empregado,
+            processar_fn=processar_fn,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    initial = construir_initial_movimento_material(
+        empregado=empregado,
+        material_id=material_id,
+    )
+    form = preparar_form_movimento_material(
+        form=form_class(empregado=empregado, initial=initial),
+        empregado=empregado,
+    )
+    return {
+        "form": form,
+        "resultado": None,
+    }
+
+
+def processar_submissao_movimento_material_form(*, form, empregado, processar_fn):
+    movimento, erro = processar_fn(form=form, empregado=empregado)
+    return {
+        "ok": erro is None,
+        "movimento": movimento,
+        "erro": erro,
+        "erros_form": form.errors,
+    }
 
 
 def verificar_stock_critico(material):

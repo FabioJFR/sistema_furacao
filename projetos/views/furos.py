@@ -1,10 +1,6 @@
 import logging
-import io
-import json
-import zipfile
 
 from django.contrib import messages
-from django.http import Http404, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -16,54 +12,35 @@ from projetos.selectors.furos import (
     empregado_trabalhou_no_furo,
     obter_furo,
     obter_lista_furos,
-    obter_medicoes_furo_para_empregado,
-    obter_registos_furo_para_empregado,
 )
 from projetos.services.furo_3d_io import (
-    dados_completos_furo as dados_completos_furo_service,
-    dados_exportacao_furo_3d as dados_exportacao_furo_3d_service,
+    exportar_furo_3d_response,
     parse_imported_3d_file as parse_imported_3d_file_service,
-    renderizar_furo_3d_csv as renderizar_furo_3d_csv_service,
-    renderizar_furo_3d_geojson as renderizar_furo_3d_geojson_service,
 )
 from projetos.services.furo_3d_chart import construir_contexto_furo_3d
 from projetos.services.furo_fluxos import (
     construir_contexto_furo_detail,
+    construir_contexto_furo_detail_empregado,
     processar_delete_furo,
+    processar_fluxo_form_furo_create,
+    processar_fluxo_form_furo_update,
     processar_importacao_3d_externa,
     resolver_furo_para_3d,
     listar_furos_para_utilizador,
-    preparar_form_furo_create,
-    preparar_form_furo_update,
-    processar_submissao_furo_create,
-    processar_submissao_furo_update,
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
 from projetos.services.acesso_contexto import obter_empresa_contexto_gestao_furos
-from projetos.services.furos import terminar_furo, reativar_furo
+from projetos.services.furos import (
+    processar_acao_reativar_furo,
+    processar_acao_terminar_furo,
+)
 
 logger = logging.getLogger("core")
 
 
 def _resolver_empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
-
-
-def _dados_exportacao_furo_3d(furo):
-    return dados_exportacao_furo_3d_service(furo)
-
-
-def _renderizar_furo_3d_csv(payload):
-    return renderizar_furo_3d_csv_service(payload)
-
-
-def _renderizar_furo_3d_geojson(payload):
-    return renderizar_furo_3d_geojson_service(payload)
-
-
-def _dados_completos_furo(furo):
-    return dados_completos_furo_service(furo)
 
 
 def _parse_imported_3d_file(uploaded_file):
@@ -145,18 +122,10 @@ def furo_detail_empregado(request, pk):
         messages.error(request, "Não tens permissão para ver os detalhes deste furo.")
         return redirect("projetos:area_empregado")
 
-    registos_furo = obter_registos_furo_para_empregado(empregado, furo)
-    medicoes_furo = obter_medicoes_furo_para_empregado(empregado, furo)
-    registos_lista = list(registos_furo)
-    datas_registo = [
-        registo.data or (registo.criado_em.date() if registo.criado_em else None)
-        for registo in registos_lista
-    ]
-    datas_registo = [d for d in datas_registo if d is not None]
-    data_inicio_real = min(datas_registo) if datas_registo else (furo.data_inicio_operacao or None)
-    dias_com_registo = len(set(datas_registo))
-    total_metros_registos = round(sum(float(r.metros_furados or 0) for r in registos_lista), 2)
-    media_metros_por_dia = round(total_metros_registos / dias_com_registo, 2) if dias_com_registo else 0.0
+    contexto_detail = construir_contexto_furo_detail_empregado(
+        empregado=empregado,
+        furo=furo,
+    )
 
     logger.info(
         "View furo_detail_empregado carregada com sucesso em furos.py. user_id=%s, empregado_id=%s, furo_id=%s",
@@ -167,12 +136,7 @@ def furo_detail_empregado(request, pk):
     return render(request, "projetos/furo_detail_empregado.html", {
         "empregado": empregado,
         "furo": furo,
-        "registos_furo": registos_furo,
-        "medicoes_furo": medicoes_furo,
-        "data_inicio_real_furo": data_inicio_real,
-        "dias_com_registo_furo": dias_com_registo,
-        "total_metros_registos": total_metros_registos,
-        "media_metros_por_dia_furo": media_metros_por_dia,
+        **contexto_detail,
     })
 
 
@@ -198,15 +162,16 @@ def furo_create(request):
             logger.warning("Acesso bloqueado por contexto de empregado na view furo_create. user_id=%s", request.user.id)
             return resposta_empregado
 
-    memoria_zona_alerta = []
-    if request.method == "POST":
-        resultado = processar_submissao_furo_create(
-            request_post=request.POST,
-            empresa_id=empresa_id,
-            empregado_contexto=empregado_contexto,
-        )
-        form = resultado["form"]
-        memoria_zona_alerta = resultado["memoria_zona_alerta"]
+    fluxo = processar_fluxo_form_furo_create(
+        request_method=request.method,
+        request_post=request.POST,
+        empresa_id=empresa_id,
+        empregado_contexto=empregado_contexto,
+    )
+    form = fluxo["form"]
+    memoria_zona_alerta = fluxo["memoria_zona_alerta"]
+    resultado = fluxo["resultado"]
+    if resultado:
         if resultado["ok"]:
             furo = resultado["furo"]
             logger.info(
@@ -215,20 +180,15 @@ def furo_create(request):
                 empresa.id,
                 furo.pk,
             )
-            messages.success(request, "Furo criado com sucesso.")
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect(furo)
 
         logger.warning(
             "Erro ao criar furo. user_id=%s, erros=%s",
             request.user.id,
-            form.errors,
+            resultado["erros_form"],
         )
-        messages.error(request, "Erro ao criar o furo. Verifique os dados.")
-    else:
-        form = preparar_form_furo_create(
-            empresa_id=empresa_id,
-            empregado_contexto=empregado_contexto,
-        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(request, "projetos/form.html", {
         "form": form,
@@ -278,34 +238,43 @@ def furo_detail(request, pk, slug):
 
 @login_required
 def furo_terminar(request, pk):
-    if request.method != "POST":
-        return redirect("projetos:furo_detail_legacy", pk=pk)
-
     empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         return resposta_erro
 
     furo = obter_furo(pk, empresa=empresa_id)
-    terminar_furo(furo=furo, empresa=empresa_id, terminado_por=request.user)
-    messages.success(request, "Furo terminado com sucesso.")
-    return redirect(furo)
+    resultado = processar_acao_terminar_furo(
+        request_method=request.method,
+        furo=furo,
+        empresa=empresa_id,
+        terminado_por=request.user,
+    )
+    if resultado["deve_redirecionar_legacy"]:
+        return redirect("projetos:furo_detail_legacy", pk=pk)
+    if resultado["mensagem_sucesso"]:
+        messages.success(request, resultado["mensagem_sucesso"])
+    return redirect(resultado["furo"])
 
 
 @login_required
 def furo_reativar(request, pk):
-    if request.method != "POST":
-        return redirect("projetos:furo_detail_legacy", pk=pk)
-
     empresa, _acesso_individual, resposta_erro = _obter_empresa_contexto_gestao_furos(request)
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
     if resposta_erro:
         return resposta_erro
 
     furo = obter_furo(pk, empresa=empresa_id)
-    reativar_furo(furo=furo, empresa=empresa_id)
-    messages.success(request, "Furo reativado com sucesso.")
-    return redirect(furo)
+    resultado = processar_acao_reativar_furo(
+        request_method=request.method,
+        furo=furo,
+        empresa=empresa_id,
+    )
+    if resultado["deve_redirecionar_legacy"]:
+        return redirect("projetos:furo_detail_legacy", pk=pk)
+    if resultado["mensagem_sucesso"]:
+        messages.success(request, resultado["mensagem_sucesso"])
+    return redirect(resultado["furo"])
 
 # Multiempresa: o administrador só pode listar e gerir furos da sua própria empresa.
 @login_required
@@ -359,14 +328,16 @@ def furo_update(request, pk):
         logger.warning("Acesso bloqueado na view furo_update. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        resultado = processar_submissao_furo_update(
-            request_post=request.POST,
-            pk=pk,
-            empresa_id=empresa_id,
-        )
-        form = resultado["form"]
-        furo = resultado["furo"]
+    fluxo = processar_fluxo_form_furo_update(
+        request_method=request.method,
+        request_post=request.POST,
+        pk=pk,
+        empresa_id=empresa_id,
+    )
+    form = fluxo["form"]
+    furo = fluxo["furo"]
+    resultado = fluxo["resultado"]
+    if resultado:
         if resultado["ok"]:
 
             logger.info(
@@ -375,22 +346,16 @@ def furo_update(request, pk):
                 empresa.id,
                 furo.pk,
             )
-            messages.success(request, "Furo atualizado com sucesso.")
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect(furo)
 
         logger.warning(
             "Erro ao atualizar furo. user_id=%s, furo_pk=%s, erros=%s",
             request.user.id,
             pk,
-            form.errors,
+            resultado["erros_form"],
         )
-        messages.error(request, "Erro ao atualizar o furo. Verifique os dados.")
-    else:
-        furo = obter_furo(pk, empresa=empresa_id)
-        form = preparar_form_furo_update(
-            furo=furo,
-            empresa_id=empresa_id,
-        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return render(request, "projetos/furo_update.html", {
         "form": form,
@@ -531,38 +496,4 @@ def furo_3d_export(request, furo_id, formato):
         return resposta_erro
 
     furo = obter_furo(furo_id, empresa=empresa_id)
-    payload = _dados_exportacao_furo_3d(furo)
-    nome_base = f"furo-{furo.pk}-3d"
-
-    if formato == "json":
-        response = HttpResponse(
-            json.dumps(payload, ensure_ascii=False, indent=2),
-            content_type="application/json; charset=utf-8",
-        )
-        response["Content-Disposition"] = f'attachment; filename="{nome_base}.json"'
-        return response
-
-    if formato == "csv":
-        response = HttpResponse(_renderizar_furo_3d_csv(payload), content_type="text/csv; charset=utf-8")
-        response["Content-Disposition"] = f'attachment; filename="{nome_base}.csv"'
-        return response
-
-    if formato == "geojson":
-        response = HttpResponse(_renderizar_furo_3d_geojson(payload), content_type="application/geo+json; charset=utf-8")
-        response["Content-Disposition"] = f'attachment; filename="{nome_base}.geojson"'
-        return response
-
-    if formato == "zip":
-        dados = _dados_completos_furo(furo)
-        buffer = io.BytesIO()
-        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr(f"{nome_base}-completo.json", json.dumps(dados, ensure_ascii=False, indent=2))
-            zip_file.writestr(f"{nome_base}-3d.json", json.dumps(payload, ensure_ascii=False, indent=2))
-            zip_file.writestr(f"{nome_base}-3d.csv", _renderizar_furo_3d_csv(payload))
-            zip_file.writestr(f"{nome_base}-3d.geojson", _renderizar_furo_3d_geojson(payload))
-        buffer.seek(0)
-        response = HttpResponse(buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{nome_base}-completo.zip"'
-        return response
-
-    raise Http404("Formato 3D não suportado.")
+    return exportar_furo_3d_response(furo, formato)

@@ -491,6 +491,106 @@ def processar_guardar_ficheiro_empregado_form(*, form, empregado, empresa):
     return ficheiro, None
 
 
+def processar_submissao_ligacao_projeto_admin_form(
+    *,
+    form,
+    empregado,
+    empresa,
+    ligacao=None,
+):
+    ligacao_guardada, erro = processar_guardar_ligacao_projeto_form(
+        form=form,
+        empregado=empregado,
+        empresa=empresa,
+        ligacao=ligacao,
+    )
+    return {
+        "ok": erro is None,
+        "ligacao": ligacao_guardada,
+        "erro": erro,
+        "erros_form": form.errors,
+    }
+
+
+def processar_fluxo_ligacao_projeto_admin_form(
+    *,
+    method,
+    post_data,
+    form_class,
+    empresa,
+    empregado,
+    ligacao=None,
+):
+    if method == "POST":
+        form = form_class(
+            post_data,
+            instance=ligacao,
+            empresa=empresa,
+            empregado=empregado,
+        )
+        resultado = processar_submissao_ligacao_projeto_admin_form(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+            ligacao=ligacao,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    form = form_class(
+        instance=ligacao,
+        empresa=empresa,
+        empregado=empregado,
+    )
+    return {
+        "form": form,
+        "resultado": None,
+    }
+
+
+def processar_submissao_ficheiro_empregado_admin_form(*, form, empregado, empresa):
+    ficheiro, erro = processar_guardar_ficheiro_empregado_form(
+        form=form,
+        empregado=empregado,
+        empresa=empresa,
+    )
+    return {
+        "ok": erro is None,
+        "ficheiro": ficheiro,
+        "erro": erro,
+        "erros_form": form.errors,
+    }
+
+
+def processar_fluxo_ficheiro_empregado_admin_form(
+    *,
+    method,
+    post_data,
+    files_data,
+    form_class,
+    empregado,
+    empresa,
+):
+    if method == "POST":
+        form = form_class(post_data, files_data)
+        resultado = processar_submissao_ficheiro_empregado_admin_form(
+            form=form,
+            empregado=empregado,
+            empresa=empresa,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(),
+        "resultado": None,
+    }
+
+
 @transaction.atomic
 def remover_ficheiro_empregado(*, ficheiro):
     ficheiro_id = ficheiro.id
@@ -524,6 +624,123 @@ def rejeitar_empregado_pendente(*, empregado, empresa=None):
 
 def processar_rejeicao_empregado_pendente(*, empregado, empresa=None):
     return rejeitar_empregado_pendente(empregado=empregado, empresa=empresa)
+
+
+def processar_acao_pendente_empregado(*, acao, empregado, empresa=None):
+    if acao == "aprovar":
+        aprovado = processar_aprovacao_empregado(empregado=empregado, empresa=empresa)
+        return {
+            "ok": True,
+            "tipo": "aprovar",
+            "empregado": aprovado,
+            "resultado": None,
+        }
+    if acao == "rejeitar":
+        resultado = processar_rejeicao_empregado_pendente(empregado=empregado, empresa=empresa)
+        return {
+            "ok": True,
+            "tipo": "rejeitar",
+            "empregado": None,
+            "resultado": resultado,
+        }
+    raise ValidationError("Ação inválida para empregado pendente.")
+
+
+def processar_acao_terminar_ligacao_projeto(*, ligacao, empresa=None):
+    ligacao_terminada = terminar_ligacao_projeto_empregado(ligacao, empresa=empresa)
+    return {
+        "ok": True,
+        "ligacao": ligacao_terminada,
+    }
+
+
+def processar_acao_remover_ficheiro_empregado(*, ficheiro):
+    ficheiro_id = remover_ficheiro_empregado(ficheiro=ficheiro)
+    return {
+        "ok": True,
+        "ficheiro_id": ficheiro_id,
+    }
+
+
+def processar_submissao_empregado_admin_form(*, form, empresa, acao):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "user": None,
+            "empregado": None,
+            "mensagem_erro": "Existem erros no formulário. Corrija os campos assinalados.",
+            "erro_tecnico": None,
+            "erros_form": form.errors,
+        }
+
+    try:
+        if acao == "create":
+            user, empregado = criar_empregado_admin(form=form, empresa=empresa)
+            return {
+                "ok": True,
+                "user": user,
+                "empregado": empregado,
+                "mensagem_erro": None,
+                "erro_tecnico": None,
+                "erros_form": None,
+            }
+        if acao == "update":
+            empregado = atualizar_empregado_admin(form=form, empresa=empresa)
+            return {
+                "ok": True,
+                "user": None,
+                "empregado": empregado,
+                "mensagem_erro": None,
+                "erro_tecnico": None,
+                "erros_form": None,
+            }
+        raise ValidationError("Ação inválida para submissão de empregado.")
+    except Exception as exc:  # pragma: no cover - proteção de camada de serviço
+        return {
+            "ok": False,
+            "user": None,
+            "empregado": None,
+            "mensagem_erro": "Erro ao guardar empregado. Verifique os dados e tente novamente.",
+            "erro_tecnico": exc,
+            "erros_form": form.errors,
+        }
+
+
+def processar_fluxo_empregado_admin_form(
+    *,
+    method,
+    post_data,
+    files_data,
+    form_class,
+    empresa,
+    acao,
+    instance=None,
+):
+    if method == "POST":
+        form = form_class(
+            post_data,
+            files_data,
+            instance=instance,
+            empresa=empresa,
+        )
+        resultado = processar_submissao_empregado_admin_form(
+            form=form,
+            empresa=empresa,
+            acao=acao,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    form = form_class(
+        instance=instance,
+        empresa=empresa,
+    )
+    return {
+        "form": form,
+        "resultado": None,
+    }
 
 
 def construir_resumo_registos_projeto_empregado(*, registos):

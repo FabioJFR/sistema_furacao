@@ -6,25 +6,19 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET, require_POST
 from dispositivos.services.serial_service import (
-    capturar_leitura_serial_para_sessao,
     listar_portas_seriais,
 )
 from dispositivos.selectors.dashboard import (
-    obter_dispositivos_qs,
     obter_dispositivo_ativo,
     construir_contexto_captura_dispositivo,
     obter_empregado_por_user_empresa,
     obter_furo,
     anexar_sessao_ao_preview,
     obter_leitura_detail,
-    obter_leituras_qs,
     obter_sessao_detail,
-    obter_sessoes_qs,
-    obter_shots_qs,
     resolver_empresa_para_registo_por_furo,
 )
 from dispositivos.services.dashboard import (
-    processar_criacao_sessao_captura,
     processar_escuta_dispositivo_detectado,
     processar_inspecao_bluetooth_detectado,
     processar_procura_dispositivos_bluetooth,
@@ -34,16 +28,27 @@ from dispositivos.services.dashboard import (
 from dispositivos.services.importacao_historico import (
     render_historico_importacao_csv,
 )
-from dispositivos.services.dashboard_import import (
-    processar_acao_importacao_magcruiser,
-    processar_preview_importacao_magcruiser_texto,
+from dispositivos.services.dashboard_import import processar_preview_importacao_magcruiser_texto
+from dispositivos.selectors.importacao_historico import obter_historico_importacao
+from dispositivos.services.captura_page import (
+    listar_historico_importacoes_seguro,
+    processar_captura_leitura_serial_sessao,
+    processar_post_captura_dispositivo,
 )
-from dispositivos.selectors.importacao_historico import (
-    listar_historico_importacoes_qs,
-    obter_historico_importacao,
+from dispositivos.services.api_flow import (
+    construir_http_response_operacao_api,
+    construir_payload_dispositivo_guardado,
+    construir_payload_escuta_dispositivo,
+)
+from dispositivos.services.dashboard_page import (
+    construir_contexto_dashboard_dispositivos,
+    construir_contexto_leituras_brutas_dispositivo,
+    construir_contexto_lista_dispositivos,
+    construir_contexto_sessao_dispositivo_detail,
+    construir_contexto_sessoes_dispositivo,
+    construir_contexto_shots_dispositivo,
 )
 from django.http import JsonResponse, HttpResponse
-from django.db import ProgrammingError
 import random
 import time
 
@@ -127,14 +132,15 @@ def api_procurar_portas_usb(request):
 def api_procurar_dispositivos_bluetooth(request):
     _garantir_admin_api(request)
     resultado = processar_procura_dispositivos_bluetooth()
-    if resultado["ok"]:
-        return _json_ok(
-            {"eventos": resultado["eventos"], "dispositivos": resultado["dispositivos"]}
-        )
-    return _json_erro(
-        "Falha na procura Bluetooth.",
-        status=resultado.get("status", 400),
-        eventos=resultado["eventos"],
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "dispositivos": r["dispositivos"],
+        },
+        mensagem_erro_padrao="Falha na procura Bluetooth.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
     )
 
 
@@ -143,12 +149,15 @@ def api_procurar_dispositivos_bluetooth(request):
 def api_testar_leitura_usb(request):
     _garantir_admin_api(request)
     resultado = processar_teste_leitura_usb(dispositivo_id=request.POST.get("dispositivo_id"))
-    if resultado["ok"]:
-        return _json_ok({"eventos": resultado["eventos"], "leitura": resultado["leitura"]})
-    return _json_erro(
-        "Falha no teste de leitura USB.",
-        status=resultado.get("status", 400),
-        eventos=resultado["eventos"],
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "leitura": r["leitura"],
+        },
+        mensagem_erro_padrao="Falha no teste de leitura USB.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
     )
 
 
@@ -160,12 +169,15 @@ def api_inspecionar_dispositivo_bluetooth(request):
     address = (request.POST.get("address") or "").strip()
     name = (request.POST.get("name") or "").strip()
     resultado = processar_inspecao_bluetooth_detectado(address=address, name=name)
-    if resultado["ok"]:
-        return _json_ok({"eventos": resultado["eventos"], "inspecao": resultado["inspecao"]})
-    return _json_erro(
-        "Falha na inspeção Bluetooth.",
-        status=resultado.get("status", 400),
-        eventos=resultado["eventos"],
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "inspecao": r["inspecao"],
+        },
+        mensagem_erro_padrao="Falha na inspeção Bluetooth.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
     )
 
 
@@ -190,24 +202,12 @@ def api_guardar_dispositivo_detectado(request):
             descricao=descricao,
             baudrate=baudrate,
         )
-        if not resultado["ok"]:
-            return _json_erro(
-                resultado["erro"],
-                status=resultado.get("status", 400),
-            )
-        dispositivo = resultado["dispositivo"]
-        eventos = resultado["eventos"]
-
-        return _json_ok(
-            {
-                "eventos": eventos,
-                "dispositivo": {
-                    "id": str(dispositivo.pk),
-                    "nome": dispositivo.nome,
-                    "canal": dispositivo.canal,
-                    "identificador": dispositivo.porta or dispositivo.mac_address or dispositivo.identificador_fisico,
-                },
-            }
+        return construir_http_response_operacao_api(
+            resultado=resultado,
+            payload_sucesso=construir_payload_dispositivo_guardado,
+            mensagem_erro_padrao=resultado.get("erro", "Falha ao guardar dispositivo."),
+            json_ok_fn=_json_ok,
+            json_erro_fn=_json_erro,
         )
     except Exception as exc:
         return _json_erro(f"Não foi possível guardar o dispositivo: {exc}", status=400)
@@ -229,93 +229,49 @@ def api_escutar_dispositivo_detectado(request):
         nome=nome,
         baudrate=baudrate,
     )
-    if resultado["ok"]:
-        response = {
-            "eventos": resultado["eventos"],
-            "modo": resultado["modo"],
-        }
-        if resultado.get("leitura") is not None:
-            response["leitura"] = resultado["leitura"]
-        if resultado.get("inspecao") is not None:
-            response["inspecao"] = resultado["inspecao"]
-        return _json_ok(response)
-    return _json_erro(
-        "Falha na escuta do dispositivo.",
-        status=resultado.get("status", 400),
-        eventos=resultado["eventos"],
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=construir_payload_escuta_dispositivo,
+        mensagem_erro_padrao="Falha na escuta do dispositivo.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
     )
 
 @login_required
 def dispositivos_dashboard(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-
-    dispositivos_qs = obter_dispositivos_qs(empresa_id)
-    sessoes_qs = obter_sessoes_qs(empresa_id)
-    leituras_qs = obter_leituras_qs(empresa_id)
-    shots_qs = obter_shots_qs(empresa_id)
-
-    total_dispositivos = dispositivos_qs.count()
-    total_ativos = dispositivos_qs.filter(ativo=True).count()
-    total_sessoes = sessoes_qs.count()
-    total_leituras_brutas = leituras_qs.count()
-    total_shots = shots_qs.count()
-
-    ultima_sessao = (
-        sessoes_qs.select_related("dispositivo", "empregado", "furo", "empresa")
-        .order_by("-iniciado_em")
-        .first()
-    )
-
-    ultima_leitura_bruta = (
-        leituras_qs.select_related("sessao", "empresa")
-        .order_by("-recebido_em")
-        .first()
-    )
-
-    ultimo_shot = (
-        shots_qs.select_related("sessao", "furo", "empresa")
-        .order_by("-criado_em")
-        .first()
-    )
-
-    context = {
-        "total_dispositivos": total_dispositivos,
-        "total_ativos": total_ativos,
-        "total_sessoes": total_sessoes,
-        "total_leituras_brutas": total_leituras_brutas,
-        "total_shots": total_shots,
-        "ultima_sessao": ultima_sessao,
-        "ultima_leitura_bruta": ultima_leitura_bruta,
-        "ultimo_shot": ultimo_shot,
-    }
+    context = construir_contexto_dashboard_dispositivos(empresa_id=empresa_id)
     return render(request, "dispositivos/dashboard.html", context)
 
 
 @login_required
 def sessao_dispositivo_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    sessoes = obter_sessoes_qs(empresa_id).select_related("dispositivo", "empresa", "empregado", "furo").order_by("-iniciado_em")
-    return render(request, "dispositivos/sessao_list.html", {
-        "sessoes": sessoes,
-    })
+    return render(
+        request,
+        "dispositivos/sessao_list.html",
+        construir_contexto_sessoes_dispositivo(empresa_id=empresa_id),
+    )
 
 
 @login_required
 def leitura_bruta_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    leituras = obter_leituras_qs(empresa_id).select_related("sessao", "empresa").order_by("-recebido_em")
-    return render(request, "dispositivos/leitura_bruta_list.html", {
-        "leituras": leituras,
-    })
+    return render(
+        request,
+        "dispositivos/leitura_bruta_list.html",
+        construir_contexto_leituras_brutas_dispositivo(empresa_id=empresa_id),
+    )
 
 
 @login_required
 def survey_shot_list(request):
     empresa_id = _obter_empresa_id_utilizador(request)
-    shots = obter_shots_qs(empresa_id).select_related("sessao", "empresa", "furo").order_by("-criado_em")
-    return render(request, "dispositivos/survey_shot_list.html", {
-        "shots": shots,
-    })
+    return render(
+        request,
+        "dispositivos/survey_shot_list.html",
+        construir_contexto_shots_dispositivo(empresa_id=empresa_id),
+    )
 
 
 @login_required
@@ -325,31 +281,21 @@ def dispositivo_list(request):
     Futuramente pode ser filtrado por empresa, projeto, estado, tipo, etc.
     """
     empresa_id = _obter_empresa_id_utilizador(request)
-    dispositivos = obter_dispositivos_qs(empresa_id).order_by("nome")
-
-    context = {
-        "dispositivos": dispositivos,
-        "total_dispositivos": dispositivos.count(),
-    }
-    return render(request, "dispositivos/dispositivo_list.html", context)
+    return render(
+        request,
+        "dispositivos/dispositivo_list.html",
+        construir_contexto_lista_dispositivos(empresa_id=empresa_id),
+    )
 
 
 @login_required
 def sessao_dispositivo_detail(request, pk):
     empresa_id = _obter_empresa_id_utilizador(request)
-    sessao = obter_sessao_detail(pk=pk, empresa_id=empresa_id)
-
-    leituras_brutas = sessao.leituras_brutas.all().order_by("sequencia")
-    leituras = sessao.leituras.all().order_by("timestamp_device", "criado_em")
-    shots = sessao.shots.all().order_by("profundidade")
-
-    context = {
-        "sessao": sessao,
-        "leituras_brutas": leituras_brutas,
-        "leituras": leituras,
-        "shots": shots,
-    }
-    return render(request, "dispositivos/sessao_detail.html", context)
+    return render(
+        request,
+        "dispositivos/sessao_detail.html",
+        construir_contexto_sessao_dispositivo_detail(pk=pk, empresa_id=empresa_id),
+    )
 
 
 @login_required
@@ -369,14 +315,11 @@ def capturar_leitura_serial_view(request, pk):
     empresa_id = _obter_empresa_id_utilizador(request)
     sessao = obter_sessao_detail(pk=pk, empresa_id=empresa_id)
 
-    try:
-        leitura = capturar_leitura_serial_para_sessao(sessao)
-        messages.success(
-            request,
-            f"Leitura bruta capturada com sucesso. Sequência: {leitura.sequencia}"
-        )
-    except Exception as e:
-        messages.error(request, f"Erro ao capturar leitura serial: {e}")
+    resultado = processar_captura_leitura_serial_sessao(sessao=sessao)
+    if resultado["message_level"] == "success":
+        messages.success(request, resultado["message"])
+    else:
+        messages.error(request, resultado["message"])
 
     return redirect("dispositivos:sessao_detail", pk=sessao.pk)
 
@@ -388,55 +331,34 @@ def captura_dispositivo(request):
     preview_data = request.session.get(MAGCRUISER_PREVIEW_SESSION_KEY)
     report_data = request.session.get(MAGCRUISER_REPORT_SESSION_KEY)
     preview_data = anexar_sessao_ao_preview(preview_data, empresa_id=empresa_id)
-    try:
-        historico_importacoes = list(
-            listar_historico_importacoes_qs(empresa_id=empresa_id).order_by("-criado_em")[:20]
-        )
-    except ProgrammingError:
-        historico_importacoes = []
-        messages.warning(
-            request,
-            "Histórico de importações ainda não disponível nesta base de dados. "
-            "Aplica as migrations da app Dispositivos.",
-        )
+    historico_resultado = listar_historico_importacoes_seguro(empresa_id=empresa_id)
+    historico_importacoes = historico_resultado["historico"]
+    if historico_resultado["mensagem_warning"]:
+        messages.warning(request, historico_resultado["mensagem_warning"])
 
     if request.method == "POST":
         action = (request.POST.get("action") or "create_session").strip()
-        if action in {"preview_import", "save_import", "clear_import", "clear_import_report"}:
-            try:
-                resultado_acao = processar_acao_importacao_magcruiser(
-                    action=action,
-                    empresa_id=empresa_id,
-                    request_post=request.POST,
-                    request_files=request.FILES,
-                    request_session=request.session,
-                    utilizador=request.user,
-                    preview_session_key=MAGCRUISER_PREVIEW_SESSION_KEY,
-                    report_session_key=MAGCRUISER_REPORT_SESSION_KEY,
-                )
-                if resultado_acao.get("message_level") == "success":
-                    messages.success(request, resultado_acao.get("message"))
-                elif resultado_acao.get("message_level") == "info":
-                    messages.info(request, resultado_acao.get("message"))
-                elif resultado_acao.get("message_level") == "error":
-                    messages.error(request, resultado_acao.get("message"))
-            except Exception as exc:
-                messages.error(request, f"Erro na ação de importação: {exc}")
-            return redirect("dispositivos:captura")
-
-        resultado = processar_criacao_sessao_captura(
+        post_resultado = processar_post_captura_dispositivo(
+            action=action,
             empresa_id=empresa_id,
             empregado=empregado,
-            dispositivo_id=request.POST.get("dispositivo_id"),
-            furo_id=request.POST.get("furo_id"),
+            request_post=request.POST,
+            request_files=request.FILES,
+            request_session=request.session,
+            utilizador=request.user,
+            preview_session_key=MAGCRUISER_PREVIEW_SESSION_KEY,
+            report_session_key=MAGCRUISER_REPORT_SESSION_KEY,
         )
-        if not resultado["ok"]:
-            messages.error(request, resultado["erro"])
-            return redirect("dispositivos:captura")
-
-        sessao = resultado["sessao"]
-        messages.success(request, "Sessão criada com sucesso.")
-        return redirect("dispositivos:sessao_detail", pk=sessao.pk)
+        if post_resultado["message_level"] == "success":
+            messages.success(request, post_resultado["message"])
+        elif post_resultado["message_level"] == "info":
+            messages.info(request, post_resultado["message"])
+        elif post_resultado["message_level"] == "error":
+            messages.error(request, post_resultado["message"])
+        return redirect(
+            post_resultado["redirect_name"],
+            **post_resultado["redirect_kwargs"],
+        )
 
     contexto_base = construir_contexto_captura_dispositivo(empresa_id=empresa_id)
     return render(request, "dispositivos/captura.html", {

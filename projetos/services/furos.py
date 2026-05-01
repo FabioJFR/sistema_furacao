@@ -273,3 +273,50 @@ def reativar_furo(*, furo, empresa=None):
     furo.refresh_from_db()
     registar_versao_furo(furo, origem="reativado")
     return furo
+
+
+def processar_acao_terminar_furo(*, request_method, furo, empresa=None, terminado_por=None):
+    if request_method != "POST":
+        return {
+            "ok": False,
+            "mensagem_sucesso": None,
+            "mensagem_erro": None,
+            "deve_redirecionar_legacy": True,
+            "furo": furo,
+        }
+
+    furo_atualizado = terminar_furo(
+        furo=furo,
+        empresa=empresa,
+        terminado_por=terminado_por,
+    )
+    return {
+        "ok": True,
+        "mensagem_sucesso": "Furo terminado com sucesso.",
+        "mensagem_erro": None,
+        "deve_redirecionar_legacy": False,
+        "furo": furo_atualizado,
+    }
+
+
+def processar_acao_reativar_furo(*, request_method, furo, empresa=None):
+    if request_method != "POST":
+        return {
+            "ok": False,
+            "mensagem_sucesso": None,
+            "mensagem_erro": None,
+            "deve_redirecionar_legacy": True,
+            "furo": furo,
+        }
+
+    furo_atualizado = reativar_furo(
+        furo=furo,
+        empresa=empresa,
+    )
+    return {
+        "ok": True,
+        "mensagem_sucesso": "Furo reativado com sucesso.",
+        "mensagem_erro": None,
+        "deve_redirecionar_legacy": False,
+        "furo": furo_atualizado,
+    }

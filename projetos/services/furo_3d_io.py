@@ -1,6 +1,9 @@
 import csv
 import io
 import json
+import zipfile
+
+from django.http import Http404, HttpResponse
 
 from projetos.models import (
     Despesa,
@@ -242,6 +245,50 @@ def dados_completos_furo(furo):
             for d in Despesa.objects.filter(furo=furo, empresa_id=furo.empresa_id).order_by("-data")
         ],
     }
+
+
+def exportar_furo_3d_response(furo, formato):
+    payload = dados_exportacao_furo_3d(furo)
+    nome_base = f"furo-{furo.pk}-3d"
+
+    if formato == "json":
+        response = HttpResponse(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            content_type="application/json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{nome_base}.json"'
+        return response
+
+    if formato == "csv":
+        response = HttpResponse(
+            renderizar_furo_3d_csv(payload),
+            content_type="text/csv; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{nome_base}.csv"'
+        return response
+
+    if formato == "geojson":
+        response = HttpResponse(
+            renderizar_furo_3d_geojson(payload),
+            content_type="application/geo+json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{nome_base}.geojson"'
+        return response
+
+    if formato == "zip":
+        dados = dados_completos_furo(furo)
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            zip_file.writestr(f"{nome_base}-completo.json", json.dumps(dados, ensure_ascii=False, indent=2))
+            zip_file.writestr(f"{nome_base}-3d.json", json.dumps(payload, ensure_ascii=False, indent=2))
+            zip_file.writestr(f"{nome_base}-3d.csv", renderizar_furo_3d_csv(payload))
+            zip_file.writestr(f"{nome_base}-3d.geojson", renderizar_furo_3d_geojson(payload))
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{nome_base}-completo.zip"'
+        return response
+
+    raise Http404("Formato 3D não suportado.")
 
 
 def parse_imported_3d_file(uploaded_file):

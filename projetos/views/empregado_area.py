@@ -4,7 +4,6 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
 from plataforma.models import MovimentoFinanceiroPlataforma, PagamentoEmpresa
@@ -13,8 +12,8 @@ from projetos.decorators import empregado_required
 from projetos.forms.empregado_area import MeusDadosEmpregadoForm
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
 from projetos.services.empregado_area import (
-    atualizar_dados_empregado,
-    atualizar_dados_individual,
+    processar_fluxo_meus_dados_empregado_form,
+    processar_fluxo_meus_dados_individual_form,
 )
 from projetos.selectors.acesso import (
     obter_individual_por_user,
@@ -281,19 +280,22 @@ def meus_dados_empregado_editar(request):
         if resposta_erro:
             return resposta_erro
 
-        if request.method == "POST":
-            form = MeusDadosIndividualForm(request.POST, request.FILES, instance=individual)
-            if form.is_valid():
-                individual = atualizar_dados_individual(
-                    form=form,
-                    user=request.user,
-                )
+        fluxo = processar_fluxo_meus_dados_individual_form(
+            method=request.method,
+            post_data=request.POST,
+            files_data=request.FILES,
+            form_class=MeusDadosIndividualForm,
+            instance=individual,
+            user=request.user,
+        )
+        form = fluxo["form"]
+        resultado = fluxo["resultado"]
+        if resultado:
+            if resultado["ok"]:
+                individual = resultado["individual"]
                 messages.success(request, "Os teus dados foram atualizados com sucesso.")
                 return redirect("projetos:meus_dados_empregado")
-
             messages.error(request, "Erro ao atualizar os teus dados.")
-        else:
-            form = MeusDadosIndividualForm(instance=individual)
 
         return _render_meus_dados_individual_editar(request, individual, form)
 
@@ -302,23 +304,20 @@ def meus_dados_empregado_editar(request):
         logger.warning("Acesso bloqueado na view meus_dados_empregado_editar. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = MeusDadosEmpregadoForm(
-            request.POST,
-            request.FILES,
-            instance=empregado,
-        )
-        if form.is_valid():
-            try:
-                empregado = atualizar_dados_empregado(
-                    form=form,
-                    user=request.user,
-                    empresa=empregado.empresa,
-                )
-            except ValidationError:
-                messages.error(request, "Erro ao atualizar os teus dados.")
-                return _render_meus_dados_empregado_editar(request, empregado, form)
-
+    fluxo = processar_fluxo_meus_dados_empregado_form(
+        method=request.method,
+        post_data=request.POST,
+        files_data=request.FILES,
+        form_class=MeusDadosEmpregadoForm,
+        instance=empregado,
+        user=request.user,
+        empresa=empregado.empresa,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        if resultado["ok"]:
+            empregado = resultado["empregado"]
             logger.info(
                 "Dados do empregado atualizados com sucesso. user_id=%s, empregado_id=%s",
                 request.user.id,
@@ -326,15 +325,12 @@ def meus_dados_empregado_editar(request):
             )
             messages.success(request, "Os teus dados foram atualizados com sucesso.")
             return redirect("projetos:meus_dados_empregado")
-
         logger.warning(
             "Erro ao atualizar dados do empregado. user_id=%s, empregado_id=%s, erros=%s",
             request.user.id,
             empregado.id,
-            form.errors,
+            resultado.get("erros_form"),
         )
         messages.error(request, "Erro ao atualizar os teus dados.")
-    else:
-        form = MeusDadosEmpregadoForm(instance=empregado)
 
     return _render_meus_dados_empregado_editar(request, empregado, form)

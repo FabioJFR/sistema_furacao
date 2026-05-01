@@ -63,3 +63,78 @@ def atualizar_avaria(*, avaria, status, solucao="", responsavel_empregado=None, 
     if mudou_estado:
         notificar_mudanca_estado(avaria=avaria, ator_nome=ator_nome)
     return avaria
+
+
+def processar_fluxo_create_avaria_form(
+    *,
+    method,
+    post_data,
+    form_class,
+    empresa_id,
+    on_success,
+):
+    if method == "POST":
+        form = form_class(post_data, empresa_id=empresa_id)
+        if not form.is_valid():
+            return {
+                "ok": False,
+                "form": form,
+                "maquina": None,
+            }
+        maquina = form.cleaned_data["maquina"]
+        furo = form.cleaned_data.get("furo")
+        descricao = form.cleaned_data.get("descricao")
+        on_success(maquina=maquina, furo=furo, descricao=descricao)
+        return {
+            "ok": True,
+            "form": form,
+            "maquina": maquina,
+        }
+
+    return {
+        "ok": None,
+        "form": form_class(empresa_id=empresa_id),
+        "maquina": None,
+    }
+
+
+def processar_fluxo_update_avaria_form(
+    *,
+    method,
+    post_data,
+    form_class,
+    avaria,
+    ator_nome,
+    responsavel_empregado,
+    empresa_id=None,
+):
+    if method == "POST":
+        if empresa_id is not None:
+            form = form_class(post_data, instance=avaria, empresa_id=empresa_id)
+        else:
+            form = form_class(post_data, instance=avaria)
+        if not form.is_valid():
+            return {
+                "ok": False,
+                "form": form,
+            }
+        atualizar_avaria(
+            avaria=avaria,
+            status=form.cleaned_data["status"],
+            solucao=form.cleaned_data.get("solucao", ""),
+            responsavel_empregado=responsavel_empregado(form),
+            ator_nome=ator_nome,
+        )
+        return {
+            "ok": True,
+            "form": form,
+        }
+
+    if empresa_id is not None:
+        form = form_class(instance=avaria, empresa_id=empresa_id)
+    else:
+        form = form_class(instance=avaria)
+    return {
+        "ok": None,
+        "form": form,
+    }

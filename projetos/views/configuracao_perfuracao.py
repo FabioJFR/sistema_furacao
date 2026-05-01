@@ -3,7 +3,6 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.core.exceptions import ValidationError
 
 from core.permissions import admin_required
 from projetos.decorators import empregado_required
@@ -20,7 +19,7 @@ from projetos.selectors.historico_configuracao import (
 )
 from projetos.services.configuracao_perfuracao import (
     apagar_configuracao_perfuracao,
-    guardar_configuracao_perfuracao,
+    processar_fluxo_form_configuracao_perfuracao,
 )
 from projetos.services.acesso_contexto import (
     obter_empregado_autenticado_contexto,
@@ -73,35 +72,12 @@ def _obter_empregado_autenticado_configuracao(request):
     return empregado, None
 
 
-def _aplicar_validation_error_no_form(form, erro):
-    if hasattr(erro, "message_dict"):
-        for campo, erros in erro.message_dict.items():
-            for item in erros:
-                form.add_error(campo, item)
-        return
-    form.add_error(None, erro)
-
-
-def _preparar_form_configuracao(*, request, empregado, empresa, instance=None):
-    form = ConfiguracaoPerfuracaoEmpregadoForm(
-        request.POST if request.method == "POST" else None,
-        instance=instance,
-        empregado=empregado,
-    )
-    form.instance.empregado = empregado
-    form.instance.empresa = empresa
-    form.instance.atualizado_por = request.user
-    return form
-
-
 def _processar_form_configuracao(
     *,
     request,
-    form,
-    empregado,
     empresa,
-    acao_historico,
-    observacoes_historico,
+    empregado,
+    resultado,
     sucesso_msg,
     erro_msg,
     log_sucesso,
@@ -109,25 +85,12 @@ def _processar_form_configuracao(
     redirect_name,
     redirect_kwargs,
 ):
-    if not form.is_valid():
-        logger.warning(log_erro, request.user.id, form.errors)
+    if not resultado["ok"]:
+        logger.warning(log_erro, request.user.id, resultado.get("erros_form"))
         messages.error(request, erro_msg)
         return None
 
-    try:
-        configuracao = guardar_configuracao_perfuracao(
-            form=form,
-            empregado=empregado,
-            empresa=empresa,
-            atualizado_por=request.user,
-            acao_historico=acao_historico,
-            observacoes_historico=observacoes_historico,
-        )
-    except ValidationError as erro:
-        _aplicar_validation_error_no_form(form, erro)
-        logger.warning(log_erro, request.user.id, form.errors)
-        messages.error(request, erro_msg)
-        return None
+    configuracao = resultado["configuracao"]
 
     logger.info(log_sucesso, request.user.id, empresa.id, empregado.id, configuracao.id)
     messages.success(request, sucesso_msg)
@@ -183,19 +146,24 @@ def configuracao_perfuracao_create_empregado(request):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = _preparar_form_configuracao(
-            request=request,
-            empregado=empregado,
-            empresa=empregado.empresa,
-        )
+    fluxo = processar_fluxo_form_configuracao_perfuracao(
+        request_method=request.method,
+        post_data=request.POST,
+        form_class=ConfiguracaoPerfuracaoEmpregadoForm,
+        empregado=empregado,
+        empresa=empregado.empresa,
+        atualizado_por=request.user,
+        acao_historico="criado",
+        observacoes_historico="Configuração criada.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta = _processar_form_configuracao(
             request=request,
-            form=form,
-            empregado=empregado,
             empresa=empregado.empresa,
-            acao_historico="criado",
-            observacoes_historico="Configuração criada.",
+            empregado=empregado,
+            resultado=resultado,
             sucesso_msg="Configuração de perfuração criada com sucesso.",
             erro_msg="Erro ao criar a configuração de perfuração. Verifique os dados.",
             log_sucesso="Configuração de perfuração criada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
@@ -205,8 +173,6 @@ def configuracao_perfuracao_create_empregado(request):
         )
         if resposta:
             return resposta
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
 
     return render(request, "projetos/configuracao_perfuracao_form.html", {
         "form": form,
@@ -233,20 +199,25 @@ def configuracao_perfuracao_update_empregado(request, pk):
 
     configuracao = obter_configuracao_perfuracao_empregado(pk, empregado)
 
-    if request.method == "POST":
-        form = _preparar_form_configuracao(
-            request=request,
-            empregado=empregado,
-            empresa=empregado.empresa,
-            instance=configuracao,
-        )
+    fluxo = processar_fluxo_form_configuracao_perfuracao(
+        request_method=request.method,
+        post_data=request.POST,
+        form_class=ConfiguracaoPerfuracaoEmpregadoForm,
+        empregado=empregado,
+        empresa=empregado.empresa,
+        atualizado_por=request.user,
+        instance=configuracao,
+        acao_historico="editado",
+        observacoes_historico="Configuração editada.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta = _processar_form_configuracao(
             request=request,
-            form=form,
-            empregado=empregado,
             empresa=empregado.empresa,
-            acao_historico="editado",
-            observacoes_historico="Configuração editada.",
+            empregado=empregado,
+            resultado=resultado,
             sucesso_msg="Configuração de perfuração atualizada com sucesso.",
             erro_msg="Erro ao atualizar a configuração de perfuração. Verifique os dados.",
             log_sucesso="Configuração de perfuração atualizada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
@@ -256,11 +227,6 @@ def configuracao_perfuracao_update_empregado(request, pk):
         )
         if resposta:
             return resposta
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            instance=configuracao,
-            empregado=empregado
-        )
 
     return render(request, "projetos/configuracao_perfuracao_form.html", {
         "form": form,
@@ -364,19 +330,24 @@ def configuracao_perfuracao_create_admin(request, pk):
 
     empregado = obter_empregado_por_pk_empresa(pk, empresa)
 
-    if request.method == "POST":
-        form = _preparar_form_configuracao(
-            request=request,
-            empregado=empregado,
-            empresa=empresa,
-        )
+    fluxo = processar_fluxo_form_configuracao_perfuracao(
+        request_method=request.method,
+        post_data=request.POST,
+        form_class=ConfiguracaoPerfuracaoEmpregadoForm,
+        empregado=empregado,
+        empresa=empresa,
+        atualizado_por=request.user,
+        acao_historico="criado",
+        observacoes_historico="Configuração criada pelo administrador.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta = _processar_form_configuracao(
             request=request,
-            form=form,
-            empregado=empregado,
             empresa=empresa,
-            acao_historico="criado",
-            observacoes_historico="Configuração criada pelo administrador.",
+            empregado=empregado,
+            resultado=resultado,
             sucesso_msg="Configuração de perfuração criada com sucesso.",
             erro_msg="Erro ao criar a configuração de perfuração. Verifique os dados.",
             log_sucesso="Configuração de perfuração criada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
@@ -386,8 +357,6 @@ def configuracao_perfuracao_create_admin(request, pk):
         )
         if resposta:
             return resposta
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(empregado=empregado)
 
     return render(request, "projetos/configuracao_perfuracao_form.html", {
         "form": form,
@@ -415,20 +384,25 @@ def configuracao_perfuracao_update_admin(request, pk):
     configuracao = obter_configuracao_perfuracao_admin(pk, empresa)
     empregado = configuracao.empregado
 
-    if request.method == "POST":
-        form = _preparar_form_configuracao(
-            request=request,
-            empregado=empregado,
-            empresa=empresa,
-            instance=configuracao,
-        )
+    fluxo = processar_fluxo_form_configuracao_perfuracao(
+        request_method=request.method,
+        post_data=request.POST,
+        form_class=ConfiguracaoPerfuracaoEmpregadoForm,
+        empregado=empregado,
+        empresa=empresa,
+        atualizado_por=request.user,
+        instance=configuracao,
+        acao_historico="editado",
+        observacoes_historico="Configuração editada pelo administrador.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
         resposta = _processar_form_configuracao(
             request=request,
-            form=form,
-            empregado=empregado,
             empresa=empresa,
-            acao_historico="editado",
-            observacoes_historico="Configuração editada pelo administrador.",
+            empregado=empregado,
+            resultado=resultado,
             sucesso_msg="Configuração de perfuração atualizada com sucesso.",
             erro_msg="Erro ao atualizar a configuração de perfuração. Verifique os dados.",
             log_sucesso="Configuração de perfuração atualizada com sucesso por admin. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
@@ -438,11 +412,6 @@ def configuracao_perfuracao_update_admin(request, pk):
         )
         if resposta:
             return resposta
-    else:
-        form = ConfiguracaoPerfuracaoEmpregadoForm(
-            instance=configuracao,
-            empregado=empregado
-        )
 
     return render(request, "projetos/configuracao_perfuracao_form.html", {
         "form": form,

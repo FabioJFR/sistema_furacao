@@ -22,9 +22,6 @@ from geologia.services.drone_sf_dashboard import (
     construir_form_comando_sf,
     criar_ou_obter_drone_sf_demo,
     motor_missoes_summary_sf,
-    parse_payload_json_request_sf,
-    processar_acao_operacao_detail_sf,
-    processar_comando_sf_create,
     processar_comandos_pendentes_bridge_sf,
     processar_ingest_estado_bridge_sf,
     processar_log_event_bridge_sf,
@@ -32,23 +29,27 @@ from geologia.services.drone_sf_dashboard import (
     processar_execucao_missao_programada_sf,
     processar_remocao_missao_programada_sf,
     processar_toggle_missao_programada_sf,
-    resolver_operacao_bridge_sf,
     serializar_estado_operacao_sf,
 )
+from geologia.services.hub_page import (
+    construir_contexto_drone_sf_hub,
+    construir_contexto_geologia_hub,
+)
+from geologia.services.drone_sf_page import (
+    processar_acao_missao_programada_sf,
+    processar_post_comando_sf,
+    processar_post_operacao_detail_sf,
+    resolver_contexto_bridge_sf,
+)
 from geologia.selectors.dashboard import (
-    listar_documentos_knowledge_base_drone,
     obter_comando_sf_operacao,
     obter_comandos_recentes_operacao_sf,
     obter_drone_sf,
     obter_drone_sf_simples,
-    obter_drones_sf_hub_qs,
     obter_furo_geologia_dashboard,
-    obter_furos_geologia_hub_qs,
     obter_logs_furo_geologia,
-    obter_logs_geologia_hub_qs,
     obter_missao_programada_drone_sf,
     obter_missoes_furo_geologia,
-    obter_missoes_geologia_hub_qs,
     obter_operacao_drone_sf,
     obter_operacao_sf_por_bridge_key,
     obter_ou_criar_configuracao_drone_sf,
@@ -97,42 +98,6 @@ def _mensagem_sucesso_redirect(*, request, mensagem, redirect_name, **redirect_k
     return redirect(redirect_name, **redirect_kwargs)
 
 
-def _processar_acao_operacao_detail_post(*, request, drone, operacao_form, missao_programada_form, missao_edicao):
-    if request.method != "POST":
-        return None
-    resultado_acao = processar_acao_operacao_detail_sf(
-        action=request.POST.get("sf_action"),
-        operacao_form=operacao_form,
-        missao_programada_form=missao_programada_form,
-        missao_edicao=missao_edicao,
-        empresa=drone.empresa,
-        utilizador=request.user,
-    )
-    if not resultado_acao.get("handled"):
-        return None
-    if resultado_acao.get("ok"):
-        messages.success(request, resultado_acao.get("message"))
-        return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
-    messages.error(request, resultado_acao.get("message"))
-    return None
-
-
-def _processar_comando_sf_post(*, request, operacao, empresa, utilizador):
-    if request.method != "POST":
-        return None
-    resultado = processar_comando_sf_create(
-        request_post=request.POST,
-        operacao=operacao,
-        empresa=empresa,
-        utilizador=utilizador,
-    )
-    if resultado["ok"]:
-        messages.success(request, "Comando do Drone S_F colocado na fila.")
-    else:
-        messages.error(request, "Não foi possível criar o comando do Drone S_F.")
-    return True
-
-
 @login_required
 @admin_required
 def geologia_hub(request):
@@ -140,23 +105,10 @@ def geologia_hub(request):
     if resposta_erro:
         return resposta_erro
 
-    furos_qs = obter_furos_geologia_hub_qs(empresa=empresa)
-    logs_qs = obter_logs_geologia_hub_qs(empresa=empresa)
-    missoes_qs = obter_missoes_geologia_hub_qs(empresa=empresa)
-
     return render(
         request,
         "geologia/hub.html",
-        {
-            "contexto_geologia": contexto_geologia,
-            "empresa_geologia": empresa,
-            "furos": furos_qs[:12],
-            "logs_recentes": logs_qs[:6],
-            "missoes_recentes": missoes_qs[:6],
-            "total_furos": furos_qs.count(),
-            "total_logs": logs_qs.count(),
-            "total_missoes": missoes_qs.count(),
-        },
+        construir_contexto_geologia_hub(empresa=empresa, contexto_geologia=contexto_geologia),
     )
 
 
@@ -167,25 +119,10 @@ def drone_sf_hub(request):
     if resposta_erro:
         return resposta_erro
 
-    furos_qs = obter_furos_geologia_hub_qs(empresa=empresa)
-    drones_qs = obter_drones_sf_hub_qs(empresa=empresa)
-    missoes_qs = obter_missoes_geologia_hub_qs(empresa=empresa)
-    documentos_drone = listar_documentos_knowledge_base_drone()
-
     return render(
         request,
         "geologia/drone_sf_hub.html",
-        {
-            "contexto_geologia": contexto_geologia,
-            "empresa_geologia": empresa,
-            "total_furos": furos_qs.count(),
-            "total_drones_sf": drones_qs.count(),
-            "total_missoes": missoes_qs.count(),
-            "furos": furos_qs[:10],
-            "drones_sf": drones_qs[:8],
-            "missoes_recentes": missoes_qs[:6],
-            "documentos_drone": documentos_drone,
-        },
+        construir_contexto_drone_sf_hub(empresa=empresa, contexto_geologia=contexto_geologia),
     )
 
 
@@ -387,15 +324,21 @@ def drone_sf_operacao_detail(request, drone_id):
             "usar_live_view": True,
         },
     )
-    resposta_post = _processar_acao_operacao_detail_post(
-        request=request,
-        drone=drone,
+    resposta_post = processar_post_operacao_detail_sf(
+        request_method=request.method,
+        action=request.POST.get("sf_action"),
         operacao_form=operacao_form,
         missao_programada_form=missao_programada_form,
         missao_edicao=missao_edicao,
+        empresa=drone.empresa,
+        utilizador=request.user,
     )
-    if resposta_post:
-        return resposta_post
+    if resposta_post["handled"]:
+        if resposta_post["ok"]:
+            messages.success(request, resposta_post["message"])
+        else:
+            messages.error(request, resposta_post["message"])
+        return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
     missoes_programadas = construir_missoes_programadas_contexto(drone, limit=20)
 
@@ -428,12 +371,18 @@ def drone_sf_comando_create(request, drone_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     operacao = obter_operacao_drone_sf(drone)
-    _processar_comando_sf_post(
-        request=request,
+    resultado_comando = processar_post_comando_sf(
+        request_method=request.method,
+        request_post=request.POST,
         operacao=operacao,
         empresa=drone.empresa,
         utilizador=request.user,
     )
+    if resultado_comando["handled"]:
+        if resultado_comando["ok"]:
+            messages.success(request, resultado_comando["message"])
+        else:
+            messages.error(request, resultado_comando["message"])
     return redirect("geologia:drone_sf_operacao_detail", drone_id=drone.pk)
 
 
@@ -449,7 +398,12 @@ def drone_sf_missao_programada_toggle(request, drone_id, missao_id):
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
 
     novo_estado = request.POST.get("ativa") == "1"
-    resultado = processar_toggle_missao_programada_sf(missao=missao, ativa=novo_estado)
+    resultado = processar_acao_missao_programada_sf(
+        acao="toggle",
+        processar_toggle_fn=processar_toggle_missao_programada_sf,
+        missao=missao,
+        ativa=novo_estado,
+    )
     return _mensagem_sucesso_redirect(
         request=request,
         mensagem=resultado["mensagem"],
@@ -470,9 +424,11 @@ def drone_sf_missao_programada_executar(request, drone_id, missao_id):
     operacao = obter_operacao_drone_sf(drone)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
 
-    resultado = processar_execucao_missao_programada_sf(
-        operacao=operacao,
+    resultado = processar_acao_missao_programada_sf(
+        acao="executar",
+        processar_execucao_fn=processar_execucao_missao_programada_sf,
         missao=missao,
+        operacao=operacao,
         utilizador=request.user,
     )
     return _mensagem_sucesso_redirect(
@@ -493,7 +449,11 @@ def drone_sf_missao_programada_delete(request, drone_id, missao_id):
 
     drone = obter_drone_sf_simples(pk=drone_id, empresa=empresa)
     missao = obter_missao_programada_drone_sf(drone=drone, missao_id=missao_id)
-    resultado = processar_remocao_missao_programada_sf(missao=missao)
+    resultado = processar_acao_missao_programada_sf(
+        acao="remover",
+        processar_remocao_fn=processar_remocao_missao_programada_sf,
+        missao=missao,
+    )
     return _mensagem_sucesso_redirect(
         request=request,
         mensagem=resultado["mensagem"],
@@ -505,18 +465,16 @@ def drone_sf_missao_programada_delete(request, drone_id, missao_id):
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_ingest_estado(request):
-    acesso = resolver_operacao_bridge_sf(
-        request,
+    contexto = resolver_contexto_bridge_sf(
+        request=request,
         obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
         metodo="POST",
+        requer_payload_json=True,
     )
-    if not acesso["ok"]:
-        return acesso["erro_response"]
-    operacao = acesso["operacao"]
-
-    payload, erro_response = parse_payload_json_request_sf(request)
-    if erro_response is not None:
-        return erro_response
+    if not contexto["ok"]:
+        return contexto["erro_response"]
+    operacao = contexto["operacao"]
+    payload = contexto["payload"]
 
     processar_ingest_estado_bridge_sf(operacao, payload)
     return _json_ok(
@@ -533,14 +491,14 @@ def api_drone_sf_bridge_ingest_estado(request):
 @csrf_exempt
 @require_GET
 def api_drone_sf_bridge_comandos_pendentes(request):
-    acesso = resolver_operacao_bridge_sf(
-        request,
+    contexto = resolver_contexto_bridge_sf(
+        request=request,
         obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
         metodo="GET",
     )
-    if not acesso["ok"]:
-        return acesso["erro_response"]
-    operacao = acesso["operacao"]
+    if not contexto["ok"]:
+        return contexto["erro_response"]
+    operacao = contexto["operacao"]
 
     comandos = processar_comandos_pendentes_bridge_sf(operacao)
     return _json_ok({"comandos": comandos})
@@ -549,20 +507,18 @@ def api_drone_sf_bridge_comandos_pendentes(request):
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_confirmar_comando(request, comando_id):
-    acesso = resolver_operacao_bridge_sf(
-        request,
+    contexto = resolver_contexto_bridge_sf(
+        request=request,
         obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
         metodo="POST",
+        requer_payload_json=True,
     )
-    if not acesso["ok"]:
-        return acesso["erro_response"]
-    operacao = acesso["operacao"]
+    if not contexto["ok"]:
+        return contexto["erro_response"]
+    operacao = contexto["operacao"]
+    payload = contexto["payload"]
 
     comando = obter_comando_sf_operacao(operacao=operacao, comando_id=comando_id)
-    payload, erro_response = parse_payload_json_request_sf(request)
-    if erro_response is not None:
-        return erro_response
-
     erro_response = confirmar_comando_bridge_sf(comando=comando, payload=payload)
     if erro_response is not None:
         return erro_response
@@ -572,18 +528,16 @@ def api_drone_sf_bridge_confirmar_comando(request, comando_id):
 @csrf_exempt
 @require_POST
 def api_drone_sf_bridge_log_event(request):
-    acesso = resolver_operacao_bridge_sf(
-        request,
+    contexto = resolver_contexto_bridge_sf(
+        request=request,
         obter_operacao_por_bridge_key_fn=obter_operacao_sf_por_bridge_key,
         metodo="POST",
+        requer_payload_json=True,
     )
-    if not acesso["ok"]:
-        return acesso["erro_response"]
-    operacao = acesso["operacao"]
-
-    payload, erro_response = parse_payload_json_request_sf(request)
-    if erro_response is not None:
-        return erro_response
+    if not contexto["ok"]:
+        return contexto["erro_response"]
+    operacao = contexto["operacao"]
+    payload = contexto["payload"]
 
     processar_log_event_bridge_sf(operacao, payload)
     return _json_ok()

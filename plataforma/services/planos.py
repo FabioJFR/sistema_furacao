@@ -57,3 +57,20 @@ def processar_submissao_plano_update(*, post_data, plano):
         "mensagem": _("Plano atualizado com sucesso."),
         "plano": plano_atualizado,
     }
+
+
+def processar_fluxo_form_plano(*, method, post_data, plano=None):
+    if method == "POST":
+        if plano is None:
+            resultado = processar_submissao_plano_create(post_data=post_data)
+        else:
+            resultado = processar_submissao_plano_update(post_data=post_data, plano=plano)
+        return {
+            "form": resultado["form"],
+            "resultado": resultado,
+        }
+
+    return {
+        "form": construir_form_plano(instance=plano),
+        "resultado": None,
+    }

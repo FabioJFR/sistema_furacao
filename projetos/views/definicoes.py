@@ -7,7 +7,7 @@ from django.utils import translation
 
 from projetos.forms import PreferenciasForm
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
-from projetos.services.definicoes import guardar_preferencias_utilizador
+from projetos.services.definicoes import processar_fluxo_preferencias_utilizador_form
 from projetos.selectors.preferencias import (
     garantir_preferencias_empresa,
     obter_ou_criar_preferencias_user,
@@ -56,22 +56,18 @@ def _aplicar_idioma_preferencias(request, preferencias):
         request.session["django_language"] = preferencias.idioma
 
 
-def _processar_form_definicoes(request, form, empregado):
-    if not form.is_valid():
+def _processar_form_definicoes(request, resultado, empregado):
+    if not resultado["ok"]:
         logger.warning(
             "Erro ao guardar definições. user_id=%s, empregado_id=%s, erros=%s",
             request.user.id,
             getattr(empregado, "id", None),
-            form.errors,
+            resultado.get("erros_form"),
         )
         messages.error(request, "Erro ao guardar definições.")
         return None
 
-    preferencias = guardar_preferencias_utilizador(
-        form=form,
-        user=request.user,
-        empresa=empregado.empresa if empregado and empregado.empresa_id else None,
-    )
+    preferencias = resultado["preferencias"]
     _aplicar_idioma_preferencias(request, preferencias)
     logger.info(
         "Definições atualizadas com sucesso. user_id=%s, empregado_id=%s",
@@ -98,13 +94,20 @@ def definicoes(request):
     if empregado and empregado.empresa_id:
         preferencias = garantir_preferencias_empresa(preferencias, empregado.empresa)
 
-    if request.method == "POST":
-        form = PreferenciasForm(request.POST, instance=preferencias)
-        resposta = _processar_form_definicoes(request, form, empregado)
+    fluxo = processar_fluxo_preferencias_utilizador_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=PreferenciasForm,
+        preferencias=preferencias,
+        user=request.user,
+        empresa=empregado.empresa if empregado and empregado.empresa_id else None,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+    if resultado:
+        resposta = _processar_form_definicoes(request, resultado, empregado)
         if resposta:
             return resposta
-    else:
-        form = PreferenciasForm(instance=preferencias)
 
     return render(request, "projetos/definicoes.html", {
         "form": form,

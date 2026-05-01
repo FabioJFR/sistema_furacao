@@ -22,19 +22,19 @@ from geologia.selectors.drone import (
     obter_ou_criar_operacao_empresa,
 )
 from geologia.services.drone_dashboard import (
-    atualizar_operacao_drone_from_form,
     colocar_drone_em_procura,
     confirmar_comando_bridge,
     construir_form_comando,
-    construir_form_importar_missao,
     construir_form_missao_create,
     construir_form_missao_update,
     parse_payload_json_request,
-    processar_comando_create,
+    processar_fluxo_comando_drone_create,
+    processar_fluxo_operacao_drone_update,
+    processar_fluxo_importacao_missao,
     processar_comandos_pendentes_bridge,
-    processar_importacao_missao,
     processar_ingest_estado_bridge,
     processar_log_event_bridge,
+    processar_fluxo_form_missao,
     processar_missao_create,
     processar_missao_update,
     serializar_estado_operacao,
@@ -72,35 +72,6 @@ def _validar_empresa_geologia_necessaria(empresa, mensagem_erro):
     return mensagem_erro
 
 
-def _processar_form_missao(
-    *,
-    request,
-    request_post,
-    request_files,
-    processar_fn,
-    construir_form_fn,
-    construir_form_kwargs,
-    processar_kwargs,
-    sucesso_msg,
-    erro_msg,
-):
-    if request.method == "POST":
-        resultado = processar_fn(
-            request_post=request_post,
-            request_files=request_files,
-            **processar_kwargs,
-        )
-        form = resultado["form"]
-        if resultado["ok"]:
-            messages.success(request, sucesso_msg)
-            return form, True
-        messages.error(request, erro_msg)
-        return form, False
-
-    form = construir_form_fn(**construir_form_kwargs)
-    return form, False
-
-
 @login_required
 @admin_required
 def drone_hub(request):
@@ -130,20 +101,21 @@ def drone_hub(request):
     else:
         estado_operacao = {}
 
-    if request.method == "POST" and request.POST.get("drone_action") == "importar_missao":
-        resultado = processar_importacao_missao(
-            request_post=request.POST,
-            request_files=request.FILES,
-            empresa=empresa,
-        )
-        form = resultado["form"]
-        if resultado["ok"]:
-            missao = resultado["missao"]
+    fluxo_importacao = processar_fluxo_importacao_missao(
+        request_method=request.method,
+        request_post=request.POST,
+        request_files=request.FILES,
+        empresa=empresa,
+        action_value=request.POST.get("drone_action"),
+    )
+    form = fluxo_importacao["form"]
+    resultado_importacao = fluxo_importacao["resultado"]
+    if resultado_importacao:
+        if resultado_importacao["ok"]:
+            missao = resultado_importacao["missao"]
             messages.success(request, "Missao DJI importada com sucesso.")
             return redirect("geologia:missao_detail", pk=missao.pk)
         messages.error(request, "Nao foi possivel importar a missao DJI.")
-    else:
-        form = construir_form_importar_missao(empresa=empresa)
 
     context = {
         "form": form,
@@ -179,17 +151,18 @@ def drone_controle_update(request):
         return redirect("geologia:drone_hub")
 
     operacao = obter_operacao_empresa(empresa)
-    form = DroneOperacaoTempoRealForm(
-        request.POST or None,
-        instance=operacao,
+    fluxo = processar_fluxo_operacao_drone_update(
+        request_method=request.method,
+        request_post=request.POST,
+        operacao=operacao,
         empresa=empresa,
-        prefix="operacao",
     )
-    operacao_atualizada = atualizar_operacao_drone_from_form(form=form) if request.method == "POST" else None
-    if operacao_atualizada is not None:
-        messages.success(request, "Centro de controlo do drone atualizado.")
-    elif request.method == "POST":
-        messages.error(request, "Nao foi possivel atualizar o centro de controlo do drone.")
+    resultado = fluxo["resultado"]
+    if resultado is not None:
+        if resultado["ok"]:
+            messages.success(request, "Centro de controlo do drone atualizado.")
+        else:
+            messages.error(request, "Nao foi possivel atualizar o centro de controlo do drone.")
     return redirect("geologia:drone_hub")
 
 
@@ -208,13 +181,15 @@ def drone_comando_create(request):
         return redirect("geologia:drone_hub")
 
     operacao = obter_operacao_empresa(empresa)
-    if request.method == "POST":
-        resultado = processar_comando_create(
-            request_post=request.POST,
-            operacao=operacao,
-            empresa=empresa,
-            user=request.user,
-        )
+    fluxo = processar_fluxo_comando_drone_create(
+        request_method=request.method,
+        request_post=request.POST,
+        operacao=operacao,
+        empresa=empresa,
+        user=request.user,
+    )
+    resultado = fluxo["resultado"]
+    if resultado is not None:
         if resultado["ok"]:
             messages.success(request, "Comando colocado na fila do drone.")
         else:
@@ -354,19 +329,21 @@ def missao_drone_create(request, furo_id):
 
     furo = obter_furo_drone(furo_id, empresa=empresa)
 
-    form, resposta = _processar_form_missao(
-        request=request,
+    fluxo = processar_fluxo_form_missao(
+        request_method=request.method,
         request_post=request.POST,
         request_files=request.FILES,
         processar_fn=processar_missao_create,
         construir_form_fn=construir_form_missao_create,
         construir_form_kwargs={"furo": furo, "empresa": empresa},
         processar_kwargs={"furo": furo, "empresa": empresa},
-        sucesso_msg="Missao do drone registada com sucesso.",
-        erro_msg="Nao foi possivel guardar a missao do drone.",
     )
-    if resposta:
+    form = fluxo["form"]
+    if fluxo["ok"] is True:
+        messages.success(request, "Missao do drone registada com sucesso.")
         return redirect("geologia:furo_dashboard", furo_id=furo.pk)
+    if fluxo["ok"] is False:
+        messages.error(request, "Nao foi possivel guardar a missao do drone.")
 
     return render(
         request,
@@ -409,19 +386,21 @@ def missao_drone_update(request, pk):
 
     missao = obter_missao_drone(pk, empresa=empresa)
 
-    form, resposta = _processar_form_missao(
-        request=request,
+    fluxo = processar_fluxo_form_missao(
+        request_method=request.method,
         request_post=request.POST,
         request_files=request.FILES,
         processar_fn=processar_missao_update,
         construir_form_fn=construir_form_missao_update,
         construir_form_kwargs={"missao": missao, "empresa": empresa},
         processar_kwargs={"missao": missao, "empresa": empresa},
-        sucesso_msg="Missao do drone atualizada com sucesso.",
-        erro_msg="Nao foi possivel atualizar a missao do drone.",
     )
-    if resposta:
+    form = fluxo["form"]
+    if fluxo["ok"] is True:
+        messages.success(request, "Missao do drone atualizada com sucesso.")
         return redirect("geologia:missao_detail", pk=missao.pk)
+    if fluxo["ok"] is False:
+        messages.error(request, "Nao foi possivel atualizar a missao do drone.")
 
     return render(
         request,
