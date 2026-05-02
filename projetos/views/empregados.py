@@ -67,16 +67,16 @@ from projetos.selectors.empregados import (
     obter_contexto_materiais_disponiveis_empregado,
 )
 from projetos.services.empregados import (
-    apagar_empregado_admin,
     construir_resumo_registos_projeto_empregado,
     garantir_individual_para_user,
-    processar_acao_remover_ficheiro_empregado,
     processar_acao_pendente_empregado,
-    processar_acao_terminar_ligacao_projeto,
+    processar_fluxo_apagar_empregado_admin,
     processar_fluxo_empregado_admin_form,
     processar_fluxo_ficheiro_empregado_admin_form,
+    processar_fluxo_registo_empregado_form,
+    processar_fluxo_remover_ficheiro_empregado,
+    processar_fluxo_terminar_ligacao_projeto,
     processar_fluxo_ligacao_projeto_admin_form,
-    processar_registo_empregado_form,
 )
 
 logger = logging.getLogger("core")
@@ -172,9 +172,15 @@ def registo_empregado(request):
         request.method,
         request.user.is_authenticated,
     )
-    if request.method == "POST":
-        form = EmpregadoRegistroForm(request.POST)
-        resultado = processar_registo_empregado_form(form=form)
+    fluxo = processar_fluxo_registo_empregado_form(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpregadoRegistroForm,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
         if resultado["estado"] == "ok":
             logger.info("Formulário de registo de empregado válido. email='%s'", form.cleaned_data.get("email"))
             resultado_registo = resultado["resultado_registo"]
@@ -189,11 +195,8 @@ def registo_empregado(request):
                     "Registo enviado com sucesso. Aguarde aprovação da empresa para receber acesso à plataforma.",
                 )
             return redirect("login")
-        else:
-            messages.error(request, "Existem erros no formulário. Corrija os campos assinalados.")
-            logger.warning("Erros no formulário de registo de empregado: %s", form.errors)
-    else:
-        form = EmpregadoRegistroForm()
+        messages.error(request, "Existem erros no formulário. Corrija os campos assinalados.")
+        logger.warning("Erros no formulário de registo de empregado: %s", form.errors)
 
     logger.info("Render da view registo_empregado concluído.")
     return render(request, "projetos/registo_empregado.html", {
@@ -425,13 +428,18 @@ def empregado_delete(request, pk):
 
     empregado = obter_empregado_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        empregado_id = apagar_empregado_admin(empregado=empregado, empresa=empresa)
+    resultado = processar_fluxo_apagar_empregado_admin(
+        method=request.method,
+        empregado=empregado,
+        empresa=empresa,
+    )
+
+    if resultado["ok"]:
         logger.info(
             "Empregado apagado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s",
             request.user.id,
             empresa.id,
-            empregado_id,
+            resultado["empregado_id"],
         )
         messages.success(request, "Empregado apagado com sucesso.")
         return redirect(reverse("projetos:empregado_list"))
@@ -584,8 +592,12 @@ def empregado_terminar_projeto(request, pk, ligacao_id):
     empregado = obter_empregado_admin_por_pk(pk, empresa)
     ligacao = obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa)
 
-    if request.method == "POST":
-        processar_acao_terminar_ligacao_projeto(ligacao=ligacao, empresa=empresa)
+    resultado = processar_fluxo_terminar_ligacao_projeto(
+        method=request.method,
+        ligacao=ligacao,
+        empresa=empresa,
+    )
+    if resultado["ok"]:
         logger.info(
             "Projeto encerrado para empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ligacao_id=%s",
             request.user.id,
@@ -675,15 +687,17 @@ def empregado_apagar_ficheiro(request, pk, ficheiro_id):
     empregado = obter_empregado_admin_por_pk(pk, empresa)
     ficheiro = obter_ficheiro_empregado_admin(ficheiro_id, empregado, empresa)
 
-    if request.method == "POST":
-        resultado = processar_acao_remover_ficheiro_empregado(ficheiro=ficheiro)
-        ficheiro_id_removido = resultado["ficheiro_id"]
+    resultado = processar_fluxo_remover_ficheiro_empregado(
+        method=request.method,
+        ficheiro=ficheiro,
+    )
+    if resultado["ok"]:
         logger.info(
             "Ficheiro removido do empregado com sucesso. user_id=%s, empresa_id=%s, empregado_id=%s, ficheiro_id=%s",
             request.user.id,
             empresa.id,
             empregado.id,
-            ficheiro_id_removido,
+            resultado["ficheiro_id"],
         )
         messages.success(request, "Ficheiro removido com sucesso.")
         return redirect(empregado)

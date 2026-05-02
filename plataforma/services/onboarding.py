@@ -129,6 +129,23 @@ def processar_submissao_onboarding_empresa(*, post_data, actor_user_id=None):
         "user_admin": user_admin,
     }
 
+
+def processar_fluxo_onboarding_empresa(*, method, post_data, actor_user_id=None):
+    if method == "POST":
+        resultado = processar_submissao_onboarding_empresa(
+            post_data=post_data,
+            actor_user_id=actor_user_id,
+        )
+        return {
+            "form": resultado["form"],
+            "resultado": resultado,
+        }
+
+    return {
+        "form": construir_form_onboarding_empresa(),
+        "resultado": None,
+    }
+
 def _validar_dados_onboarding(
     *,
     nome_empresa,

@@ -353,6 +353,33 @@
     height: auto;
 }
 
+/* Força a toolbar do Plotly (zoom/pan/etc.) a ficar legível sem painel de fundo */
+#grafico .modebar {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#grafico .modebar-btn {
+    color: #1f2937 !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    margin: 0 2px !important;
+}
+
+#grafico .modebar-btn svg path,
+#grafico .modebar-btn svg rect,
+#grafico .modebar-btn svg polygon,
+#grafico .modebar-btn svg line {
+    fill: #1f2937 !important;
+    stroke: #1f2937 !important;
+}
+
+#grafico .modebar-btn:hover {
+    background: #e2e8f0 !important;
+}
+
 @media (max-width: 768px) {
     .furo-3d-shell {
         max-width: 100%;

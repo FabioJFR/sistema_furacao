@@ -7,8 +7,7 @@ from django.shortcuts import redirect, render
 from plataforma.decorators import platform_admin_required
 from plataforma.selectors.planos import construir_planos_periodos_precos, listar_planos_ativos
 from plataforma.services.onboarding import (
-    construir_form_onboarding_empresa,
-    processar_submissao_onboarding_empresa,
+    processar_fluxo_onboarding_empresa,
 )
 
 
@@ -30,27 +29,20 @@ def onboarding_empresa(request):
         request.method,
     )
 
-    if request.method == "POST":
-        logger.info(
-            "POST recebido em onboarding_empresa. nome_empresa=%r, email_admin=%r, tipo_acesso=%r, criar_subscricao_inicial=%r",
-            request.POST.get("nome_empresa"),
-            request.POST.get("email_admin"),
-            request.POST.get("tipo_acesso"),
-            request.POST.get("criar_subscricao_inicial"),
-        )
-        resultado = processar_submissao_onboarding_empresa(
-            post_data=request.POST,
-            actor_user_id=getattr(request.user, "id", None),
-        )
-        form = resultado["form"]
+    fluxo = processar_fluxo_onboarding_empresa(
+        method=request.method,
+        post_data=request.POST,
+        actor_user_id=getattr(request.user, "id", None),
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
 
+    if resultado:
         if resultado["ok"]:
             messages.success(request, resultado["mensagem_sucesso"])
             return redirect("plataforma:onboarding_empresa")
-
         messages.error(request, resultado["mensagem_erro"])
     else:
-        form = construir_form_onboarding_empresa()
         logger.debug(
             "Formulário onboarding_empresa aberto em GET. user_id=%s",
             getattr(request.user, "id", None),

@@ -1,0 +1,272 @@
+{% extends "projetos/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "3D Implicit Model" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    #implicit-3d-plot .modebar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: transparent !important;
+    }
+    #implicit-3d-plot .modebar-group {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        margin: 0 !important;
+    }
+    #implicit-3d-plot .modebar-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+    }
+    #implicit-3d-plot .modebar-btn:hover {
+        background: #f8fafc !important;
+    }
+    #implicit-3d-plot .modebar-btn svg path,
+    #implicit-3d-plot .modebar-btn svg rect,
+    #implicit-3d-plot .modebar-btn svg polygon,
+    #implicit-3d-plot .modebar-btn svg line {
+        fill: #334155 !important;
+        stroke: #334155 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <h1 class="text-3xl font-extrabold text-slate-900">🧠 {% trans "Implicit Model 3D" %}</h1>
+    <p class="text-slate-600">{% trans "Módulo para geração algorítmica de superfícies geológicas (estilo Leapfrog), coexistindo com o 3D operacional de furos." %}</p>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+        <h2 class="font-semibold text-slate-900">{% trans "Upload e pré-visualização técnica" %}</h2>
+        <p class="text-sm text-slate-600">
+            {% blocktrans with max_mb=implicit_max_upload_mb %}
+                Envia CSV/JSON (máx. {{ max_mb }} MB) com pontos geológicos. Campos esperados: x, y, z e opcional domínio.
+            {% endblocktrans %}
+        </p>
+        <form id="implicit-upload-form" method="post" enctype="multipart/form-data" class="space-y-3">
+            {% csrf_token %}
+            <input
+                type="file"
+                name="implicit_file"
+                accept=".csv,.json"
+                class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+                required
+            >
+            <input
+                type="text"
+                name="dominio"
+                placeholder="{% trans 'Domínio padrão (ex: minério, estéril)' %}"
+                class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+            >
+            <button type="submit" name="action" value="validate" class="inline-flex items-center rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">
+                {% trans "Validar ficheiro (servidor)" %}
+            </button>
+            <button type="submit" name="action" value="validate_and_save" class="inline-flex items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 transition">
+                {% trans "Validar e guardar na base de dados" %}
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Preview implícito (nuvem + superfície aproximada)" %}</h2>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" data-implicit-camera="iso" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Isométrica" %}</button>
+            <button type="button" data-implicit-camera="top" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Topo" %}</button>
+            <button type="button" data-implicit-camera="side" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Lateral" %}</button>
+            <button type="button" data-implicit-camera="front" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Frontal" %}</button>
+            <button type="button" id="implicitExportPngBtn" class="inline-flex items-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 transition">{% trans "Exportar PNG" %}</button>
+            <button type="button" id="implicitExportCsvBtn" class="inline-flex items-center rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 transition">{% trans "Exportar CSV (seleção)" %}</button>
+            <button type="button" id="implicitExportJsonBtn" class="inline-flex items-center rounded-lg bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-800 transition">{% trans "Exportar JSON técnico" %}</button>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Animações" %}</h3>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="implicitAnimRotateToggle" type="checkbox">
+                    {% trans "Rotação automática" %}
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="implicitAnimPulseToggle" type="checkbox">
+                    {% trans "Pulso de pontos/superfícies" %}
+                </label>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Filtros de visualização" %}</h3>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="implicitShowPointsToggle" type="checkbox" checked>
+                    {% trans "Mostrar pontos" %}
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="implicitShowSurfaceToggle" type="checkbox" checked>
+                    {% trans "Mostrar superfícies" %}
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    {% trans "Modo superfície" %}
+                    <select id="implicitSurfaceMode" class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700">
+                        <option value="delaunay">{% trans "Delaunay" %}</option>
+                        <option value="hull">{% trans "Convex Hull" %}</option>
+                    </select>
+                </label>
+            </div>
+            <div class="grid gap-2 md:grid-cols-2">
+                <label class="text-sm text-slate-700">
+                    {% trans "Domínio" %}
+                    <select id="implicitDomainFilter" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+                        <option value="all">{% trans "Todos os domínios" %}</option>
+                    </select>
+                </label>
+                <label class="text-sm text-slate-700">
+                    {% trans "Opacidade da superfície" %}: <strong id="implicitOpacityLabel">0.20</strong>
+                    <input id="implicitOpacityRange" type="range" min="0.05" max="1" step="0.05" value="0.20" class="w-full">
+                </label>
+            </div>
+            <div>
+                <div class="text-sm text-slate-700 mb-2">{% trans "Domínios visíveis (multi-seleção)" %}</div>
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <button type="button" id="implicitSelectAllDomainsBtn" class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                        {% trans "Selecionar todos" %}
+                    </button>
+                    <button type="button" id="implicitClearDomainsBtn" class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                        {% trans "Limpar seleção" %}
+                    </button>
+                </div>
+                <div id="implicitDomainChecklist" class="flex flex-wrap gap-2"></div>
+            </div>
+            <div>
+                <div class="text-sm text-slate-700 mb-2">{% trans "Legenda geológica de cores" %}</div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#B8AFA6"></span>granito</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#E9EEF2"></span>quartzo</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#8B5A2B"></span>solo</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#2F343A"></span>xisto escuro</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#7C8591"></span>xisto claro</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#A65E4A"></span>argila</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#A9552B"></span>minério</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#D4AF37"></span>pirite</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#B7410E"></span>jaspe</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#D9D2C3"></span>calcário</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#C9A66B"></span>arenito</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#2F343A"></span>basalto</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#8A7D75"></span>gnaisse</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#CFC4B0"></span>dolomito</span>
+                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1"><span class="inline-block h-3 w-3 rounded-full" style="background:#F1F0EC"></span>mármore</span>
+                </div>
+            </div>
+        </div>
+        <div id="implicit-3d-status" class="text-sm text-slate-600">{% trans "Aguardando ficheiro .csv/.json para renderizar." %}</div>
+        <div id="implicit-analytics" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Resumo analítico inicial" %}</h3>
+            <div class="mt-2 grid gap-2 md:grid-cols-4 text-xs text-slate-700">
+                <div><strong>{% trans "Extensão X:" %}</strong> <span id="implicitMetricX">-</span></div>
+                <div><strong>{% trans "Extensão Y:" %}</strong> <span id="implicitMetricY">-</span></div>
+                <div><strong>{% trans "Extensão Z:" %}</strong> <span id="implicitMetricZ">-</span></div>
+                <div><strong>{% trans "Volume envolvente:" %}</strong> <span id="implicitMetricVol">-</span></div>
+            </div>
+            <div class="mt-3">
+                <h4 class="text-xs font-semibold text-slate-700">{% trans "Estimativa por domínio (bounding box)" %}</h4>
+                <div id="implicitDomainMetrics" class="mt-1 grid gap-1 text-xs text-slate-700"></div>
+            </div>
+            <p class="mt-2 text-[11px] text-slate-500">{% trans "Nota: volume envolvente calculado por bounding box da seleção atual (estimativa rápida)." %}</p>
+        </div>
+        <div id="implicit-3d-plot" class="w-full rounded-xl border border-slate-200" style="height: 520px; min-height: 420px;"></div>
+    </div>
+
+    {% if implicit_preview %}
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Resumo do ficheiro" %}</h2>
+        <div class="grid gap-2 md:grid-cols-3 text-sm text-slate-700">
+            <div><strong>{% trans "Nome:" %}</strong> {{ implicit_preview.nome }}</div>
+            <div><strong>{% trans "Extensão:" %}</strong> {{ implicit_preview.extensao }}</div>
+            <div><strong>{% trans "Tamanho:" %}</strong> {{ implicit_preview.tamanho_humano }}</div>
+        </div>
+        <div class="grid gap-2 md:grid-cols-3 text-sm text-slate-700">
+            <div><strong>{% trans "Registos válidos:" %}</strong> {{ implicit_preview.stats.registos }}</div>
+            <div><strong>{% trans "Erros:" %}</strong> {{ implicit_preview.erros }}</div>
+            <div><strong>{% trans "Nº de domínios:" %}</strong> {{ implicit_preview.stats.dominios|length }}</div>
+        </div>
+        <pre class="max-h-72 overflow-auto rounded-xl bg-slate-950 text-slate-100 p-3 text-xs">{% for linha in implicit_preview.linhas_preview %}{{ linha }}
+{% empty %}{% trans "Sem conteúdo de texto legível na amostra." %}
+{% endfor %}</pre>
+    </div>
+    {% endif %}
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Últimos modelos implícitos guardados" %}</h2>
+        {% if implicit_guardados %}
+        <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="text-left text-slate-600 border-b border-slate-200">
+                        <th class="py-2 pr-4">{% trans "Data" %}</th>
+                        <th class="py-2 pr-4">{% trans "Nome" %}</th>
+                        <th class="py-2 pr-4">{% trans "Domínio" %}</th>
+                        <th class="py-2 pr-4">{% trans "Formato" %}</th>
+                        <th class="py-2 pr-4">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in implicit_guardados %}
+                    <tr class="border-b border-slate-100 text-slate-700">
+                        <td class="py-2 pr-4">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                        <td class="py-2 pr-4">{{ item.nome }}</td>
+                        <td class="py-2 pr-4">{{ item.dominio|default:"default" }}</td>
+                        <td class="py-2 pr-4">{{ item.formato|upper }}</td>
+                        <td class="py-2 pr-4">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{% url 'projetos:modelo_3d_implicit_download' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                                    {% trans "Descarregar" %}
+                                </a>
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 transition"
+                                    data-reopen-implicit-url="{% url 'projetos:modelo_3d_implicit_conteudo' item.pk %}"
+                                    data-reopen-implicit-config-url="{% url 'projetos:modelo_3d_implicit_config' item.pk %}"
+                                    data-reopen-implicit-id="{{ item.pk }}"
+                                    data-reopen-implicit-name="{{ item.nome }}"
+                                    data-reopen-implicit-formato="{{ item.formato }}"
+                                >
+                                    {% trans "Reabrir preview" %}
+                                </button>
+                                <form method="post" action="{% url 'projetos:modelo_3d_implicit_apagar' item.pk %}" onsubmit="return confirm('{% trans "Tens a certeza que queres apagar este modelo implícito?" %}');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center rounded-lg bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-200 transition">
+                                        {% trans "Apagar" %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-600">{% trans "Ainda não existem modelos implícitos guardados." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5">
+        <h2 class="font-semibold text-slate-900">{% trans "Próximas entregas" %}</h2>
+        <ul class="mt-2 text-slate-700 list-disc pl-5 space-y-1">
+            <li>{% trans "Entradas de pontos geológicos e constraints." %}</li>
+            <li>{% trans "Geração de superfícies implícitas por domínio." %}</li>
+            <li>{% trans "Comparação de cenários e versões de modelo." %}</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'js/projetos/modelo_3d_implicit.js' %}"></script>
+{% endblock %}

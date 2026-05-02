@@ -37,6 +37,7 @@ from geologia.services.hub_page import (
 )
 from geologia.services.drone_sf_page import (
     processar_acao_missao_programada_sf,
+    processar_fluxo_form_modelo_sf,
     processar_post_comando_sf,
     processar_post_operacao_detail_sf,
     resolver_contexto_bridge_sf,
@@ -150,16 +151,18 @@ def drone_sf_create(request):
         return resposta_erro
 
     form = DroneSFForm(request.POST or None, empresa=empresa)
-    if request.method == "POST":
-        resultado = processar_form_modelo_sf(
-            form=form,
-            mensagem_sucesso="Drone S_F criado com sucesso.",
-            mensagem_erro="Não foi possível criar o Drone S_F.",
-        )
-        if resultado["ok"]:
-            messages.success(request, resultado["mensagem"])
-            return redirect("geologia:drone_sf_detail", pk=resultado["objeto"].pk)
-        messages.error(request, resultado["mensagem"])
+    fluxo = processar_fluxo_form_modelo_sf(
+        method=request.method,
+        form=form,
+        processar_form_modelo_sf_fn=processar_form_modelo_sf,
+        mensagem_sucesso="Drone S_F criado com sucesso.",
+        mensagem_erro="Não foi possível criar o Drone S_F.",
+    )
+    if fluxo["handled"]:
+        if fluxo["ok"]:
+            messages.success(request, fluxo["mensagem"])
+            return redirect("geologia:drone_sf_detail", pk=fluxo["objeto"].pk)
+        messages.error(request, fluxo["mensagem"])
 
     return render(
         request,

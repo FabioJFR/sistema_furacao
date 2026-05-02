@@ -21,7 +21,7 @@ from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.projetos import (
     apagar_projeto,
     processar_acao_associar_empregado_projeto,
-    processar_submissao_form_projeto,
+    processar_fluxo_form_projeto,
     atualizar_projeto,
     criar_projeto,
 )
@@ -137,16 +137,20 @@ def projeto_update(request, pk):
         return resposta_erro
 
     projeto = obter_projeto(pk, empresa=empresa_id)
-    form = ProjetoForm(request.POST or None, instance=projeto, empresa=empresa_id)
+    fluxo = processar_fluxo_form_projeto(
+        method=request.method,
+        post_data=request.POST,
+        form_class=ProjetoForm,
+        empresa=empresa,
+        on_success=atualizar_projeto,
+        sucesso_msg="Projeto atualizado com sucesso.",
+        erro_msg="Erro ao atualizar o projeto. Verifique os dados.",
+        instance=projeto,
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
 
-    if request.method == "POST":
-        resultado = processar_submissao_form_projeto(
-            form=form,
-            empresa=empresa,
-            on_success=atualizar_projeto,
-            sucesso_msg="Projeto atualizado com sucesso.",
-            erro_msg="Erro ao atualizar o projeto. Verifique os dados.",
-        )
+    if resultado:
         if resultado["ok"]:
             projeto = resultado["projeto"]
             logger.info(
@@ -185,15 +189,19 @@ def projeto_create(request):
         logger.warning("Acesso bloqueado na view projeto_create. user_id=%s", request.user.id)
         return resposta_erro
 
-    if request.method == "POST":
-        form = ProjetoForm(request.POST, empresa=empresa_id)
-        resultado = processar_submissao_form_projeto(
-            form=form,
-            empresa=empresa,
-            on_success=criar_projeto,
-            sucesso_msg="Projeto criado com sucesso.",
-            erro_msg="Erro ao criar o projeto. Verifique os dados.",
-        )
+    fluxo = processar_fluxo_form_projeto(
+        method=request.method,
+        post_data=request.POST,
+        form_class=ProjetoForm,
+        empresa=empresa,
+        on_success=criar_projeto,
+        sucesso_msg="Projeto criado com sucesso.",
+        erro_msg="Erro ao criar o projeto. Verifique os dados.",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
         if resultado["ok"]:
             projeto = resultado["projeto"]
             logger.info(
@@ -210,8 +218,6 @@ def projeto_create(request):
             resultado["erros"],
         )
         messages.error(request, resultado["mensagem_erro"])
-    else:
-        form = ProjetoForm(empresa=empresa_id)
 
     return render(request, "projetos/projeto_form.html", {"form": form})
 

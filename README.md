@@ -6,7 +6,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.4**
+- Versão atual: **v0.9.5**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **separação de lógica em services/selectors**, **integração de dispositivos** e **estabilização para produção**
 
@@ -21,7 +21,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ---
 
-## Release 0.9.4 (resumo)
+## Release 0.9.5 (resumo)
 
 Principais evoluções consolidadas nesta versão:
 
@@ -151,6 +151,14 @@ Comando de correção quando faltar a tabela de histórico:
 - exportação rápida
 - interoperabilidade 3D
 - página própria para importação de trajetória externa 3D
+
+### 3D avançado (Wireframe / Block / Implicit)
+
+- módulo `Wireframe 3D` com preview local e histórico de modelos guardados
+- módulo `Block Model 3D` com filtros por valor/Z, animações e exportação técnica (`CSV` da seleção + `JSON` técnico)
+- módulo `Implicit Model 3D` com filtros por domínio, superfícies (`Delaunay`/`Convex Hull`), animações e exportação técnica (`CSV`/`JSON`)
+- resumo analítico inicial no Implicit (extensões X/Y/Z, volume envolvente e estimativa por domínio)
+- persistência de configuração visual por modelo no backend (Block/Implicit), guardada em `resumo_json["ui_config"]` e reaplicada ao `Reabrir preview`
 
 ### Tubos e detalhe visual do 3D
 

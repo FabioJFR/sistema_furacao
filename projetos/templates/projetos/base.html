@@ -187,6 +187,12 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu 3D' %}">
                             <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_wireframe' %}" role="menuitem">🔺 {% trans "Wireframe" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_block_model' %}" role="menuitem">🧊 {% trans "Block Model" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_implicit' %}" role="menuitem">🧬 {% trans "Implicit Model" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -321,6 +327,12 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu 3D' %}">
                             <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_wireframe' %}" role="menuitem">🔺 {% trans "Wireframe" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_block_model' %}" role="menuitem">🧊 {% trans "Block Model" %}</a>
+                                <a href="{% url 'projetos:modelo_3d_implicit' %}" role="menuitem">🧬 {% trans "Implicit Model" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 

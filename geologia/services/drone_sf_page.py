@@ -125,3 +125,27 @@ def processar_acao_missao_programada_sf(
         resultado = processar_remocao_fn(missao=missao)
         return {"ok": True, "mensagem": resultado["mensagem"]}
     return {"ok": False, "mensagem": "Ação inválida para missão programada."}
+
+
+def processar_fluxo_form_modelo_sf(
+    *,
+    method,
+    form,
+    processar_form_modelo_sf_fn,
+    mensagem_sucesso,
+    mensagem_erro,
+):
+    if method != "POST":
+        return {"handled": False, "ok": False, "mensagem": ""}
+
+    resultado = processar_form_modelo_sf_fn(
+        form=form,
+        mensagem_sucesso=mensagem_sucesso,
+        mensagem_erro=mensagem_erro,
+    )
+    return {
+        "handled": True,
+        "ok": bool(resultado.get("ok")),
+        "mensagem": resultado.get("mensagem", ""),
+        "objeto": resultado.get("objeto"),
+    }

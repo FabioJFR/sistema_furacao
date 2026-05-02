@@ -168,6 +168,29 @@ def processar_submit_preenchimento_dashboard(post_data):
     }
 
 
+def processar_fluxo_post_uteis_dashboard(*, method, post_data):
+    if method != "POST":
+        return {
+            "handled": False,
+            "ok": False,
+            "resultado": None,
+        }
+
+    if post_data.get("action") != "preencher_furos_materiais":
+        return {
+            "handled": False,
+            "ok": False,
+            "resultado": None,
+        }
+
+    resultado = processar_submit_preenchimento_dashboard(post_data)
+    return {
+        "handled": True,
+        "ok": bool(resultado.get("ok")),
+        "resultado": resultado,
+    }
+
+
 def construir_contexto_dashboard_uteis(session):
     counts_by_key = obter_counts_datasets_ai()
     return {

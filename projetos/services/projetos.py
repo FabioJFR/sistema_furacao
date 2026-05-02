@@ -110,6 +110,38 @@ def processar_submissao_form_projeto(
     }
 
 
+def processar_fluxo_form_projeto(
+    *,
+    method,
+    post_data,
+    form_class,
+    empresa=None,
+    on_success,
+    sucesso_msg,
+    erro_msg,
+    instance=None,
+):
+    empresa_id = _resolver_empresa_id(empresa)
+    if method == "POST":
+        form = form_class(post_data, instance=instance, empresa=empresa_id)
+        resultado = processar_submissao_form_projeto(
+            form=form,
+            empresa=empresa,
+            on_success=on_success,
+            sucesso_msg=sucesso_msg,
+            erro_msg=erro_msg,
+        )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(instance=instance, empresa=empresa_id),
+        "resultado": None,
+    }
+
+
 def associar_empregado_projeto(*, empregado, projeto, empresa=None, data_inicio=None):
     empresa_id = _resolver_empresa_id(empresa) if empresa is not None else projeto.empresa_id
 

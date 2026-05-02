@@ -48,6 +48,9 @@ from .historico_configuracao import HistoricoConfiguracaoPerfuracao
 from .preferencias import PreferenciasUser
 from .evento_analytics import EventoAnalytics
 from .importacao_furo_3d import ImportacaoFuro3DExterna
+from .modelo_3d_wireframe import Modelo3DWireframe
+from .modelo_3d_block import Modelo3DBlock
+from .modelo_3d_implicit import Modelo3DImplicit
 from .sugestao import SugestaoPlataforma
 
 # ===============================

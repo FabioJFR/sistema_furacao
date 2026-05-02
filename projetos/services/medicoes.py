@@ -168,3 +168,126 @@ def apagar_medicao(*, medicao, empresa=None):
     medicao_id = medicao.pk
     medicao.delete()
     return medicao_id
+
+
+def processar_submissao_form_medicao(
+    *,
+    form,
+    empresa,
+    furo,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "medicao": None,
+            "erro": None,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+        }
+
+    try:
+        medicao = criar_medicao(form, furo=furo, empresa=empresa)
+    except ValidationError as erro:
+        form.add_error(None, erro)
+        return {
+            "ok": False,
+            "medicao": None,
+            "erro": erro,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+        }
+
+    return {
+        "ok": True,
+        "medicao": medicao,
+        "erro": None,
+        "mensagem_sucesso": sucesso_msg,
+        "mensagem_erro": None,
+    }
+
+
+def processar_submissao_form_medicao_update(
+    *,
+    form,
+    empresa,
+    sucesso_msg,
+    erro_msg,
+):
+    if not form.is_valid():
+        return {
+            "ok": False,
+            "medicao": None,
+            "erro": None,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+        }
+
+    try:
+        medicao = atualizar_medicao(form, empresa=empresa)
+    except ValidationError as erro:
+        form.add_error(None, erro)
+        return {
+            "ok": False,
+            "medicao": None,
+            "erro": erro,
+            "mensagem_sucesso": None,
+            "mensagem_erro": erro_msg,
+        }
+
+    return {
+        "ok": True,
+        "medicao": medicao,
+        "erro": None,
+        "mensagem_sucesso": sucesso_msg,
+        "mensagem_erro": None,
+    }
+
+
+def processar_fluxo_form_medicao(
+    *,
+    method,
+    post_data,
+    files_data,
+    form_class,
+    empresa,
+    furo,
+    sucesso_msg,
+    erro_msg,
+    instance=None,
+    acao="create",
+):
+    form_kwargs = {
+        "furo": furo,
+        "empresa": empresa,
+    }
+    if instance is not None:
+        form_kwargs["instance"] = instance
+
+    if method == "POST":
+        form = form_class(post_data, files_data, **form_kwargs)
+        if acao == "update":
+            resultado = processar_submissao_form_medicao_update(
+                form=form,
+                empresa=empresa,
+                sucesso_msg=sucesso_msg,
+                erro_msg=erro_msg,
+            )
+        else:
+            resultado = processar_submissao_form_medicao(
+                form=form,
+                empresa=empresa,
+                furo=furo,
+                sucesso_msg=sucesso_msg,
+                erro_msg=erro_msg,
+            )
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(**form_kwargs),
+        "resultado": None,
+    }

@@ -12,10 +12,8 @@ from projetos.selectors.empregados import (
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.empregado_furo import (
-    criar_ligacao_empregado_furo,
-    atualizar_ligacao_empregado_furo,
+    processar_fluxo_form_empregado_furo,
 )
-from projetos.services.empregados import garantir_ligacao_projeto_por_furo
 
 logger = logging.getLogger("core")
 
@@ -49,21 +47,6 @@ def _render_form_empregado_furo(request, form, furo, titulo, ligacao=None):
     return render(request, "projetos/furo_adicionar_empregado.html", context)
 
 
-def _preparar_form_empregado_furo(*, request, empresa, furo, instance=None):
-    form = EmpregadoFuroForm(
-        request.POST if request.method == "POST" else None,
-        instance=instance,
-        empresa=empresa,
-        furo=furo,
-    )
-    form.instance.furo = furo
-    form.instance.empresa = empresa
-    empregado_id = request.POST.get("empregado")
-    if empregado_id:
-        form.instance.empregado_id = empregado_id
-    return form
-
-
 # Multiempresa: a gestão de trabalhadores por furo deve acontecer sempre dentro da empresa do administrador.
 @login_required
 @admin_required
@@ -85,31 +68,21 @@ def furo_adicionar_empregado(request, furo_id):
         messages.error(request, "Este furo está terminado e já não aceita novos trabalhadores.")
         return redirect(furo)
 
-    if request.method == "POST":
-        form = _preparar_form_empregado_furo(
-            request=request,
-            empresa=empresa,
-            furo=furo,
-        )
-        if form.is_valid():
-            empregado = form.cleaned_data["empregado"]
-            ligacao = criar_ligacao_empregado_furo(
-                empregado=empregado,
-                furo=furo,
-                empresa=empresa,
-                funcao=form.cleaned_data["funcao"],
-                data_inicio=form.cleaned_data.get("data_inicio"),
-                data_fim=form.cleaned_data.get("data_fim"),
-                ativo=form.cleaned_data.get("ativo", True),
-                observacoes=form.cleaned_data.get("observacoes"),
-            )
-            ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
-                empregado=empregado,
-                furo=furo,
-                empresa=empresa,
-                data_inicio=form.cleaned_data.get("data_inicio"),
-            )
+    fluxo = processar_fluxo_form_empregado_furo(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpregadoFuroForm,
+        empresa=empresa,
+        furo=furo,
+        acao="create",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
 
+    if resultado:
+        if resultado["ok"]:
+            ligacao = resultado["ligacao"]
+            ligacao_projeto = resultado["ligacao_projeto"]
             logger.info(
                 "Trabalhador associado ao furo com sucesso. user_id=%s, empresa_id=%s, furo_id=%s, ligacao_id=%s, ligacao_projeto_id=%s, ligacao_projeto_criada=%s",
                 request.user.id,
@@ -117,12 +90,9 @@ def furo_adicionar_empregado(request, furo_id):
                 furo.id,
                 ligacao.id,
                 ligacao_projeto.id,
-                projeto_criado,
+                resultado["projeto_criado"],
             )
-            if projeto_criado:
-                messages.success(request, "Trabalhador associado ao furo e automaticamente ligado ao projeto.")
-            else:
-                messages.success(request, "Trabalhador associado ao furo com sucesso.")
+            messages.success(request, resultado["mensagem_sucesso"])
             return redirect(furo)
 
         logger.warning(
@@ -131,7 +101,7 @@ def furo_adicionar_empregado(request, furo_id):
             furo_id,
             form.errors,
         )
-        messages.error(request, "Erro ao associar trabalhador ao furo. Verifique os dados.")
+        messages.error(request, resultado["mensagem_erro"])
     else:
         form = EmpregadoFuroForm(empresa=empresa, furo=furo)
 
@@ -160,45 +130,33 @@ def furo_editar_empregado(request, pk):
 
     ligacao = obter_ligacao_empregado_furo_admin_por_pk(pk, empresa)
 
-    if request.method == "POST":
-        form = _preparar_form_empregado_furo(
-            request=request,
-            empresa=empresa,
-            furo=ligacao.furo,
-            instance=ligacao,
-        )
-        if form.is_valid():
-            empregado = form.cleaned_data["empregado"]
-            ligacao = atualizar_ligacao_empregado_furo(
-                ligacao=ligacao,
-                empregado=empregado,
-                empresa=empresa,
-                funcao=form.cleaned_data["funcao"],
-                data_inicio=form.cleaned_data.get("data_inicio"),
-                data_fim=form.cleaned_data.get("data_fim"),
-                ativo=form.cleaned_data.get("ativo", ligacao.ativo),
-                observacoes=form.cleaned_data.get("observacoes"),
-            )
-            ligacao_projeto, projeto_criado = garantir_ligacao_projeto_por_furo(
-                empregado=empregado,
-                furo=ligacao.furo,
-                empresa=empresa,
-                data_inicio=form.cleaned_data.get("data_inicio"),
-            )
+    fluxo = processar_fluxo_form_empregado_furo(
+        method=request.method,
+        post_data=request.POST,
+        form_class=EmpregadoFuroForm,
+        empresa=empresa,
+        furo=ligacao.furo,
+        instance=ligacao,
+        acao="update",
+    )
+    form = fluxo["form"]
+    resultado = fluxo["resultado"]
+
+    if resultado:
+        if resultado["ok"]:
+            ligacao_atualizada = resultado["ligacao"]
+            ligacao_projeto = resultado["ligacao_projeto"]
             logger.info(
                 "Ligação trabalhador/furo atualizada com sucesso. user_id=%s, empresa_id=%s, ligacao_id=%s, furo_id=%s, ligacao_projeto_id=%s, ligacao_projeto_criada=%s",
                 request.user.id,
                 empresa.id,
-                ligacao.id,
-                ligacao.furo.pk,
+                ligacao_atualizada.id,
+                ligacao_atualizada.furo.pk,
                 ligacao_projeto.id,
-                projeto_criado,
+                resultado["projeto_criado"],
             )
-            if projeto_criado:
-                messages.success(request, "Ligação trabalhador/furo atualizada e projeto associado automaticamente.")
-            else:
-                messages.success(request, "Ligação trabalhador/furo atualizada com sucesso.")
-            return redirect(ligacao.furo)
+            messages.success(request, resultado["mensagem_sucesso"])
+            return redirect(ligacao_atualizada.furo)
 
         logger.warning(
             "Erro ao atualizar ligação trabalhador/furo. user_id=%s, ligacao_pk=%s, erros=%s",
@@ -206,13 +164,7 @@ def furo_editar_empregado(request, pk):
             pk,
             form.errors,
         )
-        messages.error(request, "Erro ao atualizar ligação trabalhador/furo. Verifique os dados.")
-    else:
-        form = EmpregadoFuroForm(
-            instance=ligacao,
-            empresa=empresa,
-            furo=ligacao.furo,
-        )
+        messages.error(request, resultado["mensagem_erro"])
 
     return _render_form_empregado_furo(
         request,

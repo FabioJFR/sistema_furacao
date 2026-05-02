@@ -12,9 +12,9 @@ from plataforma.services.uteis import (
     construir_resposta_download_json,
     construir_resposta_download_zip,
     garantir_acesso_superuser,
+    processar_fluxo_post_uteis_dashboard,
     processar_limpeza_scope,
     processar_scope_exportacao,
-    processar_submit_preenchimento_dashboard,
 )
 
 
@@ -24,8 +24,12 @@ def uteis_dashboard(request):
     if acesso:
         return acesso
 
-    if request.method == "POST" and request.POST.get("action") == "preencher_furos_materiais":
-        resultado = processar_submit_preenchimento_dashboard(request.POST)
+    fluxo = processar_fluxo_post_uteis_dashboard(
+        method=request.method,
+        post_data=request.POST,
+    )
+    if fluxo["handled"]:
+        resultado = fluxo["resultado"]
         if resultado["ok"]:
             messages.success(request, resultado["mensagem_sucesso"])
         else:

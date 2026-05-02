@@ -385,6 +385,26 @@ def processar_registo_empregado_form(*, form):
     }
 
 
+def processar_fluxo_registo_empregado_form(
+    *,
+    method,
+    post_data,
+    form_class,
+):
+    if method == "POST":
+        form = form_class(post_data)
+        resultado = processar_registo_empregado_form(form=form)
+        return {
+            "form": form,
+            "resultado": resultado,
+        }
+
+    return {
+        "form": form_class(),
+        "resultado": None,
+    }
+
+
 @transaction.atomic
 def garantir_individual_para_user(user):
     individual = Individual.objects.filter(user=user).first()
@@ -659,6 +679,54 @@ def processar_acao_remover_ficheiro_empregado(*, ficheiro):
     return {
         "ok": True,
         "ficheiro_id": ficheiro_id,
+    }
+
+
+def processar_fluxo_apagar_empregado_admin(*, method, empregado, empresa=None):
+    if method != "POST":
+        return {
+            "ok": False,
+            "empregado_id": None,
+            "erro": "metodo_invalido",
+        }
+
+    empregado_id = apagar_empregado_admin(empregado=empregado, empresa=empresa)
+    return {
+        "ok": True,
+        "empregado_id": empregado_id,
+        "erro": None,
+    }
+
+
+def processar_fluxo_terminar_ligacao_projeto(*, method, ligacao, empresa=None):
+    if method != "POST":
+        return {
+            "ok": False,
+            "ligacao": None,
+            "erro": "metodo_invalido",
+        }
+
+    resultado = processar_acao_terminar_ligacao_projeto(ligacao=ligacao, empresa=empresa)
+    return {
+        "ok": True,
+        "ligacao": resultado["ligacao"],
+        "erro": None,
+    }
+
+
+def processar_fluxo_remover_ficheiro_empregado(*, method, ficheiro):
+    if method != "POST":
+        return {
+            "ok": False,
+            "ficheiro_id": None,
+            "erro": "metodo_invalido",
+        }
+
+    resultado = processar_acao_remover_ficheiro_empregado(ficheiro=ficheiro)
+    return {
+        "ok": True,
+        "ficheiro_id": resultado["ficheiro_id"],
+        "erro": None,
     }
 
 

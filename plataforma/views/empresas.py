@@ -69,16 +69,15 @@ def empresa_detail_plataforma(request, pk):
 @platform_admin_required
 def atualizar_renovacao_subscricao_empresa(request, pk):
     empresa = obter_empresa(pk)
-
-    if request.method != "POST":
-        return redirect("plataforma:empresa_detail", pk=empresa.pk)
-
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
-    resultado = empresas_service.processar_submissao_renovacao_subscricao(
+    resultado = empresas_service.processar_fluxo_renovacao_subscricao(
+        method=request.method,
         subscricao_atual=subscricao_atual,
         nova_data_raw=request.POST.get("proxima_renovacao"),
     )
     if not resultado.ok:
+        if resultado.erro == "metodo_invalido":
+            return redirect("plataforma:empresa_detail", pk=empresa.pk)
         messages.error(request, resultado.erro)
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
@@ -99,7 +98,8 @@ def alterar_plano_empresa(request, pk):
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
 
     if request.method == "POST":
-        resultado = empresas_service.processar_submissao_alteracao_plano_empresa(
+        resultado = empresas_service.processar_fluxo_alteracao_plano_empresa(
+            method=request.method,
             empresa=empresa,
             subscricao_atual=subscricao_atual,
             plano_id=request.POST.get("plano"),
@@ -108,6 +108,8 @@ def alterar_plano_empresa(request, pk):
             obter_plano_ativo_fn=obter_plano_ativo,
         )
         if not resultado.ok:
+            if resultado.erro == "metodo_invalido":
+                return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
             messages.error(request, resultado.erro)
             return redirect("plataforma:empresa_alterar_plano", pk=empresa.pk)
 
@@ -133,11 +135,12 @@ def alterar_plano_empresa(request, pk):
 @platform_admin_required
 def toggle_empresa_ativa(request, pk):
     empresa = obter_empresa(pk)
-
-    if request.method != "POST":
+    resultado = empresas_service.processar_fluxo_toggle_ativa_empresa(
+        method=request.method,
+        empresa=empresa,
+    )
+    if not resultado["ok"]:
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    empresa, mensagem = empresas_service.toggle_ativa_empresa(empresa)
-
-    messages.success(request, mensagem)
+    messages.success(request, resultado["mensagem"])
     return redirect("plataforma:empresa_detail", pk=empresa.pk)

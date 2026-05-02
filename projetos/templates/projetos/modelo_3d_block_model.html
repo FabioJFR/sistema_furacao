@@ -1,0 +1,213 @@
+{% extends "projetos/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "3D Block Model" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    #block-3d-plot .modebar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: transparent !important;
+    }
+    #block-3d-plot .modebar-group {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        margin: 0 !important;
+    }
+    #block-3d-plot .modebar-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+    }
+    #block-3d-plot .modebar-btn:hover {
+        background: #f8fafc !important;
+    }
+    #block-3d-plot .modebar-btn svg path,
+    #block-3d-plot .modebar-btn svg rect,
+    #block-3d-plot .modebar-btn svg polygon,
+    #block-3d-plot .modebar-btn svg line {
+        fill: #334155 !important;
+        stroke: #334155 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <h1 class="text-3xl font-extrabold text-slate-900">🧊 {% trans "Block Model 3D" %}</h1>
+    <p class="text-slate-600">{% trans "Módulo para grade 3D em voxels, útil para estimativas e análises volumétricas sem mexer no gráfico de trajetória atual." %}</p>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+        <h2 class="font-semibold text-slate-900">{% trans "Upload e pré-visualização técnica" %}</h2>
+        <p class="text-sm text-slate-600">
+            {% blocktrans with max_mb=block_max_upload_mb %}
+                Envia CSV/JSON (máx. {{ max_mb }} MB) com pontos de bloco. Campos esperados: x, y, z e opcionalmente valor.
+            {% endblocktrans %}
+        </p>
+        <form id="block-upload-form" method="post" enctype="multipart/form-data" class="space-y-3">
+            {% csrf_token %}
+            <input
+                type="file"
+                name="block_file"
+                accept=".csv,.json"
+                class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+                required
+            >
+            <button type="submit" name="action" value="validate" class="inline-flex items-center rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">
+                {% trans "Validar ficheiro (servidor)" %}
+            </button>
+            <button type="submit" name="action" value="validate_and_save" class="inline-flex items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 transition">
+                {% trans "Validar e guardar na base de dados" %}
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Preview 3D de blocos" %}</h2>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" id="blockExportCsvBtn" class="inline-flex items-center rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 transition">{% trans "Exportar CSV (seleção)" %}</button>
+            <button type="button" id="blockExportJsonBtn" class="inline-flex items-center rounded-lg bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-800 transition">{% trans "Exportar JSON técnico" %}</button>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Animações" %}</h3>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="blockAnimRotateToggle" type="checkbox">
+                    {% trans "Rotação automática" %}
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="blockAnimPulseToggle" type="checkbox">
+                    {% trans "Pulso de blocos" %}
+                </label>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Filtros e visualização" %}</h3>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="blockAsVoxelsToggle" type="checkbox" checked>
+                    {% trans "Mostrar como voxels (cubos)" %}
+                </label>
+            </div>
+            <div class="grid gap-2 md:grid-cols-2">
+                <label class="text-sm text-slate-700">
+                    {% trans "Valor mínimo" %}: <strong id="blockValueMinLabel">-</strong>
+                    <input id="blockValueMinRange" type="range" min="0" max="100" step="1" value="0" class="w-full">
+                </label>
+                <label class="text-sm text-slate-700">
+                    {% trans "Valor máximo" %}: <strong id="blockValueMaxLabel">-</strong>
+                    <input id="blockValueMaxRange" type="range" min="0" max="100" step="1" value="100" class="w-full">
+                </label>
+                <label class="text-sm text-slate-700">
+                    {% trans "Z mínimo" %}: <strong id="blockZMinLabel">-</strong>
+                    <input id="blockZMinRange" type="range" min="0" max="100" step="1" value="0" class="w-full">
+                </label>
+                <label class="text-sm text-slate-700">
+                    {% trans "Z máximo" %}: <strong id="blockZMaxLabel">-</strong>
+                    <input id="blockZMaxRange" type="range" min="0" max="100" step="1" value="100" class="w-full">
+                </label>
+            </div>
+        </div>
+        <div id="block-3d-status" class="text-sm text-slate-600">{% trans "Aguardando ficheiro .csv/.json para renderizar." %}</div>
+        <div id="block-3d-plot" class="w-full rounded-xl border border-slate-200" style="height: 520px; min-height: 420px;"></div>
+    </div>
+
+    {% if block_preview %}
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Resumo do ficheiro" %}</h2>
+        <div class="grid gap-2 md:grid-cols-3 text-sm text-slate-700">
+            <div><strong>{% trans "Nome:" %}</strong> {{ block_preview.nome }}</div>
+            <div><strong>{% trans "Extensão:" %}</strong> {{ block_preview.extensao }}</div>
+            <div><strong>{% trans "Tamanho:" %}</strong> {{ block_preview.tamanho_humano }}</div>
+        </div>
+        <div class="grid gap-2 md:grid-cols-4 text-sm text-slate-700">
+            <div><strong>{% trans "Registos válidos:" %}</strong> {{ block_preview.stats.registos }}</div>
+            <div><strong>{% trans "Erros:" %}</strong> {{ block_preview.erros }}</div>
+            <div><strong>{% trans "Z mín:" %}</strong> {{ block_preview.stats.z_min }}</div>
+            <div><strong>{% trans "Z máx:" %}</strong> {{ block_preview.stats.z_max }}</div>
+        </div>
+        <pre class="max-h-72 overflow-auto rounded-xl bg-slate-950 text-slate-100 p-3 text-xs">{% for linha in block_preview.linhas_preview %}{{ linha }}
+{% empty %}{% trans "Sem conteúdo de texto legível na amostra." %}
+{% endfor %}</pre>
+    </div>
+    {% endif %}
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Últimos block models guardados" %}</h2>
+        {% if block_guardados %}
+        <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="text-left text-slate-600 border-b border-slate-200">
+                        <th class="py-2 pr-4">{% trans "Data" %}</th>
+                        <th class="py-2 pr-4">{% trans "Nome" %}</th>
+                        <th class="py-2 pr-4">{% trans "Formato" %}</th>
+                        <th class="py-2 pr-4">{% trans "Tamanho (bytes)" %}</th>
+                        <th class="py-2 pr-4">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in block_guardados %}
+                    <tr class="border-b border-slate-100 text-slate-700">
+                        <td class="py-2 pr-4">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                        <td class="py-2 pr-4">{{ item.nome }}</td>
+                        <td class="py-2 pr-4">{{ item.formato|upper }}</td>
+                        <td class="py-2 pr-4">{{ item.tamanho_bytes }}</td>
+                        <td class="py-2 pr-4">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{% url 'projetos:modelo_3d_block_download' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                                    {% trans "Descarregar" %}
+                                </a>
+                                {% if item.conteudo_texto %}
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 transition"
+                                        data-reopen-block-url="{% url 'projetos:modelo_3d_block_conteudo' item.pk %}"
+                                        data-reopen-block-config-url="{% url 'projetos:modelo_3d_block_config' item.pk %}"
+                                        data-reopen-block-id="{{ item.pk }}"
+                                        data-reopen-block-name="{{ item.nome }}"
+                                        data-reopen-block-formato="{{ item.formato }}"
+                                    >
+                                        {% trans "Reabrir preview" %}
+                                    </button>
+                                {% endif %}
+                                <form method="post" action="{% url 'projetos:modelo_3d_block_apagar' item.pk %}" onsubmit="return confirm('{% trans "Tens a certeza que queres apagar este block model?" %}');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center rounded-lg bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-200 transition">
+                                        {% trans "Apagar" %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-600">{% trans "Ainda não existem block models guardados." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5">
+        <h2 class="font-semibold text-slate-900">{% trans "Próximas entregas" %}</h2>
+        <ul class="mt-2 text-slate-700 list-disc pl-5 space-y-1">
+            <li>{% trans "Definição de resolução da grelha (X/Y/Z)." %}</li>
+            <li>{% trans "Atribuição de atributos por bloco (estado, classe, valor)." %}</li>
+            <li>{% trans "Filtros e estatísticas por volume/intervalo." %}</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'js/projetos/modelo_3d_block_model.js' %}"></script>
+{% endblock %}

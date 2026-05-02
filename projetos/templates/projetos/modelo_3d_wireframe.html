@@ -1,0 +1,220 @@
+{% extends "projetos/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "3D Wireframe" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    #wireframe-3d-plot .modebar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: transparent !important;
+    }
+    #wireframe-3d-plot .modebar-group {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        margin: 0 !important;
+    }
+    #wireframe-3d-plot .modebar-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+    }
+    #wireframe-3d-plot .modebar-btn:hover {
+        background: #f8fafc !important;
+    }
+    #wireframe-3d-plot .modebar-btn svg path,
+    #wireframe-3d-plot .modebar-btn svg rect,
+    #wireframe-3d-plot .modebar-btn svg polygon,
+    #wireframe-3d-plot .modebar-btn svg line {
+        fill: #334155 !important;
+        stroke: #334155 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <h1 class="text-3xl font-extrabold text-slate-900">🔺 {% trans "Wireframe 3D" %}</h1>
+    <p class="text-slate-600">{% trans "Módulo reservado para superfícies trianguladas (OBJ/DXF), mantendo o 3D de trajetória dos furos em paralelo." %}</p>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+        <h2 class="font-semibold text-slate-900">{% trans "Upload e pré-visualização técnica" %}</h2>
+        <p class="text-sm text-slate-600">
+            {% blocktrans with max_mb=wireframe_max_upload_mb %}
+                Envia um ficheiro OBJ ou DXF (máx. {{ max_mb }} MB) para validação e leitura inicial.
+            {% endblocktrans %}
+        </p>
+        <form id="wireframe-upload-form" method="post" enctype="multipart/form-data" class="space-y-3">
+            {% csrf_token %}
+            <input
+                type="file"
+                name="wireframe_file"
+                accept=".obj,.dxf"
+                class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+                required
+            >
+            <button type="submit" name="action" value="validate" class="inline-flex items-center rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">
+                {% trans "Validar ficheiro (servidor)" %}
+            </button>
+            <button type="submit" name="action" value="validate_and_save" class="inline-flex items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 transition">
+                {% trans "Validar e guardar na base de dados" %}
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Pré-visualização 3D local (OBJ)" %}</h2>
+        <p class="text-sm text-slate-600">
+            {% trans "Seleciona um .obj ou .dxf no campo acima para gerar visualização imediata no browser." %}
+        </p>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" data-wireframe-camera="iso" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Isométrica" %}</button>
+            <button type="button" data-wireframe-camera="top" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Topo" %}</button>
+            <button type="button" data-wireframe-camera="side" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Lateral" %}</button>
+            <button type="button" data-wireframe-camera="front" class="inline-flex items-center rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition">{% trans "Frontal" %}</button>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-800">{% trans "Simulação visual de terreno" %}</h3>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="wireframeTerrainToggle" type="checkbox">
+                    {% trans "Simular cores de terreno" %}
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input id="wireframeRotateToggle" type="checkbox">
+                    {% trans "Rotação automática" %}
+                </label>
+            </div>
+            <div class="grid gap-2 md:grid-cols-2">
+                <label class="text-sm text-slate-700">
+                    {% trans "Opacidade da superfície" %}:
+                    <strong id="wireframeOpacityValue">0.55</strong>
+                    <input id="wireframeOpacityRange" type="range" min="0.1" max="1" step="0.05" value="0.55" class="w-full">
+                </label>
+                <label class="text-sm text-slate-700">
+                    {% trans "Escala de relevo (exagero Z)" %}:
+                    <strong id="wireframeZScaleValue">1.00</strong>
+                    <input id="wireframeZScaleRange" type="range" min="0.5" max="3" step="0.1" value="1" class="w-full">
+                </label>
+            </div>
+        </div>
+        <div id="wireframe-3d-status" class="text-sm text-slate-600">{% trans "Aguardando ficheiro .obj/.dxf para renderizar." %}</div>
+        <div id="wireframe-3d-plot" class="w-full rounded-xl border border-slate-200" style="height: 520px; min-height: 420px;"></div>
+    </div>
+
+    {% if wireframe_preview %}
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Resumo do ficheiro" %}</h2>
+        <div class="grid gap-2 md:grid-cols-3 text-sm text-slate-700">
+            <div><strong>{% trans "Nome:" %}</strong> {{ wireframe_preview.nome }}</div>
+            <div><strong>{% trans "Extensão:" %}</strong> {{ wireframe_preview.extensao }}</div>
+            <div><strong>{% trans "Tamanho:" %}</strong> {{ wireframe_preview.tamanho_humano }}</div>
+        </div>
+
+        {% if wireframe_preview.obj_stats %}
+        <div class="grid gap-2 md:grid-cols-3 text-sm text-slate-700">
+            <div><strong>{% trans "Vértices (v):" %}</strong> {{ wireframe_preview.obj_stats.vertices }}</div>
+            <div><strong>{% trans "Faces (f):" %}</strong> {{ wireframe_preview.obj_stats.faces }}</div>
+            <div><strong>{% trans "Linhas (l):" %}</strong> {{ wireframe_preview.obj_stats.lines }}</div>
+        </div>
+        {% endif %}
+
+        {% if wireframe_preview.dxf_stats %}
+        <div class="grid gap-2 md:grid-cols-2 text-sm text-slate-700">
+            <div><strong>{% trans "Tokens ENTITIES:" %}</strong> {{ wireframe_preview.dxf_stats.entities_tokens }}</div>
+            <div><strong>{% trans "Linhas lidas:" %}</strong> {{ wireframe_preview.dxf_stats.lines }}</div>
+        </div>
+        {% endif %}
+
+        <div>
+            <h3 class="font-medium text-slate-900 mb-2">{% trans "Amostra do conteúdo" %}</h3>
+            <pre class="max-h-72 overflow-auto rounded-xl bg-slate-950 text-slate-100 p-3 text-xs">{% for linha in wireframe_preview.linhas_preview %}{{ linha }}
+{% empty %}{% trans "Sem conteúdo de texto legível na amostra." %}
+{% endfor %}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h2 class="font-semibold text-slate-900">{% trans "Últimos ficheiros guardados" %}</h2>
+        {% if wireframe_guardados %}
+        <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="text-left text-slate-600 border-b border-slate-200">
+                        <th class="py-2 pr-4">{% trans "Data" %}</th>
+                        <th class="py-2 pr-4">{% trans "Nome" %}</th>
+                        <th class="py-2 pr-4">{% trans "Formato" %}</th>
+                        <th class="py-2 pr-4">{% trans "Tamanho (bytes)" %}</th>
+                        <th class="py-2 pr-4">{% trans "Utilizador" %}</th>
+                        <th class="py-2 pr-4">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in wireframe_guardados %}
+                    <tr class="border-b border-slate-100 text-slate-700">
+                        <td class="py-2 pr-4">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                        <td class="py-2 pr-4">{{ item.nome }}</td>
+                        <td class="py-2 pr-4">{{ item.formato|upper }}</td>
+                        <td class="py-2 pr-4">{{ item.tamanho_bytes }}</td>
+                        <td class="py-2 pr-4">{% if item.criado_por %}{{ item.criado_por.username }}{% else %}-{% endif %}</td>
+                        <td class="py-2 pr-4">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{% url 'projetos:modelo_3d_wireframe_download' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                                    {% trans "Descarregar" %}
+                                </a>
+                                {% if item.conteudo_texto %}
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 transition"
+                                        data-reopen-wireframe-url="{% url 'projetos:modelo_3d_wireframe_conteudo' item.pk %}"
+                                        data-reopen-wireframe-name="{{ item.nome }}"
+                                        data-reopen-wireframe-formato="{{ item.formato }}"
+                                    >
+                                        {% trans "Reabrir preview" %}
+                                    </button>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                        {% trans "Sem conteúdo (legado)" %}
+                                    </span>
+                                {% endif %}
+                                <form method="post" action="{% url 'projetos:modelo_3d_wireframe_apagar' item.pk %}" onsubmit="return confirm('{% trans "Tens a certeza que queres apagar este modelo wireframe?" %}');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center rounded-lg bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-200 transition">
+                                        {% trans "Apagar" %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-600">{% trans "Ainda não existem ficheiros guardados." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5">
+        <h2 class="font-semibold text-slate-900">{% trans "Próximas entregas" %}</h2>
+        <ul class="mt-2 text-slate-700 list-disc pl-5 space-y-1">
+            <li>{% trans "Importação de malhas OBJ/DXF." %}</li>
+            <li>{% trans "Visualização de superfícies por projeto/empresa." %}</li>
+            <li>{% trans "Exportação de layers para partilha técnica." %}</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'js/projetos/modelo_3d_wireframe.js' %}"></script>
+{% endblock %}

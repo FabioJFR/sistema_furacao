@@ -120,6 +120,18 @@ def processar_submissao_renovacao_subscricao(*, subscricao_atual, nova_data_raw)
     return ResultadoRenovacaoSubscricao(ok=True, nova_data=nova_data)
 
 
+def processar_fluxo_renovacao_subscricao(*, method, subscricao_atual, nova_data_raw):
+    if method != "POST":
+        return ResultadoRenovacaoSubscricao(
+            ok=False,
+            erro="metodo_invalido",
+        )
+    return processar_submissao_renovacao_subscricao(
+        subscricao_atual=subscricao_atual,
+        nova_data_raw=nova_data_raw,
+    )
+
+
 @transaction.atomic
 def alterar_plano_empresa(*, empresa, subscricao_atual, novo_plano, ciclo_subscricao, estado_empresa):
     if ciclo_subscricao not in ["1", "3", "6", "12"]:
@@ -180,6 +192,31 @@ def processar_submissao_alteracao_plano_empresa(
     )
 
 
+def processar_fluxo_alteracao_plano_empresa(
+    *,
+    method,
+    empresa,
+    subscricao_atual,
+    plano_id,
+    ciclo_subscricao,
+    estado_empresa,
+    obter_plano_ativo_fn,
+):
+    if method != "POST":
+        return ResultadoSubmissaoAlteracaoPlano(
+            ok=False,
+            erro="metodo_invalido",
+        )
+    return processar_submissao_alteracao_plano_empresa(
+        empresa=empresa,
+        subscricao_atual=subscricao_atual,
+        plano_id=plano_id,
+        ciclo_subscricao=ciclo_subscricao,
+        estado_empresa=estado_empresa,
+        obter_plano_ativo_fn=obter_plano_ativo_fn,
+    )
+
+
 @transaction.atomic
 def toggle_ativa_empresa(empresa):
     empresa.ativo = not empresa.ativo
@@ -193,3 +230,21 @@ def toggle_ativa_empresa(empresa):
 
     empresa.save(update_fields=["ativo", "status", "atualizado_em"])
     return empresa, mensagem
+
+
+def processar_fluxo_toggle_ativa_empresa(*, method, empresa):
+    if method != "POST":
+        return {
+            "ok": False,
+            "erro": "metodo_invalido",
+            "empresa": empresa,
+            "mensagem": None,
+        }
+
+    empresa_atualizada, mensagem = toggle_ativa_empresa(empresa)
+    return {
+        "ok": True,
+        "erro": None,
+        "empresa": empresa_atualizada,
+        "mensagem": mensagem,
+    }

@@ -20,4 +20,5 @@ urlpatterns = [
     path("despesas/", include("projetos.url_patterns.despesas")),
     path("analytics/", include("projetos.url_patterns.analytics")),
     path("opcoes/", include("projetos.url_patterns.opcoes")),
+    path("3d/", include("projetos.url_patterns.modelos_3d")),
 ]
