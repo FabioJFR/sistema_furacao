@@ -531,15 +531,50 @@ def _normalizar_implicit_ui_config(payload):
         checked_domains = []
     checked_domains = [_to_str(v, "").strip() for v in checked_domains if _to_str(v, "").strip()]
 
+    smooth_level = int(_to_float(payload.get("smoothLevel"), 1))
+    if smooth_level < 1:
+        smooth_level = 1
+    if smooth_level > 3:
+        smooth_level = 3
+    contour_levels = int(_to_float(payload.get("contourLevels"), 6))
+    if contour_levels < 3:
+        contour_levels = 3
+    if contour_levels > 12:
+        contour_levels = 12
+    contour_intensity = _to_float(payload.get("contourIntensity"), 1.0)
+    if contour_intensity < 0.6:
+        contour_intensity = 0.6
+    if contour_intensity > 2.2:
+        contour_intensity = 2.2
+    contour_axis = _to_str(payload.get("contourAxis"), "z").lower()
+    if contour_axis not in {"x", "y", "z"}:
+        contour_axis = "z"
+    extrude_mode = _to_str(payload.get("extrudeMode"), "auto").lower()
+    if extrude_mode not in {"auto", "down", "up"}:
+        extrude_mode = "auto"
+
     return {
         "showPoints": _to_bool(payload.get("showPoints"), True),
         "showSurface": _to_bool(payload.get("showSurface"), True),
+        "showEstimatedVolumes": _to_bool(payload.get("showEstimatedVolumes"), True),
         "surfaceMode": _to_str(payload.get("surfaceMode"), "delaunay") or "delaunay",
         "opacity": _to_float(payload.get("opacity"), 0.2),
+        "zoneThicknessFactor": _to_float(payload.get("zoneThicknessFactor"), 0.12),
+        "extrudeMode": extrude_mode,
+        "smoothSurface": _to_bool(payload.get("smoothSurface"), False),
+        "smoothLevel": smooth_level,
+        "showContours": _to_bool(payload.get("showContours"), False),
+        "contourAxis": contour_axis,
+        "contourLevels": contour_levels,
+        "contourIntensity": contour_intensity,
+        "contoursHighContrast": _to_bool(payload.get("contoursHighContrast"), False),
         "selectedDomain": _to_str(payload.get("selectedDomain"), "all") or "all",
         "checkedDomains": checked_domains,
         "rotateAnim": _to_bool(payload.get("rotateAnim"), False),
         "pulseAnim": _to_bool(payload.get("pulseAnim"), False),
+        "sliceEnabled": _to_bool(payload.get("sliceEnabled"), False),
+        "sliceAxis": _to_str(payload.get("sliceAxis"), "x") or "x",
+        "sliceValue": _to_float(payload.get("sliceValue"), 0.0),
     }
 
 

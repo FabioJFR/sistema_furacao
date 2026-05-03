@@ -330,6 +330,7 @@
                 extensao_y_m: 0,
                 extensao_z_m: 0,
                 volume_envolvente_m3_estimado: 0,
+                volume_voxel_m3_estimado: 0,
                 valor_min: 0,
                 valor_max: 0,
                 valor_medio: 0,
@@ -343,6 +344,8 @@
         const dy = Math.max(...ys) - Math.min(...ys);
         const dz = Math.max(...zs) - Math.min(...zs);
         const vol = Math.max(dx, 0) * Math.max(dy, 0) * Math.max(dz, 0);
+        const voxelVol = Math.max(estimatedVoxelSize, 0.0001) ** 3;
+        const volVoxel = points.length * voxelVol;
         const minVal = Math.min(...vals);
         const maxVal = Math.max(...vals);
         const meanVal = vals.reduce((acc, v) => acc + v, 0) / vals.length;
@@ -352,6 +355,7 @@
             extensao_y_m: Number(dy.toFixed(4)),
             extensao_z_m: Number(dz.toFixed(4)),
             volume_envolvente_m3_estimado: Number(vol.toFixed(4)),
+            volume_voxel_m3_estimado: Number(volVoxel.toFixed(4)),
             valor_min: Number(minVal.toFixed(4)),
             valor_max: Number(maxVal.toFixed(4)),
             valor_medio: Number(meanVal.toFixed(4)),
@@ -370,8 +374,8 @@
         const rows = points.map((p) => `${p.x},${p.y},${p.z},${p.valor}`);
         const summaryLines = [
             "# resumo",
-            "pontos,extensao_x_m,extensao_y_m,extensao_z_m,volume_envolvente_m3_estimado,valor_min,valor_max,valor_medio",
-            `${summary.pontos},${summary.extensao_x_m},${summary.extensao_y_m},${summary.extensao_z_m},${summary.volume_envolvente_m3_estimado},${summary.valor_min},${summary.valor_max},${summary.valor_medio}`,
+            "pontos,extensao_x_m,extensao_y_m,extensao_z_m,volume_envolvente_m3_estimado,volume_voxel_m3_estimado,valor_min,valor_max,valor_medio",
+            `${summary.pontos},${summary.extensao_x_m},${summary.extensao_y_m},${summary.extensao_z_m},${summary.volume_envolvente_m3_estimado},${summary.volume_voxel_m3_estimado},${summary.valor_min},${summary.valor_max},${summary.valor_medio}`,
             "",
             "# filtros_ativos",
             "mostrar_como_voxels,valor_min,valor_max,z_min,z_max,animacao_rotacao,animacao_pulso",

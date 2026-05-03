@@ -209,10 +209,30 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
                             <a href="{% url 'geologia:hub' %}" role="menuitem">🌍 {% trans "Geologia" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if request.user.is_superuser %}
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Drone' %}"
+                            data-dropdown-toggle
+                        >
+                            🚁 {% trans "Drone" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Drone' %}">
                             <a href="{% url 'geologia:drone_hub' %}" role="menuitem">🚁 {% trans "DJI Mini 4 Pro" %}</a>
                             <a href="{% url 'geologia:drone_sf_hub' %}" role="menuitem">🛰️ {% trans "Interface Drone S_F" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                 {% elif is_admin_user %}
                     <div class="nav-item">

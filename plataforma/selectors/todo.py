@@ -114,6 +114,17 @@ _AREAS_TODO = {
             "3D avançado evoluído com camada analítica inicial no Implicit Model (extensões X/Y/Z, volume envolvente e estimativa por domínio litológico).",
             "3D avançado evoluído com exportação técnica no Block Model (CSV da seleção + JSON técnico com resumo e filtros ativos).",
             "Paridade de persistência de configuração concluída entre Block Model e Implicit Model: reabertura fiel por modelo com sincronização para `resumo_json` em backend.",
+            "Estado da fase 3D avançado registado: núcleo funcional concluído em Wireframe, Block e Implicit (upload, preview, filtros, animações, exportação técnica e persistência de configuração).",
+            "Implicit Model evoluído com slice planes interativos (eixo X/Y/Z + posição + plano visual + contagem de pontos visíveis) sem reset de câmara.",
+            "Implicit Model evoluído com preenchimento geológico por domínio via zonas extrudidas e controlo de espessura da zona.",
+            "Extrusão geológica evoluída para modo unidirecional com heurística por `solo` e override manual (`auto`, `forçar para baixo`, `forçar para cima`).",
+            "Implicit Model evoluído com interpolação/suavização configurável (níveis 1-3) para superfícies mais contínuas.",
+            "Iso-linhas no Implicit Model entregues com plano selecionável (X/Y/Z), número de níveis, intensidade visual e modo alto contraste (neon).",
+            "Legenda técnica das iso-linhas entregue (por domínio, eixo, faixa numérica e níveis), incluindo marcação por cor do domínio.",
+            "Navegação técnica do gráfico evoluída com ações `Focar seleção` e `Limpar foco` para recentrar rapidamente análise filtrada.",
+            "Comparação temporal A/B no Implicit Model entregue com overlay de modelo B, resumo de diferenças por domínio e persistência de estado de UI.",
+            "Delta espacial A/B entregue no Implicit Model com marcadores de ganho/perda (+/-), casca volumétrica opcional e controlos dedicados de opacidade/tamanho.",
+            "Presets de visualização técnica por perfil entregues no Implicit Model (Operacional, Geologia, Supervisão).",
         ],
         "proximos_passos": [
             "Continuar migração de lógica restante de views para camadas dedicadas, com foco em módulos ainda densos de operação e registos técnicos.",
@@ -132,12 +143,23 @@ _AREAS_TODO = {
             "Plano 3D avançado (8/10): concluído para Block/Implicit no estado atual (configuração visual persistida em `resumo_json` + reabertura fiel por modelo).",
             "Plano 3D avançado (9/10): concluído para Block/Implicit no estado atual (exportação técnica CSV/JSON com seleção ativa e metadados).",
             "Plano 3D avançado (10/10): concluído em fase inicial (métricas rápidas e volumetria envolvente; próximo passo: cortes e comparação temporal).",
+            "[Curto prazo] Roadmap de equiparação (1/8): evoluir motor geológico para modelação implícita avançada com interpolação robusta, constraints, faults e domaining assistido.",
+            "[Curto prazo] Roadmap de equiparação (4/8): reforçar performance para grande escala (milhões de pontos/blocos, renderização e consultas otimizadas).",
+            "[Curto prazo] Roadmap de equiparação (5/8): expandir integrações industriais (DXF/DWG/LAS/APIs) e sincronização com ERPs/sensores/equipamentos.",
+            "[Médio prazo] Roadmap de equiparação (2/8): adicionar camada completa de planeamento mineiro (design, fases, sequenciamento e comparação de cenários).",
+            "[Médio prazo] Roadmap de equiparação (6/8): reforçar governança e compliance (auditoria, versionamento técnico, permissões granulares e aprovação por workflow).",
+            "[Médio prazo] Roadmap de equiparação (7/8): aumentar automação inteligente (alertas preditivos, recomendações operacionais e assistente técnico contextual).",
+            "[Longo prazo] Roadmap de equiparação (3/8): implementar geoestatística e estimativas (variografia, kriging, classificação de recursos/reservas e auditoria técnica).",
+            "[Longo prazo] Roadmap de equiparação (8/8): consolidar camada enterprise (testes de carga, documentação técnica, suporte e onboarding em escala).",
+            "[Próxima fase 3D] Evoluir métricas volumétricas para além de bounding box (estimativa por malha/superfície e por domínio).",
+            "[Próxima fase 3D] Aplicar otimizações finais de performance para datasets de maior escala (render e filtros em tempo real).",
+            "[Próxima fase 3D] Adicionar comparação lado-a-lado entre modelos (A/B) com sincronização de câmara e diferenças por domínio.",
         ],
         "falta_fazer": [
             "API versionada para mobile/sensores/drones com contratos estáveis.",
             "Histórico temporal completo de evolução de furo com consultas otimizadas.",
         ],
-        "estado_logica": "Boa e em aceleração: além do núcleo de furos, também materiais, despesas (incluindo update/delete), registos, configuração de perfuração, medições, projetos/opções, definições e avarias já receberam nova camada de separação; no 3D avançado, Block/Implicit já têm persistência backend e exportação técnica, restando módulos residuais para fechar o ciclo global.",
+        "estado_logica": "Boa e em aceleração: além do núcleo de furos, também materiais, despesas (incluindo update/delete), registos, configuração de perfuração, medições, projetos/opções, definições e avarias já receberam nova camada de separação; no 3D avançado, Block/Implicit já contam com persistência backend, exportação técnica, cortes, iso-linhas avançadas, extrusão geológica, presets por perfil, comparação temporal A/B e controlo de foco, restando agora sobretudo volumetria mais precisa e otimização para escala.",
     },
     "ia": {
         "nome": "IA",
@@ -185,12 +207,24 @@ _AREAS_TODO = {
             "Migrar restantes ações de escrita e importação para services/selectors.",
             "Padronizar validações de missão e trilhas de auditoria operacionais.",
             "Continuar a refatoração dos endpoints bridge para manter padrão único de resposta/orquestração em API.",
+            "[NOVA FASE] Evoluir Geologia para nível profissional com duas entregas principais: `Block Model 3D profissional` e `Implicit Model 3D simplificado`.",
+            "[NOVA FASE · Block Model] Evoluir os modelos já existentes (`Modelo3DBlock`) com esquema profissional incremental, criando `BlockModelCell` e mantendo compatibilidade com dados atuais.",
+            "[NOVA FASE · Block Model] Implementar services: `gerar_block_model_para_projeto`, `calcular_blocos_a_partir_das_medicoes`, `atribuir_litologia_ao_bloco`, `exportar_block_model_json`.",
+            "[NOVA FASE · Block Model] Implementar selectors: `obter_block_models_projeto`, `obter_celulas_block_model`, `obter_dados_3d_block_model` com foco em queries eficientes para PostgreSQL.",
+            "[NOVA FASE · Block Model] Reforçar as views/templates já existentes (`modelo_3d_block_model` e hub 3D) com fluxo profissional progressivo: list/create/detail/3d/delete, filtros por litologia/profundidade, toggle de furos e opção 'só blocos com dados'.",
+            "[NOVA FASE · Block Model] Entregar resumo técnico na página 3D: total de blocos, volume estimado e litologias encontradas.",
+            "[NOVA FASE · Implicit] Após Block Model, evoluir o `Modelo3DImplicit` atual para esquema profissional com `ImplicitModelSurface`, método de interpolação configurável e malha/pontos persistidos.",
+            "[NOVA FASE · Implicit] Implementar services: `gerar_implicit_model_para_projeto`, `obter_pontos_geologicos_do_projeto`, `interpolar_superficie_litologia`, `gerar_malha_superficie`, `exportar_implicit_model_json`.",
+            "[NOVA FASE · Implicit] Reforçar selectors e as páginas atuais de Implicit para visualização profissional de superfícies/zonas interpoladas + comparação com furos reais, sem ruptura de UX existente.",
+            "[NOVA FASE · Arquitetura] Garantir padrão limpo com `services/`, `selectors/`, URLs em `url_patterns/`, mensagens, logger `core`, permissões (`@login_required`, `@admin_required`) e zero lógica pesada em views.",
+            "[NOVA FASE · Segurança/Dados] Reforçar isolamento multiempresa para nunca expor dados entre empresas e adicionar testes de regressão para permissões e consulta.",
         ],
         "falta_fazer": [
             "API de operações em tempo real com autenticação por dispositivo/operador.",
             "Pipeline de dados espaciais para analytics preditivo.",
+            "Motor geológico avançado com block model persistente por célula e implicit model interpolado por litologia pronto para uso operacional.",
         ],
-        "estado_logica": "Intermédio/boa e a subir: evolução consistente com redução forte de duplicação em logs/drone/dashboard e bridge; pendências agora mais concentradas em fluxos menos centrais e reforço de cobertura de testes.",
+        "estado_logica": "Intermédio/boa e a subir: evolução consistente com redução forte de duplicação em logs/drone/dashboard e bridge. Nova fase aberta para Geologia 3D profissional (Block Model + Implicit) com implementação incremental iniciando por Block Model.",
     },
     "website": {
         "nome": "Website",
@@ -210,6 +244,71 @@ _AREAS_TODO = {
             "Páginas técnicas/documentação pública por módulo.",
         ],
         "estado_logica": "Boa para a fase atual, com foco em conteúdo, conversão e internacionalização completa.",
+    },
+    "infra_devops": {
+        "nome": "Infra / Deploy",
+        "descricao": "Operação de servidor, deploy contínuo, logs, observabilidade e rotinas de produção.",
+        "feito": [
+            "Deploy com Gunicorn + Nginx estabilizado e site em produção com HTTPS ativo.",
+            "Pipeline operacional manual documentado (git pull, migrate, collectstatic, restart services).",
+            "Ajustes de `ALLOWED_HOSTS`, cookies seguros e configuração de ambiente já aplicados em produção.",
+            "Sitemap e robots já adicionados para indexação e SEO técnico.",
+        ],
+        "proximos_passos": [
+            "Padronizar script único de deploy (pré-check, migrate, collectstatic, healthcheck e rollback).",
+            "Adicionar healthcheck automático pós-deploy (`curl` rotas críticas + validação de login).",
+            "Separar logs por serviço/módulo com rotação automática (`logrotate`) e retenção definida.",
+            "Configurar alertas de disponibilidade e erros 5xx (email/Slack) com limiares claros.",
+            "Automatizar backup de base de dados e media com testes periódicos de restore.",
+        ],
+        "falta_fazer": [
+            "CI/CD com ambiente de staging espelho da produção.",
+            "Runbooks de incidente e disaster recovery com RTO/RPO definidos.",
+        ],
+        "estado_logica": "Intermédio: produção funcional, mas ainda dependente de execução manual e com observabilidade parcial.",
+    },
+    "seguranca_qualidade": {
+        "nome": "Segurança / Qualidade",
+        "descricao": "Hardening de aplicação, cobertura de testes, auditoria de permissões e estabilidade funcional.",
+        "feito": [
+            "Checks de deploy já incorporados no fluxo operacional.",
+            "Validações de domínio críticas já iniciadas (ex.: regras de inclinação por tipo de furo).",
+            "Permissões por perfil (superuser/admin/empregado/individual) já estruturadas em múltiplos fluxos.",
+        ],
+        "proximos_passos": [
+            "Completar matriz de permissões com testes automatizados por endpoint e por perfil.",
+            "Adicionar testes de regressão para fluxos críticos (registo, login, furos, medições, despesas, avarias).",
+            "Reforçar proteção de segredos/configuração sensível e revisão de variáveis de ambiente por ambiente.",
+            "Executar varredura de segurança em dependências e corrigir CVEs com política de atualização.",
+            "Criar bateria de smoke tests para validação rápida após cada release.",
+        ],
+        "falta_fazer": [
+            "Suite E2E completa para jornadas críticas multi-perfil.",
+            "Política de versionamento de API com testes de compatibilidade.",
+        ],
+        "estado_logica": "Boa base com avanços consistentes, mas ainda falta fechar automação de testes e hardening contínuo.",
+    },
+    "produto_comercial": {
+        "nome": "Produto / Comercial",
+        "descricao": "Experiência do utilizador, planos/subscrição, onboarding e preparação para escala de clientes.",
+        "feito": [
+            "Planos e subscrições funcionais com suporte a plano gratuito (valor zero).",
+            "Configuração de pagamentos PayPal integrada na plataforma.",
+            "Página de sugestões e canais de feedback já disponíveis para utilizadores.",
+            "Menu e navegação por perfil bastante evoluídos (empresa, empregado, individual e superuser).",
+        ],
+        "proximos_passos": [
+            "Concluir fluxo robusto de verificação de email e monitorização de entregabilidade SMTP.",
+            "Melhorar onboarding guiado por tipo de conta (empresa vs individual) com checklist inicial.",
+            "Criar dashboard comercial com métricas de ativação, retenção e conversão por plano.",
+            "Definir versão trial/prova com limites de features e mensagens in-app claras.",
+            "Refinar UX mobile em páginas operacionais com maior densidade de informação.",
+        ],
+        "falta_fazer": [
+            "Funil completo de aquisição e retenção com eventos de produto padronizados.",
+            "Playbook de suporte ao cliente e documentação de onboarding por segmento.",
+        ],
+        "estado_logica": "Intermédio/alto: núcleo comercial funcional, com foco agora em maturidade de onboarding, métricas e escala.",
     },
 }
 
@@ -235,5 +334,9 @@ def obter_notas_transversais_todo():
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "
             "Pontos pendentes concentram-se sobretudo em mensagens de backend/validação e alguns textos técnicos internos, não no menu principal."
+        ),
+        "governanca_execucao": (
+            "As páginas TO DO foram expandidas para cobertura global ('para tudo'): apps funcionais + frentes transversais de Infra/Deploy, Segurança/Qualidade e Produto/Comercial. "
+            "A recomendação é executar por ciclos curtos (1-2 semanas), com objetivos mensuráveis por área e revisão no fim de cada release."
         ),
     }

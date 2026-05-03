@@ -1,0 +1,51 @@
+[
+  {"x":0,"y":0,"z":-2,"dominio":"solo"},
+  {"x":5,"y":2,"z":-3,"dominio":"solo"},
+  {"x":8,"y":1,"z":-2.5,"dominio":"solo"},
+  {"x":2,"y":6,"z":-4,"dominio":"solo"},
+
+  {"x":10,"y":3,"z":-6,"dominio":"arenito"},
+  {"x":14,"y":4,"z":-7,"dominio":"arenito"},
+  {"x":12,"y":8,"z":-6.5,"dominio":"arenito"},
+  {"x":9,"y":7,"z":-7.2,"dominio":"arenito"},
+
+  {"x":18,"y":5,"z":-9,"dominio":"calcario"},
+  {"x":22,"y":6,"z":-10,"dominio":"calcario"},
+  {"x":20,"y":9,"z":-9.5,"dominio":"calcario"},
+  {"x":17,"y":8,"z":-10.2,"dominio":"calcario"},
+
+  {"x":25,"y":4,"z":-12,"dominio":"granito"},
+  {"x":29,"y":6,"z":-13,"dominio":"granito"},
+  {"x":27,"y":9,"z":-12.4,"dominio":"granito"},
+  {"x":24,"y":8,"z":-13.2,"dominio":"granito"},
+
+  {"x":32,"y":5,"z":-15,"dominio":"xisto"},
+  {"x":36,"y":6,"z":-16,"dominio":"xisto"},
+  {"x":34,"y":10,"z":-15.5,"dominio":"xisto"},
+  {"x":31,"y":9,"z":-16.4,"dominio":"xisto"},
+
+  {"x":40,"y":4,"z":-18,"dominio":"quartzo"},
+  {"x":44,"y":6,"z":-19,"dominio":"quartzo"},
+  {"x":42,"y":9,"z":-18.6,"dominio":"quartzo"},
+  {"x":39,"y":8,"z":-19.3,"dominio":"quartzo"},
+
+  {"x":48,"y":5,"z":-21,"dominio":"basalto"},
+  {"x":52,"y":7,"z":-22,"dominio":"basalto"},
+  {"x":50,"y":10,"z":-21.4,"dominio":"basalto"},
+  {"x":47,"y":9,"z":-22.2,"dominio":"basalto"},
+
+  {"x":56,"y":6,"z":-24,"dominio":"argila"},
+  {"x":60,"y":7,"z":-25,"dominio":"argila"},
+  {"x":58,"y":11,"z":-24.7,"dominio":"argila"},
+  {"x":55,"y":10,"z":-25.4,"dominio":"argila"},
+
+  {"x":64,"y":5,"z":-27,"dominio":"gnaisse"},
+  {"x":68,"y":7,"z":-28,"dominio":"gnaisse"},
+  {"x":66,"y":10,"z":-27.5,"dominio":"gnaisse"},
+  {"x":63,"y":9,"z":-28.3,"dominio":"gnaisse"},
+
+  {"x":72,"y":6,"z":-30,"dominio":"dolomito"},
+  {"x":76,"y":8,"z":-31,"dominio":"dolomito"},
+  {"x":74,"y":11,"z":-30.6,"dominio":"dolomito"},
+  {"x":71,"y":10,"z":-31.4,"dominio":"marmore"}
+]
