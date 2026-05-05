@@ -1,0 +1,12 @@
+[Unit]
+Description=Sistema Furacao - Processar agendamentos de relatorios executivos
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=www-data
+WorkingDirectory=/var/www/sistema_furacao
+Environment="PATH=/var/www/sistema_furacao/.venv/bin"
+ExecStart=/var/www/sistema_furacao/.venv/bin/python /var/www/sistema_furacao/manage.py processar_agendamentos_relatorios_executivos
+

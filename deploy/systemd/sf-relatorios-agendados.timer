@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer - Relatorios executivos agendados (Sistema Furacao)
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+Unit=sf-relatorios-agendados.service
+
+[Install]
+WantedBy=timers.target
+

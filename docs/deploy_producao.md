@@ -5,8 +5,8 @@
 ```bash
 cd /var/www/sistema_furacao
 git fetch origin
-git checkout release-v0.9.5
-git pull origin release-v0.9.5
+git checkout release-v0.9.6
+git pull origin release-v0.9.6
 ```
 
 ## 2) Virtualenv e dependências
@@ -43,6 +43,7 @@ python manage.py collectstatic --noinput
 ## 5) Serviços de produção
 
 - Gunicorn systemd: usar modelo em `deploy/systemd/sistema_furacao.service`
+- Relatórios executivos agendados: usar `deploy/systemd/sf-relatorios-agendados.service` e `deploy/systemd/sf-relatorios-agendados.timer`
 - Nginx: usar modelo em `deploy/nginx/sistema_furacao.conf.example`
 
 Recarregar:
@@ -52,6 +53,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable sistema_furacao
 sudo systemctl restart sistema_furacao
 sudo systemctl restart nginx
+sudo systemctl enable --now sf-relatorios-agendados.timer
 ```
 
 ## 6) Verificação rápida
