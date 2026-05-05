@@ -1,0 +1,96 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mapa litológico do furo" %}{% endblock %}
+{% block page_title %}{% trans "Mapa litológico do furo" %}{% endblock %}
+{% block page_description %}{% trans "Coluna por profundidade com cores por litologia." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+            {% if empresa_geologia.logo %}
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <form method="get" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label for="id_furo" class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Furo" %}</label>
+                <select id="id_furo" name="furo" class="border rounded px-3 py-2 min-w-[280px]">
+                    {% for furo in furos %}
+                        <option value="{{ furo.id }}" {% if furo_ativo and furo.id == furo_ativo.id %}selected{% endif %}>{{ furo.nome }} · {{ furo.projeto.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">{% trans "Aplicar" %}</button>
+        </form>
+    </section>
+
+    {% if mapa %}
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">{{ mapa.furo.nome }}</h2>
+                <p class="text-sm text-gray-600">{% trans "Profundidade máxima no mapa:" %} {{ mapa.max_depth }} m · {% trans "Logs:" %} {{ mapa.total_logs }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8">
+            <div class="flex justify-center">
+                <div style="position:relative;height:560px;width:320px;">
+                    <div style="position:absolute;left:0;top:0;height:560px;width:120px;border:1px solid #d1d5db;border-radius:12px;overflow:hidden;background:#f8fafc;">
+                        {% for seg in mapa.segmentos %}
+                            <a href="{% url 'geologia:log_detail' seg.log_id %}"
+                               title="{{ seg.litologia }} · {{ seg.de_fmt }}m - {{ seg.ate_fmt }}m"
+                               style="position:absolute;left:0;right:0;top:{{ seg.top_pct_css }}%;height:{{ seg.height_pct_css }}%;background:{{ seg.cor }};display:block;">
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div style="position:absolute;left:130px;top:0;height:560px;width:190px;">
+                        {% for seg in mapa.segmentos %}
+                            <a
+                                href="{% url 'geologia:log_detail' seg.log_id %}"
+                                title="{{ seg.litologia }} · {{ seg.de_fmt }}m - {{ seg.ate_fmt }}m"
+                                style="position:absolute;left:0;top:{{ seg.top_pct_css }}%;transform:translateY(-50%);font-size:11px;line-height:1.2;color:#374151;background:#ffffffcc;padding:2px 6px;border-radius:6px;border:1px solid #e5e7eb;white-space:nowrap;"
+                            >
+                                {{ seg.de_fmt }}–{{ seg.ate_fmt }} m · {{ seg.litologia }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-lg font-semibold text-gray-900">{% trans "Legenda litológica" %}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {% for item in mapa.legenda %}
+                    <div class="flex items-center gap-2 rounded border border-gray-200 px-3 py-2">
+                        <span style="width:14px;height:14px;border-radius:9999px;background:{{ item.cor }};display:inline-block;border:1px solid rgba(0,0,0,.15);"></span>
+                        <span class="text-sm text-gray-800">{{ item.litologia }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-gray-500">{% trans "Dica: clica num segmento da coluna para abrir o log correspondente." %}</p>
+            </div>
+        </div>
+    </section>
+    {% else %}
+    <section class="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        {% trans "Sem dados para construir o mapa litológico." %}
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

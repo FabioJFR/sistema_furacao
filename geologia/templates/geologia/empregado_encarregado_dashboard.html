@@ -1,0 +1,62 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard Encarregado de Obra" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <div>
+        {% if empresa_geologia and empresa_geologia.logo %}
+        <div class="mb-3">
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-12 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+        </div>
+        {% endif %}
+        <h1 class="text-2xl font-bold text-gray-900">{% trans "Dashboard do Encarregado de Obra" %}</h1>
+        <p class="text-gray-600 mt-1">{% trans "Acompanhamento geológico e operacional dos furos ativos." %}</p>
+        {% if empresa_geologia %}
+        <p class="text-gray-500 text-sm mt-1">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</p>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <p class="text-sm text-gray-500">{% trans "Furos monitorizados" %}</p>
+            <p class="text-2xl font-semibold text-gray-900 mt-1">{{ total_furos }}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <p class="text-sm text-gray-500">{% trans "Logs geológicos" %}</p>
+            <p class="text-2xl font-semibold text-gray-900 mt-1">{{ total_logs }}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <p class="text-sm text-gray-500">{% trans "Missões DJI" %}</p>
+            <p class="text-2xl font-semibold text-gray-900 mt-1">{{ total_missoes }}</p>
+        </div>
+    </div>
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">{% trans "Furos disponíveis" %}</h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for furo in furos %}
+            <article class="px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                    <p class="font-semibold text-gray-900">{{ furo.nome }}</p>
+                    <p class="text-sm text-gray-600">{{ furo.projeto.nome }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-3 py-2 rounded border border-gray-300 text-gray-700 text-sm font-semibold">{% trans "Abrir geologia" %}</a>
+                    <a href="{% url 'projetos:meus_furos_empregado' %}" class="px-3 py-2 rounded bg-sky-600 text-white text-sm font-semibold">{% trans "Ver meus furos" %}</a>
+                </div>
+            </article>
+            {% empty %}
+            <p class="px-5 py-6 text-gray-500">{% trans "Sem furos disponíveis." %}</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

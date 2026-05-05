@@ -5,6 +5,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import translation
 
+from core.permissions import user_is_empresa_admin, user_is_geologo
+from plataforma.forms import GeologiaScoreConfigForm
+from plataforma.services import empresas as empresas_service
 from projetos.forms import PreferenciasForm
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
 from projetos.services.definicoes import processar_fluxo_preferencias_utilizador_form
@@ -94,8 +97,69 @@ def definicoes(request):
     if empregado and empregado.empresa_id:
         preferencias = garantir_preferencias_empresa(preferencias, empregado.empresa)
 
+    geologia_score_form = None
+    empresa_logo_visivel = bool(empregado and empregado.empresa_id and user_is_empresa_admin(request.user))
+    if empregado and empregado.empresa_id and user_is_geologo(request.user):
+        geologia_cfg = empresas_service.normalizar_geologia_score_config(
+            empregado.empresa.geologia_score_config
+        )
+        geologia_score_form = GeologiaScoreConfigForm(
+            initial={
+                "sem_logs": geologia_cfg["pesos"]["sem_logs"],
+                "conflito_intervalo": geologia_cfg["pesos"]["conflito_intervalo"],
+                "pendente_validacao": geologia_cfg["pesos"]["pendente_validacao"],
+                "sem_anexo": geologia_cfg["pesos"]["sem_anexo"],
+                "sem_log_24h": geologia_cfg["pesos"]["sem_log_24h"],
+                "sem_log_48h": geologia_cfg["pesos"]["sem_log_48h"],
+                "janela_atencao_horas": geologia_cfg["janelas_horas"]["atencao"],
+                "janela_critico_horas": geologia_cfg["janelas_horas"]["critico"],
+            }
+        )
+
+    if (
+        request.method == "POST"
+        and request.POST.get("form_scope") == "geologia_score"
+        and geologia_score_form is not None
+    ):
+        geologia_score_form = GeologiaScoreConfigForm(request.POST)
+        resultado_geologia = empresas_service.processar_fluxo_geologia_score_config(
+            method=request.method,
+            empresa=empregado.empresa,
+            form=geologia_score_form,
+        )
+        if resultado_geologia.ok:
+            messages.success(request, "Configuração geológica guardada com sucesso.")
+            return redirect("projetos:definicoes")
+        messages.error(request, "Verifica os valores da configuração geológica e tenta novamente.")
+
+    if (
+        request.method == "POST"
+        and request.POST.get("form_scope") == "empresa_logo"
+        and empresa_logo_visivel
+    ):
+        acao_logo = (request.POST.get("logo_action") or "upload").strip()
+        if acao_logo == "remover":
+            resultado_logo = empresas_service.remover_logo_empresa(
+                method=request.method,
+                empresa=empregado.empresa,
+            )
+        else:
+            resultado_logo = empresas_service.atualizar_logo_empresa(
+                method=request.method,
+                empresa=empregado.empresa,
+                logo_file=request.FILES.get("logo"),
+            )
+        if resultado_logo.ok:
+            messages.success(request, "Logotipo da empresa atualizado com sucesso.")
+            return redirect("projetos:definicoes")
+        messages.error(request, resultado_logo.erro or "Não foi possível atualizar o logotipo da empresa.")
+
+    method_preferencias = request.method
+    if request.method == "POST" and request.POST.get("form_scope") in {"geologia_score", "empresa_logo"}:
+        method_preferencias = "GET"
+
     fluxo = processar_fluxo_preferencias_utilizador_form(
-        method=request.method,
+        method=method_preferencias,
         post_data=request.POST,
         form_class=PreferenciasForm,
         preferencias=preferencias,
@@ -111,5 +175,8 @@ def definicoes(request):
 
     return render(request, "projetos/definicoes.html", {
         "form": form,
+        "geologia_score_form": geologia_score_form,
+        "empresa_logo_visivel": empresa_logo_visivel,
+        "empresa_atual": empregado.empresa if empregado else None,
         "titulo": "Definições",
     })

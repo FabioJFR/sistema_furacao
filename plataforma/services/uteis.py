@@ -9,6 +9,7 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
+from core.upload_security import diagnosticar_upload
 
 from plataforma.selectors.uteis import (
     AI_DELETE_MODELS_BY_GROUP,
@@ -69,6 +70,57 @@ def executar_fluxo_preenchimento_furos_materiais(*, empresa_param, raio_metros, 
         "ok": True,
         "erro": "",
         "saida_seed": saida_seed,
+        "opcoes": opcoes,
+    }
+
+
+def normalizar_opcoes_logs_geologicos(*, username, por_furo, dry_run, ignorar_existentes):
+    return {
+        "username": (username or "").strip() or "empregadogeologoteste",
+        "por_furo": str((por_furo or "3")).strip() or "3",
+        "dry_run": bool(dry_run),
+        "ignorar_existentes": bool(ignorar_existentes),
+    }
+
+
+def executar_populacao_logs_geologicos(*, username, por_furo, dry_run, ignorar_existentes):
+    stdout_buffer = StringIO()
+    call_kwargs = {
+        "stdout": stdout_buffer,
+        "username": username,
+        "por_furo": por_furo,
+        "dry_run": dry_run,
+        "ignorar_existentes": ignorar_existentes,
+    }
+    call_command("popular_logs_geologicos_empregado", **call_kwargs)
+    return stdout_buffer.getvalue()
+
+
+def executar_fluxo_populacao_logs_geologicos(*, username, por_furo, dry_run, ignorar_existentes):
+    opcoes = normalizar_opcoes_logs_geologicos(
+        username=username,
+        por_furo=por_furo,
+        dry_run=dry_run,
+        ignorar_existentes=ignorar_existentes,
+    )
+    try:
+        saida = executar_populacao_logs_geologicos(
+            username=opcoes["username"],
+            por_furo=opcoes["por_furo"],
+            dry_run=opcoes["dry_run"],
+            ignorar_existentes=opcoes["ignorar_existentes"],
+        )
+    except Exception as exc:
+        return {
+            "ok": False,
+            "erro": str(exc),
+            "saida": "",
+            "opcoes": opcoes,
+        }
+    return {
+        "ok": True,
+        "erro": "",
+        "saida": saida,
         "opcoes": opcoes,
     }
 
@@ -168,6 +220,40 @@ def processar_submit_preenchimento_dashboard(post_data):
     }
 
 
+def processar_submit_logs_geologicos_dashboard(post_data):
+    resultado = executar_fluxo_populacao_logs_geologicos(
+        username=post_data.get("username_geologo"),
+        por_furo=post_data.get("por_furo_geologo"),
+        dry_run=post_data.get("dry_run_geologo") == "on",
+        ignorar_existentes=post_data.get("ignorar_existentes_geologo") == "on",
+    )
+    opcoes = resultado["opcoes"]
+    saida = resultado["saida"]
+    if resultado["ok"]:
+        if opcoes["dry_run"]:
+            mensagem = "Simulação de logs geológicos executada com sucesso."
+        else:
+            mensagem = "Preenchimento de logs geológicos executado com sucesso."
+        return {
+            "ok": True,
+            "mensagem_sucesso": mensagem,
+            "mensagem_erro": "",
+            "saida_logs_geologicos": saida,
+            "opcoes_logs_geologicos": opcoes,
+            "saida_seed": "",
+            "opcoes": None,
+        }
+    return {
+        "ok": False,
+        "mensagem_sucesso": "",
+        "mensagem_erro": f"Erro ao executar preenchimento de logs geológicos: {resultado['erro']}",
+        "saida_logs_geologicos": saida,
+        "opcoes_logs_geologicos": opcoes,
+        "saida_seed": "",
+        "opcoes": None,
+    }
+
+
 def processar_fluxo_post_uteis_dashboard(*, method, post_data):
     if method != "POST":
         return {
@@ -176,18 +262,68 @@ def processar_fluxo_post_uteis_dashboard(*, method, post_data):
             "resultado": None,
         }
 
-    if post_data.get("action") != "preencher_furos_materiais":
+    action = post_data.get("action")
+
+    if action == "preencher_furos_materiais":
+        resultado = processar_submit_preenchimento_dashboard(post_data)
+        return {
+            "handled": True,
+            "ok": bool(resultado.get("ok")),
+            "resultado": resultado,
+        }
+
+    if action == "popular_logs_geologicos":
+        resultado = processar_submit_logs_geologicos_dashboard(post_data)
+        return {
+            "handled": True,
+            "ok": bool(resultado.get("ok")),
+            "resultado": resultado,
+        }
+
+    if action == "diagnostico_upload":
+        return {
+            "handled": True,
+            "ok": False,
+            "resultado": {
+                "ok": False,
+                "mensagem_sucesso": "",
+                "mensagem_erro": "Pedido inválido para diagnóstico de upload.",
+            },
+        }
+
+    if action != "preencher_furos_materiais":
         return {
             "handled": False,
             "ok": False,
             "resultado": None,
         }
+    return {"handled": False, "ok": False, "resultado": None}
 
-    resultado = processar_submit_preenchimento_dashboard(post_data)
+
+def processar_submit_diagnostico_upload(*, upload_file, tipo_esperado):
+    if not upload_file:
+        return {
+            "ok": False,
+            "mensagem_sucesso": "",
+            "mensagem_erro": "Seleciona um ficheiro para diagnóstico.",
+            "diagnostico": None,
+            "opcoes": {"tipo_esperado": tipo_esperado or "auto"},
+        }
+    diagnostico = diagnosticar_upload(upload_file, tipo_esperado=tipo_esperado or "auto")
+    if diagnostico["ok"]:
+        return {
+            "ok": True,
+            "mensagem_sucesso": "Diagnóstico concluído: ficheiro válido para upload.",
+            "mensagem_erro": "",
+            "diagnostico": diagnostico,
+            "opcoes": {"tipo_esperado": tipo_esperado or "auto"},
+        }
     return {
-        "handled": True,
-        "ok": bool(resultado.get("ok")),
-        "resultado": resultado,
+        "ok": False,
+        "mensagem_sucesso": "",
+        "mensagem_erro": f"Diagnóstico falhou: {diagnostico.get('erro') or 'erro desconhecido'}",
+        "diagnostico": diagnostico,
+        "opcoes": {"tipo_esperado": tipo_esperado or "auto"},
     }
 
 
@@ -201,6 +337,21 @@ def construir_contexto_dashboard_uteis(session):
             {"empresa": "", "raio_metros": "250", "forcar_furos": False, "simular": False},
         ),
         "seed_last_output": session.get("uteis_last_seed_output", ""),
+        "logs_geologicos_form_initial": session.get(
+            "uteis_last_logs_geologicos_options",
+            {
+                "username": "empregadogeologoteste",
+                "por_furo": "3",
+                "dry_run": True,
+                "ignorar_existentes": False,
+            },
+        ),
+        "logs_geologicos_last_output": session.get("uteis_last_logs_geologicos_output", ""),
+        "upload_diagnostico": session.get("uteis_upload_diagnostico"),
+        "upload_diagnostico_opcoes": session.get(
+            "uteis_upload_diagnostico_opcoes",
+            {"tipo_esperado": "auto"},
+        ),
     }
 
 

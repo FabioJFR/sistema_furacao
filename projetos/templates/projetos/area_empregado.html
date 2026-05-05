@@ -10,8 +10,22 @@
     <div class="bg-white rounded-xl shadow p-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
+                {% if empregado.empresa and empregado.empresa.logo %}
+                <div class="mb-3">
+                    <img
+                        src="{{ empregado.empresa.logo.url }}"
+                        alt="{% trans 'Logo da empresa' %}"
+                        class="max-h-12 w-auto rounded-lg border border-gray-200 bg-white p-1"
+                    >
+                </div>
+                {% endif %}
                 <h2 class="text-2xl font-bold sf-break-word">👋 {% blocktrans with nome=empregado.nome %}Bem-vindo, {{ nome }}{% endblocktrans %}</h2>
                 <p class="text-gray-500 mt-1">{% trans "Resumo geral da tua atividade." %}</p>
+                {% if empregado.empresa %}
+                <p class="text-gray-500 text-sm mt-1 sf-break-word">
+                    {{ empregado.empresa.nome_comercial|default:empregado.empresa.nome }}
+                </p>
+                {% endif %}
             </div>
 
             <div class="flex flex-wrap gap-2">

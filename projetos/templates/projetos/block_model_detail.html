@@ -1,0 +1,42 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ item.nome }}{% endblock %}
+{% block page_title %}{{ item.nome }}{% endblock %}
+{% block page_description %}{% trans "Detalhe técnico do block model profissional." %}{% endblock %}
+
+{% block content %}
+<section class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'projetos:block_model_3d' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-900 transition">3D</a>
+        <a href="{% url 'projetos:block_model_export_json' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Exportar JSON técnico" %}</a>
+        <a href="{% url 'projetos:block_model_export_csv' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Exportar CSV técnico" %}</a>
+        <form method="post" action="{% url 'projetos:block_model_regenerate_cells' item.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">
+                {% trans "Regerar células" %}
+            </button>
+        </form>
+        <a href="{% url 'projetos:block_model_list' %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Lista" %}</a>
+        <a href="{% url 'projetos:block_model_delete' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Apagar" %}</a>
+    </div>
+    <div class="grid gap-3 md:grid-cols-3 text-sm text-slate-700">
+        <div><strong>{% trans "Projeto:" %}</strong> {{ item.projeto.nome|default:"-" }}</div>
+        <div><strong>{% trans "Empresa:" %}</strong> {{ item.empresa.nome|default:"-" }}</div>
+        <div><strong>{% trans "Formato:" %}</strong> {{ item.formato|upper }}</div>
+        <div><strong>{% trans "Células:" %}</strong> {{ total_celulas }}</div>
+        <div><strong>{% trans "Tamanho bloco:" %}</strong> {{ item.tamanho_bloco_x }} × {{ item.tamanho_bloco_y }} × {{ item.tamanho_bloco_z }}</div>
+        <div><strong>{% trans "Origem:" %}</strong> ({{ item.origem_x }}, {{ item.origem_y }}, {{ item.origem_z }})</div>
+    </div>
+    <div>
+        <h3 class="text-sm font-semibold text-slate-800 mb-2">{% trans "Litologias encontradas" %}</h3>
+        <div class="flex flex-wrap gap-2">
+            {% for lit in litologias %}
+                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ lit }}</span>
+            {% empty %}
+                <span class="text-sm text-slate-500">{% trans "Sem litologias." %}</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

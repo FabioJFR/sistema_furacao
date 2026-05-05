@@ -40,7 +40,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <div><strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:empregado.funcao|default:"-" }}</div>
             <div><strong>{% trans "Data de Admissão:" %}</strong> {{ empregado.data_admissao|default:"-" }}</div>
-            <div><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default:"-" }}</div>
+            <div><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default_if_none:"-" }}</div>
             <div><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default:"-" }}</div>
             <div><strong>{% trans "Horas Mensais:" %}</strong> {{ empregado.horas_mensais|default:"-" }}</div>
             <div><strong>{% trans "Horas Extra:" %}</strong> {{ empregado.horas_extra|default:"-" }}</div>
@@ -51,6 +51,20 @@
 
     <div class="bg-white rounded-xl shadow p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Plano e Pagamentos" %}</h2>
+        {% if empresa_associada %}
+            <div class="mb-4">
+                <strong class="block mb-2">{% trans "Logo da empresa:" %}</strong>
+                {% if empresa_associada.logo %}
+                    <img
+                        src="{{ empresa_associada.logo.url }}"
+                        alt="{% trans 'Logo da empresa' %}"
+                        class="max-h-20 w-auto rounded-lg border border-gray-200 bg-white p-1"
+                    >
+                {% else %}
+                    <span class="text-gray-500">{% trans "Sem logo definido." %}</span>
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <div>
                 <strong>{% trans "Empresa associada:" %}</strong>

@@ -66,6 +66,7 @@ def validar_pedido_registo(payload):
     plano_id = payload.get("plano")
     tipo_conta = payload.get("tipo_conta") or "empresa"
     ciclo_subscricao = payload.get("ciclo_subscricao") or "1"
+    aceitar_termos = payload.get("aceitar_termos")
 
     erros = []
 
@@ -96,6 +97,8 @@ def validar_pedido_registo(payload):
             erros.append(_("Seleciona um período de pagamento válido para o plano escolhido."))
     if tipo_conta == "empresa" and not nome_empresa:
         erros.append(_("O nome da empresa é obrigatório para conta empresa."))
+    if not aceitar_termos:
+        erros.append(_("Tens de aceitar os Termos & Condições e a Política de Privacidade para criar conta."))
 
     return {"erros": erros, "plano": plano}
 

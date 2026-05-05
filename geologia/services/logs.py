@@ -1,4 +1,5 @@
 from geologia.forms import AnexoLogGeologicoForm, LogGeologicoFuroForm
+from django.utils import timezone
 
 
 def guardar_log_geologico_form(*, form):
@@ -62,6 +63,12 @@ def processar_log_update(*, request_post, request_files, log, empresa):
     )
     if form.is_valid():
         log = guardar_log_geologico_form(form=form)
+        if log.status_validacao != "pendente" or log.validado_por_id or log.validado_em:
+            log.status_validacao = "pendente"
+            log.validado_por = None
+            log.validado_em = None
+            log.observacao_validacao = ""
+            log.save(update_fields=["status_validacao", "validado_por", "validado_em", "observacao_validacao", "atualizado_em"])
         return {"ok": True, "form": form, "log": log}
     return {"ok": False, "form": form, "log": log}
 
@@ -125,3 +132,15 @@ def processar_fluxo_anexo_log_create(*, request_method, request_post, request_fi
         "form": construir_form_anexo_log(),
         "resultado": None,
     }
+
+
+def validar_log_geologico(*, log, user, acao, observacao=""):
+    if acao not in {"aprovar", "rejeitar"}:
+        return {"ok": False, "erro": "acao_invalida"}
+
+    log.status_validacao = "aprovado" if acao == "aprovar" else "rejeitado"
+    log.validado_por = user
+    log.validado_em = timezone.now()
+    log.observacao_validacao = (observacao or "").strip()
+    log.save(update_fields=["status_validacao", "validado_por", "validado_em", "observacao_validacao", "atualizado_em"])
+    return {"ok": True, "log": log}

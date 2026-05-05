@@ -1,0 +1,159 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Clientes & Contratos" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{% trans "Clientes & Contratos" %}</h1>
+            <p class="sf-muted-text">{% trans "Gestão comercial por cliente, projeto e condições contratuais." %}</p>
+            {% if somente_leitura %}
+                <p class="text-xs text-amber-700 mt-1">{% trans "Modo auditoria (somente leitura)." %}</p>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+            {% if not somente_leitura %}
+                <a href="{% url 'projetos:cliente_contrato_create' %}" class="btn btn-primary">{% trans "Novo Cliente/Contrato" %}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-6 overflow-auto rounded-xl border border-slate-200 bg-white">
+        <form method="get" class="p-4 grid grid-cols-1 md:grid-cols-12 gap-3 border-b border-slate-100">
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Cliente" %}</label>
+                <input
+                    type="text"
+                    name="termo"
+                    value="{{ filtros.termo }}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800"
+                    placeholder="{% trans 'Nome do cliente' %}"
+                />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado" %}</label>
+                <select name="status" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Projeto" %}</label>
+                <select name="projeto_id" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for p in projeto_choices %}
+                    <option value="{{ p.id }}" {% if filtros.projeto_id == p.id|stringformat:'s' %}selected{% endif %}>{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Vencimento" %}</label>
+                <select name="vencimento" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in vencimento_choices %}
+                    <option value="{{ value }}" {% if filtros.vencimento == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2 flex flex-wrap items-end gap-2">
+                <button type="submit" class="btn btn-primary whitespace-nowrap break-normal">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:cliente_contrato_list' %}" class="btn btn-light whitespace-nowrap break-normal">{% trans "Limpar" %}</a>
+            </div>
+        </form>
+
+        <div class="p-4 border-b border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="text-xs text-slate-500">{% trans "Contratos visíveis" %}</div>
+                <div class="text-lg font-semibold text-slate-800">{{ kpi_total }}</div>
+            </div>
+            <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                <div class="text-xs text-red-600">{% trans "Vencidos" %}</div>
+                <div class="text-lg font-semibold text-red-700">{{ kpi_vencidos }}</div>
+            </div>
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <div class="text-xs text-amber-700">{% trans "Vence em 7 dias" %}</div>
+                <div class="text-lg font-semibold text-amber-800">{{ kpi_7d }}</div>
+            </div>
+            <div class="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2">
+                <div class="text-xs text-orange-700">{% trans "Vence em 30 dias" %}</div>
+                <div class="text-lg font-semibold text-orange-800">{{ kpi_30d }}</div>
+            </div>
+        </div>
+
+        <table class="w-full min-w-[980px] text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                    {% if somente_leitura %}
+                    <th class="px-4 py-3 text-left">{% trans "Empresa" %}</th>
+                    {% endif %}
+                    <th class="px-4 py-3 text-left">{% trans "Cliente" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Nº Contrato" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Projeto" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Cobrança" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Valor" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "SLA (h)" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Vencimento" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Estado" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    {% if somente_leitura %}
+                    <td class="px-4 py-3">{{ item.obj.empresa.nome|default:"-" }}</td>
+                    {% endif %}
+                    <td class="px-4 py-3 font-semibold">{{ item.obj.nome_cliente }}</td>
+                    <td class="px-4 py-3">{{ item.obj.numero_contrato|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.obj.projeto.nome|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.obj.get_tipo_cobranca_display }}</td>
+                    <td class="px-4 py-3">{{ item.obj.valor_contratado|floatformat:2 }} {{ item.obj.moeda }}</td>
+                    <td class="px-4 py-3">{{ item.obj.sla_resposta_horas }}</td>
+                    <td class="px-4 py-3">
+                        {% if item.obj.data_fim %}
+                            {{ item.obj.data_fim|date:"d/m/Y" }}
+                            {% if item.dias_para_fim is not None %}
+                                {% if item.alerta_vencimento == "vencido" %}
+                                    <span class="ml-1 inline-flex rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-xs font-semibold">
+                                        {% trans "Vencido" %}
+                                    </span>
+                                {% elif item.alerta_vencimento == "7d" %}
+                                    <span class="ml-1 inline-flex rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-xs font-semibold">
+                                        {{ item.dias_para_fim }}d
+                                    </span>
+                                {% elif item.alerta_vencimento == "30d" %}
+                                    <span class="ml-1 inline-flex rounded-full bg-orange-100 text-orange-700 px-2 py-0.5 text-xs font-semibold">
+                                        {{ item.dias_para_fim }}d
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">{{ item.obj.get_status_display }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'projetos:cliente_contrato_detail' item.obj.pk %}" class="btn btn-light">{% trans "Detalhe" %}</a>
+                            {% if not somente_leitura %}
+                                <a href="{% url 'projetos:cliente_contrato_update' item.obj.pk %}" class="btn btn-secondary">{% trans "Editar" %}</a>
+                                <a href="{% url 'projetos:cliente_contrato_delete' item.obj.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if somente_leitura %}10{% else %}9{% endif %}" class="px-4 py-8 text-center text-slate-500">
+                        {% trans "Ainda não existem clientes/contratos registados." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

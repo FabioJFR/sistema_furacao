@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from website import views as website_views
 from website.sitemaps import PublicPagesSitemap
+from website.forms import LoginConsentForm
 
 
 sitemaps = {
@@ -25,6 +26,7 @@ urlpatterns = [
         "login/",
         auth_views.LoginView.as_view(
             template_name="website/login.html",
+            authentication_form=LoginConsentForm,
             redirect_authenticated_user=False,
             next_page="/app/redirect-after-login/",
         ),

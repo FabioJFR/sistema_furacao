@@ -32,6 +32,7 @@ def onboarding_empresa(request):
     fluxo = processar_fluxo_onboarding_empresa(
         method=request.method,
         post_data=request.POST,
+        files_data=request.FILES,
         actor_user_id=getattr(request.user, "id", None),
     )
     form = fluxo["form"]

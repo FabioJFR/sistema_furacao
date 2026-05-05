@@ -75,6 +75,34 @@ class ResultadoSubmissaoAlteracaoPlano:
     ciclo_subscricao: str | None = None
 
 
+@dataclass
+class ResultadoLogoEmpresa:
+    ok: bool
+    erro: str | None = None
+
+
+@dataclass
+class ResultadoGeologiaScoreConfig:
+    ok: bool
+    erro: str | None = None
+
+
+DEFAULT_GEOLOGIA_SCORE_CONFIG = {
+    "pesos": {
+        "sem_logs": 12,
+        "conflito_intervalo": 9,
+        "pendente_validacao": 3,
+        "sem_anexo": 1,
+        "sem_log_24h": 4,
+        "sem_log_48h": 7,
+    },
+    "janelas_horas": {
+        "atencao": 24,
+        "critico": 48,
+    },
+}
+
+
 @transaction.atomic
 def atualizar_renovacao_subscricao(subscricao_atual, nova_data: date):
     if not subscricao_atual:
@@ -217,6 +245,67 @@ def processar_fluxo_alteracao_plano_empresa(
     )
 
 
+def normalizar_geologia_score_config(config_raw):
+    config = config_raw if isinstance(config_raw, dict) else {}
+    pesos_in = config.get("pesos") if isinstance(config.get("pesos"), dict) else {}
+    janelas_in = config.get("janelas_horas") if isinstance(config.get("janelas_horas"), dict) else {}
+
+    pesos = dict(DEFAULT_GEOLOGIA_SCORE_CONFIG["pesos"])
+    janelas = dict(DEFAULT_GEOLOGIA_SCORE_CONFIG["janelas_horas"])
+
+    for chave in pesos:
+        try:
+            valor = int(pesos_in.get(chave, pesos[chave]))
+        except (TypeError, ValueError):
+            valor = pesos[chave]
+        pesos[chave] = max(0, min(100, valor))
+
+    for chave in janelas:
+        try:
+            valor = int(janelas_in.get(chave, janelas[chave]))
+        except (TypeError, ValueError):
+            valor = janelas[chave]
+        janelas[chave] = max(1, min(240, valor))
+
+    if janelas["critico"] <= janelas["atencao"]:
+        janelas["critico"] = max(janelas["atencao"] + 1, DEFAULT_GEOLOGIA_SCORE_CONFIG["janelas_horas"]["critico"])
+
+    return {
+        "pesos": pesos,
+        "janelas_horas": janelas,
+    }
+
+
+@transaction.atomic
+def atualizar_geologia_score_config_empresa(empresa, cleaned_data):
+    config = {
+        "pesos": {
+            "sem_logs": int(cleaned_data["sem_logs"]),
+            "conflito_intervalo": int(cleaned_data["conflito_intervalo"]),
+            "pendente_validacao": int(cleaned_data["pendente_validacao"]),
+            "sem_anexo": int(cleaned_data["sem_anexo"]),
+            "sem_log_24h": int(cleaned_data["sem_log_24h"]),
+            "sem_log_48h": int(cleaned_data["sem_log_48h"]),
+        },
+        "janelas_horas": {
+            "atencao": int(cleaned_data["janela_atencao_horas"]),
+            "critico": int(cleaned_data["janela_critico_horas"]),
+        },
+    }
+    empresa.geologia_score_config = normalizar_geologia_score_config(config)
+    empresa.save(update_fields=["geologia_score_config", "atualizado_em"])
+    return empresa
+
+
+def processar_fluxo_geologia_score_config(*, method, empresa, form):
+    if method != "POST":
+        return ResultadoGeologiaScoreConfig(ok=False, erro="metodo_invalido")
+    if not form.is_valid():
+        return ResultadoGeologiaScoreConfig(ok=False, erro="form_invalido")
+    atualizar_geologia_score_config_empresa(empresa, form.cleaned_data)
+    return ResultadoGeologiaScoreConfig(ok=True)
+
+
 @transaction.atomic
 def toggle_ativa_empresa(empresa):
     empresa.ativo = not empresa.ativo
@@ -248,3 +337,46 @@ def processar_fluxo_toggle_ativa_empresa(*, method, empresa):
         "empresa": empresa_atualizada,
         "mensagem": mensagem,
     }
+
+
+@transaction.atomic
+def atualizar_logo_empresa(*, method, empresa, logo_file):
+    if method != "POST":
+        return ResultadoLogoEmpresa(ok=False, erro="metodo_invalido")
+
+    if not logo_file:
+        return ResultadoLogoEmpresa(ok=False, erro="Selecione um ficheiro de logo.")
+
+    empresa.logo = logo_file
+    try:
+        empresa.save(update_fields=["logo", "atualizado_em"])
+    except ValidationError as exc:
+        if hasattr(exc, "message_dict") and exc.message_dict:
+            mensagens = []
+            for _, errs in exc.message_dict.items():
+                if isinstance(errs, list):
+                    mensagens.extend([str(e) for e in errs])
+                else:
+                    mensagens.append(str(errs))
+            detalhe = " | ".join(mensagens)
+        else:
+            detalhe = str(exc)
+        return ResultadoLogoEmpresa(
+            ok=False,
+            erro=f"Logotipo inválido: {detalhe}. Usa PNG/JPG/WEBP/GIF.",
+        )
+    return ResultadoLogoEmpresa(ok=True)
+
+
+@transaction.atomic
+def remover_logo_empresa(*, method, empresa):
+    if method != "POST":
+        return ResultadoLogoEmpresa(ok=False, erro="metodo_invalido")
+
+    if not empresa.logo:
+        return ResultadoLogoEmpresa(ok=False, erro="A empresa não tem logo para remover.")
+
+    empresa.logo.delete(save=False)
+    empresa.logo = None
+    empresa.save(update_fields=["logo", "atualizado_em"])
+    return ResultadoLogoEmpresa(ok=True)

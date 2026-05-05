@@ -1,7 +1,7 @@
 # =============================
 # projetos/urls/projetos.py
 # =============================
-from django.urls import path
+from django.urls import path, re_path
 from projetos import views
 
 
@@ -15,5 +15,9 @@ urlpatterns = [
     path("<uuid:pk>/empregados/adicionar/", views.projeto_adicionar_empregado, name="projeto_adicionar_empregado"),
     path("<uuid:pk>/empregados/<int:ligacao_id>/remover/", views.projeto_remover_empregado, name="projeto_remover_empregado"),
     path("<uuid:pk>/", views.projeto_detail_legacy, name="projeto_detail_legacy"),
-    path("<uuid:pk>/<slug:slug>/", views.projeto_detail, name="projeto_detail"),
+    re_path(
+        r"^(?P<pk>[0-9a-f-]{36})/(?P<slug>(?!editar$|apagar$|3d$|empregados$)[-a-zA-Z0-9_]+)/$",
+        views.projeto_detail,
+        name="projeto_detail",
+    ),
 ]

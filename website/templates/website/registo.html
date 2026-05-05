@@ -110,6 +110,23 @@
                     <input type="password" name="password2">
                 </div>
 
+                <div class="row">
+                    <label class="checkbox-row" for="id_aceitar_termos">
+                        <input
+                            type="checkbox"
+                            id="id_aceitar_termos"
+                            name="aceitar_termos"
+                            {% if dados.aceitar_termos %}checked{% endif %}
+                        >
+                        <span>
+                            {% trans "Li e concordo com os" %}
+                            <a href="{% url 'projetos:termos_condicoes' %}" target="_blank" rel="noopener noreferrer">{% trans "Termos & Condições" %}</a>
+                            {% trans "e com a" %}
+                            <a href="{% url 'projetos:politica_privacidade' %}" target="_blank" rel="noopener noreferrer">{% trans "Política de Privacidade" %}</a>.
+                        </span>
+                    </label>
+                </div>
+
                 <div class="actions">
                     <a href="{% url 'website:home' %}" class="btn btn-secondary">{% trans "Voltar" %}</a>
                     <button type="submit" class="btn btn-primary">{% trans "Criar conta" %}</button>

@@ -12,7 +12,11 @@
         </p>
     </header>
 
-    <div class="grid gap-4 md:grid-cols-3">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <a href="{% url 'projetos:block_model_list' %}" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition">
+            <h2 class="text-lg font-semibold text-slate-900">🧱 {% trans "Block Model Profissional" %}</h2>
+            <p class="text-sm text-slate-600 mt-2">{% trans "Modelos persistentes por projeto com geração, detalhe técnico e visualização 3D profissional." %}</p>
+        </a>
         <a href="{% url 'projetos:modelo_3d_wireframe' %}" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow transition">
             <h2 class="text-lg font-semibold text-slate-900">🔺 {% trans "Wireframe" %}</h2>
             <p class="text-sm text-slate-600 mt-2">{% trans "Superfícies trianguladas e interoperabilidade com OBJ/DXF." %}</p>

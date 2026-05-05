@@ -144,3 +144,38 @@ def toggle_empresa_ativa(request, pk):
 
     messages.success(request, resultado["mensagem"])
     return redirect("plataforma:empresa_detail", pk=empresa.pk)
+
+
+@login_required
+@platform_admin_required
+def atualizar_logo_empresa(request, pk):
+    empresa = obter_empresa(pk)
+    resultado = empresas_service.atualizar_logo_empresa(
+        method=request.method,
+        empresa=empresa,
+        logo_file=request.FILES.get("logo"),
+    )
+    if not resultado.ok:
+        if resultado.erro != "metodo_invalido":
+            messages.error(request, resultado.erro)
+        return redirect("plataforma:empresa_detail", pk=empresa.pk)
+
+    messages.success(request, f"Logo da empresa '{empresa.nome}' atualizado com sucesso.")
+    return redirect("plataforma:empresa_detail", pk=empresa.pk)
+
+
+@login_required
+@platform_admin_required
+def remover_logo_empresa(request, pk):
+    empresa = obter_empresa(pk)
+    resultado = empresas_service.remover_logo_empresa(
+        method=request.method,
+        empresa=empresa,
+    )
+    if not resultado.ok:
+        if resultado.erro != "metodo_invalido":
+            messages.error(request, resultado.erro)
+        return redirect("plataforma:empresa_detail", pk=empresa.pk)
+
+    messages.success(request, f"Logo da empresa '{empresa.nome}' removido com sucesso.")
+    return redirect("plataforma:empresa_detail", pk=empresa.pk)

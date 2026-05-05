@@ -37,6 +37,30 @@
     <div class="empresa-section">
         <h2>{% trans "Informação da Empresa" %}</h2>
 
+        {% if empresa.logo %}
+        <div class="empresa-logo-wrap">
+            <img src="{{ empresa.logo.url }}" alt="{% trans 'Logo da empresa' %}" class="empresa-logo-img">
+        </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" action="{% url 'plataforma:empresa_logo_atualizar' empresa.id %}" class="empresa-logo-form">
+            {% csrf_token %}
+            <label for="logo-upload"><strong>{% trans "Atualizar logo:" %}</strong></label>
+            <div class="empresa-logo-row">
+                <input id="logo-upload" type="file" name="logo" accept="image/*" class="empresa-logo-input">
+                <button type="submit" class="btn btn-primary">{% trans "Guardar logo" %}</button>
+                {% if empresa.logo %}
+                <button
+                    type="submit"
+                    formaction="{% url 'plataforma:empresa_logo_remover' empresa.id %}"
+                    formmethod="post"
+                    class="btn btn-light"
+                >
+                    {% trans "Remover logo" %}
+                </button>
+                {% endif %}
+            </div>
+        </form>
+
         <div class="empresa-row"><strong>{% trans "Estado:" %}</strong> {{ empresa.get_status_display }}</div>
         <div class="empresa-row"><strong>{% trans "Ativo:" %}</strong> {% if empresa.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
         <div class="empresa-row"><strong>{% trans "Email:" %}</strong> {{ empresa.email }}</div>

@@ -1,0 +1,18 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar pedido de compra" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <h1>{% trans "Apagar pedido de compra" %}</h1>
+    <p class="sf-muted-text mt-2">
+        {% blocktrans with desc=item.descricao %}Tens a certeza que queres apagar o pedido "{{ desc }}"?{% endblocktrans %}
+    </p>
+    <form method="post" class="mt-5 flex items-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Confirmar apagar" %}</button>
+        <a href="{% url 'projetos:gestao_compras_fornecedores' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </form>
+</section>
+{% endblock %}

@@ -1,6 +1,20 @@
 {% extends "projetos/base.html" %}
 {% load static i18n %}
-{% block title %}{% trans "Gráficos" %}{% endblock %}
+{% block title %}
+{% if analytics_mode == "financeiro" %}
+{% trans "Gráficos Financeiros" %}
+{% elif analytics_mode == "operacional" %}
+{% trans "Gráficos Operacionais" %}
+{% elif analytics_mode == "rentabilidade" %}
+{% trans "Rentabilidade" %}
+{% elif analytics_mode == "produtividade" %}
+{% trans "Produtividade Equipa" %}
+{% elif analytics_mode == "alertas" %}
+{% trans "Alertas Operacionais" %}
+{% else %}
+{% trans "Gráficos" %}
+{% endif %}
+{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/projeto/graficos_dashboard.css' %}">
@@ -9,7 +23,21 @@
 {% block content %}
 <section class="p-0 m-0 space-y-6">
     <div class="gkd-header">
-        <h1 class="gkd-title">📊 {% trans "Gráficos e Indicadores" %}</h1>
+        <h1 class="gkd-title">
+            {% if analytics_mode == "financeiro" %}
+                💶 {% trans "Gráficos Financeiros" %}
+            {% elif analytics_mode == "operacional" %}
+                🏭 {% trans "Gráficos Operacionais" %}
+            {% elif analytics_mode == "rentabilidade" %}
+                📈 {% trans "Rentabilidade" %}
+            {% elif analytics_mode == "produtividade" %}
+                👥 {% trans "Produtividade Equipa" %}
+            {% elif analytics_mode == "alertas" %}
+                🚨 {% trans "Alertas Operacionais" %}
+            {% else %}
+                📊 {% trans "Gráficos e Indicadores" %}
+            {% endif %}
+        </h1>
     </div>
 
     <div class="gkd-filter-card">
@@ -17,6 +45,7 @@
             <div>
                 <label class="gkd-label">{% trans "Período" %}</label>
                 <select name="periodo" class="w-full p-2 border rounded">
+                    <option value="total" {% if filtros.periodo == "total" %}selected{% endif %}>{% trans "Total" %}</option>
                     <option value="hoje" {% if filtros.periodo == "hoje" %}selected{% endif %}>{% trans "Hoje" %}</option>
                     <option value="7_dias" {% if filtros.periodo == "7_dias" %}selected{% endif %}>{% trans "Últimos 7 dias" %}</option>
                     <option value="30_dias" {% if filtros.periodo == "30_dias" %}selected{% endif %}>{% trans "Últimos 30 dias" %}</option>
@@ -57,13 +86,27 @@
 
             <div class="gkd-filter-actions">
                 <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
-                <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% if analytics_mode == "financeiro" %}
+                    <a href="{% url 'projetos:graficos_financeiros_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% elif analytics_mode == "operacional" %}
+                    <a href="{% url 'projetos:graficos_operacionais_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% elif analytics_mode == "rentabilidade" %}
+                    <a href="{% url 'projetos:graficos_rentabilidade_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% elif analytics_mode == "produtividade" %}
+                    <a href="{% url 'projetos:graficos_produtividade_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% elif analytics_mode == "alertas" %}
+                    <a href="{% url 'projetos:graficos_alertas_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% else %}
+                    <a href="{% url 'projetos:graficos_dashboard' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
+                {% endif %}
             </div>
         </form>
     </div>
 
     <div class="gkd-range-note">
-        {% if filtros.periodo == "hoje" %}
+        {% if filtros.periodo == "total" %}
+            {% trans "A mostrar dados de: Total (sem limite de datas)" %}
+        {% elif filtros.periodo == "hoje" %}
             {% trans "A mostrar dados de: Hoje" %}
         {% elif filtros.periodo == "7_dias" %}
             {% trans "A mostrar dados de: Últimos 7 dias" %}
@@ -76,6 +119,7 @@
         {% endif %}
     </div>
 
+    {% if mostrar_operacional_metricas or mostrar_operacional_alertas or mostrar_operacional_graficos %}
     <div class="gkd-section-intro gkd-section-operacao">
         <h2>{% trans "Operação" %}</h2>
         <p>
@@ -83,6 +127,7 @@
         </p>
     </div>
 
+    {% if mostrar_operacional_metricas %}
     <div class="gkd-grid-metrics">
         <div class="gkd-card gkd-accent-blue">
             <div class="gkd-card-title">{% trans "Metros no período" %}</div>
@@ -136,7 +181,9 @@
             <div class="gkd-summary-value">{{ total_registos }}</div>
         </div>
     </div>
+    {% endif %}
 
+    {% if mostrar_operacional_alertas %}
     <div class="gkd-grid-alerts">
         <div class="gkd-alert-card">
             <h3 class="gkd-alert-title gkd-alert-title-red">⚠️ {% trans "Stock Baixo" %}</h3>
@@ -183,7 +230,9 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
+    {% if mostrar_operacional_graficos %}
     <div class="gkd-section-intro gkd-section-white">
         <h3>{% trans "Gráficos Operacionais" %}</h3>
         <p>
@@ -213,7 +262,10 @@
             <div class="gkd-canvas-wrap"><canvas id="graficoProjetos"></canvas></div>
         </div>
     </div>
+    {% endif %}
+    {% endif %}
 
+    {% if mostrar_financeiro_metricas or mostrar_financeiro_quadros or mostrar_financeiro_graficos %}
     <div class="gkd-section-intro gkd-section-financeiro">
         <h2>{% trans "Financeiro" %}</h2>
         <p>
@@ -221,6 +273,7 @@
         </p>
     </div>
 
+    {% if mostrar_financeiro_metricas %}
     <div class="gkd-grid-metrics">
         <div class="gkd-card gkd-accent-dark-red">
             <div class="gkd-card-title">{% trans "Despesas no período" %}</div>
@@ -269,8 +322,22 @@
             <div class="gkd-card-title">{% trans "Outros valores gastos associados" %}</div>
             <div class="gkd-summary-value gkd-value-slate">{{ outros_valores_gastos_associados }} €</div>
         </div>
+        <div class="gkd-summary-card gkd-mini-purple">
+            <div class="gkd-card-title">{% trans "Salários atuais (empresa)" %}</div>
+            <div class="gkd-summary-value gkd-value-purple">{{ total_salarios_empregados }} €</div>
+        </div>
+        <div class="gkd-summary-card gkd-mini-cyan">
+            <div class="gkd-card-title">{% trans "Empregados contabilizados" %}</div>
+            <div class="gkd-summary-value gkd-value-cyan">{{ total_empregados_salario }}</div>
+        </div>
+        <div class="gkd-summary-card gkd-mini-amber">
+            <div class="gkd-card-title">{% trans "Salário médio atual" %}</div>
+            <div class="gkd-summary-value gkd-value-amber">{{ salario_medio_empregado }} €</div>
+        </div>
     </div>
+    {% endif %}
 
+    {% if mostrar_financeiro_quadros %}
     <div class="gkd-section-intro gkd-section-white">
         <h3>{% trans "Quadros Financeiros" %}</h3>
         <p>
@@ -379,7 +446,9 @@
             </table>
         </div>
     </div>
+    {% endif %}
 
+    {% if mostrar_financeiro_graficos %}
     <div class="gkd-section-intro gkd-section-white">
         <h3>{% trans "Gráficos Financeiros" %}</h3>
         <p>
@@ -403,7 +472,19 @@
             <p class="gkd-chart-desc">{% trans "Mostra quais os projetos com maior peso financeiro." %}</p>
             <div class="gkd-canvas-wrap"><canvas id="graficoDespesasProjeto"></canvas></div>
         </div>
+        <div class="gkd-chart-card">
+            <h3 class="gkd-chart-title">💼 {% trans "Salários por Função" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Compara o gasto salarial atual entre funções de empregados." %}</p>
+            <div class="gkd-canvas-wrap"><canvas id="graficoSalariosFuncao"></canvas></div>
+        </div>
+        <div class="gkd-chart-card">
+            <h3 class="gkd-chart-title">👤 {% trans "Salários por Empregado" %}</h3>
+            <p class="gkd-chart-desc">{% trans "Mostra os maiores salários atuais dos empregados da empresa." %}</p>
+            <div class="gkd-canvas-wrap"><canvas id="graficoSalariosEmpregado"></canvas></div>
+        </div>
     </div>
+    {% endif %}
+    {% endif %}
 </section>
 
 {{ labels_dia|json_script:"labels-dia-data" }}
@@ -421,9 +502,17 @@
 {{ valores_despesas_categoria|json_script:"valores-despesas-categoria-data" }}
 {{ labels_despesas_projeto|json_script:"labels-despesas-projeto-data" }}
 {{ valores_despesas_projeto|json_script:"valores-despesas-projeto-data" }}
+{{ labels_salarios_funcao|json_script:"labels-salarios-funcao-data" }}
+{{ valores_salarios_funcao|json_script:"valores-salarios-funcao-data" }}
+{{ quantidade_empregados_funcao|json_script:"quantidade-empregados-funcao-data" }}
+{{ labels_salarios_empregado|json_script:"labels-salarios-empregado-data" }}
+{{ valores_salarios_empregado|json_script:"valores-salarios-empregado-data" }}
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js"
+    onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';"
+></script>
 <script src="{% static 'js/projetos/graficos_dashboard.js' %}"></script>
 {% endblock %}

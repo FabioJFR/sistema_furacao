@@ -42,14 +42,14 @@ def _normalizar_username(username, email):
     })
 
 
-def construir_form_onboarding_empresa(*, post_data=None):
+def construir_form_onboarding_empresa(*, post_data=None, files_data=None):
     if post_data is not None:
-        return OnboardingEmpresaForm(post_data)
+        return OnboardingEmpresaForm(post_data, files_data)
     return OnboardingEmpresaForm()
 
 
-def processar_submissao_onboarding_empresa(*, post_data, actor_user_id=None):
-    form = construir_form_onboarding_empresa(post_data=post_data)
+def processar_submissao_onboarding_empresa(*, post_data, files_data=None, actor_user_id=None):
+    form = construir_form_onboarding_empresa(post_data=post_data, files_data=files_data)
     if not form.is_valid():
         logger.warning(
             "Formulário onboarding_empresa inválido. actor_user_id=%s, erros=%s",
@@ -85,6 +85,7 @@ def processar_submissao_onboarding_empresa(*, post_data, actor_user_id=None):
             pais=form.cleaned_data.get("pais"),
             cidade=form.cleaned_data.get("cidade"),
             observacoes=form.cleaned_data.get("observacoes"),
+            logo=form.cleaned_data.get("logo_empresa"),
             plano=form.cleaned_data.get("plano"),
             ciclo_subscricao=form.cleaned_data.get("ciclo_subscricao") or "mensal",
             tipo_acesso=form.cleaned_data.get("tipo_acesso") or "empresa_admin",
@@ -130,10 +131,11 @@ def processar_submissao_onboarding_empresa(*, post_data, actor_user_id=None):
     }
 
 
-def processar_fluxo_onboarding_empresa(*, method, post_data, actor_user_id=None):
+def processar_fluxo_onboarding_empresa(*, method, post_data, files_data=None, actor_user_id=None):
     if method == "POST":
         resultado = processar_submissao_onboarding_empresa(
             post_data=post_data,
+            files_data=files_data,
             actor_user_id=actor_user_id,
         )
         return {
@@ -280,6 +282,7 @@ def criar_empresa_com_admin(
     pais=None,
     cidade=None,
     observacoes=None,
+    logo=None,
     plano=None,
     ciclo_subscricao="mensal",
     tipo_acesso="empresa_admin",
@@ -333,6 +336,7 @@ def criar_empresa_com_admin(
         ativo=ativa,
         data_inicio=hoje,
         observacoes=(observacoes or "").strip(),
+        logo=logo,
     )
     logger.info("Empresa criada com sucesso no onboarding: empresa_id=%s, nome='%s'", empresa.pk, empresa.nome)
 

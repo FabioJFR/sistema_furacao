@@ -6,7 +6,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.5**
+- Versão atual: **v0.9.6**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **separação de lógica em services/selectors**, **integração de dispositivos** e **estabilização para produção**
 
@@ -21,9 +21,15 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ---
 
-## Release 0.9.5 (resumo)
+## Release 0.9.6 (resumo)
 
 Principais evoluções consolidadas nesta versão:
+
+- novo módulo `Gestão` para empresas com hub e áreas de `Clientes & Contratos`, `Planeamento`, `RH & Assiduidade`, `Compras & Fornecedores`, `Compliance & Segurança`, `Notificações` e `Relatórios Executivos`
+- evolução de `Relatórios Executivos` com comparativo financeiro por projeto (metros, registos, custo, receita estimada e margem)
+- exportação de relatórios executivos em CSV/XLSX alinhada com filtros de período
+- envio manual por email do relatório executivo com anexos CSV/XLSX
+- agendamento automático de envio (diário/semanal/mensal), com execução imediata manual e comando de processamento para servidor
 
 - paridade de permissões para conta `individual` na área de trabalhador (fluxo equivalente ao empregado de empresa)
 - criação automática de contexto interno de operação para contas individuais (evita bloqueios em menus operacionais)

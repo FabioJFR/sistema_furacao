@@ -6,6 +6,8 @@ from plataforma.views.empresas import (
     alterar_plano_empresa,
     toggle_empresa_ativa,
     atualizar_renovacao_subscricao_empresa,
+    atualizar_logo_empresa,
+    remover_logo_empresa,
 )
 from plataforma.views.planos import plano_list, plano_create, plano_update, plano_toggle_ativo
 from plataforma.views.subscricoes import subscricao_list
@@ -43,6 +45,8 @@ urlpatterns = [
     path("empresa/<uuid:pk>/alterar-plano/", alterar_plano_empresa, name="empresa_alterar_plano"),
     path("empresa/<uuid:pk>/atualizar-renovacao/", atualizar_renovacao_subscricao_empresa, name="empresa_atualizar_renovacao"),
     path("empresa/<uuid:pk>/toggle-ativa/", toggle_empresa_ativa, name="empresa_toggle_ativa"),
+    path("empresa/<uuid:pk>/logo/atualizar/", atualizar_logo_empresa, name="empresa_logo_atualizar"),
+    path("empresa/<uuid:pk>/logo/remover/", remover_logo_empresa, name="empresa_logo_remover"),
     path("subscricoes/", subscricao_list, name="subscricao_list"),
     path("financas/entradas/", financas_entrada_list, name="financas_entrada_list"),
     path("financas/saidas/", financas_saida_list, name="financas_saida_list"),

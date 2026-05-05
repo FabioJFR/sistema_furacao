@@ -1,0 +1,76 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Alertas geotécnicos" %}{% endblock %}
+{% block page_title %}{% trans "Alertas geotécnicos" %}{% endblock %}
+{% block page_description %}{% trans "Zonas críticas detetadas nos logs geológicos." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if empresa_geologia.logo %}
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Lista de alertas" %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Severidade" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Tipo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Valor" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Limite" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in alertas %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3">
+                            {% if item.severidade == "alta" %}
+                                <span class="inline-flex rounded-full bg-red-100 text-red-700 px-2 py-1 text-xs font-semibold">{% trans "Alta" %}</span>
+                            {% elif item.severidade == "media" %}
+                                <span class="inline-flex rounded-full bg-amber-100 text-amber-700 px-2 py-1 text-xs font-semibold">{% trans "Média" %}</span>
+                            {% else %}
+                                <span class="inline-flex rounded-full bg-slate-100 text-slate-700 px-2 py-1 text-xs font-semibold">{% trans "Baixa" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 font-semibold text-gray-800">{{ item.tipo }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.projeto.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.furo.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.valor }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ item.limite }}</td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'geologia:log_detail' item.log.id %}" class="text-sky-700 font-semibold">{% trans "Abrir log" %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">{% trans "Sem alertas geotécnicos detetados." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

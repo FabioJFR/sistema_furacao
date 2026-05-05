@@ -17,3 +17,8 @@ from .opcoes import *
 from .despesas import *
 from .maquina_avarias import *
 from .modelos_3d import *
+from .institucional import *
+from .gestao_empresa import *
+from .clientes_contratos import *
+from .planeamento_turnos import *
+from .assiduidade import *

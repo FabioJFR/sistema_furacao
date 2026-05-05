@@ -5,13 +5,35 @@
 {% block page_title %}{% blocktrans with nome=furo.nome %}Geologia do Furo {{ nome }}{% endblocktrans %}{% endblock %}
 {% block page_description %}{% blocktrans with nome=furo.projeto.nome %}Projeto {{ nome }}. Logging geológico, anexos e missões do DJI Mini 4 Pro.{% endblocktrans %}{% endblock %}
 {% block page_actions %}
+    {% if empregado_menu_funcao == "geologo" %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% elif empregado_menu_funcao == "encarregado_obra" %}
+    <a href="{% url 'geologia:empregado_encarregado_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% else %}
+    <a href="{% url 'geologia:hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% endif %}
     <a href="{% url 'geologia:log_create' furo.id %}" class="btn btn-primary">{% trans "Novo log geológico" %}</a>
     <a href="{% url 'geologia:missao_create' furo.id %}" class="btn btn-light">{% trans "Nova missão drone" %}</a>
-    <a href="{% url 'projetos:furo_detail' furo.id %}" class="btn btn-light">{% trans "Voltar ao furo" %}</a>
+    <a href="{{ furo.get_absolute_url }}" class="btn btn-light">{% trans "Voltar ao furo" %}</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 <div class="max-w-7xl mx-auto px-6 py-8">
+    {% if furo and furo.empresa %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if furo.empresa.logo %}
+            <img
+                src="{{ furo.empresa.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ furo.empresa.nome_comercial|default:furo.empresa.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm" data-geologia-card>
             <div class="text-sm text-gray-500">{% trans "Profundidade atual" %}</div>

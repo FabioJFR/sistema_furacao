@@ -1,0 +1,194 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ titulo }} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{{ titulo }}</h1>
+            <p class="sf-muted-text">{{ descricao }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'projetos:gestao_pedido_compra_create' %}" class="btn btn-primary">{% trans "Novo pedido" %}</a>
+            <a href="{% url 'projetos:gestao_compras_export_csv' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">{% trans "Exportar CSV" %}</a>
+            <a href="{% url 'projetos:gestao_compras_export_xlsx' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">{% trans "Exportar XLSX" %}</a>
+            <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for item in kpis %}
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-sm text-slate-500">{{ item.titulo }}</div>
+            <div class="text-2xl font-bold text-slate-800 mt-1">{{ item.valor }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-3 grid sm:grid-cols-2 gap-3">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-sm text-slate-500">{% trans "Pedidos (total)" %}</div>
+            <div class="text-2xl font-bold text-slate-800 mt-1">{{ kpi_pedidos_total }}</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-sm text-slate-500">{% trans "Pedidos (filtro atual)" %}</div>
+            <div class="text-2xl font-bold text-slate-800 mt-1">{{ kpi_pedidos_filtrados }}</div>
+        </div>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Pedidos de compra" %}</h2>
+        <form method="get" class="mt-3 grid grid-cols-1 md:grid-cols-12 gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50">
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Pesquisar" %}</label>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ filtros.q }}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800"
+                    placeholder="{% trans 'Descrição do pedido' %}"
+                />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado" %}</label>
+                <select name="estado" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in estado_choices %}
+                    <option value="{{ value }}" {% if filtros.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Prioridade" %}</label>
+                <select name="prioridade" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in prioridade_choices %}
+                    <option value="{{ value }}" {% if filtros.prioridade == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Projeto" %}</label>
+                <select name="projeto_id" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for p in projetos_choices %}
+                    <option value="{{ p.id }}" {% if filtros.projeto_id == p.id|stringformat:'s' %}selected{% endif %}>{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Categoria" %}</label>
+                <input
+                    type="text"
+                    name="categoria"
+                    value="{{ filtros.categoria }}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800"
+                    placeholder="{% trans 'Ex: combustivel' %}"
+                />
+            </div>
+            <div class="md:col-span-12 flex flex-wrap items-end gap-2">
+                <button type="submit" class="btn btn-primary whitespace-nowrap break-normal">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:gestao_compras_fornecedores' %}" class="btn btn-light whitespace-nowrap break-normal">{% trans "Limpar" %}</a>
+            </div>
+        </form>
+        <table class="w-full min-w-[900px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Data" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Descrição" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Projeto" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Prioridade" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Estado" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Valor" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pedidos %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-3 py-2">{{ p.criado_em|date:"d/m/Y" }}</td>
+                    <td class="px-3 py-2">{{ p.descricao }}</td>
+                    <td class="px-3 py-2">{{ p.projeto.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ p.get_prioridade_display }}</td>
+                    <td class="px-3 py-2">{{ p.get_estado_display }}</td>
+                    <td class="px-3 py-2">{{ p.valor_estimado|floatformat:2 }} €</td>
+                    <td class="px-3 py-2">
+                        <div class="flex items-center gap-2">
+                            <a class="btn btn-light" href="{% url 'projetos:gestao_pedido_compra_update' p.pk %}">{% trans "Editar" %}</a>
+                            {% if p.estado != "aprovado" %}
+                            <a class="btn btn-secondary" href="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'aprovado' %}">{% trans "Aprovar" %}</a>
+                            {% endif %}
+                            {% if p.estado != "rejeitado" %}
+                            <a class="btn btn-light" href="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'rejeitado' %}">{% trans "Rejeitar" %}</a>
+                            {% endif %}
+                            <a class="btn btn-danger" href="{% url 'projetos:gestao_pedido_compra_delete' p.pk %}">{% trans "Apagar" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="px-3 py-4 text-slate-500">{% trans "Sem pedidos." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Categorias com maior peso" %}</h2>
+        <table class="w-full min-w-[700px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Categoria" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Total" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Qtd." %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in categorias %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-3 py-2">{{ c.categoria }}</td>
+                    <td class="px-3 py-2">{{ c.total|floatformat:2 }} €</td>
+                    <td class="px-3 py-2">{{ c.qtd }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="px-3 py-4 text-slate-500">{% trans "Sem dados." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Últimas despesas" %}</h2>
+        <table class="w-full min-w-[900px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Data" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Descrição" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Projeto/Furo" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Valor" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in despesas_recentes %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-3 py-2">{{ d.data|date:"d/m/Y" }}</td>
+                    <td class="px-3 py-2">{{ d.descricao }}</td>
+                    <td class="px-3 py-2">{{ d.projeto.nome|default:d.furo.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ d.valor|floatformat:2 }} €</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="px-3 py-4 text-slate-500">{% trans "Sem despesas." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Próximos Passos" %}</h2>
+        <ul class="mt-3 space-y-2 text-slate-700">
+            {% for passo in proximos_passos %}
+                <li>• {{ passo }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}

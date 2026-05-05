@@ -126,6 +126,47 @@
         }
     }
 
+    function hasUsefulBackHistory() {
+        if (!document.referrer) {
+            return false;
+        }
+        try {
+            const referrerUrl = new URL(document.referrer);
+            const currentUrl = new URL(window.location.href);
+            if (referrerUrl.origin !== currentUrl.origin) {
+                return false;
+            }
+            return referrerUrl.href !== currentUrl.href;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function isBackControl(element) {
+        if (!element) {
+            return false;
+        }
+        if (element.hasAttribute("data-history-back")) {
+            return true;
+        }
+        if (element.closest(".dropdown")) {
+            return false;
+        }
+        const text = (element.textContent || "").toLowerCase().trim();
+        return /\bvoltar\b/.test(text);
+    }
+
+    function navigateBackOrFallback(element) {
+        const fallbackHref = element.getAttribute("href") || element.getAttribute("data-history-fallback") || null;
+        if (hasUsefulBackHistory() && window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+        if (fallbackHref && fallbackHref !== "#" && !fallbackHref.startsWith("javascript:")) {
+            window.location.assign(fallbackHref);
+        }
+    }
+
     document.addEventListener("click", (event) => {
         const menuToggle = event.target.closest("[data-menu-toggle]");
         if (menuToggle) {
@@ -153,7 +194,14 @@
         const historyBackButton = event.target.closest("[data-history-back]");
         if (historyBackButton) {
             event.preventDefault();
-            window.history.back();
+            navigateBackOrFallback(historyBackButton);
+            return;
+        }
+
+        const genericBackControl = event.target.closest("a, button");
+        if (genericBackControl && isBackControl(genericBackControl)) {
+            event.preventDefault();
+            navigateBackOrFallback(genericBackControl);
             return;
         }
 

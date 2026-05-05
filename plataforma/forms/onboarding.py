@@ -56,6 +56,11 @@ class OnboardingEmpresaForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
     )
+    logo_empresa = forms.ImageField(
+        label="Logo da empresa",
+        required=False,
+        widget=forms.ClearableFileInput(attrs={"class": "form-control"}),
+    )
 
     nome_admin = forms.CharField(
         label="Nome do administrador",

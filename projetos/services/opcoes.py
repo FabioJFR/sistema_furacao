@@ -1,8 +1,9 @@
 from datetime import date
 
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
-from projetos.models import Despesa
+from projetos.models import Despesa, Projeto, SalarioBaseFuncao
 from projetos.selectors.opcoes import obter_projeto_furo_filtros_exportacao
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 
@@ -146,6 +147,81 @@ def processar_submissao_financeiro_admin_form(*, financeiro_form):
         "empresa": empresa,
         "erros_form": None,
     }
+
+
+@transaction.atomic
+def atualizar_financas_projeto(*, empresa, projeto_id, custo_por_metro, outros_gastos):
+    projeto = Projeto.objects.filter(empresa=empresa, id=projeto_id).first()
+    if not projeto:
+        return {
+            "ok": False,
+            "erro": "Projeto não encontrado para esta empresa.",
+        }
+
+    if custo_por_metro in (None, ""):
+        projeto.custo_por_metro_cliente_override = None
+    else:
+        try:
+            valor = float(custo_por_metro)
+        except (TypeError, ValueError):
+            return {"ok": False, "erro": "Valor inválido para custo por metro."}
+        if valor < 0:
+            return {"ok": False, "erro": "O custo por metro do projeto não pode ser negativo."}
+        projeto.custo_por_metro_cliente_override = valor
+
+    if outros_gastos in (None, ""):
+        projeto.outros_valores_gastos_associados = 0.0
+    else:
+        try:
+            valor_outros = float(outros_gastos)
+        except (TypeError, ValueError):
+            return {"ok": False, "erro": "Valor inválido para outros gastos associados."}
+        if valor_outros < 0:
+            return {"ok": False, "erro": "Outros gastos associados não podem ser negativos."}
+        projeto.outros_valores_gastos_associados = valor_outros
+
+    try:
+        projeto.save(
+            update_fields=[
+                "custo_por_metro_cliente_override",
+                "outros_valores_gastos_associados",
+                "atualizado_em",
+            ]
+        )
+    except ValidationError as exc:
+        return {"ok": False, "erro": str(exc)}
+
+    empresa.recalcular_indicadores_financeiros()
+    return {
+        "ok": True,
+        "mensagem": "Definições financeiras do projeto atualizadas com sucesso.",
+    }
+
+
+@transaction.atomic
+def atualizar_salario_base_funcao(*, empresa, funcao, salario_base):
+    funcao_valor = (funcao or "").strip()
+    if not funcao_valor:
+        return {"ok": False, "erro": "Função inválida."}
+
+    try:
+        salario = float(salario_base or 0)
+    except (TypeError, ValueError):
+        return {"ok": False, "erro": "Valor inválido para salário base."}
+
+    if salario < 0:
+        return {"ok": False, "erro": "O salário base não pode ser negativo."}
+
+    obj, _ = SalarioBaseFuncao.objects.get_or_create(
+        empresa=empresa,
+        funcao=funcao_valor,
+        defaults={"salario_base": salario},
+    )
+    if obj.salario_base != salario:
+        obj.salario_base = salario
+        obj.save(update_fields=["salario_base", "atualizado_em"])
+
+    return {"ok": True, "mensagem": "Salário base da função atualizado com sucesso."}
 
 
 def processar_fluxo_financeiro_admin_form(

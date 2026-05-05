@@ -1,0 +1,47 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Novo Block Model Profissional" %}{% endblock %}
+{% block page_title %}{% trans "Novo Block Model Profissional" %}{% endblock %}
+{% block page_description %}{% trans "Gerar grelha de blocos a partir das medições do projeto." %}{% endblock %}
+
+{% block content %}
+<section class="bg-white border border-slate-200 rounded-2xl p-5">
+    <form method="post" class="grid gap-4 md:grid-cols-2">
+        {% csrf_token %}
+        <label class="grid gap-1">
+            <span class="text-sm font-medium text-slate-700">{% trans "Projeto" %}</span>
+            <select name="projeto_id" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">{% trans "Selecionar projeto" %}</option>
+                {% for projeto in projetos %}
+                    <option value="{{ projeto.id }}">{{ projeto.nome }}{% if projeto.empresa %} · {{ projeto.empresa.nome }}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="grid gap-1">
+            <span class="text-sm font-medium text-slate-700">{% trans "Nome do modelo" %}</span>
+            <input type="text" name="nome" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="block-model-projeto-x">
+        </label>
+        <label class="grid gap-1">
+            <span class="text-sm font-medium text-slate-700">{% trans "Tamanho bloco X" %}</span>
+            <input type="number" name="tamanho_bloco_x" step="0.1" value="1" min="0.1" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        </label>
+        <label class="grid gap-1">
+            <span class="text-sm font-medium text-slate-700">{% trans "Tamanho bloco Y" %}</span>
+            <input type="number" name="tamanho_bloco_y" step="0.1" value="1" min="0.1" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        </label>
+        <label class="grid gap-1">
+            <span class="text-sm font-medium text-slate-700">{% trans "Tamanho bloco Z" %}</span>
+            <input type="number" name="tamanho_bloco_z" step="0.1" value="1" min="0.1" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        </label>
+        <div class="md:col-span-2 flex flex-wrap gap-2">
+            <button type="submit" class="inline-flex items-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 transition">
+                {% trans "Gerar Block Model" %}
+            </button>
+            <a href="{% url 'projetos:block_model_list' %}" class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">
+                {% trans "Voltar" %}
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

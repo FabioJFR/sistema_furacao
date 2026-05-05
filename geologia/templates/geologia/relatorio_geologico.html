@@ -1,0 +1,104 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Exportar relatório geológico" %}{% endblock %}
+{% block page_title %}{% trans "Exportar relatório geológico" %}{% endblock %}
+{% block page_description %}{% trans "Exportação técnica por furo/projeto com logs, anexos e validações." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-semibold text-slate-900">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</h2>
+                <p class="text-sm text-slate-600 mt-1">
+                    {% trans "NIF" %}: {{ empresa_geologia.nif|default:"-" }} ·
+                    {% trans "Email" %}: {{ empresa_geologia.email|default:"-" }} ·
+                    {% trans "Telefone" %}: {{ empresa_geologia.telefone|default:"-" }}
+                </p>
+                <p class="text-xs text-slate-500 mt-1">
+                    {{ empresa_geologia.morada|default:"-" }}{% if empresa_geologia.cidade %}, {{ empresa_geologia.cidade }}{% endif %}{% if empresa_geologia.pais %}, {{ empresa_geologia.pais }}{% endif %}
+                </p>
+            </div>
+            <div class="text-right">
+                {% if empresa_geologia.logo %}
+                    <img src="{{ empresa_geologia.logo.url }}" alt="{% trans 'Logo da empresa' %}" class="h-12 w-12 object-cover rounded-full border border-slate-200 inline-block">
+                {% else %}
+                    <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-slate-900 text-white font-bold">
+                        {{ empresa_geologia.nome|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <div class="text-xs text-slate-500 mt-2">{% trans "Gerado em" %}: {{ gerado_em|date:"d/m/Y H:i" }}</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <form method="get" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label for="id_furo" class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Filtrar por furo (opcional)" %}</label>
+                <select id="id_furo" name="furo" class="border rounded px-3 py-2 min-w-[320px]">
+                    <option value="">{% trans "Todos os furos" %}</option>
+                    {% for furo in furos %}
+                        <option value="{{ furo.id }}" {% if furo_ativo and furo.id == furo_ativo.id %}selected{% endif %}>{{ furo.nome }} · {{ furo.projeto.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-light">{% trans "Aplicar" %}</button>
+            <a href="{% url 'geologia:relatorio_geologico_export' 'xlsx' %}{% if furo_ativo %}?furo={{ furo_ativo.id }}{% endif %}" class="btn btn-primary">{% trans "Exportar Excel" %}</a>
+            <a href="{% url 'geologia:relatorio_geologico_export' 'pdf' %}{% if furo_ativo %}?furo={{ furo_ativo.id }}{% endif %}" class="btn btn-light">{% trans "Exportar PDF" %}</a>
+            <a href="{% url 'geologia:relatorio_geologico_export' 'csv' %}{% if furo_ativo %}?furo={{ furo_ativo.id }}{% endif %}" class="btn btn-light">{% trans "Exportar CSV" %}</a>
+            <a href="{% url 'geologia:relatorio_geologico_executivo_print' %}{% if furo_ativo %}?furo={{ furo_ativo.id }}{% endif %}" target="_blank" class="btn btn-light">{% trans "Relatório executivo (impressão)" %}</a>
+        </form>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"><div class="text-sm text-gray-500">{% trans "Logs" %}</div><div class="text-2xl font-semibold text-gray-900">{{ resumo.total_logs }}</div></div>
+        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"><div class="text-sm text-gray-500">{% trans "Furos" %}</div><div class="text-2xl font-semibold text-gray-900">{{ resumo.total_furos }}</div></div>
+        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"><div class="text-sm text-gray-500">{% trans "RQD médio" %}</div><div class="text-2xl font-semibold text-gray-900">{{ resumo.rqd_medio|default:"-" }}</div></div>
+        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"><div class="text-sm text-gray-500">{% trans "RQD crítico" %}</div><div class="text-2xl font-semibold text-gray-900">{{ resumo.logs_rqd_critico }}</div></div>
+    </section>
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Pré-visualização" %}</h2>
+            <span class="text-sm text-gray-500">{% trans "Total de linhas:" %} {{ total_linhas }}</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Intervalo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Litologia" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "RQD" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Anexos" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in linhas %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3 text-gray-700">{{ row.projeto }}</td>
+                        <td class="px-4 py-3 text-gray-800 font-medium">{{ row.furo }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ row.data_registo }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ row.intervalo_de_m }}m - {{ row.intervalo_ate_m }}m</td>
+                        <td class="px-4 py-3 text-gray-700">{{ row.litologia_principal }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ row.rqd_percent|default:"-" }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ row.total_anexos }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">{% trans "Sem dados para exportar." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

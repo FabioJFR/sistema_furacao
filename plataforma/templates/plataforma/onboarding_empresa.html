@@ -24,14 +24,14 @@
         </div>
     {% endif %}
 
-    <form method="post" class="onb-grid">
+    <form method="post" enctype="multipart/form-data" class="onb-grid">
         {% csrf_token %}
 
         <div class="onb-card">
             <h2>{% trans "Empresa" %}</h2>
 
             {% for field in form %}
-                {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes" %}
+                {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes logo_empresa" %}
                     <div class="onb-field">
                         <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
                         {{ field }}

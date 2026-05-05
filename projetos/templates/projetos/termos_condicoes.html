@@ -1,0 +1,108 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Termos & Condições" %}{% endblock %}
+
+{% block content %}
+<section class="sf-panel">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">{% trans "Termos & Condições" %}</h2>
+        <p class="text-sm text-gray-600 mt-2">
+            {% trans "Condições gerais de utilização da plataforma Sistema Furação." %}
+        </p>
+        <p class="text-xs text-gray-500 mt-2">{% trans "Data de entrada em vigor:" %} 04/05/2026</p>
+    </div>
+
+    <div class="space-y-4 text-sm text-gray-700 leading-6">
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "1. Identificação do titular da plataforma" %}</h3>
+            <p><strong>{% trans "Nome:" %}</strong> Fabio Jorge Felicio Revez</p>
+            <p><strong>{% trans "NIF:" %}</strong> 217335713</p>
+            <p><strong>{% trans "Morada fiscal:" %}</strong> Bairros de ValeDoca Lote 62, 7600-023 Aljustrel, Portugal</p>
+            <p><strong>{% trans "Email de suporte:" %}</strong> sistemafuracao@gmail.com</p>
+            <p><strong>{% trans "Telefone:" %}</strong> 928044839</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "2. Objeto e aceitação" %}</h3>
+            <p>{% trans "Os presentes Termos & Condições regulam o acesso e utilização da plataforma Sistema Furação por empresas, profissionais e utilizadores particulares com idade mínima de 18 anos." %}</p>
+            <p class="mt-2">{% trans "Ao utilizar a plataforma, o utilizador declara que leu, compreendeu e aceitou estes termos." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "3. Conta de utilizador e segurança" %}</h3>
+            <p>{% trans "O utilizador é responsável por manter as credenciais de acesso seguras e confidenciais, bem como por todas as atividades realizadas na sua conta." %}</p>
+            <p class="mt-2">{% trans "Qualquer utilização indevida, suspeita de acesso não autorizado ou incidente de segurança deve ser comunicada de imediato para o email de suporte." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "4. Planos, subscrições e período de teste" %}</h3>
+            <p>{% trans "A plataforma pode operar com subscrição mensal ou anual, de acordo com o plano contratado." %}</p>
+            <p class="mt-2">{% trans "Pode existir período de teste inicial, nos termos apresentados no momento de adesão." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "5. Cancelamento e reembolso" %}</h3>
+            <p>{% trans "Em caso de cancelamento, aplica-se a política definida: sem reembolso, ou reembolso proporcional ao tempo remanescente da subscrição, quando aplicável e validado pelo titular da plataforma." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "6. Utilização permitida e conduta proibida" %}</h3>
+            <p>{% trans "É proibido utilizar a plataforma para finalidades ilícitas, manipulação indevida de dados, tentativas de acesso não autorizado, engenharia reversa ou qualquer atividade que comprometa a segurança e disponibilidade do serviço." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "7. Propriedade intelectual" %}</h3>
+            <p>{% trans "Todo o software, estrutura, design, marca, conteúdos e documentação associados ao Sistema Furação são protegidos por direitos de propriedade intelectual." %}</p>
+            <p class="mt-2">{% trans "Não é permitida cópia, distribuição, alteração, revenda, sublicenciamento ou reutilização sem autorização expressa do titular dos direitos." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "8. Privacidade e proteção de dados" %}</h3>
+            <p>{% trans "O tratamento de dados pessoais é descrito em documento próprio." %}</p>
+            <p class="mt-2">
+                <a href="{% url 'projetos:politica_privacidade' %}" class="text-indigo-700 font-semibold">
+                    {% trans "Consultar Política de Privacidade" %}
+                </a>
+            </p>
+            <p class="mt-2"><strong>{% trans "Responsável por dados:" %}</strong> Fabio Revez</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "9. Disponibilidade e limitações de responsabilidade" %}</h3>
+            <p>{% trans "A plataforma procura assegurar elevada disponibilidade, mas poderão ocorrer interrupções para manutenção, atualizações, falhas técnicas ou motivos de força maior." %}</p>
+            <p class="mt-2">{% trans "Na máxima extensão permitida por lei, o titular não responde por danos indiretos, lucros cessantes ou perdas decorrentes de indisponibilidade temporária, uso indevido ou dados inseridos por terceiros." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "10. Suspensão ou encerramento de acesso" %}</h3>
+            <p>{% trans "O acesso pode ser suspenso ou encerrado em caso de incumprimento destes termos, utilização abusiva, riscos de segurança ou obrigação legal." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "11. Lei aplicável e foro" %}</h3>
+            <p>{% trans "Estes termos regem-se pela lei portuguesa. Para resolução de litígios, é competente o foro de Lisboa, com expressa renúncia a qualquer outro." %}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "12. Reclamações e contacto" %}</h3>
+            <p>{% trans "Para questões de suporte, contacte sistemafuracao@gmail.com." %}</p>
+            <p class="mt-2">
+                <a
+                    href="https://www.livroreclamacoes.pt/Inicio/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-amber-700 font-semibold"
+                >
+                    {% trans "Livro de Reclamações (Portugal)" %}
+                </a>
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "13. Atualizações destes termos" %}</h3>
+            <p>{% trans "Os presentes termos podem ser atualizados periodicamente. A versão em vigor é sempre a publicada nesta página, com a data de entrada em vigor indicada no topo." %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

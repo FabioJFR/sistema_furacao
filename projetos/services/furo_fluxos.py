@@ -16,6 +16,7 @@ from projetos.services.furo_3d_io import guardar_importacao_externa_3d
 from projetos.services.furos import apagar_furo, atualizar_furo, criar_furo
 from geologia.selectors.logs import obter_logs_geologicos_recentes_furo
 from geologia.selectors.drone import obter_missoes_drone_recentes_furo
+from core.permissions import user_is_geologo, user_is_encarregado_obra
 
 
 def preparar_form_furo_create(*, request_post=None, empresa_id=None, empregado_contexto=None):
@@ -267,6 +268,10 @@ def resolver_furo_para_3d(
         return {"furo": None, "erro": resposta_erro, "sem_permissao": False}
 
     furo = obter_furo(furo_id, empresa=empregado.empresa_id)
+    # Geólogo e encarregado podem consultar o 3D de qualquer furo da empresa.
+    if user_is_geologo(request.user) or user_is_encarregado_obra(request.user):
+        return {"furo": furo, "erro": None, "sem_permissao": False}
+
     trabalhou_no_furo = empregado_trabalhou_no_furo(empregado, furo)
     tem_furo_nos_projetos = listar_furos_empregado_qs(
         empregado,

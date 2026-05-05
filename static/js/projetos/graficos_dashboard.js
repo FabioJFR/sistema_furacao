@@ -1,7 +1,20 @@
 (() => {
+    const showChartUnavailableMessage = () => {
+        document.querySelectorAll(".gkd-canvas-wrap").forEach((wrap) => {
+            if (!wrap) return;
+            wrap.innerHTML = '<div class="gkd-chart-unavailable">Chart.js indisponível neste carregamento.</div>';
+        });
+    };
+
     if (typeof window.Chart === "undefined") {
+        showChartUnavailableMessage();
         return;
     }
+    const createChart = (canvasId, config) => {
+        const el = document.getElementById(canvasId);
+        if (!el) return null;
+        return new window.Chart(el, config);
+    };
 
     const labelsDia = JSON.parse(document.getElementById("labels-dia-data")?.textContent || "[]");
     const metrosDia = JSON.parse(document.getElementById("metros-dia-data")?.textContent || "[]");
@@ -18,8 +31,13 @@
     const valoresDespesasCategoria = JSON.parse(document.getElementById("valores-despesas-categoria-data")?.textContent || "[]");
     const labelsDespesasProjeto = JSON.parse(document.getElementById("labels-despesas-projeto-data")?.textContent || "[]");
     const valoresDespesasProjeto = JSON.parse(document.getElementById("valores-despesas-projeto-data")?.textContent || "[]");
+    const labelsSalariosFuncao = JSON.parse(document.getElementById("labels-salarios-funcao-data")?.textContent || "[]");
+    const valoresSalariosFuncao = JSON.parse(document.getElementById("valores-salarios-funcao-data")?.textContent || "[]");
+    const quantidadeEmpregadosFuncao = JSON.parse(document.getElementById("quantidade-empregados-funcao-data")?.textContent || "[]");
+    const labelsSalariosEmpregado = JSON.parse(document.getElementById("labels-salarios-empregado-data")?.textContent || "[]");
+    const valoresSalariosEmpregado = JSON.parse(document.getElementById("valores-salarios-empregado-data")?.textContent || "[]");
 
-    new window.Chart(document.getElementById("graficoDia"), {
+    createChart("graficoDia", {
         type: "line",
         data: {
             labels: labelsDia,
@@ -31,25 +49,25 @@
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoEmpregados"), {
+    createChart("graficoEmpregados", {
         type: "bar",
         data: { labels: labelsEmpregados, datasets: [{ label: "Metros", data: metrosEmpregados, borderWidth: 1 }] },
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoFuros"), {
+    createChart("graficoFuros", {
         type: "bar",
         data: { labels: labelsFuros, datasets: [{ label: "Metros", data: metrosFuros, borderWidth: 1 }] },
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoProjetos"), {
+    createChart("graficoProjetos", {
         type: "bar",
         data: { labels: labelsProjetos, datasets: [{ label: "Metros", data: metrosProjetos, borderWidth: 1 }] },
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoDespesasDia"), {
+    createChart("graficoDespesasDia", {
         type: "line",
         data: {
             labels: labelsDespesasDia,
@@ -66,7 +84,7 @@
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoDespesasCategoria"), {
+    createChart("graficoDespesasCategoria", {
         type: "doughnut",
         data: {
             labels: labelsDespesasCategoria,
@@ -79,11 +97,42 @@
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    new window.Chart(document.getElementById("graficoDespesasProjeto"), {
+    createChart("graficoDespesasProjeto", {
         type: "bar",
         data: {
             labels: labelsDespesasProjeto,
             datasets: [{ label: "Despesas (€)", data: valoresDespesasProjeto, backgroundColor: "#b91c1c", borderWidth: 1 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    createChart("graficoSalariosFuncao", {
+        type: "bar",
+        data: {
+            labels: labelsSalariosFuncao,
+            datasets: [
+                {
+                    label: "Salários (€)",
+                    data: valoresSalariosFuncao,
+                    backgroundColor: "#7c3aed",
+                    borderWidth: 1
+                },
+                {
+                    label: "N.º empregados",
+                    data: quantidadeEmpregadosFuncao,
+                    backgroundColor: "#06b6d4",
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    createChart("graficoSalariosEmpregado", {
+        type: "bar",
+        data: {
+            labels: labelsSalariosEmpregado,
+            datasets: [{ label: "Salário (€)", data: valoresSalariosEmpregado, backgroundColor: "#0f766e", borderWidth: 1 }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });

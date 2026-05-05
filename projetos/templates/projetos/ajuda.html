@@ -1,0 +1,34 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Ajuda" %}{% endblock %}
+
+{% block content %}
+<section class="sf-panel">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">{% trans "Ajuda" %}</h2>
+        <p class="text-sm text-gray-600 mt-2">
+            {% trans "Guia rápido para navegação da plataforma e resolução de dúvidas frequentes." %}
+        </p>
+    </div>
+
+    <div class="space-y-4 text-sm text-gray-700">
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "1. Operação diária" %}</h3>
+            <p>{% trans "Use o menu Operação para gerir furos, medições e atividades do turno." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "2. Registos técnicos" %}</h3>
+            <p>{% trans "Use Registos para lançar diários, logs geológicos e acompanhar pendências." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "3. Problemas comuns" %}</h3>
+            <p>{% trans "Se algo não aparecer no menu, confirme o tipo de conta e permissões associadas." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "4. Suporte e feedback" %}</h3>
+            <p>{% trans "Envie melhorias no menu Sugestões para evolução contínua da plataforma." %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

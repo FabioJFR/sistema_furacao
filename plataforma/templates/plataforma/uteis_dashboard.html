@@ -109,6 +109,86 @@
         {% endif %}
     </section>
 
+    <section class="rounded-2xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
+        <div class="flex flex-col gap-2">
+            <h3 class="text-xl font-semibold text-indigo-950">{% trans "Preencher logs geológicos por empregado" %}</h3>
+            <p class="text-sm text-indigo-900">
+                {% trans "Executa o comando que cria logs geológicos automáticos para todos os furos da empresa associada ao geólogo indicado." %}
+            </p>
+        </div>
+
+        <form method="post" class="mt-5 grid gap-4 md:grid-cols-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="popular_logs_geologicos">
+
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-indigo-950">{% trans "Username do geólogo" %}</span>
+                <input
+                    type="text"
+                    name="username_geologo"
+                    value="{{ logs_geologicos_form_initial.username }}"
+                    class="w-full rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-400 focus:outline-none"
+                >
+            </label>
+
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-indigo-950">{% trans "Logs por furo" %}</span>
+                <input
+                    type="number"
+                    min="1"
+                    name="por_furo_geologo"
+                    value="{{ logs_geologicos_form_initial.por_furo }}"
+                    class="w-full rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-400 focus:outline-none"
+                >
+            </label>
+
+            <label class="flex items-start gap-3 rounded-xl border border-indigo-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm">
+                <input
+                    type="checkbox"
+                    name="dry_run_geologo"
+                    class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    {% if logs_geologicos_form_initial.dry_run %}checked{% endif %}
+                >
+                <span>
+                    <strong>{% trans "Modo simulação" %}</strong><br>
+                    {% trans "Mostra os logs a criar sem gravar na base de dados." %}
+                </span>
+            </label>
+
+            <label class="flex items-start gap-3 rounded-xl border border-indigo-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm md:col-span-2">
+                <input
+                    type="checkbox"
+                    name="ignorar_existentes_geologo"
+                    class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    {% if logs_geologicos_form_initial.ignorar_existentes %}checked{% endif %}
+                >
+                <span>
+                    <strong>{% trans "Ignorar existência prévia de logs" %}</strong><br>
+                    {% trans "Se ativo, cria novos logs mesmo em furos que já tenham logs geológicos." %}
+                </span>
+            </label>
+
+            <div class="md:col-span-3 flex flex-wrap gap-3">
+                <button
+                    type="submit"
+                    class="inline-flex items-center rounded-xl bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-800"
+                >
+                    {% trans "Executar preenchimento de logs" %}
+                </button>
+            </div>
+        </form>
+
+        {% if logs_geologicos_last_output %}
+            <div class="mt-5 rounded-2xl border border-indigo-200 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                    <h4 class="text-sm font-semibold text-indigo-950">{% trans "Última execução (logs geológicos)" %}</h4>
+                    <span class="text-xs text-indigo-800">{% trans "Saída do comando guardada nesta sessão" %}</span>
+                </div>
+                <pre class="mt-3 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-800">{{ logs_geologicos_last_output }}</pre>
+            </div>
+        {% endif %}
+    </section>
+
     <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {% for item in exports %}
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -180,6 +260,73 @@
             <div><strong>{% trans "6. Antes de importar:" %}</strong> {% trans "confirma sempre compatibilidade de campos, relações e IDs com o ambiente de destino." %}</div>
             <div><strong>{% trans "7. Limpeza:" %}</strong> {% trans "o botão `Limpar dados` apaga os registos do grupo selecionado diretamente da base de dados. Usa só quando tiveres um backup válido." %}</div>
         </div>
+    </section>
+
+    <section class="rounded-2xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
+        <div class="flex flex-col gap-2">
+            <h3 class="text-xl font-semibold text-violet-950">{% trans "Diagnóstico de segurança de uploads" %}</h3>
+            <p class="text-sm text-violet-900">
+                {% trans "Testa um ficheiro antes do upload real e vê o motivo técnico de aceitação/rejeição (extensão, tamanho, assinatura, antivírus e sanitização)." %}
+            </p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-5 grid gap-4 md:grid-cols-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="diagnostico_upload">
+
+            <label class="block md:col-span-2">
+                <span class="mb-1 block text-sm font-medium text-violet-950">{% trans "Ficheiro para diagnóstico" %}</span>
+                <input
+                    type="file"
+                    name="upload_diagnostico"
+                    class="w-full rounded-xl border border-violet-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-violet-400 focus:outline-none"
+                    required
+                >
+            </label>
+
+            <label class="block">
+                <span class="mb-1 block text-sm font-medium text-violet-950">{% trans "Tipo esperado" %}</span>
+                <select
+                    name="tipo_esperado_upload"
+                    class="w-full rounded-xl border border-violet-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-violet-400 focus:outline-none"
+                >
+                    <option value="auto" {% if upload_diagnostico_opcoes.tipo_esperado == "auto" %}selected{% endif %}>{% trans "Auto" %}</option>
+                    <option value="imagem" {% if upload_diagnostico_opcoes.tipo_esperado == "imagem" %}selected{% endif %}>{% trans "Imagem" %}</option>
+                    <option value="ficheiro" {% if upload_diagnostico_opcoes.tipo_esperado == "ficheiro" %}selected{% endif %}>{% trans "Ficheiro genérico" %}</option>
+                </select>
+            </label>
+
+            <div class="md:col-span-3 flex flex-wrap gap-3">
+                <button
+                    type="submit"
+                    class="inline-flex items-center rounded-xl bg-violet-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-violet-800"
+                >
+                    {% trans "Executar diagnóstico" %}
+                </button>
+            </div>
+        </form>
+
+        {% if upload_diagnostico %}
+            <div class="mt-5 rounded-2xl border border-violet-200 bg-white p-4">
+                <h4 class="text-sm font-semibold text-violet-950">{% trans "Resultado do diagnóstico" %}</h4>
+                <div class="mt-2 text-sm text-slate-700">
+                    <div><strong>{% trans "Ficheiro:" %}</strong> {{ upload_diagnostico.filename }}</div>
+                    <div><strong>{% trans "Extensão:" %}</strong> {{ upload_diagnostico.ext|default:"-" }}</div>
+                    <div><strong>{% trans "Tamanho:" %}</strong> {{ upload_diagnostico.size_mb }} MB</div>
+                    <div><strong>{% trans "Tipo interpretado:" %}</strong> {% if upload_diagnostico.is_image %}{% trans "Imagem" %}{% else %}{% trans "Ficheiro" %}{% endif %}</div>
+                    {% if upload_diagnostico.sanitized_size_mb %}
+                        <div><strong>{% trans "Tamanho após sanitização:" %}</strong> {{ upload_diagnostico.sanitized_size_mb }} MB</div>
+                    {% endif %}
+                </div>
+                <ul class="mt-3 space-y-1 text-sm">
+                    {% for step in upload_diagnostico.steps %}
+                        <li class="{% if step.ok %}text-emerald-700{% else %}text-rose-700 font-semibold{% endif %}">
+                            {% if step.ok %}✅{% else %}❌{% endif %} {{ step.label }}{% if step.detalhe %}: {{ step.detalhe }}{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

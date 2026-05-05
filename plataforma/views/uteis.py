@@ -12,6 +12,7 @@ from plataforma.services.uteis import (
     construir_resposta_download_json,
     construir_resposta_download_zip,
     garantir_acesso_superuser,
+    processar_submit_diagnostico_upload,
     processar_fluxo_post_uteis_dashboard,
     processar_limpeza_scope,
     processar_scope_exportacao,
@@ -24,6 +25,19 @@ def uteis_dashboard(request):
     if acesso:
         return acesso
 
+    if request.method == "POST" and request.POST.get("action") == "diagnostico_upload":
+        resultado = processar_submit_diagnostico_upload(
+            upload_file=request.FILES.get("upload_diagnostico"),
+            tipo_esperado=(request.POST.get("tipo_esperado_upload") or "auto"),
+        )
+        if resultado["ok"]:
+            messages.success(request, resultado["mensagem_sucesso"])
+        else:
+            messages.error(request, resultado["mensagem_erro"])
+        request.session["uteis_upload_diagnostico"] = resultado.get("diagnostico")
+        request.session["uteis_upload_diagnostico_opcoes"] = resultado.get("opcoes", {"tipo_esperado": "auto"})
+        return redirect("plataforma:uteis_dashboard")
+
     fluxo = processar_fluxo_post_uteis_dashboard(
         method=request.method,
         post_data=request.POST,
@@ -34,8 +48,14 @@ def uteis_dashboard(request):
             messages.success(request, resultado["mensagem_sucesso"])
         else:
             messages.error(request, resultado["mensagem_erro"])
-        request.session["uteis_last_seed_output"] = resultado["saida_seed"]
-        request.session["uteis_last_seed_options"] = resultado["opcoes"]
+        if "saida_seed" in resultado:
+            request.session["uteis_last_seed_output"] = resultado.get("saida_seed", "")
+        if resultado.get("opcoes") is not None:
+            request.session["uteis_last_seed_options"] = resultado["opcoes"]
+        if "saida_logs_geologicos" in resultado:
+            request.session["uteis_last_logs_geologicos_output"] = resultado.get("saida_logs_geologicos", "")
+        if resultado.get("opcoes_logs_geologicos") is not None:
+            request.session["uteis_last_logs_geologicos_options"] = resultado["opcoes_logs_geologicos"]
         return redirect("plataforma:uteis_dashboard")
 
     context = construir_contexto_dashboard_uteis(request.session)

@@ -39,6 +39,45 @@
     margin-top: 0;
 }
 
+.empresa-logo-wrap {
+    margin-bottom: 16px;
+}
+
+.empresa-logo-img {
+    display: block;
+    max-height: 84px;
+    max-width: 220px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 6px;
+    object-fit: contain;
+}
+
+.empresa-logo-form {
+    margin: 10px 0 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.empresa-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.empresa-logo-input {
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+}
+
 .empresa-row {
     margin-bottom: 10px;
 }

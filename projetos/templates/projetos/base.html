@@ -39,8 +39,8 @@
                 ☰
             </button>
 
-            <a href="{% if user.is_authenticated %}{% if is_platform_admin %}{% url 'plataforma:dashboard' %}{% elif is_admin_user %}{% url 'projetos:dashboard' %}{% elif is_empregado_user %}{% url 'projetos:area_empregado' %}{% else %}{% url 'projetos:redirect_after_login' %}{% endif %}{% else %}{% url 'login' %}{% endif %}" class="navbar-logo">
-                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="Logo">
+            <a href="{% if user.is_authenticated %}{% if is_platform_admin %}{% url 'plataforma:dashboard' %}{% elif is_admin_user %}{% url 'projetos:dashboard' %}{% elif is_empregado_user %}{% if empregado_menu_funcao == 'geologo' %}{% url 'geologia:empregado_geologo_dashboard' %}{% else %}{% url 'projetos:area_empregado' %}{% endif %}{% else %}{% url 'projetos:redirect_after_login' %}{% endif %}{% else %}{% url 'login' %}{% endif %}" class="navbar-logo">
+                <img src="{% if empresa_menu_logo_url %}{{ empresa_menu_logo_url }}{% else %}{% static 'img/sistema_furacao_logo.png' %}{% endif %}" alt="Logo">
                 <span>{% trans "Sistema Furação" %}</span>
             </a>
         </div>
@@ -48,6 +48,29 @@
         {% if user.is_authenticated %}
             <nav class="nav-center" id="topNavMenu" role="navigation" aria-label="{% trans 'Menu principal' %}">
                 {% if is_platform_admin %}
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Gestão' %}"
+                            data-dropdown-toggle
+                        >
+                            🧩 {% trans "Gestão" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Gestão' %}">
+                            <a href="{% url 'projetos:gestao_hub' %}" role="menuitem">🧭 {% trans "Centro de Gestão" %}</a>
+                            <a href="{% url 'projetos:cliente_contrato_list' %}" role="menuitem">🤝 {% trans "Clientes & Contratos (auditoria)" %}</a>
+                            <a href="{% url 'projetos:planeamento_turno_list' %}" role="menuitem">🗓️ {% trans "Planeamento (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_compras_fornecedores' %}" role="menuitem">🛒 {% trans "Compras & Fornecedores (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_compliance_seguranca' %}" role="menuitem">🛡️ {% trans "Compliance & Segurança (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_notificacoes' %}" role="menuitem">🔔 {% trans "Centro de Notificações (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_relatorios_executivos' %}" role="menuitem">📑 {% trans "Relatórios Executivos (auditoria)" %}</a>
+                        </div>
+                    </div>
+
                     <div class="nav-item">
                         <button
                             type="button"
@@ -147,8 +170,12 @@
                             📊 {% trans "Analytics" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Analytics' %}">
-                            <a href="{% url 'projetos:graficos_dashboard' %}" role="menuitem">📈 {% trans "Gráficos" %}</a>
-                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos" %}</a>
+                            <a href="{% url 'projetos:graficos_operacionais_dashboard' %}" role="menuitem">🏭 {% trans "Gráficos Operacionais" %}</a>
+                            <a href="{% url 'projetos:graficos_financeiros_dashboard' %}" role="menuitem">💶 {% trans "Gráficos Financeiros" %}</a>
+                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos Operacionais" %}</a>
+                            <a href="{% url 'projetos:graficos_rentabilidade_dashboard' %}" role="menuitem">📈 {% trans "Rentabilidade" %}</a>
+                            <a href="{% url 'projetos:graficos_produtividade_dashboard' %}" role="menuitem">👥 {% trans "Produtividade Equipa" %}</a>
+                            <a href="{% url 'projetos:graficos_alertas_dashboard' %}" role="menuitem">🚨 {% trans "Alertas Operacionais" %}</a>
                             <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
                         </div>
                     </div>
@@ -189,6 +216,7 @@
                             <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                                <a href="{% url 'projetos:block_model_list' %}" role="menuitem">🧱 {% trans "Block Model Profissional" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_wireframe' %}" role="menuitem">🔺 {% trans "Wireframe" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_block_model' %}" role="menuitem">🧊 {% trans "Block Model" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_implicit' %}" role="menuitem">🧬 {% trans "Implicit Model" %}</a>
@@ -235,6 +263,29 @@
                     {% endif %}
 
                 {% elif is_admin_user %}
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Gestão' %}"
+                            data-dropdown-toggle
+                        >
+                            🧩 {% trans "Gestão" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Gestão' %}">
+                            <a href="{% url 'projetos:gestao_hub' %}" role="menuitem">🧭 {% trans "Centro de Gestão" %}</a>
+                            <a href="{% url 'projetos:cliente_contrato_list' %}" role="menuitem">🤝 {% trans "Clientes & Contratos" %}</a>
+                            <a href="{% url 'projetos:planeamento_turno_list' %}" role="menuitem">🗓️ {% trans "Planeamento" %}</a>
+                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade" %}</a>
+                            <a href="{% url 'projetos:gestao_compras_fornecedores' %}" role="menuitem">🛒 {% trans "Compras & Fornecedores" %}</a>
+                            <a href="{% url 'projetos:gestao_compliance_seguranca' %}" role="menuitem">🛡️ {% trans "Compliance & Segurança" %}</a>
+                            <a href="{% url 'projetos:gestao_notificacoes' %}" role="menuitem">🔔 {% trans "Centro de Notificações" %}</a>
+                            <a href="{% url 'projetos:gestao_relatorios_executivos' %}" role="menuitem">📑 {% trans "Relatórios Executivos" %}</a>
+                        </div>
+                    </div>
+
                     <div class="nav-item">
                         <button
                             type="button"
@@ -308,8 +359,12 @@
                             📊 {% trans "Analytics" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Analytics' %}">
-                            <a href="{% url 'projetos:graficos_dashboard' %}" role="menuitem">📈 {% trans "Gráficos" %}</a>
-                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos" %}</a>
+                            <a href="{% url 'projetos:graficos_operacionais_dashboard' %}" role="menuitem">🏭 {% trans "Gráficos Operacionais" %}</a>
+                            <a href="{% url 'projetos:graficos_financeiros_dashboard' %}" role="menuitem">💶 {% trans "Gráficos Financeiros" %}</a>
+                            <a href="{% url 'projetos:analytics_eventos' %}" role="menuitem">🧾 {% trans "Eventos Operacionais" %}</a>
+                            <a href="{% url 'projetos:graficos_rentabilidade_dashboard' %}" role="menuitem">📈 {% trans "Rentabilidade" %}</a>
+                            <a href="{% url 'projetos:graficos_produtividade_dashboard' %}" role="menuitem">👥 {% trans "Produtividade Equipa" %}</a>
+                            <a href="{% url 'projetos:graficos_alertas_dashboard' %}" role="menuitem">🚨 {% trans "Alertas Operacionais" %}</a>
                         </div>
                     </div>
 
@@ -349,6 +404,7 @@
                             <a href="{% url 'projetos:furo_3d_importar_externo' %}" role="menuitem">📥 {% trans "Importar trajetória externa" %}</a>
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                                <a href="{% url 'projetos:block_model_list' %}" role="menuitem">🧱 {% trans "Block Model Profissional" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_wireframe' %}" role="menuitem">🔺 {% trans "Wireframe" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_block_model' %}" role="menuitem">🧊 {% trans "Block Model" %}</a>
                                 <a href="{% url 'projetos:modelo_3d_implicit' %}" role="menuitem">🧬 {% trans "Implicit Model" %}</a>
@@ -373,8 +429,10 @@
                             <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
                             <a href="{% url 'projetos:furo_create' %}" role="menuitem">➕ {% trans "Novo Furo" %}</a>
                             <a href="{% url 'projetos:medicao_list_empregado' %}" role="menuitem">📊 {% trans "Medições" %}</a>
-                            <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
-                            <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
+                            {% if empregado_menu_funcao != "geologo" %}
+                                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
+                                <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
+                            {% endif %}
                             {% if perfil_tipo == "individual" %}
                                 <a href="{% url 'projetos:despesa_list_empregado' %}" role="menuitem">💶 {% trans "Minhas Despesas" %}</a>
                             {% endif %}
@@ -395,8 +453,23 @@
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
                             <a href="{% url 'projetos:registo_diario_create' %}" role="menuitem">➕ {% trans "Novo Registo Diário" %}</a>
                             <a href="{% url 'projetos:registo_diario_list' %}" role="menuitem">📋 {% trans "Meus Registos" %}</a>
-                            <a href="{% url 'projetos:avaria_maquina_create_empregado' %}" role="menuitem">🚨 {% trans "Registar Avaria Máquina" %}</a>
-                            <a href="{% url 'projetos:avaria_maquina_minhas_empregado' %}" role="menuitem">🛠️ {% trans "Minhas Avarias" %}{% if total_minhas_avarias_maquinas_abertas_menu %} <span class="sf-menu-badge">{{ total_minhas_avarias_maquinas_abertas_menu }}</span>{% endif %}</a>
+                            {% if empregado_menu_funcao == "geologo" %}
+                                <a href="{% url 'geologia:empregado_geologo_dashboard' %}" role="menuitem">🧪 {% trans "Criar Log" %}</a>
+                                <a href="{% url 'geologia:meus_logs' %}" role="menuitem">🗂️ {% trans "Meus Logs" %}</a>
+                                <a href="{% url 'geologia:planeamento_amostragem' %}" role="menuitem">🧭 {% trans "Planeamento de amostragem" %}</a>
+                                <a href="{% url 'geologia:qualidade_dados' %}" role="menuitem">🧹 {% trans "Qualidade de dados" %}</a>
+                                <a href="{% url 'geologia:correlacoes_geologia_perfuracao' %}" role="menuitem">📉 {% trans "Correlações geologia × perfuração" %}</a>
+                                <a href="{% url 'geologia:mapa_furos_2d_3d' %}" role="menuitem">🗺️ {% trans "Mapa de furos 2D/3D" %}</a>
+                                <a href="{% url 'geologia:logs_pendentes_validacao' %}" role="menuitem">✅ {% trans "Pendentes de validação" %}</a>
+                                <a href="{% url 'geologia:logs_intervalos_conflito' %}" role="menuitem">⚠️ {% trans "Intervalos em conflito" %}</a>
+                                <a href="{% url 'geologia:mapa_litologico_furo' %}" role="menuitem">🪨 {% trans "Mapa litológico do furo" %}</a>
+                                <a href="{% url 'geologia:alertas_geotecnicos' %}" role="menuitem">🚨 {% trans "Alertas geotécnicos" %}</a>
+                                <a href="{% url 'geologia:relatorio_geologico' %}" role="menuitem">📤 {% trans "Exportar relatório geológico" %}</a>
+                            {% endif %}
+                            {% if empregado_menu_funcao != "geologo" %}
+                                <a href="{% url 'projetos:avaria_maquina_create_empregado' %}" role="menuitem">🚨 {% trans "Registar Avaria Máquina" %}</a>
+                                <a href="{% url 'projetos:avaria_maquina_minhas_empregado' %}" role="menuitem">🛠️ {% trans "Minhas Avarias" %}{% if total_minhas_avarias_maquinas_abertas_menu %} <span class="sf-menu-badge">{{ total_minhas_avarias_maquinas_abertas_menu }}</span>{% endif %}</a>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -420,6 +493,29 @@
                             <a href="{% url 'projetos:devolucao_material_list' %}" role="menuitem">↩️ {% trans "Minhas Devoluções" %}</a>
                         </div>
                     </div>
+
+                    {% if empregado_menu_funcao == "geologo" or empregado_menu_funcao == "encarregado_obra" %}
+                    <div class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{% trans 'Abrir menu Geologia' %}"
+                            data-dropdown-toggle
+                        >
+                            🌍 {% trans "Geologia" %} ▾
+                        </button>
+                        <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
+                            {% if empregado_menu_funcao == "geologo" %}
+                                <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
+                            {% endif %}
+                            {% if empregado_menu_funcao == "encarregado_obra" %}
+                                <a href="{% url 'geologia:empregado_encarregado_dashboard' %}" role="menuitem">🛠️ {% trans "Dashboard Encarregado" %}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
 
                     {% endwith %}
                 {% endif %}
@@ -457,6 +553,8 @@
                             <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
                             <a href="{% url 'projetos:definicoes' %}" role="menuitem">🛠️ {% trans "Definições" %}</a>
                         {% endif %}
+                        <a href="{% url 'projetos:ajuda' %}" role="menuitem">❓ {% trans "Ajuda" %}</a>
+                        <a href="{% url 'projetos:sobre' %}" role="menuitem">ℹ️ {% trans "Sobre" %}</a>
                         <a href="{% url 'projetos:sugestoes_plataforma' %}" role="menuitem">💡 {% trans "Sugestões" %}</a>
                         <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
                     </div>
@@ -501,6 +599,8 @@
                             <a href="{% url 'projetos:diario_tecnico' %}" role="menuitem">📘 {% trans "Diário Técnico" %}</a>
                             <a href="{% url 'projetos:definicoes' %}" role="menuitem">🛠️ {% trans "Definições" %}</a>
                         {% endif %}
+                        <a href="{% url 'projetos:ajuda' %}" role="menuitem">❓ {% trans "Ajuda" %}</a>
+                        <a href="{% url 'projetos:sobre' %}" role="menuitem">ℹ️ {% trans "Sobre" %}</a>
                         <a href="{% url 'projetos:sugestoes_plataforma' %}" role="menuitem">💡 {% trans "Sugestões" %}</a>
                         <a href="{% url 'logout' %}" role="menuitem">{% trans "Sair" %}</a>
                     </div>
@@ -524,6 +624,12 @@
 
 {% block content %}{% endblock %}
 </div>
+
+<footer class="px-4 py-4 text-center text-xs text-gray-500 border-t border-gray-200 bg-white">
+    <a href="{% url 'projetos:termos_condicoes' %}" class="hover:text-gray-700">{% trans "Termos & Condições" %}</a>
+    <span class="mx-2">·</span>
+    <a href="{% url 'projetos:politica_privacidade' %}" class="hover:text-gray-700">{% trans "Política de Privacidade" %}</a>
+</footer>
 
 {% block extra_scripts %}{% endblock %}
 <script src="{% static 'js/projetos/base.js' %}"></script>

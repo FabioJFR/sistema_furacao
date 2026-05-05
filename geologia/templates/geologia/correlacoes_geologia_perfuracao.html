@@ -1,0 +1,57 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Correlações geologia × perfuração" %}{% endblock %}
+{% block page_title %}{% trans "Correlações geologia × perfuração" %}{% endblock %}
+{% block page_description %}{% trans "Comparação entre litologia dos logs e desempenho operacional de perfuração." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Matriz de correlação por log" %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Litologia" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Intervalo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Metros/dia" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Horas/dia" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Produtividade (m/h)" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Magnetismo médio" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in linhas %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3 text-gray-700">{{ item.log.data_registo|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.projeto.nome }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ item.furo.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.litologia }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.log.intervalo_de }} m - {{ item.log.intervalo_ate }} m</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.metros_dia }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.horas_dia }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.produtividade_m_h }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.magnetismo_medio|default:"-" }}</td>
+                        <td class="px-4 py-3"><a href="{% url 'geologia:log_detail' item.log.id %}" class="text-sky-700 font-semibold">{% trans "Abrir log" %}</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="px-4 py-8 text-center text-gray-500">{% trans "Ainda não existem dados suficientes para correlação." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

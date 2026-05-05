@@ -12,6 +12,7 @@ from projetos.models import (
     Medicao,
     Projeto,
     RegistoDiarioEmpregado,
+    MaquinaAvaria,
 )
 
 
@@ -240,24 +241,60 @@ def obter_lista_furos_empregado(empregado):
     ).distinct().order_by("nome")
 
 
-def obter_lista_medicoes_empregado(empregado):
-    furos_associados_ids = empregado.ligacoes_furos.filter(
-        empresa=empregado.empresa,
-        ativo=True,
-    ).values_list("furo_id", flat=True)
-
-    furos_com_registos_ids = empregado.registos_diarios.filter(
-        empresa=empregado.empresa,
-    ).exclude(furo__isnull=True).values_list("furo_id", flat=True)
-
-    return (
-        Medicao.objects.filter(
-            empresa=empregado.empresa,
-            furo_id__in=set(furos_associados_ids).union(set(furos_com_registos_ids)),
+def obter_lista_medicoes_empregado(
+    empregado,
+    *,
+    furo_id=None,
+    nome_furo=None,
+    projeto_id=None,
+    profundidade_min=None,
+    profundidade_max=None,
+):
+    # Geólogo deve conseguir consultar todas as medições da empresa.
+    if (empregado.funcao or "").strip().lower() == "geologo":
+        qs = (
+            Medicao.objects.filter(empresa=empregado.empresa)
+            .select_related("furo", "furo__projeto")
         )
-        .select_related("furo", "furo__projeto")
-        .order_by("-criado_em", "-profundidade_medida")
-    )
+    else:
+        furos_associados_ids = empregado.ligacoes_furos.filter(
+            empresa=empregado.empresa,
+            ativo=True,
+        ).values_list("furo_id", flat=True)
+
+        furos_com_registos_ids = empregado.registos_diarios.filter(
+            empresa=empregado.empresa,
+        ).exclude(furo__isnull=True).values_list("furo_id", flat=True)
+
+        qs = (
+            Medicao.objects.filter(
+                empresa=empregado.empresa,
+                furo_id__in=set(furos_associados_ids).union(set(furos_com_registos_ids)),
+            )
+            .select_related("furo", "furo__projeto")
+        )
+
+    if furo_id:
+        qs = qs.filter(furo_id=furo_id)
+
+    if projeto_id:
+        qs = qs.filter(furo__projeto_id=projeto_id)
+
+    if nome_furo:
+        nome_furo = nome_furo.strip()
+        if nome_furo:
+            qs = qs.filter(
+                Q(nome_furo_snapshot__icontains=nome_furo)
+                | Q(furo__nome__icontains=nome_furo)
+            )
+
+    if profundidade_min not in (None, ""):
+        qs = qs.filter(profundidade_medida__gte=profundidade_min)
+
+    if profundidade_max not in (None, ""):
+        qs = qs.filter(profundidade_medida__lte=profundidade_max)
+
+    return qs.order_by("-criado_em", "-profundidade_medida")
 
 
 def obter_medicao_empregado(pk, empregado):
@@ -395,6 +432,81 @@ def obter_totais_empregado_area(empregado):
 def obter_empregado_admin_por_pk(pk, empresa):
     empresa_id = _resolver_empresa_id(empresa)
     return get_object_or_404(Empregados, pk=pk, empresa_id=empresa_id)
+
+
+def obter_medias_operacionais_empregado(empregado, empresa=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else empregado.empresa_id
+    qs = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        empresa_id=empresa_id,
+    )
+
+    total_metros = float(qs.aggregate(total=Sum("metros_furados")).get("total") or 0.0)
+    total_horas = float(qs.aggregate(total=Sum("horas_trabalhadas")).get("total") or 0.0)
+
+    dias_distintos = qs.values("data").distinct().count()
+    furos_distintos = qs.exclude(furo__isnull=True).values("furo_id").distinct().count()
+    projetos_distintos = qs.exclude(projeto__isnull=True).values("projeto_id").distinct().count()
+
+    horas_por_semana = (
+        qs.exclude(data__isnull=True)
+        .values("data__year", "data__week")
+        .annotate(total=Sum("horas_trabalhadas"))
+    )
+    horas_por_mes = (
+        qs.exclude(data__isnull=True)
+        .values("data__year", "data__month")
+        .annotate(total=Sum("horas_trabalhadas"))
+    )
+    horas_por_ano = (
+        qs.exclude(data__isnull=True)
+        .values("data__year")
+        .annotate(total=Sum("horas_trabalhadas"))
+    )
+
+    total_semanas = len(horas_por_semana)
+    total_meses = len(horas_por_mes)
+    total_anos = len(horas_por_ano)
+
+    media_metros_por_dia = round(total_metros / dias_distintos, 2) if dias_distintos else 0.0
+    media_metros_por_furo = round(total_metros / furos_distintos, 2) if furos_distintos else 0.0
+    media_metros_por_projeto = round(total_metros / projetos_distintos, 2) if projetos_distintos else 0.0
+
+    media_horas_por_dia = round(total_horas / dias_distintos, 2) if dias_distintos else 0.0
+    media_horas_semanais = round(total_horas / total_semanas, 2) if total_semanas else 0.0
+    media_horas_mensais = round(total_horas / total_meses, 2) if total_meses else 0.0
+    media_horas_anuais = round(total_horas / total_anos, 2) if total_anos else 0.0
+
+    return {
+        "media_metros_por_dia": media_metros_por_dia,
+        "media_metros_por_furo": media_metros_por_furo,
+        "media_metros_por_projeto": media_metros_por_projeto,
+        "media_horas_por_dia": media_horas_por_dia,
+        "media_horas_semanais": media_horas_semanais,
+        "media_horas_mensais": media_horas_mensais,
+        "media_horas_anuais": media_horas_anuais,
+        "dias_com_registo": dias_distintos,
+        "furos_com_registo": furos_distintos,
+        "projetos_com_registo": projetos_distintos,
+    }
+
+
+def obter_avarias_empregado(empregado, empresa=None):
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else empregado.empresa_id
+    qs = (
+        MaquinaAvaria.objects.select_related("maquina", "projeto", "furo", "reportado_por")
+        .filter(
+            empresa_id=empresa_id,
+            responsavel_empregado=empregado,
+        )
+        .order_by("-data_inicio", "-criado_em")
+    )
+    return {
+        "avarias_atribuidas": qs,
+        "total_avarias_atribuidas": qs.count(),
+        "total_avarias_resolvidas": qs.filter(status="resolvida").count(),
+        "total_avarias_abertas": qs.filter(status__in=["aberta", "em_reparacao"]).count(),
+    }
 
 
 def obter_ligacao_projeto_empregado_admin(ligacao_id, empregado, empresa):

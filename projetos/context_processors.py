@@ -16,7 +16,9 @@ def menu_context(request):
             "is_platform_owner": False,
             "perfil_plataforma": None,
             "empregado_menu_obj": None,
+            "empregado_menu_funcao": "",
             "tamanho_texto": "normal",
+            "empresa_menu_logo_url": "",
         }
 
     perfil = obter_perfil_ativo_por_user(user)
@@ -51,6 +53,14 @@ def menu_context(request):
     if preferencias is None:
         preferencias, _ = obter_ou_criar_preferencias_user(user)
 
+    empresa_menu = getattr(perfil, "empresa", None) or getattr(empregado_menu_obj, "empresa", None)
+    empresa_menu_logo_url = ""
+    if empresa_menu and getattr(empresa_menu, "logo", None):
+        try:
+            empresa_menu_logo_url = empresa_menu.logo.url
+        except Exception:
+            empresa_menu_logo_url = ""
+
     return {
         "is_admin_user": is_admin_user,
         "is_empregado_user": is_empregado_user,
@@ -59,7 +69,9 @@ def menu_context(request):
         "is_empresa_admin": is_empresa_admin,
         "perfil_plataforma": perfil,
         "empregado_menu_obj": empregado_menu_obj,
+        "empregado_menu_funcao": (getattr(empregado_menu_obj, "funcao", "") or "").strip().lower(),
         "total_avarias_maquinas_abertas_menu": total_avarias_maquinas_abertas_menu,
         "total_minhas_avarias_maquinas_abertas_menu": total_minhas_avarias_maquinas_abertas_menu,
         "tamanho_texto": getattr(preferencias, "tamanho_texto", "normal"),
+        "empresa_menu_logo_url": empresa_menu_logo_url,
     }

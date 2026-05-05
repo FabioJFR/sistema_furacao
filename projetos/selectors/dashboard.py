@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from django.db.models import F, Sum
+from django.db.models import F, Q, Sum
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
@@ -16,6 +16,7 @@ from projetos.models import (
     Material,
     Projeto,
     RegistoDiarioEmpregado,
+    SalarioBaseFuncao,
 )
 
 
@@ -73,6 +74,9 @@ def _obter_queryset_base_despesas():
 
 
 def _obter_opcoes_periodo(hoje, periodo, data_inicio=None, data_fim=None):
+    if periodo == "total":
+        return None, None
+
     if periodo == "hoje":
         return hoje, hoje
 
@@ -312,7 +316,7 @@ def _obter_resumos_financeiros(empresa=None, projeto_id=None, custo_por_metro_cl
 def obter_intervalo_filtros(request, empresa=None):
     hoje = timezone.now().date()
 
-    periodo = request.GET.get("periodo", "30_dias")
+    periodo = request.GET.get("periodo", "total")
     data_inicio_raw = request.GET.get("data_inicio")
     data_fim_raw = request.GET.get("data_fim")
     projeto_id = request.GET.get("projeto") or None
@@ -510,11 +514,14 @@ def obter_alertas_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id
 
 def obter_graficos_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id=None, empresa=None, request=None):
     hoje = timezone.now().date()
+    periodo = (request.GET.get("periodo") if request else None) or "30_dias"
 
-    if fim is None:
-        fim = hoje
-    if inicio is None:
-        inicio = fim - timedelta(days=30)
+    # No modo "total", não aplicamos limite temporal.
+    if periodo != "total":
+        if fim is None:
+            fim = hoje
+        if inicio is None:
+            inicio = fim - timedelta(days=30)
 
     registos = aplicar_filtros_registos(
         _obter_queryset_base_registos(),
@@ -588,6 +595,200 @@ def obter_graficos_dashboard(inicio=None, fim=None, projeto_id=None, empregado_i
     )
     labels_despesas_projeto = [r["projeto__nome"] or "-" for r in despesas_por_projeto]
     valores_despesas_projeto = [round(float(r["total"] or 0), 2) for r in despesas_por_projeto]
+
+    # Fallback: se os filtros atuais não devolverem despesas, mostrar visão global da empresa
+    # para evitar gráficos financeiros vazios.
+    if not labels_despesas_dia and not labels_despesas_categoria and not labels_despesas_projeto:
+        despesas_empresa = _filtrar_por_empresa(Despesa.objects.all(), empresa)
+        despesas_por_dia = (
+            despesas_empresa.values("data")
+            .annotate(total=Sum("valor"))
+            .order_by("data")
+        )
+        labels_despesas_dia = [r["data"].strftime("%d/%m/%Y") for r in despesas_por_dia]
+        valores_despesas_dia = [round(float(r["total"] or 0), 2) for r in despesas_por_dia]
+
+        despesas_por_categoria = (
+            despesas_empresa.values("categoria")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")
+        )
+        labels_despesas_categoria = [r["categoria"] or "sem categoria" for r in despesas_por_categoria]
+        valores_despesas_categoria = [round(float(r["total"] or 0), 2) for r in despesas_por_categoria]
+
+        despesas_por_projeto = (
+            despesas_empresa.exclude(projeto__isnull=True)
+            .values("projeto__nome")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")[:10]
+        )
+        labels_despesas_projeto = [r["projeto__nome"] or "-" for r in despesas_por_projeto]
+        valores_despesas_projeto = [round(float(r["total"] or 0), 2) for r in despesas_por_projeto]
+
+    empregados_salario_qs = _filtrar_por_empresa(Empregados.objects.all(), empresa)
+    if projeto_id:
+        empregados_salario_qs = empregados_salario_qs.filter(
+            Q(ligacoes_projetos__projeto_id=projeto_id)
+            | Q(registos_diarios__projeto_id=projeto_id)
+            | Q(ligacoes_furos__furo__projeto_id=projeto_id)
+        )
+    if empregado_id:
+        empregados_salario_qs = empregados_salario_qs.filter(pk=empregado_id)
+    empregados_salario = list(
+        empregados_salario_qs.distinct().values("nome", "funcao", "salario")
+    )
+    salario_base_por_funcao = {
+        item["funcao"]: float(item["salario_base"] or 0.0)
+        for item in _filtrar_por_empresa(SalarioBaseFuncao.objects.all(), empresa).values("funcao", "salario_base")
+    }
+
+    mapa_funcoes = dict(Empregados.FUNCAO_GERAL_CHOICES)
+    salarios_normalizados = []
+    for item in empregados_salario:
+        funcao_codigo = item.get("funcao") or "sem_funcao"
+        funcao = mapa_funcoes.get(funcao_codigo, funcao_codigo if funcao_codigo != "sem_funcao" else "Sem função")
+        salario_registado = float(item.get("salario") or 0.0)
+        salario_base = float(salario_base_por_funcao.get(funcao_codigo, 0.0))
+        salario_efetivo = salario_registado if salario_registado > 0 else salario_base
+        salarios_normalizados.append(
+            {
+                "nome": item.get("nome") or "-",
+                "funcao": funcao,
+                "salario": round(salario_efetivo, 2),
+            }
+        )
+
+    total_salarios_empregados = round(
+        sum(item["salario"] for item in salarios_normalizados),
+        2,
+    )
+    total_empregados_salario = len(salarios_normalizados)
+    salario_medio_empregado = round(
+        (total_salarios_empregados / total_empregados_salario) if total_empregados_salario else 0.0,
+        2,
+    )
+
+    agregados_funcao = {}
+    for item in salarios_normalizados:
+        bucket = agregados_funcao.setdefault(
+            item["funcao"],
+            {"total": 0.0, "total_empregados": 0},
+        )
+        bucket["total"] += float(item["salario"] or 0.0)
+        bucket["total_empregados"] += 1
+
+    salarios_por_funcao = sorted(
+        [
+            {
+                "funcao": funcao,
+                "total": round(dados["total"], 2),
+                "total_empregados": int(dados["total_empregados"]),
+            }
+            for funcao, dados in agregados_funcao.items()
+        ],
+        key=lambda x: x["total"],
+        reverse=True,
+    )
+    labels_salarios_funcao = [item["funcao"] for item in salarios_por_funcao]
+    valores_salarios_funcao = [item["total"] for item in salarios_por_funcao]
+    quantidade_empregados_funcao = [item["total_empregados"] for item in salarios_por_funcao]
+
+    salarios_por_empregado = sorted(
+        salarios_normalizados,
+        key=lambda x: float(x["salario"] or 0.0),
+        reverse=True,
+    )[:10]
+    labels_salarios_empregado = [item["nome"] for item in salarios_por_empregado]
+    valores_salarios_empregado = [item["salario"] for item in salarios_por_empregado]
+
+    # Fallback: se filtros atuais não trouxerem salários, mostrar salários globais da empresa.
+    if not labels_salarios_funcao and not labels_salarios_empregado:
+        empregados_salario_empresa = list(
+            _filtrar_por_empresa(Empregados.objects.all(), empresa)
+            .values("nome", "funcao", "salario")
+        )
+        salarios_normalizados_empresa = []
+        for item in empregados_salario_empresa:
+            funcao_codigo = item.get("funcao") or "sem_funcao"
+            funcao = mapa_funcoes.get(funcao_codigo, funcao_codigo if funcao_codigo != "sem_funcao" else "Sem função")
+            salario_registado = float(item.get("salario") or 0.0)
+            salario_base = float(salario_base_por_funcao.get(funcao_codigo, 0.0))
+            salario_efetivo = salario_registado if salario_registado > 0 else salario_base
+            salarios_normalizados_empresa.append(
+                {
+                    "nome": item.get("nome") or "-",
+                    "funcao": funcao,
+                    "salario": round(salario_efetivo, 2),
+                }
+            )
+
+        agregados_funcao_empresa = {}
+        for item in salarios_normalizados_empresa:
+            bucket = agregados_funcao_empresa.setdefault(
+                item["funcao"],
+                {"total": 0.0, "total_empregados": 0},
+            )
+            bucket["total"] += float(item["salario"] or 0.0)
+            bucket["total_empregados"] += 1
+
+        salarios_por_funcao = sorted(
+            [
+                {
+                    "funcao": funcao,
+                    "total": round(dados["total"], 2),
+                    "total_empregados": int(dados["total_empregados"]),
+                }
+                for funcao, dados in agregados_funcao_empresa.items()
+            ],
+            key=lambda x: x["total"],
+            reverse=True,
+        )
+        labels_salarios_funcao = [item["funcao"] for item in salarios_por_funcao]
+        valores_salarios_funcao = [item["total"] for item in salarios_por_funcao]
+        quantidade_empregados_funcao = [item["total_empregados"] for item in salarios_por_funcao]
+
+        salarios_por_empregado = sorted(
+            salarios_normalizados_empresa,
+            key=lambda x: float(x["salario"] or 0.0),
+            reverse=True,
+        )[:10]
+        labels_salarios_empregado = [item["nome"] for item in salarios_por_empregado]
+        valores_salarios_empregado = [item["salario"] for item in salarios_por_empregado]
+
+    # Failsafe visual: evitar gráficos financeiros vazios.
+    if not labels_despesas_dia:
+        labels_despesas_dia = ["Sem dados"]
+        valores_despesas_dia = [0.0]
+    if not labels_despesas_categoria:
+        labels_despesas_categoria = ["Sem dados"]
+        valores_despesas_categoria = [0.0]
+    if not labels_despesas_projeto:
+        labels_despesas_projeto = ["Sem dados"]
+        valores_despesas_projeto = [0.0]
+
+    # Se não houver empregados, tentar mostrar salários base por função (se existirem).
+    if not labels_salarios_funcao:
+        salarios_base_lista = [
+            (item["funcao"], float(item["salario_base"] or 0.0))
+            for item in _filtrar_por_empresa(SalarioBaseFuncao.objects.all(), empresa).values("funcao", "salario_base")
+            if float(item["salario_base"] or 0.0) > 0
+        ]
+        if salarios_base_lista:
+            labels_salarios_funcao = [
+                mapa_funcoes.get(funcao, funcao or "Sem função")
+                for funcao, _ in salarios_base_lista
+            ]
+            valores_salarios_funcao = [round(valor, 2) for _, valor in salarios_base_lista]
+            quantidade_empregados_funcao = [0 for _ in salarios_base_lista]
+        else:
+            labels_salarios_funcao = ["Sem dados"]
+            valores_salarios_funcao = [0.0]
+            quantidade_empregados_funcao = [0]
+
+    if not labels_salarios_empregado:
+        labels_salarios_empregado = ["Sem dados"]
+        valores_salarios_empregado = [0.0]
+
     custo_cliente = 0.0
     if hasattr(empresa, "custo_por_metro_cliente"):
         custo_cliente = float(empresa.custo_por_metro_cliente or 0)
@@ -613,6 +814,14 @@ def obter_graficos_dashboard(inicio=None, fim=None, projeto_id=None, empregado_i
         "valores_despesas_categoria": valores_despesas_categoria,
         "labels_despesas_projeto": labels_despesas_projeto,
         "valores_despesas_projeto": valores_despesas_projeto,
+        "labels_salarios_funcao": labels_salarios_funcao,
+        "valores_salarios_funcao": valores_salarios_funcao,
+        "quantidade_empregados_funcao": quantidade_empregados_funcao,
+        "labels_salarios_empregado": labels_salarios_empregado,
+        "valores_salarios_empregado": valores_salarios_empregado,
+        "total_salarios_empregados": total_salarios_empregados,
+        "total_empregados_salario": total_empregados_salario,
+        "salario_medio_empregado": salario_medio_empregado,
         "resumos_projeto_financeiro": resumos_projeto_financeiro,
         "resumos_furo_financeiro": resumos_furo_financeiro,
         "labels": series_dia["labels_dia"],

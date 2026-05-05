@@ -188,6 +188,22 @@
                 </div>
                 {% endif %}
 
+                {% if form.aplicar_salario_base_funcao %}
+                <div class="md:col-span-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900">
+                    <label for="id_aplicar_salario_base_funcao" class="font-semibold inline-flex items-center gap-2">
+                        {{ form.aplicar_salario_base_funcao }}
+                        <span>{{ form.aplicar_salario_base_funcao.label }}</span>
+                    </label>
+                    <p class="text-sm mt-1">{{ form.aplicar_salario_base_funcao.help_text }}</p>
+                    <p class="text-sm mt-1">
+                        {% trans "Nota: quando a função é alterada, o salário também é atualizado automaticamente pelo valor base dessa função." %}
+                    </p>
+                    {% if form.aplicar_salario_base_funcao.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.aplicar_salario_base_funcao.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 {% if form.curriculo %}
                 <div class="md:col-span-2">
                     <label for="id_curriculo" class="block font-semibold mb-1">{% trans "Currículo" %}</label>

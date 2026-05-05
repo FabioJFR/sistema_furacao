@@ -1,0 +1,52 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Block Models Profissionais" %}{% endblock %}
+{% block page_title %}{% trans "Block Models Profissionais" %}{% endblock %}
+{% block page_description %}{% trans "Lista de modelos block 3D com células persistidas." %}{% endblock %}
+
+{% block content %}
+<section class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+    <div class="flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-slate-900">{% trans "Modelos" %}</h2>
+        <a href="{% url 'projetos:block_model_create' %}" class="inline-flex items-center rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-900 transition">
+            {% trans "Novo Block Model" %}
+        </a>
+    </div>
+    {% if items %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-slate-600 border-b border-slate-200">
+                        <th class="py-2 pr-4">{% trans "Nome" %}</th>
+                        <th class="py-2 pr-4">{% trans "Projeto" %}</th>
+                        <th class="py-2 pr-4">{% trans "Empresa" %}</th>
+                        <th class="py-2 pr-4">{% trans "Células" %}</th>
+                        <th class="py-2 pr-4">{% trans "Criado" %}</th>
+                        <th class="py-2 pr-4">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="border-b border-slate-100 text-slate-700">
+                        <td class="py-2 pr-4">{{ item.nome }}</td>
+                        <td class="py-2 pr-4">{{ item.projeto.nome|default:"-" }}</td>
+                        <td class="py-2 pr-4">{{ item.empresa.nome|default:"-" }}</td>
+                        <td class="py-2 pr-4">{{ item.celulas.count }}</td>
+                        <td class="py-2 pr-4">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                        <td class="py-2 pr-4">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{% url 'projetos:block_model_detail' item.pk %}" class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Detalhe" %}</a>
+                                <a href="{% url 'projetos:block_model_3d' item.pk %}" class="inline-flex items-center rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-900 transition">3D</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-sm text-slate-600">{% trans "Ainda não existem block models profissionais." %}</p>
+    {% endif %}
+</section>
+{% endblock %}

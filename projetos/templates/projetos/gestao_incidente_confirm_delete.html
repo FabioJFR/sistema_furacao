@@ -1,0 +1,18 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar incidente" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <h1>{% trans "Apagar incidente" %}</h1>
+    <p class="sf-muted-text mt-2">
+        {% blocktrans with titulo=item.titulo %}Tens a certeza que queres apagar o incidente "{{ titulo }}"?{% endblocktrans %}
+    </p>
+    <form method="post" class="mt-5 flex items-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Confirmar apagar" %}</button>
+        <a href="{% url 'projetos:gestao_compliance_seguranca' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </form>
+</section>
+{% endblock %}

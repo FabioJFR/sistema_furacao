@@ -8,17 +8,34 @@
 {% endblock %}
 {% block page_actions %}
     <a href="{% url 'geologia:log_update' log.id %}" class="btn btn-primary">{% trans "Editar" %}</a>
+    <form method="post" action="{% url 'geologia:log_delete' log.id %}" style="display:inline;" onsubmit="return confirm('{% trans "Tens a certeza que queres apagar este log?" %}');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-light">{% trans "Apagar" %}</button>
+    </form>
     <a href="{% url 'geologia:anexo_create' log.id %}" class="btn btn-light">{% trans "Adicionar anexo" %}</a>
     <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-light">{% trans "Voltar" %}</a>
 {% endblock %}
 
-{% block content %}
+{% block plataforma_content %}
 {% trans "Sem observações." as sem_observacoes %}
 <div class="max-w-6xl mx-auto px-6 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Descrição geológica" %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <strong>{% trans "Validação:" %}</strong>
+                    {% if log.status_validacao == "aprovado" %}
+                        <span class="text-emerald-700 font-semibold">{% trans "Aprovado" %}</span>
+                    {% elif log.status_validacao == "rejeitado" %}
+                        <span class="text-amber-700 font-semibold">{% trans "Rejeitado" %}</span>
+                    {% else %}
+                        <span class="text-slate-700 font-semibold">{% trans "Pendente" %}</span>
+                    {% endif %}
+                </div>
+                <div><strong>{% trans "Validado por:" %}</strong> {{ log.validado_por|default:"-" }}</div>
+                <div><strong>{% trans "Data validação:" %}</strong> {{ log.validado_em|date:"d/m/Y H:i"|default:"-" }}</div>
+                <div><strong>{% trans "Obs. validação:" %}</strong> {{ log.observacao_validacao|default:"-" }}</div>
                 <div><strong>{% trans "Litologia principal:" %}</strong> {{ log.litologia_principal }}</div>
                 <div><strong>{% trans "Litologia secundária:" %}</strong> {{ log.litologia_secundaria|default:"-" }}</div>
                 <div><strong>{% trans "Cor:" %}</strong> {{ log.cor|default:"-" }}</div>

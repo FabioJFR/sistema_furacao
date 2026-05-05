@@ -21,4 +21,9 @@ urlpatterns = [
     path("analytics/", include("projetos.url_patterns.analytics")),
     path("opcoes/", include("projetos.url_patterns.opcoes")),
     path("3d/", include("projetos.url_patterns.modelos_3d")),
+    path("gestao/clientes-contratos/", include("projetos.url_patterns.clientes_contratos")),
+    path("gestao/planeamento/", include("projetos.url_patterns.planeamento_turnos")),
+    path("gestao/rh-assiduidade/", include("projetos.url_patterns.assiduidade")),
+    path("gestao/", include("projetos.url_patterns.gestao_empresa")),
+    path("", include("projetos.url_patterns.institucional")),
 ]

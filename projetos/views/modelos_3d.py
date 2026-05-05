@@ -8,8 +8,14 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
-from core.permissions import admin_required
-from projetos.models import Modelo3DBlock, Modelo3DImplicit, Modelo3DWireframe
+from core.permissions import admin_required, user_can_access_3d_geologo
+from projetos.models import Modelo3DBlock, Modelo3DImplicit, Modelo3DWireframe, Projeto, Furo
+from projetos.selectors.block_model import obter_celulas_block_model, obter_dados_3d_block_model
+from projetos.services.block_model import (
+    exportar_block_model_json,
+    gerar_block_model_para_projeto,
+    gerar_celulas_block_model,
+)
 
 MAX_WIREFRAME_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB
 WIREFRAME_ALLOWED_EXTENSIONS = {".obj", ".dxf"}
@@ -20,9 +26,10 @@ IMPLICIT_ALLOWED_EXTENSIONS = {".csv", ".json"}
 
 
 def _garantir_superuser(request):
-    if request.user.is_superuser:
+    rota_nome = getattr(getattr(request, "resolver_match", None), "view_name", None)
+    if request.user.is_superuser or user_can_access_3d_geologo(request.user, rota_nome):
         return None
-    messages.error(request, _("Esta área 3D avançada está disponível apenas para superuser."))
+    messages.error(request, _("Esta área 3D avançada está disponível apenas para superuser/geólogo autorizado."))
     return redirect("projetos:dashboard")
 
 
@@ -345,7 +352,7 @@ def modelo_3d_block_model(request):
                 messages.success(request, _("Ficheiro block model lido com sucesso."))
                 if action == "validate_and_save":
                     formato = (preview.get("extensao") or "").replace(".", "")
-                    Modelo3DBlock.objects.create(
+                    item = Modelo3DBlock.objects.create(
                         criado_por=request.user,
                         nome=preview.get("nome") or "block-model",
                         formato=formato,
@@ -357,6 +364,12 @@ def modelo_3d_block_model(request):
                             "tamanho_humano": preview.get("tamanho_humano"),
                         },
                     )
+                    try:
+                        total_celulas = gerar_celulas_block_model(item)
+                        messages.info(request, _("Células geradas para block model: %(total)s") % {"total": total_celulas})
+                    except Exception:
+                        # Não bloqueia o fluxo principal de gravação; apenas regista alerta de pós-processamento.
+                        messages.warning(request, _("Block model guardado, mas houve falha ao gerar células."))
                     messages.success(request, _("Block model guardado na base de dados com sucesso."))
 
     historico_guardados = Modelo3DBlock.objects.select_related("criado_por")[:10]
@@ -712,3 +725,193 @@ def modelo_3d_implicit_apagar(request, pk):
     item.delete()
     messages.success(request, _("Modelo implícito '%(nome)s' removido com sucesso.") % {"nome": nome})
     return redirect("projetos:modelo_3d_implicit")
+
+
+@login_required
+@admin_required
+def block_model_list(request):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    items = Modelo3DBlock.objects.select_related("empresa", "projeto", "criado_por").order_by("-criado_em")
+    return render(request, "projetos/block_model_list.html", {"items": items})
+
+
+@login_required
+@admin_required
+def block_model_create(request):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    projetos = Projeto.objects.select_related("empresa").order_by("nome")
+    if request.method == "POST":
+        projeto_id = request.POST.get("projeto_id")
+        nome = (request.POST.get("nome") or "").strip() or None
+        sx = request.POST.get("tamanho_bloco_x") or "1"
+        sy = request.POST.get("tamanho_bloco_y") or "1"
+        sz = request.POST.get("tamanho_bloco_z") or "1"
+        try:
+            model = gerar_block_model_para_projeto(
+                projeto_id=projeto_id,
+                nome=nome,
+                criado_por=request.user,
+                tamanho_bloco_x=float(sx),
+                tamanho_bloco_y=float(sy),
+                tamanho_bloco_z=float(sz),
+            )
+            messages.success(request, _("Block Model profissional gerado com sucesso."))
+            return redirect("projetos:block_model_detail", pk=model.pk)
+        except Projeto.DoesNotExist:
+            messages.error(request, _("Projeto inválido para gerar block model."))
+        except Exception:
+            messages.error(request, _("Não foi possível gerar o block model com os dados enviados."))
+    return render(request, "projetos/block_model_form.html", {"projetos": projetos})
+
+
+@login_required
+@admin_required
+def block_model_detail(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock.objects.select_related("empresa", "projeto", "criado_por"), pk=pk)
+    celulas = obter_celulas_block_model(item)
+    total = celulas.count()
+    litologias = sorted({(c.litologia or "default") for c in celulas})
+    return render(
+        request,
+        "projetos/block_model_detail.html",
+        {"item": item, "total_celulas": total, "litologias": litologias},
+    )
+
+
+@login_required
+@admin_required
+def block_model_3d(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock.objects.select_related("empresa", "projeto"), pk=pk)
+    dados = obter_dados_3d_block_model(item)
+    furos = []
+    if item.projeto_id:
+        for furo in Furo.objects.filter(projeto_id=item.projeto_id).only(
+            "id", "nome", "origem_este", "origem_norte", "origem_tvd", "profundidade_atual"
+        ):
+            furos.append(
+                {
+                    "id": str(furo.id),
+                    "nome": furo.nome,
+                    "x": float(furo.origem_este or 0.0),
+                    "y": float(furo.origem_norte or 0.0),
+                    "z": float(furo.origem_tvd or 0.0),
+                    "profundidade_atual": float(furo.profundidade_atual or 0.0),
+                }
+            )
+    return render(
+        request,
+        "projetos/block_model_3d.html",
+        {
+            "item": item,
+            "dados_json": json.dumps(dados, ensure_ascii=False),
+            "resumo_json": json.dumps(item.resumo_json or {}, ensure_ascii=False),
+            "furos_json": json.dumps(furos, ensure_ascii=False),
+        },
+    )
+
+
+@login_required
+@admin_required
+def block_model_delete(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, _("Block model removido com sucesso."))
+        return redirect("projetos:block_model_list")
+    return render(request, "projetos/block_model_confirm_delete.html", {"item": item})
+
+
+@login_required
+@admin_required
+def block_model_regenerate_cells(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    if request.method != "POST":
+        return redirect("projetos:block_model_detail", pk=item.pk)
+    try:
+        total = gerar_celulas_block_model(item)
+        messages.success(request, _("Células regeneradas com sucesso: %(total)s") % {"total": total})
+    except Exception:
+        messages.error(request, _("Falha ao regenerar células do block model."))
+    return redirect("projetos:block_model_detail", pk=item.pk)
+
+
+@login_required
+@admin_required
+def block_model_export_json(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    payload = exportar_block_model_json(item)
+    filename = f"block-model-profissional-{item.pk}.json"
+    response = HttpResponse(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        content_type="application/json; charset=utf-8",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@login_required
+@admin_required
+def block_model_export_csv(request, pk):
+    bloqueio = _garantir_superuser(request)
+    if bloqueio:
+        return bloqueio
+    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    payload = exportar_block_model_json(item)
+    cells = payload.get("cells") or []
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="block-model-profissional-{item.pk}.csv"'
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "x",
+            "y",
+            "z",
+            "centro_x",
+            "centro_y",
+            "centro_z",
+            "litologia",
+            "dureza_media",
+            "densidade",
+            "teor",
+            "distancia_ao_furo",
+            "dados_json",
+        ]
+    )
+    for c in cells:
+        writer.writerow(
+            [
+                c.get("x"),
+                c.get("y"),
+                c.get("z"),
+                c.get("centro_x"),
+                c.get("centro_y"),
+                c.get("centro_z"),
+                c.get("litologia"),
+                c.get("dureza_media"),
+                c.get("densidade"),
+                c.get("teor"),
+                c.get("distancia_ao_furo"),
+                json.dumps(c.get("dados_json") or {}, ensure_ascii=False),
+            ]
+        )
+    return response

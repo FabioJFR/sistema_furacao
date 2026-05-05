@@ -1,0 +1,137 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ titulo }} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{{ titulo }}</h1>
+            <p class="sf-muted-text">{{ descricao }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'projetos:gestao_checklist_hse_create' %}" class="btn btn-primary">{% trans "Nova checklist HSE" %}</a>
+            <a href="{% url 'projetos:gestao_incidente_create' %}" class="btn btn-secondary">{% trans "Novo incidente" %}</a>
+            <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for item in kpis %}
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-sm text-slate-500">{{ item.titulo }}</div>
+            <div class="text-2xl font-bold text-slate-800 mt-1">{{ item.valor }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <h2 class="text-lg font-semibold text-slate-800">{% trans "Checklists HSE" %}</h2>
+            <form method="get" class="flex items-end gap-2 flex-wrap">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado checklist" %}</label>
+                    <select name="check_status" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                        {% for value, label in check_status_choices %}
+                        <option value="{{ value }}" {% if filtros.check_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado incidente" %}</label>
+                    <select name="inc_status" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                        {% for value, label in inc_status_choices %}
+                        <option value="{{ value }}" {% if filtros.inc_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:gestao_compliance_seguranca' %}" class="btn btn-light">{% trans "Limpar" %}</a>
+            </form>
+        </div>
+
+        <table class="w-full min-w-[980px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Data" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Título" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Área" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Projeto" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Responsável" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Estado" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in checklists %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-3 py-2">{{ c.data_check|date:"d/m/Y" }}</td>
+                    <td class="px-3 py-2">{{ c.titulo }}</td>
+                    <td class="px-3 py-2">{{ c.area|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ c.projeto.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ c.responsavel.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ c.get_status_display }}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'projetos:gestao_checklist_hse_update' c.pk %}" class="btn btn-secondary">{% trans "Editar" %}</a>
+                            <a href="{% url 'projetos:gestao_checklist_hse_delete' c.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="px-3 py-4 text-slate-500">{% trans "Sem checklists." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Incidentes de Segurança" %}</h2>
+        <table class="w-full min-w-[1050px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Data" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Título" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Projeto" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Gravidade" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Estado" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Reportado por" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Responsável" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in incidentes %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-3 py-2">{{ i.data_incidente|date:"d/m/Y" }}</td>
+                    <td class="px-3 py-2">{{ i.titulo }}</td>
+                    <td class="px-3 py-2">{{ i.projeto.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ i.get_gravidade_display }}</td>
+                    <td class="px-3 py-2">{{ i.get_status_display }}</td>
+                    <td class="px-3 py-2">{{ i.reportado_por.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">{{ i.responsavel.nome|default:"-" }}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'projetos:gestao_incidente_update' i.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
+                            {% if i.status != "aberto" %}
+                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'aberto' %}" class="btn btn-light">{% trans "Abrir" %}</a>
+                            {% endif %}
+                            {% if i.status != "investigacao" %}
+                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'investigacao' %}" class="btn btn-secondary">{% trans "Investigar" %}</a>
+                            {% endif %}
+                            {% if i.status != "fechado" %}
+                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'fechado' %}" class="btn btn-primary">{% trans "Fechar" %}</a>
+                            {% endif %}
+                            <a href="{% url 'projetos:gestao_incidente_delete' i.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="px-3 py-4 text-slate-500">{% trans "Sem incidentes." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

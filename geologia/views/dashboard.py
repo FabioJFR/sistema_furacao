@@ -5,7 +5,12 @@ from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from core.permissions import admin_required
+from core.permissions import (
+    admin_required,
+    encarregado_obra_required,
+    geologia_operacional_required,
+    geologo_required,
+)
 from geologia.forms import (
     ConfiguracaoDroneSFForm,
     DroneSFForm,
@@ -55,9 +60,14 @@ from geologia.selectors.dashboard import (
     obter_operacao_sf_por_bridge_key,
     obter_ou_criar_configuracao_drone_sf,
     obter_ou_criar_operacao_drone_sf,
+    obter_furos_geologia_hub_qs,
+    obter_logs_geologia_hub_qs,
+    obter_missoes_geologia_hub_qs,
+    obter_semoforo_e_prioridades_furos_geologo,
 )
+from projetos.selectors.acesso import obter_empregado_por_user
 
-from .common import obter_empresa_admin_geologia
+from .common import obter_empresa_admin_geologia, obter_empresa_geologia_operacional
 
 
 def _json_ok(payload=None, *, status=200):
@@ -110,6 +120,71 @@ def geologia_hub(request):
         request,
         "geologia/hub.html",
         construir_contexto_geologia_hub(empresa=empresa, contexto_geologia=contexto_geologia),
+    )
+
+
+@login_required
+@geologo_required
+def geologia_geologo_dashboard(request):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para aceder à geologia.")
+        return redirect("projetos:area_empregado")
+
+    empresa = empregado.empresa
+    furos_qs = obter_furos_geologia_hub_qs(empresa=empresa)
+    logs_qs = obter_logs_geologia_hub_qs(empresa=empresa)
+    missoes_qs = obter_missoes_geologia_hub_qs(empresa=empresa)
+    semaforo_furos, top_prioritarios, metadados_score = obter_semoforo_e_prioridades_furos_geologo(
+        empresa=empresa,
+        limite_top=5,
+    )
+
+    return render(
+        request,
+        "geologia/empregado_geologo_dashboard.html",
+        {
+            "empregado": empregado,
+            "empresa_geologia": empresa,
+            "furos": furos_qs[:12],
+            "logs_recentes": logs_qs[:8],
+            "missoes_recentes": missoes_qs[:6],
+            "total_furos": furos_qs.count(),
+            "total_logs": logs_qs.count(),
+            "total_missoes": missoes_qs.count(),
+            "semaforo_furos": semaforo_furos,
+            "top_furos_prioritarios": top_prioritarios,
+            "metadados_score": metadados_score,
+        },
+    )
+
+
+@login_required
+@encarregado_obra_required
+def geologia_encarregado_dashboard(request):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para aceder à geologia.")
+        return redirect("projetos:area_empregado")
+
+    empresa = empregado.empresa
+    furos_qs = obter_furos_geologia_hub_qs(empresa=empresa)
+    logs_qs = obter_logs_geologia_hub_qs(empresa=empresa)
+    missoes_qs = obter_missoes_geologia_hub_qs(empresa=empresa)
+
+    return render(
+        request,
+        "geologia/empregado_encarregado_dashboard.html",
+        {
+            "empregado": empregado,
+            "empresa_geologia": empresa,
+            "furos": furos_qs[:12],
+            "logs_recentes": logs_qs[:6],
+            "missoes_recentes": missoes_qs[:6],
+            "total_furos": furos_qs.count(),
+            "total_logs": logs_qs.count(),
+            "total_missoes": missoes_qs.count(),
+        },
     )
 
 
@@ -560,9 +635,9 @@ def api_drone_sf_estado(request, drone_id):
 
 
 @login_required
-@admin_required
+@geologia_operacional_required
 def furo_geologia_dashboard(request, furo_id):
-    empresa, _, resposta_erro = obter_empresa_admin_geologia(request)
+    empresa, _, resposta_erro = obter_empresa_geologia_operacional(request)
     if resposta_erro:
         return resposta_erro
 

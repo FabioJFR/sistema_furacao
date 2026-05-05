@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'projetos.apps.ProjetosConfig',
     'widget_tweaks',
-    'core',
+    'core.apps.CoreConfig',
     'plataforma',
     'website',
     'dispositivos',
@@ -178,6 +178,29 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = '/login/'  # website app
 LOGIN_REDIRECT_URL = '/app/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Upload Security
+UPLOAD_VIRUS_SCAN_ENABLED = env_bool("UPLOAD_VIRUS_SCAN_ENABLED", False)
+UPLOAD_VIRUS_SCAN_COMMAND = env("UPLOAD_VIRUS_SCAN_COMMAND", "clamscan")
+UPLOAD_VIRUS_SCAN_TIMEOUT_SECONDS = int(env("UPLOAD_VIRUS_SCAN_TIMEOUT_SECONDS", "15"))
+UPLOAD_MAX_IMAGE_MB = int(env("UPLOAD_MAX_IMAGE_MB", "8"))
+UPLOAD_MAX_FILE_MB = int(env("UPLOAD_MAX_FILE_MB", "25"))
+UPLOAD_IMAGE_SANITIZE_ENABLED = env_bool("UPLOAD_IMAGE_SANITIZE_ENABLED", True)
+UPLOAD_IMAGE_MAX_EDGE_PX = int(env("UPLOAD_IMAGE_MAX_EDGE_PX", "2560"))
+UPLOAD_IMAGE_JPEG_QUALITY = int(env("UPLOAD_IMAGE_JPEG_QUALITY", "82"))
+UPLOAD_IMAGE_OPTIMIZE = env_bool("UPLOAD_IMAGE_OPTIMIZE", True)
+UPLOAD_ALLOWED_IMAGE_EXTENSIONS = env_list(
+    "UPLOAD_ALLOWED_IMAGE_EXTENSIONS",
+    ".jpg,.jpeg,.png,.webp,.gif",
+)
+UPLOAD_ALLOWED_FILE_EXTENSIONS = env_list(
+    "UPLOAD_ALLOWED_FILE_EXTENSIONS",
+    ".pdf,.txt,.csv,.json,.geojson,.las,.obj,.dxf,.zip,.doc,.docx,.xls,.xlsx",
+)
+UPLOAD_BLOCKED_EXTENSIONS = env_list(
+    "UPLOAD_BLOCKED_EXTENSIONS",
+    ".exe,.dll,.bat,.cmd,.com,.scr,.msi,.ps1,.sh,.php,.phtml,.js,.jar,.apk,.bin",
+)
 
 EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env("DJANGO_EMAIL_HOST", "")

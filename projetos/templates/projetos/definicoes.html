@@ -108,5 +108,130 @@
         </button>
     </form>
 
+    {% if empresa_logo_visivel and empresa_atual %}
+    <section class="mt-8 space-y-4">
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+            <h3 class="font-bold text-indigo-900">🏷️ {% trans "Logotipo da Empresa" %}</h3>
+            <p class="text-sm text-indigo-800 mt-2">
+                {% trans "Define o logotipo oficial da tua empresa para aparecer nas áreas internas da plataforma." %}
+            </p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
+            {% csrf_token %}
+            <input type="hidden" name="form_scope" value="empresa_logo">
+            <input type="hidden" name="logo_action" value="upload">
+
+            {% if empresa_atual.logo %}
+                <div class="rounded-lg border border-gray-200 bg-white p-3 inline-flex">
+                    <img src="{{ empresa_atual.logo.url }}" alt="{% trans 'Logotipo atual da empresa' %}" class="max-h-20 object-contain">
+                </div>
+            {% else %}
+                <p class="text-sm text-gray-600">{% trans "Ainda não existe logotipo definido." %}</p>
+            {% endif %}
+
+            <div>
+                <label class="block font-semibold mb-1 text-gray-800" for="id_logo_empresa">{% trans "Escolher novo logotipo" %}</label>
+                <input id="id_logo_empresa" type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.gif" class="w-full p-2 border rounded bg-white">
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                    {% trans "Guardar logotipo" %}
+                </button>
+                {% if empresa_atual.logo %}
+                <button
+                    type="submit"
+                    name="logo_action"
+                    value="remover"
+                    class="bg-gray-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-800 transition"
+                >
+                    {% trans "Remover logotipo" %}
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    {% if geologia_score_form %}
+    <section class="mt-8 space-y-4">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <h3 class="font-bold text-amber-900">🧪 {% trans "Configuração Geologia (Score de Prioridade)" %}</h3>
+            <p class="text-sm text-amber-800 mt-2">
+                {% trans "Este painel define como a dashboard do geólogo ordena os furos mais urgentes. Quanto maior o peso, maior impacto no ranking de prioridade." %}
+            </p>
+            <ul class="text-sm text-amber-900 list-disc pl-5 mt-2 leading-6">
+                <li>{% trans "'Sem logs' e 'Conflito de intervalo' devem ter peso alto (riscos operacionais)." %}</li>
+                <li>{% trans "'Pendente validação' peso médio para acelerar revisão diária." %}</li>
+                <li>{% trans "'Sem anexo' peso baixo para não superar riscos críticos." %}</li>
+                <li>{% trans "A janela crítica (horas) deve ser maior do que a janela de atenção." %}</li>
+            </ul>
+            <div class="mt-4 text-sm text-amber-900 space-y-2">
+                <p><strong>{% trans "Exemplo 1 · Equilibrado (recomendado)" %}</strong>:
+                    {% trans "Sem logs=12, Conflito=9, Pendente=3, Sem anexo=1, 24h=4, 48h=7." %}
+                    {% trans "Resultado: mistura bem risco técnico e disciplina operacional." %}
+                </p>
+                <p><strong>{% trans "Exemplo 2 · Conservador (menos alarmes)" %}</strong>:
+                    {% trans "Sem logs=10, Conflito=7, Pendente=2, Sem anexo=1, 24h=2, 48h=4." %}
+                    {% trans "Diferença vs Equilibrado: reduz sensibilidade a atraso e pendências; menos furos entram no topo por motivos administrativos." %}
+                </p>
+                <p><strong>{% trans "Exemplo 3 · Crítico (operação intensa)" %}</strong>:
+                    {% trans "Sem logs=15, Conflito=12, Pendente=4, Sem anexo=2, 24h=6, 48h=10." %}
+                    {% trans "Diferença vs Equilibrado: aumenta muito a urgência de conflitos e furos sem atualização; o Top 5 muda mais rápido." %}
+                </p>
+                <p>
+                    <strong>{% trans "Como ler a diferença entre exemplos" %}</strong>:
+                    {% trans "Se subires um peso, esse fator ganha prioridade sobre os restantes. Ex.: subir 'Conflito intervalo' acima de 'Pendente validação' faz conflitos ultrapassarem pendências no ranking final." %}
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
+            {% csrf_token %}
+            <input type="hidden" name="form_scope" value="geologia_score">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: sem logs" %}</label>
+                    {{ geologia_score_form.sem_logs|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: conflito intervalo" %}</label>
+                    {{ geologia_score_form.conflito_intervalo|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: pendente validação" %}</label>
+                    {{ geologia_score_form.pendente_validacao|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: sem anexo" %}</label>
+                    {{ geologia_score_form.sem_anexo|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: sem atualização 24h+" %}</label>
+                    {{ geologia_score_form.sem_log_24h|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: sem atualização 48h+" %}</label>
+                    {{ geologia_score_form.sem_log_48h|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Janela atenção (horas)" %}</label>
+                    {{ geologia_score_form.janela_atencao_horas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Janela crítica (horas)" %}</label>
+                    {{ geologia_score_form.janela_critico_horas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition shadow">
+                🧪 {% trans "Guardar configuração geológica" %}
+            </button>
+        </form>
+    </section>
+    {% endif %}
+
 </section>
 {% endblock %}

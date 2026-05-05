@@ -1,0 +1,91 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Intervalos em conflito" %}{% endblock %}
+{% block page_title %}{% trans "Intervalos em conflito" %}{% endblock %}
+{% block page_description %}{% trans "Deteção de sobreposição de intervalos geológicos no mesmo furo." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if empresa_geologia.logo %}
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Conflitos de intervalos" %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">#</th>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Log A" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Log B" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Conflito" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Resolver" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in conflitos %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3 text-gray-500 font-semibold">{{ forloop.counter }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.projeto.nome }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ item.furo.nome }}</td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'geologia:log_detail' item.log_a.id %}" class="text-sky-700 font-semibold">
+                                {{ item.log_a.intervalo_de }}m - {{ item.log_a.intervalo_ate }}m
+                            </a>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'geologia:log_detail' item.log_b.id %}" class="text-sky-700 font-semibold">
+                                {{ item.log_b.intervalo_de }}m - {{ item.log_b.intervalo_ate }}m
+                            </a>
+                        </td>
+                        <td class="px-4 py-3 text-amber-700 font-semibold">
+                            {{ item.intervalo_conflito_de }}m - {{ item.intervalo_conflito_ate }}m
+                            <span class="relative inline-block ml-2 align-middle group">
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold cursor-help">!</span>
+                                <span class="pointer-events-none absolute left-1/2 -translate-x-1/2 mt-2 z-20 hidden group-hover:block w-80 rounded-lg border border-amber-200 bg-white p-3 text-xs text-gray-700 shadow-lg">
+                                    {% blocktrans with furo_nome=item.furo.nome de=item.intervalo_conflito_de ate=item.intervalo_conflito_ate %}
+                                        Existe sobreposição de intervalos no furo {{ furo_nome }} entre {{ de }}m e {{ ate }}m. Revê os valores dos dois logs e ajusta o intervalo para eliminar a interseção.
+                                    {% endblocktrans %}
+                                </span>
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a
+                                href="{% url 'geologia:resolver_intervalo_conflito' %}?furo={{ item.furo.id }}&de={{ item.intervalo_conflito_de }}&ate={{ item.intervalo_conflito_ate }}&log={{ item.log_a.id }}"
+                                class="inline-flex items-center rounded-md bg-amber-600 px-3 py-2 text-white text-xs font-semibold hover:bg-amber-700 transition"
+                            >
+                                {% trans "Resolver" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">{% trans "Sem conflitos de intervalos detetados." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

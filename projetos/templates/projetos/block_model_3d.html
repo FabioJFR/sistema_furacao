@@ -1,0 +1,338 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}3D · {{ item.nome }}{% endblock %}
+{% block page_title %}3D · {{ item.nome }}{% endblock %}
+{% block page_description %}{% trans "Visualização voxelizada do block model com filtros operacionais." %}{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+    #bmPlot .modebar {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        padding: 0 !important;
+    }
+    #bmPlot .modebar-group {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        margin: 0 !important;
+    }
+    #bmPlot .modebar-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 30px !important;
+        height: 30px !important;
+        padding: 0 !important;
+        border-radius: 8px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'projetos:block_model_detail' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Detalhe" %}</a>
+        <a href="{% url 'projetos:block_model_export_json' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Exportar JSON técnico" %}</a>
+        <a href="{% url 'projetos:block_model_export_csv' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Exportar CSV técnico" %}</a>
+        <a href="{% url 'projetos:block_model_list' %}" class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">{% trans "Lista" %}</a>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-4">
+        <label class="grid gap-1">
+            <span class="text-xs font-semibold text-slate-600 uppercase">{% trans "Cor por" %}</span>
+            <select id="bmColorBy" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+                <option value="litologia">{% trans "Litologia" %}</option>
+                <option value="dureza">{% trans "Dureza" %}</option>
+                <option value="teor">{% trans "Teor" %}</option>
+                <option value="densidade">{% trans "Densidade" %}</option>
+            </select>
+        </label>
+        <label class="grid gap-1">
+            <span class="text-xs font-semibold text-slate-600 uppercase">{% trans "Litologia" %}</span>
+            <select id="bmLitologia" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+                <option value="all">{% trans "Todas" %}</option>
+            </select>
+        </label>
+        <label class="grid gap-1">
+            <span class="text-xs font-semibold text-slate-600 uppercase">{% trans "Prof. min (Z)" %}</span>
+            <input id="bmZMin" type="number" step="0.1" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+        </label>
+        <label class="grid gap-1">
+            <span class="text-xs font-semibold text-slate-600 uppercase">{% trans "Prof. max (Z)" %}</span>
+            <input id="bmZMax" type="number" step="0.1" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+        </label>
+        <label class="grid gap-1">
+            <span class="text-xs font-semibold text-slate-600 uppercase">{% trans "Escala visual bloco" %}</span>
+            <input id="bmVisualScale" type="range" min="1" max="12" step="0.5" value="3" class="w-full">
+        </label>
+    </div>
+
+    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+        <input id="bmOnlyWithData" type="checkbox">
+        {% trans "Mostrar só blocos com dados" %}
+    </label>
+    <label class="inline-flex items-center gap-2 text-sm text-slate-700 ml-4">
+        <input id="bmShowFuros" type="checkbox" checked>
+        {% trans "Mostrar furos reais" %}
+    </label>
+    <label class="inline-flex items-center gap-2 text-sm text-slate-700 ml-4">
+        <input id="bmShowFuroLabels" type="checkbox">
+        {% trans "Mostrar labels dos furos" %}
+    </label>
+
+    <div id="bmResumo" class="text-sm text-slate-700"></div>
+    <div id="bmPlot" class="w-full rounded-xl border border-slate-200" style="height:680px; min-height:520px;"></div>
+</section>
+
+<script>
+(() => {
+    const rawData = {{ dados_json|safe }};
+    const resumo = {{ resumo_json|safe }};
+    const furos = {{ furos_json|safe }};
+    const plotEl = document.getElementById("bmPlot");
+    const colorByEl = document.getElementById("bmColorBy");
+    const litEl = document.getElementById("bmLitologia");
+    const zMinEl = document.getElementById("bmZMin");
+    const zMaxEl = document.getElementById("bmZMax");
+    const onlyDataEl = document.getElementById("bmOnlyWithData");
+    const showFurosEl = document.getElementById("bmShowFuros");
+    const showFuroLabelsEl = document.getElementById("bmShowFuroLabels");
+    const visualScaleEl = document.getElementById("bmVisualScale");
+    const resumoEl = document.getElementById("bmResumo");
+    const blocoX = Number("{{ item.tamanho_bloco_x|default:1 }}") || 1;
+    const blocoY = Number("{{ item.tamanho_bloco_y|default:1 }}") || 1;
+    const blocoZ = Number("{{ item.tamanho_bloco_z|default:1 }}") || 1;
+    const MAX_MESH_CELLS = 1200;
+    let lastCamera = null;
+
+    function colorByLit(lit) {
+        const key = String(lit || "default").toLowerCase();
+        const map = {
+            granito: "#b8afa6", quartzo: "#e9eef2", solo: "#8b5a2b", xisto: "#4b5563",
+            "xisto escuro": "#2f343a", "xisto claro": "#7c8591", argila: "#a65e4a",
+            minério: "#a9552b", minerio: "#a9552b", pirite: "#d4af37", jaspe: "#b7410e",
+            calcario: "#d9d2c3", calcário: "#d9d2c3", arenito: "#c9a66b", basalto: "#2f343a",
+        };
+        return map[key] || "#64748b";
+    }
+
+    function numericToColor(v, min, max) {
+        if (!Number.isFinite(v) || !Number.isFinite(min) || !Number.isFinite(max) || max <= min) return "#94a3b8";
+        const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
+        const r = Math.round(16 + t * 220);
+        const g = Math.round(90 + (1 - t) * 120);
+        const b = Math.round(180 - t * 120);
+        return `rgb(${r},${g},${b})`;
+    }
+
+    function cubeMeshFromCells(cells, colorFn, visualScale) {
+        const traces = [];
+        if (!cells.length) return traces;
+
+        if (cells.length > MAX_MESH_CELLS) {
+            const colors = cells.map(colorFn);
+            traces.push({
+                type: "scatter3d",
+                mode: "markers",
+                x: cells.map(d => d.centro_x),
+                y: cells.map(d => d.centro_y),
+                z: cells.map(d => d.centro_z),
+                marker: { size: 4.5, color: colors, opacity: 0.85, symbol: "square" },
+                text: cells.map(d => `Litologia: ${d.litologia || "default"}<br>Dureza: ${d.dureza_media ?? "-"}<br>Densidade: ${d.densidade ?? "-"}<br>Teor: ${d.teor ?? "-"}`),
+                hovertemplate: "%{text}<extra></extra>",
+                name: "Células (fallback)",
+            });
+            return traces;
+        }
+
+        cells.forEach((d, idx) => {
+            const cx = Number(d.centro_x), cy = Number(d.centro_y), cz = Number(d.centro_z);
+            if (![cx, cy, cz].every(Number.isFinite)) return;
+            const scale = Math.max(1, Number(visualScale) || 1);
+            const hx = (blocoX * scale) / 2.0;
+            const hy = (blocoY * scale) / 2.0;
+            const hz = (blocoZ * scale) / 2.0;
+            const x = [cx-hx, cx+hx, cx+hx, cx-hx, cx-hx, cx+hx, cx+hx, cx-hx];
+            const y = [cy-hy, cy-hy, cy+hy, cy+hy, cy-hy, cy-hy, cy+hy, cy+hy];
+            const z = [cz-hz, cz-hz, cz-hz, cz-hz, cz+hz, cz+hz, cz+hz, cz+hz];
+
+            traces.push({
+                type: "mesh3d",
+                x, y, z,
+                i: [0,0,0,1,1,2,4,4,5,0,0,3],
+                j: [1,2,4,2,5,3,5,6,6,1,4,2],
+                k: [2,4,1,5,2,6,6,7,2,5,7,7],
+                color: colorFn(d),
+                opacity: 0.75,
+                flatshading: true,
+                hovertemplate: `Litologia: ${d.litologia || "default"}<br>Dureza: ${d.dureza_media ?? "-"}<br>Densidade: ${d.densidade ?? "-"}<br>Teor: ${d.teor ?? "-"}<extra></extra>`,
+                name: idx === 0 ? "Células" : "",
+                showlegend: false,
+            });
+        });
+
+        return traces;
+    }
+
+    const litologias = Array.from(new Set(rawData.map(d => d.litologia || "default"))).sort();
+    litologias.forEach(l => {
+        const op = document.createElement("option");
+        op.value = l;
+        op.textContent = l;
+        litEl.appendChild(op);
+    });
+
+    const allZ = rawData.map(d => Number(d.centro_z)).filter(Number.isFinite);
+    const zMin = allZ.length ? Math.min(...allZ) : 0;
+    const zMax = allZ.length ? Math.max(...allZ) : 0;
+    zMinEl.value = zMin;
+    zMaxEl.value = zMax;
+
+    function render() {
+        const colorBy = colorByEl.value;
+        const litSel = litEl.value;
+        const minZ = Number(zMinEl.value);
+        const maxZ = Number(zMaxEl.value);
+        const onlyWithData = !!onlyDataEl.checked;
+        const visualScale = Number(visualScaleEl?.value || 1);
+
+        let data = rawData.filter(d => Number.isFinite(Number(d.centro_z)));
+        if (litSel !== "all") data = data.filter(d => (d.litologia || "default") === litSel);
+        data = data.filter(d => Number(d.centro_z) >= minZ && Number(d.centro_z) <= maxZ);
+        if (onlyWithData) data = data.filter(d => (d.dureza_media !== null) || (d.densidade !== null) || (d.teor !== null));
+
+        const numericValues = data.map(d => Number(d[colorBy])).filter(Number.isFinite);
+        const nMin = numericValues.length ? Math.min(...numericValues) : 0;
+        const nMax = numericValues.length ? Math.max(...numericValues) : 1;
+
+        const traces = [];
+        if (colorBy === "litologia") {
+            const byLit = {};
+            data.forEach((d) => {
+                const lit = d.litologia || "default";
+                if (!byLit[lit]) byLit[lit] = [];
+                byLit[lit].push(d);
+            });
+            Object.keys(byLit).sort().forEach((lit) => {
+                const chunk = byLit[lit];
+                const chunkTraces = cubeMeshFromCells(chunk, () => colorByLit(lit), visualScale);
+                if (!chunkTraces.length) return;
+                chunkTraces[0].name = `Litologia: ${lit}`;
+                chunkTraces[0].showlegend = true;
+                traces.push(...chunkTraces);
+            });
+        } else {
+            traces.push(...cubeMeshFromCells(data, (d) => numericToColor(Number(d[colorBy]), nMin, nMax), visualScale));
+        }
+
+        if (showFurosEl && showFurosEl.checked && Array.isArray(furos) && furos.length) {
+            const showLabels = showFuroLabelsEl ? !!showFuroLabelsEl.checked : true;
+            const furosComLabel = (() => {
+                const grouped = new Map();
+                furos.forEach((f) => {
+                    const nome = String(f?.nome || "").trim() || "Furo";
+                    const z = Number(f?.z);
+                    const atual = grouped.get(nome);
+                    if (!atual) {
+                        grouped.set(nome, f);
+                        return;
+                    }
+                    const atualZ = Number(atual?.z);
+                    if (!Number.isFinite(atualZ) || (Number.isFinite(z) && z > atualZ)) {
+                        grouped.set(nome, f);
+                    }
+                });
+                const labels = Array.from(grouped.values());
+                labels.sort((a, b) => (Number(b?.z) || 0) - (Number(a?.z) || 0));
+                const kept = [];
+                const minDist = 6; // metros em XY para reduzir sobreposição visual
+                labels.forEach((f) => {
+                    const fx = Number(f?.x) || 0;
+                    const fy = Number(f?.y) || 0;
+                    const tooClose = kept.some((k) => {
+                        const kx = Number(k?.x) || 0;
+                        const ky = Number(k?.y) || 0;
+                        const dx = fx - kx;
+                        const dy = fy - ky;
+                        return Math.sqrt((dx * dx) + (dy * dy)) < minDist;
+                    });
+                    if (!tooClose) kept.push(f);
+                });
+                return kept.slice(0, 20);
+            })();
+
+            traces.push({
+                type: "scatter3d",
+                mode: "markers",
+                x: furos.map(f => f.x),
+                y: furos.map(f => f.y),
+                z: furos.map(f => f.z),
+                marker: { size: 7.5, color: "#0f172a", symbol: "diamond", opacity: 0.95 },
+                customdata: furos.map(f => [f.profundidade_atual ?? 0]),
+                hovertemplate: "Furo: %{text}<br>Profundidade atual: %{customdata[0]}m<extra></extra>",
+                text: furos.map(f => f.nome),
+                name: "Furos",
+            });
+
+            if (showLabels && furosComLabel.length) {
+                traces.push({
+                    type: "scatter3d",
+                    mode: "text",
+                    x: furosComLabel.map(f => f.x),
+                    y: furosComLabel.map(f => f.y),
+                    z: furosComLabel.map(f => f.z),
+                    text: furosComLabel.map(f => f.nome),
+                    textposition: "top center",
+                    textfont: { size: 11, color: "#0f172a" },
+                    hoverinfo: "skip",
+                    showlegend: false,
+                    name: "Labels",
+                });
+            }
+        }
+
+        const layout = {
+            margin: { l: 0, r: 0, t: 10, b: 0 },
+            paper_bgcolor: "#ffffff",
+            scene: {
+                xaxis: { title: "X", backgroundcolor: "#f8fafc", gridcolor: "#e2e8f0" },
+                yaxis: { title: "Y", backgroundcolor: "#f8fafc", gridcolor: "#e2e8f0" },
+                zaxis: { title: "Z", backgroundcolor: "#f8fafc", gridcolor: "#e2e8f0" },
+            },
+            showlegend: true,
+            legend: { orientation: "h" },
+            uirevision: "block-model-3d",
+        };
+
+        if (lastCamera) {
+            layout.scene.camera = lastCamera;
+        }
+
+        Plotly.react(plotEl, traces, layout, { responsive: true, displaylogo: false });
+
+        const litCount = Array.from(new Set(data.map(d => d.litologia || "default"))).length;
+        const vol = resumo.volume_estimado_m3 ?? "-";
+        resumoEl.textContent = `Blocos visíveis: ${data.length} · Litologias visíveis: ${litCount} · Volume estimado: ${vol} m³`;
+    }
+
+    [colorByEl, litEl, zMinEl, zMaxEl, onlyDataEl, showFurosEl, showFuroLabelsEl, visualScaleEl].forEach(el => el.addEventListener("input", render));
+    plotEl.on("plotly_relayout", (eventData) => {
+        if (eventData && eventData["scene.camera"]) {
+            lastCamera = eventData["scene.camera"];
+        }
+    });
+    render();
+})();
+</script>
+{% endblock %}

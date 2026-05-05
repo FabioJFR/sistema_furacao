@@ -1,12 +1,14 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Q
 
 from django.urls import reverse
 
+from core.permissions import user_is_encarregado_obra, user_is_geologo
 from projetos.models import (
     Empregados,
     Projeto,
@@ -65,9 +67,12 @@ from projetos.selectors.empregados import (
     obter_resumo_registos_projetos_empregado,
     obter_trabalhadores_envolvidos_projeto_empregado,
     obter_contexto_materiais_disponiveis_empregado,
+    obter_medias_operacionais_empregado,
+    obter_avarias_empregado,
 )
 from projetos.services.empregados import (
     construir_resumo_registos_projeto_empregado,
+    criar_utilizador_para_empregado,
     garantir_individual_para_user,
     processar_acao_pendente_empregado,
     processar_fluxo_apagar_empregado_admin,
@@ -331,7 +336,7 @@ def empregado_detail(request, pk, slug):
         logger.warning("Acesso bloqueado na view empregado_detail. user_id=%s", request.user.id)
         return resposta_erro
 
-    empregado = obter_empregado_pendente_admin_por_pk(pk, empresa)
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
     if slug != empregado.slug_url:
         return redirect(empregado)
 
@@ -341,10 +346,72 @@ def empregado_detail(request, pk, slug):
         empresa.id,
         empregado.id,
     )
+    medias_operacionais = obter_medias_operacionais_empregado(empregado, empresa=empresa)
+    avarias_contexto = obter_avarias_empregado(empregado, empresa=empresa)
+
     return render(request, "projetos/empregado_detail.html", {
         "empregado": empregado,
         "page_title": f"Empregado · {empregado.nome}",
+        "medias_operacionais": medias_operacionais,
+        **avarias_contexto,
     })
+
+
+@login_required
+@admin_required
+def empregado_ligar_utilizador(request, pk):
+    logger.info(
+        "Entrada na view empregado_ligar_utilizador. user_id=%s, username='%s', empregado_pk=%s, method=%s",
+        request.user.id,
+        request.user.username,
+        pk,
+        request.method,
+    )
+    empresa, resposta_erro = _obter_empresa_admin_empregados(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view empregado_ligar_utilizador. user_id=%s", request.user.id)
+        return resposta_erro
+
+    empregado = obter_empregado_admin_por_pk(pk, empresa)
+
+    resposta_post = _require_post_or_redirect(request, empregado)
+    if resposta_post:
+        return resposta_post
+
+    try:
+        empregado = criar_utilizador_para_empregado(empregado, empresa=empresa)
+        logger.info(
+            "Utilizador criado e ligado ao empregado com sucesso. admin_user_id=%s, empresa_id=%s, empregado_id=%s, novo_username='%s'",
+            request.user.id,
+            empresa.id,
+            empregado.id,
+            empregado.user.username if empregado.user else "",
+        )
+        messages.success(
+            request,
+            f"Utilizador '{empregado.user.username}' criado e ligado com sucesso. Palavra-passe temporária: 123456",
+        )
+    except ValidationError as exc:
+        logger.warning(
+            "Falha de validação em empregado_ligar_utilizador. admin_user_id=%s, empresa_id=%s, empregado_id=%s, erro=%s",
+            request.user.id,
+            empresa.id,
+            empregado.id,
+            exc,
+        )
+        mensagem = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
+        messages.error(request, mensagem or "Não foi possível criar/ligar o utilizador.")
+    except Exception as exc:  # pragma: no cover - segurança defensiva
+        logger.exception(
+            "Erro inesperado em empregado_ligar_utilizador. admin_user_id=%s, empresa_id=%s, empregado_id=%s, erro=%s",
+            request.user.id,
+            empresa.id,
+            empregado.id,
+            exc,
+        )
+        messages.error(request, "Erro inesperado ao criar/ligar utilizador.")
+
+    return redirect(empregado)
 
 
 @login_required
@@ -842,7 +909,8 @@ def furo_detail_empregado(request, pk):
         return resposta_erro
 
     furo = obter_furo_empregado(pk=pk, empregado=empregado)
-    if not furo or not empregado_tem_acesso_furo(empregado, furo):
+    geologia_pode_ver = bool(furo) and (user_is_geologo(request.user) or user_is_encarregado_obra(request.user))
+    if not furo or (not geologia_pode_ver and not empregado_tem_acesso_furo(empregado, furo)):
         logger.warning(
             "Empregado sem permissão para furo_detail_empregado. user_id=%s, empregado_id=%s, furo_id=%s",
             request.user.id,
@@ -896,9 +964,13 @@ def furo_3d_empregado(request, pk):
             "Empregado sem permissão para furo_3d_empregado. user_id=%s, empregado_id=%s, furo_id=%s",
             request.user.id,
             empregado.id,
-            furo.id,
+            getattr(furo, "id", None),
         )
         messages.error(request, "Não tens permissão para ver o 3D deste furo.")
+        if user_is_geologo(request.user):
+            return redirect("geologia:empregado_geologo_dashboard")
+        if user_is_encarregado_obra(request.user):
+            return redirect("geologia:empregado_encarregado_dashboard")
         return redirect("projetos:meus_furos_empregado")
 
     logger.info(
@@ -923,7 +995,31 @@ def medicao_list_empregado(request):
         logger.warning("Acesso bloqueado na view medicao_list_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
-    medicoes = obter_lista_medicoes_empregado(empregado)
+    filtro_furo = (request.GET.get("furo") or "").strip()
+    filtro_nome = (request.GET.get("nome") or "").strip()
+    filtro_projeto = (request.GET.get("projeto") or "").strip()
+    filtro_profundidade_min = (request.GET.get("profundidade_min") or "").strip()
+    filtro_profundidade_max = (request.GET.get("profundidade_max") or "").strip()
+
+    medicoes = obter_lista_medicoes_empregado(
+        empregado,
+        furo_id=filtro_furo or None,
+        nome_furo=filtro_nome or None,
+        projeto_id=filtro_projeto or None,
+        profundidade_min=filtro_profundidade_min or None,
+        profundidade_max=filtro_profundidade_max or None,
+    )
+
+    if user_is_geologo(request.user):
+        furos_filtro = (
+            Furo.objects.filter(empresa=empregado.empresa)
+            .select_related("projeto")
+            .order_by("nome")
+        )
+        projetos_filtro = Projeto.objects.filter(empresa=empregado.empresa).order_by("nome")
+    else:
+        furos_filtro = obter_lista_furos_empregado(empregado)
+        projetos_filtro = obter_lista_projetos_empregado(empregado)
 
     logger.info(
         "View medicao_list_empregado carregada com sucesso. user_id=%s, empregado_id=%s, total_medicoes=%s",
@@ -935,6 +1031,15 @@ def medicao_list_empregado(request):
         "empregado": empregado,
         "medicoes": medicoes,
         "titulo": "Minhas Medições",
+        "furos_filtro": furos_filtro,
+        "projetos_filtro": projetos_filtro,
+        "filtros": {
+            "furo": filtro_furo,
+            "nome": filtro_nome,
+            "projeto": filtro_projeto,
+            "profundidade_min": filtro_profundidade_min,
+            "profundidade_max": filtro_profundidade_max,
+        },
     })
 
 
@@ -1082,6 +1187,15 @@ def area_empregado(request):
         logger.warning("Acesso bloqueado na view area_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
+    # Geólogo tem dashboard própria; evitamos cair na área genérica.
+    if user_is_geologo(request.user):
+        logger.info(
+            "Redirecionar geologo para dashboard geológica em area_empregado. user_id=%s, empregado_id=%s",
+            request.user.id,
+            getattr(empregado, "id", None),
+        )
+        return redirect("geologia:empregado_geologo_dashboard")
+
     contexto_empregado = obter_contexto_area_empregado(empregado, empresa=empregado.empresa)
     contexto_empregado["configuracoes_perfuracao"] = obter_lista_configuracoes_perfuracao_empregado(
         empregado,
@@ -1132,7 +1246,14 @@ def redirect_after_login(request):
         if perfil.tipo_acesso in ["empresa_admin", "empresa_gestor"]:
             return redirect(reverse("projetos:dashboard"))
 
-        if perfil.tipo_acesso in ["empregado", "individual"]:
+        if perfil.tipo_acesso == "individual":
+            return redirect(reverse("projetos:area_empregado"))
+
+        if perfil.tipo_acesso == "empregado":
+            if user_is_geologo(request.user):
+                return redirect(reverse("geologia:empregado_geologo_dashboard"))
+            if user_is_encarregado_obra(request.user):
+                return redirect(reverse("geologia:empregado_encarregado_dashboard"))
             return redirect(reverse("projetos:area_empregado"))
 
     empregado = _resolver_empregado_por_user_ou_email(request.user)
@@ -1166,6 +1287,22 @@ def redirect_after_login(request):
         )
 
     if empregado and empregado.aprovado and empregado.empresa_id:
+        if user_is_geologo(request.user):
+            logger.info(
+                "Redirect para dashboard de geologo. user_id=%s, empregado_id=%s",
+                request.user.id,
+                empregado.id,
+            )
+            return redirect(reverse("geologia:empregado_geologo_dashboard"))
+
+        if user_is_encarregado_obra(request.user):
+            logger.info(
+                "Redirect para dashboard de encarregado de obra. user_id=%s, empregado_id=%s",
+                request.user.id,
+                empregado.id,
+            )
+            return redirect(reverse("geologia:empregado_encarregado_dashboard"))
+
         logger.info(
             "Fallback via Empregados em redirect_after_login. user_id=%s, empregado_id=%s, empresa_id=%s",
             request.user.id,

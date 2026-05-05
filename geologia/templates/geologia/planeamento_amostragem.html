@@ -1,0 +1,87 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Planeamento de amostragem" %}{% endblock %}
+{% block page_title %}{% trans "Planeamento de amostragem" %}{% endblock %}
+{% block page_description %}{% trans "Sugestão rápida de próximos intervalos geológicos por furo." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if empresa_geologia.logo %}
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-end gap-3 justify-between">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Próximos intervalos sugeridos" %}</h2>
+            <form method="get" class="flex items-end gap-2">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Intervalo padrão (m)" %}</label>
+                    <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        name="intervalo"
+                        value="{{ intervalo_padrao }}"
+                        class="rounded-lg border-gray-300"
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary">{% trans "Atualizar" %}</button>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Profundidade atual" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Último intervalo com log" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Próximo intervalo sugerido" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in linhas %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3 text-gray-700">{{ item.projeto.nome }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ item.furo.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.profundidade_atual }} m</td>
+                        <td class="px-4 py-3 text-gray-700">
+                            {% if item.ultimo_log %}
+                                {{ item.ultimo_log.intervalo_de }} m - {{ item.ultimo_log.intervalo_ate }} m
+                            {% else %}
+                                {% trans "Sem logs ainda" %}
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.inicio_sugerido }} m - {{ item.fim_sugerido }} m</td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'geologia:furo_dashboard' item.furo.id %}" class="text-sky-700 font-semibold">{% trans "Abrir geologia" %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">{% trans "Sem furos disponíveis para planeamento." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

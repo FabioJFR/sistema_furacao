@@ -23,3 +23,14 @@ from .maquina_avaria import *
 from .medicao import *
 from .despesa import *
 from .sugestao import SugestaoPlataformaForm
+from .cliente_contrato import ClienteContratoForm
+from .planeamento_turno import PlaneamentoTurnoForm
+from .assiduidade_registo import AssiduidadeRegistoForm
+from .gestao import (
+    PedidoCompraForm,
+    NotificacaoGestaoForm,
+    ChecklistHSEForm,
+    IncidenteSegurancaForm,
+    RelatorioExecutivoEmailForm,
+    AgendamentoRelatorioExecutivoForm,
+)

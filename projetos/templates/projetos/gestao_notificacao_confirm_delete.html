@@ -1,0 +1,18 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar notificação" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <h1>{% trans "Apagar notificação" %}</h1>
+    <p class="sf-muted-text mt-2">
+        {% blocktrans with titulo=item.titulo %}Tens a certeza que queres apagar a notificação "{{ titulo }}"?{% endblocktrans %}
+    </p>
+    <form method="post" class="mt-5 flex items-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Confirmar apagar" %}</button>
+        <a href="{% url 'projetos:gestao_notificacoes' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </form>
+</section>
+{% endblock %}

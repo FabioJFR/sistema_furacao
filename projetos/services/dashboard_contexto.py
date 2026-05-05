@@ -157,7 +157,7 @@ def montar_contexto_dashboard(*, request, contexto_admin, incluir_mapa=False):
 
         context = {
             "filtros": {
-                "periodo": request.GET.get("periodo", "30_dias"),
+                "periodo": request.GET.get("periodo", "total"),
                 "data_inicio": request.GET.get("data_inicio", ""),
                 "data_fim": request.GET.get("data_fim", ""),
                 "projeto": request.GET.get("projeto", ""),

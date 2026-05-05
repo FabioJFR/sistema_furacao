@@ -12,6 +12,21 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-6 py-8">
+    {% if furo and furo.empresa %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if furo.empresa.logo %}
+            <img
+                src="{{ furo.empresa.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ furo.empresa.nome_comercial|default:furo.empresa.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
     <form method="post" enctype="multipart/form-data" class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-6" data-geologia-log-form>
         {% csrf_token %}
         {% if form.non_field_errors %}
@@ -34,6 +49,11 @@
 
         <div class="flex flex-wrap gap-3 pt-2">
             <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">{% trans "Guardar log" %}</button>
+            {% if log %}
+                <a href="{% url 'geologia:log_detail' log.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Voltar" %}</a>
+            {% else %}
+                <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Voltar" %}</a>
+            {% endif %}
         </div>
     </form>
 </div>

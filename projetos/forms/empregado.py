@@ -14,7 +14,6 @@ from ..selectors.forms import (
     listar_empresas_por_nome,
     listar_furos_empresa_qs,
     listar_projetos_empresa_qs,
-    listar_users_disponiveis_para_empregado,
     resolver_empresa_id,
 )
 
@@ -353,10 +352,15 @@ class EmpregadoCreateForm(forms.ModelForm):
 
 
 class EmpregadoUpdateForm(BaseEmpregadoForm):
+    aplicar_salario_base_funcao = forms.BooleanField(
+        required=False,
+        label="Atualizar salário pelo salário base da função",
+        help_text="Se ativo, ao guardar será aplicado o salário base configurado para a função selecionada.",
+    )
+
     class Meta:
         model = Empregados
         fields = [
-            "user",
             "furos",
             "nome",
             "funcao",
@@ -383,7 +387,6 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
             "alertas",
         ]
         widgets = {
-            "user": forms.Select(attrs={"class": "form-control"}),
             "furos": forms.SelectMultiple(attrs={"class": "form-control"}),
             "nome": forms.TextInput(attrs={"class": "form-control"}),
             "funcao": forms.Select(attrs={"class": "form-control"}),
@@ -415,11 +418,8 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
 
         alertas_valor = self.initial.get("alertas", self.instance.alertas if self.instance.pk else [])
         self.fields["alertas"].initial = json.dumps(alertas_valor, ensure_ascii=False, indent=2)
-
-        if "user" in self.fields:
-            self.fields["user"].queryset = listar_users_disponiveis_para_empregado(
-                empregado_pk=self.instance.pk if self.instance.pk else None
-            )
+        if "aplicar_salario_base_funcao" in self.fields:
+            self.fields["aplicar_salario_base_funcao"].initial = False
 
     def clean_email(self):
         email = self.cleaned_data.get("email")

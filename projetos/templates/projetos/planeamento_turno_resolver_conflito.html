@@ -1,0 +1,85 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Resolver Conflito de Planeamento" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{% trans "Resolver Conflito de Planeamento" %}</h1>
+            {% if existe_sobreposicao %}
+            <p class="sf-muted-text">
+                {% blocktrans with ini=conflito_inicio|date:"d/m/Y" fim=conflito_fim|date:"d/m/Y" %}
+                Sobreposição detetada entre {{ ini }} e {{ fim }}.
+                {% endblocktrans %}
+            </p>
+            {% else %}
+            <p class="sf-muted-text">{% trans "Sem sobreposição direta neste momento (pode ter sido corrigido)." %}</p>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+            <form method="post" onsubmit="return confirm('{% trans "Confirmas a resolução automática deste conflito?" %}');">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="auto_resolver" />
+                <button type="submit" class="btn btn-primary">{% trans "Resolver automaticamente" %}</button>
+            </form>
+            <a href="{% url 'projetos:planeamento_turno_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 class="text-lg font-semibold text-slate-800">{% trans "Planeamento A" %}</h2>
+            <p class="text-slate-700 mt-2"><strong>{% trans "Projeto" %}:</strong> {{ item_a.projeto.nome }}</p>
+            <p class="text-slate-700"><strong>{% trans "Furo" %}:</strong> {{ item_a.furo.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Empregado" %}:</strong> {{ item_a.empregado.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Máquina" %}:</strong> {{ item_a.maquina.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Período" %}:</strong> {{ item_a.data_inicio|date:"d/m/Y" }}{% if item_a.data_fim %} → {{ item_a.data_fim|date:"d/m/Y" }}{% endif %}</p>
+            <p class="text-slate-700"><strong>{% trans "Turno" %}:</strong> {{ item_a.get_turno_display }}</p>
+            <p class="text-slate-700"><strong>{% trans "Estado" %}:</strong> {{ item_a.get_estado_display }}</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{% url 'projetos:planeamento_turno_update' item_a.pk %}" class="btn btn-secondary">{% trans "Editar A" %}</a>
+                <form method="post" class="inline-flex">
+                    {% csrf_token %}
+                    <input type="hidden" name="alvo" value="a" />
+                    <input type="hidden" name="estado" value="confirmado" />
+                    <button type="submit" class="btn btn-primary">{% trans "Confirmar A" %}</button>
+                </form>
+                <form method="post" class="inline-flex">
+                    {% csrf_token %}
+                    <input type="hidden" name="alvo" value="a" />
+                    <input type="hidden" name="estado" value="cancelado" />
+                    <button type="submit" class="btn btn-danger">{% trans "Cancelar A" %}</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 class="text-lg font-semibold text-slate-800">{% trans "Planeamento B" %}</h2>
+            <p class="text-slate-700 mt-2"><strong>{% trans "Projeto" %}:</strong> {{ item_b.projeto.nome }}</p>
+            <p class="text-slate-700"><strong>{% trans "Furo" %}:</strong> {{ item_b.furo.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Empregado" %}:</strong> {{ item_b.empregado.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Máquina" %}:</strong> {{ item_b.maquina.nome|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Período" %}:</strong> {{ item_b.data_inicio|date:"d/m/Y" }}{% if item_b.data_fim %} → {{ item_b.data_fim|date:"d/m/Y" }}{% endif %}</p>
+            <p class="text-slate-700"><strong>{% trans "Turno" %}:</strong> {{ item_b.get_turno_display }}</p>
+            <p class="text-slate-700"><strong>{% trans "Estado" %}:</strong> {{ item_b.get_estado_display }}</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{% url 'projetos:planeamento_turno_update' item_b.pk %}" class="btn btn-secondary">{% trans "Editar B" %}</a>
+                <form method="post" class="inline-flex">
+                    {% csrf_token %}
+                    <input type="hidden" name="alvo" value="b" />
+                    <input type="hidden" name="estado" value="confirmado" />
+                    <button type="submit" class="btn btn-primary">{% trans "Confirmar B" %}</button>
+                </form>
+                <form method="post" class="inline-flex">
+                    {% csrf_token %}
+                    <input type="hidden" name="alvo" value="b" />
+                    <input type="hidden" name="estado" value="cancelado" />
+                    <button type="submit" class="btn btn-danger">{% trans "Cancelar B" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

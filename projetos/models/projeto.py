@@ -38,6 +38,15 @@ class Projeto(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ativo')
     notas = models.TextField(blank=True)
+    custo_por_metro_cliente_override = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Se definido, este valor substitui o custo por metro global da empresa para este projeto.",
+    )
+    outros_valores_gastos_associados = models.FloatField(
+        default=0.0,
+        help_text="Outros custos associados especificamente a este projeto.",
+    )
 
     def __str__(self):
         return self.nome or "Projeto sem nome"
@@ -97,6 +106,15 @@ class Projeto(models.Model):
         if self.localizacao_lon is not None and not (-180 <= self.localizacao_lon <= 180):
             raise ValidationError({
                 "localizacao_lon": "Longitude inválida."
+            })
+
+        if self.custo_por_metro_cliente_override is not None and self.custo_por_metro_cliente_override < 0:
+            raise ValidationError({
+                "custo_por_metro_cliente_override": "O custo por metro do projeto não pode ser negativo."
+            })
+        if self.outros_valores_gastos_associados is not None and self.outros_valores_gastos_associados < 0:
+            raise ValidationError({
+                "outros_valores_gastos_associados": "Outros valores gastos associados do projeto não podem ser negativos."
             })
 
     def save(self, *args, **kwargs):

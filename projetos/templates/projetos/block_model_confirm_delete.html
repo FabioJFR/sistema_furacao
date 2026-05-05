@@ -1,0 +1,22 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar Block Model" %}{% endblock %}
+{% block page_title %}{% trans "Apagar Block Model" %}{% endblock %}
+
+{% block content %}
+<section class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 max-w-2xl">
+    <p class="text-sm text-slate-700">
+        {% blocktrans with nome=item.nome %}Tens a certeza que queres apagar o block model "{{ nome }}"?{% endblocktrans %}
+    </p>
+    <form method="post" class="flex gap-2">
+        {% csrf_token %}
+        <button type="submit" class="inline-flex items-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 transition">
+            {% trans "Confirmar apagar" %}
+        </button>
+        <a href="{% url 'projetos:block_model_detail' item.pk %}" class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">
+            {% trans "Cancelar" %}
+        </a>
+    </form>
+</section>
+{% endblock %}

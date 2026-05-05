@@ -6,6 +6,12 @@ from django.utils import timezone
 
 
 class LogGeologicoFuro(models.Model):
+    STATUS_VALIDACAO_CHOICES = [
+        ("pendente", "Pendente"),
+        ("aprovado", "Aprovado"),
+        ("rejeitado", "Rejeitado"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     empresa = models.ForeignKey(
         "plataforma.Empresa",
@@ -49,6 +55,20 @@ class LogGeologicoFuro(models.Model):
     observacoes = models.TextField(blank=True)
     imagem_referencia = models.ImageField(upload_to="geologia/logging/imagens/", blank=True, null=True)
     metadados = models.JSONField(default=dict, blank=True)
+    status_validacao = models.CharField(
+        max_length=20,
+        choices=STATUS_VALIDACAO_CHOICES,
+        default="pendente",
+    )
+    validado_por = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="logs_geologicos_validados",
+    )
+    validado_em = models.DateTimeField(null=True, blank=True)
+    observacao_validacao = models.CharField(max_length=255, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -162,4 +182,3 @@ class AnexoLogGeologico(models.Model):
             self.titulo = f"{self.get_tipo_display()} - {self.log.intervalo_de:.2f}m"
         self.full_clean()
         super().save(*args, **kwargs)
-

@@ -73,7 +73,14 @@
                 </p>
 
                 <p><strong>{% trans "Data de aprovação:" %}</strong> {{ empregado.data_aprovacao|default:"-" }}</p>
-                <p><strong>{% trans "Nome de utilizador:" %}</strong> {{ username_gerado|default:"-" }}</p>
+                <p>
+                    <strong>{% trans "Nome de utilizador:" %}</strong>
+                    {% if empregado.user and empregado.user.username %}
+                        {{ empregado.user.username }}
+                    {% else %}
+                        {{ username_gerado|default_if_none:"-" }}
+                    {% endif %}
+                </p>
                 <p><strong>{% trans "Ligado a utilizador:" %}</strong> {% if empregado.user %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
             </div>
 
@@ -84,6 +91,17 @@
                     {% trans "Se precisares de entregar novo acesso ao empregado, o mais seguro é redefinir a palavra-passe no utilizador associado." %}
                 </p>
             </div>
+            {% if not empregado.user %}
+            <div class="mt-4">
+                <form method="post" action="{% url 'projetos:empregado_ligar_utilizador' empregado.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
+                        👤 {% trans "Criar/Ligar utilizador" %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
         </div>
 
         <!-- DADOS DO EMPREGADO -->
@@ -94,8 +112,84 @@
             <p><strong>{% trans "Idade:" %}</strong> {{ empregado.idade|default:"-" }}</p>
             <p><strong>{% trans "Nacionalidade:" %}</strong> {{ empregado.nacionalidade|default:"-" }}</p>
             <p><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</p>
-            <p><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default:"-" }}</p>
-            <p><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default:"-" }}</p>
+            <p><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default_if_none:"-" }}</p>
+            <p><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default_if_none:"-" }}</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Médias Operacionais" %}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
+                <p><strong>{% trans "Média de metros por dia:" %}</strong> {{ medias_operacionais.media_metros_por_dia }} m</p>
+                <p><strong>{% trans "Média de metros por furo:" %}</strong> {{ medias_operacionais.media_metros_por_furo }} m</p>
+                <p><strong>{% trans "Média de metros por projeto:" %}</strong> {{ medias_operacionais.media_metros_por_projeto }} m</p>
+                <p><strong>{% trans "Média de horas por dia:" %}</strong> {{ medias_operacionais.media_horas_por_dia }} h</p>
+                <p><strong>{% trans "Média de horas semanais:" %}</strong> {{ medias_operacionais.media_horas_semanais }} h</p>
+                <p><strong>{% trans "Média de horas mensais:" %}</strong> {{ medias_operacionais.media_horas_mensais }} h</p>
+                <p><strong>{% trans "Média de horas anuais:" %}</strong> {{ medias_operacionais.media_horas_anuais }} h</p>
+                <p><strong>{% trans "Dias com registo:" %}</strong> {{ medias_operacionais.dias_com_registo }}</p>
+                <p><strong>{% trans "Furos com registo:" %}</strong> {{ medias_operacionais.furos_com_registo }}</p>
+                <p><strong>{% trans "Projetos com registo:" %}</strong> {{ medias_operacionais.projetos_com_registo }}</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Avarias e Reparações" %}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-700 mb-4">
+                <p><strong>{% trans "Total atribuídas:" %}</strong> {{ total_avarias_atribuidas }}</p>
+                <p><strong>{% trans "Em aberto/reparação:" %}</strong> {{ total_avarias_abertas }}</p>
+                <p><strong>{% trans "Resolvidas:" %}</strong> {{ total_avarias_resolvidas }}</p>
+            </div>
+
+            {% if avarias_atribuidas %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Máquina" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Projeto/Furo" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Descrição" %}</th>
+                                <th class="text-left px-4 py-3">{% trans "Solução" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for avaria in avarias_atribuidas %}
+                                <tr class="border-t border-gray-200">
+                                    <td class="px-4 py-3 text-gray-700">
+                                        {{ avaria.data_inicio|date:"d/m/Y H:i" }}
+                                    </td>
+                                    <td class="px-4 py-3 font-medium text-gray-800">
+                                        {{ avaria.maquina.nome|default:"-" }}
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-700">
+                                        {{ avaria.projeto.nome|default:"-" }}{% if avaria.furo %} / {{ avaria.furo.nome }}{% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        {% if avaria.status == "resolvida" %}
+                                            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                                {% trans "Resolvida" %}
+                                            </span>
+                                        {% elif avaria.status == "em_reparacao" %}
+                                            <span class="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                                {% trans "Em reparação" %}
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-block bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                                {% trans "Aberta" %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-700">{{ avaria.descricao|default:"-" }}</td>
+                                    <td class="px-4 py-3 text-gray-700">{{ avaria.solucao|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-gray-500">{% trans "Este empregado ainda não tem avarias atribuídas para reparação." %}</p>
+            {% endif %}
         </div>
 
         <!-- PROJETOS ATUAIS -->

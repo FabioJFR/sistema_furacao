@@ -1,0 +1,18 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar Planeamento" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <h1>{% trans "Apagar Planeamento" %}</h1>
+    <p class="sf-muted-text mt-2">
+        {% blocktrans with data=item.data_inicio|date:"d/m/Y" turno=item.get_turno_display %}Tens a certeza que queres apagar o planeamento de {{ data }} ({{ turno }})?{% endblocktrans %}
+    </p>
+    <form method="post" class="mt-5 flex items-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Confirmar apagar" %}</button>
+        <a href="{% url 'projetos:planeamento_turno_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </form>
+</section>
+{% endblock %}

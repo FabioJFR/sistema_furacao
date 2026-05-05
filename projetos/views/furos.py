@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from core.permissions import user_is_empresa_admin
 from core.permissions import user_is_global_admin
+from core.permissions import user_is_geologo, user_is_encarregado_obra
 from ..decorators import admin_required, empregado_required
 from projetos.selectors.furos import (
     empregado_trabalhou_no_furo,
@@ -420,6 +421,10 @@ def furo_3d_geologico(request, furo_id=None, pk=None, slug=None):
     if acesso["sem_permissao"]:
         logger.warning("Empregado sem permissão para furo_3d_geologico. user_id=%s, furo_id=%s", request.user.id, furo_id)
         messages.error(request, "Não tens permissão para ver o 3D deste furo.")
+        if user_is_geologo(request.user):
+            return redirect("geologia:empregado_geologo_dashboard")
+        if user_is_encarregado_obra(request.user):
+            return redirect("geologia:empregado_encarregado_dashboard")
         return redirect("projetos:area_empregado")
     furo = acesso["furo"]
 

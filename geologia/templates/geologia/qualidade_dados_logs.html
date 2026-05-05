@@ -1,0 +1,63 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Qualidade de dados" %}{% endblock %}
+{% block page_title %}{% trans "Qualidade de dados geológicos" %}{% endblock %}
+{% block page_description %}{% trans "Validações rápidas de consistência dos logs geológicos." %}{% endblock %}
+{% block page_actions %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Logs com pendências de qualidade" %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Intervalo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Problemas" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in linhas %}
+                    <tr class="border-t border-gray-100 align-top">
+                        <td class="px-4 py-3 text-gray-700">{{ item.log.data_registo|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.projeto.nome }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ item.furo.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.log.intervalo_de }} m - {{ item.log.intervalo_ate }} m</td>
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap gap-2">
+                                {% for problema in item.problemas %}
+                                <span class="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800">{{ problema }}</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'geologia:log_detail' item.log.id %}" class="text-sky-700 font-semibold">{% trans "Abrir log" %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">{% trans "Sem pendências de qualidade neste momento." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

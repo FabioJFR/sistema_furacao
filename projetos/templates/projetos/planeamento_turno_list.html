@@ -1,0 +1,178 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Planeamento" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{% trans "Planeamento de Turnos" %}</h1>
+            <p class="sf-muted-text">{% trans "Organiza operação diária por projeto, furo, equipa e máquina." %}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+            <a href="{% url 'projetos:planeamento_turno_create' %}" class="btn btn-primary">{% trans "Novo Planeamento" %}</a>
+        </div>
+    </div>
+
+    <div class="mt-6 overflow-auto rounded-xl border border-slate-200 bg-white">
+        <form method="get" class="p-4 grid grid-cols-1 md:grid-cols-12 gap-3 border-b border-slate-100">
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado" %}</label>
+                <select name="estado" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in estado_choices %}
+                    <option value="{{ value }}" {% if filtros.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Turno" %}</label>
+                <select name="turno" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in turno_choices %}
+                    <option value="{{ value }}" {% if filtros.turno == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Data início" %}</label>
+                <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800" />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Data fim" %}</label>
+                <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800" />
+            </div>
+            <div class="md:col-span-2 flex items-end gap-2">
+                <button type="submit" class="btn btn-primary whitespace-nowrap break-normal">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:planeamento_turno_list' %}" class="btn btn-light whitespace-nowrap break-normal">{% trans "Limpar" %}</a>
+            </div>
+        </form>
+
+        <div class="p-4 border-b border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <div class="text-xs text-amber-700">{% trans "Conflitos detetados" %}</div>
+                <div class="text-lg font-semibold text-amber-800">{{ conflitos|length }}</div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="text-xs text-slate-500">{% trans "Planeamentos visíveis" %}</div>
+                <div class="text-lg font-semibold text-slate-800">{{ items|length }}</div>
+            </div>
+        </div>
+
+        <table class="w-full min-w-[1100px] text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-left">{% trans "Data início" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Data fim" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Turno" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Projeto" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Furo" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Empregado" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Máquina" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Estado" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Prioridade" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-4 py-3">{{ item.data_inicio|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">{{ item.data_fim|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.get_turno_display }}</td>
+                    <td class="px-4 py-3">{{ item.projeto.nome }}</td>
+                    <td class="px-4 py-3">{{ item.furo.nome|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.empregado.nome|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.maquina.nome|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ item.get_estado_display }}</td>
+                    <td class="px-4 py-3">{{ item.prioridade }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'projetos:planeamento_turno_update' item.pk %}" class="btn btn-secondary">{% trans "Editar" %}</a>
+                            <a href="{% url 'projetos:planeamento_turno_delete' item.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="px-4 py-8 text-center text-slate-500">{% trans "Ainda não existem planeamentos criados." %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 overflow-auto rounded-xl border border-slate-200 bg-white">
+        <div class="p-4 border-b border-slate-100">
+            <h2 class="text-lg font-semibold text-slate-800">{% trans "Conflitos automáticos de recursos" %}</h2>
+            <p class="text-sm text-slate-500 mt-1">{% trans "Sobreposição no mesmo recurso (empregado ou máquina) em períodos coincidentes." %}</p>
+        </div>
+        <table class="w-full min-w-[980px] text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-left">#</th>
+                    <th class="px-4 py-3 text-left">{% trans "Tipo recurso" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Recurso" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Janela de conflito" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Planeamento A" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Planeamento B" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in conflitos %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-4 py-3">{{ forloop.counter }}</td>
+                    <td class="px-4 py-3">{{ c.recurso_tipo }}</td>
+                    <td class="px-4 py-3">{{ c.recurso_nome }}</td>
+                    <td class="px-4 py-3">{{ c.inicio|date:"d/m/Y" }} → {{ c.fim|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">
+                        {{ c.a.projeto.nome }} · {{ c.a.get_turno_display }} · {{ c.a.data_inicio|date:"d/m/Y" }}{% if c.a.data_fim %} → {{ c.a.data_fim|date:"d/m/Y" }}{% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {{ c.b.projeto.nome }} · {{ c.b.get_turno_display }} · {{ c.b.data_inicio|date:"d/m/Y" }}{% if c.b.data_fim %} → {{ c.b.data_fim|date:"d/m/Y" }}{% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <a href="{% url 'projetos:planeamento_turno_resolver_conflito' c.a.id c.b.id %}" class="btn btn-secondary">
+                            {% trans "Resolver" %}
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-4 py-8 text-center text-slate-500">{% trans "Sem conflitos neste filtro." %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 overflow-auto rounded-xl border border-slate-200 bg-white">
+        <div class="p-4 border-b border-slate-100">
+            <h2 class="text-lg font-semibold text-slate-800">{% trans "Resumo de capacidade por turno/estado" %}</h2>
+        </div>
+        <table class="w-full min-w-[700px] text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-left">{% trans "Turno" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Estado" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Total" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in resumo_turno %}
+                <tr class="border-t border-slate-100 text-slate-700">
+                    <td class="px-4 py-3">{{ row.turno }}</td>
+                    <td class="px-4 py-3">{{ row.estado }}</td>
+                    <td class="px-4 py-3">{{ row.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-4 py-8 text-center text-slate-500">{% trans "Sem dados para o período." %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

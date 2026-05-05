@@ -326,6 +326,20 @@
     height: 260px;
 }
 
+.gkd-chart-unavailable {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 12px;
+}
+
 .gkd-table-stack {
     display: flex;
     flex-direction: column;

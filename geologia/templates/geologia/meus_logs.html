@@ -1,0 +1,78 @@
+{% extends "plataforma/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Meus Logs" %}{% endblock %}
+{% block page_title %}{% trans "Meus Logs Geológicos" %}{% endblock %}
+{% block page_description %}{% trans "Lista de logs geológicos da empresa." %}{% endblock %}
+{% block page_actions %}
+    {% if empregado_menu_funcao == "geologo" %}
+    <a href="{% url 'geologia:empregado_geologo_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% elif empregado_menu_funcao == "encarregado_obra" %}
+    <a href="{% url 'geologia:empregado_encarregado_dashboard' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% else %}
+    <a href="{% url 'geologia:hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    {% endif %}
+{% endblock %}
+
+{% block plataforma_content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    {% if empresa_geologia %}
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4">
+        <div class="flex items-center gap-3">
+            {% if empresa_geologia.logo %}
+            <img
+                src="{{ empresa_geologia.logo.url }}"
+                alt="{% trans 'Logo da empresa' %}"
+                class="max-h-10 w-auto rounded-lg border border-gray-200 bg-white p-1"
+            >
+            {% endif %}
+            <div class="text-sm font-semibold text-gray-700">{{ empresa_geologia.nome_comercial|default:empresa_geologia.nome }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">{% trans "Logs geológicos" %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Intervalo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Litologia principal" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="border-t border-gray-100">
+                        <td class="px-4 py-3 text-gray-700">{{ log.data_registo|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ log.furo.nome }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</td>
+                        <td class="px-4 py-3 text-gray-700">{{ log.litologia_principal }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <a href="{% url 'geologia:log_detail' log.id %}" class="text-sky-700 font-semibold">{% trans "Abrir" %}</a>
+                                <a href="{% url 'geologia:log_update' log.id %}" class="text-emerald-700 font-semibold">{% trans "Editar" %}</a>
+                                <form method="post" action="{% url 'geologia:log_delete' log.id %}" onsubmit="return confirm('{% trans "Tens a certeza que queres apagar este log?" %}');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'geologia:meus_logs' %}">
+                                    <button type="submit" class="text-rose-700 font-semibold">{% trans "Apagar" %}</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">{% trans "Ainda não existem logs geológicos." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

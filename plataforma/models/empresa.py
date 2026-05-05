@@ -33,6 +33,8 @@ class Empresa(models.Model):
     responsavel_nome = models.CharField(max_length=200, blank=True)
     responsavel_email = models.EmailField(blank=True)
     responsavel_telefone = models.CharField(max_length=30, blank=True)
+    logo = models.ImageField(upload_to="plataforma/empresas/logos/", blank=True, null=True)
+    geologia_score_config = models.JSONField(default=dict, blank=True)
 
     plano = models.ForeignKey(
         "Plano",
@@ -126,6 +128,7 @@ class Empresa(models.Model):
     def recalcular_indicadores_financeiros(self, guardar=True):
         Despesa = apps.get_model("projetos", "Despesa")
         Furo = apps.get_model("projetos", "Furo")
+        Projeto = apps.get_model("projetos", "Projeto")
         Material = apps.get_model("projetos", "Material")
         LevantamentoMaterial = apps.get_model("projetos", "LevantamentoMaterial")
         DevolucaoMaterial = apps.get_model("projetos", "DevolucaoMaterial")
@@ -171,7 +174,26 @@ class Empresa(models.Model):
             self.outros_valores_gastos_associados or 0
         )
         self.custo_por_metro_empresa = round(total_gastos_empresa / total_metros, 2) if total_metros else 0.0
-        self.valor_total_cobrado_cliente = round(total_metros * float(self.custo_por_metro_cliente or 0), 2)
+
+        projeto_rates = {
+            str(pid): (float(rate) if rate is not None else None)
+            for pid, rate in Projeto.objects.filter(empresa_id=self.pk).values_list("id", "custo_por_metro_cliente_override")
+        }
+        rate_global = float(self.custo_por_metro_cliente or 0)
+        total_cobrado = 0.0
+        metros_por_projeto = (
+            Furo.objects.filter(empresa_id=self.pk)
+            .values("projeto_id")
+            .annotate(total=Sum("metros_furados"))
+        )
+        for item in metros_por_projeto:
+            metros = float(item.get("total") or 0)
+            projeto_id = str(item.get("projeto_id")) if item.get("projeto_id") else ""
+            rate_projeto = projeto_rates.get(projeto_id)
+            rate_efetiva = rate_global if rate_projeto is None else float(rate_projeto)
+            total_cobrado += metros * rate_efetiva
+
+        self.valor_total_cobrado_cliente = round(total_cobrado, 2)
         self.valor_total_ganho_furo = self.valor_total_cobrado_cliente
 
         if guardar:

@@ -18,7 +18,27 @@ class Modelo3DBlock(models.Model):
         blank=True,
         related_name="modelos_block_3d",
     )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_block",
+    )
+    projeto = models.ForeignKey(
+        "projetos.Projeto",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_block",
+    )
     nome = models.CharField(max_length=255)
+    tamanho_bloco_x = models.FloatField(default=1.0)
+    tamanho_bloco_y = models.FloatField(default=1.0)
+    tamanho_bloco_z = models.FloatField(default=1.0)
+    origem_x = models.FloatField(default=0.0)
+    origem_y = models.FloatField(default=0.0)
+    origem_z = models.FloatField(default=0.0)
     formato = models.CharField(max_length=10, choices=FORMATO_CHOICES)
     conteudo_texto = models.TextField(default="", blank=True)
     tamanho_bytes = models.BigIntegerField(default=0)

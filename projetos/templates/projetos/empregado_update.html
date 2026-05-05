@@ -52,6 +52,24 @@
                 {% endif %}
             </div>
 
+            <div>
+                <label for="id_salario" class="block font-semibold mb-1">{% trans "Salário" %}</label>
+                {{ form.salario }}
+                {% if form.salario.errors %}
+                    <div class="eu-errors">{{ form.salario.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="p-3 border border-amber-200 rounded bg-amber-50 text-amber-900">
+                <label for="id_aplicar_salario_base_funcao" class="font-semibold">
+                    {{ form.aplicar_salario_base_funcao }} {{ form.aplicar_salario_base_funcao.label }}
+                </label>
+                <p class="text-sm mt-1">{{ form.aplicar_salario_base_funcao.help_text }}</p>
+                {% if form.aplicar_salario_base_funcao.errors %}
+                    <div class="eu-errors">{{ form.aplicar_salario_base_funcao.errors }}</div>
+                {% endif %}
+            </div>
+
             <button type="submit" class="eu-btn-save">
                 💾 {% trans "Salvar Alterações" %}
             </button>

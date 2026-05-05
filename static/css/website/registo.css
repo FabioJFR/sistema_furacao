@@ -22,6 +22,29 @@ body {
     margin-bottom: 16px;
 }
 
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    font-weight: 500;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: auto;
+    margin-top: 4px;
+    transform: scale(1.15);
+}
+
+.checkbox-row span {
+    line-height: 1.45;
+}
+
+.checkbox-row a {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
 label {
     display: block;
     margin-bottom: 6px;

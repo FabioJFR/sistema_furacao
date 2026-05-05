@@ -1,0 +1,55 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sobre" %}{% endblock %}
+
+{% block content %}
+<section class="sf-panel">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">{% trans "Sobre o Sistema Furação" %}</h2>
+        <p class="text-sm text-gray-600 mt-2">
+            {% trans "Plataforma profissional para gestão de operações de drilling, geologia, modelos 3D e controlo técnico em campo." %}
+        </p>
+    </div>
+
+    <div class="space-y-4 text-sm text-gray-700 leading-6">
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "Sobre a Plataforma" %}</h3>
+            <p>{% trans "O Sistema Furação foi desenhado para apoiar equipas de perfuração e geologia com foco em produtividade, rastreabilidade técnica e apoio à decisão." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "Sobre o Desenvolvedor" %}</h3>
+            <p>{% trans "Desenvolvimento liderado por Fábio Revez, com evolução contínua baseada no uso real de campo e feedback operacional das equipas." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "Licenças e Propriedade Intelectual" %}</h3>
+            <p>{% trans "Todos os conteúdos, código, design, marca e componentes do Sistema Furação estão protegidos por direitos de propriedade intelectual e legislação aplicável." %}</p>
+            <p class="mt-2">{% trans "É proibida a reprodução, distribuição ou utilização não autorizada, total ou parcial, sem consentimento expresso dos titulares dos direitos." %}</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "Dados de Contacto" %}</h3>
+            <p><strong>{% trans "Email:" %}</strong> sistemafuracao@gmail.com</p>
+            <p><strong>{% trans "Website:" %}</strong> https://www.sistemafuracao.pt</p>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4 bg-white">
+            <h3 class="font-semibold text-gray-900 mb-2">{% trans "Documentos e Reclamações" %}</h3>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:termos_condicoes' %}" class="px-3 py-2 rounded border border-gray-300 text-gray-700 font-semibold">
+                    📄 {% trans "Termos & Condições" %}
+                </a>
+                <a href="{% url 'projetos:politica_privacidade' %}" class="px-3 py-2 rounded border border-indigo-300 text-indigo-700 font-semibold">
+                    🔐 {% trans "Política de Privacidade" %}
+                </a>
+                <a
+                    href="https://www.livroreclamacoes.pt/Inicio/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-3 py-2 rounded border border-amber-300 text-amber-700 font-semibold"
+                >
+                    ⚖️ {% trans "Livro de Reclamações" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

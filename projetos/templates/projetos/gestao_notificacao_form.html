@@ -1,0 +1,27 @@
+{% extends "projetos/base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block title %}{% if is_create %}{% trans "Nova notificação de gestão" %}{% else %}{% trans "Editar notificação de gestão" %}{% endif %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <h1>{% if is_create %}{% trans "Nova notificação de gestão" %}{% else %}{% trans "Editar notificação de gestão" %}{% endif %}</h1>
+        <a href="{% url 'projetos:gestao_notificacoes' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </div>
+    <form method="post" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="{% if field.name == 'detalhes' or field.name == 'origem_url' %}md:col-span-2{% endif %}">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">{{ field.label }}</label>
+            {{ field|add_class:"w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800" }}
+            {% for error in field.errors %}<p class="text-sm text-red-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="md:col-span-2 flex items-center gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">{% trans "Guardar" %}</button>
+            <a href="{% url 'projetos:gestao_notificacoes' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -28,7 +28,7 @@
                     </div>
                 {% endfor %}
             {% endif %}
-            {% if form.errors %}
+            {% if form.non_field_errors %}
                 <div class="error-box">
                     {% trans "Username ou password inválidos." %}
                 </div>
@@ -42,6 +42,22 @@
                 <div class="row">
                     <label for="id_password">{% trans "Password" %}</label>
                     {{ form.password }}
+                </div>
+                <div class="row">
+                    <label class="checkbox-row" for="{{ form.confirmar_termos.id_for_label }}">
+                        {{ form.confirmar_termos }}
+                        <span>
+                            {% trans "Li e concordo com os" %}
+                            <a href="{% url 'projetos:termos_condicoes' %}" target="_blank" rel="noopener noreferrer">{% trans "Termos & Condições" %}</a>
+                            {% trans "e com a" %}
+                            <a href="{% url 'projetos:politica_privacidade' %}" target="_blank" rel="noopener noreferrer">{% trans "Política de Privacidade" %}</a>.
+                        </span>
+                    </label>
+                    {% if form.confirmar_termos.errors %}
+                        <div class="error-box">
+                            {{ form.confirmar_termos.errors|striptags }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="actions">
                     <a href="{% url 'website:home' %}" class="btn btn-secondary">

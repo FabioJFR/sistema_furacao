@@ -3,9 +3,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.text import slugify
 
 from plataforma.models import PerfilPlataforma
-from projetos.models import EmpregadoProjeto, Empregados, Individual
+from projetos.models import EmpregadoProjeto, Empregados, Individual, SalarioBaseFuncao
 
 
 # TODO futuro:
@@ -19,6 +20,20 @@ def _resolver_empresa_id(empresa):
     return getattr(empresa, "pk", empresa)
 
 
+def _obter_salario_base_funcao(*, empresa=None, funcao=None):
+    funcao_valor = (funcao or "").strip()
+    empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
+    if not empresa_id or not funcao_valor:
+        return 0.0
+
+    salario = (
+        SalarioBaseFuncao.objects.filter(empresa_id=empresa_id, funcao=funcao_valor)
+        .values_list("salario_base", flat=True)
+        .first()
+    )
+    return float(salario or 0.0)
+
+
 
 def _obter_ou_criar_grupo_empregados():
     grupo, _ = Group.objects.get_or_create(name="Empregados")
@@ -27,7 +42,25 @@ def _obter_ou_criar_grupo_empregados():
 
 
 def _gerar_username_empregado(empregado):
-    return empregado.email or empregado.nome.replace(" ", "").lower()
+    base = (empregado.email or empregado.nome or "").strip()
+    if "@" in base:
+        base = base.split("@", 1)[0]
+    base = slugify(base).replace("-", "") or f"empregado{str(empregado.pk)[:8]}"
+    return base[:150]
+
+
+def _gerar_username_disponivel(base_username):
+    base = (base_username or "empregado").strip()[:150] or "empregado"
+    if not User.objects.filter(username__iexact=base).exists():
+        return base
+
+    for i in range(2, 10000):
+        sufixo = str(i)
+        candidato = f"{base[:150 - len(sufixo)]}{sufixo}"
+        if not User.objects.filter(username__iexact=candidato).exists():
+            return candidato
+
+    raise ValidationError("Não foi possível gerar um nome de utilizador disponível.")
 
 
 
@@ -114,15 +147,29 @@ def recalcular_resumo_empregado(empregado, empresa=None):
 def criar_utilizador_para_empregado(empregado, empresa=None):
     validar_empregado_empresa(empregado, empresa=empresa)
 
-    username = _gerar_username_empregado(empregado)
+    username_base = _gerar_username_empregado(empregado)
     password = "123456"
 
     if empregado.user_id:
         raise ValidationError("Este empregado já tem um utilizador associado.")
 
-    if User.objects.filter(username__iexact=username).exists():
-        raise ValidationError("Já existe um utilizador com este nome de utilizador.")
+    # Se já existir um utilizador com o username base, tentamos primeiro
+    # reaproveitar uma conta solta com o mesmo email (sem empregado associado).
+    user_existente = User.objects.filter(username__iexact=username_base).first()
+    if user_existente:
+        tem_empregado = Empregados.objects.filter(user=user_existente).exclude(pk=empregado.pk).exists()
+        email_empregado = (empregado.email or "").strip().lower()
+        email_user = (user_existente.email or "").strip().lower()
+        if not tem_empregado and email_empregado and email_user and email_empregado == email_user:
+            empregado.user = user_existente
+            empregado.save(update_fields=["user"])
+            user_existente.is_active = True
+            user_existente.save(update_fields=["is_active"])
+            grupo = _obter_ou_criar_grupo_empregados()
+            user_existente.groups.add(grupo)
+            return empregado
 
+    username = _gerar_username_disponivel(username_base)
     user = User.objects.create_user(
         username=username,
         password=password,
@@ -274,6 +321,7 @@ def registar_conta_publica(*, tipo_conta, nome, email, telefone=None, funcao=Non
         telefone=telefone,
         funcao=funcao,
         empresa=None,
+        salario=0.0,
         aprovado=False,
     )
     return "empregado"
@@ -297,6 +345,10 @@ def criar_empregado_com_user_form(*, form, empresa):
     empregado = form.save(commit=False)
     empregado.user = user
     empregado.empresa = empresa
+    empregado.salario = _obter_salario_base_funcao(
+        empresa=empresa,
+        funcao=form.cleaned_data.get("funcao"),
+    )
     empregado.aprovado = False
     empregado.data_aprovacao = None
     empregado.save()
@@ -311,8 +363,32 @@ def criar_empregado_admin(*, form, empresa):
 
 @transaction.atomic
 def atualizar_empregado_admin(*, form, empresa):
+    funcao_anterior = None
+    user_anterior_id = None
+    if form.instance and form.instance.pk:
+        dados_anteriores = (
+            Empregados.objects.filter(pk=form.instance.pk)
+            .values_list("funcao", "user_id")
+            .first()
+        )
+        if dados_anteriores:
+            funcao_anterior, user_anterior_id = dados_anteriores
+
     empregado = form.save(commit=False)
     empregado.empresa = empresa
+
+    # Proteção: ao editar, não perder ligação User<->Empregado quando o campo
+    # user não vem preenchido no POST.
+    if not empregado.user_id and user_anterior_id:
+        empregado.user_id = user_anterior_id
+
+    funcao_nova = form.cleaned_data.get("funcao")
+    funcao_alterada = (funcao_nova or "") != (funcao_anterior or "")
+    if form.cleaned_data.get("aplicar_salario_base_funcao") or funcao_alterada:
+        empregado.salario = _obter_salario_base_funcao(
+            empresa=empresa,
+            funcao=funcao_nova,
+        )
     empregado.save()
     form.save_m2m()
     return empregado
@@ -351,6 +427,7 @@ def registar_utilizador_e_perfil(*, user, tipo_conta, nome, email, telefone=None
         telefone=telefone,
         funcao=funcao,
         empresa=empresa,
+        salario=_obter_salario_base_funcao(empresa=empresa, funcao=funcao),
         aprovado=False,
     )
     return "empregado"
