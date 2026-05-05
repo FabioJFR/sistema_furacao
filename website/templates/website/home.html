@@ -36,7 +36,7 @@
 
         <section class="hero">
             <div class="hero-copy">
-                <span class="hero-badge">{% trans "SaaS especializado para operações de diamond drilling" %}</span>
+                <span class="hero-badge">{% trans "SaaS especializado para operações de diamond drilling · v0.9.6" %}</span>
                 <h1>{% trans "Do planeamento ao relatório final, tudo numa única plataforma" %}</h1>
                 <p>
                     {% blocktrans %}Centraliza projetos, furos, medições, materiais, produção, despesas e analytics num fluxo único.
@@ -53,6 +53,7 @@
                     <span>{% trans "Operação e registos técnicos" %}</span>
                     <span>{% trans "IA visual + chat técnico" %}</span>
                     <span>{% trans "Gestão financeira e subscrições" %}</span>
+                    <span>{% trans "Gestão empresarial completa" %}</span>
                 </div>
             </div>
 
@@ -64,7 +65,31 @@
                 <div class="metric"><span>💶 {% trans "Despesas e controlo financeiro por contexto" %}</span></div>
                 <div class="metric"><span>🤖 {% trans "Módulo AI Visual, chat técnico e biblioteca PDF" %}</span></div>
                 <div class="metric"><span>🧩 {% trans "Features por plano/empresa/individual" %}</span></div>
-                <div class="metric"><span>🌍 {% trans "Módulos 3D e geologia prontos para evolução" %}</span></div>
+                <div class="metric"><span>🛠️ {% trans "Módulo Gestão: RH, Planeamento, Compliance, Compras e Relatórios Executivos" %}</span></div>
+                <div class="metric"><span>📧 {% trans "Relatórios executivos com envio manual e agendamento automático por email" %}</span></div>
+                <div class="metric"><span>🌍 {% trans "3D avançado: Wireframe, Block Model, Block Profissional e Implicit Model" %}</span></div>
+            </div>
+        </section>
+
+        <section class="release-panel">
+            <h2>{% trans "Novidades da versão v0.9.6" %}</h2>
+            <div class="release-grid">
+                <div class="release-item">
+                    <h3>{% trans "Gestão de empresa" %}</h3>
+                    <p class="muted">{% trans "Hub dedicado com Clientes & Contratos, Planeamento, RH & Assiduidade, Compras, Compliance, Notificações e Relatórios." %}</p>
+                </div>
+                <div class="release-item">
+                    <h3>{% trans "Geologia operacional" %}</h3>
+                    <p class="muted">{% trans "Dashboard para geólogo, mapa litológico, deteção/resolução de conflitos de intervalos, alertas geotécnicos e fluxos de validação." %}</p>
+                </div>
+                <div class="release-item">
+                    <h3>{% trans "Relatórios executivos" %}</h3>
+                    <p class="muted">{% trans "Comparativo financeiro por projeto com exportação CSV/XLSX e envio por email (manual e agendado)." %}</p>
+                </div>
+                <div class="release-item">
+                    <h3>{% trans "Segurança e compliance" %}</h3>
+                    <p class="muted">{% trans "Validação reforçada de uploads, termos e privacidade, e melhoria contínua de permissões por perfil." %}</p>
+                </div>
             </div>
         </section>
 
@@ -128,6 +153,32 @@
                     {% blocktrans %}Planos configuráveis, cobrança por ciclo, pagamentos e rastreio financeiro para acompanhar crescimento com controlo.{% endblocktrans %}
                 </p>
             </div>
+        </section>
+
+        <h2 class="section-title">{% trans "Planos ativos" %}</h2>
+        <section class="plans-preview">
+            {% for plano in planos %}
+                <article class="plan-card">
+                    <h3>{{ plano.obj.nome }}</h3>
+                    {% if plano.resumo %}
+                        <p class="muted plan-desc">{{ plano.resumo }}</p>
+                    {% endif %}
+                    {% if plano.pontos %}
+                        <ul class="plan-points">
+                            {% for ponto in plano.pontos %}
+                                <li>{{ ponto }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="plan-price">{{ plano.obj.preco_mensal }} € <span>{% trans "/mês" %}</span></div>
+                    <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Começar com este plano" %}</a>
+                </article>
+            {% empty %}
+                <article class="plan-card">
+                    <h3>{% trans "Sem planos visíveis" %}</h3>
+                    <p class="muted">{% trans "Não existem planos ativos configurados neste momento." %}</p>
+                </article>
+            {% endfor %}
         </section>
 
         <section class="cta">

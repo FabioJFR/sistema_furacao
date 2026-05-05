@@ -29,18 +29,28 @@
         <div class="grid">
             {% for plano in planos %}
                 <div class="card">
-                    <h2>{{ plano.nome }}</h2>
-                    <p class="muted">{{ plano.descricao }}</p>
-                    <div class="price">{{ plano.preco_mensal }} €<span class="muted price-period">{% trans "/mês" %}</span></div>
-                    <p>{% trans "Tipo:" %} <strong>{{ plano.get_tipo_display }}</strong></p>
+                    <h2>{{ plano.obj.nome }}</h2>
+                    {% if plano.resumo %}
+                        <p class="muted plan-desc">{{ plano.resumo }}</p>
+                    {% endif %}
+                    {% if plano.pontos %}
+                        <ul class="plan-points">
+                            {% for ponto in plano.pontos %}
+                                <li>{{ ponto }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <div class="price">{{ plano.obj.preco_mensal }} €<span class="muted price-period">{% trans "/mês" %}</span></div>
+                    <p>{% trans "Tipo:" %} <strong>{{ plano.obj.get_tipo_display }}</strong></p>
                     <p>{% trans "Dashboard empresa:" %}
-                        <strong>{% if plano.acesso_dashboard_empresa %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
+                        <strong>{% if plano.obj.acesso_dashboard_empresa %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
                     <p>{% trans "Painel empregado:" %}
-                        <strong>{% if plano.acesso_painel_empregado %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
+                        <strong>{% if plano.obj.acesso_painel_empregado %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
                     <p>{% trans "Multiutilizador:" %}
-                        <strong>{% if plano.permite_multiplos_utilizadores %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
+                        <strong>{% if plano.obj.permite_multiplos_utilizadores %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong>
                     </p>
                     <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Escolher este plano" %}</a>
                 </div>

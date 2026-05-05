@@ -14,23 +14,25 @@ from website import services
 
 
 def home(request):
-    planos = selectors.listar_planos_ativos()
+    planos_qs = selectors.listar_planos_ativos()
+    planos_cards = selectors.construir_planos_para_cards(planos_qs)
     return render(
         request,
         "website/home.html",
         {
-            "planos": planos[:3],
+            "planos": planos_cards[:3],
         },
     )
 
 
 def planos(request):
     planos_qs = selectors.listar_planos_ativos()
+    planos_cards = selectors.construir_planos_para_cards(planos_qs)
     return render(
         request,
         "website/planos.html",
         {
-            "planos": planos_qs,
+            "planos": planos_cards,
         },
     )
 
