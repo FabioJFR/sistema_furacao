@@ -87,6 +87,12 @@ class ResultadoGeologiaScoreConfig:
     erro: str | None = None
 
 
+@dataclass
+class ResultadoComplianceScoreConfig:
+    ok: bool
+    erro: str | None = None
+
+
 DEFAULT_GEOLOGIA_SCORE_CONFIG = {
     "pesos": {
         "sem_logs": 12,
@@ -99,6 +105,20 @@ DEFAULT_GEOLOGIA_SCORE_CONFIG = {
     "janelas_horas": {
         "atencao": 24,
         "critico": 48,
+    },
+}
+
+DEFAULT_COMPLIANCE_SCORE_CONFIG = {
+    "pesos": {
+        "vencidas": 4,
+        "criticas": 3,
+        "altas": 2,
+        "vence_7d": 2,
+        "abertas": 1,
+    },
+    "thresholds": {
+        "medio": 6,
+        "alto": 12,
     },
 }
 
@@ -276,6 +296,40 @@ def normalizar_geologia_score_config(config_raw):
     }
 
 
+def normalizar_compliance_score_config(config_raw):
+    config = config_raw if isinstance(config_raw, dict) else {}
+    pesos_in = config.get("pesos") if isinstance(config.get("pesos"), dict) else {}
+    thresholds_in = config.get("thresholds") if isinstance(config.get("thresholds"), dict) else {}
+
+    pesos = dict(DEFAULT_COMPLIANCE_SCORE_CONFIG["pesos"])
+    thresholds = dict(DEFAULT_COMPLIANCE_SCORE_CONFIG["thresholds"])
+
+    for chave in pesos:
+        try:
+            valor = int(pesos_in.get(chave, pesos[chave]))
+        except (TypeError, ValueError):
+            valor = pesos[chave]
+        pesos[chave] = max(0, min(100, valor))
+
+    for chave in thresholds:
+        try:
+            valor = int(thresholds_in.get(chave, thresholds[chave]))
+        except (TypeError, ValueError):
+            valor = thresholds[chave]
+        thresholds[chave] = max(0, min(500, valor))
+
+    if thresholds["alto"] <= thresholds["medio"]:
+        thresholds["alto"] = max(
+            thresholds["medio"] + 1,
+            DEFAULT_COMPLIANCE_SCORE_CONFIG["thresholds"]["alto"],
+        )
+
+    return {
+        "pesos": pesos,
+        "thresholds": thresholds,
+    }
+
+
 @transaction.atomic
 def atualizar_geologia_score_config_empresa(empresa, cleaned_data):
     config = {
@@ -304,6 +358,35 @@ def processar_fluxo_geologia_score_config(*, method, empresa, form):
         return ResultadoGeologiaScoreConfig(ok=False, erro="form_invalido")
     atualizar_geologia_score_config_empresa(empresa, form.cleaned_data)
     return ResultadoGeologiaScoreConfig(ok=True)
+
+
+@transaction.atomic
+def atualizar_compliance_score_config_empresa(empresa, cleaned_data):
+    config = {
+        "pesos": {
+            "vencidas": int(cleaned_data["peso_vencidas"]),
+            "criticas": int(cleaned_data["peso_criticas"]),
+            "altas": int(cleaned_data["peso_altas"]),
+            "vence_7d": int(cleaned_data["peso_vence_7d"]),
+            "abertas": int(cleaned_data["peso_abertas"]),
+        },
+        "thresholds": {
+            "medio": int(cleaned_data["threshold_medio"]),
+            "alto": int(cleaned_data["threshold_alto"]),
+        },
+    }
+    empresa.compliance_score_config = normalizar_compliance_score_config(config)
+    empresa.save(update_fields=["compliance_score_config", "atualizado_em"])
+    return empresa
+
+
+def processar_fluxo_compliance_score_config(*, method, empresa, form):
+    if method != "POST":
+        return ResultadoComplianceScoreConfig(ok=False, erro="metodo_invalido")
+    if not form.is_valid():
+        return ResultadoComplianceScoreConfig(ok=False, erro="form_invalido")
+    atualizar_compliance_score_config_empresa(empresa, form.cleaned_data)
+    return ResultadoComplianceScoreConfig(ok=True)
 
 
 @transaction.atomic

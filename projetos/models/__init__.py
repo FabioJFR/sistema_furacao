@@ -27,7 +27,7 @@ from .medicao import Medicao
 # ===============================
 # EQUIPAMENTOS E MATERIAIS
 # ===============================
-from .maquina import Maquina
+from .maquina import Maquina, MaquinaTurno
 from .maquina_historico import MaquinaAvaria, MaquinaEventoOperacional
 from .material import (
     Material,
@@ -54,15 +54,30 @@ from .block_model_cell import BlockModelCell
 from .modelo_3d_implicit import Modelo3DImplicit
 from .sugestao import SugestaoPlataforma
 from .salario_base_funcao import SalarioBaseFuncao
-from .cliente_contrato import ClienteContrato
+from .cliente_contrato import (
+    ClienteComercial,
+    ClienteContrato,
+    ClienteContratoAdenda,
+    ClienteContratoAnexo,
+    ClienteContratoWorkflowHistorico,
+)
 from .planeamento_turno import PlaneamentoTurno
 from .assiduidade_registo import AssiduidadeRegisto
 from .gestao import (
     PedidoCompra,
+    FornecedorCompra,
+    PropostaFornecedorCompra,
     NotificacaoGestao,
     ChecklistHSE,
     IncidenteSeguranca,
+    AuditoriaHSE,
+    PlanoAuditoriaHSE,
+    AcaoCorretiva,
+    AcaoPreventiva,
+    EvidenciaCompliance,
+    FechoAcaoCorretiva,
     AgendamentoRelatorioExecutivo,
+    HistoricoEnvioRelatorioExecutivo,
 )
 
 # ===============================

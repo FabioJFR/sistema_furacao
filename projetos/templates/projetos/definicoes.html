@@ -154,6 +154,82 @@
     </section>
     {% endif %}
 
+    {% if compliance_score_form %}
+    <section class="mt-8 space-y-4">
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-4">
+            <h3 class="font-bold text-rose-900">🛡️ {% trans "Configuração Compliance (Score de Incumprimento)" %}</h3>
+            <p class="text-sm text-rose-800 mt-2">
+                {% trans "Este painel define como a plataforma calcula o risco operacional de incumprimento em compliance. Quanto maior o peso, maior impacto no score final e na prioridade dos alertas." %}
+            </p>
+            <ul class="text-sm text-rose-900 list-disc pl-5 mt-2 leading-6">
+                <li>{% trans "'Vencidas' deve ter o maior peso, porque representa incumprimento já consumado." %}</li>
+                <li>{% trans "'Críticas' e 'Altas' reforçam o risco mesmo antes de vencer, para dar prioridade a temas mais sensíveis." %}</li>
+                <li>{% trans "'Vence em 7 dias' antecipa problemas e melhora a prevenção antes de entrar em atraso." %}</li>
+                <li>{% trans "'Abertas' mede carga operacional acumulada; útil para perceber equipas ou projetos sobrecarregados." %}</li>
+                <li>{% trans "Os limiares definem quando um score passa de risco baixo para médio e de médio para alto." %}</li>
+            </ul>
+            <div class="mt-4 text-sm text-rose-900 space-y-2">
+                <p><strong>{% trans "Exemplo 1 · Equilibrado (recomendado)" %}</strong>:
+                    {% trans "Vencidas=4, Críticas=3, Altas=2, Vence em 7 dias=2, Abertas=1, Médio=6, Alto=12." %}
+                    {% trans "Resultado: boa leitura entre urgência real e carga acumulada." %}
+                </p>
+                <p><strong>{% trans "Exemplo 2 · Preventivo" %}</strong>:
+                    {% trans "Vencidas=4, Críticas=3, Altas=2, Vence em 7 dias=3, Abertas=1, Médio=7, Alto=13." %}
+                    {% trans "Diferença: o sistema sobe mais cedo itens prestes a vencer, antes de entrarem em atraso." %}
+                </p>
+                <p><strong>{% trans "Exemplo 3 · Tolerante à carga" %}</strong>:
+                    {% trans "Vencidas=5, Críticas=3, Altas=2, Vence em 7 dias=1, Abertas=0, Médio=6, Alto=11." %}
+                    {% trans "Diferença: quase ignora volume aberto e reage sobretudo a incumprimento efetivo." %}
+                </p>
+                <p>
+                    <strong>{% trans "Como interpretar" %}</strong>:
+                    {% trans "Se subires um peso, esse fator passa a empurrar mais rapidamente o responsável ou projeto para risco médio/alto. Se subires os limiares, o dashboard fica menos sensível." %}
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
+            {% csrf_token %}
+            <input type="hidden" name="form_scope" value="compliance_score">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: ações vencidas" %}</label>
+                    {{ compliance_score_form.peso_vencidas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: prioridade crítica" %}</label>
+                    {{ compliance_score_form.peso_criticas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: prioridade alta" %}</label>
+                    {{ compliance_score_form.peso_altas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: vence em 7 dias" %}</label>
+                    {{ compliance_score_form.peso_vence_7d|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Peso: ações abertas" %}</label>
+                    {{ compliance_score_form.peso_abertas|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Limiar risco médio" %}</label>
+                    {{ compliance_score_form.threshold_medio|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-gray-800">{% trans "Limiar risco alto" %}</label>
+                    {{ compliance_score_form.threshold_alto|add_class:"w-full p-2 border rounded bg-white" }}
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-rose-600 text-white py-3 rounded-lg font-semibold hover:bg-rose-700 transition shadow">
+                🛡️ {% trans "Guardar configuração de compliance" %}
+            </button>
+        </form>
+    </section>
+    {% endif %}
+
     {% if geologia_score_form %}
     <section class="mt-8 space-y-4">
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">

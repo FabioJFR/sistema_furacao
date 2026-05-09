@@ -11,6 +11,75 @@
             {{ titulo }}
         </h2>
 
+        <div class="mb-6 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+            <div class="font-semibold text-base mb-1">{% trans "Registo operacional a partir de planeamento" %}</div>
+            <p>
+                {% trans "Se selecionar um planeamento, o sistema herda automaticamente o projeto, o furo, a data e o horário base do turno cumprido." %}
+            </p>
+            <p class="mt-1">
+                {% trans "As pausas, observações, metros e anexos continuam a ser preenchidos manualmente no registo operacional." %}
+            </p>
+        </div>
+
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                    <h3 class="text-lg font-bold text-emerald-900">{% trans "Turnos disponíveis para esta data" %}</h3>
+                    <p class="text-sm text-emerald-800">
+                        {% if form.data_planeamento_referencia %}
+                            {% blocktrans with data=form.data_planeamento_referencia|date:"d/m/Y" %}A mostrar os planeamentos disponíveis para {{ data }}.{% endblocktrans %}
+                        {% else %}
+                            {% trans "Selecione a data do registo para filtrar os planeamentos disponíveis." %}
+                        {% endif %}
+                    </p>
+                </div>
+                {% if form.planeamento_turno_selecionado_id %}
+                    <span id="planeamento-selecionado-badge" class="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                        {% trans "Planeamento selecionado" %}
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if form.planeamentos_disponiveis %}
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for planeamento in form.planeamentos_disponiveis %}
+                        <div
+                            class="planeamento-card rounded-xl border p-4 cursor-pointer {% if planeamento.id|stringformat:'s' == form.planeamento_turno_selecionado_id %}border-emerald-500 bg-white shadow-sm{% else %}border-emerald-200 bg-white/70{% endif %}"
+                            data-planeamento-id="{{ planeamento.id }}"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ planeamento.nome_efetivo }}</div>
+                                    <div class="text-sm text-gray-600 mt-1">{{ planeamento.get_turno_display }} · {{ planeamento.intervalo_horario_display|default:"-" }}</div>
+                                </div>
+                                <div class="flex flex-col items-end gap-2">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {% if planeamento.empregado_id %}bg-blue-100 text-blue-800{% else %}bg-orange-100 text-orange-800{% endif %}">
+                                        {% if planeamento.empregado_id %}
+                                            {% trans "Atribuído a si" %}
+                                        {% else %}
+                                            {% trans "Disponível" %}
+                                        {% endif %}
+                                    </span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {% if planeamento.estado == 'confirmado' %}bg-emerald-100 text-emerald-800{% elif planeamento.estado == 'concluido' %}bg-slate-200 text-slate-800{% elif planeamento.estado == 'cancelado' %}bg-rose-100 text-rose-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                        {{ planeamento.get_estado_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-3 space-y-1 text-sm text-gray-700">
+                                <div><span class="font-medium">{% trans "Projeto" %}:</span> {{ planeamento.projeto.nome|default:"-" }}</div>
+                                <div><span class="font-medium">{% trans "Furo" %}:</span> {{ planeamento.furo.nome|default:"-" }}</div>
+                                <div><span class="font-medium">{% trans "Máquina" %}:</span> {{ planeamento.maquina.nome|default:"-" }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mt-4 rounded-xl border border-dashed border-emerald-300 bg-white/70 p-4 text-sm text-emerald-900">
+                    {% trans "Não existem planeamentos disponíveis para esta data. Pode continuar o registo manualmente ou voltar depois de o turno ser planeado." %}
+                </div>
+            {% endif %}
+        </div>
+
         <form method="POST" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
 
@@ -19,34 +88,269 @@
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
+            {% if relatorio_form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                    {{ relatorio_form.non_field_errors }}
+                </div>
+            {% endif %}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">{% trans "Registo operacional" %}</h3>
+                    <p class="text-sm text-gray-600">{% trans "Horas, pausas, avanço do turno, observações e anexos principais." %}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                {% for field in form %}
-                    <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' or field.name == 'fotos_amostra' %}md:col-span-2{% endif %}">
-                        <label class="block font-semibold mb-1">{{ field.label }}</label>
-                        {{ field|add_class:"w-full p-2 border rounded" }}
+                    {% for field in form %}
+                        <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' or field.name == 'fotos_amostra' %}md:col-span-2{% endif %}">
+                            <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                            {{ field|add_class:"w-full rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 shadow-sm transition focus:border-sky-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-200" }}
 
-                        {% if field.help_text %}
-                            <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
-                        {% endif %}
+                            {% if field.help_text %}
+                                <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                            {% endif %}
 
-                        {% if field.errors %}
-                            <div class="text-red-600 text-sm mt-1">
-                                {{ field.errors }}
+                            {% if field.errors %}
+                                <div class="text-red-600 text-sm mt-1">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+
+                            {% if field.name == 'relatorio_foto' and form.instance.pk and form.instance.relatorio_foto %}
+                                <p class="text-sm text-gray-600 mt-2">
+                                    {% trans "Atual:" %}
+                                    <a href="{{ form.instance.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                        {% trans "Ver imagem" %}
+                                    </a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-indigo-900">{% trans "Relatório técnico do turno" %}</h3>
+                    <p class="text-sm text-indigo-800">{% trans "Este bloco é opcional. Use-o quando precisar de guardar informação técnica detalhada do turno para consulta e exportação posterior." %}</p>
+                </div>
+
+                <div class="space-y-5">
+                    {% for secao in relatorio_form.secoes %}
+                        <div class="rounded-xl border border-indigo-100 bg-white p-4">
+                            <div class="mb-4">
+                                <h4 class="text-base font-bold text-gray-900">{{ secao.titulo }}</h4>
+                                <p class="text-sm text-gray-600">{{ secao.descricao }}</p>
                             </div>
-                        {% endif %}
-
-                        {% if field.name == 'relatorio_foto' and form.instance.pk and form.instance.relatorio_foto %}
-                            <p class="text-sm text-gray-600 mt-2">
-                                {% trans "Atual:" %}
-                                <a href="{{ form.instance.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
-                                    {% trans "Ver imagem" %}
-                                </a>
-                            </p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+                            {% if secao.colunas %}
+                                <div class="{{ secao.grid_classes|default:'grid grid-cols-1 lg:grid-cols-3 gap-4' }}">
+                                    {% for coluna in secao.colunas %}
+                                        <div class="space-y-4">
+                                            {% for field in coluna %}
+                                                <div>
+                                                    <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                    {{ field|add_class:"w-full rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200" }}
+                                                    {% if field.help_text %}
+                                                        <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                    {% endif %}
+                                                    {% if field.errors %}
+                                                        <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="{{ secao.grid_classes|default:'grid grid-cols-1 md:grid-cols-2 gap-4' }}">
+                                    {% for field in secao.campos %}
+                                        <div class="{% if field.name == 'notas' or field.name == 'polimeros' or field.name == 'furacoes' or field.name == 'operacoes_ocorrencias' or field.name == 'equipa_turno' %}md:col-span-full{% endif %}">
+                                            {% if field.name == 'equipa_turno' %}
+                                                <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                {{ field }}
+                                                <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                                                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                                        <input type="text" id="equipa-funcao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Função' %}">
+                                                        <input type="text" id="equipa-nome-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Nome' %}">
+                                                        <input type="number" step="0.01" min="0" id="equipa-horas-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Horas' %}">
+                                                    </div>
+                                                    <div class="mt-3 flex justify-end">
+                                                        <button type="button" id="equipa-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                                            {% trans "Cancelar edição" %}
+                                                        </button>
+                                                        <button type="button" id="equipa-add-btn" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                                                            + {% trans "Adicionar elemento" %}
+                                                        </button>
+                                                    </div>
+                                                    <div class="mt-4 overflow-x-auto">
+                                                        <table class="min-w-full text-sm">
+                                                            <thead class="bg-white text-slate-700">
+                                                                <tr>
+                                                                    <th class="px-3 py-2 text-left">#</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Função" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Nome" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Horas" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="equipa-lista"></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                                        <div class="rounded-lg bg-white px-3 py-2">
+                                                            {% trans "Elementos" %}: <span id="equipa-total-count">0</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% if field.help_text %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                {% endif %}
+                                            {% elif field.name == 'operacoes_ocorrencias' %}
+                                                <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                {{ field }}
+                                                <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                                                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                                        <select id="operacao-tipo-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                                            <option value="">{% trans "Selecionar ocorrência" %}</option>
+                                                            {% for item in relatorio_form.operacoes_ocorrencias_tipos %}
+                                                                <option value="{{ item.value }}">{{ item.label }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <input type="time" id="operacao-de-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                                        <input type="time" id="operacao-ate-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                                    </div>
+                                                    <div class="mt-3 flex justify-end">
+                                                        <button type="button" id="operacao-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                                            {% trans "Cancelar edição" %}
+                                                        </button>
+                                                        <button type="button" id="operacao-add-btn" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                                                            + {% trans "Adicionar ocorrência" %}
+                                                        </button>
+                                                    </div>
+                                                    <div class="mt-4 overflow-x-auto">
+                                                        <table class="min-w-full text-sm">
+                                                            <thead class="bg-white text-slate-700">
+                                                                <tr>
+                                                                    <th class="px-3 py-2 text-left">#</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Ocorrência" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "De" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Até" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="operacoes-lista"></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                                        <div class="rounded-lg bg-white px-3 py-2">
+                                                            {% trans "Ocorrências" %}: <span id="operacoes-total-count">0</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% if field.help_text %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                {% endif %}
+                                            {% elif field.name == 'furacoes' %}
+                                                <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                {{ field }}
+                                                <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                                                    <div class="grid grid-cols-1 gap-3 xl:grid-cols-6">
+                                                        <input type="number" step="0.01" id="furacao-inicio-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação início' %}">
+                                                        <input type="number" step="0.01" id="furacao-fim-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação fim' %}">
+                                                        <input type="number" step="0.01" id="furacao-avanco-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação avanço' %}">
+                                                        <input type="number" step="0.01" id="furacao-recuperacao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação recuperação' %}">
+                                                        <input type="text" id="furacao-rocha-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação rocha' %}">
+                                                        <input type="text" id="furacao-descricao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="{% trans 'Furação descrição' %}">
+                                                    </div>
+                                                    <div class="mt-3 flex justify-end">
+                                                        <button type="button" id="furacao-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                                            {% trans "Cancelar edição" %}
+                                                        </button>
+                                                        <button type="button" id="furacao-add-btn" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                                                            + {% trans "Adicionar furada" %}
+                                                        </button>
+                                                    </div>
+                                                    <div class="mt-4 overflow-x-auto">
+                                                        <table class="min-w-full text-sm">
+                                                            <thead class="bg-white text-slate-700">
+                                                                <tr>
+                                                                    <th class="px-3 py-2 text-left">#</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Início" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Fim" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Avanço" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Recuperação" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Rocha" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Descrição" %}</th>
+                                                                    <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="furacoes-lista"></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                                        <div class="rounded-lg bg-white px-3 py-2">
+                                                            {% trans "Furadas" %}: <span id="furacoes-total-count">0</span>
+                                                        </div>
+                                                        <div class="rounded-lg bg-white px-3 py-2">
+                                                            {% trans "Avanço total" %}: <span id="furacoes-total-avanco">0.00</span>
+                                                        </div>
+                                                        <div class="rounded-lg bg-white px-3 py-2">
+                                                            {% trans "Recuperação total" %}: <span id="furacoes-total-recuperacao">0.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% if field.help_text %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                {% endif %}
+                                            {% elif field.name == 'polimeros' %}
+                                                <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                {{ field }}
+                                                <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                                                    <div class="flex flex-col gap-3 md:flex-row">
+                                                        <input
+                                                            type="text"
+                                                            id="polimero-input"
+                                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                                            placeholder="{% trans 'Adicionar polímero' %}"
+                                                        >
+                                                        <button type="button" id="polimero-add-btn" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                                                            + {% trans "Adicionar" %}
+                                                        </button>
+                                                    </div>
+                                                    <div id="polimeros-lista" class="mt-3 flex flex-wrap gap-2"></div>
+                                                </div>
+                                                {% if field.help_text %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                {% endif %}
+                                            {% else %}
+                                                <label class="mb-1 block font-semibold text-slate-800">{{ field.label }}</label>
+                                                {{ field|add_class:"w-full rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200" }}
+                                                {% if field.help_text %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <div class="text-red-600 text-sm mt-1">{{ field.errors }}</div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
 
             {% if form.instance.pk and form.instance.fotos_amostra.all %}
@@ -81,4 +385,564 @@
         </div>
     </div>
 </section>
+{{ form.planeamentos_mapa|json_script:"planeamentos-turno-data" }}
+{{ relatorio_form.polimeros_lista_inicial|json_script:"polimeros-iniciais-data" }}
+{{ relatorio_form.furacoes_lista_inicial|json_script:"furacoes-iniciais-data" }}
+{{ relatorio_form.operacoes_ocorrencias_lista_inicial|json_script:"operacoes-iniciais-data" }}
+{{ relatorio_form.equipa_turno_lista_inicial|json_script:"equipa-inicial-data" }}
+<script>
+    (() => {
+        const planeamentoSelect = document.getElementById("id_planeamento_turno");
+        if (!planeamentoSelect) return;
+
+        const planeamentos = JSON.parse(document.getElementById("planeamentos-turno-data").textContent || "[]");
+        const planeamentosMap = new Map(planeamentos.map((item) => [item.id, item]));
+        const badgeSelecionado = document.getElementById("planeamento-selecionado-badge");
+        const cards = Array.from(document.querySelectorAll(".planeamento-card"));
+
+        const setFieldValue = (fieldId, value) => {
+            const field = document.getElementById(fieldId);
+            if (!field || value === undefined || value === null || value === "") return;
+            field.value = value;
+            field.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+
+        const atualizarCards = (selectedId) => {
+            cards.forEach((card) => {
+                const isSelected = card.dataset.planeamentoId === selectedId;
+                card.classList.toggle("border-emerald-500", isSelected);
+                card.classList.toggle("shadow-sm", isSelected);
+                card.classList.toggle("bg-white", isSelected);
+                card.classList.toggle("border-emerald-200", !isSelected);
+                card.classList.toggle("bg-white/70", !isSelected);
+            });
+            if (badgeSelecionado) {
+                badgeSelecionado.style.display = selectedId ? "inline-flex" : "none";
+            }
+        };
+
+        const aplicarPlaneamento = (selectedId) => {
+            const planeamento = planeamentosMap.get(selectedId);
+            atualizarCards(selectedId);
+            if (!planeamento) return;
+            setFieldValue("id_data", planeamento.data);
+            setFieldValue("id_hora_inicio", planeamento.hora_inicio);
+            setFieldValue("id_hora_fim", planeamento.hora_fim);
+            setFieldValue("id_projeto", planeamento.projeto_id);
+            if (planeamento.furo_id) {
+                setFieldValue("id_furo", planeamento.furo_id);
+            }
+        };
+
+        planeamentoSelect.addEventListener("change", (event) => {
+            aplicarPlaneamento(event.target.value);
+        });
+
+        cards.forEach((card) => {
+            card.addEventListener("click", () => {
+                planeamentoSelect.value = card.dataset.planeamentoId;
+                aplicarPlaneamento(card.dataset.planeamentoId);
+            });
+        });
+
+        if (planeamentoSelect.value) {
+            aplicarPlaneamento(planeamentoSelect.value);
+        } else if (badgeSelecionado) {
+            badgeSelecionado.style.display = "none";
+        }
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.equipa_turno.id_for_label }}");
+        const funcaoInput = document.getElementById("equipa-funcao-input");
+        const nomeInput = document.getElementById("equipa-nome-input");
+        const horasInput = document.getElementById("equipa-horas-input");
+        const addBtn = document.getElementById("equipa-add-btn");
+        const cancelBtn = document.getElementById("equipa-cancel-btn");
+        const lista = document.getElementById("equipa-lista");
+        const totalCount = document.getElementById("equipa-total-count");
+        const initialDataEl = document.getElementById("equipa-inicial-data");
+        if (!hiddenField || !funcaoInput || !nomeInput || !horasInput || !addBtn || !cancelBtn || !lista || !totalCount || !initialDataEl) return;
+
+        let equipa = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(equipa);
+        };
+
+        const limparInputs = () => {
+            funcaoInput.value = "";
+            nomeInput.value = "";
+            horasInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar elemento' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const fmtHoras = (value) => value === null || value === undefined || value === "" ? "-" : Number(value).toFixed(2);
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!equipa.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="5" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhum elemento adicionado.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                sync();
+                return;
+            }
+            equipa.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${item.funcao || "-"}</td>
+                    <td class="px-3 py-2">${item.nome || "-"}</td>
+                    <td class="px-3 py-2">${fmtHoras(item.horas)}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="equipa-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="equipa-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".equipa-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    funcaoInput.value = item.funcao ?? "";
+                    nomeInput.value = item.nome ?? "";
+                    horasInput.value = item.horas ?? "";
+                    atualizarModoEdicao();
+                    funcaoInput.focus();
+                });
+                row.querySelector(".equipa-remove-btn").addEventListener("click", () => {
+                    equipa.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(equipa.length);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "funcao": funcaoInput.value.trim(),
+                "nome": nomeInput.value.trim(),
+                "horas": horasInput.value === "" ? null : parseFloat(horasInput.value),
+            };
+            if (!item.funcao && !item.nome && item.horas === null) return;
+            if (!item.funcao || !item.nome) return;
+            if (editingIndex === null) {
+                equipa.push(item);
+            } else {
+                equipa[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            funcaoInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            funcaoInput.focus();
+        });
+
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.operacoes_ocorrencias.id_for_label }}");
+        const tipoInput = document.getElementById("operacao-tipo-input");
+        const deInput = document.getElementById("operacao-de-input");
+        const ateInput = document.getElementById("operacao-ate-input");
+        const addBtn = document.getElementById("operacao-add-btn");
+        const cancelBtn = document.getElementById("operacao-cancel-btn");
+        const lista = document.getElementById("operacoes-lista");
+        const totalCount = document.getElementById("operacoes-total-count");
+        const initialDataEl = document.getElementById("operacoes-iniciais-data");
+        if (!hiddenField || !tipoInput || !deInput || !ateInput || !addBtn || !cancelBtn || !lista || !totalCount || !initialDataEl) return;
+
+        const labels = {
+            {% for item in relatorio_form.operacoes_ocorrencias_tipos %}
+            "{{ item.value }}": "{{ item.label|escapejs }}",
+            {% endfor %}
+        };
+
+        let operacoes = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(operacoes);
+        };
+
+        const limparInputs = () => {
+            tipoInput.value = "";
+            deInput.value = "";
+            ateInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar ocorrência' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!operacoes.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="5" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhuma ocorrência adicionada.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                sync();
+                return;
+            }
+            operacoes.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${labels[item.tipo] || item.tipo || "-"}</td>
+                    <td class="px-3 py-2">${item.de || "-"}</td>
+                    <td class="px-3 py-2">${item.ate || "-"}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="operacao-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="operacao-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".operacao-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    tipoInput.value = item.tipo ?? "";
+                    deInput.value = item.de ?? "";
+                    ateInput.value = item.ate ?? "";
+                    atualizarModoEdicao();
+                    tipoInput.focus();
+                });
+                row.querySelector(".operacao-remove-btn").addEventListener("click", () => {
+                    operacoes.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(operacoes.length);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "tipo": tipoInput.value,
+                "de": deInput.value,
+                "ate": ateInput.value,
+            };
+            if (!item.tipo && !item.de && !item.ate) {
+                return;
+            }
+            if (!item.tipo || !item.de || !item.ate) {
+                return;
+            }
+            if (editingIndex === null) {
+                operacoes.push(item);
+            } else {
+                operacoes[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            tipoInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            tipoInput.focus();
+        });
+
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.furacoes.id_for_label }}");
+        const inicioInput = document.getElementById("furacao-inicio-input");
+        const fimInput = document.getElementById("furacao-fim-input");
+        const avancoInput = document.getElementById("furacao-avanco-input");
+        const recuperacaoInput = document.getElementById("furacao-recuperacao-input");
+        const rochaInput = document.getElementById("furacao-rocha-input");
+        const descricaoInput = document.getElementById("furacao-descricao-input");
+        const addBtn = document.getElementById("furacao-add-btn");
+        const cancelBtn = document.getElementById("furacao-cancel-btn");
+        const lista = document.getElementById("furacoes-lista");
+        const totalCount = document.getElementById("furacoes-total-count");
+        const totalAvanco = document.getElementById("furacoes-total-avanco");
+        const totalRecuperacao = document.getElementById("furacoes-total-recuperacao");
+        const initialDataEl = document.getElementById("furacoes-iniciais-data");
+        if (!hiddenField || !inicioInput || !fimInput || !avancoInput || !recuperacaoInput || !rochaInput || !descricaoInput || !addBtn || !cancelBtn || !lista || !totalCount || !totalAvanco || !totalRecuperacao || !initialDataEl) return;
+
+        let furacoes = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(furacoes);
+        };
+
+        const fmt = (value) => value === null || value === undefined || value === "" ? "-" : Number(value).toFixed(2);
+
+        const limparInputs = () => {
+            inicioInput.value = "";
+            fimInput.value = "";
+            avancoInput.value = "";
+            recuperacaoInput.value = "";
+            rochaInput.value = "";
+            descricaoInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar furada' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const recalcularAvanco = () => {
+            const inicio = parseFloat(inicioInput.value);
+            const fim = parseFloat(fimInput.value);
+            if (!Number.isNaN(inicio) && !Number.isNaN(fim)) {
+                avancoInput.value = (fim - inicio).toFixed(2);
+            }
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!furacoes.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="8" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhuma furada adicionada.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                totalAvanco.textContent = "0.00";
+                totalRecuperacao.textContent = "0.00";
+                sync();
+                return;
+            }
+            let somaAvanco = 0;
+            let somaRecuperacao = 0;
+            furacoes.forEach((item, index) => {
+                somaAvanco += Number(item.avanco || 0);
+                somaRecuperacao += Number(item.recuperacao || 0);
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${fmt(item.inicio)}</td>
+                    <td class="px-3 py-2">${fmt(item.fim)}</td>
+                    <td class="px-3 py-2">${fmt(item.avanco)}</td>
+                    <td class="px-3 py-2">${fmt(item.recuperacao)}</td>
+                    <td class="px-3 py-2">${item.rocha || "-"}</td>
+                    <td class="px-3 py-2">${item.descricao || "-"}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="furacao-up-btn rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200" ${index === 0 ? "disabled" : ""}>↑</button>
+                            <button type="button" class="furacao-down-btn rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200" ${index === furacoes.length - 1 ? "disabled" : ""}>↓</button>
+                            <button type="button" class="furacao-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="furacao-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".furacao-up-btn").addEventListener("click", () => {
+                    if (index === 0) return;
+                    [furacoes[index - 1], furacoes[index]] = [furacoes[index], furacoes[index - 1]];
+                    if (editingIndex === index) {
+                        editingIndex -= 1;
+                    } else if (editingIndex === index - 1) {
+                        editingIndex += 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-down-btn").addEventListener("click", () => {
+                    if (index >= furacoes.length - 1) return;
+                    [furacoes[index], furacoes[index + 1]] = [furacoes[index + 1], furacoes[index]];
+                    if (editingIndex === index) {
+                        editingIndex += 1;
+                    } else if (editingIndex === index + 1) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-remove-btn").addEventListener("click", () => {
+                    furacoes.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    inicioInput.value = item.inicio ?? "";
+                    fimInput.value = item.fim ?? "";
+                    avancoInput.value = item.avanco ?? "";
+                    recuperacaoInput.value = item.recuperacao ?? "";
+                    rochaInput.value = item.rocha ?? "";
+                    descricaoInput.value = item.descricao ?? "";
+                    atualizarModoEdicao();
+                    inicioInput.focus();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(furacoes.length);
+            totalAvanco.textContent = somaAvanco.toFixed(2);
+            totalRecuperacao.textContent = somaRecuperacao.toFixed(2);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "inicio": inicioInput.value === "" ? null : parseFloat(inicioInput.value),
+                "fim": fimInput.value === "" ? null : parseFloat(fimInput.value),
+                "avanco": avancoInput.value === "" ? null : parseFloat(avancoInput.value),
+                "recuperacao": recuperacaoInput.value === "" ? null : parseFloat(recuperacaoInput.value),
+                "rocha": rochaInput.value.trim(),
+                "descricao": descricaoInput.value.trim(),
+            };
+            if (
+                item.inicio === null &&
+                item.fim === null &&
+                item.avanco === null &&
+                item.recuperacao === null &&
+                !item.rocha &&
+                !item.descricao
+            ) {
+                return;
+            }
+            if (editingIndex === null) {
+                furacoes.push(item);
+            } else {
+                furacoes[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            inicioInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            inicioInput.focus();
+        });
+
+        inicioInput.addEventListener("input", recalcularAvanco);
+        fimInput.addEventListener("input", recalcularAvanco);
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.polimeros.id_for_label }}");
+        const input = document.getElementById("polimero-input");
+        const addBtn = document.getElementById("polimero-add-btn");
+        const lista = document.getElementById("polimeros-lista");
+        const initialDataEl = document.getElementById("polimeros-iniciais-data");
+        if (!hiddenField || !input || !addBtn || !lista || !initialDataEl) return;
+
+        let polimeros = JSON.parse(initialDataEl.textContent || "[]");
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(polimeros);
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!polimeros.length) {
+                const vazio = document.createElement("div");
+                vazio.className = "text-sm text-slate-500";
+                vazio.textContent = "{% trans 'Nenhum polímero adicionado.' %}";
+                lista.appendChild(vazio);
+                sync();
+                return;
+            }
+            polimeros.forEach((item, index) => {
+                const pill = document.createElement("div");
+                pill.className = "inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-900";
+
+                const texto = document.createElement("span");
+                texto.textContent = item;
+                pill.appendChild(texto);
+
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "rounded-full bg-indigo-200 px-2 py-0.5 text-xs font-bold text-indigo-900 hover:bg-indigo-300";
+                removeBtn.textContent = "×";
+                removeBtn.addEventListener("click", () => {
+                    polimeros.splice(index, 1);
+                    render();
+                });
+                pill.appendChild(removeBtn);
+                lista.appendChild(pill);
+            });
+            sync();
+        };
+
+        const adicionarPolimero = () => {
+            const valor = input.value.trim();
+            if (!valor) return;
+            polimeros.push(valor);
+            input.value = "";
+            render();
+            input.focus();
+        };
+
+        addBtn.addEventListener("click", adicionarPolimero);
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                adicionarPolimero();
+            }
+        });
+
+        render();
+    })();
+</script>
 {% endblock %}

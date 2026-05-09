@@ -57,8 +57,10 @@ def enviar_relatorio_executivo_email(
     destinos: list[str],
     incluir_csv: bool,
     incluir_xlsx: bool,
+    incluir_pdf: bool,
     csv_bytes: bytes,
     xlsx_bytes: bytes,
+    pdf_bytes: bytes | None = None,
 ) -> EnvioRelatorioResultado:
     periodo_inicio = filtros.get("data_inicio") or "-"
     periodo_fim = filtros.get("data_fim") or "-"
@@ -86,6 +88,8 @@ def enviar_relatorio_executivo_email(
             xlsx_bytes,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
+    if incluir_pdf and pdf_bytes:
+        email.attach("relatorio_executivo.pdf", pdf_bytes, "application/pdf")
     enviados = int(email.send(fail_silently=False) or 0)
     return EnvioRelatorioResultado(enviados=enviados, destinos=destinos)
 
@@ -141,4 +145,3 @@ def calcular_proximo_envio_agendado(*, agendamento, referencia=None):
         data_candidato = clamp_date(ano, mes, dia)
         candidato = aware_for_date(data_candidato)
     return candidato
-

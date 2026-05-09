@@ -1,0 +1,100 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Ficha Técnica do Registo" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto p-6">
+    <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-xl">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">{% trans "Informação Técnica" %}</div>
+                    <h1 class="text-3xl font-black">{% trans "Ficha Técnica do Registo" %}</h1>
+                    <p class="max-w-3xl text-sm text-slate-200">
+                        {% trans "Informação técnica detalhada associada ao registo diário, com identificação, avanço, ocorrências e equipa." %}
+                    </p>
+                    {% if not pode_exportar %}
+                    <div class="inline-flex rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-slate-100">
+                        {% trans "Modo consulta: edição e exportação reservadas à empresa." %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url voltar_url %}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                        {% trans "Voltar" %}
+                    </a>
+                    {% if pode_editar_relatorio %}
+                    <a href="{% url editar_relatorio_url relatorio.id %}" class="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300">
+                        {% trans "Editar informação técnica" %}
+                    </a>
+                    {% endif %}
+                    {% if pode_editar_registo %}
+                    <a href="{% url editar_url registo.id %}" class="rounded-xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300">
+                        {% trans "Editar registo" %}
+                    </a>
+                    {% endif %}
+                    {% if pode_exportar %}
+                    <a href="{% url pdf_url relatorio.id %}" class="rounded-xl bg-sky-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-300">
+                        {% trans "Exportar PDF" %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Cliente" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.cliente }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Nº Relatório" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.numero_relatorio }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Data / Turno" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.data }}</div>
+                <div class="text-sm text-slate-500">{{ cabecalho_relatorio.turno }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Empregado" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.empregado }}</div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Projeto" %}</div>
+                <div class="mt-2 text-base font-bold text-slate-900">{{ cabecalho_relatorio.projeto }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Furo" %}</div>
+                <div class="mt-2 text-base font-bold text-slate-900">{{ cabecalho_relatorio.furo }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Planeamento" %}</div>
+                <div class="mt-2 text-base font-bold text-slate-900">{{ cabecalho_relatorio.planeamento }}</div>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            {% for secao in secoes_relatorio %}
+            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+                    <h2 class="text-xl font-black text-slate-900">{{ secao.titulo }}</h2>
+                </div>
+                <div class="grid gap-px bg-slate-200 md:grid-cols-2">
+                    {% for linha in secao.linhas %}
+                    <div class="bg-white px-5 py-4">
+                        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ linha.label }}</div>
+                        <div class="mt-2 whitespace-pre-line text-sm font-medium text-slate-900">{{ linha.valor }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

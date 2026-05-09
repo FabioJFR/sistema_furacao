@@ -5,15 +5,19 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from ..decorators import admin_required
-from ..forms.maquina import MaquinaForm
+from ..forms.maquina import MaquinaForm, MaquinaTurnoForm
 from projetos.selectors.maquinas import (
     obter_contexto_maquina_detail,
     obter_lista_maquinas,
     obter_maquina,
+    obter_maquina_turno,
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
 from projetos.services.maquinas import (
     apagar_maquina,
+    apagar_maquina_turno,
+    atualizar_maquina_turno,
+    criar_maquina_turno,
     processar_fluxo_form_maquina,
 )
 
@@ -46,6 +50,17 @@ def _render_maquina_form(request, form, titulo, maquina=None):
     if maquina is not None:
         context["maquina"] = maquina
     return render(request, "projetos/maquina_form.html", context)
+
+
+def _render_maquina_turno_form(request, form, titulo, maquina, turno=None):
+    context = {
+        "form": form,
+        "titulo": titulo,
+        "maquina": maquina,
+    }
+    if turno is not None:
+        context["turno_item"] = turno
+    return render(request, "projetos/maquina_turno_form.html", context)
 
 
 # Multiempresa: o administrador só pode listar e gerir máquinas da sua própria empresa.
@@ -227,3 +242,61 @@ def maquina_delete(request, maquina_id):
     return render(request, 'projetos/maquina_confirm_delete.html', {
         'maquina': maquina
     })
+
+
+@login_required
+@admin_required
+def maquina_turno_create(request, maquina_id):
+    empresa, resposta_erro = _obter_empresa_admin_maquinas(request)
+    if resposta_erro:
+        return resposta_erro
+
+    maquina = obter_maquina(maquina_id, empresa=empresa)
+    form = MaquinaTurnoForm(request.POST or None, empresa=empresa, maquina=maquina)
+    if request.method == "POST" and form.is_valid():
+        criar_maquina_turno(form=form, maquina=maquina, empresa=empresa)
+        messages.success(request, "Turno da máquina criado com sucesso.")
+        return redirect("projetos:maquina_detail", maquina_id=maquina.id)
+    return _render_maquina_turno_form(request, form, "Novo Turno da Máquina", maquina=maquina)
+
+
+@login_required
+@admin_required
+def maquina_turno_update(request, maquina_id, turno_id):
+    empresa, resposta_erro = _obter_empresa_admin_maquinas(request)
+    if resposta_erro:
+        return resposta_erro
+
+    maquina = obter_maquina(maquina_id, empresa=empresa)
+    turno = obter_maquina_turno(turno_id, maquina=maquina, empresa=empresa)
+    form = MaquinaTurnoForm(request.POST or None, instance=turno, empresa=empresa, maquina=maquina)
+    if request.method == "POST" and form.is_valid():
+        atualizar_maquina_turno(form=form, maquina=maquina, empresa=empresa)
+        messages.success(request, "Turno da máquina atualizado com sucesso.")
+        return redirect("projetos:maquina_detail", maquina_id=maquina.id)
+    return _render_maquina_turno_form(request, form, "Editar Turno da Máquina", maquina=maquina, turno=turno)
+
+
+@login_required
+@admin_required
+def maquina_turno_delete(request, maquina_id, turno_id):
+    empresa, resposta_erro = _obter_empresa_admin_maquinas(request)
+    if resposta_erro:
+        return resposta_erro
+
+    maquina = obter_maquina(maquina_id, empresa=empresa)
+    turno = obter_maquina_turno(turno_id, maquina=maquina, empresa=empresa)
+
+    if request.method == "POST":
+        apagar_maquina_turno(turno=turno, maquina=maquina, empresa=empresa)
+        messages.success(request, "Turno da máquina apagado com sucesso.")
+        return redirect("projetos:maquina_detail", maquina_id=maquina.id)
+
+    return render(
+        request,
+        "projetos/maquina_turno_confirm_delete.html",
+        {
+            "maquina": maquina,
+            "turno_item": turno,
+        },
+    )

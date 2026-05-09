@@ -11,13 +11,85 @@
             <p class="sf-muted-text">
                 {% trans "Contrato" %}: {{ item.numero_contrato|default:"-" }} · {% trans "Estado" %}: {{ item.get_status_display }}
             </p>
+            <p class="mt-2">
+                {% if item.workflow_comercial == "renovacao_pendente" %}
+                    <span class="inline-flex rounded-full bg-red-100 text-red-700 px-3 py-1 text-xs font-semibold">{{ item.get_workflow_comercial_display }}</span>
+                {% elif item.workflow_comercial == "em_negociacao" %}
+                    <span class="inline-flex rounded-full bg-amber-100 text-amber-700 px-3 py-1 text-xs font-semibold">{{ item.get_workflow_comercial_display }}</span>
+                {% elif item.workflow_comercial == "renovado" %}
+                    <span class="inline-flex rounded-full bg-emerald-100 text-emerald-700 px-3 py-1 text-xs font-semibold">{{ item.get_workflow_comercial_display }}</span>
+                {% elif item.workflow_comercial == "perdido" %}
+                    <span class="inline-flex rounded-full bg-slate-200 text-slate-700 px-3 py-1 text-xs font-semibold">{{ item.get_workflow_comercial_display }}</span>
+                {% else %}
+                    <span class="inline-flex rounded-full bg-sky-100 text-sky-700 px-3 py-1 text-xs font-semibold">{{ item.get_workflow_comercial_display }}</span>
+                {% endif %}
+            </p>
         </div>
         <div class="flex items-center gap-2">
             <a href="{% url 'projetos:cliente_contrato_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+            <a href="{% url 'projetos:cliente_comercial_detail' %}?cliente={{ item.nome_cliente|urlencode }}{% if somente_leitura %}&empresa_id={{ item.empresa_id }}{% endif %}" class="btn btn-light">{% trans "Ficha cliente" %}</a>
+            <a href="{% url 'projetos:cliente_contrato_exportar_dossier' item.pk %}" class="btn btn-light">{% trans "Exportar dossiê" %}</a>
             {% if not somente_leitura %}
+                <a href="{% url 'projetos:cliente_contrato_anexo_create' item.pk %}" class="btn btn-light">{% trans "Adicionar anexo" %}</a>
+                <a href="{% url 'projetos:cliente_contrato_adenda_create' item.pk %}" class="btn btn-light">{% trans "Nova adenda" %}</a>
                 <a href="{% url 'projetos:cliente_contrato_update' item.pk %}" class="btn btn-secondary">{% trans "Editar" %}</a>
                 <a href="{% url 'projetos:cliente_contrato_delete' item.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
             {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão Comercial" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">{% trans "Detalhe de Cliente & Contrato" %}</div>
+        <p class="mt-3 text-sm text-slate-600">
+            {% trans "Consulta rápida de condições comerciais, contacto, SLA, valor contratado e enquadramento do projeto." %}
+        </p>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Alertas Operacionais" %}</h3>
+        <div class="mt-3 space-y-3">
+            {% for alerta in alertas_operacionais %}
+                <div class="rounded-lg border px-3 py-3 {% if alerta.gravidade == 'alta' %}border-red-200 bg-red-50{% elif alerta.gravidade == 'media' %}border-amber-200 bg-amber-50{% else %}border-slate-200 bg-slate-50{% endif %}">
+                    <div class="font-semibold {% if alerta.gravidade == 'alta' %}text-red-800{% elif alerta.gravidade == 'media' %}text-amber-800{% else %}text-slate-800{% endif %}">{{ alerta.titulo }}</div>
+                    <p class="mt-1 text-sm {% if alerta.gravidade == 'alta' %}text-red-700{% elif alerta.gravidade == 'media' %}text-amber-700{% else %}text-slate-700{% endif %}">{{ alerta.detalhe }}</p>
+                </div>
+            {% empty %}
+                <p class="text-sm text-emerald-700 font-semibold">{% trans "Sem alertas operacionais neste momento." %}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Workflow Assistido" %}</h3>
+        <div class="mt-3 space-y-3">
+            {% for sugestao in sugestoes_workflow %}
+                <div class="rounded-lg border px-3 py-3 {% if sugestao.prioridade == 'alta' %}border-red-200 bg-red-50{% elif sugestao.prioridade == 'media' %}border-amber-200 bg-amber-50{% else %}border-sky-200 bg-sky-50{% endif %}">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="font-semibold {% if sugestao.prioridade == 'alta' %}text-red-800{% elif sugestao.prioridade == 'media' %}text-amber-800{% else %}text-sky-800{% endif %}">
+                            {{ sugestao.titulo }}
+                        </div>
+                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold {% if sugestao.prioridade == 'alta' %}bg-red-100 text-red-700{% elif sugestao.prioridade == 'media' %}bg-amber-100 text-amber-700{% else %}bg-sky-100 text-sky-700{% endif %}">
+                            {{ sugestao.label }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-sm {% if sugestao.prioridade == 'alta' %}text-red-700{% elif sugestao.prioridade == 'media' %}text-amber-700{% else %}text-sky-700{% endif %}">
+                        {{ sugestao.motivo }}
+                    </p>
+                    {% if sugestao.ja_ativo %}
+                        <p class="mt-2 text-xs font-semibold text-emerald-700">{% trans "Este workflow já está aplicado no contrato." %}</p>
+                    {% elif not somente_leitura %}
+                        <form method="post" action="{% url 'projetos:cliente_contrato_aplicar_sugestao_workflow' item.pk %}" class="mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="workflow_novo" value="{{ sugestao.workflow }}" />
+                            <input type="hidden" name="observacao" value="{% trans 'Workflow aplicado a partir da sugestão assistida no detalhe do contrato.' %}" />
+                            <button type="submit" class="btn btn-light">{% trans "Aplicar sugestão" %}</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-sm text-emerald-700 font-semibold">{% trans "Sem necessidade de ajuste assistido do workflow neste momento." %}</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -26,16 +98,176 @@
             <h3 class="text-lg font-semibold text-slate-800">{% trans "Comercial" %}</h3>
             <p class="text-slate-700 mt-2"><strong>{% trans "Projeto" %}:</strong> {{ item.projeto.nome|default:"-" }}</p>
             <p class="text-slate-700"><strong>{% trans "Tipo de cobrança" %}:</strong> {{ item.get_tipo_cobranca_display }}</p>
+            <p class="text-slate-700"><strong>{% trans "Workflow comercial" %}:</strong> {{ item.get_workflow_comercial_display }}</p>
             <p class="text-slate-700"><strong>{% trans "Valor contratado" %}:</strong> {{ item.valor_contratado|floatformat:2 }} {{ item.moeda }}</p>
+            <p class="text-slate-700"><strong>{% trans "Total com adendas" %}:</strong> {{ valor_total_estimado|floatformat:2 }} {{ item.moeda }}</p>
             <p class="text-slate-700"><strong>{% trans "SLA resposta" %}:</strong> {{ item.sla_resposta_horas }} h</p>
             <p class="text-slate-700"><strong>{% trans "Início" %}:</strong> {{ item.data_inicio|date:"d/m/Y"|default:"-" }}</p>
             <p class="text-slate-700"><strong>{% trans "Fim" %}:</strong> {{ item.data_fim|date:"d/m/Y"|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Fim efetivo" %}:</strong> {{ data_fim_efetiva|date:"d/m/Y"|default:"-" }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <h3 class="text-lg font-semibold text-slate-800">{% trans "Contacto" %}</h3>
             <p class="text-slate-700 mt-2"><strong>{% trans "Nome" %}:</strong> {{ item.contacto_nome|default:"-" }}</p>
             <p class="text-slate-700"><strong>Email:</strong> {{ item.contacto_email|default:"-" }}</p>
             <p class="text-slate-700"><strong>{% trans "Telefone" %}:</strong> {{ item.contacto_telefone|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Último contacto" %}:</strong> {{ item.ultimo_contacto_em|date:"d/m/Y"|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Próximo follow-up" %}:</strong> {{ item.proximo_followup_em|date:"d/m/Y"|default:"-" }}</p>
+            <p class="text-slate-700"><strong>{% trans "Alerta sem contacto" %}:</strong> {{ item.dias_alerta_sem_contacto }} {% trans "dias" %}</p>
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Renovação & Alertas" %}</h3>
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
+            <div>
+                <p><strong>{% trans "Renovação automática" %}:</strong> {% if item.renovacao_automatica %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
+                <p><strong>{% trans "Período de renovação" %}:</strong> {{ item.periodo_renovacao_meses }} {% trans "meses" %}</p>
+            </div>
+            <div>
+                <p><strong>{% trans "Janela de alerta" %}:</strong> {{ item.dias_alerta_vencimento }} {% trans "dias" %}</p>
+                <p><strong>{% trans "Dias até ao fim" %}:</strong> {{ dias_para_fim|default_if_none:"-" }}</p>
+                <p>
+                    <strong>{% trans "Estado do alerta" %}:</strong>
+                    {% if renovacao_em_alerta %}
+                        <span class="text-amber-700 font-semibold">{% trans "Em janela de alerta" %}</span>
+                    {% else %}
+                        <span class="text-emerald-700 font-semibold">{% trans "Sem alerta" %}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-semibold text-slate-800">{% trans "Anexos do contrato" %}</h3>
+                {% if not somente_leitura %}
+                    <a href="{% url 'projetos:cliente_contrato_anexo_create' item.pk %}" class="btn btn-light">{% trans "Adicionar" %}</a>
+                {% endif %}
+            </div>
+            <div class="mt-3 space-y-3">
+                {% for anexo in anexos %}
+                    <div class="rounded-lg border border-slate-200 p-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-slate-900 sf-break-word">{{ anexo.titulo }}</div>
+                                <div class="text-xs text-slate-500 mt-1">{{ anexo.criado_em|date:"d/m/Y H:i" }}</div>
+                                <p class="text-sm text-slate-600 mt-2 whitespace-pre-wrap">{{ anexo.descricao|default:"-" }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ anexo.ficheiro.url }}" class="btn btn-light" target="_blank" rel="noopener">{% trans "Abrir" %}</a>
+                                {% if not somente_leitura %}
+                                    <a href="{% url 'projetos:cliente_contrato_anexo_delete' item.pk anexo.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500">{% trans "Ainda não existem anexos associados a este contrato." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-semibold text-slate-800">{% trans "Adendas" %}</h3>
+                {% if not somente_leitura %}
+                    <a href="{% url 'projetos:cliente_contrato_adenda_create' item.pk %}" class="btn btn-light">{% trans "Adicionar" %}</a>
+                {% endif %}
+            </div>
+            <div class="mt-3 space-y-3">
+                {% for adenda in adendas %}
+                    <div class="rounded-lg border border-slate-200 p-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-slate-900 sf-break-word">{{ adenda.titulo }}</div>
+                                <div class="text-xs text-slate-500 mt-1">
+                                    {{ adenda.data_adenda|date:"d/m/Y" }} · {{ adenda.get_origem_display }}
+                                </div>
+                                <p class="text-sm text-slate-600 mt-2 whitespace-pre-wrap">{{ adenda.descricao|default:"-" }}</p>
+                                <div class="mt-2 text-sm text-slate-700">
+                                    <span><strong>{% trans "Valor adicional" %}:</strong> {{ adenda.valor_adicional|floatformat:2 }} {{ item.moeda }}</span>
+                                    <span class="ml-3"><strong>{% trans "Nova data fim" %}:</strong> {{ adenda.nova_data_fim|date:"d/m/Y"|default:"-" }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% if adenda.ficheiro %}
+                                    <a href="{{ adenda.ficheiro.url }}" class="btn btn-light" target="_blank" rel="noopener">{% trans "Abrir" %}</a>
+                                {% endif %}
+                                {% if not somente_leitura %}
+                                    <a href="{% url 'projetos:cliente_contrato_adenda_update' item.pk adenda.pk %}" class="btn btn-secondary">{% trans "Editar" %}</a>
+                                    <a href="{% url 'projetos:cliente_contrato_adenda_delete' item.pk adenda.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500">{% trans "Ainda não existem adendas associadas a este contrato." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Histórico de renovações" %}</h3>
+        <div class="mt-3 space-y-3">
+            {% for renovacao in renovacoes %}
+                <div class="rounded-lg border border-slate-200 p-3">
+                    <div class="font-semibold text-slate-900">{{ renovacao.titulo }}</div>
+                    <div class="mt-1 text-sm text-slate-600">
+                        {{ renovacao.data_adenda|date:"d/m/Y" }} ·
+                        {{ renovacao.data_fim_anterior|date:"d/m/Y"|default:"-" }} →
+                        {{ renovacao.nova_data_fim|date:"d/m/Y"|default:"-" }}
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Ainda não existem renovações automáticas registadas para este contrato." %}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Histórico de workflow comercial" %}</h3>
+        <div class="mt-3 space-y-3">
+            {% for registo in historico_workflow %}
+                <div class="rounded-lg border border-slate-200 p-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="font-semibold text-slate-900 sf-break-word">
+                                {{ registo.get_workflow_anterior_label }} → {{ registo.get_workflow_novo_label }}
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600">
+                                {% trans "Alterado por" %}: {{ registo.alterado_por.username|default:"Sistema Furação" }}
+                            </p>
+                            <p class="mt-1 text-sm text-slate-600 whitespace-pre-wrap">{{ registo.observacao|default:"-" }}</p>
+                        </div>
+                        <div class="text-xs font-semibold text-slate-500 whitespace-nowrap">{{ registo.criado_em|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Ainda não existem mudanças de workflow comercial registadas para este contrato." %}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 class="text-lg font-semibold text-slate-800">{% trans "Timeline Comercial" %}</h3>
+        <div class="mt-3 space-y-3">
+            {% for evento in timeline %}
+                <div class="rounded-lg border border-slate-200 p-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="font-semibold text-slate-900 sf-break-word">{{ evento.titulo }}</div>
+                            <p class="text-sm text-slate-600 mt-1">{{ evento.detalhe }}</p>
+                        </div>
+                        <div class="text-xs font-semibold text-slate-500 whitespace-nowrap">{{ evento.data|date:"d/m/Y" }}</div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Ainda não existem eventos suficientes para a timeline comercial." %}</p>
+            {% endfor %}
         </div>
     </div>
 

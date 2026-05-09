@@ -1,6 +1,10 @@
+from datetime import timedelta
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.permissions import admin_required
@@ -17,7 +21,10 @@ from projetos.services.planeamento_analise import escolher_planeamento_cancelar_
 from projetos.services.planeamento_turnos import (
     apagar_planeamento_turno,
     atualizar_planeamento_turno,
+    construir_calendario_mensal_planeamento,
+    construir_calendario_semanal_planeamento,
     criar_planeamento_turno,
+    resolver_data_referencia_calendario,
 )
 
 
@@ -46,6 +53,10 @@ def planeamento_turno_list(request):
         "data_inicio": (request.GET.get("data_inicio") or "").strip(),
         "data_fim": (request.GET.get("data_fim") or "").strip(),
     }
+    modo_calendario = (request.GET.get("modo_calendario") or "semanal").strip().lower()
+    if modo_calendario not in {"semanal", "mensal"}:
+        modo_calendario = "semanal"
+    data_referencia = resolver_data_referencia_calendario(request.GET.get("data_referencia"))
     items_qs = listar_planeamentos_empresa(empresa, filtros=filtros)
     items = list(items_qs)
     conflitos = detetar_conflitos_planeamento(items=items)
@@ -60,6 +71,22 @@ def planeamento_turno_list(request):
         }
         for row in resumo_bruto
     ]
+
+    if modo_calendario == "mensal":
+        calendario = construir_calendario_mensal_planeamento(items=items, conflitos=conflitos, referencia=data_referencia)
+        data_referencia_anterior = calendario["inicio"] - timedelta(days=1)
+        proximo_mes = calendario["fim"] + timedelta(days=1)
+        data_referencia_seguinte = proximo_mes.replace(day=1)
+    else:
+        calendario = construir_calendario_semanal_planeamento(items=items, conflitos=conflitos, referencia=data_referencia)
+        data_referencia_anterior = calendario["inicio"] - timedelta(days=7)
+        data_referencia_seguinte = calendario["inicio"] + timedelta(days=7)
+
+    base_query = {chave: valor for chave, valor in filtros.items() if valor}
+    query_anterior = urlencode({**base_query, "modo_calendario": modo_calendario, "data_referencia": data_referencia_anterior.isoformat()})
+    query_seguinte = urlencode({**base_query, "modo_calendario": modo_calendario, "data_referencia": data_referencia_seguinte.isoformat()})
+    query_hoje = urlencode({**base_query, "modo_calendario": modo_calendario, "data_referencia": timezone.localdate().isoformat()})
+
     return render(
         request,
         "projetos/planeamento_turno_list.html",
@@ -70,6 +97,12 @@ def planeamento_turno_list(request):
             "turno_choices": [("", _("Todos"))] + list(PlaneamentoTurno.TURNO_CHOICES),
             "conflitos": conflitos,
             "resumo_turno": resumo_turno,
+            "modo_calendario": modo_calendario,
+            "data_referencia": data_referencia,
+            "calendario": calendario,
+            "query_anterior": query_anterior,
+            "query_seguinte": query_seguinte,
+            "query_hoje": query_hoje,
         },
     )
 

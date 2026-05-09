@@ -1,6 +1,7 @@
 import csv
 import io
 import logging
+import os
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,33 +13,58 @@ from datetime import timedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 from django.db.utils import OperationalError, ProgrammingError
+from django.db import transaction
 from openpyxl import Workbook
 
 from core.permissions import admin_required
 from projetos.forms import (
+    AcaoPreventivaForm,
+    AcaoCorretivaForm,
     AgendamentoRelatorioExecutivoForm,
+    AuditoriaHSEForm,
     ChecklistHSEForm,
+    EvidenciaComplianceForm,
+    FechoAcaoCorretivaForm,
+    FornecedorCompraForm,
     IncidenteSegurancaForm,
     NotificacaoGestaoForm,
     PedidoCompraForm,
+    PlanoAuditoriaHSEForm,
+    PropostaFornecedorCompraForm,
     RelatorioExecutivoEmailForm,
 )
 from projetos.models import (
+    AcaoPreventiva,
+    AcaoCorretiva,
     AssiduidadeRegisto,
     AgendamentoRelatorioExecutivo,
+    AuditoriaHSE,
     ChecklistHSE,
     Despesa,
     Empregados,
+    EvidenciaCompliance,
+    FechoAcaoCorretiva,
+    FornecedorCompra,
     Furo,
     IncidenteSeguranca,
     MaquinaAvaria,
     NotificacaoGestao,
     PedidoCompra,
     PlaneamentoTurno,
+    PlanoAuditoriaHSE,
+    PropostaFornecedorCompra,
     Projeto,
     RegistoDiarioEmpregado,
+    HistoricoEnvioRelatorioExecutivo,
 )
 from projetos.services.acesso_contexto import obter_empresa_admin_contexto
+from projetos.services.gestao_compliance import (
+    construir_dashboard_eficacia_compliance,
+    gerar_auditorias_recorrentes_pendentes,
+    guardar_evidencia_compliance_form,
+    registar_fecho_formal_acao_corretiva,
+    sincronizar_alertas_automaticos_compliance,
+)
 from projetos.services.gestao_relatorios import (
     calcular_proximo_envio_agendado,
     construir_url_relatorio_com_filtros,
@@ -73,9 +99,170 @@ def _obter_ou_criar_agendamento_relatorio(empresa):
             "dia_mes": 1,
             "incluir_csv": True,
             "incluir_xlsx": True,
+            "incluir_pdf": False,
         },
     )
     return agendamento
+
+
+def _resumo_kpis_relatorio(relatorio):
+    return {
+        "projetos": relatorio["kpis"][0]["valor"],
+        "furos": relatorio["kpis"][1]["valor"],
+        "empregados": relatorio["kpis"][2]["valor"],
+        "despesa_periodo": relatorio["kpis"][3]["valor"],
+    }
+
+
+def _obter_filtros_compliance_dashboard(request):
+    janela_raw = (request.GET.get("janela_dias") or "").strip()
+    compare_raw = (request.GET.get("compare_janela") or "").strip()
+
+    try:
+        janela_dias = int(janela_raw) if janela_raw else 0
+    except (TypeError, ValueError):
+        janela_dias = 0
+    if janela_dias not in {0, 7, 30, 90}:
+        janela_dias = 0
+
+    compare_janela = str(int(bool(compare_raw and compare_raw not in {"0", "false", "False"})))
+
+    return {
+        "check_status": (request.GET.get("check_status") or "").strip(),
+        "inc_status": (request.GET.get("inc_status") or "").strip(),
+        "aud_status": (request.GET.get("aud_status") or "").strip(),
+        "acao_status": (request.GET.get("acao_status") or "").strip(),
+        "plano_status": (request.GET.get("plano_status") or "").strip(),
+        "prev_status": (request.GET.get("prev_status") or "").strip(),
+        "drill_projeto": (request.GET.get("drill_projeto") or "").strip(),
+        "drill_responsavel": (request.GET.get("drill_responsavel") or "").strip(),
+        "janela_dias": janela_dias,
+        "compare_janela": compare_janela,
+    }
+
+
+def _gerar_dashboard_compliance_csv_bytes(*, empresa, dashboard_eficacia, filtros):
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+
+    writer.writerow(["Empresa", empresa.nome])
+    writer.writerow(["Janela dias", filtros.get("janela_dias") or "total"])
+    writer.writerow(["Referência", dashboard_eficacia.get("referencia")])
+    writer.writerow([])
+
+    resumo = dashboard_eficacia.get("resumo", {})
+    writer.writerow(["Resumo"])
+    writer.writerow(["Total ações", resumo.get("total_acoes", 0)])
+    writer.writerow(["Total concluídas", resumo.get("total_concluidas", 0)])
+    writer.writerow(["Total abertas", resumo.get("total_abertas", 0)])
+    writer.writerow(["Total vencidas", resumo.get("total_vencidas", 0)])
+    writer.writerow(["Taxa global fecho", resumo.get("taxa_global_fecho", 0.0)])
+    writer.writerow(["Taxa SLA global", resumo.get("taxa_sla_global", 0.0)])
+    writer.writerow(["Tempo médio fecho global", resumo.get("tempo_medio_fecho_global", 0.0)])
+    writer.writerow([])
+
+    snapshots = dashboard_eficacia.get("snapshots", {})
+    if snapshots.get("atual") and snapshots.get("anterior"):
+        writer.writerow(["Snapshot comparativo"])
+        writer.writerow(["Período", "Abertas", "Concluídas", "Vencidas", "SLA", "Fecho médio"])
+        writer.writerow([
+            f"Atual ({snapshots['atual']['inicio']} a {snapshots['atual']['fim']})",
+            snapshots["atual"]["abertas"],
+            snapshots["atual"]["concluidas"],
+            snapshots["atual"]["vencidas"],
+            snapshots["atual"]["taxa_sla"],
+            snapshots["atual"]["tempo_medio_fecho"],
+        ])
+        writer.writerow([
+            f"Anterior ({snapshots['anterior']['inicio']} a {snapshots['anterior']['fim']})",
+            snapshots["anterior"]["abertas"],
+            snapshots["anterior"]["concluidas"],
+            snapshots["anterior"]["vencidas"],
+            snapshots["anterior"]["taxa_sla"],
+            snapshots["anterior"]["tempo_medio_fecho"],
+        ])
+        writer.writerow([
+            "Delta",
+            snapshots["delta_abertas"],
+            snapshots["delta_concluidas"],
+            snapshots["delta_vencidas"],
+            snapshots["delta_sla"],
+            snapshots["delta_tempo_medio"],
+        ])
+        writer.writerow([])
+
+    writer.writerow(["Previsão por responsável"])
+    writer.writerow(["Responsável", "Abertas", "Vencidas", "Score base", "Score ajustado", "Risco", "SLA histórico", "Fecho histórico", "Tempo médio histórico"])
+    for item in dashboard_eficacia.get("previsao_incumprimento", {}).get("responsaveis", []):
+        writer.writerow([
+            item.get("nome"),
+            item.get("abertas", 0),
+            item.get("vencidas", 0),
+            item.get("score", 0.0),
+            item.get("score_ajustado", 0.0),
+            item.get("risco", ""),
+            item.get("taxa_sla_historica", 0.0),
+            item.get("taxa_fecho_historica", 0.0),
+            item.get("tempo_medio_fecho_historico", 0.0),
+        ])
+    writer.writerow([])
+
+    writer.writerow(["Previsão por projeto"])
+    writer.writerow(["Projeto", "Abertas", "Vencidas", "Score base", "Score ajustado", "Risco", "SLA histórico", "Fecho histórico", "Tempo médio histórico"])
+    for item in dashboard_eficacia.get("previsao_incumprimento", {}).get("projetos", []):
+        writer.writerow([
+            item.get("nome"),
+            item.get("abertas", 0),
+            item.get("vencidas", 0),
+            item.get("score", 0.0),
+            item.get("score_ajustado", 0.0),
+            item.get("risco", ""),
+            item.get("taxa_sla_historica", 0.0),
+            item.get("taxa_fecho_historica", 0.0),
+            item.get("tempo_medio_fecho_historico", 0.0),
+        ])
+
+    return buffer.getvalue().encode("utf-8-sig")
+
+
+def _registar_historico_envio_relatorio(
+    *,
+    empresa,
+    agendamento=None,
+    origem="manual",
+    status="sucesso",
+    assunto="",
+    destinos=None,
+    incluir_csv=True,
+    incluir_xlsx=True,
+    incluir_pdf=False,
+    enviados=0,
+    filtros=None,
+    relatorio=None,
+    erro="",
+):
+    try:
+        HistoricoEnvioRelatorioExecutivo.objects.create(
+            empresa=empresa,
+            agendamento=agendamento,
+            origem=origem,
+            status=status,
+            assunto=(assunto or "").strip(),
+            destinos="\n".join(destinos or []),
+            incluir_csv=bool(incluir_csv),
+            incluir_xlsx=bool(incluir_xlsx),
+            incluir_pdf=bool(incluir_pdf),
+            enviados=max(int(enviados or 0), 0),
+            filtros_json=filtros or {},
+            resumo_json=_resumo_kpis_relatorio(relatorio) if relatorio else {},
+            erro=(erro or "").strip(),
+        )
+    except (ProgrammingError, OperationalError):
+        logger.warning(
+            "Histórico de relatórios não registado por falta de migração. empresa_id=%s origem=%s",
+            getattr(empresa, "id", None),
+            origem,
+        )
 
 
 def _obter_filtros_compras(request):
@@ -105,6 +292,42 @@ def _filtrar_pedidos_compra(*, empresa, filtros):
     return qs.order_by("-criado_em")
 
 
+def _avaliar_propostas_pedido(*, pedido):
+    propostas = list(
+        pedido.propostas_fornecedor.select_related("fornecedor").order_by("valor_proposto", "prazo_entrega_dias", "-criado_em")
+    )
+    if not propostas:
+        return []
+
+    valores = [float(p.valor_proposto or 0.0) for p in propostas]
+    prazos = [int(p.prazo_entrega_dias or 0) for p in propostas]
+    min_valor, max_valor = min(valores), max(valores)
+    min_prazo, max_prazo = min(prazos), max(prazos)
+    range_valor = max(max_valor - min_valor, 1e-9)
+    range_prazo = max(max_prazo - min_prazo, 1e-9)
+
+    avaliadas = []
+    for proposta in propostas:
+        valor = float(proposta.valor_proposto or 0.0)
+        prazo = int(proposta.prazo_entrega_dias or 0)
+        score_valor = (max_valor - valor) / range_valor
+        score_prazo = (max_prazo - prazo) / range_prazo
+        # Peso de decisão: 60% preço, 40% prazo.
+        score_total = (score_valor * 0.6) + (score_prazo * 0.4)
+        avaliadas.append(
+            {
+                "obj": proposta,
+                "score_total": score_total,
+            }
+        )
+
+    avaliadas.sort(key=lambda item: item["score_total"], reverse=True)
+    melhor_id = avaliadas[0]["obj"].id if avaliadas else None
+    for item in avaliadas:
+        item["is_melhor"] = item["obj"].id == melhor_id
+    return avaliadas
+
+
 def _render_secao(request, *, slug, titulo, descricao, proximos_passos, kpis=None, linhas=None):
     return render(
         request,
@@ -117,6 +340,49 @@ def _render_secao(request, *, slug, titulo, descricao, proximos_passos, kpis=Non
             "kpis": kpis or [],
             "linhas": linhas or [],
         },
+    )
+
+
+def _render_formulario_evidencia_compliance(request, *, form, origem, origem_label):
+    return render(
+        request,
+        "projetos/gestao_evidencia_compliance_form.html",
+        {
+            "form": form,
+            "origem": origem,
+            "origem_label": origem_label,
+        },
+    )
+
+
+def _criar_evidencia_compliance_para_origem(request, *, origem, origem_label, empresa, kwargs_origem):
+    form = EvidenciaComplianceForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        guardar_evidencia_compliance_form(
+            form=form,
+            empresa=empresa,
+            user=request.user,
+            **kwargs_origem,
+        )
+        messages.success(request, _("Evidência adicionada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _render_formulario_evidencia_compliance(
+        request,
+        form=form,
+        origem=origem,
+        origem_label=origem_label,
+    )
+
+
+def _apagar_evidencia_compliance(request, *, evidencia):
+    if request.method == "POST":
+        evidencia.delete()
+        messages.success(request, _("Evidência apagada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(
+        request,
+        "projetos/gestao_evidencia_compliance_confirm_delete.html",
+        {"item": evidencia},
     )
 
 
@@ -232,9 +498,68 @@ def gestao_compras_fornecedores(request):
     recentes = despesas.select_related("projeto", "furo", "maquina").order_by("-data", "-criado_em")[:8]
     pedidos_qs = _filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
     pedidos = pedidos_qs[:20]
+    pedidos_info = []
     projetos_choices = Projeto.objects.filter(empresa=empresa).order_by("nome").values("id", "nome")
     kpi_pedidos_total = PedidoCompra.objects.filter(empresa=empresa).count()
     kpi_pedidos_filtrados = pedidos_qs.count()
+    fornecedores_top = (
+        PedidoCompra.objects.filter(empresa=empresa)
+        .exclude(fornecedor_sugerido__exact="")
+        .values("fornecedor_sugerido")
+        .annotate(
+            qtd=Count("id"),
+            total_estimado=Sum("valor_estimado"),
+        )
+        .order_by("-qtd", "-total_estimado")[:8]
+    )
+    fornecedores_ativos = (
+        PedidoCompra.objects.filter(empresa=empresa)
+        .exclude(fornecedor_sugerido__exact="")
+        .values("fornecedor_sugerido")
+        .distinct()
+        .count()
+    )
+    fornecedores_cadastrados = []
+    pendentes_por_prioridade_qs = (
+        PedidoCompra.objects.filter(empresa=empresa, estado="pendente")
+        .values("prioridade")
+        .annotate(qtd=Count("id"))
+        .order_by("-qtd")
+    )
+    pendentes_label_map = dict(PedidoCompra.PRIORIDADE_CHOICES)
+    pendentes_por_prioridade = [
+        {
+            "prioridade": item["prioridade"],
+            "prioridade_label": pendentes_label_map.get(item["prioridade"], item["prioridade"] or "-"),
+            "qtd": item["qtd"],
+        }
+        for item in pendentes_por_prioridade_qs
+    ]
+
+    try:
+        for pedido in pedidos:
+            propostas_qs = pedido.propostas_fornecedor.all().order_by("valor_proposto", "prazo_entrega_dias")
+            proposta_selecionada = propostas_qs.filter(selecionada=True).first()
+            melhor_proposta = propostas_qs.first()
+            pedidos_info.append(
+                {
+                    "pedido": pedido,
+                    "propostas_count": propostas_qs.count(),
+                    "proposta_selecionada": proposta_selecionada,
+                    "melhor_proposta": melhor_proposta,
+                }
+            )
+        fornecedores_cadastrados = FornecedorCompra.objects.filter(empresa=empresa).order_by("nome")
+    except (ProgrammingError, OperationalError):
+        messages.warning(
+            request,
+            _(
+                "Módulo de fornecedores/propostas ainda sem migração aplicada. "
+                "Executa `python manage.py migrate` para ativar esta funcionalidade."
+            ),
+        )
+        pedidos_info = [{"pedido": pedido, "propostas_count": 0, "proposta_selecionada": None, "melhor_proposta": None} for pedido in pedidos]
+        fornecedores_cadastrados = []
 
     return render(
         request,
@@ -246,9 +571,10 @@ def gestao_compras_fornecedores(request):
                 {"titulo": _("Despesa total"), "valor": f"{total:,.2f} €"},
                 {"titulo": _("Despesa do mês"), "valor": f"{total_mes:,.2f} €"},
                 {"titulo": _("Registos"), "valor": str(despesas.count())},
+                {"titulo": _("Fornecedores ativos"), "valor": str(fornecedores_ativos)},
             ],
             "categorias": categorias,
-            "pedidos": pedidos,
+            "pedidos_info": pedidos_info,
             "filtros": filtros,
             "projetos_choices": projetos_choices,
             "estado_choices": [("", _("Todos"))] + list(PedidoCompra.ESTADO_CHOICES),
@@ -256,11 +582,9 @@ def gestao_compras_fornecedores(request):
             "kpi_pedidos_total": kpi_pedidos_total,
             "kpi_pedidos_filtrados": kpi_pedidos_filtrados,
             "despesas_recentes": recentes,
-            "proximos_passos": [
-                _("Adicionar cadastro de fornecedores com SLA e avaliação."),
-                _("Criar pedidos de compra com fluxo de aprovação."),
-                _("Comparar propostas por preço e prazo automaticamente."),
-            ],
+            "fornecedores_top": fornecedores_top,
+            "fornecedores_cadastrados": fornecedores_cadastrados,
+            "pendentes_por_prioridade": pendentes_por_prioridade,
         },
     )
 
@@ -436,12 +760,206 @@ def gestao_pedido_compra_estado(request, pk, estado):
 
 @login_required
 @admin_required
+def gestao_fornecedor_create(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    form = FornecedorCompraForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        fornecedor = form.save(commit=False)
+        fornecedor.empresa = empresa
+        fornecedor.save()
+        messages.success(request, _("Fornecedor criado com sucesso."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    return render(request, "projetos/gestao_fornecedor_form.html", {"form": form, "is_create": True})
+
+
+@login_required
+@admin_required
+def gestao_fornecedor_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    fornecedor = FornecedorCompra.objects.filter(empresa=empresa, pk=pk).first()
+    if not fornecedor:
+        messages.error(request, _("Fornecedor não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    form = FornecedorCompraForm(request.POST or None, instance=fornecedor)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Fornecedor atualizado com sucesso."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    return render(
+        request,
+        "projetos/gestao_fornecedor_form.html",
+        {"form": form, "is_create": False, "item": fornecedor},
+    )
+
+
+@login_required
+@admin_required
+def gestao_fornecedor_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    fornecedor = FornecedorCompra.objects.filter(empresa=empresa, pk=pk).first()
+    if not fornecedor:
+        messages.error(request, _("Fornecedor não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    if request.method == "POST":
+        fornecedor.delete()
+        messages.success(request, _("Fornecedor apagado com sucesso."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    return render(request, "projetos/gestao_fornecedor_confirm_delete.html", {"item": fornecedor})
+
+
+@login_required
+@admin_required
+def gestao_proposta_compra_create(request, pedido_pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    pedido = PedidoCompra.objects.filter(empresa=empresa, pk=pedido_pk).first()
+    if not pedido:
+        messages.error(request, _("Pedido não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    form = PropostaFornecedorCompraForm(request.POST or None, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        proposta = form.save(commit=False)
+        proposta.pedido = pedido
+        proposta.save()
+        if proposta.selecionada:
+            PropostaFornecedorCompra.objects.filter(pedido=pedido).exclude(pk=proposta.pk).update(selecionada=False)
+        messages.success(request, _("Proposta registada com sucesso."))
+        return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)
+    return render(
+        request,
+        "projetos/gestao_proposta_compra_form.html",
+        {"form": form, "pedido": pedido, "is_create": True},
+    )
+
+
+@login_required
+@admin_required
+def gestao_proposta_compra_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    proposta = PropostaFornecedorCompra.objects.select_related("pedido").filter(pedido__empresa=empresa, pk=pk).first()
+    if not proposta:
+        messages.error(request, _("Proposta não encontrada."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    form = PropostaFornecedorCompraForm(request.POST or None, instance=proposta, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        proposta = form.save()
+        if proposta.selecionada:
+            PropostaFornecedorCompra.objects.filter(pedido=proposta.pedido).exclude(pk=proposta.pk).update(selecionada=False)
+        messages.success(request, _("Proposta atualizada com sucesso."))
+        return redirect("projetos:gestao_pedido_compra_comparar", pk=proposta.pedido.pk)
+    return render(
+        request,
+        "projetos/gestao_proposta_compra_form.html",
+        {"form": form, "pedido": proposta.pedido, "is_create": False, "item": proposta},
+    )
+
+
+@login_required
+@admin_required
+def gestao_proposta_compra_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    proposta = PropostaFornecedorCompra.objects.select_related("pedido").filter(pedido__empresa=empresa, pk=pk).first()
+    if not proposta:
+        messages.error(request, _("Proposta não encontrada."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    if request.method == "POST":
+        pedido_pk = proposta.pedido.pk
+        proposta.delete()
+        messages.success(request, _("Proposta apagada com sucesso."))
+        return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido_pk)
+    return render(request, "projetos/gestao_proposta_compra_confirm_delete.html", {"item": proposta})
+
+
+@login_required
+@admin_required
+def gestao_pedido_compra_comparar(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    pedido = PedidoCompra.objects.filter(empresa=empresa, pk=pk).first()
+    if not pedido:
+        messages.error(request, _("Pedido não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+
+    propostas_avaliadas = _avaliar_propostas_pedido(pedido=pedido)
+    return render(
+        request,
+        "projetos/gestao_pedido_compra_comparar.html",
+        {
+            "pedido": pedido,
+            "propostas_avaliadas": propostas_avaliadas,
+        },
+    )
+
+
+@login_required
+@admin_required
+def gestao_pedido_compra_selecionar_melhor(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    pedido = PedidoCompra.objects.filter(empresa=empresa, pk=pk).first()
+    if not pedido:
+        messages.error(request, _("Pedido não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+
+    propostas_avaliadas = _avaliar_propostas_pedido(pedido=pedido)
+    if not propostas_avaliadas:
+        messages.error(request, _("Não existem propostas para comparar neste pedido."))
+        return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)
+
+    melhor = propostas_avaliadas[0]["obj"]
+    with transaction.atomic():
+        PropostaFornecedorCompra.objects.filter(pedido=pedido).update(selecionada=False)
+        melhor.selecionada = True
+        melhor.save(update_fields=["selecionada", "atualizado_em"])
+    messages.success(request, _("Melhor proposta selecionada automaticamente com base em preço e prazo."))
+    return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)
+
+
+@login_required
+@admin_required
+def gestao_pedido_compra_selecionar_proposta(request, pedido_pk, proposta_pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    pedido = PedidoCompra.objects.filter(empresa=empresa, pk=pedido_pk).first()
+    if not pedido:
+        messages.error(request, _("Pedido não encontrado."))
+        return redirect("projetos:gestao_compras_fornecedores")
+    proposta = PropostaFornecedorCompra.objects.filter(pedido=pedido, pk=proposta_pk).first()
+    if not proposta:
+        messages.error(request, _("Proposta não encontrada."))
+        return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)
+
+    with transaction.atomic():
+        PropostaFornecedorCompra.objects.filter(pedido=pedido).update(selecionada=False)
+        proposta.selecionada = True
+        proposta.save(update_fields=["selecionada", "atualizado_em"])
+    messages.success(request, _("Proposta selecionada com sucesso."))
+    return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)
+
+
+@login_required
+@admin_required
 def gestao_compliance_seguranca(request):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
 
     hoje = timezone.localdate()
+    filtros_dashboard = _obter_filtros_compliance_dashboard(request)
     avarias = MaquinaAvaria.objects.filter(empresa=empresa)
     avarias_abertas = avarias.exclude(status="resolvida").count()
     avarias_resolvidas_30d = avarias.filter(
@@ -451,25 +969,194 @@ def gestao_compliance_seguranca(request):
     empregados = Empregados.objects.filter(empresa=empresa)
     sem_contrato = empregados.filter(contrato__isnull=True).count()
     sem_curriculo = empregados.filter(curriculo__isnull=True).count()
-    filtro_check = (request.GET.get("check_status") or "").strip()
-    filtro_inc = (request.GET.get("inc_status") or "").strip()
+    filtro_check = filtros_dashboard["check_status"]
+    filtro_inc = filtros_dashboard["inc_status"]
+    filtro_aud = filtros_dashboard["aud_status"]
+    filtro_acao = filtros_dashboard["acao_status"]
+    filtro_plano = filtros_dashboard["plano_status"]
+    filtro_prev = filtros_dashboard["prev_status"]
+    drill_projeto = filtros_dashboard["drill_projeto"]
+    drill_responsavel = filtros_dashboard["drill_responsavel"]
+    janela_dias = filtros_dashboard["janela_dias"]
     checklists = []
     incidentes = []
+    auditorias = []
+    planos_auditoria = []
+    acoes_corretivas = []
+    acoes_preventivas = []
     checklists_nao_conformes = 0
     incidentes_abertos = 0
+    auditorias_abertas = 0
+    planos_vencidos = 0
+    acoes_abertas = 0
+    acoes_vencidas = 0
+    acoes_preventivas_abertas = 0
+    acoes_preventivas_vencidas = 0
+    evidencias_total = 0
+    acoes_com_fecho_formal = 0
+    evidencias_recentes = []
+    dashboard_eficacia = {
+        "resumo": {
+            "total_acoes": 0,
+            "total_concluidas": 0,
+            "total_abertas": 0,
+            "total_vencidas": 0,
+            "taxa_global_fecho": 0.0,
+            "tempo_medio_fecho_global": 0.0,
+            "taxa_sla_global": 0.0,
+            "responsaveis_criticos": 0,
+            "projetos_em_risco": 0,
+            "equipas_em_risco": 0,
+        },
+        "responsaveis": [],
+        "equipas": [],
+        "projetos": [],
+        "tendencia": [],
+        "historico": [],
+        "comparativos": {
+            "periodo_atual": None,
+            "periodo_anterior": None,
+            "delta_abertas": 0,
+            "delta_concluidas": 0,
+            "delta_vencidas": 0,
+            "delta_sla": 0.0,
+            "delta_tempo_medio": 0.0,
+        },
+        "benchmark": {
+            "melhor_responsavel": None,
+            "responsavel_maior_risco": None,
+            "melhor_equipa": None,
+            "equipa_maior_risco": None,
+        },
+        "previsao_incumprimento": {
+            "responsaveis": [],
+            "projetos": [],
+        },
+        "drilldown": {
+            "titulo": "",
+            "projeto_id": "",
+            "responsavel_id": "",
+            "projeto_choices": [],
+            "responsavel_choices": [],
+            "resumo": {
+                "total": 0,
+                "abertas": 0,
+                "concluidas": 0,
+                "vencidas": 0,
+                "vence_7d": 0,
+                "taxa_sla": 0.0,
+                "tempo_medio_fecho": 0.0,
+            },
+            "itens": [],
+        },
+        "snapshots": {
+            "janela_dias": 0,
+            "atual": None,
+            "anterior": None,
+            "delta_abertas": 0,
+            "delta_concluidas": 0,
+            "delta_vencidas": 0,
+            "delta_sla": 0.0,
+            "delta_tempo_medio": 0.0,
+        },
+        "janela_dias": 0,
+        "inicio_janela": None,
+        "referencia": hoje,
+    }
+    alertas_compliance = {
+        "criticos": [],
+        "preventivos": [],
+    }
 
     try:
-        checklists_qs = ChecklistHSE.objects.filter(empresa=empresa).select_related("projeto", "responsavel")
+        checklists_qs = ChecklistHSE.objects.filter(empresa=empresa).select_related("projeto", "responsavel").annotate(
+            total_evidencias=Count("evidencias")
+        )
         if filtro_check:
             checklists_qs = checklists_qs.filter(status=filtro_check)
         checklists = list(checklists_qs.order_by("-data_check", "-criado_em")[:25])
         checklists_nao_conformes = ChecklistHSE.objects.filter(empresa=empresa, status="nao_conforme").count()
 
-        incidentes_qs = IncidenteSeguranca.objects.filter(empresa=empresa).select_related("projeto", "reportado_por", "responsavel")
+        incidentes_qs = IncidenteSeguranca.objects.filter(empresa=empresa).select_related(
+            "projeto",
+            "reportado_por",
+            "responsavel",
+        ).annotate(total_evidencias=Count("evidencias"))
         if filtro_inc:
             incidentes_qs = incidentes_qs.filter(status=filtro_inc)
         incidentes = list(incidentes_qs.order_by("status", "-data_incidente", "-criado_em")[:25])
         incidentes_abertos = IncidenteSeguranca.objects.filter(empresa=empresa).exclude(status="fechado").count()
+
+        auditorias_qs = AuditoriaHSE.objects.filter(empresa=empresa).select_related("projeto", "responsavel").annotate(
+            total_evidencias=Count("evidencias")
+        )
+        if filtro_aud:
+            auditorias_qs = auditorias_qs.filter(status=filtro_aud)
+        auditorias = list(auditorias_qs.order_by("status", "-data_auditoria", "-criado_em")[:25])
+        auditorias_abertas = AuditoriaHSE.objects.filter(empresa=empresa).exclude(status="concluida").count()
+
+        planos_qs = PlanoAuditoriaHSE.objects.filter(empresa=empresa).select_related("projeto", "responsavel")
+        if filtro_plano == "ativos":
+            planos_qs = planos_qs.filter(ativo=True)
+        elif filtro_plano == "inativos":
+            planos_qs = planos_qs.filter(ativo=False)
+        elif filtro_plano == "vencidos":
+            planos_qs = planos_qs.filter(ativo=True, proxima_execucao__lt=hoje)
+        planos_auditoria = list(planos_qs.order_by("proxima_execucao", "titulo")[:25])
+        planos_vencidos = PlanoAuditoriaHSE.objects.filter(
+            empresa=empresa,
+            ativo=True,
+            proxima_execucao__lt=hoje,
+        ).count()
+
+        acoes_qs = AcaoCorretiva.objects.filter(empresa=empresa).select_related(
+            "projeto",
+            "responsavel",
+            "checklist",
+            "incidente",
+            "auditoria",
+            "fecho_formal",
+        ).annotate(total_evidencias=Count("evidencias"))
+        if filtro_acao:
+            acoes_qs = acoes_qs.filter(status=filtro_acao)
+        acoes_corretivas = list(acoes_qs.order_by("status", "prazo", "-criado_em")[:25])
+        acoes_abertas = AcaoCorretiva.objects.filter(empresa=empresa).exclude(status__in=["concluida", "cancelada"]).count()
+        acoes_vencidas = AcaoCorretiva.objects.filter(
+            empresa=empresa,
+            prazo__lt=hoje,
+        ).exclude(status__in=["concluida", "cancelada"]).count()
+        acoes_prev_qs = AcaoPreventiva.objects.filter(empresa=empresa).select_related(
+            "projeto",
+            "responsavel",
+            "checklist",
+            "incidente",
+            "auditoria",
+        ).annotate(total_evidencias=Count("evidencias"))
+        if filtro_prev:
+            acoes_prev_qs = acoes_prev_qs.filter(status=filtro_prev)
+        acoes_preventivas = list(acoes_prev_qs.order_by("status", "prazo", "-criado_em")[:25])
+        acoes_preventivas_abertas = AcaoPreventiva.objects.filter(empresa=empresa).exclude(
+            status__in=["concluida", "cancelada"]
+        ).count()
+        acoes_preventivas_vencidas = AcaoPreventiva.objects.filter(
+            empresa=empresa,
+            prazo__lt=hoje,
+        ).exclude(status__in=["concluida", "cancelada"]).count()
+        evidencias_total = EvidenciaCompliance.objects.filter(empresa=empresa).count()
+        acoes_com_fecho_formal = FechoAcaoCorretiva.objects.filter(empresa=empresa).count()
+        evidencias_recentes = list(
+            EvidenciaCompliance.objects.filter(empresa=empresa)
+            .select_related("criado_por", "checklist", "incidente", "auditoria", "acao_corretiva", "acao_preventiva")
+            .order_by("-criado_em")[:12]
+        )
+        dashboard_eficacia = construir_dashboard_eficacia_compliance(
+            empresa=empresa,
+            referencia=hoje,
+            projeto_id=drill_projeto,
+            responsavel_id=drill_responsavel,
+            janela_dias=janela_dias or None,
+        )
+        alertas_compliance = sincronizar_alertas_automaticos_compliance(empresa=empresa, referencia=hoje)
     except (ProgrammingError, OperationalError):
         messages.warning(
             request,
@@ -489,14 +1176,73 @@ def gestao_compliance_seguranca(request):
                 {"titulo": _("Empregados sem currículo"), "valor": str(sem_curriculo)},
                 {"titulo": _("Checklists não conformes"), "valor": str(checklists_nao_conformes)},
                 {"titulo": _("Incidentes abertos"), "valor": str(incidentes_abertos)},
+                {"titulo": _("Auditorias abertas"), "valor": str(auditorias_abertas)},
+                {"titulo": _("Planos vencidos"), "valor": str(planos_vencidos)},
+                {"titulo": _("Ações corretivas abertas"), "valor": str(acoes_abertas)},
+                {"titulo": _("Ações vencidas"), "valor": str(acoes_vencidas)},
+                {"titulo": _("Ações preventivas abertas"), "valor": str(acoes_preventivas_abertas)},
+                {"titulo": _("Preventivas vencidas"), "valor": str(acoes_preventivas_vencidas)},
+                {"titulo": _("Evidências registadas"), "valor": str(evidencias_total)},
+                {"titulo": _("Fechos formais"), "valor": str(acoes_com_fecho_formal)},
             ],
             "checklists": checklists,
             "incidentes": incidentes,
+            "auditorias": auditorias,
+            "planos_auditoria": planos_auditoria,
+            "acoes_corretivas": acoes_corretivas,
+            "acoes_preventivas": acoes_preventivas,
+            "evidencias_recentes": evidencias_recentes,
+            "dashboard_eficacia": dashboard_eficacia,
+            "alertas_compliance": alertas_compliance,
             "check_status_choices": [("", _("Todos"))] + list(ChecklistHSE.STATUS_CHOICES),
             "inc_status_choices": [("", _("Todos"))] + list(IncidenteSeguranca.STATUS_CHOICES),
-            "filtros": {"check_status": filtro_check, "inc_status": filtro_inc},
+            "aud_status_choices": [("", _("Todos"))] + list(AuditoriaHSE.STATUS_CHOICES),
+            "acao_status_choices": [("", _("Todos"))] + list(AcaoCorretiva.STATUS_CHOICES),
+            "prev_status_choices": [("", _("Todos"))] + list(AcaoPreventiva.STATUS_CHOICES),
+            "plano_status_choices": [
+                ("", _("Todos")),
+                ("ativos", _("Ativos")),
+                ("inativos", _("Inativos")),
+                ("vencidos", _("Vencidos")),
+            ],
+            "janela_dias_choices": [
+                (0, _("Total")),
+                (7, _("Últimos 7 dias")),
+                (30, _("Últimos 30 dias")),
+                (90, _("Últimos 90 dias")),
+            ],
+            "today": hoje,
+            "filtros": filtros_dashboard,
         },
     )
+
+
+@login_required
+@admin_required
+def gestao_compliance_dashboard_export_csv(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+
+    hoje = timezone.localdate()
+    filtros = _obter_filtros_compliance_dashboard(request)
+    dashboard_eficacia = construir_dashboard_eficacia_compliance(
+        empresa=empresa,
+        referencia=hoje,
+        projeto_id=filtros["drill_projeto"],
+        responsavel_id=filtros["drill_responsavel"],
+        janela_dias=filtros["janela_dias"] or None,
+    )
+    csv_bytes = _gerar_dashboard_compliance_csv_bytes(
+        empresa=empresa,
+        dashboard_eficacia=dashboard_eficacia,
+        filtros=filtros,
+    )
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="dashboard_compliance.csv"'
+    response.write(csv_bytes)
+    return response
 
 
 @login_required
@@ -552,6 +1298,25 @@ def gestao_checklist_hse_delete(request, pk):
 
 @login_required
 @admin_required
+def gestao_checklist_hse_evidencia_create(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = ChecklistHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Checklist HSE não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _criar_evidencia_compliance_para_origem(
+        request,
+        origem=item,
+        origem_label=_("Checklist HSE"),
+        empresa=empresa,
+        kwargs_origem={"checklist": item},
+    )
+
+
+@login_required
+@admin_required
 def gestao_incidente_create(request):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
@@ -603,6 +1368,25 @@ def gestao_incidente_delete(request, pk):
 
 @login_required
 @admin_required
+def gestao_incidente_evidencia_create(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = IncidenteSeguranca.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Incidente não encontrado."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _criar_evidencia_compliance_para_origem(
+        request,
+        origem=item,
+        origem_label=_("Incidente"),
+        empresa=empresa,
+        kwargs_origem={"incidente": item},
+    )
+
+
+@login_required
+@admin_required
 def gestao_incidente_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
@@ -617,6 +1401,385 @@ def gestao_incidente_estado(request, pk, estado):
     item.status = estado
     item.save(update_fields=["status", "atualizado_em"])
     messages.success(request, _("Estado do incidente atualizado."))
+    return redirect("projetos:gestao_compliance_seguranca")
+
+
+@login_required
+@admin_required
+def gestao_auditoria_hse_create(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    form = AuditoriaHSEForm(request.POST or None, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        item.empresa = empresa
+        item.save()
+        messages.success(request, _("Auditoria HSE criada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_auditoria_hse_form.html", {"form": form, "is_create": True})
+
+
+@login_required
+@admin_required
+def gestao_auditoria_hse_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AuditoriaHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Auditoria HSE não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    form = AuditoriaHSEForm(request.POST or None, instance=item, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Auditoria HSE atualizada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_auditoria_hse_form.html", {"form": form, "is_create": False, "item": item})
+
+
+@login_required
+@admin_required
+def gestao_auditoria_hse_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AuditoriaHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Auditoria HSE não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, _("Auditoria HSE apagada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_auditoria_hse_confirm_delete.html", {"item": item})
+
+
+@login_required
+@admin_required
+def gestao_auditoria_hse_evidencia_create(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AuditoriaHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Auditoria HSE não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _criar_evidencia_compliance_para_origem(
+        request,
+        origem=item,
+        origem_label=_("Auditoria HSE"),
+        empresa=empresa,
+        kwargs_origem={"auditoria": item},
+    )
+
+
+@login_required
+@admin_required
+def gestao_plano_auditoria_hse_create(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    form = PlanoAuditoriaHSEForm(request.POST or None, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        item.empresa = empresa
+        item.save()
+        messages.success(request, _("Plano de auditoria HSE criado com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_plano_auditoria_hse_form.html", {"form": form, "is_create": True})
+
+
+@login_required
+@admin_required
+def gestao_plano_auditoria_hse_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = PlanoAuditoriaHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Plano de auditoria HSE não encontrado."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    form = PlanoAuditoriaHSEForm(request.POST or None, instance=item, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Plano de auditoria HSE atualizado com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(
+        request,
+        "projetos/gestao_plano_auditoria_hse_form.html",
+        {"form": form, "is_create": False, "item": item},
+    )
+
+
+@login_required
+@admin_required
+def gestao_plano_auditoria_hse_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = PlanoAuditoriaHSE.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Plano de auditoria HSE não encontrado."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, _("Plano de auditoria HSE apagado com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_plano_auditoria_hse_confirm_delete.html", {"item": item})
+
+
+@login_required
+@admin_required
+def gestao_plano_auditoria_hse_gerar(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    geradas = gerar_auditorias_recorrentes_pendentes(empresa=empresa, user=request.user)
+    if geradas:
+        messages.success(request, _("Foram geradas %(total)s auditorias recorrentes.") % {"total": len(geradas)})
+    else:
+        messages.info(request, _("Não existem auditorias recorrentes vencidas para gerar."))
+    return redirect("projetos:gestao_compliance_seguranca")
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_create(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    form = AcaoCorretivaForm(request.POST or None, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        item.empresa = empresa
+        if item.status != "concluida":
+            item.concluida_em = None
+        elif item.status == "concluida" and item.concluida_em is None:
+            item.concluida_em = timezone.localdate()
+        item.save()
+        messages.success(request, _("Ação corretiva criada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_corretiva_form.html", {"form": form, "is_create": True})
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação corretiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    form = AcaoCorretivaForm(request.POST or None, instance=item, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        obj = form.save(commit=False)
+        if obj.status != "concluida":
+            obj.concluida_em = None
+        elif obj.concluida_em is None:
+            obj.concluida_em = timezone.localdate()
+        obj.save()
+        messages.success(request, _("Ação corretiva atualizada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_corretiva_form.html", {"form": form, "is_create": False, "item": item})
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação corretiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, _("Ação corretiva apagada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_corretiva_confirm_delete.html", {"item": item})
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_evidencia_create(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação corretiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _criar_evidencia_compliance_para_origem(
+        request,
+        origem=item,
+        origem_label=_("Ação corretiva"),
+        empresa=empresa,
+        kwargs_origem={"acao_corretiva": item},
+    )
+
+
+@login_required
+@admin_required
+def gestao_evidencia_compliance_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    evidencia = EvidenciaCompliance.objects.filter(empresa=empresa, pk=pk).first()
+    if not evidencia:
+        messages.error(request, _("Evidência não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _apagar_evidencia_compliance(request, evidencia=evidencia)
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_fecho(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).select_related("fecho_formal").first()
+    if not item:
+        messages.error(request, _("Ação corretiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    instance = getattr(item, "fecho_formal", None)
+    form = FechoAcaoCorretivaForm(request.POST or None, instance=instance)
+    if request.method == "POST" and form.is_valid():
+        registar_fecho_formal_acao_corretiva(
+            acao=item,
+            user=request.user,
+            cleaned_data=form.cleaned_data,
+        )
+        messages.success(request, _("Fecho formal registado com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(
+        request,
+        "projetos/gestao_acao_corretiva_fecho_form.html",
+        {"form": form, "item": item, "is_create": instance is None},
+    )
+
+
+@login_required
+@admin_required
+def gestao_acao_corretiva_estado(request, pk, estado):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação corretiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if estado not in {"aberta", "em_andamento", "concluida", "cancelada"}:
+        messages.error(request, _("Estado inválido."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if estado == "concluida":
+        return redirect("projetos:gestao_acao_corretiva_fecho", pk=item.pk)
+    item.status = estado
+    item.concluida_em = timezone.localdate() if estado == "concluida" else None
+    item.save(update_fields=["status", "concluida_em", "atualizado_em"])
+    messages.success(request, _("Estado da ação corretiva atualizado."))
+    return redirect("projetos:gestao_compliance_seguranca")
+
+
+@login_required
+@admin_required
+def gestao_acao_preventiva_create(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    form = AcaoPreventivaForm(request.POST or None, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        item.empresa = empresa
+        if item.status != "concluida":
+            item.concluida_em = None
+        elif item.concluida_em is None:
+            item.concluida_em = timezone.localdate()
+        item.save()
+        messages.success(request, _("Ação preventiva criada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_preventiva_form.html", {"form": form, "is_create": True})
+
+
+@login_required
+@admin_required
+def gestao_acao_preventiva_update(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoPreventiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação preventiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    form = AcaoPreventivaForm(request.POST or None, instance=item, empresa=empresa)
+    if request.method == "POST" and form.is_valid():
+        obj = form.save(commit=False)
+        if obj.status != "concluida":
+            obj.concluida_em = None
+        elif obj.concluida_em is None:
+            obj.concluida_em = timezone.localdate()
+        obj.save()
+        messages.success(request, _("Ação preventiva atualizada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_preventiva_form.html", {"form": form, "is_create": False, "item": item})
+
+
+@login_required
+@admin_required
+def gestao_acao_preventiva_delete(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoPreventiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação preventiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, _("Ação preventiva apagada com sucesso."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return render(request, "projetos/gestao_acao_preventiva_confirm_delete.html", {"item": item})
+
+
+@login_required
+@admin_required
+def gestao_acao_preventiva_evidencia_create(request, pk):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoPreventiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação preventiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    return _criar_evidencia_compliance_para_origem(
+        request,
+        origem=item,
+        origem_label=_("Ação preventiva"),
+        empresa=empresa,
+        kwargs_origem={"acao_preventiva": item},
+    )
+
+
+@login_required
+@admin_required
+def gestao_acao_preventiva_estado(request, pk, estado):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    item = AcaoPreventiva.objects.filter(empresa=empresa, pk=pk).first()
+    if not item:
+        messages.error(request, _("Ação preventiva não encontrada."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    if estado not in {"aberta", "em_andamento", "concluida", "cancelada"}:
+        messages.error(request, _("Estado inválido."))
+        return redirect("projetos:gestao_compliance_seguranca")
+    item.status = estado
+    item.concluida_em = timezone.localdate() if estado == "concluida" else None
+    item.save(update_fields=["status", "concluida_em", "atualizado_em"])
+    messages.success(request, _("Estado da ação preventiva atualizado."))
     return redirect("projetos:gestao_compliance_seguranca")
 
 
@@ -836,6 +1999,7 @@ def gestao_relatorios_executivos(request):
             "destinos": default_email,
             "incluir_csv": True,
             "incluir_xlsx": True,
+            "incluir_pdf": False,
         }
     )
     agendamento = _obter_ou_criar_agendamento_relatorio(empresa)
@@ -843,6 +2007,18 @@ def gestao_relatorios_executivos(request):
     proximo_envio = agendamento.proximo_envio_em
     if agendamento.ativo and not proximo_envio:
         proximo_envio = calcular_proximo_envio_agendado(agendamento=agendamento)
+    historico_envios = []
+    try:
+        historico_envios = list(
+            HistoricoEnvioRelatorioExecutivo.objects.filter(empresa=empresa)
+            .select_related("agendamento")
+            .order_by("-criado_em")[:30]
+        )
+    except (ProgrammingError, OperationalError):
+        messages.warning(
+            request,
+            _("Módulo de histórico de relatórios ainda sem migração aplicada. Executa `python manage.py migrate` para ativar."),
+        )
 
     return render(
         request,
@@ -861,6 +2037,7 @@ def gestao_relatorios_executivos(request):
             "form_agendamento": form_agendamento,
             "agendamento": agendamento,
             "proximo_envio": proximo_envio,
+            "historico_envios": historico_envios,
         },
     )
 
@@ -906,7 +2083,12 @@ def gestao_relatorios_agendamento_executar_agora(request):
 
     agendamento = _obter_ou_criar_agendamento_relatorio(empresa)
     try:
-        _executar_envio_agendado_empresa(empresa=empresa, agendamento=agendamento, referencia=timezone.now())
+        _executar_envio_agendado_empresa(
+            empresa=empresa,
+            agendamento=agendamento,
+            referencia=timezone.now(),
+            origem="executar_agora",
+        )
     except Exception as exc:
         logger.exception("Falha ao executar envio agendado manual. empresa_id=%s", empresa.id)
         messages.error(request, _("Erro ao executar envio imediato: %(erro)s") % {"erro": str(exc)})
@@ -954,6 +2136,26 @@ def gestao_relatorios_export_xlsx(request):
 
 @login_required
 @admin_required
+def gestao_relatorios_export_pdf(request):
+    empresa, resposta_erro = _resolver_empresa_admin(request)
+    if resposta_erro:
+        return resposta_erro
+    filtros = _obter_filtros_relatorio_executivo(request)
+    relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
+    try:
+        pdf_bytes = _gerar_relatorio_pdf_bytes(empresa=empresa, filtros=filtros, relatorio=relatorio)
+    except RuntimeError as exc:
+        messages.error(request, str(exc))
+        return redirect(construir_url_relatorio_com_filtros(filtros=filtros))
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="relatorio_executivo.pdf"'
+    response.write(pdf_bytes)
+    return response
+
+
+@login_required
+@admin_required
 def gestao_relatorios_enviar_email(request):
     if request.method != "POST":
         return redirect("projetos:gestao_relatorios_executivos")
@@ -984,6 +2186,14 @@ def gestao_relatorios_enviar_email(request):
         assunto = _("Relatório Executivo - %(empresa)s") % {"empresa": empresa.nome}
     incluir_csv = bool(form.cleaned_data.get("incluir_csv"))
     incluir_xlsx = bool(form.cleaned_data.get("incluir_xlsx"))
+    incluir_pdf = bool(form.cleaned_data.get("incluir_pdf"))
+    pdf_bytes = None
+    if incluir_pdf:
+        try:
+            pdf_bytes = _gerar_relatorio_pdf_bytes(empresa=empresa, filtros=filtros, relatorio=relatorio)
+        except RuntimeError as exc:
+            messages.error(request, str(exc))
+            return redirect(construir_url_relatorio_com_filtros(filtros=filtros))
 
     try:
         resultado = enviar_relatorio_executivo_email(
@@ -994,13 +2204,42 @@ def gestao_relatorios_enviar_email(request):
             destinos=destinos,
             incluir_csv=incluir_csv,
             incluir_xlsx=incluir_xlsx,
+            incluir_pdf=incluir_pdf,
             csv_bytes=_gerar_relatorio_csv_bytes(filtros=filtros, relatorio=relatorio),
             xlsx_bytes=_gerar_relatorio_xlsx_bytes(filtros=filtros, relatorio=relatorio),
+            pdf_bytes=pdf_bytes,
         )
     except Exception as exc:
+        _registar_historico_envio_relatorio(
+            empresa=empresa,
+            origem="manual",
+            status="erro",
+            assunto=assunto,
+            destinos=destinos,
+            incluir_csv=incluir_csv,
+            incluir_xlsx=incluir_xlsx,
+            incluir_pdf=incluir_pdf,
+            enviados=0,
+            filtros=filtros,
+            relatorio=relatorio,
+            erro=str(exc),
+        )
         messages.error(request, _("Erro ao enviar email: %(erro)s") % {"erro": str(exc)})
         return redirect(construir_url_relatorio_com_filtros(filtros=filtros))
 
+    _registar_historico_envio_relatorio(
+        empresa=empresa,
+        origem="manual",
+        status="sucesso",
+        assunto=assunto,
+        destinos=resultado.destinos,
+        incluir_csv=incluir_csv,
+        incluir_xlsx=incluir_xlsx,
+        incluir_pdf=incluir_pdf,
+        enviados=resultado.enviados,
+        filtros=filtros,
+        relatorio=relatorio,
+    )
     if resultado.enviados:
         messages.success(request, _("Relatório enviado por email com sucesso."))
     else:
@@ -1033,26 +2272,82 @@ def _filtros_periodo_agendamento(*, agendamento, referencia=None):
     }
 
 
-def _executar_envio_agendado_empresa(*, empresa, agendamento, referencia=None):
+def _executar_envio_agendado_empresa(*, empresa, agendamento, referencia=None, origem="agendado"):
     filtros = _filtros_periodo_agendamento(agendamento=agendamento, referencia=referencia)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     destinos_agendamento = normalizar_destinos(agendamento.destinos or "")
     destinos = resolver_destinos_relatorio(empresa=empresa, destinos_form=destinos_agendamento)
     if not destinos:
-        raise ValueError("Não existem destinatários válidos para o agendamento.")
+        erro = "Não existem destinatários válidos para o agendamento."
+        _registar_historico_envio_relatorio(
+            empresa=empresa,
+            agendamento=agendamento,
+            origem=origem,
+            status="erro",
+            assunto=_("Relatório Executivo Agendado - %(empresa)s") % {"empresa": empresa.nome},
+            destinos=destinos,
+            incluir_csv=bool(agendamento.incluir_csv),
+            incluir_xlsx=bool(agendamento.incluir_xlsx),
+            incluir_pdf=bool(agendamento.incluir_pdf),
+            enviados=0,
+            filtros=filtros,
+            relatorio=relatorio,
+            erro=erro,
+        )
+        raise ValueError(erro)
 
     assunto = _("Relatório Executivo Agendado - %(empresa)s") % {"empresa": empresa.nome}
-    enviar_relatorio_executivo_email(
+    incluir_pdf = bool(agendamento.incluir_pdf)
+    pdf_bytes = None
+    if incluir_pdf:
+        pdf_bytes = _gerar_relatorio_pdf_bytes(empresa=empresa, filtros=filtros, relatorio=relatorio)
+    try:
+        resultado = enviar_relatorio_executivo_email(
+            empresa=empresa,
+            filtros=filtros,
+            relatorio=relatorio,
+            assunto=assunto,
+            destinos=destinos,
+            incluir_csv=bool(agendamento.incluir_csv),
+            incluir_xlsx=bool(agendamento.incluir_xlsx),
+            incluir_pdf=incluir_pdf,
+            csv_bytes=_gerar_relatorio_csv_bytes(filtros=filtros, relatorio=relatorio),
+            xlsx_bytes=_gerar_relatorio_xlsx_bytes(filtros=filtros, relatorio=relatorio),
+            pdf_bytes=pdf_bytes,
+        )
+    except Exception as exc:
+        _registar_historico_envio_relatorio(
+            empresa=empresa,
+            agendamento=agendamento,
+            origem=origem,
+            status="erro",
+            assunto=assunto,
+            destinos=destinos,
+            incluir_csv=bool(agendamento.incluir_csv),
+            incluir_xlsx=bool(agendamento.incluir_xlsx),
+            incluir_pdf=incluir_pdf,
+            enviados=0,
+            filtros=filtros,
+            relatorio=relatorio,
+            erro=str(exc),
+        )
+        raise
+
+    _registar_historico_envio_relatorio(
         empresa=empresa,
-        filtros=filtros,
-        relatorio=relatorio,
+        agendamento=agendamento,
+        origem=origem,
+        status="sucesso",
         assunto=assunto,
         destinos=destinos,
         incluir_csv=bool(agendamento.incluir_csv),
         incluir_xlsx=bool(agendamento.incluir_xlsx),
-        csv_bytes=_gerar_relatorio_csv_bytes(filtros=filtros, relatorio=relatorio),
-        xlsx_bytes=_gerar_relatorio_xlsx_bytes(filtros=filtros, relatorio=relatorio),
+        incluir_pdf=incluir_pdf,
+        enviados=resultado.enviados,
+        filtros=filtros,
+        relatorio=relatorio,
     )
+    return resultado
 
 
 def _gerar_relatorio_csv_bytes(*, filtros, relatorio):
@@ -1112,6 +2407,17 @@ def _gerar_relatorio_csv_bytes(*, filtros, relatorio):
     writer.writerow(["Checklists nao conformes", relatorio["compliance"]["checklists_nao_conformes"]])
     writer.writerow(["Incidentes total", relatorio["compliance"]["incidentes_total"]])
     writer.writerow(["Incidentes abertos", relatorio["compliance"]["incidentes_abertos"]])
+    writer.writerow(["Auditorias total", relatorio["compliance"]["auditorias_total"]])
+    writer.writerow(["Auditorias abertas", relatorio["compliance"]["auditorias_abertas"]])
+    writer.writerow(["Planos auditoria total", relatorio["compliance"]["planos_total"]])
+    writer.writerow(["Planos auditoria vencidos", relatorio["compliance"]["planos_vencidos"]])
+    writer.writerow(["Acoes corretivas total", relatorio["compliance"]["acoes_total"]])
+    writer.writerow(["Acoes corretivas abertas", relatorio["compliance"]["acoes_abertas"]])
+    writer.writerow(["Acoes preventivas total", relatorio["compliance"]["preventivas_total"]])
+    writer.writerow(["Acoes preventivas abertas", relatorio["compliance"]["preventivas_abertas"]])
+    writer.writerow(["Acoes preventivas vencidas", relatorio["compliance"]["preventivas_vencidas"]])
+    writer.writerow(["Evidencias registadas", relatorio["compliance"]["evidencias_total"]])
+    writer.writerow(["Acoes com fecho formal", relatorio["compliance"]["acoes_com_fecho_formal"]])
 
     writer.writerow([])
     writer.writerow(["Tendencia despesas", "", ""])
@@ -1152,6 +2458,17 @@ def _gerar_relatorio_xlsx_bytes(*, filtros, relatorio):
     ws4.append(["Checklists nao conformes", relatorio["compliance"]["checklists_nao_conformes"]])
     ws4.append(["Incidentes total", relatorio["compliance"]["incidentes_total"]])
     ws4.append(["Incidentes abertos", relatorio["compliance"]["incidentes_abertos"]])
+    ws4.append(["Auditorias total", relatorio["compliance"]["auditorias_total"]])
+    ws4.append(["Auditorias abertas", relatorio["compliance"]["auditorias_abertas"]])
+    ws4.append(["Planos auditoria total", relatorio["compliance"]["planos_total"]])
+    ws4.append(["Planos auditoria vencidos", relatorio["compliance"]["planos_vencidos"]])
+    ws4.append(["Acoes corretivas total", relatorio["compliance"]["acoes_total"]])
+    ws4.append(["Acoes corretivas abertas", relatorio["compliance"]["acoes_abertas"]])
+    ws4.append(["Acoes preventivas total", relatorio["compliance"]["preventivas_total"]])
+    ws4.append(["Acoes preventivas abertas", relatorio["compliance"]["preventivas_abertas"]])
+    ws4.append(["Acoes preventivas vencidas", relatorio["compliance"]["preventivas_vencidas"]])
+    ws4.append(["Evidencias registadas", relatorio["compliance"]["evidencias_total"]])
+    ws4.append(["Acoes com fecho formal", relatorio["compliance"]["acoes_com_fecho_formal"]])
 
     ws5 = wb.create_sheet("Tendencia")
     ws5.append(["Mes", "Total (€)", "Registos"])
@@ -1178,11 +2495,442 @@ def _gerar_relatorio_xlsx_bytes(*, filtros, relatorio):
     return output.getvalue()
 
 
+def _gerar_relatorio_pdf_bytes(*, empresa, filtros, relatorio):
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    except Exception as exc:
+        raise RuntimeError(
+            "Exportação PDF indisponível: instala `reportlab` no ambiente (`pip install reportlab==4.2.2`)."
+        ) from exc
+
+    output = io.BytesIO()
+    doc = SimpleDocTemplate(
+        output,
+        pagesize=A4,
+        leftMargin=14 * mm,
+        rightMargin=14 * mm,
+        topMargin=18 * mm,
+        bottomMargin=14 * mm,
+    )
+
+    palette = {
+        "brand": colors.HexColor("#0f172a"),
+        "brand_soft": colors.HexColor("#e2e8f0"),
+        "accent": colors.HexColor("#2563eb"),
+        "accent_soft": colors.HexColor("#dbeafe"),
+        "ok": colors.HexColor("#047857"),
+        "danger": colors.HexColor("#be123c"),
+        "text": colors.HexColor("#111827"),
+        "muted": colors.HexColor("#475569"),
+        "line": colors.HexColor("#cbd5e1"),
+        "panel": colors.white,
+        "panel_alt": colors.HexColor("#f8fafc"),
+    }
+
+    styles = getSampleStyleSheet()
+    styles.add(
+        ParagraphStyle(
+            name="ExecTitle",
+            parent=styles["Title"],
+            fontName="Helvetica-Bold",
+            fontSize=20,
+            leading=24,
+            textColor=palette["brand"],
+            alignment=TA_LEFT,
+            spaceAfter=4,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="ExecMeta",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9,
+            leading=12,
+            textColor=palette["muted"],
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="HeroTitle",
+            parent=styles["Title"],
+            fontName="Helvetica-Bold",
+            fontSize=24,
+            leading=28,
+            textColor=colors.white,
+            alignment=TA_LEFT,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="HeroSub",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=10,
+            leading=14,
+            textColor=colors.white,
+            alignment=TA_LEFT,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="SectionTitle",
+            parent=styles["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=12,
+            leading=14,
+            textColor=palette["brand"],
+            spaceAfter=6,
+            spaceBefore=4,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="SmallCell",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            leading=11,
+            textColor=palette["text"],
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="SmallCellRight",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            leading=11,
+            textColor=palette["text"],
+            alignment=TA_RIGHT,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="SummaryBody",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9,
+            leading=13,
+            textColor=palette["text"],
+        )
+    )
+
+    def fmt_money(value):
+        return f"{float(value or 0):,.2f} EUR".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    def fmt_num(value):
+        return f"{float(value or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    def build_kpi_card(title, value):
+        inner = Table(
+            [
+                [Paragraph(title, styles["ExecMeta"])],
+                [Paragraph(f"<b>{value}</b>", styles["SectionTitle"])],
+            ],
+            colWidths=[40 * mm],
+        )
+        inner.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), palette["panel_alt"]),
+                    ("BOX", (0, 0), (-1, -1), 0.75, palette["line"]),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                    ("TOPPADDING", (0, 0), (-1, -1), 7),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                ]
+            )
+        )
+        return inner
+
+    story = []
+
+    logo_path = ""
+    try:
+        if getattr(empresa, "logo", None) and getattr(empresa.logo, "path", ""):
+            candidate = empresa.logo.path
+            if candidate and os.path.exists(candidate):
+                logo_path = candidate
+    except Exception:
+        logo_path = ""
+
+    logo_flowable = Paragraph("<b>Sistema Furação</b>", styles["SectionTitle"])
+    if logo_path:
+        try:
+            logo_flowable = Image(logo_path, width=28 * mm, height=28 * mm, kind="proportional")
+        except Exception:
+            logo_flowable = Paragraph("<b>Sistema Furação</b>", styles["SectionTitle"])
+
+    periodo_inicio = filtros.get("data_inicio") or "-"
+    periodo_fim = filtros.get("data_fim") or "-"
+    gerado_em = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %H:%M")
+
+    header_meta_text = (
+        f"<b>Empresa:</b> {empresa.nome}<br/>"
+        f"<b>Período:</b> {periodo_inicio} até {periodo_fim}<br/>"
+        f"<b>Gerado em:</b> {gerado_em}"
+    )
+    hero_text = (
+        "Visão consolidada do desempenho operacional, financeiro e de compliance "
+        "para apoio rápido à decisão."
+    )
+    hero = Table(
+        [
+            [
+                logo_flowable,
+                Paragraph("Relatório Executivo", styles["HeroTitle"]),
+                Paragraph(header_meta_text, styles["HeroSub"]),
+            ],
+            [
+                "",
+                Paragraph(hero_text, styles["HeroSub"]),
+                "",
+            ],
+        ],
+        colWidths=[34 * mm, 96 * mm, 52 * mm],
+    )
+    hero.setStyle(
+        TableStyle(
+            [
+                ("SPAN", (1, 1), (2, 1)),
+                ("BACKGROUND", (0, 0), (-1, -1), palette["brand"]),
+                ("BOX", (0, 0), (-1, -1), 0.75, palette["brand"]),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ]
+        )
+    )
+    story.append(hero)
+    story.append(Spacer(1, 8))
+
+    margem_total = relatorio["projetos_financeiro"]["totais"]["margem_estimada"]
+    nao_conformes = relatorio["compliance"]["checklists_nao_conformes"]
+    incidentes_abertos = relatorio["compliance"]["incidentes_abertos"]
+    auditorias_abertas = relatorio["compliance"]["auditorias_abertas"]
+    planos_vencidos = relatorio["compliance"]["planos_vencidos"]
+    acoes_abertas = relatorio["compliance"]["acoes_abertas"]
+    preventivas_abertas = relatorio["compliance"]["preventivas_abertas"]
+    preventivas_vencidas = relatorio["compliance"]["preventivas_vencidas"]
+    evidencias_total = relatorio["compliance"]["evidencias_total"]
+    acoes_com_fecho_formal = relatorio["compliance"]["acoes_com_fecho_formal"]
+    destaque_margem = "positiva" if margem_total >= 0 else "negativa"
+    resumo_executivo = (
+        f"No período analisado, a empresa registou {relatorio['kpis'][0]['valor']} projetos, "
+        f"{relatorio['kpis'][1]['valor']} furos e {relatorio['kpis'][2]['valor']} colaboradores considerados no consolidado. "
+        f"A despesa total foi de {fmt_money(relatorio['financeiro']['despesas_total'])} e a margem estimada agregada encontra-se "
+        f"{destaque_margem} em {fmt_money(margem_total)}. "
+        f"Em compliance, existem {nao_conformes} checklist(s) não conforme(s), {incidentes_abertos} incidente(s), "
+        f"{auditorias_abertas} auditoria(s), {planos_vencidos} plano(s) vencido(s), {acoes_abertas} ação(ões) corretiva(s) "
+        f"e {preventivas_abertas} ação(ões) preventiva(s) ainda em aberto. "
+        f"Foram registadas {evidencias_total} evidência(s), {preventivas_vencidas} preventiva(s) estão vencidas "
+        f"e {acoes_com_fecho_formal} ação(ões) corretiva(s) já têm fecho formal."
+    )
+    resumo_box = Table(
+        [[Paragraph("<b>Resumo Executivo</b>", styles["SectionTitle"])], [Paragraph(resumo_executivo, styles["SummaryBody"])]],
+        colWidths=[182 * mm],
+    )
+    resumo_box.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), palette["accent_soft"]),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+                ("BOX", (0, 0), (-1, -1), 0.75, palette["line"]),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+    story.append(resumo_box)
+    story.append(Spacer(1, 8))
+
+    kpi_cards = []
+    for item in relatorio["kpis"]:
+        kpi_cards.append(build_kpi_card(item["titulo"], item["valor"]))
+    kpi_rows = [kpi_cards[:2], kpi_cards[2:4]]
+    kpi_table = Table(kpi_rows, colWidths=[86 * mm, 86 * mm], rowHeights=[None, None], hAlign="LEFT")
+    kpi_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
+    story.append(kpi_table)
+    story.append(Spacer(1, 6))
+
+    resumo_table = Table(
+        [
+            [
+                Paragraph("<b>Financeiro</b>", styles["SectionTitle"]),
+                Paragraph("<b>RH</b>", styles["SectionTitle"]),
+                Paragraph("<b>Compliance</b>", styles["SectionTitle"]),
+            ],
+            [
+                Paragraph(
+                    f"Despesas total: {fmt_money(relatorio['financeiro']['despesas_total'])}<br/>"
+                    f"N.º despesas: {relatorio['financeiro']['despesas_qtd']}<br/>"
+                    f"Receita estimada: {fmt_money(relatorio['projetos_financeiro']['totais']['receita_estimada'])}<br/>"
+                    f"Margem estimada: {fmt_money(relatorio['projetos_financeiro']['totais']['margem_estimada'])}",
+                    styles["SmallCell"],
+                ),
+                Paragraph(
+                    f"Horas presenca: {fmt_num(relatorio['rh']['horas_presenca'])}<br/>"
+                    f"Horas extra: {fmt_num(relatorio['rh']['horas_extra'])}<br/>"
+                    f"Horas falta: {fmt_num(relatorio['rh']['horas_falta'])}",
+                    styles["SmallCell"],
+                ),
+                Paragraph(
+                    f"Checklists total: {relatorio['compliance']['checklists_total']}<br/>"
+                    f"Não conformes: {relatorio['compliance']['checklists_nao_conformes']}<br/>"
+                    f"Incidentes total: {relatorio['compliance']['incidentes_total']}<br/>"
+                    f"Incidentes abertos: {relatorio['compliance']['incidentes_abertos']}<br/>"
+                    f"Auditorias abertas: {relatorio['compliance']['auditorias_abertas']}<br/>"
+                    f"Planos vencidos: {relatorio['compliance']['planos_vencidos']}<br/>"
+                    f"Ações corretivas abertas: {relatorio['compliance']['acoes_abertas']}<br/>"
+                    f"Ações preventivas abertas: {relatorio['compliance']['preventivas_abertas']}<br/>"
+                    f"Preventivas vencidas: {relatorio['compliance']['preventivas_vencidas']}<br/>"
+                    f"Evidências: {relatorio['compliance']['evidencias_total']}<br/>"
+                    f"Fechos formais: {relatorio['compliance']['acoes_com_fecho_formal']}",
+                    styles["SmallCell"],
+                ),
+            ],
+        ],
+        colWidths=[58 * mm, 58 * mm, 58 * mm],
+    )
+    resumo_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), palette["accent_soft"]),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+                ("BOX", (0, 0), (-1, -1), 0.75, palette["line"]),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, palette["line"]),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+    story.append(resumo_table)
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("Comparativo por Projeto", styles["SectionTitle"]))
+    project_rows = [
+        [
+            Paragraph("<b>Projeto</b>", styles["SmallCell"]),
+            Paragraph("<b>Metros</b>", styles["SmallCellRight"]),
+            Paragraph("<b>Registos</b>", styles["SmallCellRight"]),
+            Paragraph("<b>Custo</b>", styles["SmallCellRight"]),
+            Paragraph("<b>Receita</b>", styles["SmallCellRight"]),
+            Paragraph("<b>Margem</b>", styles["SmallCellRight"]),
+        ]
+    ]
+    for item in relatorio["projetos_financeiro"]["linhas"][:18]:
+        margin_color = palette["ok"] if item["margem_estimada"] >= 0 else palette["danger"]
+        margin_style = ParagraphStyle(
+            name=f"MarginStyle{item['projeto_id']}",
+            parent=styles["SmallCellRight"],
+            textColor=margin_color,
+        )
+        project_rows.append(
+            [
+                Paragraph(item["projeto_nome"], styles["SmallCell"]),
+                Paragraph(f"{fmt_num(item['metros'])} m", styles["SmallCellRight"]),
+                Paragraph(str(item["registos"]), styles["SmallCellRight"]),
+                Paragraph(fmt_money(item["custo_total"]), styles["SmallCellRight"]),
+                Paragraph(fmt_money(item["receita_estimada"]), styles["SmallCellRight"]),
+                Paragraph(fmt_money(item["margem_estimada"]), margin_style),
+            ]
+        )
+    if len(project_rows) == 1:
+        project_rows.append([Paragraph("Sem dados de projetos para o período selecionado.", styles["SmallCell"]), "", "", "", "", ""])
+
+    projects_table = Table(project_rows, colWidths=[58 * mm, 23 * mm, 19 * mm, 28 * mm, 30 * mm, 26 * mm], repeatRows=1)
+    projects_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), palette["brand"]),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, palette["panel_alt"]]),
+                ("BOX", (0, 0), (-1, -1), 0.75, palette["line"]),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, palette["line"]),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.append(projects_table)
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("Tendência de Despesas", styles["SectionTitle"]))
+    trend_rows = [
+        [
+            Paragraph("<b>Mês</b>", styles["SmallCell"]),
+            Paragraph("<b>Total</b>", styles["SmallCellRight"]),
+            Paragraph("<b>Registos</b>", styles["SmallCellRight"]),
+        ]
+    ]
+    for item in relatorio["tendencia"]:
+        trend_rows.append(
+            [
+                Paragraph(item["mes"], styles["SmallCell"]),
+                Paragraph(fmt_money(item["total"]), styles["SmallCellRight"]),
+                Paragraph(str(item["qtd"]), styles["SmallCellRight"]),
+            ]
+        )
+    if len(trend_rows) == 1:
+        trend_rows.append([Paragraph("Sem dados disponíveis.", styles["SmallCell"]), "", ""])
+
+    trend_table = Table(trend_rows, colWidths=[52 * mm, 38 * mm, 28 * mm], hAlign="LEFT", repeatRows=1)
+    trend_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), palette["accent"]),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, palette["panel_alt"]]),
+                ("BOX", (0, 0), (-1, -1), 0.75, palette["line"]),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, palette["line"]),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.append(trend_table)
+
+    def draw_page(canvas, doc_obj):
+        canvas.saveState()
+        canvas.setStrokeColor(palette["line"])
+        canvas.setFillColor(palette["muted"])
+        canvas.setFont("Helvetica", 8)
+        canvas.line(doc_obj.leftMargin, 10 * mm, A4[0] - doc_obj.rightMargin, 10 * mm)
+        canvas.drawString(doc_obj.leftMargin, 6 * mm, f"Sistema Furação | {empresa.nome}")
+        canvas.drawRightString(A4[0] - doc_obj.rightMargin, 6 * mm, f"Página {canvas.getPageNumber()}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_page, onLaterPages=draw_page)
+    return output.getvalue()
+
+
 def _montar_relatorio_executivo(*, empresa, filtros):
     despesas_qs = Despesa.objects.filter(empresa=empresa)
     assiduidade_qs = AssiduidadeRegisto.objects.filter(empresa=empresa, estado="aprovado")
     checklists_qs = ChecklistHSE.objects.filter(empresa=empresa)
     incidentes_qs = IncidenteSeguranca.objects.filter(empresa=empresa)
+    auditorias_qs = AuditoriaHSE.objects.filter(empresa=empresa)
+    planos_qs = PlanoAuditoriaHSE.objects.filter(empresa=empresa)
+    acoes_qs = AcaoCorretiva.objects.filter(empresa=empresa)
+    preventivas_qs = AcaoPreventiva.objects.filter(empresa=empresa)
     registos_qs = RegistoDiarioEmpregado.objects.filter(empresa=empresa)
 
     data_inicio = filtros.get("data_inicio")
@@ -1192,12 +2940,20 @@ def _montar_relatorio_executivo(*, empresa, filtros):
         assiduidade_qs = assiduidade_qs.filter(data_inicio__gte=data_inicio)
         checklists_qs = checklists_qs.filter(data_check__gte=data_inicio)
         incidentes_qs = incidentes_qs.filter(data_incidente__gte=data_inicio)
+        auditorias_qs = auditorias_qs.filter(data_auditoria__gte=data_inicio)
+        planos_qs = planos_qs.filter(criado_em__date__gte=data_inicio)
+        acoes_qs = acoes_qs.filter(criado_em__date__gte=data_inicio)
+        preventivas_qs = preventivas_qs.filter(criado_em__date__gte=data_inicio)
         registos_qs = registos_qs.filter(data__gte=data_inicio)
     if data_fim:
         despesas_qs = despesas_qs.filter(data__lte=data_fim)
         assiduidade_qs = assiduidade_qs.filter(data_inicio__lte=data_fim)
         checklists_qs = checklists_qs.filter(data_check__lte=data_fim)
         incidentes_qs = incidentes_qs.filter(data_incidente__lte=data_fim)
+        auditorias_qs = auditorias_qs.filter(data_auditoria__lte=data_fim)
+        planos_qs = planos_qs.filter(criado_em__date__lte=data_fim)
+        acoes_qs = acoes_qs.filter(criado_em__date__lte=data_fim)
+        preventivas_qs = preventivas_qs.filter(criado_em__date__lte=data_fim)
         registos_qs = registos_qs.filter(data__lte=data_fim)
 
     projetos_qtd = Projeto.objects.filter(empresa=empresa).count()
@@ -1213,11 +2969,34 @@ def _montar_relatorio_executivo(*, empresa, filtros):
     checklists_nao_conformes = 0
     incidentes_total = 0
     incidentes_abertos = 0
+    auditorias_total = 0
+    auditorias_abertas = 0
+    planos_total = 0
+    planos_vencidos = 0
+    acoes_total = 0
+    acoes_abertas = 0
+    preventivas_total = 0
+    preventivas_abertas = 0
+    preventivas_vencidas = 0
+    evidencias_total = 0
+    acoes_com_fecho_formal = 0
+    hoje = timezone.localdate()
     try:
         checklists_total = checklists_qs.count()
         checklists_nao_conformes = checklists_qs.filter(status="nao_conforme").count()
         incidentes_total = incidentes_qs.count()
         incidentes_abertos = incidentes_qs.exclude(status="fechado").count()
+        auditorias_total = auditorias_qs.count()
+        auditorias_abertas = auditorias_qs.exclude(status="concluida").count()
+        planos_total = planos_qs.count()
+        planos_vencidos = planos_qs.filter(ativo=True, proxima_execucao__lt=hoje).count()
+        acoes_total = acoes_qs.count()
+        acoes_abertas = acoes_qs.exclude(status__in=["concluida", "cancelada"]).count()
+        preventivas_total = preventivas_qs.count()
+        preventivas_abertas = preventivas_qs.exclude(status__in=["concluida", "cancelada"]).count()
+        preventivas_vencidas = preventivas_qs.filter(prazo__lt=hoje).exclude(status__in=["concluida", "cancelada"]).count()
+        evidencias_total = EvidenciaCompliance.objects.filter(empresa=empresa).count()
+        acoes_com_fecho_formal = FechoAcaoCorretiva.objects.filter(empresa=empresa).count()
     except (ProgrammingError, OperationalError):
         pass
 
@@ -1310,6 +3089,17 @@ def _montar_relatorio_executivo(*, empresa, filtros):
             "checklists_nao_conformes": checklists_nao_conformes,
             "incidentes_total": incidentes_total,
             "incidentes_abertos": incidentes_abertos,
+            "auditorias_total": auditorias_total,
+            "auditorias_abertas": auditorias_abertas,
+            "planos_total": planos_total,
+            "planos_vencidos": planos_vencidos,
+            "acoes_total": acoes_total,
+            "acoes_abertas": acoes_abertas,
+            "preventivas_total": preventivas_total,
+            "preventivas_abertas": preventivas_abertas,
+            "preventivas_vencidas": preventivas_vencidas,
+            "evidencias_total": evidencias_total,
+            "acoes_com_fecho_formal": acoes_com_fecho_formal,
         },
         "tendencia": tendencia,
     }

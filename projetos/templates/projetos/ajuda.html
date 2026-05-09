@@ -30,5 +30,251 @@
             <p>{% trans "Envie melhorias no menu Sugestões para evolução contínua da plataforma." %}</p>
         </div>
     </div>
+
+    <div class="mt-8 rounded-2xl border border-sky-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Tutorial: Novo Registo Diário" %}</h3>
+                <p class="mt-2 text-sm text-slate-600">
+                    {% trans "Guia completo para criar, preencher, editar e apagar um registo diário com informação operacional e técnica do turno." %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% if is_empregado_user %}
+                <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-light">
+                    {% trans "Abrir Meus Registos" %}
+                </a>
+                <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">
+                    {% trans "Novo Registo" %}
+                </a>
+                {% endif %}
+                {% if is_admin_user %}
+                <a href="{% url 'projetos:registos_admin_list' %}" class="btn btn-primary">
+                    {% trans "Abrir Registos de Produção" %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "O que é um Registo Diário" %}</h4>
+                <p class="mt-2">
+                    {% trans "É o registo principal do trabalho realizado no turno. Guarda horas, pausas, metros furados, observações, anexos e a ficha técnica detalhada quando necessário." %}
+                </p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Quando usar" %}</h4>
+                <p class="mt-2">
+                    {% trans "Use um registo por turno efetivamente realizado. Se o turno foi planeado, selecione o planeamento para herdar automaticamente projeto, furo, data e horário base." %}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-6 space-y-4">
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 1. Abrir a página de novo registo" %}</h4>
+                <p class="mt-2">
+                    {% trans "O empregado entra em Meus Registos e clica em Novo Registo. A empresa pode abrir o mesmo fluxo a partir da área de Registos de Produção." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Se existirem turnos planeados para a data, eles aparecem no topo para seleção rápida." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 2. Selecionar o Planeamento Turno" %}</h4>
+                <p class="mt-2">
+                    {% trans "Ao escolher um planeamento, o sistema preenche automaticamente a data, o projeto, o furo e as horas base do turno. Isto reduz erros e liga o registo ao turno correto." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Se não existir planeamento, o registo também pode ser preenchido manualmente." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 3. Preencher o Registo Operacional" %}</h4>
+                <p class="mt-2">
+                    {% trans "Nesta primeira secção preencha as horas do turno, pausas, horas de paragem, tipo de paragem, metros furados, foto do relatório e observações gerais." %}
+                </p>
+                <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Horas de paragem só devem ser usadas quando houve interrupção real." %}</li>
+                    <li>{% trans "Tipo de paragem ajuda a distinguir responsabilidade entre cliente e empresa." %}</li>
+                    <li>{% trans "Observações servem para notas operacionais rápidas do turno." %}</li>
+                </ul>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 4. Preencher a Informação Técnica" %}</h4>
+                <p class="mt-2">
+                    {% trans "A ficha técnica do turno é opcional, mas deve ser usada quando queres guardar o relatório técnico com mais detalhe." %}
+                </p>
+                <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Informação: cliente, sonda, torre, bombas, estaleiro, número do relatório, turno e valores principais." %}</li>
+                    <li>{% trans "Avanço e recuperação: adicionar as furadas do turno uma a uma, com início, fim, avanço, recuperação, rocha e descrição." %}</li>
+                    <li>{% trans "Operações e ocorrências: adicionar linhas com o tipo de ocorrência e o intervalo horário de cada uma." %}</li>
+                    <li>{% trans "Polímeros: adicionar os polímeros usados, um a um." %}</li>
+                    <li>{% trans "Equipa: adicionar os elementos da equipa com função, nome e horas trabalhadas." %}</li>
+                </ul>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 5. Adicionar listas dinâmicas" %}</h4>
+                <p class="mt-2">
+                    {% trans "Nas secções Furadas, Operações/Ocorrências e Equipa, os dados são adicionados em linhas. Depois de preencher os campos, clica no botão + para guardar a linha na lista." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Também podes editar uma linha já criada ou removê-la antes de guardar o registo final." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 6. Guardar o registo" %}</h4>
+                <p class="mt-2">
+                    {% trans "Depois de rever as secções preenchidas, clica em Guardar Registo. O sistema grava o registo operacional e, se existir conteúdo técnico, guarda também a informação técnica no próprio registo." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Se a ficha técnica estiver vazia, o sistema guarda apenas o registo operacional." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 7. Editar um registo existente" %}</h4>
+                <p class="mt-2">
+                    {% trans "Na lista de registos, abre o registo pretendido e usa o botão Editar ou Corrigir. Aí podes atualizar horas, metros, observações e também toda a parte técnica do turno." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "As listas dinâmicas mantêm as linhas já criadas, permitindo corrigir uma furada, uma ocorrência ou um elemento da equipa sem voltar a escrever tudo." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 8. Apagar um registo" %}</h4>
+                <p class="mt-2">
+                    {% trans "Se um registo tiver sido criado por engano, abre a lista correspondente e usa a ação de apagar no registo certo. O sistema pede confirmação antes de remover." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Apaga apenas quando o registo foi mesmo lançado por erro. Se o objetivo for corrigir conteúdo, o mais seguro é editar." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Boas práticas" %}</h4>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Seleciona sempre o planeamento correto quando existir." %}</li>
+                    <li>{% trans "Regista cada furada e ocorrência em linhas separadas para manter o histórico limpo." %}</li>
+                    <li>{% trans "Usa observações para contexto curto e descrição técnica nas secções certas." %}</li>
+                    <li>{% trans "Revê horas, metros e listas antes de guardar." %}</li>
+                    <li>{% trans "Prefere editar em vez de apagar, para reduzir perda de histórico." %}</li>
+                </ul>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Dúvidas comuns" %}</h4>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Se os turnos não aparecerem, verifica se existe planeamento para a data ou se o turno ainda está sem empregado atribuído." %}</li>
+                    <li>{% trans "Se um campo técnico não se aplicar, pode ficar vazio." %}</li>
+                    <li>{% trans "Se a lista dinâmica não mostrar a linha, confirma se clicaste no botão + depois de preencher os campos." %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+                <h3 class="text-xl font-semibold text-slate-900">{% trans "Tutorial: Compliance & Segurança" %}</h3>
+                <p class="mt-2 text-sm text-slate-600">
+                    {% trans "Fluxo recomendado para controlar checklists, incidentes, auditorias, ações corretivas, ações preventivas e risco operacional da empresa." %}
+                </p>
+            </div>
+            {% if is_admin_user %}
+            <div class="shrink-0">
+                <a href="{% url 'projetos:gestao_compliance_seguranca' %}" class="btn btn-primary">
+                    {% trans "Abrir Compliance & Segurança" %}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Quem deve usar" %}</h4>
+                <p class="mt-2">
+                    {% trans "Este módulo é mais útil para contas de empresa e responsáveis operacionais. Centraliza conformidade documental, prevenção de incidentes e controlo de ações com prazo." %}
+                </p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Objetivo principal" %}</h4>
+                <p class="mt-2">
+                    {% trans "Detetar riscos cedo, registar evidências, acompanhar correções e perceber rapidamente onde a empresa está a falhar mais." %}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-6 space-y-4">
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 1. Registar a base operacional" %}</h4>
+                <p class="mt-2">
+                    {% trans "Comece por lançar checklists HSE, incidentes e auditorias. Estes registos alimentam os indicadores principais e criam a base para decisões futuras." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Sugestão prática: use checklists para rotina, incidentes para ocorrências reais e auditorias para validações mais formais." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 2. Criar ações com responsável e prazo" %}</h4>
+                <p class="mt-2">
+                    {% trans "Quando encontrar um problema, crie uma ação corretiva ou preventiva. Defina prioridade, responsável, data-limite e o projeto associado sempre que possível." %}
+                </p>
+                <p class="mt-2 text-slate-600">
+                    {% trans "Isto permite ao painel calcular vencimentos, SLA, taxa de fecho e previsão de incumprimento." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 3. Anexar evidências" %}</h4>
+                <p class="mt-2">
+                    {% trans "Adicione fotografias, PDFs, relatórios ou outros anexos às checklists, incidentes, auditorias e ações. As evidências ajudam na validação, auditoria e fecho formal." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 4. Fechar corretamente as ações" %}</h4>
+                <p class="mt-2">
+                    {% trans "Ao concluir uma ação corretiva, faça o fecho formal com resumo do que foi feito e validação de eficácia. Isso melhora a qualidade do histórico e dos relatórios executivos." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 5. Ler o dashboard de eficácia" %}</h4>
+                <p class="mt-2">
+                    {% trans "O dashboard mostra taxa de fecho, SLA, tempo médio de resolução, responsáveis críticos, projetos com maior risco, snapshots comparativos e previsão de incumprimento." %}
+                </p>
+                <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Use os filtros temporais Total, 7, 30 e 90 dias para perceber o comportamento recente." %}</li>
+                    <li>{% trans "Use o drill-down por projeto e por responsável para abrir diretamente o detalhe das ações." %}</li>
+                    <li>{% trans "Consulte os alertas automáticos para ações críticas vencidas e situações preventivas a vencer." %}</li>
+                </ul>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Passo 6. Ajustar o score de risco" %}</h4>
+                <p class="mt-2">
+                    {% trans "Em Definições, a empresa pode ajustar os pesos e limiares do score de incumprimento. Assim, o sistema pode dar mais importância a ações críticas, vencidas ou próximas do prazo, conforme a realidade da operação." %}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-900">{% trans "Rotina recomendada" %}</h4>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-slate-600">
+                    <li>{% trans "Diariamente: validar novos incidentes, checklists e alertas críticos." %}</li>
+                    <li>{% trans "Semanalmente: rever ações abertas, vencidas e a vencer." %}</li>
+                    <li>{% trans "Mensalmente: analisar o dashboard, comparar janelas e emitir relatório executivo." %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </section>
 {% endblock %}

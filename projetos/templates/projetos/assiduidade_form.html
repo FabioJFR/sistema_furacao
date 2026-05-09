@@ -10,6 +10,16 @@
         <a href="{% url 'projetos:assiduidade_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
     </div>
 
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão de Pessoas" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">
+            {% if is_create %}{% trans "Criar Registo de Assiduidade" %}{% else %}{% trans "Editar Registo de Assiduidade" %}{% endif %}
+        </div>
+        <p class="mt-3 text-sm text-slate-600">
+            {% trans "Registe presença, falta, férias, baixa ou horas extra com o respetivo período, horas e motivo associado." %}
+        </p>
+    </div>
+
     <form method="post" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {% csrf_token %}
         {% for field in form %}

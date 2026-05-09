@@ -1,0 +1,786 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto p-6">
+    <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 p-6 text-white shadow-xl">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">{% trans "Informação Técnica" %}</div>
+                    <h1 class="text-3xl font-black">{{ titulo }}</h1>
+                    <p class="max-w-3xl text-sm text-slate-200">
+                        {% trans "Esta página permite corrigir apenas a informação técnica do registo, sem alterar diretamente o registo operacional principal." %}
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url detalhe_url relatorio.id %}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                        {% trans "Voltar" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Cliente" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.cliente }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Empregado" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.empregado }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Projeto" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.projeto }}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{% trans "Planeamento" %}</div>
+                <div class="mt-2 text-lg font-bold text-slate-900">{{ cabecalho_relatorio.planeamento }}</div>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if relatorio_form.non_field_errors %}
+            <div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+                {{ relatorio_form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            {% for secao in relatorio_form.secoes %}
+            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+                    <h2 class="text-xl font-black text-slate-900">{{ secao.titulo }}</h2>
+                    <p class="mt-1 text-sm text-slate-500">{{ secao.descricao }}</p>
+                </div>
+                {% if secao.colunas %}
+                <div class="{{ secao.grid_classes|default:'grid grid-cols-1 lg:grid-cols-3 gap-5' }} px-6 py-6">
+                    {% for coluna in secao.colunas %}
+                    <div class="space-y-5">
+                        {% for field in coluna %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                            <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="{{ secao.grid_classes|default:'grid gap-5 px-6 py-6 md:grid-cols-2 xl:grid-cols-3' }}">
+                    {% for field in secao.campos %}
+                    <div class="{% if field.name == 'notas' or field.name == 'polimeros' or field.name == 'furacoes' or field.name == 'operacoes_ocorrencias' or field.name == 'equipa_turno' %}md:col-span-2 xl:col-span-3{% endif %}">
+                        {% if field.name == 'equipa_turno' %}
+                        <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                <input type="text" id="equipa-funcao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Função' %}">
+                                <input type="text" id="equipa-nome-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Nome' %}">
+                                <input type="number" step="0.01" min="0" id="equipa-horas-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Horas' %}">
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="button" id="equipa-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                    {% trans "Cancelar edição" %}
+                                </button>
+                                <button type="button" id="equipa-add-btn" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                    + {% trans "Adicionar elemento" %}
+                                </button>
+                            </div>
+                            <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-white text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left">#</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Função" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Nome" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Horas" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="equipa-lista"></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                <div class="rounded-lg bg-white px-3 py-2">
+                                    {% trans "Elementos" %}: <span id="equipa-total-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if field.help_text %}
+                        <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                        {% endif %}
+                        {% elif field.name == 'operacoes_ocorrencias' %}
+                        <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                <select id="operacao-tipo-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                                    <option value="">{% trans "Selecionar ocorrência" %}</option>
+                                    {% for item in relatorio_form.operacoes_ocorrencias_tipos %}
+                                        <option value="{{ item.value }}">{{ item.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="time" id="operacao-de-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                                <input type="time" id="operacao-ate-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="button" id="operacao-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                    {% trans "Cancelar edição" %}
+                                </button>
+                                <button type="button" id="operacao-add-btn" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                    + {% trans "Adicionar ocorrência" %}
+                                </button>
+                            </div>
+                            <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-white text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left">#</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Ocorrência" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "De" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Até" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="operacoes-lista"></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                <div class="rounded-lg bg-white px-3 py-2">
+                                    {% trans "Ocorrências" %}: <span id="operacoes-total-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if field.help_text %}
+                        <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                        {% endif %}
+                        {% elif field.name == 'furacoes' %}
+                        <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                            <div class="grid grid-cols-1 gap-3 xl:grid-cols-6">
+                                <input type="number" step="0.01" id="furacao-inicio-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação início' %}">
+                                <input type="number" step="0.01" id="furacao-fim-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação fim' %}">
+                                <input type="number" step="0.01" id="furacao-avanco-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação avanço' %}">
+                                <input type="number" step="0.01" id="furacao-recuperacao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação recuperação' %}">
+                                <input type="text" id="furacao-rocha-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação rocha' %}">
+                                <input type="text" id="furacao-descricao-input" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="{% trans 'Furação descrição' %}">
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="button" id="furacao-cancel-btn" class="mr-2 hidden rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                    {% trans "Cancelar edição" %}
+                                </button>
+                                <button type="button" id="furacao-add-btn" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                    + {% trans "Adicionar furada" %}
+                                </button>
+                            </div>
+                            <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-white text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left">#</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Início" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Fim" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Avanço" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Recuperação" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Rocha" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Descrição" %}</th>
+                                            <th class="px-3 py-2 text-left">{% trans "Ações" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="furacoes-lista"></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                <div class="rounded-lg bg-white px-3 py-2">
+                                    {% trans "Furadas" %}: <span id="furacoes-total-count">0</span>
+                                </div>
+                                <div class="rounded-lg bg-white px-3 py-2">
+                                    {% trans "Avanço total" %}: <span id="furacoes-total-avanco">0.00</span>
+                                </div>
+                                <div class="rounded-lg bg-white px-3 py-2">
+                                    {% trans "Recuperação total" %}: <span id="furacoes-total-recuperacao">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if field.help_text %}
+                        <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                        {% endif %}
+                        {% elif field.name == 'polimeros' %}
+                        <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        <div class="rounded-xl border border-slate-300 bg-slate-100 p-3 shadow-sm">
+                            <div class="flex flex-col gap-3 md:flex-row">
+                                <input
+                                    type="text"
+                                    id="polimero-input"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                                    placeholder="{% trans 'Adicionar polímero' %}"
+                                >
+                                <button type="button" id="polimero-add-btn" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                    + {% trans "Adicionar" %}
+                                </button>
+                            </div>
+                            <div id="polimeros-lista" class="mt-3 flex flex-wrap gap-2"></div>
+                        </div>
+                        {% if field.help_text %}
+                        <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                        {% endif %}
+                        {% else %}
+                        <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="mt-2 text-sm text-rose-600">{{ field.errors }}</div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="flex flex-wrap justify-end gap-3">
+                <a href="{% url detalhe_url relatorio.id %}" class="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    {% trans "Voltar" %}
+                </a>
+                <button type="submit" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                    {% trans "Guardar informação técnica" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{{ relatorio_form.polimeros_lista_inicial|json_script:"polimeros-iniciais-data" }}
+{{ relatorio_form.furacoes_lista_inicial|json_script:"furacoes-iniciais-data" }}
+{{ relatorio_form.operacoes_ocorrencias_lista_inicial|json_script:"operacoes-iniciais-data" }}
+{{ relatorio_form.equipa_turno_lista_inicial|json_script:"equipa-inicial-data" }}
+<script>
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.equipa_turno.id_for_label }}");
+        const funcaoInput = document.getElementById("equipa-funcao-input");
+        const nomeInput = document.getElementById("equipa-nome-input");
+        const horasInput = document.getElementById("equipa-horas-input");
+        const addBtn = document.getElementById("equipa-add-btn");
+        const cancelBtn = document.getElementById("equipa-cancel-btn");
+        const lista = document.getElementById("equipa-lista");
+        const totalCount = document.getElementById("equipa-total-count");
+        const initialDataEl = document.getElementById("equipa-inicial-data");
+        if (!hiddenField || !funcaoInput || !nomeInput || !horasInput || !addBtn || !cancelBtn || !lista || !totalCount || !initialDataEl) return;
+
+        let equipa = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(equipa);
+        };
+
+        const limparInputs = () => {
+            funcaoInput.value = "";
+            nomeInput.value = "";
+            horasInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar elemento' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const fmtHoras = (value) => value === null || value === undefined || value === "" ? "-" : Number(value).toFixed(2);
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!equipa.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="5" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhum elemento adicionado.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                sync();
+                return;
+            }
+            equipa.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${item.funcao || "-"}</td>
+                    <td class="px-3 py-2">${item.nome || "-"}</td>
+                    <td class="px-3 py-2">${fmtHoras(item.horas)}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="equipa-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="equipa-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".equipa-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    funcaoInput.value = item.funcao ?? "";
+                    nomeInput.value = item.nome ?? "";
+                    horasInput.value = item.horas ?? "";
+                    atualizarModoEdicao();
+                    funcaoInput.focus();
+                });
+                row.querySelector(".equipa-remove-btn").addEventListener("click", () => {
+                    equipa.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(equipa.length);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "funcao": funcaoInput.value.trim(),
+                "nome": nomeInput.value.trim(),
+                "horas": horasInput.value === "" ? null : parseFloat(horasInput.value),
+            };
+            if (!item.funcao && !item.nome && item.horas === null) return;
+            if (!item.funcao || !item.nome) return;
+            if (editingIndex === null) {
+                equipa.push(item);
+            } else {
+                equipa[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            funcaoInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            funcaoInput.focus();
+        });
+
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.operacoes_ocorrencias.id_for_label }}");
+        const tipoInput = document.getElementById("operacao-tipo-input");
+        const deInput = document.getElementById("operacao-de-input");
+        const ateInput = document.getElementById("operacao-ate-input");
+        const addBtn = document.getElementById("operacao-add-btn");
+        const cancelBtn = document.getElementById("operacao-cancel-btn");
+        const lista = document.getElementById("operacoes-lista");
+        const totalCount = document.getElementById("operacoes-total-count");
+        const initialDataEl = document.getElementById("operacoes-iniciais-data");
+        if (!hiddenField || !tipoInput || !deInput || !ateInput || !addBtn || !cancelBtn || !lista || !totalCount || !initialDataEl) return;
+
+        const labels = {
+            {% for item in relatorio_form.operacoes_ocorrencias_tipos %}
+            "{{ item.value }}": "{{ item.label|escapejs }}",
+            {% endfor %}
+        };
+
+        let operacoes = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(operacoes);
+        };
+
+        const limparInputs = () => {
+            tipoInput.value = "";
+            deInput.value = "";
+            ateInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar ocorrência' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!operacoes.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="5" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhuma ocorrência adicionada.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                sync();
+                return;
+            }
+            operacoes.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${labels[item.tipo] || item.tipo || "-"}</td>
+                    <td class="px-3 py-2">${item.de || "-"}</td>
+                    <td class="px-3 py-2">${item.ate || "-"}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="operacao-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="operacao-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".operacao-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    tipoInput.value = item.tipo ?? "";
+                    deInput.value = item.de ?? "";
+                    ateInput.value = item.ate ?? "";
+                    atualizarModoEdicao();
+                    tipoInput.focus();
+                });
+                row.querySelector(".operacao-remove-btn").addEventListener("click", () => {
+                    operacoes.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(operacoes.length);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "tipo": tipoInput.value,
+                "de": deInput.value,
+                "ate": ateInput.value,
+            };
+            if (!item.tipo && !item.de && !item.ate) return;
+            if (!item.tipo || !item.de || !item.ate) return;
+            if (editingIndex === null) {
+                operacoes.push(item);
+            } else {
+                operacoes[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            tipoInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            tipoInput.focus();
+        });
+
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.furacoes.id_for_label }}");
+        const inicioInput = document.getElementById("furacao-inicio-input");
+        const fimInput = document.getElementById("furacao-fim-input");
+        const avancoInput = document.getElementById("furacao-avanco-input");
+        const recuperacaoInput = document.getElementById("furacao-recuperacao-input");
+        const rochaInput = document.getElementById("furacao-rocha-input");
+        const descricaoInput = document.getElementById("furacao-descricao-input");
+        const addBtn = document.getElementById("furacao-add-btn");
+        const cancelBtn = document.getElementById("furacao-cancel-btn");
+        const lista = document.getElementById("furacoes-lista");
+        const totalCount = document.getElementById("furacoes-total-count");
+        const totalAvanco = document.getElementById("furacoes-total-avanco");
+        const totalRecuperacao = document.getElementById("furacoes-total-recuperacao");
+        const initialDataEl = document.getElementById("furacoes-iniciais-data");
+        if (!hiddenField || !inicioInput || !fimInput || !avancoInput || !recuperacaoInput || !rochaInput || !descricaoInput || !addBtn || !cancelBtn || !lista || !totalCount || !totalAvanco || !totalRecuperacao || !initialDataEl) return;
+
+        let furacoes = JSON.parse(initialDataEl.textContent || "[]");
+        let editingIndex = null;
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(furacoes);
+        };
+
+        const fmt = (value) => value === null || value === undefined || value === "" ? "-" : Number(value).toFixed(2);
+
+        const limparInputs = () => {
+            inicioInput.value = "";
+            fimInput.value = "";
+            avancoInput.value = "";
+            recuperacaoInput.value = "";
+            rochaInput.value = "";
+            descricaoInput.value = "";
+        };
+
+        const atualizarModoEdicao = () => {
+            if (editingIndex === null) {
+                addBtn.textContent = "+ {% trans 'Adicionar furada' %}";
+                cancelBtn.classList.add("hidden");
+            } else {
+                addBtn.textContent = "{% trans 'Guardar edição' %}";
+                cancelBtn.classList.remove("hidden");
+            }
+        };
+
+        const recalcularAvanco = () => {
+            const inicio = parseFloat(inicioInput.value);
+            const fim = parseFloat(fimInput.value);
+            if (!Number.isNaN(inicio) && !Number.isNaN(fim)) {
+                avancoInput.value = (fim - inicio).toFixed(2);
+            }
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!furacoes.length) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="8" class="px-3 py-4 text-center text-slate-500">{% trans 'Nenhuma furada adicionada.' %}</td>`;
+                lista.appendChild(row);
+                totalCount.textContent = "0";
+                totalAvanco.textContent = "0.00";
+                totalRecuperacao.textContent = "0.00";
+                sync();
+                return;
+            }
+            let somaAvanco = 0;
+            let somaRecuperacao = 0;
+            furacoes.forEach((item, index) => {
+                somaAvanco += Number(item.avanco || 0);
+                somaRecuperacao += Number(item.recuperacao || 0);
+                const row = document.createElement("tr");
+                row.className = "border-t border-slate-200 bg-white";
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-slate-500">${index + 1}</td>
+                    <td class="px-3 py-2">${fmt(item.inicio)}</td>
+                    <td class="px-3 py-2">${fmt(item.fim)}</td>
+                    <td class="px-3 py-2">${fmt(item.avanco)}</td>
+                    <td class="px-3 py-2">${fmt(item.recuperacao)}</td>
+                    <td class="px-3 py-2">${item.rocha || "-"}</td>
+                    <td class="px-3 py-2">${item.descricao || "-"}</td>
+                    <td class="px-3 py-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="furacao-up-btn rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200" ${index === 0 ? "disabled" : ""}>↑</button>
+                            <button type="button" class="furacao-down-btn rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200" ${index === furacoes.length - 1 ? "disabled" : ""}>↓</button>
+                            <button type="button" class="furacao-edit-btn rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-200">{% trans "Editar" %}</button>
+                            <button type="button" class="furacao-remove-btn rounded-lg bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-200">×</button>
+                        </div>
+                    </td>
+                `;
+                row.querySelector(".furacao-up-btn").addEventListener("click", () => {
+                    if (index === 0) return;
+                    [furacoes[index - 1], furacoes[index]] = [furacoes[index], furacoes[index - 1]];
+                    if (editingIndex === index) {
+                        editingIndex -= 1;
+                    } else if (editingIndex === index - 1) {
+                        editingIndex += 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-down-btn").addEventListener("click", () => {
+                    if (index >= furacoes.length - 1) return;
+                    [furacoes[index], furacoes[index + 1]] = [furacoes[index + 1], furacoes[index]];
+                    if (editingIndex === index) {
+                        editingIndex += 1;
+                    } else if (editingIndex === index + 1) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-remove-btn").addEventListener("click", () => {
+                    furacoes.splice(index, 1);
+                    if (editingIndex === index) {
+                        editingIndex = null;
+                        limparInputs();
+                        atualizarModoEdicao();
+                    } else if (editingIndex !== null && editingIndex > index) {
+                        editingIndex -= 1;
+                    }
+                    render();
+                });
+                row.querySelector(".furacao-edit-btn").addEventListener("click", () => {
+                    editingIndex = index;
+                    inicioInput.value = item.inicio ?? "";
+                    fimInput.value = item.fim ?? "";
+                    avancoInput.value = item.avanco ?? "";
+                    recuperacaoInput.value = item.recuperacao ?? "";
+                    rochaInput.value = item.rocha ?? "";
+                    descricaoInput.value = item.descricao ?? "";
+                    atualizarModoEdicao();
+                    inicioInput.focus();
+                });
+                lista.appendChild(row);
+            });
+            totalCount.textContent = String(furacoes.length);
+            totalAvanco.textContent = somaAvanco.toFixed(2);
+            totalRecuperacao.textContent = somaRecuperacao.toFixed(2);
+            sync();
+        };
+
+        addBtn.addEventListener("click", () => {
+            const item = {
+                "inicio": inicioInput.value === "" ? null : parseFloat(inicioInput.value),
+                "fim": fimInput.value === "" ? null : parseFloat(fimInput.value),
+                "avanco": avancoInput.value === "" ? null : parseFloat(avancoInput.value),
+                "recuperacao": recuperacaoInput.value === "" ? null : parseFloat(recuperacaoInput.value),
+                "rocha": rochaInput.value.trim(),
+                "descricao": descricaoInput.value.trim(),
+            };
+            if (
+                item.inicio === null &&
+                item.fim === null &&
+                item.avanco === null &&
+                item.recuperacao === null &&
+                !item.rocha &&
+                !item.descricao
+            ) {
+                return;
+            }
+            if (editingIndex === null) {
+                furacoes.push(item);
+            } else {
+                furacoes[editingIndex] = item;
+                editingIndex = null;
+            }
+            limparInputs();
+            atualizarModoEdicao();
+            render();
+            inicioInput.focus();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editingIndex = null;
+            limparInputs();
+            atualizarModoEdicao();
+            inicioInput.focus();
+        });
+
+        inicioInput.addEventListener("input", recalcularAvanco);
+        fimInput.addEventListener("input", recalcularAvanco);
+        atualizarModoEdicao();
+        render();
+    })();
+
+    (() => {
+        const hiddenField = document.getElementById("{{ relatorio_form.polimeros.id_for_label }}");
+        const input = document.getElementById("polimero-input");
+        const addBtn = document.getElementById("polimero-add-btn");
+        const lista = document.getElementById("polimeros-lista");
+        const initialDataEl = document.getElementById("polimeros-iniciais-data");
+        if (!hiddenField || !input || !addBtn || !lista || !initialDataEl) return;
+
+        let polimeros = JSON.parse(initialDataEl.textContent || "[]");
+
+        const sync = () => {
+            hiddenField.value = JSON.stringify(polimeros);
+        };
+
+        const render = () => {
+            lista.innerHTML = "";
+            if (!polimeros.length) {
+                const vazio = document.createElement("div");
+                vazio.className = "text-sm text-slate-500";
+                vazio.textContent = "{% trans 'Nenhum polímero adicionado.' %}";
+                lista.appendChild(vazio);
+                sync();
+                return;
+            }
+            polimeros.forEach((item, index) => {
+                const pill = document.createElement("div");
+                pill.className = "inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-900";
+
+                const texto = document.createElement("span");
+                texto.textContent = item;
+                pill.appendChild(texto);
+
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-bold text-emerald-900 hover:bg-emerald-300";
+                removeBtn.textContent = "×";
+                removeBtn.addEventListener("click", () => {
+                    polimeros.splice(index, 1);
+                    render();
+                });
+                pill.appendChild(removeBtn);
+                lista.appendChild(pill);
+            });
+            sync();
+        };
+
+        const adicionarPolimero = () => {
+            const valor = input.value.trim();
+            if (!valor) return;
+            polimeros.push(valor);
+            input.value = "";
+            render();
+            input.focus();
+        };
+
+        addBtn.addEventListener("click", adicionarPolimero);
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                adicionarPolimero();
+            }
+        });
+
+        render();
+    })();
+</script>
+{% endblock %}

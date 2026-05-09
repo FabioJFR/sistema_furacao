@@ -9,11 +9,16 @@
 
         <div class="flex justify-between items-center flex-wrap gap-3">
             <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Registos Diários" %}</h1>
-
-            <a href="{% url 'projetos:registo_diario_create' %}"
-               class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                ➕ {% trans "Novo Registo" %}
-            </a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:relatorio_turno_list' %}"
+                   class="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition shadow">
+                    📘 {% trans "Fichas Técnicas" %}
+                </a>
+                <a href="{% url 'projetos:registo_diario_create' %}"
+                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
+                    ➕ {% trans "Novo Registo" %}
+                </a>
+            </div>
         </div>
 
         {% if registos %}
@@ -22,6 +27,7 @@
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="text-left px-4 py-3">{% trans "Data" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Planeamento" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Início" %}</th>
@@ -32,6 +38,9 @@
                             <th class="text-left px-4 py-3">{% trans "Paragem" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Tipo Paragem" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Metros" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Furadas" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Avanço Furadas" %}</th>
+                            <th class="text-left px-4 py-3">{% trans "Recuperação Furadas" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Foto" %}</th>
                             <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
                         </tr>
@@ -40,6 +49,7 @@
                         {% for registo in registos %}
                             <tr class="border-t border-gray-200">
                                 <td class="px-4 py-3">{{ registo.data }}</td>
+                                <td class="px-4 py-3">{{ registo.planeamento_turno.nome_efetivo|default:"-" }}</td>
                                 <td class="px-4 py-3">{{ registo.projeto.nome|default:"-" }}</td>
                                 <td class="px-4 py-3">{{ registo.furo.nome|default:"-" }}</td>
                                 <td class="px-4 py-3">{{ registo.hora_inicio|default:"-" }}</td>
@@ -51,6 +61,25 @@
                                 <td class="px-4 py-3">{{ registo.get_tipo_paragem_display|default:"-" }}</td>
                                 <td class="px-4 py-3">{{ registo.metros_furados|floatformat:2 }}</td>
                                 <td class="px-4 py-3">
+                                    {% with total_furadas=registo.furacoes|length %}
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if total_furadas == 0 %}bg-rose-100 text-rose-700{% elif total_furadas <= 2 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                        {{ total_furadas }}
+                                    </span>
+                                    {% endwith %}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                                        {{ registo.furacao_avanco|default:"0"|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    {% with avanco=registo.furacao_avanco|default_if_none:0 recuperacao=registo.furacao_recuperacao|default_if_none:0 %}
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if recuperacao == 0 %}bg-rose-100 text-rose-700{% elif recuperacao < avanco %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                        {{ recuperacao|floatformat:2 }}
+                                    </span>
+                                    {% endwith %}
+                                </td>
+                                <td class="px-4 py-3">
                                     {% if registo.relatorio_foto %}
                                         <a href="{{ registo.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
                                             {% trans "Ver" %}
@@ -60,6 +89,12 @@
                                     {% endif %}
                                 </td>
                                 <td class="px-4 py-3">
+                                    {% if registo.tem_relatorio_tecnico %}
+                                        <a href="{% url 'projetos:relatorio_turno_detail' registo.id %}"
+                                           class="mb-2 inline-block bg-sky-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-sky-700 transition">
+                                            {% trans "Ficha Técnica" %}
+                                        </a>
+                                    {% endif %}
                                     <a href="{% url 'projetos:registo_diario_update' registo.id %}"
                                        class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
                                         {% trans "Editar" %}
@@ -68,7 +103,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="13" class="px-4 py-6 text-center text-gray-500">
+                                <td colspan="17" class="px-4 py-6 text-center text-gray-500">
                                     {% trans "Ainda não existem registos diários." %}
                                 </td>
                             </tr>

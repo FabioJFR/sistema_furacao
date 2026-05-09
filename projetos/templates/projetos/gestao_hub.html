@@ -10,6 +10,29 @@
         {% trans "Centro de controlo para administração transversal da operação, pessoas, risco e performance." %}
     </p>
 
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão Comercial" %}</div>
+            <div class="mt-2 text-2xl font-black text-slate-900">{% trans "Clientes & Contratos" %}</div>
+            <p class="mt-2 text-sm text-slate-600">{% trans "Clientes, contratos, SLA, renovação e enquadramento comercial dos projetos." %}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão Operacional" %}</div>
+            <div class="mt-2 text-2xl font-black text-slate-900">{% trans "Planeamento & Recursos" %}</div>
+            <p class="mt-2 text-sm text-slate-600">{% trans "Turnos, equipas, máquinas, capacidade e conflitos operacionais." %}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão de Pessoas" %}</div>
+            <div class="mt-2 text-2xl font-black text-slate-900">{% trans "RH & Assiduidade" %}</div>
+            <p class="mt-2 text-sm text-slate-600">{% trans "Presenças, faltas, férias, banco de horas e controlo administrativo da equipa." %}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Governança" %}</div>
+            <div class="mt-2 text-2xl font-black text-slate-900">{% trans "Compras, Compliance, Alertas e Relatórios" %}</div>
+            <p class="mt-2 text-sm text-slate-600">{% trans "Fornecedores, risco, segurança, notificações e leitura executiva da empresa." %}</p>
+        </div>
+    </div>
+
     {% if kpis %}
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
         {% for item in kpis %}

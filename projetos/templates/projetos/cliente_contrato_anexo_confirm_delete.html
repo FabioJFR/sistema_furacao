@@ -1,0 +1,21 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Apagar anexo do contrato" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="rounded-2xl border border-rose-200 bg-white p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-600">{% trans "Gestão Comercial" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">{% trans "Apagar anexo do contrato" %}</div>
+        <p class="mt-3 text-sm text-slate-600">
+            {% blocktrans with titulo=anexo.titulo cliente=item.nome_cliente %}Tens a certeza que queres apagar o anexo "{{ titulo }}" do contrato de {{ cliente }}?{% endblocktrans %}
+        </p>
+    </div>
+    <form method="post" class="mt-5 flex items-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Confirmar apagar" %}</button>
+        <a href="{% url 'projetos:cliente_contrato_detail' item.pk %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </form>
+</section>
+{% endblock %}

@@ -21,3 +21,24 @@ class GeologiaScoreConfigForm(forms.Form):
                 "A janela crítica tem de ser maior do que a janela de atenção.",
             )
         return cleaned
+
+
+class ComplianceScoreConfigForm(forms.Form):
+    peso_vencidas = forms.IntegerField(min_value=0, max_value=100, required=True)
+    peso_criticas = forms.IntegerField(min_value=0, max_value=100, required=True)
+    peso_altas = forms.IntegerField(min_value=0, max_value=100, required=True)
+    peso_vence_7d = forms.IntegerField(min_value=0, max_value=100, required=True)
+    peso_abertas = forms.IntegerField(min_value=0, max_value=100, required=True)
+    threshold_medio = forms.IntegerField(min_value=0, max_value=500, required=True)
+    threshold_alto = forms.IntegerField(min_value=1, max_value=500, required=True)
+
+    def clean(self):
+        cleaned = super().clean()
+        threshold_medio = cleaned.get("threshold_medio")
+        threshold_alto = cleaned.get("threshold_alto")
+        if threshold_medio is not None and threshold_alto is not None and threshold_alto <= threshold_medio:
+            self.add_error(
+                "threshold_alto",
+                "O limiar de risco alto tem de ser maior do que o limiar de risco médio.",
+            )
+        return cleaned

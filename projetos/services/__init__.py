@@ -8,4 +8,5 @@ from .registos import *
 from .furo_versioning import *
 from .furo_memoria import *
 from .furo_3d_io import *
+from .gestao_compliance import *
 from .gestao_relatorios import *

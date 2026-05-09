@@ -1,0 +1,370 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Fichas Técnicas dos Registos" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto p-6 space-y-6">
+    <div class="rounded-3xl border border-slate-200 bg-gradient-to-r from-sky-950 via-slate-900 to-slate-800 p-6 text-white shadow-xl">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-2">
+                <div class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">{% trans "Informação Técnica" %}</div>
+                <h1 class="text-3xl font-black">
+                    {% if modo_admin %}
+                        {% trans "Fichas Técnicas da Empresa" %}
+                    {% else %}
+                        {% trans "Minhas Fichas Técnicas" %}
+                    {% endif %}
+                </h1>
+                <p class="max-w-3xl text-sm text-slate-200">
+                    {% if modo_admin %}
+                        {% trans "Lista própria das fichas técnicas ligadas aos registos, com acesso rápido ao detalhe, edição dedicada e exportações da empresa." %}
+                    {% else %}
+                        {% trans "Lista de consulta das fichas técnicas dos teus registos, com acesso rápido ao detalhe." %}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% if pode_exportar %}
+                    {% if modo_admin %}
+                <a href="{% url 'projetos:relatorio_turno_admin_export_pdf_consolidado' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-indigo-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-indigo-200">
+                    {% trans "PDF Consolidado" %}
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_admin_export_xlsx' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
+                    XLSX
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_admin_export_csv' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+                    CSV
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_admin_export_zip' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300">
+                    {% trans "Exportar ZIP" %}
+                </a>
+                {% else %}
+                <a href="{% url 'projetos:relatorio_turno_export_pdf_consolidado' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-indigo-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-indigo-200">
+                    {% trans "PDF Consolidado" %}
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_export_xlsx' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
+                    XLSX
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_export_csv' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+                    CSV
+                </a>
+                <a href="{% url 'projetos:relatorio_turno_export_zip' %}{% if querystring_atual %}?{{ querystring_atual }}{% endif %}" class="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300">
+                    {% trans "Exportar ZIP" %}
+                </a>
+                    {% endif %}
+                {% else %}
+                <div class="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-slate-200">
+                    {% trans "Consulta disponível. Exportações apenas para a empresa." %}
+                </div>
+                {% endif %}
+                {% if modo_admin %}
+                <a href="{% url 'projetos:registos_admin_list' %}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                    {% trans "Voltar aos registos" %}
+                </a>
+                {% else %}
+                <a href="{% url 'projetos:registo_diario_list' %}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                    {% trans "Voltar aos registos" %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Total de fichas" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dashboard_relatorios.cards.total_relatorios }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Avanço Total" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dashboard_relatorios.cards.avanco_total|floatformat:2 }}</div>
+            <div class="text-sm text-slate-500">m</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Recuperação Média" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dashboard_relatorios.cards.recuperacao_media|floatformat:2 }}</div>
+            <div class="text-sm text-slate-500">%</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Horas de Paragem" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dashboard_relatorios.cards.horas_paragem_total|floatformat:2 }}</div>
+            <div class="text-sm text-slate-500">h</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Fichas com Ocorrências" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dashboard_relatorios.cards.relatorios_com_ocorrencia }}</div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-3">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Por Projeto" %}</h2>
+            <div class="mt-4 space-y-3">
+                {% for item in dashboard_relatorios.por_projeto %}
+                <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                    <span class="text-sm font-semibold text-slate-700">{{ item.nome }}</span>
+                    <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">{{ item.total }}</span>
+                </div>
+                {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Sem dados." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Por Turno" %}</h2>
+            <div class="mt-4 space-y-3">
+                {% for item in dashboard_relatorios.por_turno %}
+                <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                    <span class="text-sm font-semibold text-slate-700">{{ item.nome }}</span>
+                    <span class="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-800">{{ item.total }}</span>
+                </div>
+                {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Sem dados." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Por Máquina" %}</h2>
+            <div class="mt-4 space-y-3">
+                {% for item in dashboard_relatorios.por_maquina %}
+                <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                    <span class="text-sm font-semibold text-slate-700">{{ item.nome }}</span>
+                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">{{ item.total }}</span>
+                </div>
+                {% empty %}
+                <p class="text-sm text-slate-500">{% trans "Sem dados." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-3">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Projeto · avanço / recuperação / paragem" %}</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-700">
+                        <tr>
+                            <th class="px-3 py-2 text-left">{% trans "Projeto" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Avanço" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Rec." %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Paragem" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dashboard_relatorios.metricas_projeto %}
+                        <tr class="border-t border-slate-200">
+                            <td class="px-3 py-2 font-semibold text-slate-700">{{ item.nome }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.avanco|floatformat:2 }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.recuperacao_media|floatformat:2 }}%</td>
+                            <td class="px-3 py-2 text-right">{{ item.paragem|floatformat:2 }}h</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-3 py-4 text-center text-slate-500">{% trans "Sem dados." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Turno · avanço / recuperação / paragem" %}</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-700">
+                        <tr>
+                            <th class="px-3 py-2 text-left">{% trans "Turno" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Avanço" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Rec." %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Paragem" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dashboard_relatorios.metricas_turno %}
+                        <tr class="border-t border-slate-200">
+                            <td class="px-3 py-2 font-semibold text-slate-700">{{ item.nome }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.avanco|floatformat:2 }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.recuperacao_media|floatformat:2 }}%</td>
+                            <td class="px-3 py-2 text-right">{{ item.paragem|floatformat:2 }}h</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-3 py-4 text-center text-slate-500">{% trans "Sem dados." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-black text-slate-900">{% trans "Máquina · avanço / recuperação / paragem" %}</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-700">
+                        <tr>
+                            <th class="px-3 py-2 text-left">{% trans "Máquina" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Avanço" %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Rec." %}</th>
+                            <th class="px-3 py-2 text-right">{% trans "Paragem" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dashboard_relatorios.metricas_maquina %}
+                        <tr class="border-t border-slate-200">
+                            <td class="px-3 py-2 font-semibold text-slate-700">{{ item.nome }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.avanco|floatformat:2 }}</td>
+                            <td class="px-3 py-2 text-right">{{ item.recuperacao_media|floatformat:2 }}%</td>
+                            <td class="px-3 py-2 text-right">{{ item.paragem|floatformat:2 }}h</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-3 py-4 text-center text-slate-500">{% trans "Sem dados." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-lg font-black text-slate-900">{% trans "Ocorrências por Tipo" %}</h2>
+        <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            {% for item in dashboard_relatorios.ocorrencias_por_tipo %}
+            <div class="rounded-xl bg-rose-50 px-4 py-3">
+                <div class="text-sm font-semibold text-rose-900">{{ item.nome }}</div>
+                <div class="mt-1 text-2xl font-black text-rose-700">{{ item.total }}</div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-slate-500">{% trans "Sem ocorrências registadas." %}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <form method="get" class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            {% if modo_admin %}
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Empregado" %}</label>
+                <select name="empregado" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for item in empregados %}
+                    <option value="{{ item.id }}" {% if filtros.empregado == item.id|stringformat:"s" %}selected{% endif %}>{{ item.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Projeto" %}</label>
+                <select name="projeto" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for item in projetos %}
+                    <option value="{{ item.id }}" {% if filtros.projeto == item.id|stringformat:"s" %}selected{% endif %}>{{ item.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Furo" %}</label>
+                <select name="furo" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for item in furos %}
+                    <option value="{{ item.id }}" {% if filtros.furo == item.id|stringformat:"s" %}selected{% endif %}>{{ item.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Data início" %}</label>
+                <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Data fim" %}</label>
+                <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">{% trans "Texto" %}</label>
+                <input type="text" name="q" value="{{ filtros.q }}" placeholder="{% trans 'Cliente, relatório, projeto...' %}" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+            </div>
+            <div class="{% if modo_admin %}xl:col-span-6{% else %}xl:col-span-5{% endif %} flex flex-wrap gap-3 pt-2">
+                <button type="submit" class="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700">{% trans "Filtrar" %}</button>
+                {% if modo_admin %}
+                <a href="{% url 'projetos:relatorio_turno_admin_list' %}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{% trans "Limpar" %}</a>
+                {% else %}
+                <a href="{% url 'projetos:relatorio_turno_list' %}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{% trans "Limpar" %}</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Data" %}</th>
+                        {% if modo_admin %}<th class="px-4 py-3 text-left">{% trans "Empregado" %}</th>{% endif %}
+                        <th class="px-4 py-3 text-left">{% trans "Nº Relatório" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Cliente" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Projeto" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Furo" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Turno" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Furadas" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Avanço" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Recuperação" %}</th>
+                        <th class="px-4 py-3 text-left">{% trans "Planeamento" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for relatorio in relatorios %}
+                    <tr class="border-t border-slate-200 align-top">
+                        <td class="px-4 py-3">
+                            {% if modo_admin %}
+                            <a href="{% url 'projetos:relatorio_turno_admin_detail' relatorio.id %}" class="mb-2 inline-block rounded-lg bg-sky-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-sky-700">
+                                {% trans "Abrir" %}
+                            </a>
+                            <a href="{% url 'projetos:relatorio_turno_admin_update' relatorio.id %}" class="inline-block rounded-lg bg-amber-500 px-3 py-1 text-sm font-semibold text-white transition hover:bg-amber-600">
+                                {% trans "Editar" %}
+                            </a>
+                            {% else %}
+                            <a href="{% url 'projetos:relatorio_turno_detail' relatorio.id %}" class="inline-block rounded-lg bg-sky-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-sky-700">
+                                {% trans "Abrir" %}
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">{{ relatorio.data|default:"-" }}</td>
+                        {% if modo_admin %}<td class="px-4 py-3">{{ relatorio.empregado.nome|default:"-" }}</td>{% endif %}
+                        <td class="px-4 py-3">{{ relatorio.numero_relatorio|default:"-" }}</td>
+                        <td class="px-4 py-3">{{ relatorio.cliente|default:"-" }}</td>
+                        <td class="px-4 py-3">{{ relatorio.projeto.nome|default:"-" }}</td>
+                        <td class="px-4 py-3">{{ relatorio.furo.nome|default:"-" }}</td>
+                        <td class="px-4 py-3">{{ relatorio.turno|default:"-" }}</td>
+                        <td class="px-4 py-3">
+                            {% with total_furadas=relatorio.furacoes|length %}
+                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if total_furadas == 0 %}bg-rose-100 text-rose-700{% elif total_furadas <= 2 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                {{ total_furadas }}
+                            </span>
+                            {% endwith %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                                {{ relatorio.furacao_avanco|default:"0"|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% with avanco=relatorio.furacao_avanco|default_if_none:0 recuperacao=relatorio.furacao_recuperacao|default_if_none:0 %}
+                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if recuperacao == 0 %}bg-rose-100 text-rose-700{% elif recuperacao < avanco %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                {{ recuperacao|floatformat:2 }}
+                            </span>
+                            {% endwith %}
+                        </td>
+                        <td class="px-4 py-3">{{ relatorio.planeamento_turno.nome_efetivo|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if modo_admin %}12{% else %}11{% endif %}" class="px-4 py-8 text-center text-slate-500">
+                            {% trans "Sem relatórios técnicos encontrados." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

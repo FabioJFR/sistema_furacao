@@ -103,6 +103,40 @@
     </div>
 
     <div class="mqd-section">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <h3>{% trans "Turnos da Máquina" %}</h3>
+            <a href="{% url 'projetos:maquina_turno_create' maquina.id %}" class="mqd-btn mqd-btn-edit">
+                🕒 {% trans "Adicionar turno" %}
+            </a>
+        </div>
+        {% if turnos_maquina %}
+            <div class="mqd-pill-wrap">
+                {% for turno_item in turnos_maquina %}
+                    <div class="mqd-soft-card">
+                        <strong>{{ turno_item.get_turno_display }}</strong>
+                        · {{ turno_item.intervalo_display }}
+                        {% if turno_item.atravessa_meia_noite %}
+                            <div class="mqd-soft-text">{% trans "Termina no dia seguinte." %}</div>
+                        {% endif %}
+                        <div class="mt-3 flex items-center gap-2 flex-wrap">
+                            <a href="{% url 'projetos:maquina_turno_update' maquina.id turno_item.id %}" class="mqd-btn mqd-btn-edit">
+                                ✏️ {% trans "Editar turno" %}
+                            </a>
+                            <a href="{% url 'projetos:maquina_turno_delete' maquina.id turno_item.id %}" class="mqd-btn mqd-btn-delete">
+                                🗑️ {% trans "Apagar turno" %}
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mqd-soft-text">
+                {% trans "Sem turnos configurados. Quando definir um turno nesta máquina, os planeamentos dessa máquina passam a obedecer obrigatoriamente a esse horário." %}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="mqd-section">
         <h3>{% trans "Avarias da máquina" %}</h3>
         {% if avarias %}
             <div class="mqd-pill-wrap">

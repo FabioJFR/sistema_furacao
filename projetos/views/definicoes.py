@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import translation
 
 from core.permissions import user_is_empresa_admin, user_is_geologo
-from plataforma.forms import GeologiaScoreConfigForm
+from plataforma.forms import ComplianceScoreConfigForm, GeologiaScoreConfigForm
 from plataforma.services import empresas as empresas_service
 from projetos.forms import PreferenciasForm
 from projetos.services.acesso_contexto import obter_empregado_autenticado_contexto
@@ -98,6 +98,7 @@ def definicoes(request):
         preferencias = garantir_preferencias_empresa(preferencias, empregado.empresa)
 
     geologia_score_form = None
+    compliance_score_form = None
     empresa_logo_visivel = bool(empregado and empregado.empresa_id and user_is_empresa_admin(request.user))
     if empregado and empregado.empresa_id and user_is_geologo(request.user):
         geologia_cfg = empresas_service.normalizar_geologia_score_config(
@@ -113,6 +114,21 @@ def definicoes(request):
                 "sem_log_48h": geologia_cfg["pesos"]["sem_log_48h"],
                 "janela_atencao_horas": geologia_cfg["janelas_horas"]["atencao"],
                 "janela_critico_horas": geologia_cfg["janelas_horas"]["critico"],
+            }
+        )
+    if empregado and empregado.empresa_id and user_is_empresa_admin(request.user):
+        compliance_cfg = empresas_service.normalizar_compliance_score_config(
+            empregado.empresa.compliance_score_config
+        )
+        compliance_score_form = ComplianceScoreConfigForm(
+            initial={
+                "peso_vencidas": compliance_cfg["pesos"]["vencidas"],
+                "peso_criticas": compliance_cfg["pesos"]["criticas"],
+                "peso_altas": compliance_cfg["pesos"]["altas"],
+                "peso_vence_7d": compliance_cfg["pesos"]["vence_7d"],
+                "peso_abertas": compliance_cfg["pesos"]["abertas"],
+                "threshold_medio": compliance_cfg["thresholds"]["medio"],
+                "threshold_alto": compliance_cfg["thresholds"]["alto"],
             }
         )
 
@@ -131,6 +147,22 @@ def definicoes(request):
             messages.success(request, "Configuração geológica guardada com sucesso.")
             return redirect("projetos:definicoes")
         messages.error(request, "Verifica os valores da configuração geológica e tenta novamente.")
+
+    if (
+        request.method == "POST"
+        and request.POST.get("form_scope") == "compliance_score"
+        and compliance_score_form is not None
+    ):
+        compliance_score_form = ComplianceScoreConfigForm(request.POST)
+        resultado_compliance = empresas_service.processar_fluxo_compliance_score_config(
+            method=request.method,
+            empresa=empregado.empresa,
+            form=compliance_score_form,
+        )
+        if resultado_compliance.ok:
+            messages.success(request, "Configuração de compliance guardada com sucesso.")
+            return redirect("projetos:definicoes")
+        messages.error(request, "Verifica os valores da configuração de compliance e tenta novamente.")
 
     if (
         request.method == "POST"
@@ -155,7 +187,7 @@ def definicoes(request):
         messages.error(request, resultado_logo.erro or "Não foi possível atualizar o logotipo da empresa.")
 
     method_preferencias = request.method
-    if request.method == "POST" and request.POST.get("form_scope") in {"geologia_score", "empresa_logo"}:
+    if request.method == "POST" and request.POST.get("form_scope") in {"geologia_score", "empresa_logo", "compliance_score"}:
         method_preferencias = "GET"
 
     fluxo = processar_fluxo_preferencias_utilizador_form(
@@ -176,6 +208,7 @@ def definicoes(request):
     return render(request, "projetos/definicoes.html", {
         "form": form,
         "geologia_score_form": geologia_score_form,
+        "compliance_score_form": compliance_score_form,
         "empresa_logo_visivel": empresa_logo_visivel,
         "empresa_atual": empregado.empresa if empregado else None,
         "titulo": "Definições",

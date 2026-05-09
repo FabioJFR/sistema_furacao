@@ -35,6 +35,7 @@ class Empresa(models.Model):
     responsavel_telefone = models.CharField(max_length=30, blank=True)
     logo = models.ImageField(upload_to="plataforma/empresas/logos/", blank=True, null=True)
     geologia_score_config = models.JSONField(default=dict, blank=True)
+    compliance_score_config = models.JSONField(default=dict, blank=True)
 
     plano = models.ForeignKey(
         "Plano",

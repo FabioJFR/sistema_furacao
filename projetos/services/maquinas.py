@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from projetos.models import Maquina
+from projetos.models import Maquina, MaquinaTurno
 
 
 # TODO futuro:
@@ -186,3 +186,41 @@ def apagar_maquina(*, maquina, empresa=None):
     maquina_id = maquina.id
     maquina.delete()
     return maquina_id
+
+
+@transaction.atomic
+def criar_maquina_turno(*, form, maquina, empresa=None):
+    validar_maquina_empresa(maquina, empresa=empresa)
+    turno = form.save(commit=False)
+    turno.maquina = maquina
+    turno.save()
+    return turno
+
+
+@transaction.atomic
+def atualizar_maquina_turno(*, form, maquina, empresa=None):
+    validar_maquina_empresa(maquina, empresa=empresa)
+    turno = form.save(commit=False)
+    turno.maquina = maquina
+    turno.save()
+    return turno
+
+
+@transaction.atomic
+def apagar_maquina_turno(*, turno, maquina, empresa=None):
+    validar_maquina_empresa(maquina, empresa=empresa)
+    if turno.maquina_id != maquina.id:
+        raise ValidationError("O turno não pertence à máquina selecionada.")
+    turno_id = turno.id
+    turno.delete()
+    return turno_id
+
+
+def obter_turno_configurado_maquina(*, maquina=None, turno=None):
+    if maquina is None or not turno:
+        return None
+    return (
+        MaquinaTurno.objects.filter(maquina=maquina, turno=turno, ativo=True)
+        .order_by("-atualizado_em")
+        .first()
+    )

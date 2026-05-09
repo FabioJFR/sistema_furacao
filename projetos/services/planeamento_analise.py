@@ -15,11 +15,11 @@ def detetar_conflitos_planeamento(*, items, max_resultados=30):
     def processar_grupo(grupo_items, tipo):
         grupo = sorted(grupo_items, key=lambda x: (x.data_inicio, x.data_fim or x.data_inicio, str(x.id)))
         for idx, atual in enumerate(grupo):
-            atual_inicio = atual.data_inicio
-            atual_fim = atual.data_fim or atual.data_inicio
+            atual_inicio = atual.inicio_datetime
+            atual_fim = atual.fim_datetime
             for prox in grupo[idx + 1 :]:
-                prox_inicio = prox.data_inicio
-                prox_fim = prox.data_fim or prox.data_inicio
+                prox_inicio = prox.inicio_datetime
+                prox_fim = prox.fim_datetime
 
                 if prox_inicio > atual_fim:
                     break

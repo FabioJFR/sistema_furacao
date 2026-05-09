@@ -5,6 +5,27 @@ from .projeto import Projeto
 from .furo import Furo
 
 
+TURNOS_MAQUINA_CHOICES = [
+    ("manha", "Manhã"),
+    ("tarde", "Tarde"),
+    ("noite", "Noite"),
+    ("extra", "Extra"),
+    ("extra_manha", "Extra Manhã"),
+    ("extra_tarde", "Extra Tarde"),
+    ("extra_noite", "Extra Noite"),
+]
+
+TURNOS_MAQUINA_ORDEM = {
+    "manha": 1,
+    "tarde": 2,
+    "noite": 3,
+    "extra": 4,
+    "extra_manha": 5,
+    "extra_tarde": 6,
+    "extra_noite": 7,
+}
+
+
 # ------------------------
 # Maquina
 # ------------------------
@@ -153,6 +174,67 @@ class Maquina(models.Model):
             raise ValidationError({
                 "data_revisao": "A data de revisão não pode ser anterior à data de compra."
             })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class MaquinaTurno(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    maquina = models.ForeignKey(
+        Maquina,
+        on_delete=models.CASCADE,
+        related_name="turnos_maquina",
+    )
+    turno = models.CharField(max_length=20, choices=TURNOS_MAQUINA_CHOICES)
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
+    ativo = models.BooleanField(default=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["turno", "-atualizado_em"]
+        verbose_name = "Turno da Máquina"
+        verbose_name_plural = "Turnos da Máquina"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["maquina", "turno"],
+                name="unique_turno_por_maquina",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.maquina.nome} · {self.get_turno_display()} · {self.intervalo_display}"
+
+    @property
+    def atravessa_meia_noite(self):
+        return self.hora_fim <= self.hora_inicio
+
+    @property
+    def ordem_turno(self):
+        return TURNOS_MAQUINA_ORDEM.get(self.turno, 99)
+
+    @property
+    def intervalo_display(self):
+        return f"{self.hora_inicio.strftime('%H:%M')} - {self.hora_fim.strftime('%H:%M')}"
+
+    def clean(self):
+        super().clean()
+        if not self.maquina_id:
+            raise ValidationError({"maquina": "O turno deve estar associado a uma máquina."})
+
+        if self.maquina and not self.maquina.empresa_id:
+            raise ValidationError({"maquina": "A máquina deve estar associada a uma empresa."})
+
+        if self.hora_inicio is None or self.hora_fim is None:
+            raise ValidationError(
+                {
+                    "hora_inicio": "Defina a hora de início.",
+                    "hora_fim": "Defina a hora de fim.",
+                }
+            )
 
     def save(self, *args, **kwargs):
         self.full_clean()

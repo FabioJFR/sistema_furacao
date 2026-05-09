@@ -1,6 +1,6 @@
 from django import forms
 
-from ..models.maquina import Maquina
+from ..models.maquina import Maquina, MaquinaTurno
 
 
 
@@ -208,5 +208,43 @@ class MaquinaForm(forms.ModelForm):
 
         if data_compra and data_revisao and data_revisao < data_compra:
             self.add_error("data_revisao", "A revisão não pode ser anterior à compra.")
+
+        return cleaned
+
+
+class MaquinaTurnoForm(forms.ModelForm):
+    class Meta:
+        model = MaquinaTurno
+        fields = ["turno", "hora_inicio", "hora_fim", "ativo"]
+        widgets = {
+            "turno": forms.Select(attrs={"class": "form-control"}),
+            "hora_inicio": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
+            "hora_fim": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
+            "ativo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+        labels = {
+            "turno": "Turno",
+            "hora_inicio": "Hora de início",
+            "hora_fim": "Hora de fim",
+            "ativo": "Ativo",
+        }
+
+    def __init__(self, *args, empresa=None, maquina=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.empresa = empresa
+        self.maquina = maquina or getattr(self.instance, "maquina", None)
+        if self.maquina is not None:
+            self.instance.maquina = self.maquina
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.maquina is None:
+            self.add_error(None, "Não foi possível identificar a máquina deste turno.")
+            return cleaned
+
+        if self.empresa is not None:
+            empresa_id = _resolver_empresa_id(self.empresa)
+            if self.maquina.empresa_id != empresa_id:
+                self.add_error(None, "A máquina selecionada não pertence à empresa atual.")
 
         return cleaned

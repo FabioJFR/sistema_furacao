@@ -10,6 +10,22 @@
         <a href="{% url 'projetos:planeamento_turno_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
     </div>
 
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão Operacional" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">
+            {% if is_create %}{% trans "Criar Planeamento" %}{% else %}{% trans "Editar Planeamento" %}{% endif %}
+        </div>
+        <p class="mt-3 text-sm text-slate-600">
+            {% trans "Defina o período, o turno, o projeto, o furo, a equipa e a máquina para organizar a operação e evitar sobreposições." %}
+        </p>
+        <div class="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+            {% trans "Se a máquina escolhida tiver um horário oficial configurado para esse turno, a plataforma aplica automaticamente esse horário e o planeamento passa a respeitá-lo de forma obrigatória." %}
+        </div>
+        <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            {% trans "Pode dar um nome ao planeamento para depois o identificar facilmente, por exemplo: `Turno Noite CS-14`, `Equipe A - Frente Norte` ou `Extra Tarde Furo 12`." %}
+        </div>
+    </div>
+
     <form method="post" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {% csrf_token %}
         {% for field in form %}

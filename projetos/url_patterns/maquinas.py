@@ -13,6 +13,9 @@ urlpatterns = [
     path("avarias/", views.avaria_maquina_list_admin, name="avaria_maquina_list_admin"),
     path("avarias/<uuid:pk>/editar/", views.avaria_maquina_update_admin, name="avaria_maquina_update_admin"),
     path("<uuid:maquina_id>/", views.maquina_detail, name="maquina_detail"),
+    path("<uuid:maquina_id>/turnos/novo/", views.maquina_turno_create, name="maquina_turno_create"),
+    path("<uuid:maquina_id>/turnos/<uuid:turno_id>/editar/", views.maquina_turno_update, name="maquina_turno_update"),
+    path("<uuid:maquina_id>/turnos/<uuid:turno_id>/apagar/", views.maquina_turno_delete, name="maquina_turno_delete"),
     path("<uuid:maquina_id>/editar/", views.maquina_update, name="maquina_update"),
     path("<uuid:maquina_id>/apagar/", views.maquina_delete, name="maquina_delete"),
 ]

@@ -8,6 +8,10 @@
 
     <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
         <h1 class="text-2xl font-bold text-gray-800">📊 {% trans "Registos de Produção" %}</h1>
+        <a href="{% url 'projetos:relatorio_turno_admin_list' %}"
+           class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700">
+            📘 {% trans "Fichas Técnicas" %}
+        </a>
     </div>
 
     <!-- FILTROS -->
@@ -93,6 +97,7 @@
                     <th class="py-2">{% trans "Ações" %}</th>
                     <th class="py-2">{% trans "Data" %}</th>
                     <th class="py-2">{% trans "Empregado" %}</th>
+                    <th class="py-2">{% trans "Planeamento" %}</th>
                     <th class="py-2">{% trans "Projeto" %}</th>
                     <th class="py-2">{% trans "Furo" %}</th>
                     <th class="py-2">{% trans "Início" %}</th>
@@ -103,6 +108,9 @@
                     <th class="py-2">{% trans "Paragem" %}</th>
                     <th class="py-2">{% trans "Tipo Paragem" %}</th>
                     <th class="py-2">{% trans "Metros" %}</th>
+                    <th class="py-2">{% trans "Furadas" %}</th>
+                    <th class="py-2">{% trans "Avanço Furadas" %}</th>
+                    <th class="py-2">{% trans "Recuperação Furadas" %}</th>
                     <th class="py-2">{% trans "Foto" %}</th>
                     <th class="py-2">{% trans "Observações" %}</th>
                 </tr>
@@ -111,6 +119,12 @@
                 {% for r in registos %}
                 <tr class="border-b align-top">
                     <td class="py-2">
+                        {% if r.tem_relatorio_tecnico %}
+                        <a href="{% url 'projetos:relatorio_turno_admin_detail' r.id %}"
+                           class="mb-2 inline-block rounded-lg bg-sky-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-sky-700">
+                            {% trans "Ficha Técnica" %}
+                        </a>
+                        {% endif %}
                         <a href="{% url 'projetos:registo_admin_update' r.id %}"
                            class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
                             {% trans "Corrigir" %}
@@ -118,6 +132,7 @@
                     </td>
                     <td class="py-2">{{ r.data }}</td>
                     <td class="py-2">{{ r.empregado.nome }}</td>
+                    <td class="py-2">{{ r.planeamento_turno.nome_efetivo|default:"-" }}</td>
                     <td class="py-2">{{ r.projeto.nome|default:"-" }}</td>
                     <td class="py-2">{{ r.furo.nome|default:"-" }}</td>
                     <td class="py-2">{{ r.hora_inicio|default:"-" }}</td>
@@ -128,6 +143,25 @@
                     <td class="py-2">{{ r.horas_paragem|floatformat:2 }}</td>
                     <td class="py-2">{{ r.get_tipo_paragem_display|default:"-" }}</td>
                     <td class="py-2">{{ r.metros_furados|floatformat:2 }}</td>
+                    <td class="py-2">
+                        {% with total_furadas=r.furacoes|length %}
+                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if total_furadas == 0 %}bg-rose-100 text-rose-700{% elif total_furadas <= 2 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                            {{ total_furadas }}
+                        </span>
+                        {% endwith %}
+                    </td>
+                    <td class="py-2">
+                        <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                            {{ r.furacao_avanco|default:"0"|floatformat:2 }}
+                        </span>
+                    </td>
+                    <td class="py-2">
+                        {% with avanco=r.furacao_avanco|default_if_none:0 recuperacao=r.furacao_recuperacao|default_if_none:0 %}
+                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if recuperacao == 0 %}bg-rose-100 text-rose-700{% elif recuperacao < avanco %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                            {{ recuperacao|floatformat:2 }}
+                        </span>
+                        {% endwith %}
+                    </td>
                     <td class="py-2">
                         {% if r.relatorio_foto %}
                             <a href="{{ r.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
@@ -141,7 +175,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="15" class="py-4 text-center text-gray-500">
+                    <td colspan="19" class="py-4 text-center text-gray-500">
                         {% trans "Sem registos encontrados." %}
                     </td>
                 </tr>

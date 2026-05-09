@@ -12,6 +12,7 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{% url 'projetos:gestao_relatorios_export_csv' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">{% trans "Exportar CSV" %}</a>
+            <a href="{% url 'projetos:gestao_relatorios_export_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">{% trans "Exportar PDF" %}</a>
             <a href="{% url 'projetos:gestao_relatorios_export_xlsx' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">{% trans "Exportar XLSX" %}</a>
             <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-light">{% trans "Voltar" %}</a>
         </div>
@@ -61,6 +62,17 @@
             <p class="text-slate-700"><strong>{% trans "Não conformes" %}:</strong> {{ compliance.checklists_nao_conformes }}</p>
             <p class="text-slate-700"><strong>{% trans "Incidentes total" %}:</strong> {{ compliance.incidentes_total }}</p>
             <p class="text-slate-700"><strong>{% trans "Incidentes abertos" %}:</strong> {{ compliance.incidentes_abertos }}</p>
+            <p class="text-slate-700"><strong>{% trans "Auditorias total" %}:</strong> {{ compliance.auditorias_total }}</p>
+            <p class="text-slate-700"><strong>{% trans "Auditorias abertas" %}:</strong> {{ compliance.auditorias_abertas }}</p>
+            <p class="text-slate-700"><strong>{% trans "Planos de auditoria" %}:</strong> {{ compliance.planos_total }}</p>
+            <p class="text-slate-700"><strong>{% trans "Planos vencidos" %}:</strong> {{ compliance.planos_vencidos }}</p>
+            <p class="text-slate-700"><strong>{% trans "Ações corretivas total" %}:</strong> {{ compliance.acoes_total }}</p>
+            <p class="text-slate-700"><strong>{% trans "Ações corretivas abertas" %}:</strong> {{ compliance.acoes_abertas }}</p>
+            <p class="text-slate-700"><strong>{% trans "Ações preventivas total" %}:</strong> {{ compliance.preventivas_total }}</p>
+            <p class="text-slate-700"><strong>{% trans "Ações preventivas abertas" %}:</strong> {{ compliance.preventivas_abertas }}</p>
+            <p class="text-slate-700"><strong>{% trans "Preventivas vencidas" %}:</strong> {{ compliance.preventivas_vencidas }}</p>
+            <p class="text-slate-700"><strong>{% trans "Evidências registadas" %}:</strong> {{ compliance.evidencias_total }}</p>
+            <p class="text-slate-700"><strong>{% trans "Fechos formais" %}:</strong> {{ compliance.acoes_com_fecho_formal }}</p>
         </div>
     </div>
 
@@ -120,6 +132,10 @@
                 <label class="inline-flex items-center gap-2 text-sm text-slate-700">
                     <input type="checkbox" name="incluir_xlsx" value="1" {% if form_email.incluir_xlsx.value %}checked{% endif %}>
                     <span>{% trans "Anexo XLSX" %}</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="incluir_pdf" value="1" {% if form_email.incluir_pdf.value %}checked{% endif %}>
+                    <span>{% trans "Anexo PDF" %}</span>
                 </label>
             </div>
 
@@ -183,6 +199,10 @@
                     <input type="checkbox" name="incluir_xlsx" value="1" {% if form_agendamento.incluir_xlsx.value %}checked{% endif %}>
                     <span>{% trans "Anexo XLSX" %}</span>
                 </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="incluir_pdf" value="1" {% if form_agendamento.incluir_pdf.value %}checked{% endif %}>
+                    <span>{% trans "Anexo PDF" %}</span>
+                </label>
             </div>
             <div class="md:col-span-10">
                 <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Destinatários" %}</label>
@@ -197,6 +217,55 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-secondary">{% trans "Executar agora" %}</button>
         </form>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">
+        <h2 class="text-lg font-semibold text-slate-800">{% trans "Histórico de envios" %}</h2>
+        <p class="text-sm text-slate-600 mt-1">{% trans "Auditoria de envios manuais e agendados de relatórios executivos." %}</p>
+        <table class="w-full min-w-[1040px] text-sm mt-3">
+            <thead class="text-slate-600">
+                <tr>
+                    <th class="px-3 py-2 text-left">{% trans "Data/Hora" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Origem" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Estado" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Assunto" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Destinatários" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Anexos" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Enviados" %}</th>
+                    <th class="px-3 py-2 text-left">{% trans "Erro" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in historico_envios %}
+                <tr class="border-t border-slate-100 text-slate-700 align-top">
+                    <td class="px-3 py-2 whitespace-nowrap">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{{ item.get_origem_display }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        {% if item.status == "sucesso" %}
+                            <span class="text-emerald-700 font-semibold">{% trans "Sucesso" %}</span>
+                        {% else %}
+                            <span class="text-rose-700 font-semibold">{% trans "Erro" %}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-3 py-2">{{ item.assunto|default:"-" }}</td>
+                    <td class="px-3 py-2 whitespace-pre-line">{{ item.destinos|default:"-" }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        {% if item.incluir_csv %}CSV{% endif %}
+                        {% if item.incluir_csv and item.incluir_xlsx %} + {% endif %}
+                        {% if item.incluir_xlsx %}XLSX{% endif %}
+                        {% if item.incluir_pdf and item.incluir_csv %} + {% endif %}
+                        {% if item.incluir_pdf and item.incluir_xlsx and not item.incluir_csv %} + {% endif %}
+                        {% if item.incluir_pdf %}PDF{% endif %}
+                        {% if not item.incluir_csv and not item.incluir_xlsx and not item.incluir_pdf %}-{% endif %}
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">{{ item.enviados }}</td>
+                    <td class="px-3 py-2">{{ item.erro|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="px-3 py-4 text-slate-500">{% trans "Sem envios registados ainda." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 overflow-auto">

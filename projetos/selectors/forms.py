@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from plataforma.models import Empresa
-from projetos.models import EmpregadoFuro, Empregados, Furo, Material, Projeto, RegistoDiarioEmpregado
+from projetos.models import EmpregadoFuro, Empregados, Furo, Material, PlaneamentoTurno, Projeto, RegistoDiarioEmpregado
 
 
 def resolver_empresa_id(empresa):
@@ -53,6 +53,38 @@ def listar_furos_empregado_qs(empregado, *, empresa=None):
             projeto__in=projetos_atuais,
         ).distinct().order_by("nome")
     return Furo.objects.filter(projeto__in=projetos_atuais).distinct().order_by("nome")
+
+
+def listar_planeamentos_empregado_qs(empregado, *, empresa=None, data=None):
+    if not empregado:
+        return PlaneamentoTurno.objects.none()
+    queryset = (
+        PlaneamentoTurno.objects.filter(Q(empregado=empregado) | Q(empregado__isnull=True))
+        .exclude(estado="cancelado")
+        .annotate(
+            disponibilidade_ordem=Case(
+                When(empregado=empregado, then=Value(0)),
+                When(empregado__isnull=True, then=Value(1)),
+                default=Value(2),
+                output_field=IntegerField(),
+            )
+        )
+    )
+    if empresa is not None:
+        queryset = queryset.filter(empresa_id=resolver_empresa_id(empresa))
+    if data is not None:
+        queryset = queryset.filter(data_inicio__lte=data).filter(Q(data_fim__isnull=True, data_inicio=data) | Q(data_fim__gte=data))
+    return queryset.select_related("projeto", "furo", "maquina").order_by("disponibilidade_ordem", "data_inicio", "hora_inicio", "turno", "nome")
+
+
+def listar_planeamentos_empresa_qs(empresa):
+    if empresa is None:
+        return PlaneamentoTurno.objects.none()
+    return (
+        PlaneamentoTurno.objects.filter(empresa_id=resolver_empresa_id(empresa))
+        .select_related("empregado", "projeto", "furo", "maquina")
+        .order_by("-data_inicio", "turno", "nome")
+    )
 
 
 def listar_materiais_ativos_com_stock_qs(empresa):

@@ -1,0 +1,209 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Painel Comercial por Cliente" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-wide">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{% trans "Painel Comercial por Cliente" %}</h1>
+            <p class="sf-muted-text">{% trans "Vista consolidada dos contratos, alertas e follow-ups agrupados por cliente." %}</p>
+            {% if somente_leitura %}
+                <p class="text-xs text-amber-700 mt-1">{% trans "Modo auditoria (somente leitura)." %}</p>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'projetos:cliente_contrato_list' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+        </div>
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Gestão Comercial" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">{% trans "Painel Comercial Consolidado" %}</div>
+        <p class="mt-3 text-sm text-slate-600">
+            {% trans "Consulta rápida por cliente para perceber quantos contratos existem, quem precisa de follow-up, que contratos estão em risco e qual o valor comercial estimado." %}
+        </p>
+    </div>
+
+    <div class="mt-6 overflow-auto rounded-xl border border-slate-200 bg-white">
+        <form method="get" class="p-4 grid grid-cols-1 md:grid-cols-12 gap-3 border-b border-slate-100">
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Cliente" %}</label>
+                <input
+                    type="text"
+                    name="termo"
+                    value="{{ filtros.termo }}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800"
+                    placeholder="{% trans 'Nome do cliente' %}"
+                />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Estado" %}</label>
+                <select name="status" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Workflow" %}</label>
+                <select name="workflow" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    {% for value, label in workflow_choices %}
+                    <option value="{{ value }}" {% if filtros.workflow == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{% trans "Projeto" %}</label>
+                <select name="projeto_id" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
+                    <option value="">{% trans "Todos" %}</option>
+                    {% for p in projeto_choices %}
+                    <option value="{{ p.id }}" {% if filtros.projeto_id == p.id|stringformat:'s' %}selected{% endif %}>{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2 flex flex-wrap items-end gap-2">
+                <button type="submit" class="btn btn-primary whitespace-nowrap break-normal">{% trans "Filtrar" %}</button>
+                <a href="{% url 'projetos:cliente_contrato_painel_clientes' %}" class="btn btn-light whitespace-nowrap break-normal">{% trans "Limpar" %}</a>
+            </div>
+        </form>
+
+        <div class="p-4 border-b border-slate-100 grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="text-xs text-slate-500">{% trans "Clientes visíveis" %}</div>
+                <div class="text-lg font-semibold text-slate-800">{{ total_clientes }}</div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="text-xs text-slate-500">{% trans "Contratos" %}</div>
+                <div class="text-lg font-semibold text-slate-800">{{ total_contratos }}</div>
+            </div>
+            <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                <div class="text-xs text-red-600">{% trans "Contratos com alerta" %}</div>
+                <div class="text-lg font-semibold text-red-700">{{ total_alertas }}</div>
+            </div>
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <div class="text-xs text-amber-700">{% trans "Follow-ups em atraso" %}</div>
+                <div class="text-lg font-semibold text-amber-800">{{ total_followups_atrasados }}</div>
+            </div>
+            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <div class="text-xs text-emerald-700">{% trans "Valor total estimado" %}</div>
+                <div class="text-lg font-semibold text-emerald-800">{{ valor_total_estimado|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 space-y-4">
+        {% for cliente in painel_clientes %}
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900">{{ cliente.nome_cliente }}</h2>
+                        {% if cliente.empresa_nome %}
+                            <p class="mt-1 text-sm text-slate-500">{{ cliente.empresa_nome }}</p>
+                        {% endif %}
+                        <p class="mt-2 text-sm text-slate-600">
+                            {{ cliente.total_contratos }} {% trans "contrato(s)" %} ·
+                            {{ cliente.contratos_ativos }} {% trans "ativo(s)" %} ·
+                            {{ cliente.contratos_vencidos }} {% trans "vencido(s)" %}
+                        </p>
+                        <p class="mt-1 text-sm text-slate-600">
+                            {% trans "Workflows" %}: {{ cliente.workflows_resumo|default:"-" }}
+                        </p>
+                        <div class="mt-3">
+                            <a href="{% url 'projetos:cliente_comercial_detail' %}?cliente={{ cliente.nome_cliente|urlencode }}{% if cliente.empresa_id and somente_leitura %}&empresa_id={{ cliente.empresa_id }}{% endif %}" class="btn btn-light">{% trans "Abrir ficha cliente" %}</a>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-sm min-w-[280px]">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                            <div class="text-xs text-slate-500">{% trans "Alertas" %}</div>
+                            <div class="text-lg font-semibold text-slate-800">{{ cliente.contratos_com_alerta }}</div>
+                        </div>
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                            <div class="text-xs text-amber-700">{% trans "Follow-ups atrasados" %}</div>
+                            <div class="text-lg font-semibold text-amber-800">{{ cliente.followups_atrasados }}</div>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                            <div class="text-xs text-slate-500">{% trans "Próximo follow-up" %}</div>
+                            <div class="text-sm font-semibold text-slate-800">{{ cliente.proximo_followup|date:"d/m/Y"|default:"-" }}</div>
+                        </div>
+                        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                            <div class="text-xs text-emerald-700">{% trans "Valor estimado" %}</div>
+                            <div class="text-sm font-semibold text-emerald-800">{{ cliente.valor_total_estimado|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 overflow-auto rounded-xl border border-slate-200">
+                    <table class="w-full min-w-[880px] text-sm">
+                        <thead class="bg-slate-50 text-slate-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">{% trans "Contrato" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Projeto" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Estado" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Workflow" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Fim efetivo" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Follow-up" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Alertas" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Valor estimado" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Ações" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contrato in cliente.contratos %}
+                                <tr class="border-t border-slate-100 text-slate-700">
+                                    <td class="px-4 py-3 font-semibold">{{ contrato.numero_contrato|default:"-" }}</td>
+                                    <td class="px-4 py-3">{{ contrato.projeto_nome }}</td>
+                                    <td class="px-4 py-3">{{ contrato.status_display }}</td>
+                                    <td class="px-4 py-3">
+                                        <div>{{ contrato.workflow_display }}</div>
+                                        {% if contrato.sugestao_workflow_principal and not contrato.sugestao_workflow_principal.ja_ativo %}
+                                            <div class="text-xs {% if contrato.sugestao_workflow_principal.prioridade == 'alta' %}text-red-700{% elif contrato.sugestao_workflow_principal.prioridade == 'media' %}text-amber-700{% else %}text-sky-700{% endif %}">
+                                                {% trans "Sugestão" %}: {{ contrato.sugestao_workflow_principal.label }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        {{ contrato.data_fim_efetiva|date:"d/m/Y"|default:"-" }}
+                                        {% if contrato.dias_para_fim is not None %}
+                                            <div class="text-xs {% if contrato.dias_para_fim < 0 %}text-red-700{% elif contrato.dias_para_fim <= 30 %}text-amber-700{% else %}text-slate-500{% endif %}">
+                                                {% if contrato.dias_para_fim < 0 %}
+                                                    {% trans "Vencido" %}
+                                                {% else %}
+                                                    {{ contrato.dias_para_fim }}d
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">{{ contrato.proximo_followup_em|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="px-4 py-3">
+                                        {% if contrato.alertas_operacionais %}
+                                            <div class="flex flex-wrap gap-1">
+                                                {% for alerta in contrato.alertas_operacionais %}
+                                                    <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold {% if alerta.gravidade == 'alta' %}bg-red-100 text-red-700{% elif alerta.gravidade == 'media' %}bg-amber-100 text-amber-700{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                                        {{ alerta.titulo }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-xs text-emerald-700 font-semibold">{% trans "Sem alertas" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">{{ contrato.valor_total_estimado|floatformat:2 }}</td>
+                                    <td class="px-4 py-3">
+                                        <a href="{% url 'projetos:cliente_contrato_detail' contrato.pk %}" class="btn btn-light">{% trans "Abrir" %}</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% empty %}
+            <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+                {% trans "Ainda não existem clientes com contratos visíveis neste painel." %}
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

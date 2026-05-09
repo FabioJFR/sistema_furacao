@@ -1,0 +1,44 @@
+{% extends "projetos/base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block title %}{% trans "Nova Evidência de Compliance" %} | Sistema Furação{% endblock %}
+
+{% block content %}
+<section class="page-card sf-page-narrow">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1>{% trans "Nova Evidência de Compliance" %}</h1>
+            <p class="sf-muted-text">
+                {% blocktrans with origem=origem_label titulo=origem.titulo %}Adicionar evidência à origem {{ origem }}: {{ titulo }}.{% endblocktrans %}
+            </p>
+        </div>
+        <a href="{% url 'projetos:gestao_compliance_seguranca' %}" class="btn btn-light">{% trans "Voltar" %}</a>
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">{% trans "Compliance" %}</div>
+        <div class="mt-2 text-3xl font-black text-slate-900">{% trans "Adicionar Evidência" %}</div>
+        <p class="mt-3 text-sm text-slate-700">
+            {% trans "Anexe ficheiros de suporte para reforçar a rastreabilidade, validação e auditoria do registo selecionado." %}
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        {% for field in form.visible_fields %}
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">{{ field.label }}</label>
+            {{ field|add_class:"w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800" }}
+            {% if field.help_text %}<p class="text-xs text-slate-500 mt-1">{{ field.help_text }}</p>{% endif %}
+            {% for error in field.errors %}<p class="text-sm text-rose-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        {% for error in form.non_field_errors %}<p class="text-sm text-rose-600">{{ error }}</p>{% endfor %}
+        <div class="flex items-center gap-2 pt-2">
+            <button type="submit" class="btn btn-primary">{% trans "Guardar evidência" %}</button>
+            <a href="{% url 'projetos:gestao_compliance_seguranca' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
