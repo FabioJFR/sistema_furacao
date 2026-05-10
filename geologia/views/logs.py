@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
@@ -55,6 +56,19 @@ def _processar_post_form(
         return redirect(redirect_name, **redirect_kwargs)
     messages.error(request, mensagem_erro)
     return None
+
+
+def _next_url_segura(request):
+    next_url = request.POST.get("next") or request.GET.get("next")
+    if not next_url:
+        return ""
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return ""
 
 
 @login_required
@@ -212,7 +226,7 @@ def log_geologico_delete(request, pk):
     log = obter_log_geologico(pk, empresa=empresa)
     furo_id = log.furo_id
 
-    next_url = request.POST.get("next") or request.GET.get("next")
+    next_url = _next_url_segura(request)
 
     if request.method == "POST":
         log.delete()
@@ -320,6 +334,8 @@ def mapa_furos_2d_3d_geologo(request):
     if resposta_erro:
         return resposta_erro
 
+    from .dashboard import _obter_fontes_cartograficas_contexto
+
     projeto_id = (request.GET.get("projeto") or "").strip()
     furos = obter_mapa_furos_geologo(empresa=empresa, projeto_id=projeto_id or None)
     projetos = obter_furos_geologia_hub_qs(empresa=empresa).values("projeto_id", "projeto__nome").distinct().order_by("projeto__nome")
@@ -339,6 +355,7 @@ def mapa_furos_2d_3d_geologo(request):
         for item in furos
         if item.get("tem_coordenadas")
     ]
+    fontes_cartograficas_mapa, _ = _obter_fontes_cartograficas_contexto(empresa=empresa)
 
     return render(
         request,
@@ -349,6 +366,7 @@ def mapa_furos_2d_3d_geologo(request):
             "projetos": projetos,
             "projeto_id_ativo": projeto_id,
             "mapa_pontos": mapa_pontos,
+            "fontes_cartograficas_mapa": fontes_cartograficas_mapa,
         },
     )
 

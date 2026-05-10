@@ -1,7 +1,16 @@
+from datetime import timedelta
+
+from django.urls import reverse
+from django.utils import timezone
+
 from core.permissions import user_is_empresa_admin, user_is_empregado, user_is_platform_admin
-from projetos.models import MaquinaAvaria
+from projetos.models import AssiduidadeRegisto, MaquinaAvaria, NotificacaoGestao
 from projetos.selectors.acesso import obter_empregado_por_user, obter_perfil_ativo_por_user
 from projetos.selectors.preferencias import obter_ou_criar_preferencias_user
+from projetos.views.institucional import obter_ajuda_contextual
+
+
+AJUDA_CONTEXTUAL_JANELA_UTILIZADOR_RECENTE_DIAS = 30
 
 
 def menu_context(request):
@@ -19,6 +28,9 @@ def menu_context(request):
             "empregado_menu_funcao": "",
             "tamanho_texto": "normal",
             "empresa_menu_logo_url": "",
+            "total_pedidos_ferias_pendentes_menu": 0,
+            "total_notificacoes_empregado_abertas_menu": 0,
+            "ajuda_contextual_atual": None,
         }
 
     perfil = obter_perfil_ativo_por_user(user)
@@ -35,6 +47,8 @@ def menu_context(request):
     is_empregado_user = user_is_empregado(user)
     total_avarias_maquinas_abertas_menu = 0
     total_minhas_avarias_maquinas_abertas_menu = 0
+    total_pedidos_ferias_pendentes_menu = 0
+    total_notificacoes_empregado_abertas_menu = 0
 
     empresa_id_menu = getattr(perfil, "empresa_id", None) or getattr(empregado_menu_obj, "empresa_id", None)
     if is_admin_user and empresa_id_menu:
@@ -42,11 +56,27 @@ def menu_context(request):
             empresa_id=empresa_id_menu,
             status__in=["aberta", "em_reparacao"],
         ).count()
+        total_pedidos_ferias_pendentes_menu = AssiduidadeRegisto.objects.filter(
+            empresa_id=empresa_id_menu,
+            tipo="ferias",
+            estado="pendente",
+        ).count()
+    elif is_platform_admin and empresa_id_menu:
+        total_pedidos_ferias_pendentes_menu = AssiduidadeRegisto.objects.filter(
+            empresa_id=empresa_id_menu,
+            tipo="ferias",
+            estado="pendente",
+        ).count()
     if is_empregado_user and empregado_menu_obj and empregado_menu_obj.empresa_id:
         total_minhas_avarias_maquinas_abertas_menu = MaquinaAvaria.objects.filter(
             empresa_id=empregado_menu_obj.empresa_id,
             responsavel_empregado_id=empregado_menu_obj.id,
             status__in=["aberta", "em_reparacao"],
+        ).count()
+        total_notificacoes_empregado_abertas_menu = NotificacaoGestao.objects.filter(
+            empresa_id=empregado_menu_obj.empresa_id,
+            responsavel_id=empregado_menu_obj.id,
+            estado__in=["aberta", "em_andamento"],
         ).count()
 
     preferencias = getattr(request, "sf_preferencias", None)
@@ -61,6 +91,34 @@ def menu_context(request):
         except Exception:
             empresa_menu_logo_url = ""
 
+    ajuda_contextual_atual = None
+    if getattr(preferencias, "ajuda_contextual_ativa", True):
+        resolver_match = getattr(request, "resolver_match", None)
+        nome_rota_atual = getattr(resolver_match, "view_name", "")
+        ajuda_contextual = obter_ajuda_contextual(nome_rota_atual)
+        if ajuda_contextual:
+            mostrar_ajuda = True
+            if (
+                getattr(preferencias, "ajuda_contextual_apenas_paginas_novas", False)
+                and ajuda_contextual.get("contexto_tipo") != "novo"
+            ):
+                mostrar_ajuda = False
+
+            if (
+                mostrar_ajuda
+                and getattr(preferencias, "ajuda_contextual_apenas_utilizadores_recentes", False)
+            ):
+                data_limite = timezone.now() - timedelta(days=AJUDA_CONTEXTUAL_JANELA_UTILIZADOR_RECENTE_DIAS)
+                if not getattr(user, "date_joined", None) or user.date_joined < data_limite:
+                    mostrar_ajuda = False
+
+            if mostrar_ajuda:
+                ajuda_contextual_atual = {
+                    **ajuda_contextual,
+                    "url": f"{reverse('projetos:ajuda')}#{ajuda_contextual['anchor']}",
+                    "url_passos": f"{reverse('projetos:ajuda')}#{ajuda_contextual['anchor']}-passos",
+                }
+
     return {
         "is_admin_user": is_admin_user,
         "is_empregado_user": is_empregado_user,
@@ -72,6 +130,12 @@ def menu_context(request):
         "empregado_menu_funcao": (getattr(empregado_menu_obj, "funcao", "") or "").strip().lower(),
         "total_avarias_maquinas_abertas_menu": total_avarias_maquinas_abertas_menu,
         "total_minhas_avarias_maquinas_abertas_menu": total_minhas_avarias_maquinas_abertas_menu,
+        "total_pedidos_ferias_pendentes_menu": total_pedidos_ferias_pendentes_menu,
+        "total_notificacoes_empregado_abertas_menu": total_notificacoes_empregado_abertas_menu,
         "tamanho_texto": getattr(preferencias, "tamanho_texto", "normal"),
+        "ajuda_contextual_ativa": getattr(preferencias, "ajuda_contextual_ativa", True),
+        "ajuda_contextual_apenas_paginas_novas": getattr(preferencias, "ajuda_contextual_apenas_paginas_novas", False),
+        "ajuda_contextual_apenas_utilizadores_recentes": getattr(preferencias, "ajuda_contextual_apenas_utilizadores_recentes", False),
         "empresa_menu_logo_url": empresa_menu_logo_url,
+        "ajuda_contextual_atual": ajuda_contextual_atual,
     }

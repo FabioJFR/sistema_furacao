@@ -1,4 +1,5 @@
 from .anexos import AnexoLogGeologicoForm
+from .cartografia import FonteCartograficaGeologicaForm
 from .drone import DroneComandoOperacaoForm, DroneOperacaoTempoRealForm, MissaoDroneFuroForm
 from .drone_sf import (
     ComandoDroneSFOperacaoForm,
@@ -14,6 +15,7 @@ from .logging import LogGeologicoFuroForm
 
 __all__ = [
     "MissaoDroneFuroForm",
+    "FonteCartograficaGeologicaForm",
     "DroneOperacaoTempoRealForm",
     "DroneComandoOperacaoForm",
     "DroneSFForm",

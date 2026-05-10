@@ -112,15 +112,24 @@
                     <td class="px-3 py-2">{{ n.responsavel }}</td>
                     <td class="px-3 py-2">{{ n.prazo }}</td>
                     <td class="px-3 py-2">{{ n.sla }}</td>
-                    <td class="px-3 py-2">
-                        <div class="flex items-center gap-2">
-                            <a class="btn btn-light" href="{% url 'projetos:gestao_notificacao_update' n.id %}">{% trans "Editar" %}</a>
-                            <a class="btn btn-light" href="{% url 'projetos:gestao_notificacao_estado' n.id 'aberta' %}">{% trans "Abrir" %}</a>
-                            <a class="btn btn-secondary" href="{% url 'projetos:gestao_notificacao_estado' n.id 'em_andamento' %}">{% trans "Em andamento" %}</a>
-                            <a class="btn btn-primary" href="{% url 'projetos:gestao_notificacao_estado' n.id 'resolvida' %}">{% trans "Resolver" %}</a>
-                            <a class="btn btn-danger" href="{% url 'projetos:gestao_notificacao_delete' n.id %}">{% trans "Apagar" %}</a>
-                        </div>
-                    </td>
+	                    <td class="px-3 py-2">
+	                        <div class="flex items-center gap-2">
+	                            <a class="btn btn-light" href="{% url 'projetos:gestao_notificacao_update' n.id %}">{% trans "Editar" %}</a>
+	                            <form method="post" action="{% url 'projetos:gestao_notificacao_estado' n.id 'aberta' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-light">{% trans "Abrir" %}</button>
+	                            </form>
+	                            <form method="post" action="{% url 'projetos:gestao_notificacao_estado' n.id 'em_andamento' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-secondary">{% trans "Em andamento" %}</button>
+	                            </form>
+	                            <form method="post" action="{% url 'projetos:gestao_notificacao_estado' n.id 'resolvida' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-primary">{% trans "Resolver" %}</button>
+	                            </form>
+	                            <a class="btn btn-danger" href="{% url 'projetos:gestao_notificacao_delete' n.id %}">{% trans "Apagar" %}</a>
+	                        </div>
+	                    </td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="7" class="px-3 py-4 text-slate-500">{% trans "Sem notificações." %}</td></tr>

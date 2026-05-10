@@ -16,6 +16,9 @@ urlpatterns = [
     # ---------------- FUNCIONALIDADES ----------------
     path("definicoes/", views.definicoes, name="definicoes"),
     path("diario-tecnico/", views.diario_tecnico, name="diario_tecnico"),
+    path("calendario-turnos/", views.calendario_turnos_empregado, name="calendario_turnos_empregado"),
+    path("notificacoes/", views.notificacoes_empregado, name="notificacoes_empregado"),
+    path("notificacoes/<uuid:pk>/<str:estado>/", views.notificacao_empregado_estado, name="notificacao_empregado_estado"),
     path("medicoes/", views.medicao_list_empregado, name="medicao_list_empregado"),
     path("medicoes/<uuid:pk>/", views.medicao_detail_empregado, name="medicao_detail_empregado"),
 

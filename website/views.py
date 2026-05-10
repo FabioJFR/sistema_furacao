@@ -13,6 +13,30 @@ from website import selectors
 from website import services
 
 
+def _website_quick_links():
+    return [
+        {"label": _("Sobre"), "url_name": "website:sobre"},
+        {"label": _("Contactos"), "url_name": "website:contactos"},
+        {"label": _("Termos & Condições"), "url_name": "website:termos_condicoes"},
+        {"label": _("Política de Privacidade"), "url_name": "website:politica_privacidade"},
+    ]
+
+
+def _render_public_info_page(request, *, title, eyebrow, intro, sections, meta_notice=""):
+    return render(
+        request,
+        "website/info_page.html",
+        {
+            "title": title,
+            "eyebrow": eyebrow,
+            "intro": intro,
+            "meta_notice": meta_notice,
+            "sections": sections,
+            "quick_links": _website_quick_links(),
+        },
+    )
+
+
 def home(request):
     planos_qs = selectors.listar_planos_ativos()
     planos_cards = selectors.construir_planos_para_cards(planos_qs)
@@ -21,6 +45,7 @@ def home(request):
         "website/home.html",
         {
             "planos": planos_cards[:3],
+            "quick_links": _website_quick_links(),
         },
     )
 
@@ -34,6 +59,194 @@ def planos(request):
         {
             "planos": planos_cards,
         },
+    )
+
+
+def sobre(request):
+    return _render_public_info_page(
+        request,
+        title=_("Sobre o Sistema Furação"),
+        eyebrow=_("Plataforma"),
+        intro=_("Conhece a missão da plataforma, o contexto do produto e a base legal e operacional que suporta a sua evolução."),
+        sections=[
+            {
+                "title": _("Sobre a plataforma"),
+                "paragraphs": [
+                    _("O Sistema Furação foi desenhado para apoiar equipas de perfuração e geologia com foco em produtividade, rastreabilidade técnica e apoio à decisão."),
+                    _("A plataforma junta operação diária, gestão empresarial, IA aplicada, analytics e modelos 3D numa base única e escalável."),
+                ],
+            },
+            {
+                "title": _("Sobre o desenvolvimento"),
+                "paragraphs": [
+                    _("Desenvolvimento liderado por Fábio Revez, com evolução contínua baseada no uso real de campo e feedback operacional das equipas."),
+                ],
+            },
+            {
+                "title": _("Licenças e propriedade intelectual"),
+                "paragraphs": [
+                    _("Todos os conteúdos, código, design, marca e componentes do Sistema Furação estão protegidos por direitos de propriedade intelectual e legislação aplicável."),
+                    _("É proibida a reprodução, distribuição ou utilização não autorizada, total ou parcial, sem consentimento expresso dos titulares dos direitos."),
+                ],
+            },
+        ],
+    )
+
+
+def contactos(request):
+    return _render_public_info_page(
+        request,
+        title=_("Contactos"),
+        eyebrow=_("Suporte e contacto"),
+        intro=_("Pontos de contacto públicos para questões comerciais, suporte, privacidade e reclamações."),
+        sections=[
+            {
+                "title": _("Contacto geral"),
+                "paragraphs": [
+                    _("Email: sistemafuracao@gmail.com"),
+                    _("Website: https://www.sistemafuracao.pt"),
+                    _("Telefone: 928044839"),
+                ],
+            },
+            {
+                "title": _("Privacidade e dados"),
+                "paragraphs": [
+                    _("Para assuntos de privacidade e direitos de dados pessoais, utiliza o email sistemafuracao@gmail.com."),
+                ],
+            },
+            {
+                "title": _("Reclamações"),
+                "paragraphs": [
+                    _("Para reclamações formais em Portugal, podes utilizar o Livro de Reclamações eletrónico."),
+                ],
+                "links": [
+                    {
+                        "label": _("Livro de Reclamações"),
+                        "url": "https://www.livroreclamacoes.pt/Inicio/",
+                        "external": True,
+                    }
+                ],
+            },
+        ],
+    )
+
+
+def termos_condicoes(request):
+    return _render_public_info_page(
+        request,
+        title=_("Termos & Condições"),
+        eyebrow=_("Informação legal"),
+        intro=_("Condições gerais de utilização da plataforma Sistema Furação."),
+        meta_notice=_("Versão pública informativa, revista em maio de 2026."),
+        sections=[
+            {
+                "title": _("Identificação do titular da plataforma"),
+                "paragraphs": [
+                    _("Nome: Fabio Jorge Felicio Revez"),
+                    _("Sede operacional: Portugal"),
+                    _("Email de suporte: sistemafuracao@gmail.com"),
+                    _("Telefone: 928044839"),
+                ],
+            },
+            {
+                "title": _("Objeto e aceitação"),
+                "paragraphs": [
+                    _("Os presentes Termos & Condições regulam o acesso e utilização da plataforma Sistema Furação por empresas, profissionais e utilizadores particulares com idade mínima de 18 anos."),
+                    _("Ao utilizar a plataforma, o utilizador declara que leu, compreendeu e aceitou estes termos."),
+                ],
+            },
+            {
+                "title": _("Planos, subscrições e cancelamento"),
+                "paragraphs": [
+                    _("A plataforma pode operar com subscrição mensal ou anual, de acordo com o plano contratado."),
+                    _("Pode existir período de teste inicial, nos termos apresentados no momento de adesão."),
+                    _("Em caso de cancelamento, aplica-se a política definida: sem reembolso, ou reembolso proporcional ao tempo remanescente da subscrição, quando aplicável e validado pelo titular da plataforma."),
+                ],
+            },
+            {
+                "title": _("Utilização permitida e responsabilidade"),
+                "paragraphs": [
+                    _("É proibido utilizar a plataforma para finalidades ilícitas, manipulação indevida de dados, tentativas de acesso não autorizado, engenharia reversa ou qualquer atividade que comprometa a segurança e disponibilidade do serviço."),
+                    _("A plataforma procura assegurar elevada disponibilidade, mas poderão ocorrer interrupções para manutenção, atualizações, falhas técnicas ou motivos de força maior."),
+                ],
+            },
+            {
+                "title": _("Lei aplicável e contacto"),
+                "paragraphs": [
+                    _("Estes termos regem-se pela lei portuguesa. Para resolução de litígios, é competente o foro de Lisboa, com expressa renúncia a qualquer outro."),
+                    _("Para questões de suporte, contacte sistemafuracao@gmail.com."),
+                ],
+                "links": [
+                    {
+                        "label": _("Política de Privacidade"),
+                        "url_name": "website:politica_privacidade",
+                    }
+                ],
+            },
+        ],
+    )
+
+
+def politica_privacidade(request):
+    return _render_public_info_page(
+        request,
+        title=_("Política de Privacidade"),
+        eyebrow=_("Informação legal"),
+        intro=_("Informação sobre o tratamento de dados pessoais no Sistema Furação."),
+        meta_notice=_("Versão pública informativa, revista em maio de 2026."),
+        sections=[
+            {
+                "title": _("Responsável pelo tratamento"),
+                "paragraphs": [
+                    _("Nome: Fabio Jorge Felicio Revez"),
+                    _("Localização: Portugal"),
+                    _("Email: sistemafuracao@gmail.com"),
+                ],
+            },
+            {
+                "title": _("Que dados tratamos"),
+                "paragraphs": [
+                    _("Dados de conta (nome, email, perfil), dados operacionais inseridos pelos utilizadores (projetos, furos, logs, registos), e dados técnicos necessários ao funcionamento e segurança da plataforma."),
+                ],
+            },
+            {
+                "title": _("Finalidades e base legal"),
+                "paragraphs": [
+                    _("Gestão de acesso, prestação do serviço, suporte ao utilizador, melhoria do produto, segurança operacional e cumprimento de obrigações legais."),
+                    _("Execução de contrato, diligências pré-contratuais, interesse legítimo na segurança e evolução do serviço, e cumprimento de obrigações legais."),
+                ],
+            },
+            {
+                "title": _("Cookies e medição de utilização"),
+                "paragraphs": [
+                    _("As páginas públicas da plataforma podem usar ferramentas técnicas de medição e análise de visitas para compreender o uso do website e melhorar a experiência disponibilizada aos visitantes."),
+                    _("Essas medições podem incluir serviços de analytics de terceiros, como o Google Analytics, aplicados às páginas públicas institucionais."),
+                    _("Se preferires, podes limitar ou bloquear cookies e tecnologias semelhantes através das definições do teu navegador."),
+                ],
+            },
+            {
+                "title": _("Conservação, partilha e direitos"),
+                "paragraphs": [
+                    _("Os dados são conservados pelo período necessário às finalidades indicadas, podendo ser mantidos por prazo superior quando exigido por lei ou para defesa de direitos."),
+                    _("Os dados não são vendidos. Podem ser partilhados com prestadores de serviços essenciais ao funcionamento da plataforma, sempre com medidas de proteção adequadas."),
+                    _("Nos termos legais, pode solicitar acesso, retificação, apagamento, limitação, oposição e portabilidade dos seus dados, bem como retirar consentimentos quando aplicável."),
+                ],
+            },
+            {
+                "title": _("Segurança e contacto"),
+                "paragraphs": [
+                    _("São aplicadas medidas técnicas e organizativas para proteger os dados contra acesso não autorizado, perda, alteração ou divulgação indevida."),
+                    _("Para assuntos de privacidade, utilize o email sistemafuracao@gmail.com."),
+                ],
+                "links": [
+                    {
+                        "label": _("Livro de Reclamações"),
+                        "url": "https://www.livroreclamacoes.pt/Inicio/",
+                        "external": True,
+                    }
+                ],
+            },
+        ],
     )
 
 

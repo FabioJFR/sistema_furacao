@@ -1,9 +1,11 @@
+from .cartografia import FonteCartograficaGeologica
 from .drone import DroneComandoOperacao, DroneOperacaoTempoReal, MissaoDroneFuro
 from .drone_sf import ConfiguracaoDroneSF, DroneSF, ModuloDroneSF, SensorDroneSF
 from .drone_sf import ComandoDroneSFOperacao, MissaoProgramadaDroneSF, OperacaoDroneSFTempoReal
 from .logging import AnexoLogGeologico, LogGeologicoFuro
 
 __all__ = [
+    "FonteCartograficaGeologica",
     "MissaoDroneFuro",
     "DroneOperacaoTempoReal",
     "DroneComandoOperacao",

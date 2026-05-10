@@ -261,6 +261,7 @@ class EmpregadosForm(BaseEmpregadoForm):
             "curriculo": forms.FileInput(attrs={"class": "form-control"}),
             "contrato": forms.FileInput(attrs={"class": "form-control"}),
             "salario": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "dias_ferias_anuais": forms.NumberInput(attrs={"class": "form-control", "min": "0", "max": "366"}),
             "horas_diarias": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_mensais": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_extra": forms.NumberInput(attrs={"class": "form-control"}),
@@ -379,6 +380,7 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
             "curriculo",
             "contrato",
             "salario",
+            "dias_ferias_anuais",
             "horas_diarias",
             "horas_mensais",
             "horas_extra",
@@ -405,6 +407,7 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
             "curriculo": forms.FileInput(attrs={"class": "form-control"}),
             "contrato": forms.FileInput(attrs={"class": "form-control"}),
             "salario": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "dias_ferias_anuais": forms.NumberInput(attrs={"class": "form-control", "min": "0", "max": "366"}),
             "horas_diarias": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_mensais": forms.NumberInput(attrs={"class": "form-control"}),
             "horas_extra": forms.NumberInput(attrs={"class": "form-control"}),
@@ -415,6 +418,8 @@ class EmpregadoUpdateForm(BaseEmpregadoForm):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._configurar_empresa(empresa=empresa)
+        if "dias_ferias_anuais" in self.fields:
+            self.fields["dias_ferias_anuais"].help_text = "Por defeito cada trabalhador tem 22 dias de férias por ano."
 
         alertas_valor = self.initial.get("alertas", self.instance.alertas if self.instance.pk else [])
         self.fields["alertas"].initial = json.dumps(alertas_valor, ensure_ascii=False, indent=2)

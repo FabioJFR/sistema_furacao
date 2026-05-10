@@ -209,7 +209,7 @@ class DroneOperacaoTempoRealForm(forms.ModelForm):
             self.instance.empresa_id = empresa_id
             self.fields["furo"].queryset = self.fields["furo"].queryset.filter(empresa_id=empresa_id).order_by("projeto__nome", "nome")
         self.fields["bridge_ativa"].help_text = "Ativa a bridge externa para DJI RC 2 e permite receber heartbeat, vídeo e telemetria."
-        self.fields["bridge_base_url"].help_text = "Endpoint base da bridge local, por exemplo http://127.0.0.1:8787."
+        self.fields["bridge_base_url"].help_text = "Endpoint base da bridge local, por exemplo http://127.0.0.1:8787. Não uses query string nem credenciais embutidas na URL."
         self.fields["bridge_api_key"].help_text = "Chave usada pela bridge para enviar estado para a plataforma."
 
 

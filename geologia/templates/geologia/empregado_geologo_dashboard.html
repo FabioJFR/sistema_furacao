@@ -37,6 +37,38 @@
         </div>
     </div>
 
+    <section class="rounded-xl border border-sky-100 bg-sky-50/70 shadow-sm">
+        <div class="px-5 py-4 border-b border-sky-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-semibold text-sky-950">{% trans "Cartografia oficial do LNEG" %}</h2>
+                <p class="text-sm text-sky-900 mt-1">{{ cartografia_oficial.subtitulo }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'geologia:mapa_cartografico' %}" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm font-semibold">{% trans "Abrir mapa cartográfico" %}</a>
+                <a href="{% url 'geologia:cartografia_oficial' %}" class="px-3 py-2 rounded border border-sky-300 text-sky-800 text-sm font-semibold">{% trans "Abrir centro cartográfico" %}</a>
+                <a href="{% url 'geologia:fontes_cartograficas_manage' %}" class="px-3 py-2 rounded border border-emerald-300 text-emerald-800 text-sm font-semibold">{% trans "Gerir mapas da empresa" %}</a>
+                <a href="{% url 'geologia:fonte_cartografica_create' %}" class="px-3 py-2 rounded border border-emerald-300 text-emerald-800 text-sm font-semibold">{% trans "Adicionar mapa" %}</a>
+            </div>
+        </div>
+        <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {% for item in cartografia_oficial.colecoes|slice:":3" %}
+            <article class="rounded-lg border border-sky-100 bg-white p-4">
+                <h3 class="font-semibold text-gray-900">{{ item.titulo }}</h3>
+                <p class="text-sm text-gray-600 mt-2">{{ item.descricao }}</p>
+                <p class="text-xs text-sky-900 mt-2">{{ item.utilidade }}</p>
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="inline-flex mt-3 text-sm font-semibold text-sky-700 hover:text-sky-900">
+                    {% trans "Abrir coleção" %}
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+        <div class="px-5 pb-4">
+            <p class="text-xs text-sky-900">
+                {% blocktrans with total=fontes_cartograficas_empresa|length %}Camadas próprias da empresa já preparadas para o mapa interno: {{ total }}.{% endblocktrans %}
+            </p>
+        </div>
+    </section>
+
     <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900">{% trans "Top 5 furos prioritários" %}</h2>

@@ -46,6 +46,9 @@
             <div><strong>{% trans "Horas Extra:" %}</strong> {{ empregado.horas_extra|default:"-" }}</div>
             <div><strong>{% trans "Horas Trabalhadas no Mês:" %}</strong> {{ empregado.horas_trabalhadas_mes|default:"-" }}</div>
             <div><strong>{% trans "Horas Totais:" %}</strong> {{ empregado.horas_total|default:"-" }}</div>
+            <div><strong>{% trans "Férias anuais:" %}</strong> {{ empregado.dias_ferias_anuais }}</div>
+            <div><strong>{% trans "Férias gozadas (ano atual):" %}</strong> {{ empregado.dias_ferias_gozados_ano_atual }}</div>
+            <div><strong>{% trans "Férias disponíveis (ano atual):" %}</strong> {{ empregado.dias_ferias_disponiveis_ano_atual }}</div>
         </div>
     </div>
 
@@ -85,14 +88,6 @@
             <div>
                 <strong>{% trans "Conta desde:" %}</strong>
                 {{ data_inicio_plano|date:"d/m/Y"|default:"-" }}
-            </div>
-            <div>
-                <strong>{% trans "Termina em:" %}</strong>
-                {{ data_fim_plano|date:"d/m/Y"|default:"-" }}
-            </div>
-            <div>
-                <strong>{% trans "Data Limite de pagamento:" %}</strong>
-                {{ proximo_pagamento|date:"d/m/Y"|default:"-" }}
             </div>
         </div>
     </div>

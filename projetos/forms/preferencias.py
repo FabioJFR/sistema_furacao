@@ -14,12 +14,23 @@ class PreferenciasForm(forms.ModelForm):
 
     class Meta:
         model = PreferenciasUser
-        fields = ["tema", "paleta", "idioma", "tamanho_texto"]
+        fields = [
+            "tema",
+            "paleta",
+            "idioma",
+            "tamanho_texto",
+            "ajuda_contextual_ativa",
+            "ajuda_contextual_apenas_paginas_novas",
+            "ajuda_contextual_apenas_utilizadores_recentes",
+        ]
         widgets = {
             "tema": forms.Select(attrs={"class": "form-control"}),
             "paleta": forms.Select(attrs={"class": "form-control"}),
             "idioma": forms.Select(attrs={"class": "form-control"}),
             "tamanho_texto": forms.Select(attrs={"class": "form-control"}),
+            "ajuda_contextual_ativa": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"}),
+            "ajuda_contextual_apenas_paginas_novas": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"}),
+            "ajuda_contextual_apenas_utilizadores_recentes": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"}),
         }
 
     def clean(self):

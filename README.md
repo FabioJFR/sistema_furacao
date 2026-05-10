@@ -6,7 +6,7 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ## Estado atual
 
-- Versão atual: **v0.9.6**
+- Versão atual: **v0.9.7**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **separação de lógica em services/selectors**, **integração de dispositivos** e **estabilização para produção**
 
@@ -21,9 +21,18 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 
 ---
 
-## Release 0.9.6 (resumo)
+## Release 0.9.7 (resumo)
 
 Principais evoluções consolidadas nesta versão:
+
+- endurecimento de segurança com `bridge keys` apenas por header, validação reforçada de URLs configuráveis e proteção básica contra abuso em `login` e `password reset`
+- hardening de uploads com comportamento `fail closed` configurável para antivírus e melhor tratamento de falhas de scanner
+- revisão de `open redirect` em fluxos operacionais com testes de regressão dedicados
+- evolução da cartografia geológica interna com visualizador próprio, camadas oficiais LNEG, identificação por clique e gestão de fontes privadas por empresa
+- preparação de deploy reforçada com checklist de produção, variáveis de ambiente de segurança e documentação atualizada
+- expansão da cobertura de testes para segurança, assiduidade, notificações, contexto de menu e regressões de registos
+- ajuda contextual, centro de ajuda por perfil e onboarding configurável diretamente nas definições
+- área de empregado reforçada com calendário de turnos, notificações, férias e melhor contexto operacional do último turno/furo
 
 - novo módulo `Gestão` para empresas com hub e áreas de `Clientes & Contratos`, `Planeamento`, `RH & Assiduidade`, `Compras & Fornecedores`, `Compliance & Segurança`, `Notificações` e `Relatórios Executivos`
 - evolução de `Relatórios Executivos` com comparativo financeiro por projeto (metros, registos, custo, receita estimada e margem)

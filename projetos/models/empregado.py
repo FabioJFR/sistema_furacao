@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -109,6 +110,7 @@ class Empregados(models.Model):
     
 
     salario = models.FloatField(default=0.0)
+    dias_ferias_anuais = models.PositiveSmallIntegerField(default=22)
     horas_diarias = models.IntegerField(default=0, blank=True)
     horas_mensais = models.IntegerField(default=0, blank=True)
     horas_extra = models.IntegerField(default=0, blank=True)
@@ -162,6 +164,56 @@ class Empregados(models.Model):
         return Projeto.objects.filter(
             empregado_projetos__empregado=self,
         ).distinct()
+
+    def _dias_ferias_por_estado(self, *, estado, ano=None):
+        from .assiduidade_registo import AssiduidadeRegisto
+
+        ano = ano or timezone.localdate().year
+        inicio_ano = date(ano, 1, 1)
+        fim_ano = date(ano, 12, 31)
+        pedidos = AssiduidadeRegisto.objects.filter(
+            empresa=self.empresa,
+            empregado=self,
+            tipo="ferias",
+            estado=estado,
+            data_inicio__lte=fim_ano,
+        ).filter(
+            models.Q(data_fim__isnull=True, data_inicio__gte=inicio_ano) | models.Q(data_fim__gte=inicio_ano)
+        )
+
+        total = 0
+        for pedido in pedidos:
+            data_fim = pedido.data_fim or pedido.data_inicio
+            inicio_contagem = max(pedido.data_inicio, inicio_ano)
+            fim_contagem = min(data_fim, fim_ano)
+            total += max((fim_contagem - inicio_contagem).days + 1, 0)
+        return total
+
+    def dias_ferias_gozados(self, ano=None):
+        return self._dias_ferias_por_estado(estado="aprovado", ano=ano)
+
+    def dias_ferias_pendentes(self, ano=None):
+        return self._dias_ferias_por_estado(estado="pendente", ano=ano)
+
+    def dias_ferias_disponiveis(self, ano=None):
+        return max(
+            int(self.dias_ferias_anuais or 0)
+            - self.dias_ferias_gozados(ano=ano)
+            - self.dias_ferias_pendentes(ano=ano),
+            0,
+        )
+
+    @property
+    def dias_ferias_gozados_ano_atual(self):
+        return self.dias_ferias_gozados()
+
+    @property
+    def dias_ferias_pendentes_ano_atual(self):
+        return self.dias_ferias_pendentes()
+
+    @property
+    def dias_ferias_disponiveis_ano_atual(self):
+        return self.dias_ferias_disponiveis()
     
     def clean(self):
         super().clean()
@@ -179,6 +231,11 @@ class Empregados(models.Model):
         if self.user and hasattr(self.user, "empregado") and self.user.empregado.pk != self.pk:
             raise ValidationError({
                 "user": "Este utilizador já está associado a outro empregado."
+            })
+
+        if self.dias_ferias_anuais < 0 or self.dias_ferias_anuais > 366:
+            raise ValidationError({
+                "dias_ferias_anuais": "Os dias de férias anuais devem estar entre 0 e 366."
             })
 
         if self.pk and self.empresa_id:

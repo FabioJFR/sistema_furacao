@@ -3,6 +3,8 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from core.url_security import validate_configured_url
+
 
 class DroneSF(models.Model):
     STATUS_CHOICES = [
@@ -328,6 +330,23 @@ class OperacaoDroneSFTempoReal(models.Model):
                 raise ValidationError({field_name: "O valor deve estar entre 0 e 100."})
         if self.bridge_ativa and not self.bridge_base_url:
             raise ValidationError({"bridge_base_url": "Define o endpoint base da bridge S_F para ativar a integração."})
+        if self.bridge_base_url:
+            validate_configured_url(
+                field_name="bridge_base_url",
+                value=self.bridge_base_url,
+                allow_query=False,
+                allow_fragment=False,
+            )
+        if self.live_view_url:
+            validate_configured_url(
+                field_name="live_view_url",
+                value=self.live_view_url,
+            )
+        if self.frame_snapshot_url:
+            validate_configured_url(
+                field_name="frame_snapshot_url",
+                value=self.frame_snapshot_url,
+            )
 
     def save(self, *args, **kwargs):
         if self.drone_id:

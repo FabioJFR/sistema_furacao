@@ -224,28 +224,11 @@ def registo_diario_list(request):
 @login_required
 @empregado_required
 def relatorio_turno_list(request):
-    empregado, resposta_erro = _obter_empregado_autenticado_registos(request)
-    if resposta_erro:
-        return resposta_erro
-
-    resultados = obter_relatorios_turno_empregado(empregado, filtros=request.GET)
-    contexto_filtros = obter_contexto_filtros_registos_admin(empregado.empresa)
-    return render(
+    messages.info(
         request,
-        "projetos/relatorio_turno_list.html",
-        {
-            "empregado": empregado,
-            "relatorios": resultados["relatorios"],
-            "filtros": resultados["filtros"],
-            "projetos": contexto_filtros["projetos"],
-            "furos": contexto_filtros["furos"],
-            "total_relatorios": resultados["totais"]["total"],
-            "dashboard_relatorios": obter_dashboard_relatorios_turno(resultados["relatorios"]),
-            "modo_admin": False,
-            "pode_exportar": False,
-            "querystring_atual": request.GET.urlencode(),
-        },
+        "As fichas técnicas dos teus turnos estão disponíveis dentro de 'Meus Registos'.",
     )
+    return redirect("projetos:registo_diario_list")
 
 
 @login_required

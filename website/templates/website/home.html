@@ -28,6 +28,12 @@
                 </div>
             </a>
 
+            <nav class="public-nav" aria-label="{% trans 'Navegação pública' %}">
+                {% for link in quick_links %}
+                <a href="{% url link.url_name %}" class="public-nav__link">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+
             <div class="topbar-actions">
                 <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
                 <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
@@ -36,7 +42,7 @@
 
         <section class="hero">
             <div class="hero-copy">
-                <span class="hero-badge">{% trans "SaaS especializado para operações de diamond drilling · v0.9.6" %}</span>
+                <span class="hero-badge">{% trans "SaaS especializado para operações de diamond drilling · v0.9.7" %}</span>
                 <h1>{% trans "Do planeamento ao relatório final, tudo numa única plataforma" %}</h1>
                 <p>
                     {% blocktrans %}Centraliza projetos, furos, medições, materiais, produção, despesas e analytics num fluxo único.
@@ -47,6 +53,12 @@
                 <div class="actions">
                     <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Criar conta" %}</a>
                     <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Comparar planos" %}</a>
+                </div>
+
+                <div class="hero-links">
+                    <a href="{% url 'website:sobre' %}" class="hero-links__item">{% trans "Sobre a plataforma" %}</a>
+                    <a href="{% url 'website:contactos' %}" class="hero-links__item">{% trans "Contactos" %}</a>
+                    <a href="{% url 'website:termos_condicoes' %}" class="hero-links__item">{% trans "Informação legal" %}</a>
                 </div>
 
                 <div class="trust-row">
@@ -71,8 +83,50 @@
             </div>
         </section>
 
+        <section class="visitor-panel">
+            <div class="visitor-panel__intro">
+                <div class="visitor-panel__eyebrow">{% trans "Para visitantes" %}</div>
+                <h2>{% trans "Tudo o que precisas para avaliar a plataforma com confiança" %}</h2>
+                <p class="muted">
+                    {% blocktrans %}Antes de criar conta, podes consultar quem está por trás da plataforma, como falar connosco e que informação legal está disponível publicamente.{% endblocktrans %}
+                </p>
+            </div>
+
+            <div class="visitor-panel__grid">
+                <article class="visitor-panel__card">
+                    <h3>{% trans "Sobre" %}</h3>
+                    <p class="muted">{% trans "Conhece a missão do Sistema de Furação, o contexto do produto e a visão por trás da plataforma." %}</p>
+                    <a href="{% url 'website:sobre' %}" class="btn btn-light">{% trans "Abrir Sobre" %}</a>
+                </article>
+
+                <article class="visitor-panel__card">
+                    <h3>{% trans "Contactos" %}</h3>
+                    <p class="muted">{% trans "Consulta email, telefone, website e canais para suporte, privacidade e reclamações." %}</p>
+                    <a href="{% url 'website:contactos' %}" class="btn btn-light">{% trans "Ver contactos" %}</a>
+                </article>
+
+                <article class="visitor-panel__card">
+                    <h3>{% trans "Informação legal" %}</h3>
+                    <p class="muted">{% trans "Lê os termos, a política de privacidade e os pontos essenciais de responsabilidade e proteção de dados." %}</p>
+                    <div class="visitor-panel__card-links">
+                        <a href="{% url 'website:termos_condicoes' %}" class="btn btn-light">{% trans "Termos" %}</a>
+                        <a href="{% url 'website:politica_privacidade' %}" class="btn btn-light">{% trans "Privacidade" %}</a>
+                    </div>
+                </article>
+
+                <article class="visitor-panel__card">
+                    <h3>{% trans "Privacidade e transparência" %}</h3>
+                    <p class="muted">{% trans "Consulta como tratamos dados pessoais nas páginas públicas, que canais oficiais usamos e onde reclamar formalmente se necessário." %}</p>
+                    <div class="visitor-panel__card-links">
+                        <a href="{% url 'website:politica_privacidade' %}" class="btn btn-light">{% trans "Proteção de dados" %}</a>
+                        <a href="https://www.livroreclamacoes.pt/Inicio/" target="_blank" rel="noopener noreferrer" class="btn btn-light">{% trans "Reclamações" %}</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
         <section class="release-panel">
-            <h2>{% trans "Novidades da versão v0.9.6" %}</h2>
+            <h2>{% trans "Novidades da versão v0.9.7" %}</h2>
             <div class="release-grid">
                 <div class="release-item">
                     <h3>{% trans "Gestão de empresa" %}</h3>
@@ -88,7 +142,7 @@
                 </div>
                 <div class="release-item">
                     <h3>{% trans "Segurança e compliance" %}</h3>
-                    <p class="muted">{% trans "Validação reforçada de uploads, termos e privacidade, e melhoria contínua de permissões por perfil." %}</p>
+                    <p class="muted">{% trans "Validação reforçada de uploads, bridge keys apenas por header, proteção de login/reset e melhoria contínua de permissões por perfil." %}</p>
                 </div>
             </div>
         </section>
@@ -193,7 +247,16 @@
         </section>
 
         <footer class="footer">
-            {% trans "© 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling" %}
+            <div class="footer-links">
+                <a href="{% url 'website:sobre' %}">{% trans "Sobre" %}</a>
+                <a href="{% url 'website:contactos' %}">{% trans "Contactos" %}</a>
+                <a href="{% url 'website:termos_condicoes' %}">{% trans "Termos & Condições" %}</a>
+                <a href="{% url 'website:politica_privacidade' %}">{% trans "Política de Privacidade" %}</a>
+                <a href="https://www.livroreclamacoes.pt/Inicio/" target="_blank" rel="noopener noreferrer">{% trans "Livro de Reclamações" %}</a>
+            </div>
+            <div class="footer-meta">
+                {% trans "© 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling" %}
+            </div>
         </footer>
     </div>
 </body>

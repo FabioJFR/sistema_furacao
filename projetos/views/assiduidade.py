@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -10,6 +11,7 @@ from core.permissions import admin_required
 from projetos.forms import AssiduidadeRegistoForm
 from projetos.models import AssiduidadeRegisto, Empregados
 from projetos.selectors.assiduidade import (
+    construir_contexto_calendario_equipa_empresa,
     listar_assiduidade_empresa_filtro,
     obter_assiduidade_empresa,
     resumo_horas_por_empregado,
@@ -23,6 +25,12 @@ from projetos.services.assiduidade import (
     criar_assiduidade,
     rejeitar_assiduidade,
 )
+
+
+def _validation_error_message(exc):
+    if hasattr(exc, "messages"):
+        return " ".join(str(message) for message in exc.messages)
+    return str(exc)
 
 
 def _resolver_empresa_admin(request):
@@ -82,6 +90,12 @@ def assiduidade_list(request):
         horas_falta = row.get("horas_falta") or 0.0
         row["saldo_horas"] = horas_presenca + horas_extras - horas_falta
         saldo_mes.append(row)
+    calendario_equipa = construir_contexto_calendario_equipa_empresa(
+        empresa,
+        ano=filtros_query["ano"] or hoje.year,
+        mes=filtros_query["mes"] or hoje.month,
+        empregado_id=filtros_query["empregado_id"],
+    )
     empregados_filtro = Empregados.objects.filter(empresa=empresa).order_by("nome")
     filtros = {
         "estado": filtros_query["estado"],
@@ -97,6 +111,7 @@ def assiduidade_list(request):
             "items": items,
             "resumo_horas": resumo_horas,
             "saldo_mes": saldo_mes,
+            "calendario_equipa": calendario_equipa,
             "filtros": filtros,
             "empregados_filtro": empregados_filtro,
             "estado_choices": [("", "Todos")] + list(AssiduidadeRegisto.ESTADO_CHOICES),
@@ -113,9 +128,14 @@ def assiduidade_create(request):
         return resposta_erro
     form = AssiduidadeRegistoForm(request.POST or None, empresa=empresa)
     if request.method == "POST" and form.is_valid():
-        criar_assiduidade(form=form, empresa=empresa)
-        messages.success(request, "Registo de assiduidade criado com sucesso.")
-        return redirect("projetos:assiduidade_list")
+        try:
+            criar_assiduidade(form=form, empresa=empresa)
+        except ValidationError as exc:
+            form.add_error(None, exc)
+            messages.error(request, _validation_error_message(exc))
+        else:
+            messages.success(request, "Registo de assiduidade criado com sucesso.")
+            return redirect("projetos:assiduidade_list")
     return render(request, "projetos/assiduidade_form.html", {"form": form, "is_create": True})
 
 
@@ -128,9 +148,14 @@ def assiduidade_update(request, pk):
     item = obter_assiduidade_empresa(pk=pk, empresa=empresa)
     form = AssiduidadeRegistoForm(request.POST or None, instance=item, empresa=empresa)
     if request.method == "POST" and form.is_valid():
-        atualizar_assiduidade(form=form)
-        messages.success(request, "Registo de assiduidade atualizado com sucesso.")
-        return redirect("projetos:assiduidade_list")
+        try:
+            atualizar_assiduidade(form=form)
+        except ValidationError as exc:
+            form.add_error(None, exc)
+            messages.error(request, _validation_error_message(exc))
+        else:
+            messages.success(request, "Registo de assiduidade atualizado com sucesso.")
+            return redirect("projetos:assiduidade_list")
     return render(request, "projetos/assiduidade_form.html", {"form": form, "item": item, "is_create": False})
 
 
@@ -156,8 +181,12 @@ def assiduidade_aprovar(request, pk):
         return resposta_erro
     item = obter_assiduidade_empresa(pk=pk, empresa=empresa)
     if request.method == "POST":
-        aprovar_assiduidade(obj=item)
-        messages.success(request, "Registo aprovado.")
+        try:
+            aprovar_assiduidade(obj=item)
+        except ValidationError as exc:
+            messages.error(request, _validation_error_message(exc))
+        else:
+            messages.success(request, "Registo aprovado.")
     return redirect("projetos:assiduidade_list")
 
 

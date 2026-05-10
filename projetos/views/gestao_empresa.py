@@ -744,6 +744,9 @@ def gestao_pedido_compra_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
+    if request.method != "POST":
+        messages.error(request, "A atualização de estado deve ser feita por formulário.")
+        return redirect("projetos:gestao_compras_fornecedores")
     item = PedidoCompra.objects.filter(empresa=empresa, pk=pk).first()
     if not item:
         messages.error(request, "Pedido não encontrado.")
@@ -1391,6 +1394,9 @@ def gestao_incidente_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
+    if request.method != "POST":
+        messages.error(request, _("A atualização de estado deve ser feita por formulário."))
+        return redirect("projetos:gestao_compliance_seguranca")
     item = IncidenteSeguranca.objects.filter(empresa=empresa, pk=pk).first()
     if not item:
         messages.error(request, _("Incidente não encontrado."))
@@ -1668,6 +1674,9 @@ def gestao_acao_corretiva_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
+    if request.method != "POST":
+        messages.error(request, _("A atualização de estado deve ser feita por formulário."))
+        return redirect("projetos:gestao_compliance_seguranca")
     item = AcaoCorretiva.objects.filter(empresa=empresa, pk=pk).first()
     if not item:
         messages.error(request, _("Ação corretiva não encontrada."))
@@ -1769,6 +1778,9 @@ def gestao_acao_preventiva_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
+    if request.method != "POST":
+        messages.error(request, _("A atualização de estado deve ser feita por formulário."))
+        return redirect("projetos:gestao_compliance_seguranca")
     item = AcaoPreventiva.objects.filter(empresa=empresa, pk=pk).first()
     if not item:
         messages.error(request, _("Ação preventiva não encontrada."))
@@ -1970,6 +1982,9 @@ def gestao_notificacao_estado(request, pk, estado):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
+    if request.method != "POST":
+        messages.error(request, "A atualização da notificação deve ser feita por formulário.")
+        return redirect("projetos:gestao_notificacoes")
     item = NotificacaoGestao.objects.filter(empresa=empresa, pk=pk).first()
     if not item:
         messages.error(request, "Notificação não encontrada.")

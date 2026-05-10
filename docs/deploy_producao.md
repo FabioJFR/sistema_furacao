@@ -5,8 +5,8 @@
 ```bash
 cd /var/www/sistema_furacao
 git fetch origin
-git checkout release-v0.9.6
-git pull origin release-v0.9.6
+git checkout release-v0.9.7
+git pull origin release-v0.9.7
 ```
 
 ## 2) Virtualenv e dependências
@@ -31,6 +31,14 @@ Obrigatório em produção:
 - `DJANGO_ALLOWED_HOSTS=sistemafuracao.pt,www.sistemafuracao.pt,92.5.58.215`
 - `DJANGO_CSRF_TRUSTED_ORIGINS=https://sistemafuracao.pt,https://www.sistemafuracao.pt`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+- `DJANGO_SECURE_SSL_REDIRECT=True`
+- `DJANGO_SESSION_COOKIE_SECURE=True`
+- `DJANGO_CSRF_COOKIE_SECURE=True`
+- `DJANGO_SECURE_HSTS_SECONDS=31536000`
+- `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True`
+- `DJANGO_SECURE_HSTS_PRELOAD=True`
+- `UPLOAD_VIRUS_SCAN_ENABLED=True`
+- `UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True`
 
 ## 4) Validar segurança e base de dados
 
@@ -63,6 +71,15 @@ sudo systemctl status sistema_furacao --no-pager
 sudo systemctl status nginx --no-pager
 curl -I http://127.0.0.1
 ```
+
+Checklist de segurança antes de abrir ao público:
+
+- confirmar `DEBUG=False`
+- confirmar `SECRET_KEY` longa e aleatória
+- confirmar HTTPS funcional ponta a ponta
+- confirmar `check --deploy` sem warnings
+- confirmar antivírus (`clamscan`) instalado e acessível pelo serviço
+- confirmar bridge keys de drones apenas por header `X-Bridge-Key`
 
 ## 7) Backup antes de cada deploy
 

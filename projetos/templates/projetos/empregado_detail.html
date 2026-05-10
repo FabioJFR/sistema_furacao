@@ -114,6 +114,9 @@
             <p><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</p>
             <p><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default_if_none:"-" }}</p>
             <p><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default_if_none:"-" }}</p>
+            <p><strong>{% trans "Férias anuais:" %}</strong> {{ empregado.dias_ferias_anuais }}</p>
+            <p><strong>{% trans "Férias gozadas (ano atual):" %}</strong> {{ empregado.dias_ferias_gozados_ano_atual }}</p>
+            <p><strong>{% trans "Férias disponíveis (ano atual):" %}</strong> {{ empregado.dias_ferias_disponiveis_ano_atual }}</p>
         </div>
 
         <div class="bg-gray-50 rounded-xl p-5 shadow-sm">

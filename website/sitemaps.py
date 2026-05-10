@@ -9,10 +9,13 @@ class PublicPagesSitemap(Sitemap):
     def items(self):
         return [
             "website:home",
+            "website:sobre",
+            "website:contactos",
+            "website:termos_condicoes",
+            "website:politica_privacidade",
             "website:planos",
             "website:registo",
         ]
 
     def location(self, item):
         return reverse(item)
-

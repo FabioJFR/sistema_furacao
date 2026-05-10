@@ -10,15 +10,15 @@
         <div class="flex justify-between items-center flex-wrap gap-3">
             <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Registos Diários" %}</h1>
             <div class="flex flex-wrap gap-2">
-                <a href="{% url 'projetos:relatorio_turno_list' %}"
-                   class="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition shadow">
-                    📘 {% trans "Fichas Técnicas" %}
-                </a>
                 <a href="{% url 'projetos:registo_diario_create' %}"
                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
                     ➕ {% trans "Novo Registo" %}
                 </a>
             </div>
+        </div>
+
+        <div class="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+            {% trans "A ficha técnica de cada turno está disponível dentro do próprio registo, na coluna de ações." %}
         </div>
 
         {% if registos %}

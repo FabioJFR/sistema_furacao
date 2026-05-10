@@ -29,6 +29,26 @@
             </div>
 
             <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:registo_diario_create' %}"
+                   class="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm font-semibold">
+                    📝 {% trans "Novo Registo" %}
+                </a>
+
+                <a href="{% url 'projetos:registo_diario_list' %}"
+                   class="inline-block bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition text-sm font-semibold">
+                    📋 {% trans "Meus Registos" %}
+                </a>
+
+                <a href="{% url 'projetos:calendario_turnos_empregado' %}"
+                   class="inline-block bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition text-sm font-semibold">
+                    🗓️ {% trans "Calendário de Turnos" %}
+                </a>
+
+                <a href="{% url 'projetos:notificacoes_empregado' %}"
+                   class="inline-block bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm font-semibold">
+                    🔔 {% trans "Notificações" %}{% if total_notificacoes_empregado_abertas_menu %} ({{ total_notificacoes_empregado_abertas_menu }}){% endif %}
+                </a>
+
                 <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
                    class="inline-block bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm font-semibold">
                     ⚙️ {% trans "Configurações de Perfuração" %}
@@ -44,11 +64,181 @@
                     🕳 {% trans "Meus Furos" %}
                 </a>
 
-                <a href="{% url 'projetos:relatorio_turno_list' %}"
-                   class="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition text-sm font-semibold">
-                    📘 {% trans "Consultar Fichas Técnicas" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-5 border border-blue-100">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">🗓️ {% trans "Meu Turno de Referência" %}</h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                        {% trans "Mostra o turno em curso ou o próximo turno planeado para ti." %}
+                    </p>
+                </div>
+                <a href="{% url 'projetos:registo_diario_create' %}"
+                   class="inline-block bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-xs font-semibold">
+                    {% trans "Registar Turno" %}
                 </a>
             </div>
+
+            {% if turno_referencia %}
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {% if turno_referencia.estado_referencia == 'em_curso' %}bg-emerald-100 text-emerald-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                            {% if turno_referencia.estado_referencia == "em_curso" %}
+                                {% trans "Em curso" %}
+                            {% else %}
+                                {% trans "Próximo turno" %}
+                            {% endif %}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700">
+                            {{ turno_referencia.turno_label }}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700">
+                            {{ turno_referencia.estado_label }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <div class="text-lg font-bold text-slate-900 sf-break-word">{{ turno_referencia.nome }}</div>
+                        <div class="text-sm text-gray-500 mt-1">
+                            {{ turno_referencia.data_inicio|date:"d/m/Y" }}
+                            {% if turno_referencia.horario and turno_referencia.horario != "-" %}
+                                · {{ turno_referencia.horario }}
+                            {% endif %}
+                            {% if turno_referencia.data_fim and turno_referencia.data_fim != turno_referencia.data_inicio %}
+                                · {% trans "termina em" %} {{ turno_referencia.data_fim|date:"d/m/Y" }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Projeto" %}</div>
+                            <div class="font-semibold text-slate-800 sf-break-word">{{ turno_referencia.projeto_nome }}</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Furo" %}</div>
+                            <div class="font-semibold text-slate-800 sf-break-word">{{ turno_referencia.furo_nome }}</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Máquina" %}</div>
+                            <div class="font-semibold text-slate-800 sf-break-word">{{ turno_referencia.maquina_nome }}</div>
+                        </div>
+                    </div>
+
+                    {% if turno_referencia.objetivo %}
+                        <div class="rounded-lg bg-blue-50 border border-blue-100 p-3">
+                            <div class="text-xs uppercase tracking-wide text-blue-600">{% trans "Objetivo" %}</div>
+                            <div class="font-medium text-slate-800 sf-break-word">{{ turno_referencia.objetivo }}</div>
+                        </div>
+                    {% endif %}
+
+                    {% if turno_referencia.notas %}
+                        <div class="rounded-lg bg-amber-50 border border-amber-100 p-3">
+                            <div class="text-xs uppercase tracking-wide text-amber-700">{% trans "Notas do planeamento" %}</div>
+                            <div class="font-medium text-slate-800 sf-break-word">{{ turno_referencia.notas }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-gray-600">
+                    {% trans "Ainda não tens um turno em curso ou um próximo turno planeado atribuído. Quando existir, ele aparecerá aqui com o respetivo furo e horário." %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-5 border border-violet-100">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-slate-900">🧭 {% trans "Último Turno no Furo" %}</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {% trans "Mostra o que aconteceu no último turno do furo onde vais trabalhar ou, se ainda não houver turno atribuído, no último furo em que trabalhaste." %}
+                </p>
+            </div>
+
+            {% if ultimo_turno_furo_referencia %}
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {% if ultimo_turno_furo_referencia.referencia == 'proximo_turno' %}bg-violet-100 text-violet-700{% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {% if ultimo_turno_furo_referencia.referencia == "proximo_turno" %}
+                                {% trans "Mesmo furo do próximo turno" %}
+                            {% else %}
+                                {% trans "Baseado no último furo trabalhado" %}
+                            {% endif %}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700">
+                            {{ ultimo_turno_furo_referencia.turno_label }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <div class="text-lg font-bold text-slate-900 sf-break-word">{{ ultimo_turno_furo_referencia.furo_nome }}</div>
+                        <div class="text-sm text-gray-500 mt-1">
+                            {{ ultimo_turno_furo_referencia.projeto_nome }} · {{ ultimo_turno_furo_referencia.data|date:"d/m/Y" }} · {{ ultimo_turno_furo_referencia.empregado_nome }}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Horas" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.horas_trabalhadas|floatformat:2 }}</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Metros" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.metros_furados|floatformat:2 }} m</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Furadas" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.total_furadas }}</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Paragem" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.horas_paragem|floatformat:2 }} h</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="rounded-lg bg-emerald-50 border border-emerald-100 p-3">
+                            <div class="text-xs uppercase tracking-wide text-emerald-700">{% trans "Avanço das furadas" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.total_avanco_furadas|floatformat:2 }} m</div>
+                        </div>
+                        <div class="rounded-lg bg-cyan-50 border border-cyan-100 p-3">
+                            <div class="text-xs uppercase tracking-wide text-cyan-700">{% trans "Recuperação das furadas" %}</div>
+                            <div class="font-semibold text-slate-800">{{ ultimo_turno_furo_referencia.total_recuperacao_furadas|floatformat:2 }} m</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Máquina" %}</div>
+                            <div class="font-semibold text-slate-800 sf-break-word">{{ ultimo_turno_furo_referencia.maquina_nome }}</div>
+                        </div>
+                    </div>
+
+                    {% if ultimo_turno_furo_referencia.ocorrencias %}
+                        <div>
+                            <div class="text-xs uppercase tracking-wide text-slate-500 mb-2">{% trans "Ocorrências do último turno" %}</div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for ocorrencia in ultimo_turno_furo_referencia.ocorrencias %}
+                                    <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-semibold">
+                                        {{ ocorrencia }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if ultimo_turno_furo_referencia.notas_curta %}
+                        <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                            <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Resumo do que foi feito" %}</div>
+                            <div class="font-medium text-slate-800 sf-break-word">{{ ultimo_turno_furo_referencia.notas_curta }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-gray-600">
+                    {% trans "Ainda não existe contexto suficiente para mostrar o último turno do furo. Assim que houver um turno atribuído ou um registo anterior nesse furo, o resumo aparecerá aqui." %}
+                </div>
+            {% endif %}
         </div>
     </div>
 

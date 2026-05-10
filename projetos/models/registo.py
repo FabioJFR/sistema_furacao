@@ -35,6 +35,12 @@ class RegistoDiarioEmpregado(models.Model):
         ("nao", "Não"),
     ]
     RELATORIO_OCORRENCIA_CHOICES = [
+        ("furacao", "Furação"),
+        ("viagem", "Viagem"),
+        ("preparar_material", "Preparar material"),
+        ("palestra_seguranca", "Palestra segurança"),
+        ("formacao", "Formação"),
+        ("trabalho_ajudante", "Trabalho de ajudante"),
         ("manobra", "Manobra"),
         ("reaming", "Reaming"),
         ("avaria", "Avaria"),
@@ -119,7 +125,7 @@ class RegistoDiarioEmpregado(models.Model):
     estaleiro = models.CharField(max_length=200, blank=True)
     numero_sondagem = models.CharField(max_length=120, blank=True)
     inclinacao = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    diametro_furo = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    diametro_furo = models.CharField(max_length=120, null=True, blank=True)
     numero_relatorio = models.CharField(max_length=120, blank=True)
     no_inicio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     no_final = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -190,7 +196,7 @@ class RegistoDiarioEmpregado(models.Model):
     horas_servente_3 = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     servente_4 = models.CharField(max_length=120, blank=True)
     horas_servente_4 = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    bit_novo = models.CharField(max_length=3, choices=RELATORIO_SIM_NAO_CHOICES, blank=True, default="nao")
+    bit_novo = models.CharField(max_length=160, blank=True)
     bit_novo_de = models.TimeField(null=True, blank=True)
     bit_novo_ate = models.TimeField(null=True, blank=True)
     turno = models.CharField(max_length=120, blank=True)
@@ -233,7 +239,8 @@ class RegistoDiarioEmpregado(models.Model):
         verbose_name_plural = "Registos Diários dos Empregados"
 
     def __str__(self):
-        return f"{self.empregado.nome} - {self.data}"
+        nome_empregado = self.empregado.nome if self.empregado_id else "Sem empregado"
+        return f"{nome_empregado} - {self.data}"
 
     @property
     def tem_relatorio_tecnico(self):
@@ -258,11 +265,13 @@ class RegistoDiarioEmpregado(models.Model):
         ]
         campos_sim_nao = {
             "manobra", "reaming", "avaria", "relatorio_horas_paragem", "medicao_desvio",
-            "cimentacao", "lavar_furo", "varas_presas", "entubamento", "bit_novo",
+            "cimentacao", "lavar_furo", "varas_presas", "entubamento",
         }
         for campo in campos_relatorio:
             valor = getattr(self, campo)
             if campo in campos_sim_nao and valor == "nao":
+                continue
+            if campo == "bit_novo" and valor == "nao":
                 continue
             if valor in (None, "", [], (), {}):
                 continue
@@ -272,9 +281,11 @@ class RegistoDiarioEmpregado(models.Model):
     def clean(self):
         super().clean()
 
+        empregado = self.empregado if self.empregado_id else None
+        empresa_empregado_id = getattr(empregado, "empresa_id", None)
+
         if getattr(self, "empregado_id", None):
-            empregado = getattr(self, "empregado", None)
-            if not empregado or not getattr(empregado, "empresa_id", None):
+            if not empregado or not empresa_empregado_id:
                 raise ValidationError("O empregado não está associado a uma empresa.")
 
         if self.projeto and not self.projeto.empresa_id:
@@ -287,19 +298,19 @@ class RegistoDiarioEmpregado(models.Model):
                 "furo": "O furo tem de estar associado a uma empresa."
             })
 
-        if self.empregado and self.empregado.empresa_id:
-            if self.empresa_id and self.empresa_id != self.empregado.empresa_id:
+        if empresa_empregado_id:
+            if self.empresa_id and self.empresa_id != empresa_empregado_id:
                 raise ValidationError({
                     "empresa": "A empresa do registo deve ser a mesma do empregado."
                 })
-        if self.projeto and self.empregado and self.empregado.empresa_id:
-            if self.projeto.empresa_id != self.empregado.empresa_id:
+        if self.projeto and empresa_empregado_id:
+            if self.projeto.empresa_id != empresa_empregado_id:
                 raise ValidationError({
                     "projeto": "O projeto selecionado não pertence à empresa do empregado."
                 })
 
-        if self.furo and self.empregado and self.empregado.empresa_id:
-            if self.furo.empresa_id != self.empregado.empresa_id:
+        if self.furo and empresa_empregado_id:
+            if self.furo.empresa_id != empresa_empregado_id:
                 raise ValidationError({
                     "furo": "O furo selecionado não pertence à empresa do empregado."
                 })
@@ -327,7 +338,7 @@ class RegistoDiarioEmpregado(models.Model):
             })
 
         if self.planeamento_turno:
-            if self.planeamento_turno.empresa_id != self.empregado.empresa_id:
+            if empresa_empregado_id and self.planeamento_turno.empresa_id != empresa_empregado_id:
                 raise ValidationError({
                     "planeamento_turno": "O planeamento selecionado não pertence à empresa do empregado."
                 })
@@ -476,19 +487,40 @@ class RegistoDiarioEmpregado(models.Model):
             self.hora_fim_pausa,
             self.hora_fim,
         ]
-        total_horarios = sum(1 for h in horarios if h is not None)
+        tem_inicio = self.hora_inicio is not None
+        tem_fim = self.hora_fim is not None
+        tem_pausa_inicio = self.hora_inicio_pausa is not None
+        tem_pausa_fim = self.hora_fim_pausa is not None
 
-        if 0 < total_horarios < 4:
+        if tem_inicio != tem_fim:
             raise ValidationError(
-                "Preencha todos os horários do turno ou deixe todos em branco."
+                "Preencha 'Hora de início' e 'Hora de fim' ou deixe ambos em branco."
             )
 
-        if total_horarios == 4:
-            if not self.data:
+        if tem_pausa_inicio != tem_pausa_fim:
+            raise ValidationError(
+                "Preencha 'Hora de início da pausa' e 'Hora de fim da pausa' ou deixe ambas em branco."
+            )
+
+        if (tem_pausa_inicio or tem_pausa_fim) and not (tem_inicio and tem_fim):
+            raise ValidationError(
+                "Para registar uma pausa, preencha também a hora de início e a hora de fim do turno."
+            )
+
+        if tem_inicio and tem_fim and not self.data:
+            raise ValidationError({
+                "data": "A data é obrigatória quando preenche os horários."
+            })
+
+        if tem_inicio and tem_fim:
+            inicio_dt = _juntar_data_hora(self.data, self.hora_inicio)
+            fim_dt_sem_pausa = _hora_apos(self.data, self.hora_inicio, self.hora_fim)
+            if fim_dt_sem_pausa < inicio_dt:
                 raise ValidationError({
-                    "data": "A data é obrigatória quando preenche os horários."
+                    "hora_fim": "A hora de fim deve ser posterior à hora de início."
                 })
 
+        if tem_inicio and tem_fim and tem_pausa_inicio and tem_pausa_fim:
             inicio_dt = _juntar_data_hora(self.data, self.hora_inicio)
             inicio_pausa_dt = _hora_apos(self.data, self.hora_inicio, self.hora_inicio_pausa)
             fim_pausa_dt = _hora_apos(self.data, self.hora_inicio_pausa, self.hora_fim_pausa)

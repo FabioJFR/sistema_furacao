@@ -128,10 +128,16 @@
                             <a class="btn btn-light" href="{% url 'projetos:gestao_pedido_compra_update' p.pk %}">{% trans "Editar" %}</a>
                             <a class="btn btn-secondary" href="{% url 'projetos:gestao_pedido_compra_comparar' p.pk %}">{% trans "Comparar propostas" %}</a>
                             {% if p.estado != "aprovado" %}
-                            <a class="btn btn-secondary" href="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'aprovado' %}">{% trans "Aprovar" %}</a>
+                            <form method="post" action="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'aprovado' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary">{% trans "Aprovar" %}</button>
+                            </form>
                             {% endif %}
                             {% if p.estado != "rejeitado" %}
-                            <a class="btn btn-light" href="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'rejeitado' %}">{% trans "Rejeitar" %}</a>
+                            <form method="post" action="{% url 'projetos:gestao_pedido_compra_estado' p.pk 'rejeitado' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-light">{% trans "Rejeitar" %}</button>
+                            </form>
                             {% endif %}
                             <a class="btn btn-danger" href="{% url 'projetos:gestao_pedido_compra_delete' p.pk %}">{% trans "Apagar" %}</a>
                         </div>

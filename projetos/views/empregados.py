@@ -18,6 +18,7 @@ from projetos.models import (
     EmpregadoProjeto,
     EmpregadoFicheiro,
     Medicao,
+    NotificacaoGestao,
     RegistoDiarioEmpregado,
 )
 from ..decorators import admin_required, empregado_required
@@ -28,6 +29,8 @@ from ..forms.empregado import (
     EmpregadoRegistroForm,
     EmpregadoUpdateForm,
 )
+from projetos.forms import PedidoFeriasCalendarioForm
+from projetos.selectors.assiduidade import construir_contexto_calendario_turnos_empregado
 from projetos.selectors.configuracao_perfuracao import (
     obter_lista_configuracoes_perfuracao_empregado,
 )
@@ -40,6 +43,7 @@ from projetos.services.acesso_contexto import (
     obter_empregado_autenticado_contexto,
     obter_empresa_admin_contexto,
 )
+from projetos.services.assiduidade import criar_pedidos_ferias_empregado
 from projetos.selectors.empregados import (
     empregado_tem_acesso_furo,
     empregado_tem_acesso_projeto,
@@ -1209,6 +1213,146 @@ def area_empregado(request):
         empregado.empresa_id,
     )
     return render(request, "projetos/area_empregado.html", contexto_empregado)
+
+
+@login_required
+@empregado_required
+def calendario_turnos_empregado(request):
+    logger.info(
+        "Entrada na view calendario_turnos_empregado. user_id=%s, username='%s', method=%s",
+        request.user.id,
+        request.user.username,
+        request.method,
+    )
+    empregado, resposta_erro = _obter_empregado_autenticado(request)
+    if resposta_erro:
+        logger.warning("Acesso bloqueado na view calendario_turnos_empregado. user_id=%s", request.user.id)
+        return resposta_erro
+
+    hoje = timezone.localdate()
+    ano_default = hoje.year
+    ano_param = request.POST.get("ano") if request.method == "POST" else request.GET.get("ano")
+    try:
+        ano = int(ano_param or ano_default)
+    except (TypeError, ValueError):
+        ano = ano_default
+    ano = max(2000, min(2100, ano))
+
+    form = PedidoFeriasCalendarioForm(
+        request.POST or None,
+        initial={"ano": ano},
+    )
+    if request.method == "POST" and form.is_valid():
+        try:
+            resultado = criar_pedidos_ferias_empregado(
+                empregado=empregado,
+                datas=form.cleaned_data["datas_selecionadas"],
+                motivo=form.cleaned_data.get("motivo", ""),
+                notas=form.cleaned_data.get("notas", ""),
+            )
+        except ValidationError as exc:
+            form.add_error(None, exc)
+        else:
+            total_criados = len(resultado["criados"])
+            datas_bloqueadas = resultado["datas_bloqueadas"]
+            if datas_bloqueadas:
+                messages.success(
+                    request,
+                    f"Pedido de férias submetido para {total_criados} dia(s). Algumas datas foram ignoradas porque já tinham pedido/assiduidade pendente ou aprovada.",
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Pedido de férias submetido com sucesso para {total_criados} dia(s). Aguarda aprovação da empresa.",
+                )
+            return redirect(f"{reverse('projetos:calendario_turnos_empregado')}?ano={ano}")
+
+    contexto_calendario = construir_contexto_calendario_turnos_empregado(empregado, ano=ano)
+    contexto = {
+        "empregado": empregado,
+        "form": form,
+        "ano_anterior": max(2000, ano - 1),
+        "ano_seguinte": min(2100, ano + 1),
+        "dias_semana_labels": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+        **contexto_calendario,
+    }
+    return render(request, "projetos/calendario_turnos_empregado.html", contexto)
+
+
+@login_required
+@empregado_required
+def notificacoes_empregado(request):
+    empregado, resposta_erro = _obter_empregado_autenticado(request)
+    if resposta_erro:
+        return resposta_erro
+
+    estado_filtro = (request.GET.get("estado") or "").strip()
+    prioridade_filtro = (request.GET.get("prioridade") or "").strip()
+
+    notificacoes_qs = NotificacaoGestao.objects.filter(
+        empresa=empregado.empresa,
+        responsavel=empregado,
+    )
+    if estado_filtro:
+        notificacoes_qs = notificacoes_qs.filter(estado=estado_filtro)
+    if prioridade_filtro:
+        notificacoes_qs = notificacoes_qs.filter(prioridade=prioridade_filtro)
+
+    notificacoes = notificacoes_qs.order_by("estado", "-criado_em")
+    kpis = [
+        {"titulo": "Abertas", "valor": notificacoes_qs.filter(estado="aberta").count()},
+        {"titulo": "Em andamento", "valor": notificacoes_qs.filter(estado="em_andamento").count()},
+        {"titulo": "Resolvidas", "valor": notificacoes_qs.filter(estado="resolvida").count()},
+        {"titulo": "Total", "valor": notificacoes_qs.count()},
+    ]
+
+    return render(
+        request,
+        "projetos/notificacoes_empregado.html",
+        {
+            "empregado": empregado,
+            "titulo": "Minhas notificações",
+            "descricao": "Alertas pessoais sobre férias, aprovações, pendências e outros avisos úteis do teu dia a dia.",
+            "kpis": kpis,
+            "notificacoes": notificacoes,
+            "filtros": {
+                "estado": estado_filtro,
+                "prioridade": prioridade_filtro,
+            },
+            "estado_choices": [("", "Todos")] + list(NotificacaoGestao.ESTADO_CHOICES),
+            "prioridade_choices": [("", "Todos")] + list(NotificacaoGestao.PRIORIDADE_CHOICES),
+        },
+    )
+
+
+@login_required
+@empregado_required
+def notificacao_empregado_estado(request, pk, estado):
+    empregado, resposta_erro = _obter_empregado_autenticado(request)
+    if resposta_erro:
+        return resposta_erro
+
+    if request.method != "POST":
+        messages.error(request, "A atualização da notificação deve ser feita por formulário.")
+        return redirect("projetos:notificacoes_empregado")
+
+    if estado not in {"aberta", "em_andamento", "resolvida"}:
+        messages.error(request, "Estado inválido.")
+        return redirect("projetos:notificacoes_empregado")
+
+    item = NotificacaoGestao.objects.filter(
+        empresa=empregado.empresa,
+        responsavel=empregado,
+        pk=pk,
+    ).first()
+    if not item:
+        messages.error(request, "Notificação não encontrada.")
+        return redirect("projetos:notificacoes_empregado")
+
+    item.estado = estado
+    item.save(update_fields=["estado", "atualizado_em"])
+    messages.success(request, "Notificação atualizada com sucesso.")
+    return redirect("projetos:notificacoes_empregado")
 
 # --------- REDIRECT ------------
 

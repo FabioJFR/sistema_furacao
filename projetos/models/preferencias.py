@@ -41,6 +41,9 @@ class PreferenciasUser(models.Model):
     paleta = models.CharField(max_length=30, choices=PALETA_CHOICES, default="industrial-blue")
     idioma = models.CharField(max_length=10, choices=IDIOMA_CHOICES, default="pt-pt")
     tamanho_texto = models.CharField(max_length=20, choices=TAMANHO_TEXTO_CHOICES, default="normal")
+    ajuda_contextual_ativa = models.BooleanField(default=True)
+    ajuda_contextual_apenas_paginas_novas = models.BooleanField(default=False)
+    ajuda_contextual_apenas_utilizadores_recentes = models.BooleanField(default=False)
     # TODO futuro:
     # - avaliar preferências por empresa vs preferências globais do utilizador
     # - adicionar mais opções (layout, notificações, dashboard inicial)

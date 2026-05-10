@@ -370,13 +370,20 @@ def parse_payload_json_request_sf(request):
 
 
 def resolver_operacao_bridge_sf(request, *, obter_operacao_por_bridge_key_fn, metodo="POST"):
-    if metodo == "GET":
-        bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
-    else:
-        bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key") or request.GET.get("bridge_key")
+    bridge_key = (request.headers.get("X-Bridge-Key") or "").strip()
 
     if not bridge_key:
-        return {"ok": False, "operacao": None, "erro_response": JsonResponse({"ok": False, "erro": "Bridge key em falta."}, status=403)}
+        return {
+            "ok": False,
+            "operacao": None,
+            "erro_response": JsonResponse(
+                {
+                    "ok": False,
+                    "erro": "Bridge key em falta. Use o header X-Bridge-Key.",
+                },
+                status=403,
+            ),
+        }
 
     operacao = obter_operacao_por_bridge_key_fn(bridge_key)
     if operacao is None:

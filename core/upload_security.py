@@ -54,6 +54,10 @@ ALLOWED_IMAGE_SIGNATURES = {
 }
 
 
+def _virus_scan_fail_closed() -> bool:
+    return bool(getattr(settings, "UPLOAD_VIRUS_SCAN_FAIL_CLOSED", not settings.DEBUG))
+
+
 def _as_extension(filename: str) -> str:
     if not filename or "." not in filename:
         return ""
@@ -118,7 +122,7 @@ def _validate_generic_mime(*, field_name: str, upload_file, filename: str) -> No
 
 def _scan_with_clamav(*, field_name: str, upload_file) -> None:
     if not getattr(settings, "UPLOAD_VIRUS_SCAN_ENABLED", False):
-        return
+        return "disabled"
 
     command = getattr(settings, "UPLOAD_VIRUS_SCAN_COMMAND", "clamscan")
     timeout = int(getattr(settings, "UPLOAD_VIRUS_SCAN_TIMEOUT_SECONDS", 15))
@@ -137,11 +141,30 @@ def _scan_with_clamav(*, field_name: str, upload_file) -> None:
                 timeout=timeout,
             )
         except Exception as exc:
-            raise ValidationError({field_name: f"Falha ao executar antivírus: {exc}"}) from exc
+            if _virus_scan_fail_closed():
+                raise ValidationError(
+                    {
+                        field_name: (
+                            "Não foi possível concluir a validação antivírus do ficheiro."
+                        )
+                    }
+                ) from exc
+            return "scanner_unavailable"
 
     output = f"{proc.stdout}\n{proc.stderr}".upper()
-    if "FOUND" in output or proc.returncode not in {0, 1}:
+    if "FOUND" in output or proc.returncode == 1:
         raise ValidationError({field_name: "Ficheiro rejeitado na validação de segurança (antivírus)."})
+    if proc.returncode != 0:
+        if _virus_scan_fail_closed():
+            raise ValidationError(
+                {
+                    field_name: (
+                        "Não foi possível concluir a validação antivírus do ficheiro."
+                    )
+                }
+            )
+        return "scanner_unavailable"
+    return "scanned"
 
 
 def _sanitize_image_if_needed(*, field_name: str, upload_file):
@@ -261,8 +284,11 @@ def diagnosticar_upload(upload_file, tipo_esperado: str = "auto") -> dict:
             step("Tipo MIME aceitável", True)
 
         if getattr(settings, "UPLOAD_VIRUS_SCAN_ENABLED", False):
-            _scan_with_clamav(field_name="upload", upload_file=upload_file)
-            step("Scan antivírus", True, "clamscan OK")
+            scan_result = _scan_with_clamav(field_name="upload", upload_file=upload_file)
+            if scan_result == "scanner_unavailable":
+                step("Scan antivírus", True, "scanner indisponível; upload aceite por configuração")
+            else:
+                step("Scan antivírus", True, "clamscan OK")
         else:
             step("Scan antivírus", True, "desativado por configuração")
 

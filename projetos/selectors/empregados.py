@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from projetos.models import (
     ConfiguracaoPerfuracaoEmpregado,
@@ -13,6 +16,7 @@ from projetos.models import (
     Projeto,
     RegistoDiarioEmpregado,
     MaquinaAvaria,
+    PlaneamentoTurno,
 )
 
 
@@ -76,6 +80,206 @@ def _obter_dados_grafico_registos(registos_grafico):
     }
 
 
+def _calcular_totais_furacoes_registo(registo):
+    furacoes = getattr(registo, "furacoes", None) or []
+    total_furadas = 0
+    total_avanco = 0.0
+    total_recuperacao = 0.0
+
+    for item in furacoes:
+        if not isinstance(item, dict):
+            continue
+        total_furadas += 1
+        try:
+            total_avanco += float(item.get("avanco") or 0)
+        except (TypeError, ValueError):
+            pass
+        try:
+            total_recuperacao += float(item.get("recuperacao") or 0)
+        except (TypeError, ValueError):
+            pass
+
+    return {
+        "total_furadas": total_furadas,
+        "total_avanco": round(total_avanco, 2),
+        "total_recuperacao": round(total_recuperacao, 2),
+    }
+
+
+def _obter_ocorrencias_registo(registo):
+    operacoes = getattr(registo, "operacoes_ocorrencias", None) or []
+    mapa = dict(RegistoDiarioEmpregado.RELATORIO_OCORRENCIA_CHOICES)
+    ocorrencias = []
+
+    for item in operacoes:
+        if not isinstance(item, dict):
+            continue
+        tipo = (item.get("tipo") or "").strip()
+        if not tipo:
+            continue
+        label = mapa.get(tipo, tipo.replace("_", " ").title())
+        if label not in ocorrencias:
+            ocorrencias.append(label)
+
+    return ocorrencias
+
+
+def _resumir_ultimo_turno_furo(registo, *, referencia):
+    if not registo:
+        return None
+
+    totais_furacoes = _calcular_totais_furacoes_registo(registo)
+    ocorrencias = _obter_ocorrencias_registo(registo)
+    turno_label = (
+        registo.turno
+        or (
+            registo.planeamento_turno.get_turno_display()
+            if registo.planeamento_turno_id
+            else "-"
+        )
+    )
+    maquina_nome = (
+        registo.planeamento_turno.maquina.nome
+        if registo.planeamento_turno_id and registo.planeamento_turno.maquina_id
+        else "-"
+    )
+    notas_curta = (registo.notas or registo.observacoes or "").strip()
+    if len(notas_curta) > 180:
+        notas_curta = f"{notas_curta[:177]}..."
+
+    return {
+        "referencia": referencia,
+        "registo": registo,
+        "data": registo.data,
+        "empregado_nome": registo.empregado.nome if registo.empregado_id else "-",
+        "furo_nome": registo.furo.nome if registo.furo_id else "-",
+        "projeto_nome": registo.projeto.nome if registo.projeto_id else "-",
+        "turno_label": turno_label,
+        "maquina_nome": maquina_nome,
+        "horas_trabalhadas": registo.horas_trabalhadas or 0,
+        "metros_furados": registo.metros_furados or 0,
+        "horas_paragem": registo.horas_paragem or 0,
+        "total_furadas": totais_furacoes["total_furadas"],
+        "total_avanco_furadas": totais_furacoes["total_avanco"],
+        "total_recuperacao_furadas": totais_furacoes["total_recuperacao"],
+        "ocorrencias": ocorrencias[:4],
+        "notas_curta": notas_curta,
+    }
+
+
+def _selecionar_turno_referencia_empregado(empregado, empresa_id=None):
+    hoje = timezone.localdate()
+    agora = timezone.localtime().replace(tzinfo=None)
+
+    qs = (
+        PlaneamentoTurno.objects.filter(
+            empregado=empregado,
+            estado__in=["planeado", "confirmado"],
+        )
+        .select_related("projeto", "furo", "maquina")
+        .order_by("data_inicio", "hora_inicio", "criado_em")
+    )
+
+    if empresa_id is not None:
+        qs = qs.filter(empresa_id=empresa_id)
+
+    qs = qs.filter(
+        Q(data_fim__isnull=True, data_inicio__gte=hoje - timedelta(days=1))
+        | Q(data_fim__isnull=False, data_fim__gte=hoje - timedelta(days=1))
+    )
+
+    em_curso = []
+    futuros = []
+
+    for turno in qs:
+        inicio_dt = turno.inicio_datetime
+        fim_dt = turno.fim_datetime
+        if inicio_dt <= agora <= fim_dt:
+            em_curso.append(turno)
+        elif inicio_dt >= agora:
+            futuros.append(turno)
+
+    if em_curso:
+        return em_curso[0], "em_curso"
+    if futuros:
+        return futuros[0], "proximo"
+    return None, None
+
+
+def _construir_resumo_planeamento(turno, *, estado_referencia):
+    if not turno:
+        return None
+
+    return {
+        "obj": turno,
+        "estado_referencia": estado_referencia,
+        "nome": turno.nome_efetivo,
+        "turno_label": turno.get_turno_display(),
+        "estado_label": turno.get_estado_display(),
+        "projeto_nome": turno.projeto.nome if turno.projeto_id else "-",
+        "furo_nome": turno.furo.nome if turno.furo_id else "-",
+        "maquina_nome": turno.maquina.nome if turno.maquina_id else "-",
+        "horario": turno.intervalo_horario_display or "-",
+        "data_inicio": turno.data_inicio,
+        "data_fim": turno.data_fim,
+        "objetivo": (turno.objetivo or "").strip(),
+        "notas": (turno.notas or "").strip(),
+    }
+
+
+def _obter_contexto_turno_empregado(empregado, *, empresa_id=None):
+    turno_referencia, estado_referencia = _selecionar_turno_referencia_empregado(empregado, empresa_id=empresa_id)
+    resumo_turno = _construir_resumo_planeamento(turno_referencia, estado_referencia=estado_referencia)
+
+    ultimos_registos_qs = (
+        empregado.registos_diarios.select_related(
+            "empregado",
+            "projeto",
+            "furo",
+            "planeamento_turno",
+            "planeamento_turno__maquina",
+        )
+        .filter(furo__isnull=False)
+        .order_by("-data", "-hora_fim", "-criado_em")
+    )
+    if empresa_id is not None:
+        ultimos_registos_qs = ultimos_registos_qs.filter(empresa_id=empresa_id)
+
+    ultimo_registo_empregado = ultimos_registos_qs.first()
+    furo_referencia = turno_referencia.furo if turno_referencia and turno_referencia.furo_id else None
+    referencia = "proximo_turno"
+
+    if furo_referencia is None and ultimo_registo_empregado and ultimo_registo_empregado.furo_id:
+        furo_referencia = ultimo_registo_empregado.furo
+        referencia = "ultimo_furo_empregado"
+
+    ultimo_turno_furo = None
+    if furo_referencia is not None:
+        registos_furo_qs = (
+            RegistoDiarioEmpregado.objects.select_related(
+                "empregado",
+                "projeto",
+                "furo",
+                "planeamento_turno",
+                "planeamento_turno__maquina",
+            )
+            .filter(furo=furo_referencia)
+            .order_by("-data", "-hora_fim", "-criado_em")
+        )
+        if empresa_id is not None:
+            registos_furo_qs = registos_furo_qs.filter(empresa_id=empresa_id)
+        ultimo_turno_furo = _resumir_ultimo_turno_furo(
+            registos_furo_qs.first(),
+            referencia=referencia,
+        )
+
+    return {
+        "turno_referencia": resumo_turno,
+        "ultimo_turno_furo_referencia": ultimo_turno_furo,
+        "ultimo_registo_empregado": ultimo_registo_empregado,
+    }
+
+
 
 def _contexto_empregado_vazio(empregado):
     return {
@@ -94,6 +298,9 @@ def _contexto_empregado_vazio(empregado):
         "grafico_horas": [],
         "grafico_produtividade": [],
         "furos_trabalhados": Furo.objects.none(),
+        "turno_referencia": None,
+        "ultimo_turno_furo_referencia": None,
+        "ultimo_registo_empregado": None,
     }
 
 
@@ -128,6 +335,7 @@ def obter_contexto_area_empregado(empregado, empresa=None):
     ultimos_registos = ultimos_registos_qs[:5]
 
     dados_grafico = _obter_dados_grafico_registos(registos_grafico)
+    contexto_turno = _obter_contexto_turno_empregado(empregado, empresa_id=empresa_id)
 
     return {
         "empregado": empregado,
@@ -141,6 +349,7 @@ def obter_contexto_area_empregado(empregado, empresa=None):
         "media_metros_dia": empregado.media_metros_por_dia or 0,
         "ultimos_registos": ultimos_registos,
         "furos_trabalhados": furos_trabalhados,
+        **contexto_turno,
         **dados_grafico,
     }
 

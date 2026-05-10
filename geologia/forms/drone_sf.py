@@ -101,6 +101,9 @@ class ConfiguracaoDroneSFForm(forms.ModelForm):
             self.instance.drone = drone
         if empresa is not None:
             self.instance.empresa_id = _resolver_empresa_id(empresa)
+        self.fields["bridge_ativa"].help_text = "Ativa a bridge externa do Drone S_F e permite receber heartbeat, vídeo e telemetria."
+        self.fields["bridge_base_url"].help_text = "Endpoint base da bridge S_F. Não uses query string nem credenciais embutidas na URL."
+        self.fields["bridge_api_key"].help_text = "Chave usada pela bridge S_F para enviar estado para a plataforma."
 
     def save(self, commit=True):
         instance = super().save(commit=False)

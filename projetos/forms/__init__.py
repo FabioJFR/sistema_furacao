@@ -25,7 +25,7 @@ from .despesa import *
 from .sugestao import SugestaoPlataformaForm
 from .cliente_contrato import ClienteComercialForm, ClienteContratoAdendaForm, ClienteContratoAnexoForm, ClienteContratoForm
 from .planeamento_turno import PlaneamentoTurnoForm
-from .assiduidade_registo import AssiduidadeRegistoForm
+from .assiduidade_registo import AssiduidadeRegistoForm, PedidoFeriasCalendarioForm
 from .gestao import (
     PedidoCompraForm,
     FornecedorCompraForm,

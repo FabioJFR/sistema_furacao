@@ -228,14 +228,15 @@ def recalcular_resumo_furo(furo):
     if data_inicio_operacao:
         furo.data_inicio_operacao = data_inicio_operacao
 
-    furo.save(
-        update_fields=[
-            "profundidade_atual",
-            "profundidade_maxima_atingida",
-            "total_horas",
-            "data_inicio_operacao",
-        ]
-    )
+    # Recalcular o resumo não deve falhar por validações históricas de outros
+    # campos do furo que não estão a ser alterados neste processo.
+    update_data = {
+        "profundidade_atual": profundidade_corrente,
+        "profundidade_maxima_atingida": profundidade_maxima,
+        "total_horas": total_horas,
+        "data_inicio_operacao": furo.data_inicio_operacao,
+    }
+    Furo.objects.filter(pk=furo.pk).update(**update_data)
     registar_versao_furo(furo, origem="recalculo")
 
     return furo

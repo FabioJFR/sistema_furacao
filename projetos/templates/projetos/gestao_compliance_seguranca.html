@@ -990,17 +990,26 @@
                     <td class="px-3 py-2">{{ i.total_evidencias|default:"0" }}</td>
                     <td class="px-3 py-2">
                         <div class="flex items-center gap-2">
-                            <a href="{% url 'projetos:gestao_incidente_evidencia_create' i.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
-                            <a href="{% url 'projetos:gestao_incidente_update' i.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
-                            {% if i.status != "aberto" %}
-                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'aberto' %}" class="btn btn-light">{% trans "Abrir" %}</a>
-                            {% endif %}
-                            {% if i.status != "investigacao" %}
-                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'investigacao' %}" class="btn btn-secondary">{% trans "Investigar" %}</a>
-                            {% endif %}
-                            {% if i.status != "fechado" %}
-                            <a href="{% url 'projetos:gestao_incidente_estado' i.pk 'fechado' %}" class="btn btn-primary">{% trans "Fechar" %}</a>
-                            {% endif %}
+	                            <a href="{% url 'projetos:gestao_incidente_evidencia_create' i.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
+	                            <a href="{% url 'projetos:gestao_incidente_update' i.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
+	                            {% if i.status != "aberto" %}
+	                            <form method="post" action="{% url 'projetos:gestao_incidente_estado' i.pk 'aberto' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-light">{% trans "Abrir" %}</button>
+	                            </form>
+	                            {% endif %}
+	                            {% if i.status != "investigacao" %}
+	                            <form method="post" action="{% url 'projetos:gestao_incidente_estado' i.pk 'investigacao' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-secondary">{% trans "Investigar" %}</button>
+	                            </form>
+	                            {% endif %}
+	                            {% if i.status != "fechado" %}
+	                            <form method="post" action="{% url 'projetos:gestao_incidente_estado' i.pk 'fechado' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-primary">{% trans "Fechar" %}</button>
+	                            </form>
+	                            {% endif %}
                             <a href="{% url 'projetos:gestao_incidente_delete' i.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
                         </div>
                     </td>
@@ -1056,19 +1065,25 @@
                     </td>
                     <td class="px-3 py-2">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <a href="{% url 'projetos:gestao_acao_corretiva_evidencia_create' acao.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
-                            <a href="{% url 'projetos:gestao_acao_corretiva_update' acao.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
-                            {% if acao.status != "em_andamento" %}
-                            <a href="{% url 'projetos:gestao_acao_corretiva_estado' acao.pk 'em_andamento' %}" class="btn btn-secondary">{% trans "Iniciar" %}</a>
-                            {% endif %}
+	                            <a href="{% url 'projetos:gestao_acao_corretiva_evidencia_create' acao.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
+	                            <a href="{% url 'projetos:gestao_acao_corretiva_update' acao.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
+	                            {% if acao.status != "em_andamento" %}
+	                            <form method="post" action="{% url 'projetos:gestao_acao_corretiva_estado' acao.pk 'em_andamento' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-secondary">{% trans "Iniciar" %}</button>
+	                            </form>
+	                            {% endif %}
                             {% if acao.status != "concluida" %}
                             <a href="{% url 'projetos:gestao_acao_corretiva_fecho' acao.pk %}" class="btn btn-primary">{% trans "Fecho formal" %}</a>
                             {% else %}
                             <a href="{% url 'projetos:gestao_acao_corretiva_fecho' acao.pk %}" class="btn btn-light">{% trans "Ver fecho" %}</a>
                             {% endif %}
-                            {% if acao.status != "cancelada" %}
-                            <a href="{% url 'projetos:gestao_acao_corretiva_estado' acao.pk 'cancelada' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
-                            {% endif %}
+	                            {% if acao.status != "cancelada" %}
+	                            <form method="post" action="{% url 'projetos:gestao_acao_corretiva_estado' acao.pk 'cancelada' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-light">{% trans "Cancelar" %}</button>
+	                            </form>
+	                            {% endif %}
                             <a href="{% url 'projetos:gestao_acao_corretiva_delete' acao.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
                         </div>
                     </td>
@@ -1116,17 +1131,26 @@
                     <td class="px-3 py-2">{{ acao.total_evidencias|default:"0" }}</td>
                     <td class="px-3 py-2">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <a href="{% url 'projetos:gestao_acao_preventiva_evidencia_create' acao.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
-                            <a href="{% url 'projetos:gestao_acao_preventiva_update' acao.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
-                            {% if acao.status != "em_andamento" %}
-                            <a href="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'em_andamento' %}" class="btn btn-secondary">{% trans "Iniciar" %}</a>
-                            {% endif %}
-                            {% if acao.status != "concluida" %}
-                            <a href="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'concluida' %}" class="btn btn-primary">{% trans "Concluir" %}</a>
-                            {% endif %}
-                            {% if acao.status != "cancelada" %}
-                            <a href="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'cancelada' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
-                            {% endif %}
+	                            <a href="{% url 'projetos:gestao_acao_preventiva_evidencia_create' acao.pk %}" class="btn btn-light">{% trans "Adicionar evidência" %}</a>
+	                            <a href="{% url 'projetos:gestao_acao_preventiva_update' acao.pk %}" class="btn btn-light">{% trans "Editar" %}</a>
+	                            {% if acao.status != "em_andamento" %}
+	                            <form method="post" action="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'em_andamento' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-secondary">{% trans "Iniciar" %}</button>
+	                            </form>
+	                            {% endif %}
+	                            {% if acao.status != "concluida" %}
+	                            <form method="post" action="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'concluida' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-primary">{% trans "Concluir" %}</button>
+	                            </form>
+	                            {% endif %}
+	                            {% if acao.status != "cancelada" %}
+	                            <form method="post" action="{% url 'projetos:gestao_acao_preventiva_estado' acao.pk 'cancelada' %}">
+	                                {% csrf_token %}
+	                                <button type="submit" class="btn btn-light">{% trans "Cancelar" %}</button>
+	                            </form>
+	                            {% endif %}
                             <a href="{% url 'projetos:gestao_acao_preventiva_delete' acao.pk %}" class="btn btn-danger">{% trans "Apagar" %}</a>
                         </div>
                     </td>

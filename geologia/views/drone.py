@@ -66,6 +66,20 @@ def _obter_operacao_por_bridge_key(bridge_key):
     return obter_operacao_por_bridge_key_selector(bridge_key)
 
 
+def _obter_bridge_key_header(request):
+    return (request.headers.get("X-Bridge-Key") or "").strip()
+
+
+def _validar_bridge_key_header(request):
+    bridge_key = _obter_bridge_key_header(request)
+    if not bridge_key:
+        return None, _json_erro(
+            erro="Bridge key em falta. Use o header X-Bridge-Key.",
+            status=403,
+        )
+    return bridge_key, None
+
+
 def _validar_empresa_geologia_necessaria(empresa, mensagem_erro):
     if empresa is not None:
         return None
@@ -247,9 +261,9 @@ def api_estado_drone(request):
 @csrf_exempt
 @require_POST
 def api_bridge_ingest_estado(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
-    if not bridge_key:
-        return _json_erro(erro="Bridge key em falta.", status=403)
+    bridge_key, erro_response = _validar_bridge_key_header(request)
+    if erro_response is not None:
+        return erro_response
 
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
@@ -274,7 +288,9 @@ def api_bridge_ingest_estado(request):
 @csrf_exempt
 @require_GET
 def api_bridge_comandos_pendentes(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
+    bridge_key, erro_response = _validar_bridge_key_header(request)
+    if erro_response is not None:
+        return erro_response
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
         return _json_erro(erro="Bridge não autorizada.", status=403)
@@ -287,7 +303,9 @@ def api_bridge_comandos_pendentes(request):
 @csrf_exempt
 @require_POST
 def api_bridge_confirmar_comando(request, comando_id):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.GET.get("bridge_key")
+    bridge_key, erro_response = _validar_bridge_key_header(request)
+    if erro_response is not None:
+        return erro_response
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
         return _json_erro(erro="Bridge não autorizada.", status=403)
@@ -307,7 +325,9 @@ def api_bridge_confirmar_comando(request, comando_id):
 @csrf_exempt
 @require_POST
 def api_bridge_log_event(request):
-    bridge_key = request.headers.get("X-Bridge-Key") or request.POST.get("bridge_key")
+    bridge_key, erro_response = _validar_bridge_key_header(request)
+    if erro_response is not None:
+        return erro_response
     operacao = _obter_operacao_por_bridge_key(bridge_key)
     if operacao is None:
         return _json_erro(erro="Bridge não autorizada.", status=403)

@@ -14,11 +14,13 @@ from core.permissions import (
 from geologia.forms import (
     ConfiguracaoDroneSFForm,
     DroneSFForm,
+    FonteCartograficaGeologicaForm,
     MissaoProgramadaDroneSFForm,
     ModuloDroneSFForm,
     OperacaoDroneSFTempoRealForm,
     SensorDroneSFForm,
 )
+from geologia.models import FonteCartograficaGeologica
 from geologia.services.drone_sf_dashboard import (
     bridge_logs_context_sf,
     bridge_status_summary_sf,
@@ -109,6 +111,337 @@ def _mensagem_sucesso_redirect(*, request, mensagem, redirect_name, **redirect_k
     return redirect(redirect_name, **redirect_kwargs)
 
 
+def _fontes_cartograficas_padrao():
+    return [
+        {
+            "id": "lneg-cgp1m-mapa",
+            "nome": "LNEG · 1:1 000 000 · Mapa geológico",
+            "descricao": "Carta geológica nacional em mosaico cacheado, estável para visualização direta dentro da plataforma.",
+            "pais_regiao": "Portugal",
+            "tipo_servico": "tile",
+            "url_servico": "https://sig.lneg.pt/server/rest/services/CGP1M/MapServer/tile/{z}/{y}/{x}",
+            "layer_names": "",
+            "attribution": "Fonte: LNEG · CGP1M",
+            "formato_imagem": "",
+            "transparencia": False,
+            "opacidade": 0.92,
+            "centro_latitude": 39.5,
+            "centro_longitude": -8.0,
+            "zoom_inicial": 6,
+            "visivel_por_defeito": True,
+            "origem": "padrao",
+            "identify_mode": "query",
+            "identify_url": "https://sig.lneg.pt/server/rest/services/CGP1M/MapServer/2/query",
+            "identify_title": "Carta Geológica de Portugal, escala 1:1 000 000",
+            "identify_hint": "Geologia vetorial: identifica a unidade geológica no ponto.",
+            "identify_fields": [
+                {"key": "Codigo", "label": "Código"},
+                {"key": "UC_desc", "label": "Descrição"},
+                {"key": "Zona_TE", "label": "Zona Tectono-Estratigráfica"},
+                {"key": "Eonotema", "label": "Eonotema"},
+                {"key": "Eratema", "label": "Eratema"},
+                {"key": "Sistema", "label": "Sistema"},
+                {"key": "Serie", "label": "Série"},
+                {"key": "LitologiasPredominantes", "label": "Litologias predominantes"},
+            ],
+            "external_url": "https://geoportal.lneg.pt/mapa/?mapa=CGP1M",
+        },
+        {
+            "id": "lneg-cgp500k-mapa",
+            "nome": "LNEG · 1:500 000 · Mapa geológico",
+            "descricao": "Carta geológica vetorial intermédia, útil para leitura regional mais fina.",
+            "pais_regiao": "Portugal",
+            "tipo_servico": "tile",
+            "url_servico": "https://sig.lneg.pt/server/rest/services/CGP500k/MapServer/tile/{z}/{y}/{x}",
+            "layer_names": "",
+            "attribution": "Fonte: LNEG · CGP500k",
+            "formato_imagem": "",
+            "transparencia": False,
+            "opacidade": 0.88,
+            "centro_latitude": 39.5,
+            "centro_longitude": -8.0,
+            "zoom_inicial": 7,
+            "visivel_por_defeito": False,
+            "origem": "padrao",
+            "identify_mode": "query",
+            "identify_url": "https://sig.lneg.pt/server/rest/services/CGP500k/MapServer/2/query",
+            "identify_title": "Carta Geológica de Portugal, escala 1:500 000",
+            "identify_hint": "Geologia vetorial: identifica a unidade geológica no ponto.",
+            "external_url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp500k/",
+        },
+        {
+            "id": "lneg-cgp200k-mapa",
+            "nome": "LNEG · 1:200 000 · Mapa geológico",
+            "descricao": "Mosaico raster 1:200 000 para enquadramento técnico regional.",
+            "pais_regiao": "Portugal",
+            "tipo_servico": "tile",
+            "url_servico": "https://sig.lneg.pt/server/rest/services/CGP200k/MapServer/tile/{z}/{y}/{x}",
+            "layer_names": "",
+            "attribution": "Fonte: LNEG · CGP200k",
+            "formato_imagem": "",
+            "transparencia": False,
+            "opacidade": 0.9,
+            "centro_latitude": 39.5,
+            "centro_longitude": -8.0,
+            "zoom_inicial": 9,
+            "visivel_por_defeito": False,
+            "origem": "padrao",
+            "identify_mode": "multi_query",
+            "identify_urls": [
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/2/query",
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/3/query",
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/5/query",
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/7/query",
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/8/query",
+                "https://sig.lneg.pt/server/rest/services/CGP200k_vetor/MapServer/9/query",
+            ],
+            "identify_title": "Carta Geológica de Portugal, escala 1:200 000",
+            "identify_hint": "Geologia vetorial: identifica a unidade geológica no ponto.",
+            "identify_fields": [
+                {"key": "CODIGO", "label": "Código"},
+                {"key": "UnidadeGeologica", "label": "Unidade geológica"},
+                {"key": "Eonotema", "label": "Eonotema"},
+                {"key": "Eratema", "label": "Eratema"},
+                {"key": "Sistema", "label": "Sistema"},
+                {"key": "Série", "label": "Série"},
+                {"key": "Andar", "label": "Andar"},
+            ],
+            "external_url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp200k/",
+        },
+        {
+            "id": "lneg-cgp25k-folhas",
+            "nome": "LNEG · 1:25 000 · Índice de folhas publicadas",
+            "descricao": "Índice documental de folhas e metadados públicos na escala 1:25 000, útil para localizar rapidamente a publicação mais próxima do projeto.",
+            "pais_regiao": "Portugal",
+            "tipo_servico": "wms",
+            "url_servico": "https://sig.lneg.pt/server/services/geoPortal/CartografiaOficial/MapServer/WMSServer",
+            "layer_names": "1",
+            "attribution": "Fonte: LNEG · Cartografia Oficial",
+            "formato_imagem": "image/png",
+            "transparencia": True,
+            "opacidade": 0.58,
+            "centro_latitude": 39.5,
+            "centro_longitude": -8.0,
+            "zoom_inicial": 14,
+            "visivel_por_defeito": False,
+            "origem": "padrao",
+            "identify_mode": "query",
+            "identify_url": "https://sig.lneg.pt/server/rest/services/geoPortal/CartografiaOficial/MapServer/1/query",
+            "identify_title": "Cartografia oficial publicada, escala 1:25 000",
+            "identify_badge": "Camada documental",
+            "identify_hint": "Camada documental: identifica a folha publicada e a documentação disponível.",
+            "identify_fields": [
+                {"key": "Codigo", "label": "Código"},
+                {"key": "Nome", "label": "Folha"},
+                {"key": "Ano", "label": "Ano"},
+                {"key": "Autores", "label": "Autores"},
+                {"key": "Edicao", "label": "Edição"},
+                {"key": "Papel", "label": "Formato papel"},
+                {"key": "Digital", "label": "Formato digital"},
+                {"key": "Nota", "label": "Notícia explicativa"},
+                {"key": "Nota_Autor", "label": "Autor da notícia"},
+                {"key": "Nota_Ano", "label": "Ano da notícia"},
+                {"key": "Nota_Paginas", "label": "Páginas da notícia"},
+            ],
+            "external_url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/",
+        },
+        {
+            "id": "lneg-cgp50k-mapa",
+            "nome": "LNEG · 1:50 000 · Mapa geológico",
+            "descricao": "Mosaico raster de maior detalhe entre as cartas nacionais base aqui disponíveis.",
+            "pais_regiao": "Portugal",
+            "tipo_servico": "tile",
+            "url_servico": "https://sig.lneg.pt/server/rest/services/CGP50k/MapServer/tile/{z}/{y}/{x}",
+            "layer_names": "",
+            "attribution": "Fonte: LNEG · CGP50k",
+            "formato_imagem": "",
+            "transparencia": False,
+            "opacidade": 0.9,
+            "centro_latitude": 39.5,
+            "centro_longitude": -8.0,
+            "zoom_inicial": 12,
+            "visivel_por_defeito": False,
+            "origem": "padrao",
+            "identify_mode": "query",
+            "identify_url": "https://sig.lneg.pt/server/rest/services/geoPortal/CartografiaOficial/MapServer/2/query",
+            "identify_title": "Carta Geológica de Portugal, escala 1:50 000",
+            "identify_badge": "Folha publicada",
+            "identify_hint": "Folha publicada: identifica a folha oficial e os respetivos metadados.",
+            "identify_fields": [
+                {"key": "Codigo", "label": "Código"},
+                {"key": "Nome", "label": "Folha"},
+                {"key": "Ano", "label": "Ano"},
+                {"key": "Autores", "label": "Autores"},
+                {"key": "Edicao", "label": "Edição"},
+                {"key": "Papel", "label": "Formato papel"},
+                {"key": "Digital", "label": "Formato digital"},
+                {"key": "Nota", "label": "Notícia explicativa"},
+                {"key": "Nota_Autor", "label": "Autor da notícia"},
+                {"key": "Nota_Ano", "label": "Ano da notícia"},
+                {"key": "Nota_Paginas", "label": "Páginas da notícia"},
+            ],
+            "external_url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp50k/",
+        },
+    ]
+
+
+def _serializar_fonte_cartografica_modelo(fonte):
+    return {
+        "id": str(fonte.id),
+        "nome": fonte.nome,
+        "descricao": fonte.descricao,
+        "pais_regiao": fonte.pais_regiao,
+        "tipo_servico": fonte.tipo_servico,
+        "url_servico": fonte.url_servico,
+        "layer_names": fonte.layer_names,
+        "attribution": fonte.attribution,
+        "formato_imagem": fonte.formato_imagem or "image/png",
+        "transparencia": fonte.transparencia,
+        "opacidade": fonte.opacidade,
+        "centro_latitude": fonte.centro_latitude,
+        "centro_longitude": fonte.centro_longitude,
+        "zoom_inicial": fonte.zoom_inicial,
+        "visivel_por_defeito": fonte.visivel_por_defeito,
+        "origem": "empresa",
+    }
+
+
+def _obter_fontes_cartograficas_contexto(*, empresa):
+    fontes_empresa = [
+        _serializar_fonte_cartografica_modelo(item)
+        for item in FonteCartograficaGeologica.objects.filter(empresa=empresa, ativo=True).order_by("ordem", "nome")
+    ]
+    return _fontes_cartograficas_padrao() + fontes_empresa, fontes_empresa
+
+
+def _obter_fonte_cartografica_empresa(*, pk, empresa):
+    try:
+        return FonteCartograficaGeologica.objects.get(pk=pk, empresa=empresa)
+    except FonteCartograficaGeologica.DoesNotExist as exc:
+        raise FonteCartograficaGeologica.DoesNotExist from exc
+
+
+def _cartografia_oficial_contexto():
+    return {
+        "titulo": "Cartografia oficial",
+        "subtitulo": "Acesso rápido à cartografia geológica pública do LNEG, organizada por escala e utilidade prática para enquadramento regional, análise intermédia e leitura mais próxima do projeto.",
+        "alerta_escala": "As escalas pequenas são excelentes para contexto regional. Para interpretação local, a plataforma deve continuar a privilegiar o detalhe do furo, das amostras, dos logs e da cartografia de maior resolução.",
+        "atalhos_rapidos": [
+            {
+                "titulo": "Centro de cartografia geológica",
+                "descricao": "Visão geral do catálogo de cartografia geológica aberta do LNEG.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/",
+                "etiqueta": "Abrir catálogo",
+            },
+            {
+                "titulo": "WMS oficial 1:1 000 000",
+                "descricao": "Ligação preparada para futura integração cartográfica na plataforma.",
+                "url": "https://sig.lneg.pt/server/services/CGP1M/MapServer/WMSServer?request=GetCapabilities&service=WMS",
+                "etiqueta": "Abrir WMS",
+            },
+            {
+                "titulo": "Serviço REST oficial 1:1 000 000",
+                "descricao": "Página técnica do serviço, útil para ver layers, cache e operações do mapa.",
+                "url": "https://sig.lneg.pt/server/rest/services/CGP1M/MapServer",
+                "etiqueta": "Abrir REST",
+            },
+        ],
+        "colecoes": [
+            {
+                "titulo": "Escala 1:1 000 000",
+                "descricao": "Síntese nacional útil para enquadramento geológico macro e leitura regional do território.",
+                "utilidade": "Ideal para contexto nacional e alinhamento inicial do projeto.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp1m/",
+                "fontes": [
+                    "Metadados",
+                    "JPG/PDF",
+                    "Shapefile",
+                    "GeoPackage",
+                    "WMS/WMTS",
+                ],
+            },
+            {
+                "titulo": "Escala 1:500 000",
+                "descricao": "Referência intermédia publicada pelos Serviços Geológicos de Portugal, útil para leitura regional alargada.",
+                "utilidade": "Boa para transição entre visão nacional e análise regional.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp500k/",
+                "fontes": [
+                    "Metadados",
+                    "JPG/PDF",
+                    "Folha Norte",
+                    "Folha Sul",
+                ],
+            },
+            {
+                "titulo": "Escala 1:200 000",
+                "descricao": "Informação geológica mais detalhada, com folhas publicadas e notícias explicativas em vários casos.",
+                "utilidade": "Muito útil para enquadramento regional técnico antes de abrir o detalhe do furo.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp200k/",
+                "fontes": [
+                    "Metadados",
+                    "JPG/PDF",
+                    "Raster georreferenciado",
+                    "Notícia explicativa",
+                ],
+            },
+            {
+                "titulo": "Escala 1:25 000",
+                "descricao": "Folhas publicadas de detalhe local, úteis para localizar rapidamente a cartografia oficial mais próxima e a respetiva documentação associada.",
+                "utilidade": "Boa para consulta fina de publicação disponível e enquadramento documental local.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/",
+                "fontes": [
+                    "Metadados",
+                    "Folhas publicadas",
+                    "Notícia explicativa",
+                    "Autores e edição",
+                ],
+            },
+            {
+                "titulo": "Escala 1:50 000",
+                "descricao": "Cartografia geológica de base do território nacional, dividida por folhas e com georreferenciação melhorada em PT-TM06/ETRS89 em junho de 2024.",
+                "utilidade": "A escala mais relevante deste conjunto para aproximação ao contexto local do projeto.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cgp50k/",
+                "fontes": [
+                    "PDF",
+                    "Raster georreferenciado",
+                    "Notícia explicativa",
+                    "Folhas locais",
+                ],
+            },
+            {
+                "titulo": "Açores",
+                "descricao": "Cartas geológicas de várias ilhas, com escalas 1:25 000 e 1:50 000 conforme a ilha.",
+                "utilidade": "Essencial para operação e estudo em contexto insular açoriano.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cartografia_geologica_acores/",
+                "fontes": [
+                    "Metadados",
+                    "JPG/PDF",
+                    "Notícia explicativa",
+                    "Folhas por ilha",
+                ],
+            },
+            {
+                "titulo": "Madeira",
+                "descricao": "Cartas geológicas da Madeira, Porto Santo, Desertas e Selvagens, com escalas 1:25 000 e 1:50 000.",
+                "utilidade": "Útil para contexto geológico regional insular e apoio a estudos locais.",
+                "url": "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/cartografia_geologica_madeira/",
+                "fontes": [
+                    "Metadados",
+                    "JPG/PDF",
+                    "Notícia explicativa",
+                    "Folhas por ilha",
+                ],
+            },
+        ],
+        "proximos_passos": [
+            "Ligar o WMS/WMTS ao mapa geológico da plataforma.",
+            "Permitir abrir a folha oficial adequada a partir do projeto ou do furo ativo.",
+            "Sugerir a escala mais útil com base na localização e no contexto do projeto.",
+            "Cruzar o enquadramento regional com logs, litologia e modelos 3D.",
+        ],
+    }
+
+
 @login_required
 @admin_required
 def geologia_hub(request):
@@ -139,6 +472,7 @@ def geologia_geologo_dashboard(request):
         empresa=empresa,
         limite_top=5,
     )
+    fontes_mapa, fontes_empresa = _obter_fontes_cartograficas_contexto(empresa=empresa)
 
     return render(
         request,
@@ -155,6 +489,9 @@ def geologia_geologo_dashboard(request):
             "semaforo_furos": semaforo_furos,
             "top_furos_prioritarios": top_prioritarios,
             "metadados_score": metadados_score,
+            "cartografia_oficial": _cartografia_oficial_contexto(),
+            "fontes_cartograficas_mapa": fontes_mapa,
+            "fontes_cartograficas_empresa": fontes_empresa,
         },
     )
 
@@ -171,6 +508,7 @@ def geologia_encarregado_dashboard(request):
     furos_qs = obter_furos_geologia_hub_qs(empresa=empresa)
     logs_qs = obter_logs_geologia_hub_qs(empresa=empresa)
     missoes_qs = obter_missoes_geologia_hub_qs(empresa=empresa)
+    fontes_mapa, fontes_empresa = _obter_fontes_cartograficas_contexto(empresa=empresa)
 
     return render(
         request,
@@ -184,8 +522,219 @@ def geologia_encarregado_dashboard(request):
             "total_furos": furos_qs.count(),
             "total_logs": logs_qs.count(),
             "total_missoes": missoes_qs.count(),
+            "cartografia_oficial": _cartografia_oficial_contexto(),
+            "fontes_cartograficas_mapa": fontes_mapa,
+            "fontes_cartograficas_empresa": fontes_empresa,
         },
     )
+
+
+@login_required
+@geologia_operacional_required
+def cartografia_oficial(request):
+    empresa, _, resposta_erro = obter_empresa_geologia_operacional(request)
+    if resposta_erro:
+        return resposta_erro
+
+    return render(
+        request,
+        "geologia/cartografia_oficial.html",
+        {
+            "empresa_geologia": empresa,
+            "cartografia_oficial": _cartografia_oficial_contexto(),
+        },
+    )
+
+
+@login_required
+@geologia_operacional_required
+def mapa_cartografico(request):
+    empresa, _, resposta_erro = obter_empresa_geologia_operacional(request)
+    if resposta_erro:
+        return resposta_erro
+
+    fontes_mapa, fontes_empresa = _obter_fontes_cartograficas_contexto(empresa=empresa)
+
+    return render(
+        request,
+        "geologia/mapa_cartografico.html",
+        {
+            "empresa_geologia": empresa,
+            "fontes_cartograficas_mapa": fontes_mapa,
+            "fontes_cartograficas_empresa": fontes_empresa,
+            "fontes_cartograficas_padrao_total": len(_fontes_cartograficas_padrao()),
+        },
+    )
+
+
+@login_required
+@geologo_required
+def fonte_cartografica_create(request):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    form = FonteCartograficaGeologicaForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        fonte = form.save(commit=False)
+        fonte.empresa = empregado.empresa
+        fonte.criado_por = request.user
+        fonte.save()
+        messages.success(request, "Fonte cartográfica adicionada com sucesso.")
+        return redirect("geologia:mapa_cartografico")
+
+    return render(
+        request,
+        "geologia/fonte_cartografica_form.html",
+        {
+            "empresa_geologia": empregado.empresa,
+            "form": form,
+            "titulo": "Adicionar mapa cartográfico",
+            "subtitulo": "Regista uma nova fonte cartográfica privada da empresa para aparecer no mapa interno da geologia.",
+            "url_cancelar": "geologia:fontes_cartograficas_manage",
+        },
+    )
+
+
+@login_required
+@geologo_required
+def fontes_cartograficas_manage(request):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    fontes_empresa = FonteCartograficaGeologica.objects.filter(empresa=empregado.empresa).order_by("ordem", "nome")
+    return render(
+        request,
+        "geologia/fontes_cartograficas_manage.html",
+        {
+            "empresa_geologia": empregado.empresa,
+            "fontes_empresa": fontes_empresa,
+            "fontes_empresa_preview": [_serializar_fonte_cartografica_modelo(item) for item in fontes_empresa],
+            "total_fontes_ativas": fontes_empresa.filter(ativo=True).count(),
+        },
+    )
+
+
+@login_required
+@geologo_required
+def fonte_cartografica_update(request, pk):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    try:
+        fonte = _obter_fonte_cartografica_empresa(pk=pk, empresa=empregado.empresa)
+    except FonteCartograficaGeologica.DoesNotExist:
+        messages.error(request, "A fonte cartográfica pedida não pertence à tua empresa.")
+        return redirect("geologia:fontes_cartograficas_manage")
+
+    form = FonteCartograficaGeologicaForm(request.POST or None, instance=fonte)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Fonte cartográfica atualizada com sucesso.")
+        return redirect("geologia:fontes_cartograficas_manage")
+
+    return render(
+        request,
+        "geologia/fonte_cartografica_form.html",
+        {
+            "empresa_geologia": empregado.empresa,
+            "form": form,
+            "fonte": fonte,
+            "titulo": "Editar mapa cartográfico",
+            "subtitulo": "Atualiza uma fonte cartográfica privada da tua empresa.",
+            "url_cancelar": "geologia:fontes_cartograficas_manage",
+        },
+    )
+
+
+@login_required
+@geologo_required
+@require_POST
+def fonte_cartografica_toggle(request, pk):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    try:
+        fonte = _obter_fonte_cartografica_empresa(pk=pk, empresa=empregado.empresa)
+    except FonteCartograficaGeologica.DoesNotExist:
+        messages.error(request, "A fonte cartográfica pedida não pertence à tua empresa.")
+        return redirect("geologia:fontes_cartograficas_manage")
+
+    fonte.ativo = not fonte.ativo
+    fonte.save(update_fields=["ativo", "atualizado_em"])
+    messages.success(
+        request,
+        "Fonte cartográfica ativada com sucesso." if fonte.ativo else "Fonte cartográfica desativada com sucesso.",
+    )
+    return redirect("geologia:fontes_cartograficas_manage")
+
+
+@login_required
+@geologo_required
+@require_POST
+def fonte_cartografica_duplicate(request, pk):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    try:
+        fonte = _obter_fonte_cartografica_empresa(pk=pk, empresa=empregado.empresa)
+    except FonteCartograficaGeologica.DoesNotExist:
+        messages.error(request, "A fonte cartográfica pedida não pertence à tua empresa.")
+        return redirect("geologia:fontes_cartograficas_manage")
+
+    copia = FonteCartograficaGeologica(
+        empresa=empregado.empresa,
+        criado_por=request.user,
+        nome=f"{fonte.nome} (cópia)",
+        descricao=fonte.descricao,
+        pais_regiao=fonte.pais_regiao,
+        tipo_servico=fonte.tipo_servico,
+        url_servico=fonte.url_servico,
+        layer_names=fonte.layer_names,
+        attribution=fonte.attribution,
+        formato_imagem=fonte.formato_imagem,
+        transparencia=fonte.transparencia,
+        opacidade=fonte.opacidade,
+        centro_latitude=fonte.centro_latitude,
+        centro_longitude=fonte.centro_longitude,
+        zoom_inicial=fonte.zoom_inicial,
+        visivel_por_defeito=False,
+        ativo=False,
+        ordem=fonte.ordem,
+    )
+    copia.save()
+    messages.success(request, f"Fonte cartográfica duplicada com sucesso: {copia.nome}.")
+    return redirect("geologia:fonte_cartografica_update", pk=copia.pk)
+
+
+@login_required
+@geologo_required
+@require_POST
+def fonte_cartografica_delete(request, pk):
+    empregado = obter_empregado_por_user(request.user)
+    if not empregado or not empregado.empresa_id:
+        messages.error(request, "A tua conta não está ligada a uma empresa para gerir fontes cartográficas.")
+        return redirect("projetos:area_empregado")
+
+    try:
+        fonte = _obter_fonte_cartografica_empresa(pk=pk, empresa=empregado.empresa)
+    except FonteCartograficaGeologica.DoesNotExist:
+        messages.error(request, "A fonte cartográfica pedida não pertence à tua empresa.")
+        return redirect("geologia:fontes_cartograficas_manage")
+
+    nome = fonte.nome
+    fonte.delete()
+    messages.success(request, f"Fonte cartográfica '{nome}' apagada com sucesso.")
+    return redirect("geologia:fontes_cartograficas_manage")
 
 
 @login_required

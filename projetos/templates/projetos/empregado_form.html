@@ -188,6 +188,17 @@
                 </div>
                 {% endif %}
 
+                {% if form.dias_ferias_anuais %}
+                <div>
+                    <label for="id_dias_ferias_anuais" class="block font-semibold mb-1">{% trans "Dias de Férias / Ano" %}</label>
+                    {{ form.dias_ferias_anuais|add_class:"w-full p-2 border rounded" }}
+                    <p class="text-sm text-gray-600 mt-1">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
+                    {% if form.dias_ferias_anuais.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.dias_ferias_anuais.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 {% if form.aplicar_salario_base_funcao %}
                 <div class="md:col-span-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900">
                     <label for="id_aplicar_salario_base_funcao" class="font-semibold inline-flex items-center gap-2">

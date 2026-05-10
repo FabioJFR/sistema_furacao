@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+from decimal import Decimal, ROUND_HALF_UP
 
 from django import forms
 from django.utils import timezone
@@ -77,15 +78,36 @@ def _validar_horarios_turno(form, cleaned_data):
     hora_fim_pausa = cleaned_data.get("hora_fim_pausa")
     hora_fim = cleaned_data.get("hora_fim")
 
-    horarios = [hora_inicio, hora_inicio_pausa, hora_fim_pausa, hora_fim]
-    total_horarios = sum(1 for h in horarios if h is not None)
+    tem_inicio = hora_inicio is not None
+    tem_fim = hora_fim is not None
+    tem_pausa_inicio = hora_inicio_pausa is not None
+    tem_pausa_fim = hora_fim_pausa is not None
 
-    if 0 < total_horarios < 4:
+    if tem_inicio != tem_fim:
         raise forms.ValidationError(
-            "Preencha todos os horários do turno ou deixe todos em branco."
+            "Preencha 'Hora de início' e 'Hora de fim' ou deixe ambos em branco."
         )
 
-    if total_horarios == 4:
+    if tem_pausa_inicio != tem_pausa_fim:
+        raise forms.ValidationError(
+            "Preencha 'Hora de início da pausa' e 'Hora de fim da pausa' ou deixe ambas em branco."
+        )
+
+    if (tem_pausa_inicio or tem_pausa_fim) and not (tem_inicio and tem_fim):
+        raise forms.ValidationError(
+            "Para registar uma pausa, preencha também a hora de início e a hora de fim do turno."
+        )
+
+    if tem_inicio and tem_fim:
+        fim_dt = _hora_apos(hora_inicio, hora_fim)
+        inicio_dt = _juntar_data_hora(hora_inicio)
+        if fim_dt < inicio_dt:
+            form.add_error(
+                "hora_fim",
+                "A hora de fim deve ser posterior à hora de início.",
+            )
+
+    if tem_inicio and tem_fim and tem_pausa_inicio and tem_pausa_fim:
         inicio_dt = _juntar_data_hora(hora_inicio)
         inicio_pausa_dt = _hora_apos(hora_inicio, hora_inicio_pausa)
         fim_pausa_dt = _hora_apos(hora_inicio_pausa, hora_fim_pausa)
@@ -158,7 +180,6 @@ class RegistoDiarioValidacoesMixin:
 
         self._validar_empresa_clean(cleaned_data)
         _validar_relacao_furo_projeto(self, projeto, furo)
-        _validar_horarios_turno(self, cleaned_data)
         _validar_tipo_paragem(self, cleaned_data)
 
 
@@ -448,6 +469,7 @@ class RelatorioTurnoForm(forms.ModelForm):
             "furacoes",
             "operacoes_ocorrencias",
             "polimeros",
+            "bit_novo",
             "polimeros_de",
             "polimeros_ate",
             "notas",
@@ -463,7 +485,7 @@ class RelatorioTurnoForm(forms.ModelForm):
             "estaleiro": forms.TextInput(attrs={"class": "form-control"}),
             "numero_sondagem": forms.TextInput(attrs={"class": "form-control"}),
             "inclinacao": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-            "diametro_furo": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "diametro_furo": forms.TextInput(attrs={"class": "form-control"}),
             "numero_relatorio": forms.TextInput(attrs={"class": "form-control"}),
             "no_inicio": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "no_final": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
@@ -473,6 +495,7 @@ class RelatorioTurnoForm(forms.ModelForm):
             "furacoes": forms.HiddenInput(),
             "operacoes_ocorrencias": forms.HiddenInput(),
             "polimeros": forms.HiddenInput(),
+            "bit_novo": forms.TextInput(attrs={"class": "form-control"}),
             "polimeros_de": forms.TimeInput(attrs={"class": "form-control", "type": "time"}),
             "polimeros_ate": forms.TimeInput(attrs={"class": "form-control", "type": "time"}),
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
@@ -493,6 +516,7 @@ class RelatorioTurnoForm(forms.ModelForm):
             "bomba_injecao": "Bomba injeção",
             "bomba_captacao": "Bomba captação",
             "polimeros": "Polímeros",
+            "bit_novo": "Bit novo",
             "polimeros_de": "De",
             "polimeros_ate": "Até",
             "equipa_turno": "Equipa do turno",
@@ -599,7 +623,6 @@ class RelatorioTurnoForm(forms.ModelForm):
                 ("lavar_furo", "lavar_furo", "lavar_furo_de", "lavar_furo_ate"),
                 ("varas_presas", "varas_presas", "varas_presas_de", "varas_presas_ate"),
                 ("entubamento", "entubamento", "entubamento_de", "entubamento_ate"),
-                ("bit_novo", "bit_novo", "bit_novo_de", "bit_novo_ate"),
                 ("outros", "outros", "outros_de", "outros_ate"),
             ]
             for tipo, campo_flag, campo_de, campo_ate in campos_legado:
@@ -614,6 +637,18 @@ class RelatorioTurnoForm(forms.ModelForm):
                         "tipo": tipo,
                         "de": hora_de.strftime("%H:%M") if hasattr(hora_de, "strftime") else (hora_de or ""),
                         "ate": hora_ate.strftime("%H:%M") if hasattr(hora_ate, "strftime") else (hora_ate or ""),
+                    }
+                )
+            valor_bit_novo = self.initial.get("bit_novo", getattr(self.instance, "bit_novo", None))
+            hora_bit_novo_de = self.initial.get("bit_novo_de", getattr(self.instance, "bit_novo_de", None))
+            hora_bit_novo_ate = self.initial.get("bit_novo_ate", getattr(self.instance, "bit_novo_ate", None))
+            bit_novo_ativo = valor_bit_novo not in (None, "", "nao")
+            if bit_novo_ativo or hora_bit_novo_de or hora_bit_novo_ate:
+                operacoes_iniciais.append(
+                    {
+                        "tipo": "bit_novo",
+                        "de": hora_bit_novo_de.strftime("%H:%M") if hasattr(hora_bit_novo_de, "strftime") else (hora_bit_novo_de or ""),
+                        "ate": hora_bit_novo_ate.strftime("%H:%M") if hasattr(hora_bit_novo_ate, "strftime") else (hora_bit_novo_ate or ""),
                     }
                 )
         self.operacoes_ocorrencias_lista_inicial = []
@@ -748,6 +783,7 @@ class RelatorioTurnoForm(forms.ModelForm):
                 "campos": [
                     self["operacoes_ocorrencias"],
                     self["polimeros"],
+                    self["bit_novo"],
                     self["notas"],
                 ],
                 "grid_classes": "grid grid-cols-1 md:grid-cols-3 gap-4",
@@ -760,6 +796,27 @@ class RelatorioTurnoForm(forms.ModelForm):
                 ],
             },
         ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        avanco_turno = cleaned_data.get("avanco_turno")
+        testemunho_recuperado = cleaned_data.get("testemunho_recuperado")
+
+        if avanco_turno not in (None, "") and testemunho_recuperado not in (None, ""):
+            try:
+                avanco_decimal = Decimal(str(avanco_turno))
+                testemunho_decimal = Decimal(str(testemunho_recuperado))
+            except Exception:
+                return cleaned_data
+
+            if avanco_decimal > 0:
+                percentagem = (testemunho_decimal / avanco_decimal) * Decimal("100")
+                cleaned_data["percentagem_recuperacao"] = percentagem.quantize(
+                    Decimal("0.01"),
+                    rounding=ROUND_HALF_UP,
+                )
+
+        return cleaned_data
 
     def clean_polimeros(self):
         valor = self.cleaned_data.get("polimeros")

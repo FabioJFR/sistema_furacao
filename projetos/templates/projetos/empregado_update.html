@@ -60,6 +60,15 @@
                 {% endif %}
             </div>
 
+            <div>
+                <label for="id_dias_ferias_anuais" class="block font-semibold mb-1">{% trans "Dias de Férias / Ano" %}</label>
+                {{ form.dias_ferias_anuais }}
+                <p class="text-sm mt-1">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
+                {% if form.dias_ferias_anuais.errors %}
+                    <div class="eu-errors">{{ form.dias_ferias_anuais.errors }}</div>
+                {% endif %}
+            </div>
+
             <div class="p-3 border border-amber-200 rounded bg-amber-50 text-amber-900">
                 <label for="id_aplicar_salario_base_funcao" class="font-semibold">
                     {{ form.aplicar_salario_base_funcao }} {{ form.aplicar_salario_base_funcao.label }}

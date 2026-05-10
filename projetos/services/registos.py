@@ -1,5 +1,6 @@
 from datetime import date, datetime, time, timedelta
 import csv
+from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 import zipfile
 from collections import Counter
@@ -31,9 +32,14 @@ RELATORIO_TURNO_CAMPOS_SIM_NAO = {
     "lavar_furo",
     "varas_presas",
     "entubamento",
-    "bit_novo",
 }
 RELATORIO_TURNO_OCORRENCIAS_LABELS = {
+    "furacao": "Furação",
+    "viagem": "Viagem",
+    "preparar_material": "Preparar material",
+    "palestra_seguranca": "Palestra segurança",
+    "formacao": "Formação",
+    "trabalho_ajudante": "Trabalho de ajudante",
     "manobra": "Manobra",
     "reaming": "Reaming",
     "avaria": "Avaria",
@@ -137,7 +143,6 @@ def _obter_operacoes_ocorrencias_relatorio(relatorio):
         ("lavar_furo", "lavar_furo", "lavar_furo_de", "lavar_furo_ate"),
         ("varas_presas", "varas_presas", "varas_presas_de", "varas_presas_ate"),
         ("entubamento", "entubamento", "entubamento_de", "entubamento_ate"),
-        ("bit_novo", "bit_novo", "bit_novo_de", "bit_novo_ate"),
         ("outros", "outros", "outros_de", "outros_ate"),
     ):
         valor_flag = getattr(relatorio, campo_flag, None)
@@ -151,6 +156,18 @@ def _obter_operacoes_ocorrencias_relatorio(relatorio):
                 "tipo": tipo,
                 "de": hora_de.strftime("%H:%M") if hora_de else "",
                 "ate": hora_ate.strftime("%H:%M") if hora_ate else "",
+            }
+        )
+    valor_bit_novo = getattr(relatorio, "bit_novo", None)
+    hora_bit_novo_de = getattr(relatorio, "bit_novo_de", None)
+    hora_bit_novo_ate = getattr(relatorio, "bit_novo_ate", None)
+    bit_novo_ativo = valor_bit_novo not in (None, "", "nao")
+    if bit_novo_ativo or hora_bit_novo_de or hora_bit_novo_ate:
+        operacoes_legado.append(
+            {
+                "tipo": "bit_novo",
+                "de": hora_bit_novo_de.strftime("%H:%M") if hora_bit_novo_de else "",
+                "ate": hora_bit_novo_ate.strftime("%H:%M") if hora_bit_novo_ate else "",
             }
         )
     return operacoes_legado
@@ -254,8 +271,7 @@ RELATORIO_TURNO_SECOES_DETALHE = [
         "campos": [
             ("operacoes_ocorrencias", "Ocorrências do turno"),
             ("polimeros", "Polímeros"),
-            ("polimeros_de", "Polímeros de"),
-            ("polimeros_ate", "Polímeros até"),
+            ("bit_novo", "Bit novo"),
             ("notas", "Notas"),
         ],
     },
@@ -361,6 +377,29 @@ def obter_relatorio_turno_contexto(relatorio):
                     }
                 )
                 continue
+            if atributo == "polimeros":
+                polimeros = getattr(relatorio, "polimeros", []) or []
+                valor_polimeros = _fmt_valor_relatorio(polimeros)
+                hora_de = getattr(relatorio, "polimeros_de", None)
+                hora_ate = getattr(relatorio, "polimeros_ate", None)
+                if hora_de or hora_ate:
+                    horario = " - ".join(
+                        parte for parte in [
+                            _fmt_valor_relatorio(hora_de) if hora_de else "",
+                            _fmt_valor_relatorio(hora_ate) if hora_ate else "",
+                        ] if parte
+                    )
+                    if valor_polimeros == "-":
+                        valor_polimeros = horario or "-"
+                    elif horario:
+                        valor_polimeros = f"{valor_polimeros}\nHorário: {horario}"
+                linhas.append(
+                    {
+                        "label": label,
+                        "valor": valor_polimeros,
+                    }
+                )
+                continue
             if atributo == "equipa_turno":
                 equipa = _obter_equipa_turno_relatorio(relatorio)
                 linhas.append(
@@ -374,6 +413,8 @@ def obter_relatorio_turno_contexto(relatorio):
             valor = getattr(relatorio, atributo)
             if atributo in RELATORIO_TURNO_CAMPOS_SIM_NAO and valor:
                 valor = getattr(relatorio, f"get_{atributo}_display")()
+            if atributo == "bit_novo" and valor == "nao":
+                valor = ""
             if atributo in {"furacao_descricao", "notas"} and valor:
                 valor = valor.strip()
             linhas.append(
@@ -904,19 +945,22 @@ def _guardar_relatorio_turno(*, relatorio_form, registo):
 
     relatorio = relatorio_form.save(commit=False)
 
+    def _decimal_2(valor):
+        if valor in (None, ""):
+            return None
+        return Decimal(str(valor)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     furacoes = getattr(relatorio, "furacoes", []) or []
     if furacoes:
         primeira = furacoes[0]
         ultima = furacoes[-1]
-        relatorio.furacao_inicio = primeira.get("inicio")
-        relatorio.furacao_fim = ultima.get("fim")
-        relatorio.furacao_avanco = round(
+        relatorio.furacao_inicio = _decimal_2(primeira.get("inicio"))
+        relatorio.furacao_fim = _decimal_2(ultima.get("fim"))
+        relatorio.furacao_avanco = _decimal_2(
             sum(item.get("avanco") or 0 for item in furacoes if isinstance(item, dict)),
-            2,
         )
-        relatorio.furacao_recuperacao = round(
+        relatorio.furacao_recuperacao = _decimal_2(
             sum(item.get("recuperacao") or 0 for item in furacoes if isinstance(item, dict)),
-            2,
         )
         rochas = [str(item.get("rocha")).strip() for item in furacoes if isinstance(item, dict) and str(item.get("rocha") or "").strip()]
         descricoes = [str(item.get("descricao")).strip() for item in furacoes if isinstance(item, dict) and str(item.get("descricao") or "").strip()]
@@ -941,11 +985,12 @@ def _guardar_relatorio_turno(*, relatorio_form, registo):
         "lavar_furo",
         "varas_presas",
         "entubamento",
-        "bit_novo",
     ):
         setattr(relatorio, campo, "nao")
         setattr(relatorio, f"{campo}_de" if campo != "relatorio_horas_paragem" else "horas_paragem_de", None)
         setattr(relatorio, f"{campo}_ate" if campo != "relatorio_horas_paragem" else "horas_paragem_ate", None)
+    relatorio.bit_novo_de = None
+    relatorio.bit_novo_ate = None
     relatorio.outros = ""
     relatorio.outros_de = None
     relatorio.outros_ate = None
@@ -974,6 +1019,12 @@ def _guardar_relatorio_turno(*, relatorio_form, registo):
                 relatorio.outros_de = hora_de
             if relatorio.outros_ate is None:
                 relatorio.outros_ate = hora_ate
+            continue
+        if tipo == "bit_novo":
+            if relatorio.bit_novo_de is None:
+                relatorio.bit_novo_de = hora_de
+            if relatorio.bit_novo_ate is None:
+                relatorio.bit_novo_ate = hora_ate
             continue
         if tipo in RELATORIO_TURNO_CAMPOS_SIM_NAO:
             setattr(relatorio, tipo, "sim")
@@ -1022,8 +1073,13 @@ def _guardar_relatorio_turno(*, relatorio_form, registo):
     if not relatorio.relatorio_horas_paragem and registo.horas_paragem:
         relatorio.relatorio_horas_paragem = "sim"
 
-    relatorio.save()
-    return relatorio
+    for campo in RELATORIO_TURNO_CAMPOS_MODELO:
+        setattr(registo, campo, getattr(relatorio, campo))
+
+    registo.empregado = registo.empregado or getattr(relatorio, "empregado", None) or registo.empregado
+    registo.empresa = registo.empresa or getattr(relatorio, "empresa", None) or registo.empresa
+    registo.save(update_fields=RELATORIO_TURNO_CAMPOS_MODELO + ["empregado", "empresa"])
+    return registo
 
 
 def _relatorio_form_tem_conteudo(relatorio_form):
@@ -1072,29 +1128,39 @@ def _preparar_registo_para_guardar(registo, empregado):
 
 
 def _atualizar_resumo_furo_com_registo(furo, registo):
-    furo.profundidade_atual = registo.profundidade_furo_depois
+    profundidade_atual = registo.profundidade_furo_depois
 
     profundidade_maxima_atual = furo.profundidade_maxima_atingida or 0.0
-    if profundidade_maxima_atual < registo.profundidade_furo_depois:
-        furo.profundidade_maxima_atingida = registo.profundidade_furo_depois
+    profundidade_maxima_atingida = profundidade_maxima_atual
+    if profundidade_atual is not None and profundidade_maxima_atual < profundidade_atual:
+        profundidade_maxima_atingida = profundidade_atual
 
     total_horas_atual = furo.total_horas or timedelta()
     horas_registo = registo.horas_trabalhadas_furo or timedelta()
-    furo.total_horas = total_horas_atual + horas_registo
+    total_horas = total_horas_atual + horas_registo
 
     data_registo = registo.data or (registo.criado_em.date() if registo.criado_em else None)
+    data_inicio_operacao = furo.data_inicio_operacao
     if data_registo:
-        if not furo.data_inicio_operacao or data_registo < furo.data_inicio_operacao:
-            furo.data_inicio_operacao = data_registo
+        if not data_inicio_operacao or data_registo < data_inicio_operacao:
+            data_inicio_operacao = data_registo
 
-    furo.save(
-        update_fields=[
-            "profundidade_atual",
-            "profundidade_maxima_atingida",
-            "total_horas",
-            "data_inicio_operacao",
-        ]
-    )
+    # Esta atualização é meramente operacional e não deve falhar por validações
+    # antigas de outros campos do furo que o registo não alterou.
+    update_data = {
+        "profundidade_maxima_atingida": profundidade_maxima_atingida,
+        "total_horas": total_horas,
+        "data_inicio_operacao": data_inicio_operacao,
+    }
+    if profundidade_atual is not None:
+        update_data["profundidade_atual"] = profundidade_atual
+
+    Furo.objects.filter(pk=furo.pk).update(**update_data)
+
+    furo.profundidade_atual = update_data.get("profundidade_atual", furo.profundidade_atual)
+    furo.profundidade_maxima_atingida = profundidade_maxima_atingida
+    furo.total_horas = total_horas
+    furo.data_inicio_operacao = data_inicio_operacao
 
 
 
@@ -1112,6 +1178,8 @@ def _recalcular_dependencias_registo(empregado, furo_antigo=None, furo_novo=None
 @transaction.atomic
 def criar_registo_diario(form, empregado):
     registo = form.save(commit=False)
+    registo.empregado = empregado
+    registo.empresa = empregado.empresa
     furo = _preparar_registo_para_guardar(registo, empregado)
 
     registo.save()

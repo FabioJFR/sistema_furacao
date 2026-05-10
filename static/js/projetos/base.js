@@ -1,5 +1,6 @@
 (() => {
     const THEME_STORAGE_KEY = "sf_theme_palette";
+    const AJUDA_CONTEXTUAL_STORAGE_PREFIX = "sf_ajuda_contextual_dismissed:";
     const AVAILABLE_THEMES = ["industrial-blue", "earth-drill", "graphite-tech", "sandstone"];
 
     function applyTheme(themeName) {
@@ -79,6 +80,36 @@
         window.setTimeout(() => {
             box.remove();
         }, 300);
+    }
+
+    function setupAjudaContextual() {
+        const box = document.querySelector("[data-ajuda-contextual]");
+        if (!box) {
+            return;
+        }
+
+        const key = box.getAttribute("data-ajuda-contextual-key") || window.location.pathname;
+        const storageKey = `${AJUDA_CONTEXTUAL_STORAGE_PREFIX}${key}`;
+        const closeButton = box.querySelector("[data-ajuda-contextual-close]");
+
+        if (window.sessionStorage.getItem(storageKey) === "1") {
+            box.remove();
+            return;
+        }
+
+        if (!closeButton) {
+            return;
+        }
+
+        closeButton.addEventListener("click", () => {
+            closeButton.blur();
+            window.sessionStorage.setItem(storageKey, "1");
+            box.style.opacity = "0";
+            box.style.transform = "translateY(-10px)";
+            window.setTimeout(() => {
+                box.remove();
+            }, 250);
+        });
     }
 
     function closeAllDropdowns() {
@@ -191,6 +222,23 @@
             return;
         }
 
+        const closeAjudaContextualButton = event.target.closest("[data-ajuda-contextual-close]");
+        if (closeAjudaContextualButton) {
+            event.preventDefault();
+            const box = closeAjudaContextualButton.closest("[data-ajuda-contextual]");
+            if (box) {
+                const key = box.getAttribute("data-ajuda-contextual-key") || window.location.pathname;
+                const storageKey = `${AJUDA_CONTEXTUAL_STORAGE_PREFIX}${key}`;
+                window.sessionStorage.setItem(storageKey, "1");
+                box.style.opacity = "0";
+                box.style.transform = "translateY(-10px)";
+                window.setTimeout(() => {
+                    box.remove();
+                }, 250);
+            }
+            return;
+        }
+
         const historyBackButton = event.target.closest("[data-history-back]");
         if (historyBackButton) {
             event.preventDefault();
@@ -243,4 +291,5 @@
 
     setupThemePicker();
     setupThemePresets();
+    setupAjudaContextual();
 })();

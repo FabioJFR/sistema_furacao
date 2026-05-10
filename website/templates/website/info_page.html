@@ -1,0 +1,98 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'pt' }}">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5DHRKQ2PR"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Z5DHRKQ2PR');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | {% trans "Sistema de Furação" %}</title>
+    <link rel="stylesheet" href="{% static 'css/website/home.css' %}">
+</head>
+<body>
+    <div class="bg-decor"></div>
+    <div class="container home-page">
+        <header class="topbar">
+            <a href="{% url 'website:home' %}" class="brand">
+                <img src="{% static 'img/sistema_furacao_logo.png' %}" alt="{% trans 'Logo Sistema de Furação' %}" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-title">{% trans "Sistema de Furação" %}</span>
+                    <span class="brand-subtitle">{% trans "Plataforma para Diamond Drilling" %}</span>
+                </div>
+            </a>
+
+            <nav class="public-nav" aria-label="{% trans 'Navegação pública' %}">
+                {% for link in quick_links %}
+                <a href="{% url link.url_name %}" class="public-nav__link">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+
+            <div class="topbar-actions">
+                <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
+                <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
+            </div>
+        </header>
+
+        <section class="info-hero">
+            <div class="info-hero__eyebrow">{{ eyebrow }}</div>
+            <h1 class="info-hero__title">{{ title }}</h1>
+            <p class="info-hero__intro">{{ intro }}</p>
+            {% if meta_notice %}
+            <p class="muted" style="margin-top: 0.75rem;">{{ meta_notice }}</p>
+            {% endif %}
+        </section>
+
+        <section class="info-grid">
+            {% for section in sections %}
+            <article class="info-card">
+                <h2>{{ section.title }}</h2>
+                {% for paragraph in section.paragraphs %}
+                <p class="muted">{{ paragraph }}</p>
+                {% endfor %}
+                {% if section.links %}
+                <div class="info-card__links">
+                    {% for link in section.links %}
+                        {% if link.url_name %}
+                        <a href="{% url link.url_name %}" class="btn btn-light">{{ link.label }}</a>
+                        {% else %}
+                        <a href="{{ link.url }}" class="btn btn-light" {% if link.external %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ link.label }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="visitor-cta">
+            <div>
+                <div class="visitor-cta__eyebrow">{% trans "Visitantes" %}</div>
+                <h2>{% trans "Queres conhecer a plataforma com mais detalhe?" %}</h2>
+                <p class="muted">{% trans "Explora os planos, cria conta ou fala connosco antes de avançar." %}</p>
+            </div>
+            <div class="actions">
+                <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
+                <a href="{% url 'website:registo' %}" class="btn btn-primary">{% trans "Criar conta" %}</a>
+            </div>
+        </section>
+
+        <footer class="footer footer-rich">
+            <div class="footer-links">
+                <a href="{% url 'website:home' %}">{% trans "Home" %}</a>
+                <a href="{% url 'website:sobre' %}">{% trans "Sobre" %}</a>
+                <a href="{% url 'website:contactos' %}">{% trans "Contactos" %}</a>
+                <a href="{% url 'website:termos_condicoes' %}">{% trans "Termos & Condições" %}</a>
+                <a href="{% url 'website:politica_privacidade' %}">{% trans "Política de Privacidade" %}</a>
+            </div>
+            <div class="footer-meta">
+                {% trans "© 2026 Sistema de Furação · Plataforma para gestão de operações de diamond drilling" %}
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

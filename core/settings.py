@@ -40,11 +40,24 @@ def env_list(name, default=""):
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def secret_key_looks_unsafe(value: str) -> bool:
+    return (
+        len(value) < 50
+        or len(set(value)) < 5
+        or value.startswith("django-insecure-")
+    )
+
+
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY em falta. Define a variável no ambiente/.env.")
 
 DEBUG = env_bool("DJANGO_DEBUG", False)
+
+if not DEBUG and secret_key_looks_unsafe(SECRET_KEY):
+    raise RuntimeError(
+        "DJANGO_SECRET_KEY insegura para produção. Define uma chave longa, aleatória e forte no ambiente/.env."
+    )
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
@@ -84,6 +97,7 @@ MIDDLEWARE = [
     'projetos.middleware.CurrentUserMiddleware',
     'projetos.middleware.UserLanguageMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'core.security.SensitivePostRateLimitMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -178,11 +192,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = '/login/'  # website app
 LOGIN_REDIRECT_URL = '/app/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_RATE_LIMIT_MAX_ATTEMPTS = int(env("LOGIN_RATE_LIMIT_MAX_ATTEMPTS", "7"))
+LOGIN_RATE_LIMIT_WINDOW_SECONDS = int(env("LOGIN_RATE_LIMIT_WINDOW_SECONDS", "300"))
+PASSWORD_RESET_RATE_LIMIT_MAX_ATTEMPTS = int(
+    env("PASSWORD_RESET_RATE_LIMIT_MAX_ATTEMPTS", "5")
+)
+PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS = int(
+    env("PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS", "600")
+)
 
 # Upload Security
 UPLOAD_VIRUS_SCAN_ENABLED = env_bool("UPLOAD_VIRUS_SCAN_ENABLED", False)
 UPLOAD_VIRUS_SCAN_COMMAND = env("UPLOAD_VIRUS_SCAN_COMMAND", "clamscan")
 UPLOAD_VIRUS_SCAN_TIMEOUT_SECONDS = int(env("UPLOAD_VIRUS_SCAN_TIMEOUT_SECONDS", "15"))
+UPLOAD_VIRUS_SCAN_FAIL_CLOSED = env_bool(
+    "UPLOAD_VIRUS_SCAN_FAIL_CLOSED", not DEBUG
+)
 UPLOAD_MAX_IMAGE_MB = int(env("UPLOAD_MAX_IMAGE_MB", "8"))
 UPLOAD_MAX_FILE_MB = int(env("UPLOAD_MAX_FILE_MB", "25"))
 UPLOAD_IMAGE_SANITIZE_ENABLED = env_bool("UPLOAD_IMAGE_SANITIZE_ENABLED", True)
@@ -225,10 +250,17 @@ PAYPAL_WEBHOOK_ID = env("PAYPAL_WEBHOOK_ID", "")
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
 SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
 CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
-SECURE_HSTS_SECONDS = int(env("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_SECONDS = int(
+    env("DJANGO_SECURE_HSTS_SECONDS", "0" if DEBUG else "31536000")
+)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
 SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
 SECURE_REFERRER_POLICY = env("DJANGO_SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin")
+SECURE_CONTENT_TYPE_NOSNIFF = env_bool("DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", True)
+SECURE_CROSS_ORIGIN_OPENER_POLICY = env(
+    "DJANGO_SECURE_CROSS_ORIGIN_OPENER_POLICY", "same-origin"
+)
+X_FRAME_OPTIONS = env("DJANGO_X_FRAME_OPTIONS", "DENY")
 if env_bool("DJANGO_USE_X_FORWARDED_PROTO", not DEBUG):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = env_bool("DJANGO_USE_X_FORWARDED_HOST", not DEBUG)

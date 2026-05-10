@@ -1,0 +1,283 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Calendário de Turnos" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto p-6 space-y-6">
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">{% trans "Planeamento Pessoal" %}</div>
+                <h1 class="mt-2 text-3xl font-black text-slate-900">{% trans "Calendário de Turnos" %}</h1>
+                <p class="mt-3 max-w-3xl text-sm text-slate-600">
+                    {% trans "Consulta os teus dias com turnos planeados ou já registados, seleciona várias datas e submete pedidos de férias para aprovação da empresa." %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'projetos:registo_diario_create' %}" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                    ➕ {% trans "Novo Registo" %}
+                </a>
+                <a href="{% url 'projetos:registo_diario_list' %}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    📋 {% trans "Meus Registos" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Ano" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ ano }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Dias Trabalhados" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dias_trabalhados }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Dias Planeados" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dias_planeados }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Férias Anuais" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dias_ferias_anuais }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Férias Gozadas" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dias_ferias_gozados }}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Férias Disponíveis" %}</div>
+            <div class="mt-2 text-3xl font-black text-slate-900">{{ dias_ferias_disponiveis }}</div>
+            <div class="mt-1 text-xs text-slate-500">{% trans "Pendentes / Aprovadas" %}: {{ ferias_pendentes }} / {{ ferias_aprovadas }}</div>
+        </div>
+    </div>
+
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-xl font-black text-slate-900">{% trans "Ano de trabalho" %}</h2>
+                <p class="mt-1 text-sm text-slate-500">{% trans "Navega pelo ano e escolhe os dias de férias diretamente no calendário." %}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="?ano={{ ano_anterior }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{% trans "Ano anterior" %}</a>
+                <span class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">{{ ano }}</span>
+                <a href="?ano={{ ano_seguinte }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{% trans "Ano seguinte" %}</a>
+            </div>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">{% trans "Registo criado" %}</span>
+            <span class="rounded-full bg-sky-100 px-3 py-1 text-sky-700">{% trans "Turno planeado" %}</span>
+            <span class="rounded-full bg-amber-100 px-3 py-1 text-amber-700">{% trans "Férias pendentes" %}</span>
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">{% trans "Férias aprovadas" %}</span>
+            <span class="rounded-full bg-rose-100 px-3 py-1 text-rose-700">{% trans "Férias rejeitadas" %}</span>
+            <span class="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-violet-700">{% trans "Selecionado" %}</span>
+        </div>
+
+        <div class="mt-6 grid gap-5 xl:grid-cols-3">
+            {% for mes in meses %}
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-lg font-black text-slate-900">{{ mes.primeiro_dia|date:"F" }}</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ ano }}</span>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                    {% for label in dias_semana_labels %}
+                    <div class="py-1">{{ label }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-2 space-y-1">
+                    {% for semana in mes.semanas %}
+                    <div class="grid grid-cols-7 gap-1">
+                        {% for dia in semana %}
+                        <button
+                            type="button"
+                            class="calendar-day rounded-xl border px-2 py-2 text-left text-xs transition
+                                {% if not dia.no_mes %}border-transparent bg-transparent text-slate-300 cursor-default
+                                {% elif dia.estado_ferias == 'aprovado' %}border-emerald-200 bg-emerald-100 text-emerald-800
+                                {% elif dia.estado_ferias == 'pendente' %}border-amber-200 bg-amber-100 text-amber-800
+                                {% elif dia.estado_ferias == 'rejeitado' %}border-rose-200 bg-rose-100 text-rose-800
+                                {% elif dia.worked %}border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100
+                                {% elif dia.planned %}border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100
+                                {% elif dia.selectable %}border-slate-200 bg-white text-slate-700 hover:bg-violet-50 hover:border-violet-200
+                                {% else %}border-slate-100 bg-slate-100 text-slate-400 cursor-not-allowed{% endif %}
+                                {% if dia.is_today %} ring-2 ring-violet-400{% endif %}"
+                            data-date="{{ dia.iso }}"
+                            data-selectable="{% if dia.selectable %}true{% else %}false{% endif %}"
+                            {% if not dia.selectable %}disabled{% endif %}
+                        >
+                            <div class="font-black">{{ dia.dia }}</div>
+                            {% if dia.no_mes %}
+                                <div class="mt-1 truncate text-[10px]">
+                                    {{ dia.estado_texto|default:"-" }}
+                                </div>
+                            {% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-black text-slate-900">{% trans "Pedir férias" %}</h2>
+            <p class="mt-2 text-sm text-slate-500">
+                {% trans "Seleciona um ou vários dias no calendário e submete o pedido. Cada dia fica pendente até a empresa aprovar ou rejeitar." %}
+            </p>
+
+            <form method="post" class="mt-5 space-y-4">
+                {% csrf_token %}
+                {{ form.ano }}
+                {{ form.datas_selecionadas }}
+
+                {% if form.non_field_errors %}
+                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="rounded-2xl border border-violet-200 bg-violet-50 p-4">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">{% trans "Dias selecionados" %}</div>
+                    <div id="ferias-selected-count" class="mt-2 text-3xl font-black text-slate-900">0</div>
+                    <div id="ferias-selected-preview" class="mt-2 text-sm text-slate-600">{% trans "Nenhum dia selecionado." %}</div>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700" for="{{ form.motivo.id_for_label }}">{% trans "Motivo" %}</label>
+                    {{ form.motivo }}
+                    {% if form.motivo.errors %}
+                    <div class="mt-1 text-sm text-rose-600">{{ form.motivo.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700" for="{{ form.notas.id_for_label }}">{% trans "Notas" %}</label>
+                    {{ form.notas }}
+                    {% if form.notas.errors %}
+                    <div class="mt-1 text-sm text-rose-600">{{ form.notas.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                        {% trans "Submeter pedido de férias" %}
+                    </button>
+                    <button type="button" id="ferias-clear-selection" class="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        {% trans "Limpar seleção" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="space-y-6">
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-xl font-black text-slate-900">{% trans "Últimos pedidos de férias" %}</h2>
+                <div class="mt-4 space-y-3">
+                    {% for pedido in pedidos_ferias %}
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="font-semibold text-slate-900">{{ pedido.data_inicio|date:"d/m/Y" }}</div>
+                            <span class="rounded-full px-3 py-1 text-xs font-bold
+                                {% if pedido.estado == 'aprovado' %}bg-emerald-100 text-emerald-700
+                                {% elif pedido.estado == 'pendente' %}bg-amber-100 text-amber-700
+                                {% else %}bg-rose-100 text-rose-700{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </div>
+                        {% if pedido.motivo %}
+                        <div class="mt-2 text-sm text-slate-700">{{ pedido.motivo }}</div>
+                        {% endif %}
+                        {% if pedido.notas %}
+                        <div class="mt-1 text-xs text-slate-500">{{ pedido.notas }}</div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+                        {% trans "Ainda não tens pedidos de férias registados neste ano." %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-black text-slate-900">{% trans "Como funciona" %}</h2>
+                <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                    <li>{% trans "1. Consulta os dias já trabalhados ou planeados." %}</li>
+                    <li>{% trans "2. Seleciona um ou vários dias futuros no calendário." %}</li>
+                    <li>{% trans "3. Submete o pedido de férias." %}</li>
+                    <li>{% trans "4. A empresa vê o pedido em RH & Assiduidade e aprova ou rejeita." %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const hiddenInput = document.getElementById("id_datas_selecionadas");
+    const countEl = document.getElementById("ferias-selected-count");
+    const previewEl = document.getElementById("ferias-selected-preview");
+    const clearBtn = document.getElementById("ferias-clear-selection");
+    if (!hiddenInput || !countEl || !previewEl || !clearBtn) return;
+
+    const initialSelected = hiddenInput.value
+        ? hiddenInput.value.split(",").map(v => v.trim()).filter(Boolean)
+        : [];
+    const selected = new Set(initialSelected);
+    const buttons = Array.from(document.querySelectorAll(".calendar-day[data-selectable='true']"));
+
+    function formatDate(value) {
+        const [y, m, d] = value.split("-");
+        return `${d}/${m}/${y}`;
+    }
+
+    function syncUi() {
+        buttons.forEach((btn) => {
+            const value = btn.dataset.date;
+            if (selected.has(value)) {
+                btn.classList.add("ring-2", "ring-violet-500", "bg-violet-100", "border-violet-300", "text-violet-900");
+            } else {
+                btn.classList.remove("ring-2", "ring-violet-500", "bg-violet-100", "border-violet-300", "text-violet-900");
+            }
+        });
+
+        const ordered = Array.from(selected).sort();
+        hiddenInput.value = ordered.join(",");
+        countEl.textContent = String(ordered.length);
+        previewEl.textContent = ordered.length
+            ? ordered.map(formatDate).join(", ")
+            : "Nenhum dia selecionado.";
+    }
+
+    buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const value = btn.dataset.date;
+            if (selected.has(value)) {
+                selected.delete(value);
+            } else {
+                selected.add(value);
+            }
+            syncUi();
+        });
+    });
+
+    clearBtn.addEventListener("click", () => {
+        selected.clear();
+        syncUi();
+    });
+
+    syncUi();
+})();
+</script>
+{% endblock %}

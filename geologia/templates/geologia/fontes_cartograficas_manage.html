@@ -1,0 +1,267 @@
+{% extends "projetos/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Gerir Mapas da Empresa" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{% trans "Gerir mapas da empresa" %}</h1>
+            <p class="text-gray-600 mt-1">{% trans "As fontes criadas aqui ficam privadas à tua empresa e podem ser ativadas, editadas ou removidas a qualquer momento." %}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'geologia:mapa_cartografico' %}" class="px-4 py-2 rounded border border-gray-300 text-gray-700 font-semibold">{% trans "Voltar ao mapa" %}</a>
+            <a href="{% url 'geologia:fonte_cartografica_create' %}" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">{% trans "Adicionar mapa" %}</a>
+        </div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="rounded-xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm">
+            <p class="text-sm font-semibold text-emerald-950">{% trans "Fontes da empresa" %}</p>
+            <p class="text-3xl font-bold text-emerald-900 mt-2">{{ fontes_empresa|length }}</p>
+        </article>
+        <article class="rounded-xl border border-sky-100 bg-sky-50 p-5 shadow-sm">
+            <p class="text-sm font-semibold text-sky-950">{% trans "Ativas no catálogo" %}</p>
+            <p class="text-3xl font-bold text-sky-900 mt-2">{{ total_fontes_ativas }}</p>
+        </article>
+        <article class="rounded-xl border border-amber-100 bg-amber-50 p-5 shadow-sm">
+            <p class="text-sm font-semibold text-amber-950">{% trans "Privacidade" %}</p>
+            <p class="text-sm text-amber-900 mt-2">{% trans "Estas fontes só aparecem para utilizadores da tua empresa." %}</p>
+        </article>
+    </section>
+
+    <section class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        {{ fontes_empresa_preview|json_script:"fontes-cartograficas-empresa-preview" }}
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">{% trans "Catálogo privado da empresa" %}</h2>
+        </div>
+        {% if fontes_empresa %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">{% trans "Nome" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Região" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Tipo" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ordem" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
+                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in fontes_empresa %}
+                    <tr class="border-t border-gray-100 align-top">
+                        <td class="px-4 py-3">
+                            <div class="font-semibold text-gray-900">{{ item.nome }}</div>
+                            <div class="text-xs text-gray-500 mt-1">{{ item.descricao|default:"Sem descrição." }}</div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.pais_regiao|default:"-" }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.get_tipo_servico_display }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ item.ordem }}</td>
+                        <td class="px-4 py-3">
+                            {% if item.ativo %}
+                            <span class="inline-flex rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">{% trans "Ativo" %}</span>
+                            {% else %}
+                            <span class="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{% trans "Desativado" %}</span>
+                            {% endif %}
+                            {% if item.visivel_por_defeito %}
+                            <div class="mt-2 text-xs text-sky-700">{% trans "Visível por defeito" %}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    class="px-3 py-2 rounded border border-indigo-300 text-indigo-800 font-semibold"
+                                    data-preview-source-id="{{ item.pk }}"
+                                >
+                                    {% trans "Pré-visualizar" %}
+                                </button>
+                                <a href="{% url 'geologia:fonte_cartografica_update' item.pk %}" class="px-3 py-2 rounded border border-sky-300 text-sky-800 font-semibold">{% trans "Editar" %}</a>
+                                <form method="post" action="{% url 'geologia:fonte_cartografica_duplicate' item.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-2 rounded border border-violet-300 text-violet-800 font-semibold">{% trans "Duplicar" %}</button>
+                                </form>
+                                <form method="post" action="{% url 'geologia:fonte_cartografica_toggle' item.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-2 rounded border border-amber-300 text-amber-800 font-semibold">
+                                        {% if item.ativo %}{% trans "Desativar" %}{% else %}{% trans "Ativar" %}{% endif %}
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'geologia:fonte_cartografica_delete' item.pk %}" onsubmit="return confirm('{% trans "Queres mesmo apagar esta fonte cartográfica?" %}');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-2 rounded border border-rose-300 text-rose-700 font-semibold">{% trans "Apagar" %}</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-5 py-8 text-sm text-gray-500">
+            {% trans "Ainda não existem fontes cartográficas privadas para esta empresa." %}
+        </div>
+        {% endif %}
+    </section>
+
+    <div id="fontes-preview-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-950/60" data-preview-close></div>
+        <div class="relative mx-auto mt-10 w-[min(1000px,calc(100%-2rem))] rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
+                <div>
+                    <h2 id="fontes-preview-title" class="text-xl font-semibold text-gray-900">{% trans "Pré-visualização do mapa" %}</h2>
+                    <p id="fontes-preview-meta" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                <button type="button" class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700" data-preview-close>{% trans "Fechar" %}</button>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-0">
+                <div class="p-4">
+                    <div id="fontes-preview-map" class="w-full rounded-xl border border-gray-200" style="height: 520px;"></div>
+                </div>
+                <aside class="border-l border-gray-100 p-5 space-y-4 bg-slate-50/70">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Descrição" %}</p>
+                        <p id="fontes-preview-description" class="text-sm text-slate-700 mt-2"></p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 text-sm">
+                        <div class="rounded-lg border border-slate-200 bg-white p-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Tipo" %}</p>
+                            <p id="fontes-preview-type" class="mt-2 text-slate-800 font-semibold"></p>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-white p-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Layers / detalhe" %}</p>
+                            <p id="fontes-preview-layers" class="mt-2 text-slate-800 font-semibold"></p>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-white p-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Serviço" %}</p>
+                            <p id="fontes-preview-url" class="mt-2 break-all text-slate-700 text-xs"></p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+(() => {
+  const dataNode = document.getElementById("fontes-cartograficas-empresa-preview");
+  const modal = document.getElementById("fontes-preview-modal");
+  const mapEl = document.getElementById("fontes-preview-map");
+  if (!dataNode || !modal || !mapEl) return;
+
+  let fontes = [];
+  try {
+    fontes = JSON.parse(dataNode.textContent || "[]");
+  } catch (e) {
+    fontes = [];
+  }
+
+  const openButtons = Array.from(document.querySelectorAll("[data-preview-source-id]"));
+  const closeButtons = Array.from(document.querySelectorAll("[data-preview-close]"));
+  const titleEl = document.getElementById("fontes-preview-title");
+  const metaEl = document.getElementById("fontes-preview-meta");
+  const descriptionEl = document.getElementById("fontes-preview-description");
+  const typeEl = document.getElementById("fontes-preview-type");
+  const layersEl = document.getElementById("fontes-preview-layers");
+  const urlEl = document.getElementById("fontes-preview-url");
+  let previewMap = null;
+  let previewLayer = null;
+
+  const buildLayer = (fonte) => {
+    if (!fonte?.tipo_servico || !fonte?.url_servico) return null;
+    if (fonte.tipo_servico === "wms" && fonte.layer_names) {
+      return L.tileLayer.wms(fonte.url_servico, {
+        layers: fonte.layer_names,
+        format: fonte.formato_imagem || "image/png",
+        transparent: fonte.transparencia !== false,
+        opacity: fonte.opacidade ?? 0.75,
+        attribution: fonte.attribution || "",
+      });
+    }
+    if (fonte.tipo_servico === "tile") {
+      return L.tileLayer(fonte.url_servico, {
+        opacity: fonte.opacidade ?? 0.75,
+        attribution: fonte.attribution || "",
+      });
+    }
+    return null;
+  };
+
+  const resolveSourceView = (fonte) => {
+    const lat = Number(fonte?.centro_latitude);
+    const lon = Number(fonte?.centro_longitude);
+    const zoom = Number(fonte?.zoom_inicial);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return null;
+    }
+    return {
+      center: [lat, lon],
+      zoom: Number.isFinite(zoom) ? zoom : 6,
+    };
+  };
+
+  const ensureMap = () => {
+    if (previewMap) return;
+    previewMap = L.map(mapEl).setView([39.5, -8.0], 6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(previewMap);
+  };
+
+  const openPreview = (fonteId) => {
+    const fonte = fontes.find((item) => String(item.id) === String(fonteId));
+    if (!fonte) return;
+    ensureMap();
+    if (previewLayer) {
+      previewMap.removeLayer(previewLayer);
+      previewLayer = null;
+    }
+    previewLayer = buildLayer(fonte);
+    if (previewLayer) {
+      previewLayer.addTo(previewMap);
+    }
+    const sourceView = resolveSourceView(fonte) || { center: [39.5, -8.0], zoom: 6 };
+    previewMap.setView(sourceView.center, sourceView.zoom);
+    setTimeout(() => previewMap.invalidateSize(), 60);
+
+    titleEl.textContent = fonte.nome || "Pré-visualização do mapa";
+    metaEl.textContent = [fonte.pais_regiao, fonte.origem === "empresa" ? "Privado da empresa" : ""].filter(Boolean).join(" · ");
+    descriptionEl.textContent = fonte.descricao || "Sem descrição.";
+    typeEl.textContent = (fonte.tipo_servico || "-").toUpperCase();
+    layersEl.textContent = fonte.layer_names || "Sem layers explícitas";
+    urlEl.textContent = fonte.url_servico || "-";
+    modal.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+  };
+
+  const closePreview = () => {
+    modal.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+  };
+
+  openButtons.forEach((button) => {
+    button.addEventListener("click", () => openPreview(button.dataset.previewSourceId));
+  });
+  closeButtons.forEach((button) => {
+    button.addEventListener("click", closePreview);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+      closePreview();
+    }
+  });
+})();
+</script>
+{% endblock %}

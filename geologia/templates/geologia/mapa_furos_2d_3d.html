@@ -29,6 +29,16 @@
         </form>
     </section>
 
+    <section class="rounded-xl border border-sky-100 bg-sky-50/60 p-4 shadow-sm mb-4">
+        <h2 class="text-base font-semibold text-sky-950">{% trans "Cartografia oficial diretamente no mapa" %}</h2>
+        <p class="text-sm text-sky-900 mt-2">
+            {% trans "Este mapa já pode mostrar camadas oficiais do LNEG e também fontes privadas da empresa diretamente dentro da plataforma, sem sair para o geoPortal externo." %}
+        </p>
+        <p class="text-xs text-sky-900 mt-2">
+            {% trans "A identificação por clique já responde nas escalas 1:1 000 000, 1:500 000, 1:200 000, 1:50 000 e também na consulta de folhas publicadas 1:25 000." %}
+        </p>
+    </section>
+
     <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div class="px-6 py-4 border-b border-gray-100">
             <h2 class="text-xl font-semibold text-gray-900">{% trans "Furos no espaço operacional" %}</h2>
@@ -36,8 +46,13 @@
         <div class="p-4 border-b border-gray-100">
             {% if mapa_pontos %}
                 {{ mapa_pontos|json_script:"mapa-furos-pontos" }}
+                {{ fontes_cartograficas_mapa|json_script:"mapa-furos-camadas-lneg" }}
                 <div id="mapa-furos-geologo" class="w-full rounded-xl border border-gray-200" style="height: 420px;"></div>
-                <p class="text-xs text-gray-500 mt-2">{% trans "Clica num ponto para abrir atalhos rápidos do furo." %}</p>
+                <p class="text-xs text-gray-500 mt-2">{% trans "Clica num ponto para abrir atalhos rápidos do furo. Usa o seletor de camadas do mapa para ligar ou desligar a cartografia oficial." %}</p>
+                <div id="mapa-furos-identify-panel" class="mt-4 rounded-xl border border-gray-200 bg-slate-50 p-4">
+                    <p class="text-sm font-semibold text-slate-900">{% trans "Identificação geológica" %}</p>
+                    <p class="text-sm text-slate-600 mt-1">{% trans "Clica num local do mapa para consultar a unidade geológica do LNEG nesse ponto." %}</p>
+                </div>
             {% else %}
                 <p class="text-sm text-gray-500">{% trans "Nenhum furo com coordenadas para mostrar no mapa." %}</p>
             {% endif %}
@@ -90,21 +105,60 @@
 (() => {
   const el = document.getElementById("mapa-furos-geologo");
   const dataNode = document.getElementById("mapa-furos-pontos");
-  if (!el || !dataNode) return;
+  const layersNode = document.getElementById("mapa-furos-camadas-lneg");
+  const identifyPanel = document.getElementById("mapa-furos-identify-panel");
+  if (!el || !dataNode || !identifyPanel) return;
 
   let pontos = [];
+  let camadasLneg = [];
   try {
     pontos = JSON.parse(dataNode.textContent || "[]");
   } catch (e) {
     pontos = [];
   }
+  try {
+    camadasLneg = JSON.parse(layersNode?.textContent || "[]");
+  } catch (e) {
+    camadasLneg = [];
+  }
   if (!Array.isArray(pontos) || !pontos.length) return;
 
+  const escapeHtml = (value) => String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#039;");
+
+  const formatLabel = (key) => String(key || "")
+    .replaceAll("_", " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const genericIdentifyIgnore = new Set([
+    "OBJECTID",
+    "OBJECTID_1",
+    "Shape",
+    "Shape_Length",
+    "Shape_Area",
+    "Shape__Area",
+    "Shape__Length",
+    "GLOBALID",
+  ]);
+
   const map = L.map(el);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
+  const baseMaps = {
+    "OpenStreetMap": osm
+  };
+  const overlayMaps = {};
+  const layerBindings = [];
+  let identifyMarker = null;
+  let identifySourceAtivoId = null;
 
   const markers = [];
   const corPorEstado = (estadoRaw) => {
@@ -146,8 +200,268 @@
     markers.push(marker);
   });
 
+  camadasLneg.forEach((camada) => {
+    if (!camada) return;
+    let layer = null;
+    const tipoServico = camada.tipo_servico || camada.tipo;
+    const urlServico = camada.url_servico || camada.url;
+    if (!tipoServico || !urlServico) return;
+    const layerNames = camada.layer_names || camada.layers;
+    const formatoImagem = camada.formato_imagem || camada.format;
+    const transparencia = camada.transparencia;
+    const opacidade = camada.opacidade ?? camada.opacity;
+    const attribution = camada.attribution || "LNEG";
+    const visivelPorDefeito = camada.visivel_por_defeito ?? camada.default;
+    const nomeCamada = camada.nome || camada.label || camada.id;
+    if (tipoServico === "wms" && layerNames) {
+      layer = L.tileLayer.wms(urlServico, {
+        layers: layerNames,
+        format: formatoImagem || "image/png",
+        transparent: transparencia !== false,
+        opacity: opacidade ?? 0.75,
+        attribution
+      });
+    } else if (tipoServico === "tile") {
+      layer = L.tileLayer(urlServico, {
+        opacity: opacidade ?? 0.75,
+        attribution
+      });
+    }
+    if (!layer) return;
+    overlayMaps[nomeCamada] = layer;
+    if (visivelPorDefeito) {
+      layer.addTo(map);
+      identifySourceAtivoId = camada.id;
+    }
+    layerBindings.push({ fonte: camada, layer });
+  });
+
   const group = L.featureGroup(markers);
   map.fitBounds(group.getBounds().pad(0.2));
+  L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+
+  const getBindingByLayer = (layer) => layerBindings.find((item) => item.layer === layer) || null;
+
+  const resolveIdentifyBinding = () => {
+    if (identifySourceAtivoId) {
+      const activeBinding = layerBindings.find(
+        (item) => item.fonte?.id === identifySourceAtivoId && map.hasLayer(item.layer),
+      );
+      if (activeBinding && activeBinding.fonte?.identify_mode) {
+        return activeBinding;
+      }
+    }
+    const visibleBindings = layerBindings.filter(
+      (item) => map.hasLayer(item.layer) && item.fonte?.identify_mode,
+    );
+    return visibleBindings[visibleBindings.length - 1] || null;
+  };
+
+  map.on("overlayadd", (event) => {
+    const binding = getBindingByLayer(event.layer);
+    if (binding?.fonte?.id) {
+      identifySourceAtivoId = binding.fonte.id;
+      if (typeof event.layer.bringToFront === "function") {
+        event.layer.bringToFront();
+      }
+      const lat = Number(binding.fonte.centro_latitude);
+      const lon = Number(binding.fonte.centro_longitude);
+      const zoom = Number(binding.fonte.zoom_inicial);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        map.flyTo([lat, lon], Number.isFinite(zoom) ? zoom : map.getZoom(), {
+          animate: true,
+          duration: 0.4,
+        });
+      }
+    }
+  });
+
+  map.on("overlayremove", (event) => {
+    const binding = getBindingByLayer(event.layer);
+    if (binding?.fonte?.id === identifySourceAtivoId) {
+      identifySourceAtivoId = null;
+    }
+  });
+
+  const renderIdentifyEmpty = (message) => {
+    identifyPanel.innerHTML = `
+      <p class="text-sm font-semibold text-slate-900">${escapeHtml(message || "Sem identificação ativa")}</p>
+      <p class="text-sm text-slate-600 mt-1">Clica noutro local do mapa para nova consulta geológica.</p>
+    `;
+  };
+
+  const renderIdentifyPending = (fonte, latlng) => {
+    identifyPanel.innerHTML = `
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+        <p class="text-sm font-semibold text-amber-950">${escapeHtml(fonte?.label || "Camada cartográfica ativa")}</p>
+        <p class="text-sm text-amber-800 mt-1">${escapeHtml(fonte?.identify_note || "A identificação detalhada desta escala ainda está a ser preparada.")}</p>
+        <p class="text-xs text-amber-700 mt-2">Longitude ${escapeHtml(Number(latlng.lng).toFixed(4))} · Latitude ${escapeHtml(Number(latlng.lat).toFixed(4))}</p>
+      </div>
+    `;
+  };
+
+  const buildIdentifyRows = (attrs, fonte) => {
+    if (!attrs || typeof attrs !== "object") return [];
+    if (Array.isArray(fonte?.identify_fields) && fonte.identify_fields.length) {
+      return fonte.identify_fields
+        .map((field) => [field.label || formatLabel(field.key), attrs?.[field.key]])
+        .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "");
+    }
+    return Object.entries(attrs)
+      .filter(([key, value]) => !genericIdentifyIgnore.has(String(key)) && value !== undefined && value !== null && String(value).trim() !== "")
+      .map(([key, value]) => [formatLabel(key), value]);
+  };
+
+  const exportIdentifyExcel = (rows, lon, lat) => {
+    const htmlRows = rows.map(([label, value]) => `<tr><th style="text-align:left;border:1px solid #cbd5e1;padding:6px;background:#f8fafc">${escapeHtml(label)}</th><td style="border:1px solid #cbd5e1;padding:6px">${escapeHtml(value)}</td></tr>`).join("");
+    const html = `
+      <table>
+        <tr><th colspan="2" style="text-align:left;font-size:16px;padding:8px">Identificação geológica</th></tr>
+        ${htmlRows}
+        <tr><th style="text-align:left;border:1px solid #cbd5e1;padding:6px;background:#f8fafc">Longitude</th><td style="border:1px solid #cbd5e1;padding:6px">${escapeHtml(lon)}</td></tr>
+        <tr><th style="text-align:left;border:1px solid #cbd5e1;padding:6px;background:#f8fafc">Latitude</th><td style="border:1px solid #cbd5e1;padding:6px">${escapeHtml(lat)}</td></tr>
+      </table>
+    `;
+    const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "identificacao_geologica.xls";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const fetchIdentifyAttributes = async (fonte, params) => {
+    if (fonte?.identify_mode === "query" && fonte.identify_url) {
+      const response = await fetch(`${fonte.identify_url}?${params.toString()}`);
+      const data = await response.json();
+      return data?.features?.[0]?.attributes || null;
+    }
+    if (fonte?.identify_mode === "multi_query" && Array.isArray(fonte.identify_urls)) {
+      for (const url of fonte.identify_urls) {
+        if (!url) continue;
+        const response = await fetch(`${url}?${params.toString()}`);
+        const data = await response.json();
+        const attrs = data?.features?.[0]?.attributes || null;
+        if (attrs) {
+          return attrs;
+        }
+      }
+      return null;
+    }
+    return null;
+  };
+
+  const renderIdentifyResult = (fonte, attrs, latlng) => {
+    const rows = buildIdentifyRows(attrs, fonte);
+    const lon = Number(latlng.lng).toFixed(4);
+    const lat = Number(latlng.lat).toFixed(4);
+    const externalUrl = fonte?.external_url || "https://geoportal.lneg.pt/pt/dados_abertos/cartografia_geologica/";
+    const sourceTitle = fonte?.identify_title || fonte?.label || "Carta geológica";
+    const sourceBadge = fonte?.identify_badge || "";
+    const sourceHint = fonte?.identify_hint || "";
+    identifyPanel.innerHTML = `
+      <div class="rounded-xl border border-amber-900 bg-[#18110b] text-white overflow-hidden">
+        <div class="flex items-center justify-between gap-3 bg-[#8d2d2d] px-4 py-3">
+          <div class="text-lg font-semibold">Identificar</div>
+          <button type="button" id="mapa-furos-identify-export-btn" class="rounded bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100">Exportar Excel</button>
+        </div>
+        <div class="p-4">
+          <div class="text-xl font-semibold text-amber-300">${escapeHtml(sourceTitle)}</div>
+          <div class="flex items-center gap-2 mt-2 flex-wrap">
+            <div class="text-sm text-amber-100">Unidades Geológicas</div>
+            ${sourceBadge ? `<span class="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-200">${escapeHtml(sourceBadge)}</span>` : ""}
+          </div>
+          ${sourceHint ? `<div class="mt-2 text-xs text-amber-100/90">${escapeHtml(sourceHint)}</div>` : ""}
+          <div class="mt-4 border border-amber-700/40 rounded-lg px-4 py-2">
+            ${rows.length ? rows.map(([label, value]) => `
+              <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-3 border-t border-amber-700/30 py-2 text-sm">
+                <div class="font-semibold text-amber-100">${escapeHtml(label)}</div>
+                <div class="text-white">${escapeHtml(value)}</div>
+              </div>
+            `).join("") : `<div class="text-sm text-slate-200">Sem atributos disponíveis para este ponto.</div>`}
+            <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-3 border-t border-amber-700/30 py-2 text-sm">
+              <div class="font-semibold text-amber-100">Ver no mapa</div>
+              <div><a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="text-amber-300 underline">geoPortal LNEG</a></div>
+            </div>
+            <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-3 border-t border-amber-700/30 py-2 text-sm">
+              <div class="font-semibold text-amber-100">Longitude</div>
+              <div>${escapeHtml(lon)}</div>
+            </div>
+            <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-3 border-t border-amber-700/30 py-2 text-sm">
+              <div class="font-semibold text-amber-100">Latitude</div>
+              <div>${escapeHtml(lat)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    const exportBtn = document.getElementById("mapa-furos-identify-export-btn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => exportIdentifyExcel(rows, lon, lat));
+    }
+  };
+
+  map.on("click", async (event) => {
+    const { lat, lng } = event.latlng;
+    if (identifyMarker) {
+      map.removeLayer(identifyMarker);
+    }
+    identifyMarker = L.circleMarker([lat, lng], {
+      radius: 7,
+      color: "#7c2d12",
+      fillColor: "#fb923c",
+      fillOpacity: 0.95,
+      weight: 2
+    }).addTo(map);
+
+    identifyPanel.innerHTML = `
+      <p class="text-sm font-semibold text-sky-900">A identificar unidade geológica...</p>
+      <p class="text-sm text-sky-700 mt-1">Longitude ${lng.toFixed(4)} · Latitude ${lat.toFixed(4)}</p>
+    `;
+
+    const identifyBinding = resolveIdentifyBinding();
+    const identifySource = identifyBinding?.fonte;
+    if (!identifySource) {
+      renderIdentifyEmpty("Ativa uma camada cartográfica para identificar geologia");
+      return;
+    }
+    if (identifySource.identify_mode === "pending") {
+      renderIdentifyPending(identifySource, event.latlng);
+      return;
+    }
+    const supportsIdentify =
+      (identifySource.identify_mode === "query" && identifySource.identify_url) ||
+      (identifySource.identify_mode === "multi_query" && Array.isArray(identifySource.identify_urls) && identifySource.identify_urls.length);
+    if (!supportsIdentify) {
+      renderIdentifyEmpty("Esta camada ainda não suporta identificação por clique");
+      return;
+    }
+
+    const params = new URLSearchParams({
+      f: "pjson",
+      where: "1=1",
+      returnGeometry: "false",
+      spatialRel: "esriSpatialRelIntersects",
+      geometry: `${lng},${lat}`,
+      geometryType: "esriGeometryPoint",
+      inSR: "4326",
+      outFields: "*"
+    });
+
+    try {
+      const attrs = await fetchIdentifyAttributes(identifySource, params);
+      if (!attrs) {
+        renderIdentifyEmpty("Sem unidade geológica identificada neste ponto");
+        return;
+      }
+      renderIdentifyResult(identifySource, attrs, event.latlng);
+    } catch (error) {
+      renderIdentifyEmpty("Não foi possível consultar a cartografia neste momento");
+    }
+  });
 })();
 </script>
 {% endblock %}

@@ -57,13 +57,13 @@
                             aria-label="{% trans 'Abrir menu Gestão' %}"
                             data-dropdown-toggle
                         >
-                            🧩 {% trans "Gestão" %} ▾
+                            🧩 {% trans "Gestão" %}{% if total_pedidos_ferias_pendentes_menu %} <span class="sf-menu-badge" title="{% trans 'Existem pedidos de férias pendentes' %}">!</span>{% endif %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Gestão' %}">
                             <a href="{% url 'projetos:gestao_hub' %}" role="menuitem">🧭 {% trans "Centro de Gestão" %}</a>
                             <a href="{% url 'projetos:cliente_contrato_list' %}" role="menuitem">🤝 {% trans "Clientes & Contratos (auditoria)" %}</a>
                             <a href="{% url 'projetos:planeamento_turno_list' %}" role="menuitem">🗓️ {% trans "Planeamento (auditoria)" %}</a>
-                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade (auditoria)" %}</a>
+                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade (auditoria)" %}{% if total_pedidos_ferias_pendentes_menu %} <span class="sf-menu-badge" title="{% trans 'Existem pedidos de férias pendentes' %}">!</span>{% endif %}</a>
                             <a href="{% url 'projetos:gestao_compras_fornecedores' %}" role="menuitem">🛒 {% trans "Compras & Fornecedores (auditoria)" %}</a>
                             <a href="{% url 'projetos:gestao_compliance_seguranca' %}" role="menuitem">🛡️ {% trans "Compliance & Segurança (auditoria)" %}</a>
                             <a href="{% url 'projetos:gestao_notificacoes' %}" role="menuitem">🔔 {% trans "Centro de Notificações (auditoria)" %}</a>
@@ -273,13 +273,13 @@
                             aria-label="{% trans 'Abrir menu Gestão' %}"
                             data-dropdown-toggle
                         >
-                            🧩 {% trans "Gestão" %} ▾
+                            🧩 {% trans "Gestão" %}{% if total_pedidos_ferias_pendentes_menu %} <span class="sf-menu-badge" title="{% trans 'Existem pedidos de férias pendentes' %}">!</span>{% endif %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Gestão' %}">
                             <a href="{% url 'projetos:gestao_hub' %}" role="menuitem">🧭 {% trans "Centro de Gestão" %}</a>
                             <a href="{% url 'projetos:cliente_contrato_list' %}" role="menuitem">🤝 {% trans "Clientes & Contratos" %}</a>
                             <a href="{% url 'projetos:planeamento_turno_list' %}" role="menuitem">🗓️ {% trans "Planeamento" %}</a>
-                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade" %}</a>
+                            <a href="{% url 'projetos:gestao_rh_assiduidade' %}" role="menuitem">👥 {% trans "RH & Assiduidade" %}{% if total_pedidos_ferias_pendentes_menu %} <span class="sf-menu-badge" title="{% trans 'Existem pedidos de férias pendentes' %}">!</span>{% endif %}</a>
                             <a href="{% url 'projetos:gestao_compras_fornecedores' %}" role="menuitem">🛒 {% trans "Compras & Fornecedores" %}</a>
                             <a href="{% url 'projetos:gestao_compliance_seguranca' %}" role="menuitem">🛡️ {% trans "Compliance & Segurança" %}</a>
                             <a href="{% url 'projetos:gestao_notificacoes' %}" role="menuitem">🔔 {% trans "Centro de Notificações" %}</a>
@@ -455,6 +455,8 @@
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Registos' %}">
                             <a href="{% url 'projetos:registo_diario_create' %}" role="menuitem">➕ {% trans "Novo Registo Diário" %}</a>
                             <a href="{% url 'projetos:registo_diario_list' %}" role="menuitem">📋 {% trans "Meus Registos" %}</a>
+                            <a href="{% url 'projetos:calendario_turnos_empregado' %}" role="menuitem">🗓️ {% trans "Calendário de Turnos" %}</a>
+                            <a href="{% url 'projetos:notificacoes_empregado' %}" role="menuitem">🔔 {% trans "Notificações" %}{% if total_notificacoes_empregado_abertas_menu %} <span class="sf-menu-badge">{{ total_notificacoes_empregado_abertas_menu }}</span>{% endif %}</a>
                             {% if empregado_menu_funcao == "geologo" %}
                                 <a href="{% url 'geologia:empregado_geologo_dashboard' %}" role="menuitem">🧪 {% trans "Criar Log" %}</a>
                                 <a href="{% url 'geologia:meus_logs' %}" role="menuitem">🗂️ {% trans "Meus Logs" %}</a>
@@ -509,6 +511,12 @@
                             🌍 {% trans "Geologia" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Geologia' %}">
+                            <a href="{% url 'geologia:mapa_cartografico' %}" role="menuitem">🧭 {% trans "Mapa cartográfico" %}</a>
+                            <a href="{% url 'geologia:cartografia_oficial' %}" role="menuitem">🗺️ {% trans "Cartografia oficial" %}</a>
+                            {% if empregado_menu_funcao == "geologo" %}
+                                <a href="{% url 'geologia:fontes_cartograficas_manage' %}" role="menuitem">🗂️ {% trans "Gerir mapas da empresa" %}</a>
+                                <a href="{% url 'geologia:fonte_cartografica_create' %}" role="menuitem">➕ {% trans "Adicionar mapa" %}</a>
+                            {% endif %}
                             {% if empregado_menu_funcao == "geologo" %}
                                 <a href="{% url 'projetos:modelos_3d_hub' %}" role="menuitem">🧠 {% trans "3D Avançado" %}</a>
                             {% endif %}
@@ -621,6 +629,58 @@
                     <button type="button" data-close-message class="msg-close" aria-label="{% trans 'Fechar mensagem' %}">×</button>
                 </div>
             {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if ajuda_contextual_atual %}
+        <div
+            class="mb-4 rounded-2xl border border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-slate-50 p-4 shadow-sm"
+            data-ajuda-contextual
+            data-ajuda-contextual-key="{{ request.resolver_match.view_name|default:request.path }}"
+        >
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700">
+                            {% trans "Ajuda contextual" %}
+                        </div>
+                        <span class="inline-flex rounded-full border border-cyan-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-cyan-800">
+                            {{ ajuda_contextual_atual.contexto_label }}
+                        </span>
+                    </div>
+                    <div class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {{ ajuda_contextual_atual.categoria }} · {{ ajuda_contextual_atual.perfil }}
+                    </div>
+                    <h2 class="mt-1 text-lg font-bold text-slate-900">
+                        {{ ajuda_contextual_atual.titulo }}
+                    </h2>
+                    <p class="mt-1 text-sm text-slate-600">
+                        {{ ajuda_contextual_atual.descricao }}
+                    </p>
+                    <p class="mt-2 text-sm text-slate-500">
+                        {{ ajuda_contextual_atual.contextualizacao }}
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-start justify-end gap-2">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
+                        data-ajuda-contextual-close
+                        aria-label="{% trans 'Fechar ajuda contextual' %}"
+                    >
+                        ×
+                    </button>
+                    <a href="{{ ajuda_contextual_atual.url_passos }}" class="btn btn-light whitespace-nowrap">
+                        {% trans "Ver só passos rápidos" %}
+                    </a>
+                    <a href="{{ ajuda_contextual_atual.url }}" class="btn btn-light whitespace-nowrap">
+                        {{ ajuda_contextual_atual.acao_label_contextual }}
+                    </a>
+                    <a href="{% url 'projetos:ajuda' %}" class="btn btn-primary whitespace-nowrap">
+                        {% trans "Abrir centro de ajuda" %}
+                    </a>
+                </div>
+            </div>
         </div>
     {% endif %}
 
