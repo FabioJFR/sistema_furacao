@@ -331,6 +331,11 @@ body {
     box-shadow: var(--shadow);
 }
 
+.visitor-panel__card--accent {
+    background: linear-gradient(135deg, #f4f9ff, #eef6ff);
+    border-color: #cfdfee;
+}
+
 .visitor-panel__card h3,
 .info-card h2 {
     margin-top: 0;

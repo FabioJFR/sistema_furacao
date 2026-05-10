@@ -67,6 +67,14 @@ class SensitivePostRateLimitMiddleware:
                 "message": "Demasiados pedidos de recuperação de password. Aguarda alguns minutos e tenta novamente.",
                 "reset_on_redirect": False,
             },
+            {
+                "path": "/registo/",
+                "limit": settings.REGISTO_RATE_LIMIT_MAX_ATTEMPTS,
+                "window": settings.REGISTO_RATE_LIMIT_WINDOW_SECONDS,
+                "scope": "registo",
+                "message": "Demasiadas tentativas de registo. Aguarda algum tempo e tenta novamente.",
+                "reset_on_redirect": False,
+            },
         )
         for regra in regras:
             if path == regra["path"]:

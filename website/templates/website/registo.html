@@ -36,6 +36,18 @@
             <form method="post">
                 {% csrf_token %}
 
+                <div class="row row-honeypot" aria-hidden="true">
+                    <label for="id_website_url">{% trans "Website" %}</label>
+                    <input
+                        type="text"
+                        name="website_url"
+                        id="id_website_url"
+                        value=""
+                        tabindex="-1"
+                        autocomplete="off"
+                    >
+                </div>
+
                 <div class="row">
                     <label>{% trans "Tipo de conta" %}</label>
                     <select name="tipo_conta" id="id_tipo_conta">

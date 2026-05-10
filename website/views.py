@@ -12,11 +12,14 @@ from django.utils.translation import gettext as _
 from website import selectors
 from website import services
 
+REGISTO_STARTED_AT_SESSION_KEY = "website_registo_started_at"
+
 
 def _website_quick_links():
     return [
         {"label": _("Sobre"), "url_name": "website:sobre"},
         {"label": _("Contactos"), "url_name": "website:contactos"},
+        {"label": _("Feedback"), "url_name": "website:feedback"},
         {"label": _("Termos & Condições"), "url_name": "website:termos_condicoes"},
         {"label": _("Política de Privacidade"), "url_name": "website:politica_privacidade"},
     ]
@@ -125,6 +128,64 @@ def contactos(request):
                         "url": "https://www.livroreclamacoes.pt/Inicio/",
                         "external": True,
                     }
+                ],
+            },
+        ],
+    )
+
+
+def feedback(request):
+    return _render_public_info_page(
+        request,
+        title=_("Feedback e contacto público"),
+        eyebrow=_("Visitantes"),
+        intro=_("Escolhe o canal mais adequado para deixar uma mensagem, avaliar a plataforma ou reportar um problema de forma simples."),
+        sections=[
+            {
+                "title": _("Deixar uma mensagem"),
+                "paragraphs": [
+                    _("Se queres fazer uma pergunta, pedir mais informação ou iniciar contacto comercial, podes enviar-nos uma mensagem direta."),
+                    _("Usa este canal para pedidos gerais, dúvidas iniciais ou conversas de apresentação da plataforma."),
+                ],
+                "links": [
+                    {
+                        "label": _("Enviar mensagem"),
+                        "url": "mailto:sistemafuracao@gmail.com?subject=Mensagem%20sobre%20o%20Sistema%20de%20Fura%C3%A7%C3%A3o",
+                        "external": True,
+                    }
+                ],
+            },
+            {
+                "title": _("Avaliar a plataforma"),
+                "paragraphs": [
+                    _("Se já viste a plataforma, a landing page ou uma demonstração, podes enviar a tua opinião e avaliação geral."),
+                    _("Este canal é útil para perceção de valor, clareza da proposta e feedback sobre a experiência pública."),
+                ],
+                "links": [
+                    {
+                        "label": _("Enviar avaliação"),
+                        "url": "mailto:sistemafuracao@gmail.com?subject=Avalia%C3%A7%C3%A3o%20da%20plataforma",
+                        "external": True,
+                    }
+                ],
+            },
+            {
+                "title": _("Reportar um problema"),
+                "paragraphs": [
+                    _("Se encontraste um erro, falha técnica, link partido ou comportamento inesperado, podes reportar o problema diretamente."),
+                    _("Se possível, inclui o que estavas a fazer, a página afetada e uma captura de ecrã para acelerar a análise."),
+                ],
+                "links": [
+                    {
+                        "label": _("Reportar problema"),
+                        "url": "mailto:sistemafuracao@gmail.com?subject=Reporte%20de%20problema%20na%20plataforma",
+                        "external": True,
+                    },
+                    {
+                        "label": _("Livro de Reclamações"),
+                        "url": "https://www.livroreclamacoes.pt/Inicio/",
+                        "external": True,
+                    },
                 ],
             },
         ],
@@ -255,7 +316,11 @@ def registo(request):
     planos_contexto = selectors.construir_planos_contexto(planos_qs)
 
     if request.method == "POST":
-        resultado = services.executar_registo(request.POST, request=request)
+        resultado = services.executar_registo(
+            request.POST,
+            request=request,
+            registo_started_at=request.session.get(REGISTO_STARTED_AT_SESSION_KEY),
+        )
         if not resultado.sucesso:
             for erro in resultado.erros:
                 messages.error(request, erro)
@@ -273,8 +338,10 @@ def registo(request):
             request,
             _("Conta criada com sucesso. Enviámos um email para confirmares a conta antes do primeiro login."),
         )
+        request.session.pop(REGISTO_STARTED_AT_SESSION_KEY, None)
         return redirect("login")
 
+    request.session[REGISTO_STARTED_AT_SESSION_KEY] = timezone.now().timestamp()
     return render(
         request,
         "website/registo.html",

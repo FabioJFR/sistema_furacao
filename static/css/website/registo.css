@@ -22,6 +22,16 @@ body {
     margin-bottom: 16px;
 }
 
+.row-honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .checkbox-row {
     display: flex;
     align-items: flex-start;

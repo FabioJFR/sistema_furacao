@@ -58,6 +58,7 @@
                 <div class="hero-links">
                     <a href="{% url 'website:sobre' %}" class="hero-links__item">{% trans "Sobre a plataforma" %}</a>
                     <a href="{% url 'website:contactos' %}" class="hero-links__item">{% trans "Contactos" %}</a>
+                    <a href="{% url 'website:feedback' %}" class="hero-links__item">{% trans "Feedback" %}</a>
                     <a href="{% url 'website:termos_condicoes' %}" class="hero-links__item">{% trans "Informação legal" %}</a>
                 </div>
 
@@ -103,6 +104,15 @@
                     <h3>{% trans "Contactos" %}</h3>
                     <p class="muted">{% trans "Consulta email, telefone, website e canais para suporte, privacidade e reclamações." %}</p>
                     <a href="{% url 'website:contactos' %}" class="btn btn-light">{% trans "Ver contactos" %}</a>
+                </article>
+
+                <article class="visitor-panel__card visitor-panel__card--accent">
+                    <h3>{% trans "Mensagens, avaliações e problemas" %}</h3>
+                    <p class="muted">{% trans "Cria um contacto rápido connosco para deixar uma mensagem, avaliar a plataforma ou reportar um problema." %}</p>
+                    <div class="visitor-panel__card-links">
+                        <a href="{% url 'website:feedback' %}" class="btn btn-primary">{% trans "Abrir feedback" %}</a>
+                        <a href="mailto:sistemafuracao@gmail.com?subject=Mensagem%20sobre%20o%20Sistema%20de%20Fura%C3%A7%C3%A3o" class="btn btn-light">{% trans "Enviar mensagem" %}</a>
+                    </div>
                 </article>
 
                 <article class="visitor-panel__card">
@@ -250,6 +260,7 @@
             <div class="footer-links">
                 <a href="{% url 'website:sobre' %}">{% trans "Sobre" %}</a>
                 <a href="{% url 'website:contactos' %}">{% trans "Contactos" %}</a>
+                <a href="{% url 'website:feedback' %}">{% trans "Feedback" %}</a>
                 <a href="{% url 'website:termos_condicoes' %}">{% trans "Termos & Condições" %}</a>
                 <a href="{% url 'website:politica_privacidade' %}">{% trans "Política de Privacidade" %}</a>
                 <a href="https://www.livroreclamacoes.pt/Inicio/" target="_blank" rel="noopener noreferrer">{% trans "Livro de Reclamações" %}</a>

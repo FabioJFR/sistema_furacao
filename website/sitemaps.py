@@ -11,6 +11,7 @@ class PublicPagesSitemap(Sitemap):
             "website:home",
             "website:sobre",
             "website:contactos",
+            "website:feedback",
             "website:termos_condicoes",
             "website:politica_privacidade",
             "website:planos",

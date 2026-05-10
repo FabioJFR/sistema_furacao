@@ -103,6 +103,29 @@ def validar_pedido_registo(payload):
     return {"erros": erros, "plano": plano}
 
 
+def validar_pedido_registo_antibot(*, payload, registo_started_at=None):
+    erros = []
+
+    honeypot = (payload.get("website_url") or "").strip()
+    if honeypot:
+        erros.append(_("Não foi possível validar o registo."))
+
+    if registo_started_at is not None:
+        try:
+            tempo_decorrido = timezone.now().timestamp() - float(registo_started_at)
+        except (TypeError, ValueError):
+            tempo_decorrido = None
+
+        if (
+            tempo_decorrido is not None
+            and tempo_decorrido >= 0
+            and tempo_decorrido < settings.REGISTO_MIN_SUBMISSION_SECONDS
+        ):
+            erros.append(_("A submissão foi demasiado rápida. Aguarda alguns segundos e tenta novamente."))
+
+    return erros
+
+
 def _resolver_from_email():
     backend = (getattr(settings, "EMAIL_BACKEND", "") or "").strip()
     email_host_user = (getattr(settings, "EMAIL_HOST_USER", "") or "").strip()
@@ -164,9 +187,12 @@ def enviar_email_confirmacao_conta(*, user, request=None):
 
 
 @transaction.atomic
-def executar_registo(payload, request=None):
+def executar_registo(payload, request=None, registo_started_at=None):
     validacao = validar_pedido_registo(payload)
-    erros = validacao["erros"]
+    erros = validacao["erros"] + validar_pedido_registo_antibot(
+        payload=payload,
+        registo_started_at=registo_started_at,
+    )
     plano = validacao["plano"]
     if erros:
         return ResultadoRegisto(sucesso=False, erros=erros)
