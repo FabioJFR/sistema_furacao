@@ -30,12 +30,12 @@
         <div class="card">
             <div class="metric-label">{% trans "Empresas ativas" %}</div>
             <div class="metric-value">{{ empresas_ativas }}</div>
-            <div class="metric-note">{% trans "Clientes em operação normal." %}</div>
+            <div class="metric-note">{% trans "Empresas com subscrição ativa e operação normal." %}</div>
         </div>
         <div class="card">
             <div class="metric-label">{% trans "Empresas em teste" %}</div>
             <div class="metric-value">{{ empresas_teste }}</div>
-            <div class="metric-note">{% trans "Contas em fase de onboarding ou validação." %}</div>
+            <div class="metric-note">{% trans "Contas em onboarding, validação ou com subscrição pendente." %}</div>
         </div>
         <div class="card">
             <div class="metric-label">{% trans "Empresas suspensas" %}</div>
@@ -77,7 +77,8 @@
                             <tr>
                                 <th>{% trans "Empresa" %}</th>
                                 <th>{% trans "Plano" %}</th>
-                                <th>{% trans "Estado" %}</th>
+                                <th>{% trans "Estado comercial" %}</th>
+                                <th>{% trans "Subscrição" %}</th>
                                 <th>{% trans "Ativa" %}</th>
                                 <th>{% trans "Criada em" %}</th>
                                 <th>{% trans "Ações" %}</th>
@@ -102,7 +103,14 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ empresa.status }}">{{ empresa.get_status_display }}</span>
+                                        <span class="badge badge-{{ empresa.estado_comercial }}">{{ empresa.estado_comercial_label }}</span>
+                                    </td>
+                                    <td>
+                                        {% if empresa.subscricao_atual_estado %}
+                                            <span class="badge badge-{{ empresa.subscricao_atual_estado }}">{{ empresa.subscricao_atual_estado_label }}</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% if empresa.ativo %}

@@ -93,6 +93,11 @@ def marcar_pagamento_como_pago(pagamento, *, referencia_externa=""):
     if pagamento.subscricao and pagamento.subscricao.estado in ["pendente", "suspensa"]:
         pagamento.subscricao.estado = "ativa"
         pagamento.subscricao.save(update_fields=["estado", "atualizado_em"])
+        empresa = pagamento.subscricao.empresa
+        if empresa and empresa.status in ["teste", "suspensa"]:
+            empresa.status = "ativa"
+            empresa.ativo = True
+            empresa.save(update_fields=["status", "ativo", "atualizado_em"])
 
     return pagamento
 

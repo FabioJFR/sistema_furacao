@@ -200,7 +200,7 @@ def executar_registo(payload, request=None):
             responsavel_nome=nome_responsavel,
             responsavel_email=email,
             plano=plano,
-            status="ativa",
+            status="teste",
             data_inicio=timezone.now().date(),
             ativo=True,
         )

@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from plataforma.decorators import platform_admin_required
 from plataforma.selectors.dashboard import (
+    enriquecer_empresas_dashboard,
     obter_alertas_renovacao_qs,
     obter_empresas_dashboard_qs,
     obter_metricas_empresas_dashboard,
@@ -20,12 +21,13 @@ def dashboard_plataforma(request):
 
     empresas_qs = obter_empresas_dashboard_qs()
     metricas = obter_metricas_empresas_dashboard(empresas_qs)
+    empresas_recentes = enriquecer_empresas_dashboard(list(empresas_qs[:12]))
     alertas_renovacao = obter_alertas_renovacao_qs()
 
     context = {
         "perfil": perfil,
         **metricas,
-        "empresas": empresas_qs[:12],
+        "empresas": empresas_recentes,
         "alertas_renovacao": alertas_renovacao,
     }
 
