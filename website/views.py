@@ -37,7 +37,7 @@ def _website_base_url(request):
     return request.build_absolute_uri("/").rstrip("/")
 
 
-def _website_public_meta(request, *, title="", description=""):
+def _website_public_meta(request, *, title="", description="", robots="index,follow"):
     base_url = _website_base_url(request)
     logo_url = f"{base_url}{PUBLIC_LOGO_STATIC_PATH}"
     current_url = request.build_absolute_uri()
@@ -56,6 +56,13 @@ def _website_public_meta(request, *, title="", description=""):
         },
         "email": "sistemafuracao@gmail.com",
         "telephone": "+351928044839",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "sistemafuracao@gmail.com",
+            "telephone": "+351928044839",
+            "availableLanguage": ["pt-PT", "en"],
+        },
         "description": description or "Plataforma profissional para operacoes de diamond drilling.",
     }
     return {
@@ -64,6 +71,7 @@ def _website_public_meta(request, *, title="", description=""):
         "public_logo_url": logo_url,
         "page_title_text": title,
         "page_description": description,
+        "page_robots": robots,
         "organization_schema_json": json.dumps(schema, ensure_ascii=False),
     }
 
@@ -83,6 +91,7 @@ def _render_public_info_page(request, *, title, eyebrow, intro, sections, meta_n
                 request,
                 title=f"{title} | Sistema de Furação",
                 description=intro,
+                robots="index,follow",
             ),
         },
     )
@@ -104,6 +113,7 @@ def home(request):
                     "Sistema de Furação: plataforma profissional para projetos, furos, medições, "
                     "gestão operacional, financeira e técnica em operações de diamond drilling."
                 ),
+                robots="index,follow",
             ),
         },
     )
@@ -121,6 +131,7 @@ def planos(request):
                 request,
                 title="Planos | Sistema de Furação",
                 description="Consulta os planos comerciais do Sistema de Furação para equipas, empresas e operação técnica.",
+                robots="index,follow",
             ),
         },
     )
@@ -413,6 +424,7 @@ def registo(request):
                 request,
                 title="Registo | Sistema de Furação",
                 description="Cria conta no Sistema de Furação e começa a avaliar a plataforma.",
+                robots="index,follow",
             ),
         },
     )
