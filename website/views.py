@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
