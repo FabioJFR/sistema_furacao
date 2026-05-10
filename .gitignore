@@ -1,6 +1,8 @@
 .venv/
 __pycache__/
 *.pyc
+.DS_Store
+._*
 .env
 .env.*
 logs/
@@ -9,3 +11,5 @@ staticfiles/
 *.log
 backup_*.tar.gz
 db.sqlite3
+*.sqlite3
+*.sqlite3-*
