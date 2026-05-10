@@ -13,7 +13,22 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Sistema de Furação | Plataforma profissional para operações de drilling" %}</title>
+    <title>{{ page_title_text }}</title>
+    <meta name="description" content="{{ page_description }}">
+    <link rel="canonical" href="{{ public_current_url }}">
+    <link rel="icon" type="image/png" href="{{ public_logo_url }}">
+    <link rel="apple-touch-icon" href="{{ public_logo_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ page_title_text }}">
+    <meta property="og:description" content="{{ page_description }}">
+    <meta property="og:url" content="{{ public_current_url }}">
+    <meta property="og:site_name" content="Sistema de Furação">
+    <meta property="og:image" content="{{ public_logo_url }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title_text }}">
+    <meta name="twitter:description" content="{{ page_description }}">
+    <meta name="twitter:image" content="{{ public_logo_url }}">
+    <script type="application/ld+json">{{ organization_schema_json|safe }}</script>
     <link rel="stylesheet" href="{% static 'css/website/home.css' %}">
 </head>
 <body>

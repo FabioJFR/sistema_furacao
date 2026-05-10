@@ -1,8 +1,11 @@
+import json
+
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
+from django.templatetags.static import static
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_decode
@@ -14,6 +17,7 @@ from website import selectors
 from website import services
 
 REGISTO_STARTED_AT_SESSION_KEY = "website_registo_started_at"
+PUBLIC_LOGO_STATIC_PATH = static("img/sistema_furacao_logo.png")
 
 
 def _website_quick_links():
@@ -24,6 +28,44 @@ def _website_quick_links():
         {"label": _("Termos & Condições"), "url_name": "website:termos_condicoes"},
         {"label": _("Política de Privacidade"), "url_name": "website:politica_privacidade"},
     ]
+
+
+def _website_base_url(request):
+    base_url = (getattr(settings, "SITE_BASE_URL", "") or "").strip()
+    if base_url:
+        return base_url.rstrip("/")
+    return request.build_absolute_uri("/").rstrip("/")
+
+
+def _website_public_meta(request, *, title="", description=""):
+    base_url = _website_base_url(request)
+    logo_url = f"{base_url}{PUBLIC_LOGO_STATIC_PATH}"
+    current_url = request.build_absolute_uri()
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sistema de Furação",
+        "alternateName": "Sistema Furação",
+        "url": f"{base_url}/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": logo_url,
+            "contentUrl": logo_url,
+            "width": 1024,
+            "height": 1024,
+        },
+        "email": "sistemafuracao@gmail.com",
+        "telephone": "+351928044839",
+        "description": description or "Plataforma profissional para operacoes de diamond drilling.",
+    }
+    return {
+        "public_site_url": f"{base_url}/",
+        "public_current_url": current_url,
+        "public_logo_url": logo_url,
+        "page_title_text": title,
+        "page_description": description,
+        "organization_schema_json": json.dumps(schema, ensure_ascii=False),
+    }
 
 
 def _render_public_info_page(request, *, title, eyebrow, intro, sections, meta_notice=""):
@@ -37,6 +79,11 @@ def _render_public_info_page(request, *, title, eyebrow, intro, sections, meta_n
             "meta_notice": meta_notice,
             "sections": sections,
             "quick_links": _website_quick_links(),
+            **_website_public_meta(
+                request,
+                title=f"{title} | Sistema de Furação",
+                description=intro,
+            ),
         },
     )
 
@@ -50,6 +97,14 @@ def home(request):
         {
             "planos": planos_cards[:3],
             "quick_links": _website_quick_links(),
+            **_website_public_meta(
+                request,
+                title="Sistema de Furação | Plataforma profissional para operações de drilling",
+                description=(
+                    "Sistema de Furação: plataforma profissional para projetos, furos, medições, "
+                    "gestão operacional, financeira e técnica em operações de diamond drilling."
+                ),
+            ),
         },
     )
 
@@ -62,6 +117,11 @@ def planos(request):
         "website/planos.html",
         {
             "planos": planos_cards,
+            **_website_public_meta(
+                request,
+                title="Planos | Sistema de Furação",
+                description="Consulta os planos comerciais do Sistema de Furação para equipas, empresas e operação técnica.",
+            ),
         },
     )
 
@@ -349,6 +409,11 @@ def registo(request):
         {
             "planos": planos_qs,
             "planos_contexto": planos_contexto,
+            **_website_public_meta(
+                request,
+                title="Registo | Sistema de Furação",
+                description="Cria conta no Sistema de Furação e começa a avaliar a plataforma.",
+            ),
         },
     )
 
