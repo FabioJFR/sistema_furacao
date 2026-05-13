@@ -23,7 +23,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 
-<body class="{% if is_platform_admin %}sf-platform-admin{% endif %}">
+<body class="{% if is_platform_admin %}sf-platform-admin {% endif %}{% if request.user.is_superuser %}sf-superuser-nav{% endif %}">
 
 <div class="navbar">
     <div class="navbar-inner">

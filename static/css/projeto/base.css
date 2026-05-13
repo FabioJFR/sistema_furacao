@@ -392,49 +392,121 @@
             line-height: 1.2;
         }
 
-        body.sf-platform-admin .navbar-inner {
+        body.sf-platform-admin .navbar-inner,
+        body.sf-superuser-nav .navbar-inner {
             min-height: 58px;
             gap: 12px;
             padding-right: 24px;
+            flex-wrap: nowrap;
+            align-items: center;
         }
 
-        body.sf-platform-admin .nav-center {
+        body.sf-platform-admin .nav-center,
+        body.sf-superuser-nav .nav-center {
             gap: 6px;
+            flex: 1 1 auto;
+            min-width: 0;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
         }
 
-        body.sf-platform-admin .nav-link {
+        body.sf-platform-admin .nav-link,
+        body.sf-superuser-nav .nav-link {
             padding: 9px 11px;
             font-size: 13px;
             gap: 5px;
         }
 
-        body.sf-platform-admin .dropdown {
+        body.sf-platform-admin .nav-left,
+        body.sf-superuser-nav .nav-left {
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+
+        body.sf-platform-admin .navbar-logo,
+        body.sf-superuser-nav .navbar-logo {
+            padding: 8px 12px;
+            gap: 8px;
+            font-size: 1.05rem;
+        }
+
+        body.sf-platform-admin .navbar-logo img,
+        body.sf-superuser-nav .navbar-logo img {
+            width: 30px;
+            height: 30px;
+        }
+
+        body.sf-platform-admin .nav-item,
+        body.sf-superuser-nav .nav-item {
+            flex: 0 0 auto;
+        }
+
+        body.sf-platform-admin .dropdown,
+        body.sf-superuser-nav .dropdown {
             min-width: 210px;
         }
 
-        body.sf-platform-admin .dropdown a {
+        body.sf-platform-admin .dropdown a,
+        body.sf-superuser-nav .dropdown a {
             padding: 9px 14px;
             font-size: 13px;
         }
 
-        body.sf-platform-admin .nav-right {
+        body.sf-platform-admin .nav-right,
+        body.sf-superuser-nav .nav-right {
+            flex: 0 0 auto;
+            margin-left: auto;
             margin-right: 18px;
         }
 
-        body.sf-platform-admin .user-box {
+        body.sf-platform-admin .user-box,
+        body.sf-superuser-nav .user-box {
             min-height: 42px;
             padding: 8px 12px;
             gap: 8px;
         }
 
-        body.sf-platform-admin .user-label {
+        body.sf-platform-admin .user-label,
+        body.sf-superuser-nav .user-label {
             font-size: 11px;
             margin-bottom: 1px;
             white-space: nowrap;
         }
 
-        body.sf-platform-admin .user-name {
+        body.sf-platform-admin .user-name,
+        body.sf-superuser-nav .user-name {
             font-size: 13px;
+        }
+
+        @media (min-width: 1200px) {
+            body.sf-platform-admin .navbar-inner,
+            body.sf-superuser-nav .navbar-inner {
+                max-width: 1780px;
+                padding-left: 18px;
+                padding-right: 18px;
+                gap: 10px;
+            }
+
+            body.sf-platform-admin .nav-link,
+            body.sf-superuser-nav .nav-link {
+                padding: 8px 10px;
+                font-size: 12.5px;
+            }
+
+            body.sf-platform-admin .dropdown a,
+            body.sf-superuser-nav .dropdown a {
+                font-size: 12.5px;
+            }
+
+            body.sf-platform-admin .nav-right,
+            body.sf-superuser-nav .nav-right {
+                margin-right: 0;
+            }
+
+            body.sf-platform-admin .user-box,
+            body.sf-superuser-nav .user-box {
+                padding: 7px 10px;
+            }
         }
 
         .content-wrap {
