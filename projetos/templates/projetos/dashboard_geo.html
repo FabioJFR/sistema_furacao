@@ -1,6 +1,6 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
-<!-- projetos/templates/projetos/dashboard_geo.html -->
+{% load static i18n %}
+
 {% block title %}{% trans "Dashboard Geológico" %}{% endblock %}
 
 {% block extra_head %}
@@ -8,22 +8,39 @@
 {% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <!-- TÍTULO -->
-    <div class="header-bar mb-6">
-        <h1 class="title">{% blocktrans with nome=furo.nome %}📊 Dashboard Geológico - {{ nome }}{% endblocktrans %}</h1>
-    </div>
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Geologia" %}</p>
+                <h1 class="sf-page-title sf-break-word">
+                    {% blocktrans with nome=furo.nome %}Dashboard geológico - {{ nome }}{% endblocktrans %}
+                </h1>
+                <p class="sf-page-description">
+                    {% trans "Visualização rápida da evolução geológica do furo, usando o mesmo enquadramento visual das páginas de gestão." %}
+                </p>
+            </div>
+        </div>
 
-    <!-- CARD DO GRÁFICO -->
-    <div class="card dashboard-geo-card">
-        <canvas id="grafico" class="dashboard-geo-canvas"></canvas>
+        <div class="sf-note-card">
+            {% trans "O gráfico é carregado a partir das medições do furo e ocupa a largura útil da página para melhor leitura em desktop e mobile." %}
+        </div>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Gráfico geológico" %}</h2>
+                </div>
+            </div>
+            <div class="dashboard-geo-card">
+                <canvas id="grafico" class="dashboard-geo-canvas"></canvas>
+            </div>
+        </section>
     </div>
 </section>
-
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div id="dashboard-geo-config" data-medicoes-url="{% url 'projetos:furo_medicoes_json' furo.id %}"></div>
 <script src="{% static 'js/projetos/dashboard_geo.js' %}"></script>

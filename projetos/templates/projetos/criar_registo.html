@@ -1,66 +1,82 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}{% trans "Criar Registo Diário" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+<section class="of-page">
+    <div class="of-card">
+        <div class="of-hero">
+            <div>
+                <div class="of-eyebrow">{% trans "Registo Operacional" %}</div>
+                <h1 class="of-title">{% trans "Criar Registo Diário" %}</h1>
+                <p class="of-subtitle">{% trans "Regista o trabalho realizado no turno com horas, metros, pausas e evidências, mantendo histórico claro da operação no furo." %}</p>
+            </div>
+            <div class="of-hero-card">
+                <div class="of-hero-kicker">{% trans "Objetivo" %}</div>
+                <div class="of-hero-value">{% trans "Turno completo" %}</div>
+                <p class="of-hero-copy">{% trans "Preenche os dados essenciais do turno e anexa a foto do relatório quando existir suporte visual." %}</p>
+            </div>
+        </div>
 
-        <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            📘 {% trans "Criar Registo Diário" %}
-        </h1>
+        <div class="of-banner">
+            <strong>{% trans "Dica:" %}</strong>
+            <span>{% trans "Regista aqui o trabalho diário realizado no furo, incluindo metros furados, horas e eventuais paragens." %}</span>
+        </div>
 
-        <form method="post" enctype="multipart/form-data" class="space-y-5">
+        <form method="post" enctype="multipart/form-data" class="of-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                <div class="of-alert">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="of-section">
+                <div class="of-section-head">
+                    <div>
+                        <div class="of-section-eyebrow">{% trans "Preenchimento" %}</div>
+                        <h2 class="of-section-title">{% trans "Dados do registo" %}</h2>
+                    </div>
+                    <p class="of-section-copy">{% trans "Preencha os campos do turno e use as observações para qualquer contexto operacional que possa ser útil mais tarde." %}</p>
+                </div>
+                <div class="of-grid">
                 {% for field in form %}
-                    <div class="{% if field.name == 'observacoes' or field.name == 'relatorio_foto' %}md:col-span-2{% endif %}">
-                        <label class="block font-semibold mb-1 text-gray-700">
+                    <div class="of-field {% if field.name == 'observacoes' or field.name == 'relatorio_foto' %}of-field-span-2{% endif %}">
+                        <label class="of-label">
                             {{ field.label }}
                         </label>
 
-                        {{ field|add_class:"w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" }}
+                        {{ field|add_class:"of-input" }}
 
                         {% if field.help_text %}
-                            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                            <p class="of-help">{{ field.help_text }}</p>
                         {% endif %}
 
                         {% if field.errors %}
-                            <div class="text-red-600 text-sm mt-1">
+                            <div class="of-errors">
                                 {{ field.errors }}
                             </div>
                         {% endif %}
                     </div>
                 {% endfor %}
+                </div>
             </div>
 
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
-                <p class="text-sm">
-                    {% trans "Regista aqui o trabalho diário realizado no furo, incluindo metros furados, horas e eventuais paragens." %}
-                </p>
+            <div class="of-actions">
+                <a href="{% url 'projetos:area_empregado' %}" class="of-btn of-btn-secondary">
+                    {% trans "Voltar" %}
+                </a>
+                <button type="submit" class="of-btn of-btn-primary">
+                    {% trans "Guardar Registo" %}
+                </button>
             </div>
-
-            <button type="submit"
-                    class="bg-emerald-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition shadow w-full text-lg">
-                💾 {% trans "Guardar Registo" %}
-            </button>
         </form>
-
-        <div class="mt-4 text-center">
-            <a href="{% url 'projetos:area_empregado' %}"
-               class="inline-block bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                🔙 {% trans "Voltar" %}
-            </a>
-        </div>
-
     </div>
 </section>
 {% endblock %}

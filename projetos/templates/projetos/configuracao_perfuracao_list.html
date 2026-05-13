@@ -4,66 +4,82 @@
 {% block title %}{% trans "Configurações de Perfuração" %}{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">
-                {% blocktrans with nome=empregado.nome %}Configurações de Perfuração - {{ nome }}{% endblocktrans %}
-            </h1>
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Perfuração" %}</p>
+                <h1 class="sf-page-title">
+                    {% blocktrans with nome=empregado.nome %}Configurações de perfuração - {{ nome }}{% endblocktrans %}
+                </h1>
+                <p class="sf-page-description">
+                    {% trans "Resumo das configurações registadas para este trabalhador, com acesso direto à criação e edição." %}
+                </p>
+            </div>
 
-            {% if modo_admin %}
-                <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado.pk %}"
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    {% trans "Nova Configuração" %}
-                </a>
+            <div class="sf-page-actions">
+                {% if modo_admin %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_create_admin' empregado.pk %}" class="btn btn-primary">
+                        {% trans "Nova configuração" %}
+                    </a>
+                {% else %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}" class="btn btn-primary">
+                        {% trans "Nova configuração" %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Configurações registadas" %}</h2>
+                </div>
+            </div>
+
+            {% if configuracoes %}
+                <div class="sf-table-card">
+                    <div class="sf-table-wrap">
+                        <table class="sf-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Furo" %}</th>
+                                    <th>{% trans "Conjunto de fundo" %}</th>
+                                    <th>{% trans "Tubo interior" %}</th>
+                                    <th>{% trans "Atualizado em" %}</th>
+                                    <th>{% trans "Ações" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for config in configuracoes %}
+                                    <tr>
+                                        <td>{{ config.furo.nome }}</td>
+                                        <td>{{ config.comprimento_total_conjunto_fundo|floatformat:2 }} m</td>
+                                        <td>{{ config.comprimento_total_tubo_interior|floatformat:2 }} m</td>
+                                        <td>{{ config.atualizado_em }}</td>
+                                        <td>
+                                            <div class="sf-actions-inline">
+                                                {% if modo_admin %}
+                                                    <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}" class="btn btn-primary">
+                                                        {% trans "Editar" %}
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}" class="btn btn-primary">
+                                                        {% trans "Editar" %}
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             {% else %}
-                <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}"
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    {% trans "Nova Configuração" %}
-                </a>
+                <div class="sf-empty-state">{% trans "Ainda não existem configurações de perfuração registadas." %}</div>
             {% endif %}
-        </div>
-
-        {% if configuracoes %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr>
-                        <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Conjunto de Fundo" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Tubo Interior" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Atualizado em" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for config in configuracoes %}
-                    <tr class="border-t border-gray-200">
-                        <td class="px-4 py-3">{{ config.furo.nome }}</td>
-                        <td class="px-4 py-3">{{ config.comprimento_total_conjunto_fundo|floatformat:2 }} m</td>
-                        <td class="px-4 py-3">{{ config.comprimento_total_tubo_interior|floatformat:2 }} m</td>
-                        <td class="px-4 py-3">{{ config.atualizado_em }}</td>
-                        <td class="px-4 py-3">
-                            {% if modo_admin %}
-                                    <a href="{% url 'projetos:configuracao_perfuracao_update_admin' config.pk %}"
-                                   class="bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-600 transition">
-                                    {% trans "Editar" %}
-                                </a>
-                            {% else %}
-                                <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}"
-                                   class="bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-600 transition">
-                                    {% trans "Editar" %}
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração registadas." %}</p>
-        {% endif %}
+        </section>
     </div>
 </section>
 {% endblock %}

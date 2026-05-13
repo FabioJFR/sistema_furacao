@@ -1,58 +1,93 @@
 {% extends "projetos/base.html" %}
-{% load i18n widget_tweaks %}
+{% load static i18n widget_tweaks %}
 
 {% block title %}{{ titulo }} | Sistema Furação{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_form.css' %}?v=20260512-1528">
+{% endblock %}
+
 {% block content %}
-<section class="page-card sf-page-wide">
-    <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-            <h1>{{ titulo }}</h1>
-            <p class="mt-2 text-sm text-slate-600">
-                {% trans "Máquina:" %} <strong>{{ maquina.nome }}</strong>
-            </p>
-        </div>
-        <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="btn btn-light">{% trans "Voltar" %}</a>
-    </div>
-
-    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{% trans "Planeamento por Máquina" %}</div>
-        <div class="mt-2 text-3xl font-black text-slate-900">{{ titulo }}</div>
-        <p class="mt-3 text-sm text-slate-600">
-            {% trans "Defina aqui o horário oficial de cada turno desta máquina. Qualquer trabalhador planeado nesta máquina terá de cumprir obrigatoriamente este horário." %}
-        </p>
-    </div>
-
-    <form method="post" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-            <div class="md:col-span-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {{ form.non_field_errors }}
+<section class="mqf-page">
+    <div class="mqf-shell">
+        <div class="mqf-top">
+            <div class="mqf-heading">
+                <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mqf-back">
+                    ← {% trans "Voltar à máquina" %}
+                </a>
+                <h1 class="mqf-title">{{ titulo }}</h1>
+                <p class="mqf-subtitle">
+                    {% blocktrans with nome=maquina.nome %}Defina o horário operativo da máquina {{ nome }} para garantir planeamento e execução consistentes.{% endblocktrans %}
+                </p>
             </div>
-        {% endif %}
-        {% for field in form %}
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ field.label }}</label>
-                {% if field.field.widget.input_type == "checkbox" %}
-                    <div class="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800">
-                        {{ field }}
-                        <span>{% trans "Ativo para planeamento" %}</span>
+        </div>
+
+        <form method="post" class="mqf-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="mqf-global-errors">
+                    {% for erro in form.non_field_errors %}
+                        <div>{{ erro }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="mqf-section">
+                <div class="mqf-section-head">
+                    <div>
+                        <h2 class="mqf-section-title">{% trans "Dados do turno" %}</h2>
                     </div>
-                {% else %}
-                    {{ field|add_class:"w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800" }}
-                {% endif %}
-                {% for error in field.errors %}
-                    <p class="text-sm text-red-600 mt-1">{{ error }}</p>
-                {% endfor %}
+                    <p class="mqf-section-copy">
+                        {% trans "Defina o turno, a hora de início e a hora de fim. Se atravessar a meia-noite, o sistema trata automaticamente o fecho no dia seguinte." %}
+                    </p>
+                </div>
+
+                <div class="mqf-grid">
+                    {% for field in form %}
+                        {% if field.field.widget.input_type == "checkbox" %}
+                            <div class="mqf-field mqf-field-span-2 mqf-field-checkbox">
+                                <label class="mqf-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                <label class="mqf-checkbox-card" for="{{ field.id_for_label }}">
+                                    {{ field }}
+                                    <span>
+                                        <strong>{% trans "Ativo para planeamento" %}</strong>
+                                        <small>{% trans "Quando ativo, este turno pode ser usado como referência oficial no planeamento da máquina." %}</small>
+                                    </span>
+                                </label>
+                                {% for error in field.errors %}
+                                    <div class="mqf-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mqf-field">
+                                <label class="mqf-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field|add_class:"mqf-input" }}
+                                {% if field.help_text %}<small class="mqf-hint">{{ field.help_text }}</small>{% endif %}
+                                {% for error in field.errors %}
+                                    <div class="mqf-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="mqf-field mqf-field-span-2">
+                        <small class="mqf-hint">
+                            {% trans "Exemplo: uma máquina pode operar em 06:00-14:00, 14:00-22:00 ou 22:00-06:00, conforme a organização da operação." %}
+                        </small>
+                    </div>
+                </div>
             </div>
-        {% endfor %}
-        <div class="md:col-span-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
-            {% trans "Exemplo: numa máquina pode definir Manhã 06:00-14:00 e Noutra 08:00-18:00. Se o turno atravessar a meia-noite, como 22:00-06:00, o planeamento passa automaticamente a terminar no dia seguinte." %}
-        </div>
-        <div class="md:col-span-2 flex items-center gap-2 mt-2">
-            <button type="submit" class="btn btn-primary">{% trans "Guardar" %}</button>
-            <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="btn btn-light">{% trans "Cancelar" %}</a>
-        </div>
-    </form>
+
+            <div class="mqf-actions">
+                <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mqf-btn mqf-btn-secondary">
+                    {% trans "Cancelar" %}
+                </a>
+                <button type="submit" class="mqf-btn mqf-btn-primary">
+                    {% trans "Guardar" %}
+                </button>
+            </div>
+        </form>
+    </div>
 </section>
 {% endblock %}

@@ -1,67 +1,262 @@
 {% extends 'projetos/base.html' %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/material_form.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/material_form.css' %}?v=20260512-1735">
 {% endblock %}
 
 {% block content %}
-<section class="mf-shell">
-
-    <div class="mf-card">
-
-        <h1 class="mf-title">
-            {{ titulo }}
-        </h1>
+<section class="mf-page">
+    <div class="mf-shell">
+        <div class="mf-top">
+            <div class="mf-heading">
+                <a href="{% if material %}{% url 'projetos:material_detail' material.id %}{% else %}{% url 'projetos:material_list' %}{% endif %}" class="mf-back">
+                    ← {% if material %}{% trans "Voltar ao material" %}{% else %}{% trans "Voltar aos materiais" %}{% endif %}
+                </a>
+                <h1 class="mf-title">
+                    {% if material %}📦 {% trans "Editar material" %}{% else %}📦 {% trans "Criar material" %}{% endif %}
+                </h1>
+                <p class="mf-subtitle">
+                    {% if material %}
+                        {% trans "Atualize stock, fornecedor, afetação operacional e custo deste material sem sair deste formulário." %}
+                    {% else %}
+                        {% trans "Crie uma ficha de material clara para controlar stock, fornecedor, afetação operacional e custo com mais confiança." %}
+                    {% endif %}
+                </p>
+            </div>
+            {% if material %}
+                <div class="mf-top-actions">
+                    <a href="{% url 'projetos:material_detail' material.id %}" class="mf-btn mf-btn-primary">
+                        {% trans "Ver material" %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
 
         <form method="post" class="mf-form">
             {% csrf_token %}
 
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% endif %}
+            {% endfor %}
+
             {% if form.non_field_errors %}
                 <div class="mf-global-errors">
-                    {{ form.non_field_errors }}
+                    {% for erro in form.non_field_errors %}
+                        <div>{{ erro }}</div>
+                    {% endfor %}
                 </div>
             {% endif %}
 
-            <div class="mf-grid">
-                {% for field in form %}
-                    <div class="{% if field.name == 'observacoes' %}mf-field-full{% endif %}">
-                        <label class="mf-label">
-                            {{ field.label }}
-                        </label>
-
-                        {{ field }}
-
-                        {% if field.help_text %}
-                            <small class="mf-help">
-                                {{ field.help_text }}
-                            </small>
-                        {% endif %}
-
-                        {% if field.errors %}
-                            <div class="mf-errors">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
+            <div class="mf-section">
+                <div class="mf-section-head">
+                    <div>
+                        <h2 class="mf-section-title">{% trans "Projeto e furo associados" %}</h2>
                     </div>
-                {% endfor %}
+                    <p class="mf-section-copy">
+                        {% trans "Defina o enquadramento operacional deste material dentro da empresa." %}
+                    </p>
+                </div>
+                <div class="mf-grid">
+                    {% if form.projeto %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.projeto.id_for_label }}">{{ form.projeto.label }}</label>
+                            {{ form.projeto }}
+                            {% if form.projeto.help_text %}<small class="mf-help">{{ form.projeto.help_text }}</small>{% endif %}
+                            {% if form.projeto.errors %}<div class="mf-errors">{{ form.projeto.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.furo %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.furo.id_for_label }}">{{ form.furo.label }}</label>
+                            {{ form.furo }}
+                            {% if form.furo.help_text %}<small class="mf-help">{{ form.furo.help_text }}</small>{% endif %}
+                            {% if form.furo.errors %}<div class="mf-errors">{{ form.furo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mf-section">
+                <div class="mf-section-head">
+                    <div>
+                        <h2 class="mf-section-title">{% trans "Ficha principal do material" %}</h2>
+                    </div>
+                    <p class="mf-section-copy">
+                        {% trans "Os campos abaixo ajudam a identificar rapidamente o material em stock, em listas e em movimentos." %}
+                    </p>
+                </div>
+                <div class="mf-grid">
+                    {% if form.nome %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                            {{ form.nome }}
+                            {% if form.nome.help_text %}<small class="mf-help">{{ form.nome.help_text }}</small>{% endif %}
+                            {% if form.nome.errors %}<div class="mf-errors">{{ form.nome.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.tipo %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                            {{ form.tipo }}
+                            {% if form.tipo.help_text %}<small class="mf-help">{{ form.tipo.help_text }}</small>{% endif %}
+                            {% if form.tipo.errors %}<div class="mf-errors">{{ form.tipo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.marca %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.marca.id_for_label }}">{{ form.marca.label }}</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}<div class="mf-errors">{{ form.marca.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.numero_serie %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.numero_serie.id_for_label }}">{{ form.numero_serie.label }}</label>
+                            {{ form.numero_serie }}
+                            {% if form.numero_serie.errors %}<div class="mf-errors">{{ form.numero_serie.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.estado %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}<div class="mf-errors">{{ form.estado.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.localizacao %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.localizacao.id_for_label }}">{{ form.localizacao.label }}</label>
+                            {{ form.localizacao }}
+                            {% if form.localizacao.errors %}<div class="mf-errors">{{ form.localizacao.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mf-section">
+                <div class="mf-section-head">
+                    <div>
+                        <h2 class="mf-section-title">{% trans "Quantidades, unidade e controlo" %}</h2>
+                    </div>
+                    <p class="mf-section-copy">
+                        {% trans "Mantenha estes valores atualizados para evitar ruturas e melhorar o acompanhamento do inventário." %}
+                    </p>
+                </div>
+                <div class="mf-grid">
+                    {% if form.quantidade %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.quantidade.id_for_label }}">{{ form.quantidade.label }}</label>
+                            {{ form.quantidade }}
+                            {% if form.quantidade.errors %}<div class="mf-errors">{{ form.quantidade.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.stock_minimo %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
+                            {{ form.stock_minimo }}
+                            {% if form.stock_minimo.errors %}<div class="mf-errors">{{ form.stock_minimo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.unidade %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.unidade.id_for_label }}">{{ form.unidade.label }}</label>
+                            {{ form.unidade }}
+                            {% if form.unidade.errors %}<div class="mf-errors">{{ form.unidade.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.diametro %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.diametro.id_for_label }}">{{ form.diametro.label }}</label>
+                            {{ form.diametro }}
+                            {% if form.diametro.errors %}<div class="mf-errors">{{ form.diametro.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.ativo %}
+                        <div class="mf-field mf-field-span-2">
+                            <label class="mf-label" for="{{ form.ativo.id_for_label }}">{{ form.ativo.label }}</label>
+                            <label class="mf-checkbox-card" for="{{ form.ativo.id_for_label }}">
+                                {{ form.ativo }}
+                                <span>
+                                    <strong>{% trans "Material ativo" %}</strong>
+                                    <small>{% trans "Disponível para uso, movimentos e seleção nos fluxos normais da empresa." %}</small>
+                                </span>
+                            </label>
+                            {% if form.ativo.errors %}<div class="mf-errors">{{ form.ativo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mf-section">
+                <div class="mf-section-head">
+                    <div>
+                        <h2 class="mf-section-title">{% trans "Fornecedor, custo e data" %}</h2>
+                    </div>
+                    <p class="mf-section-copy">
+                        {% trans "Registe a origem do material e o seu custo para apoiar compras e análise financeira." %}
+                    </p>
+                </div>
+                <div class="mf-grid">
+                    {% if form.fornecedor %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.fornecedor.id_for_label }}">{{ form.fornecedor.label }}</label>
+                            {{ form.fornecedor }}
+                            {% if form.fornecedor.errors %}<div class="mf-errors">{{ form.fornecedor.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.valor %}
+                        <div class="mf-field">
+                            <label class="mf-label" for="{{ form.valor.id_for_label }}">{{ form.valor.label }}</label>
+                            {{ form.valor }}
+                            {% if form.valor.errors %}<div class="mf-errors">{{ form.valor.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.data_compra %}
+                        <div class="mf-field mf-field-span-2">
+                            <label class="mf-label" for="{{ form.data_compra.id_for_label }}">{{ form.data_compra.label }}</label>
+                            {{ form.data_compra }}
+                            {% if form.data_compra.errors %}<div class="mf-errors">{{ form.data_compra.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mf-section">
+                <div class="mf-section-head">
+                    <div>
+                        <h2 class="mf-section-title">{% trans "Observações adicionais" %}</h2>
+                    </div>
+                    <p class="mf-section-copy">
+                        {% trans "Use este espaço para indicar condições especiais, destino previsto, cuidados de armazenamento ou contexto operacional." %}
+                    </p>
+                </div>
+                <div class="mf-grid">
+                    {% if form.observacoes %}
+                        <div class="mf-field mf-field-span-2">
+                            <label class="mf-label" for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.help_text %}<small class="mf-help">{{ form.observacoes.help_text }}</small>{% endif %}
+                            {% if form.observacoes.errors %}<div class="mf-errors">{{ form.observacoes.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
             <div class="mf-actions">
-
-                <button type="submit" class="mf-btn mf-btn-save">
-                    💾 {% trans "Salvar" %}
+                <button type="submit" class="mf-btn mf-btn-primary">
+                    {% if material %}{% trans "Salvar alterações" %}{% else %}{% trans "Criar material" %}{% endif %}
                 </button>
 
-                <a href="{% url 'projetos:material_list' %}" class="mf-btn mf-btn-back">
-                    🔙 {% trans "Voltar" %}
+                <a href="{% if material %}{% url 'projetos:material_detail' material.id %}{% else %}{% url 'projetos:material_list' %}{% endif %}" class="mf-btn mf-btn-secondary">
+                    {% trans "Cancelar" %}
                 </a>
-
             </div>
         </form>
-
     </div>
 </section>
 {% endblock %}

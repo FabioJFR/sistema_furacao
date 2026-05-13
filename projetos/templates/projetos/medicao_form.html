@@ -1,47 +1,162 @@
-{% extends 'projetos/base.html' %}
-{% load i18n %}
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/medicao_form.css' %}?v=20260512-1658">
+{% endblock %}
 
 {% block content %}
-<section class="sf-page">
-
-    <div class="sf-panel border-t-4 border-blue-600">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-            {{ titulo }}
-        </h1>
+<section class="mdf-page">
+    <div class="mdf-shell">
+        <div class="mdf-top">
+            <div class="mdf-heading">
+                <a href="{% if furo %}{{ furo.get_absolute_url }}{% else %}{% url 'projetos:medicao_list' %}{% endif %}" class="mdf-back">
+                    ← {% if furo %}{% trans "Voltar ao furo" %}{% else %}{% trans "Voltar às medições" %}{% endif %}
+                </a>
+                <h1 class="mdf-title">📏 {{ titulo }}</h1>
+                <p class="mdf-subtitle">
+                    {% if medicao %}
+                        {% trans "Atualize a leitura técnica da medição, incluindo profundidade, direção, coordenadas e observações de apoio." %}
+                    {% else %}
+                        {% trans "Registe uma nova leitura técnica da medição, incluindo profundidade, direção, coordenadas e observações de apoio." %}
+                    {% endif %}
+                </p>
+            </div>
+            {% if furo %}
+                <div class="mdf-top-actions">
+                    <a href="{{ furo.get_absolute_url }}" class="mdf-btn mdf-btn-primary">{% trans "Ver furo" %}</a>
+                </div>
+            {% endif %}
+        </div>
 
         {% if form.non_field_errors %}
-            <div class="mb-4 rounded-lg bg-red-100 text-red-700 p-3">
-                {{ form.non_field_errors }}
+            <div class="mdf-errors-global">
+                {% for erro in form.non_field_errors %}
+                    <div>{{ erro }}</div>
+                {% endfor %}
             </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data" class="space-y-5">
+        <form method="post" enctype="multipart/form-data" class="mdf-form">
             {% csrf_token %}
 
-            <div class="space-y-4">
-                {{ form.as_p }}
-            </div>
+            <section class="mdf-section">
+                <div class="mdf-section-head">
+                    <div>
+                        <h2 class="mdf-section-title">{% trans "Leitura técnica" %}</h2>
+                    </div>
+                    <p class="mdf-section-copy">
+                        {% trans "Preencha os indicadores principais da medição para manter o histórico técnico do furo consistente." %}
+                    </p>
+                </div>
+                <div class="mdf-grid">
+                    <div class="mdf-field">
+                        <label for="{{ form.profundidade_medida.id_for_label }}" class="mdf-label">{{ form.profundidade_medida.label }}</label>
+                        {{ form.profundidade_medida }}
+                        {% if form.profundidade_medida.errors %}<div class="mdf-errors">{{ form.profundidade_medida.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.inclinacao_real_medida.id_for_label }}" class="mdf-label">{{ form.inclinacao_real_medida.label }}</label>
+                        {{ form.inclinacao_real_medida }}
+                        {% if form.inclinacao_real_medida.errors %}<div class="mdf-errors">{{ form.inclinacao_real_medida.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.azimute_real_medido.id_for_label }}" class="mdf-label">{{ form.azimute_real_medido.label }}</label>
+                        {{ form.azimute_real_medido }}
+                        {% if form.azimute_real_medido.errors %}<div class="mdf-errors">{{ form.azimute_real_medido.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.magnetismo.id_for_label }}" class="mdf-label">{{ form.magnetismo.label }}</label>
+                        {{ form.magnetismo }}
+                        {% if form.magnetismo.errors %}<div class="mdf-errors">{{ form.magnetismo.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
 
-            <div class="flex gap-3 pt-4">
-                <button type="submit" 
-                        class="flex-1 flex items-center justify-center bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                    💾 {% trans "Salvar" %}
+            <section class="mdf-section">
+                <div class="mdf-section-head">
+                    <div>
+                        <h2 class="mdf-section-title">{% trans "Coordenadas e imagem" %}</h2>
+                    </div>
+                    <p class="mdf-section-copy">
+                        {% trans "Guarde a referência espacial e eventual imagem da medição para consulta futura." %}
+                    </p>
+                </div>
+                <div class="mdf-grid">
+                    <div class="mdf-field">
+                        <label for="{{ form.latitude.id_for_label }}" class="mdf-label">{{ form.latitude.label }}</label>
+                        {{ form.latitude }}
+                        {% if form.latitude.errors %}<div class="mdf-errors">{{ form.latitude.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.longitude.id_for_label }}" class="mdf-label">{{ form.longitude.label }}</label>
+                        {{ form.longitude }}
+                        {% if form.longitude.errors %}<div class="mdf-errors">{{ form.longitude.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.altitude.id_for_label }}" class="mdf-label">{{ form.altitude.label }}</label>
+                        {{ form.altitude }}
+                        {% if form.altitude.errors %}<div class="mdf-errors">{{ form.altitude.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.imagem.id_for_label }}" class="mdf-label">{{ form.imagem.label }}</label>
+                        {{ form.imagem }}
+                        {% if form.imagem.errors %}<div class="mdf-errors">{{ form.imagem.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="mdf-section">
+                <div class="mdf-section-head">
+                    <div>
+                        <h2 class="mdf-section-title">{% trans "Caracterização complementar" %}</h2>
+                    </div>
+                    <p class="mdf-section-copy">
+                        {% trans "Dados adicionais de leitura de campo para apoiar análise geológica e interpretação posterior." %}
+                    </p>
+                </div>
+                <div class="mdf-grid">
+                    <div class="mdf-field">
+                        <label for="{{ form.tipo_rocha.id_for_label }}" class="mdf-label">{{ form.tipo_rocha.label }}</label>
+                        {{ form.tipo_rocha }}
+                        {% if form.tipo_rocha.errors %}<div class="mdf-errors">{{ form.tipo_rocha.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.cor.id_for_label }}" class="mdf-label">{{ form.cor.label }}</label>
+                        {{ form.cor }}
+                        {% if form.cor.errors %}<div class="mdf-errors">{{ form.cor.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field">
+                        <label for="{{ form.dureza.id_for_label }}" class="mdf-label">{{ form.dureza.label }}</label>
+                        {{ form.dureza }}
+                        {% if form.dureza.errors %}<div class="mdf-errors">{{ form.dureza.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mdf-field mdf-field-span-2">
+                        <label for="{{ form.observacoes.id_for_label }}" class="mdf-label">{{ form.observacoes.label }}</label>
+                        {{ form.observacoes }}
+                        {% if form.observacoes.errors %}<div class="mdf-errors">{{ form.observacoes.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <div class="mdf-actions">
+                <button type="submit" class="mdf-btn mdf-btn-primary">
+                    {% if medicao %}{% trans "Salvar alterações" %}{% else %}{% trans "Salvar" %}{% endif %}
                 </button>
 
                 {% if furo %}
-                    <a href="{{ furo.get_absolute_url }}" 
-                       class="flex-1 flex items-center justify-center bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                        🔙 {% trans "Voltar" %}
+                    <a href="{{ furo.get_absolute_url }}" class="mdf-btn mdf-btn-secondary">
+                        {% trans "Cancelar" %}
                     </a>
                 {% else %}
-                    <a href="{% url 'projetos:medicao_list' %}" 
-                       class="flex-1 flex items-center justify-center bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-                        🔙 {% trans "Voltar" %}
+                    <a href="{% url 'projetos:medicao_list' %}" class="mdf-btn mdf-btn-secondary">
+                        {% trans "Cancelar" %}
                     </a>
                 {% endif %}
             </div>
         </form>
     </div>
-
 </section>
 {% endblock %}

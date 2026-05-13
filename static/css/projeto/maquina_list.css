@@ -1,114 +1,183 @@
-.mql-wrap {
+.maq-page {
+    padding: 24px 15px 36px;
+}
+
+.maq-wrap {
     width: 100%;
-    margin: 20px 0;
+    max-width: 1920px;
+    margin: 0 auto;
 }
 
-.mql-top {
+.maq-hero {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.mql-top h1 {
-    margin: 0;
-}
-
-.mql-btn-add {
-    background-color: #0f766e;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background 0.2s;
-}
-
-.mql-btn-add:hover {
-    background: #115e59;
-}
-
-.mql-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.mql-card {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-    color: #0f172a;
-    display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.2s, box-shadow 0.2s;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
 }
 
-.mql-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
-}
-
-.mql-card h2 {
-    margin-top: 0;
-    margin-bottom: 12px;
+.maq-title {
+    margin: 0;
     color: #0f172a;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.08;
+    font-weight: 900;
 }
 
-.mql-card p {
-    color: #334155;
+.maq-create-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 16px;
+    background: #334c68;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    transition: background 0.18s ease, transform 0.18s ease;
 }
 
-.mql-actions {
-    margin-top: 15px;
+.maq-create-btn:hover {
+    background: #283f59;
+    transform: translateY(-1px);
+}
+
+.maq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 314px));
+    gap: 14px;
+    align-items: start;
+}
+
+.maq-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px 18px 16px;
+    border: 1px solid #dbe3ec;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.maq-card-head {
+    display: grid;
+    gap: 6px;
+}
+
+.maq-eyebrow {
+    color: #64748b;
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.maq-card-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.22rem;
+    line-height: 1.12;
+    font-weight: 900;
+    word-break: break-word;
+}
+
+.maq-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+}
+
+.maq-meta-item {
+    display: grid;
+    gap: 4px;
+}
+
+.maq-meta-item-full {
+    grid-column: 1 / -1;
+}
+
+.maq-meta-label {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.maq-meta-value {
+    color: #0f172a;
+    font-size: 0.88rem;
+    line-height: 1.38;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.maq-actions {
     display: flex;
-    gap: 10px;
+    gap: 7px;
     flex-wrap: wrap;
 }
 
-.mql-action {
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
+.maq-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 96px;
+    min-height: 36px;
+    padding: 7px 10px;
+    border-radius: 13px;
+    background: #334c68;
+    color: #ffffff;
     text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.maq-btn:hover {
+    background: #283f59;
+    transform: translateY(-1px);
+}
+
+.maq-btn-danger {
+    background: #a83f3f;
+}
+
+.maq-btn-danger:hover {
+    background: #8e3535;
+}
+
+.maq-empty {
+    padding: 22px 24px;
+    border: 1px solid #dbe3ec;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.95rem;
     font-weight: 700;
-    transition: background 0.2s;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
 }
 
-.mql-action-view {
-    background: #0f766e;
-}
+@media (max-width: 720px) {
+    .maq-grid {
+        grid-template-columns: 1fr;
+    }
 
-.mql-action-view:hover {
-    background: #115e59;
-}
+    .maq-card {
+        padding: 20px 18px 18px;
+    }
 
-.mql-action-edit {
-    background: #334155;
-}
+    .maq-meta {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 
-.mql-action-edit:hover {
-    background: #1f2937;
-}
-
-.mql-action-delete {
-    background: #64748b;
-}
-
-.mql-action-delete:hover {
-    background: #475569;
-}
-
-.mql-empty {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    color: #6b7280;
+    .maq-actions {
+        flex-direction: column;
+    }
 }

@@ -1,101 +1,95 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Lista de Empregados" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/empregado_list.css' %}?v=20260511-1105">
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-        <h1 class="text-3xl font-bold text-gray-800">👷 {% trans "Lista de Empregados" %}</h1>
+<section class="emp-page">
+    <div class="emp-wrap">
+        <div class="emp-hero">
+            <div>
+                <h1 class="emp-title">👷 {% trans "Empregados" %}</h1>
+            </div>
+            <a href="{% url 'projetos:empregado_create' %}" class="emp-create-btn">
+                + {% trans "Criar Empregado" %}
+            </a>
+        </div>
 
-        <a href="{% url 'projetos:empregado_create' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
-            ➕ {% trans "Criar Novo Empregado" %}
-        </a>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full border-collapse">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr class="text-left">
-                        <th class="px-4 py-3 border-b">{% trans "Nome" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Função" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Email" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Telefone" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Data de Admissão" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Projetos Atuais" %}</th>
-                        <th class="px-4 py-3 border-b">{% trans "Ações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for empregado in empregados %}
-                    <tr class="border-b hover:bg-gray-50 transition">
-                        <td class="px-4 py-3 font-semibold text-gray-800">
-                            <a href="{{ empregado.get_absolute_url }}" class="hover:text-blue-600 transition">
-                                {{ empregado.nome|default:"-" }}
-                            </a>
-                        </td>
-
-                        <td class="px-4 py-3 text-gray-700">
-                            {{ empregado.funcao|default:"-" }}
-                        </td>
-
-                        <td class="px-4 py-3 text-gray-700">
-                            {{ empregado.email|default:"-" }}
-                        </td>
-
-                        <td class="px-4 py-3 text-gray-700">
-                            {{ empregado.telefone|default:"-" }}
-                        </td>
-
-                        <td class="px-4 py-3 text-gray-700">
-                            {{ empregado.data_admissao|default:"-" }}
-                        </td>
-
-                        <td class="px-4 py-3 text-gray-700">
-                            {% with projetos=empregado.projetos_atuais %}
-                                {% if projetos %}
-                                    <div class="flex flex-wrap gap-2">
-                                        {% for projeto in projetos %}
-                                            <span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">
-                                                {{ projeto.nome }}
-                                            </span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <span class="text-gray-400">{% trans "Sem projetos atuais" %}</span>
-                                {% endif %}
-                            {% endwith %}
-                        </td>
-
-                        <td class="px-4 py-3">
-                            <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 min-w-[220px]">
-                                <a href="{{ empregado.get_absolute_url }}"
-                                   class="inline-flex items-center justify-center min-w-[92px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
-                                    {% trans "Detalhes" %}
+        <div class="emp-table-card">
+            <div class="emp-table-wrap">
+                <table class="emp-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Nome" %}</th>
+                            <th>{% trans "Função" %}</th>
+                            <th>{% trans "Email" %}</th>
+                            <th>{% trans "Telefone" %}</th>
+                            <th>{% trans "Data de Admissão" %}</th>
+                            <th>{% trans "Projetos Atuais" %}</th>
+                            <th>{% trans "Ações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empregado in empregados %}
+                        <tr>
+                            <td>
+                                <a href="{{ empregado.get_absolute_url }}" class="emp-link">
+                                    {{ empregado.nome|default:"-" }}
                                 </a>
+                            </td>
 
-                                <a href="{% url 'projetos:empregado_update' empregado.id %}"
-                                   class="inline-flex items-center justify-center min-w-[92px] bg-amber-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-amber-600 transition shadow-sm">
-                                    {% trans "Editar" %}
-                                </a>
+                            <td>{{ empregado.funcao|default:"-" }}</td>
 
-                                <a href="{% url 'projetos:empregado_delete' empregado.id %}"
-                                   class="inline-flex items-center justify-center min-w-[92px] bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-rose-600 transition shadow-sm">
-                                    {% trans "Apagar" %}
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
-                            {% trans "Nenhum empregado registrado." %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <td>{{ empregado.email|default:"-" }}</td>
+
+                            <td>{{ empregado.telefone|default:"-" }}</td>
+
+                            <td>{{ empregado.data_admissao|default:"-" }}</td>
+
+                            <td>
+                                {% with projetos=empregado.projetos_atuais %}
+                                    {% if projetos %}
+                                        <div class="emp-tag-list">
+                                            {% for projeto in projetos %}
+                                                <span class="emp-tag">{{ projeto.nome }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span class="emp-muted">{% trans "Sem projetos atuais" %}</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+
+                            <td>
+                                <div class="emp-actions">
+                                    <a href="{{ empregado.get_absolute_url }}" class="emp-btn">
+                                        {% trans "Detalhes" %}
+                                    </a>
+
+                                    <a href="{% url 'projetos:empregado_update' empregado.id %}" class="emp-btn">
+                                        {% trans "Editar" %}
+                                    </a>
+
+                                    <a href="{% url 'projetos:empregado_delete' empregado.id %}" class="emp-btn emp-btn-danger">
+                                        {% trans "Apagar" %}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="emp-empty">
+                                {% trans "Nenhum empregado registrado." %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

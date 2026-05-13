@@ -1,16 +1,29 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            {{ titulo }}
-        </h2>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
 
-        <div class="mb-6 rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+{% block content %}
+<section class="of-page">
+    <div class="of-card of-card-wide">
+        <div class="of-hero">
+            <div>
+                <div class="of-eyebrow">{% trans "Correção Operacional" %}</div>
+                <h1 class="of-title">{{ titulo }}</h1>
+                <p class="of-subtitle">{% trans "Ajuste um registo existente com contexto de planeamento, detalhe técnico e evidência suficiente para manter histórico operacional fiável." %}</p>
+            </div>
+            <div class="of-hero-card">
+                <div class="of-hero-kicker">{% trans "Uso ideal" %}</div>
+                <div class="of-hero-value">{% trans "Revisão segura" %}</div>
+                <p class="of-hero-copy">{% trans "Corrija apenas o que precisa, mantendo o alinhamento entre turno planeado, execução registada e relatório técnico." %}</p>
+            </div>
+        </div>
+
+        <div class="of-banner">
             <div class="font-semibold text-base mb-1">{% trans "Correção baseada em planeamento" %}</div>
             <p>
                 {% trans "Ao selecionar um planeamento, o sistema usa automaticamente o projeto, o furo, a data e o horário base definidos para esse turno." %}
@@ -20,21 +33,21 @@
             </p>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" enctype="multipart/form-data" class="of-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <div class="of-alert">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
             {% if relatorio_form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <div class="of-alert">
                     {{ relatorio_form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div class="of-section">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-900">{% trans "Correção do registo operacional" %}</h3>
                     <p class="text-sm text-gray-600">{% trans "Ajuste os dados principais do registo diário e, se necessário, o turno planeado associado." %}</p>
@@ -68,7 +81,7 @@
                 </div>
             </div>
 
-            <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+            <div class="of-section" style="border-color:#c7d2fe; background:linear-gradient(180deg, rgba(238, 242, 255, 0.88) 0%, rgba(255,255,255,1) 100%);">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-indigo-900">{% trans "Relatório técnico do turno" %}</h3>
                     <p class="text-sm text-indigo-800">{% trans "Bloco técnico opcional associado ao registo operacional, usado para detalhe de sondagem, recuperação, equipa e ocorrências." %}</p>
@@ -295,7 +308,7 @@
             </div>
 
             {% if form.instance.pk and form.instance.fotos_amostra.all %}
-                <div class="mt-6">
+                <div class="of-section">
                     <h3 class="text-lg font-bold text-gray-800 mb-3">{% trans "Fotos de Amostra já guardadas" %}</h3>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -314,14 +327,13 @@
                 </div>
             {% endif %}
 
-            <div class="flex gap-3 pt-2">
-                <button type="submit" class="btn btn-success">
-                    💾 {% trans "Guardar Correção" %}
-                </button>
-
-                <a href="{% url 'projetos:registos_admin_list' %}" class="btn btn-primary">
-                    🔙 {% trans "Voltar" %}
+            <div class="of-actions">
+                <a href="{% url 'projetos:registos_admin_list' %}" class="of-btn of-btn-secondary">
+                    {% trans "Voltar" %}
                 </a>
+                <button type="submit" class="of-btn of-btn-primary">
+                    {% trans "Guardar Correção" %}
+                </button>
             </div>
         </form>
     </div>

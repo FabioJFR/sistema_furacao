@@ -1,65 +1,108 @@
-{% extends 'projetos/base.html' %}
-{% load widget_tweaks  i18n %}
+{% extends "projetos/base.html" %}
+{% load static i18n %}
 
 {% block title %}{% trans "Criar Projeto" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/projeto_form.css' %}?v=20260511-1040">
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
+<section class="projeto-page">
+    <div class="projeto-shell projeto-form-shell">
+        <div class="projeto-form-top">
+            <div class="projeto-form-heading">
+                <a href="{% url 'projetos:projeto_list' %}" class="projeto-form-back">← {% trans "Voltar aos projetos" %}</a>
+                <h1 class="projeto-page-title">📁 {% trans "Criar projeto" %}</h1>
+                <p class="projeto-form-subtitle">
+                    {% trans "Registe um novo projeto com a identificação principal, estado operacional e localização de referência." %}
+                </p>
+            </div>
+        </div>
 
-    <div class="max-w-2xl mx-auto sf-panel space-y-6">
-
-        <h2 class="text-2xl font-bold text-center">➕ {% trans "Criar Projeto" %}</h2>
-
-        <form method="POST" class="space-y-5">
-            {% csrf_token %}
-
-            <div class="space-y-4">
-
+        <section class="projeto-form-card">
+            <div class="projeto-form-card-head">
                 <div>
+                    <h2 class="projeto-form-card-title">{% trans "Dados do projeto" %}</h2>
+                    <p class="projeto-form-card-copy">
+                        {% trans "Preencha os dados base do cliente, da localização e do estado para criar o projeto." %}
+                    </p>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="projeto-form-errors">
+                    {% for erro in form.non_field_errors %}
+                        <div>{{ erro }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="projeto-form-grid">
+                {% csrf_token %}
+
+                <div class="projeto-form-field projeto-form-field-full">
                     <label for="{{ form.nome.id_for_label }}">{% trans "Nome" %}</label>
-                    {{ form.nome|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
+                    {{ form.nome }}
+                    {% if form.nome.errors %}<div class="projeto-form-error">{{ form.nome.errors|join:", " }}</div>{% endif %}
                 </div>
 
-                <div>
+                <div class="projeto-form-field projeto-form-field-full">
                     <label for="{{ form.cliente.id_for_label }}">{% trans "Cliente" %}</label>
-                    {{ form.cliente|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
+                    {{ form.cliente }}
+                    {% if form.clientes_sugeridos %}
+                        <datalist id="projeto-cliente-sugestoes">
+                            {% for cliente_nome in form.clientes_sugeridos %}
+                                <option value="{{ cliente_nome }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    {% endif %}
+                    {% if form.cliente.help_text %}<div class="projeto-form-help">{{ form.cliente.help_text }}</div>{% endif %}
+                    {% if form.cliente.errors %}<div class="projeto-form-error">{{ form.cliente.errors|join:", " }}</div>{% endif %}
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="{{ form.cidade.id_for_label }}">{% trans "Cidade" %}</label>
-                        {{ form.cidade|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
-                    </div>
-                    <div>
-                        <label for="{{ form.pais.id_for_label }}">{% trans "País" %}</label>
-                        {{ form.pais|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
-                    </div>
+                <div class="projeto-form-field">
+                    <label for="{{ form.cidade.id_for_label }}">{% trans "Cidade" %}</label>
+                    {{ form.cidade }}
+                    {% if form.cidade.errors %}<div class="projeto-form-error">{{ form.cidade.errors|join:", " }}</div>{% endif %}
                 </div>
 
-                <div>
-                    <label for="{{ form.status.id_for_label }}">{% trans "Status" %}</label>
-                    {{ form.status|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
+                <div class="projeto-form-field">
+                    <label for="{{ form.pais.id_for_label }}">{% trans "País" %}</label>
+                    {{ form.pais }}
+                    {% if form.pais.errors %}<div class="projeto-form-error">{{ form.pais.errors|join:", " }}</div>{% endif %}
                 </div>
 
-                <div>
+                <div class="projeto-form-field projeto-form-field-full">
+                    <label for="{{ form.status.id_for_label }}">{% trans "Estado" %}</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="projeto-form-error">{{ form.status.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <div class="projeto-form-field projeto-form-field-full">
                     <label for="{{ form.notas.id_for_label }}">{% trans "Notas" %}</label>
-                    {{ form.notas|attr:"class:w-full p-2 rounded border border-gray-300 bg-white text-gray-900" }}
+                    {{ form.notas }}
+                    {% if form.notas.errors %}<div class="projeto-form-error">{{ form.notas.errors|join:", " }}</div>{% endif %}
                 </div>
 
-            </div>
+                <div class="projeto-form-field">
+                    <label for="{{ form.localizacao_lat.id_for_label }}">{% trans "Latitude" %}</label>
+                    {{ form.localizacao_lat }}
+                    {% if form.localizacao_lat.errors %}<div class="projeto-form-error">{{ form.localizacao_lat.errors|join:", " }}</div>{% endif %}
+                </div>
 
-            <div class="flex gap-3">
-                <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg shadow">
-                    💾 {% trans "Salvar" %}
-                </button>
-                <a href="{% url 'projetos:projeto_list' %}" 
-                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow text-center">
-                    🔙 {% trans "Voltar" %}
-                </a>
-            </div>
+                <div class="projeto-form-field">
+                    <label for="{{ form.localizacao_lon.id_for_label }}">{% trans "Longitude" %}</label>
+                    {{ form.localizacao_lon }}
+                    {% if form.localizacao_lon.errors %}<div class="projeto-form-error">{{ form.localizacao_lon.errors|join:", " }}</div>{% endif %}
+                </div>
 
-        </form>
+                <div class="projeto-form-footer">
+                    <button type="submit" class="projeto-btn-primary">{% trans "Criar projeto" %}</button>
+                    <a href="{% url 'projetos:projeto_list' %}" class="projeto-btn-secondary">{% trans "Cancelar" %}</a>
+                </div>
+            </form>
+        </section>
     </div>
-
 </section>
 {% endblock %}

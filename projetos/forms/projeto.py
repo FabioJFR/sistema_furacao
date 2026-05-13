@@ -1,5 +1,6 @@
 from django import forms
 
+from ..models.cliente_contrato import ClienteComercial, ClienteContrato
 from ..models.projeto import Projeto
 from ..selectors.forms import existe_projeto_nome_empresa, resolver_empresa_id
 
@@ -23,10 +24,15 @@ class ProjetoForm(forms.ModelForm):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.empresa = empresa
+        self.clientes_sugeridos = []
 
         empresa_id = _resolver_empresa_id(empresa) if empresa is not None else None
         if empresa_id is not None:
             self.instance.empresa_id = empresa_id
+            self.clientes_sugeridos = self._carregar_clientes_sugeridos(empresa_id)
+            if self.clientes_sugeridos:
+                self.fields["cliente"].widget.attrs["list"] = "projeto-cliente-sugestoes"
+                self.fields["cliente"].help_text = "Sugestões carregadas dos clientes já registados na empresa."
 
     class Meta:
         model = Projeto
@@ -39,6 +45,27 @@ class ProjetoForm(forms.ModelForm):
             "notas": forms.Textarea(attrs={"rows": 3}),
             "status": forms.Select(),
         }
+
+    @staticmethod
+    def _carregar_clientes_sugeridos(empresa_id):
+        nomes = []
+        vistos = set()
+
+        for nome in ClienteComercial.objects.filter(empresa_id=empresa_id).values_list("nome_cliente", flat=True):
+            nome_normalizado = (nome or "").strip()
+            chave = nome_normalizado.casefold()
+            if nome_normalizado and chave not in vistos:
+                vistos.add(chave)
+                nomes.append(nome_normalizado)
+
+        for nome in ClienteContrato.objects.filter(empresa_id=empresa_id).values_list("nome_cliente", flat=True):
+            nome_normalizado = (nome or "").strip()
+            chave = nome_normalizado.casefold()
+            if nome_normalizado and chave not in vistos:
+                vistos.add(chave)
+                nomes.append(nome_normalizado)
+
+        return sorted(nomes, key=str.casefold)
 
     def clean_nome(self):
         nome = _normalizar_texto(self.cleaned_data.get("nome"))

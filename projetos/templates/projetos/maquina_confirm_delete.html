@@ -4,35 +4,38 @@
 {% block title %}{% trans "Apagar Máquina" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/maquina_confirm_delete.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260513-1128">
 {% endblock %}
 
 {% block content %}
-<section class="sf-page p-6">
-<div class="mcd-wrap">
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="cf-back">
+            ← {% trans "Voltar à máquina" %}
+        </a>
 
-    <h2 class="mcd-title">⚠️ {% trans "Apagar Máquina" %}</h2>
+        <div class="cf-kicker">{% trans "Ação irreversível" %}</div>
+        <h1 class="cf-title">{% trans "Apagar máquina" %}</h1>
+        <p class="cf-copy">
+            {% blocktrans with nome=maquina.nome %}
+                Está prestes a apagar a máquina "{{ nome }}". Esta ação pode afetar histórico, turnos, associações operacionais e registos ligados a esta ficha.
+            {% endblocktrans %}
+        </p>
 
-    <p class="mcd-text">
-        {% trans "Tem a certeza que deseja apagar a máquina:" %}
-    </p>
-
-    <h3 class="mcd-name">{{ maquina.nome }}</h3>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="mcd-actions">
-            <button type="submit" class="mcd-btn mcd-btn-delete">
-                🗑️ {% trans "Sim, apagar" %}
-            </button>
-
-            <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mcd-btn mcd-btn-cancel">
-                🔙 {% trans "Cancelar" %}
-            </a>
+        <div class="cf-highlight">
+            <strong>{% trans "Máquina" %}:</strong> {{ maquina.nome }}<br>
+            <strong>{% trans "Projeto atual" %}:</strong> {{ maquina.projeto.nome|default:"-" }}
         </div>
-    </form>
 
-</div>
+        <form method="post" class="cf-actions">
+            {% csrf_token %}
+            <button type="submit" class="cf-btn cf-btn-danger">
+                {% trans "Sim, apagar" %}
+            </button>
+            <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="cf-btn cf-btn-secondary">
+                {% trans "Cancelar" %}
+            </a>
+        </form>
+    </div>
 </section>
 {% endblock %}

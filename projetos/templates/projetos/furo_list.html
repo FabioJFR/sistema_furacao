@@ -1,80 +1,84 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
+
 {% block title %}{% trans "Dashboard de Furos" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/furo_list.css' %}?v=20260512-1548">
+{% endblock %}
+
 {% block content %}
-<section class="max-w-7xl mx-auto p-6">
-
-    <!-- HEADER -->
-    <div class="flex justify-between items-center flex-wrap gap-4 mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">🕳 {% trans "Dashboard de Furos" %}</h1>
-            <p class="text-gray-600 mt-1">{% trans "Visão geral de todos os furos registados." %}</p>
+<section class="furo-page">
+    <div class="furo-shell">
+        <div class="furo-hero">
+            <h1 class="furo-title">🕳️ {% trans "Furos" %}</h1>
+            <a href="{% url 'projetos:furo_create' %}" class="furo-create-btn">
+                + {% trans "Criar Furo" %}
+            </a>
         </div>
 
-        <a href="{% url 'projetos:furo_create' %}" 
-            class="btn btn-success">
-                ➕ {% trans "Criar Novo Furo" %}
-        </a>
-    </div>
+        {% if furos %}
+            <div class="furo-grid">
+                {% for furo in furos %}
+                    <article class="furo-card">
+                        <div class="furo-card-top">
+                            <div>
+                                <div class="furo-eyebrow">{% trans "Furo" %}</div>
+                                <h2 class="furo-card-title sf-break-word">{{ furo.nome }}</h2>
+                            </div>
+                            <span class="furo-badge
+                                {% if furo.estado == 'ativo' %}furo-badge-active
+                                {% elif furo.estado == 'pausado' %}furo-badge-paused
+                                {% else %}furo-badge-neutral{% endif %}">
+                                {{ furo.get_estado_display }}
+                            </span>
+                        </div>
 
-    {% if furos %}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {% for furo in furos %}
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-5 flex flex-col justify-between hover:shadow-lg transition">
+                        <div class="furo-meta">
+                            <div class="furo-meta-item">
+                                <span class="furo-meta-label">{% trans "Inclinação" %}</span>
+                                <span class="furo-meta-value">{{ furo.inclinacao }}°</span>
+                            </div>
+                            <div class="furo-meta-item">
+                                <span class="furo-meta-label">{% trans "Azimute" %}</span>
+                                <span class="furo-meta-value">{{ furo.azimute }}°</span>
+                            </div>
+                            <div class="furo-meta-item">
+                                <span class="furo-meta-label">{% trans "Profundidade atual" %}</span>
+                                <span class="furo-meta-value">{{ furo.profundidade_atual }} m</span>
+                            </div>
+                            <div class="furo-meta-item">
+                                <span class="furo-meta-label">{% trans "Profundidade alvo" %}</span>
+                                <span class="furo-meta-value">{{ furo.profundidade_alvo }} m</span>
+                            </div>
+                            <div class="furo-meta-item furo-meta-item-full">
+                                <span class="furo-meta-label">{% trans "Sistema de coordenadas" %}</span>
+                                <span class="furo-meta-value">{{ furo.get_sistema_coordenadas_display }}</span>
+                            </div>
+                        </div>
 
-            <!-- INFO -->
-            <div>
-                <div class="flex justify-between items-start mb-3">
-                    <h2 class="text-xl font-bold text-gray-800 sf-break-word">{{ furo.nome }}</h2>
+                        <div class="furo-coords">
+                            <div><strong>Lat:</strong> {{ furo.latitude|default:"-" }}</div>
+                            <div><strong>Lon:</strong> {{ furo.longitude|default:"-" }}</div>
+                            <div><strong>Alt:</strong> {{ furo.altitude|default:"-" }}</div>
+                        </div>
 
-                    <span class="text-xs px-3 py-1 rounded-full 
-                        {% if furo.estado == 'ativo' %}
-                            bg-green-100 text-green-700
-                        {% elif furo.estado == 'pausado' %}
-                            bg-yellow-100 text-yellow-700
-                        {% else %}
-                            bg-gray-200 text-gray-700
-                        {% endif %}
-                    ">
-                        {{ furo.get_estado_display }}
-                    </span>
-                </div>
-
-                <div class="space-y-1 text-sm text-gray-700">
-                    <p><strong>{% trans "Inclinação:" %}</strong> {{ furo.inclinacao }}°</p>
-                    <p><strong>{% trans "Azimute:" %}</strong> {{ furo.azimute }}°</p>
-                    <p><strong>{% trans "Profundidade Atual:" %}</strong> {{ furo.profundidade_atual }} m</p>
-                    <p><strong>{% trans "Profundidade Alvo:" %}</strong> {{ furo.profundidade_alvo }} m</p>
-                    <p><strong>{% trans "Coord.:" %}</strong> {{ furo.get_sistema_coordenadas_display }}</p>
-                </div>
-
-                <div class="mt-3 text-xs text-gray-500">
-                    <p>Lat: {{ furo.latitude }}</p>
-                    <p>Lon: {{ furo.longitude }}</p>
-                    <p>Alt: {{ furo.altitude }}</p>
-                </div>
+                        <div class="furo-actions">
+                            <a href="{{ furo.get_absolute_url }}" class="furo-btn">
+                                {% trans "Detalhes" %}
+                            </a>
+                            <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-btn furo-btn-secondary">
+                                {% trans "Medição" %}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
             </div>
-
-            <!-- ACTIONS -->
-            <div class="flex gap-2 mt-4">
-                <a href="{{ furo.get_absolute_url }}" class="btn btn-primary flex-1 text-center">
-                    ℹ️ {% trans "Detalhes" %}
-                </a>
-
-                <a href="{% url 'projetos:medicao_create' furo.id %}" class="btn btn-warning flex-1 text-center">
-                    ➕ {% trans "Medição" %}
-                </a>
+        {% else %}
+            <div class="furo-empty">
+                {% trans "Nenhum furo registado ainda." %}
             </div>
-
-        </div>
-        {% endfor %}
+        {% endif %}
     </div>
-    {% else %}
-    <div class="bg-white rounded-xl shadow p-8 text-center text-gray-600">
-        {% trans "Nenhum furo registado ainda." %}
-    </div>
-    {% endif %}
-
 </section>
 {% endblock %}

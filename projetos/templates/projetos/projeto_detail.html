@@ -1,324 +1,371 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{% if page_title %}{{ page_title }}{% else %}{% trans "Detalhes do Projeto" %}{% endif %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/projeto_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/projeto_detail.css' %}?v=20260511-1028">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+    .projeto-page { padding: 24px 15px 36px; }
+    .projeto-shell { width: 100%; max-width: 1920px; margin: 0 auto; }
+    .projeto-detail-shell { display: grid; gap: 24px; }
+    .projeto-detail-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .projeto-page-title { margin: 0; color: #0f172a; font-size: clamp(1.95rem, 2.4vw, 2.7rem); line-height: 1.08; font-weight: 900; }
+    .projeto-detail-summary,
+    .projeto-detail-overview-grid,
+    .projeto-detail-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .projeto-detail-summary-card,
+    .projeto-detail-card,
+    .projeto-detail-mini-card,
+    .projeto-detail-note,
+    .projeto-detail-empty,
+    .projeto-detail-table-card,
+    .projeto-detail-section { border: 1px solid #dbe3ec; border-radius: 20px; background: #fff; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06); }
+    .projeto-detail-summary-card,
+    .projeto-detail-card,
+    .projeto-detail-mini-card,
+    .projeto-detail-note,
+    .projeto-detail-empty { padding: 18px; }
+    .projeto-detail-section { padding: 22px; border-radius: 24px; box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06); }
+    .projeto-detail-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .projeto-detail-actions,
+    .projeto-detail-inline-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    @media (max-width: 1080px) {
+        .projeto-detail-summary,
+        .projeto-detail-overview-grid,
+        .projeto-detail-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 720px) {
+        .projeto-detail-summary,
+        .projeto-detail-overview-grid,
+        .projeto-detail-card-grid { grid-template-columns: 1fr; }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="sf-page">
+<section class="projeto-page">
+    <div class="projeto-shell projeto-detail-shell">
+        <div class="projeto-detail-top">
+            <div class="projeto-detail-heading">
+                <a href="{% url 'projetos:projeto_list' %}" class="projeto-detail-back">← {% trans "Voltar aos projetos" %}</a>
+                <h1 class="projeto-page-title sf-break-word">📁 {{ projeto.nome }}</h1>
+                <p class="projeto-detail-subtitle">
+                    <strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}
+                    {% if projeto.cidade %} | <strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}{% endif %}
+                    {% if projeto.pais %} | <strong>{% trans "País:" %}</strong> {{ projeto.pais }}{% endif %}
+                </p>
+            </div>
 
-    <div class="sf-panel space-y-6">
-        <nav class="text-sm text-gray-500">
-            <a href="{% url 'projetos:dashboard' %}" class="hover:text-gray-700">{% trans "Dashboard" %}</a>
-            <span class="mx-2">/</span>
-            <a href="{% url 'projetos:projeto_list' %}" class="hover:text-gray-700">{% trans "Projetos" %}</a>
-            <span class="mx-2">/</span>
-            <span class="text-gray-700 font-semibold sf-break-word">{{ projeto.nome }}</span>
-        </nav>
-
-        <!-- HEADER -->
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800 sf-break-word">{{ projeto.nome }}</h1>
-            <div class="flex gap-3 flex-wrap">
-                <a href="{% url 'projetos:projeto_3d' projeto.pk %}" 
-                   class="bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-700 transition shadow">
-                    🖥️ {% trans "Ver 3D" %}
-                </a>
-                <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
-                   class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
-                    ✏️ {% trans "Editar" %}
-                </a>
-                <a href="{% url 'projetos:projeto_delete' projeto.pk %}" 
-                   class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
-                    🗑️ {% trans "Apagar" %}
-                </a>
+            <div class="projeto-detail-actions">
+                <a href="{% url 'projetos:projeto_3d' projeto.pk %}" class="projeto-btn">{% trans "Ver 3D" %}</a>
+                <a href="{% url 'projetos:projeto_update' projeto.pk %}" class="projeto-btn">{% trans "Editar" %}</a>
+                <a href="{% url 'projetos:projeto_delete' projeto.pk %}" class="projeto-btn projeto-btn-danger">{% trans "Apagar" %}</a>
             </div>
         </div>
 
-        <!-- INFORMAÇÕES DO PROJETO -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}</p>
-            <p><strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}</p>
-            <p><strong>{% trans "País:" %}</strong> {{ projeto.pais }}</p>
-            <p><strong>{% trans "Estado:" %}</strong> {{ projeto.get_status_display }}</p>
-            {% if projeto.notas %}
-                <p class="sm:col-span-2"><strong>{% trans "Notas:" %}</strong> {{ projeto.notas }}</p>
-            {% endif %}
+        <div class="projeto-detail-summary">
+            <div class="projeto-detail-summary-card">
+                <div class="projeto-detail-summary-label">{% trans "Cliente" %}</div>
+                <div class="projeto-detail-summary-value sf-break-word">{{ projeto.cliente }}</div>
+                <div class="projeto-detail-summary-copy">{{ projeto.cidade }}{% if projeto.pais %}, {{ projeto.pais }}{% endif %}</div>
+            </div>
+            <div class="projeto-detail-summary-card">
+                <div class="projeto-detail-summary-label">{% trans "Estado" %}</div>
+                <div class="projeto-detail-summary-value">{{ projeto.get_status_display }}</div>
+                <div class="projeto-detail-summary-copy">{% trans "Situação operacional atual do projeto." %}</div>
+            </div>
+            <div class="projeto-detail-summary-card">
+                <div class="projeto-detail-summary-label">{% trans "Equipa ativa" %}</div>
+                <div class="projeto-detail-summary-value">{{ trabalhadores_envolvidos|length }}</div>
+                <div class="projeto-detail-summary-copy">{% trans "Trabalhador(es) atualmente associados ao projeto." %}</div>
+            </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
-            <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
-                <h2 class="text-xl font-bold text-gray-800">👷 {% trans "Trabalhadores Envolvidos" %}</h2>
-                <span class="text-sm text-gray-500">{{ trabalhadores_envolvidos|length }} {% trans "trabalhador(es)" %}</span>
-            </div>
-
-            <form method="post" action="{% url 'projetos:projeto_adicionar_empregado' projeto.pk %}" class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_220px_auto] gap-3 mb-5">
-                {% csrf_token %}
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Empregado" %}</label>
+                    <h2 class="projeto-detail-section-title">{% trans "Enquadramento do projeto" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Resumo administrativo e notas operacionais de base." %}</p>
+                </div>
+            </div>
+
+            <div class="projeto-detail-overview-grid">
+                <div class="projeto-detail-card">
+                    <h3 class="projeto-detail-card-title">{% trans "Localização" %}</h3>
+                    <dl class="projeto-detail-list">
+                        <div class="projeto-detail-item">
+                            <dt class="projeto-detail-label">{% trans "Cidade" %}</dt>
+                            <dd class="projeto-detail-value">{{ projeto.cidade|default:"-" }}</dd>
+                        </div>
+                        <div class="projeto-detail-item">
+                            <dt class="projeto-detail-label">{% trans "País" %}</dt>
+                            <dd class="projeto-detail-value">{{ projeto.pais|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="projeto-detail-card">
+                    <h3 class="projeto-detail-card-title">{% trans "Cliente" %}</h3>
+                    <dl class="projeto-detail-list">
+                        <div class="projeto-detail-item">
+                            <dt class="projeto-detail-label">{% trans "Cliente" %}</dt>
+                            <dd class="projeto-detail-value">{{ projeto.cliente|default:"-" }}</dd>
+                        </div>
+                        <div class="projeto-detail-item">
+                            <dt class="projeto-detail-label">{% trans "Estado" %}</dt>
+                            <dd class="projeto-detail-value">{{ projeto.get_status_display }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                {% if projeto.notas %}
+                    <div class="projeto-detail-note">{{ projeto.notas|linebreaksbr }}</div>
+                {% else %}
+                    <div class="projeto-detail-empty">{% trans "Sem notas adicionais registadas." %}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">{% trans "Trabalhadores envolvidos" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Associar e gerir a equipa ativa do projeto num único bloco operacional." %}</p>
+                </div>
+                <div class="projeto-detail-badge">{{ trabalhadores_envolvidos|length }} {% trans "trabalhador(es)" %}</div>
+            </div>
+
+            <form method="post" action="{% url 'projetos:projeto_adicionar_empregado' projeto.pk %}" class="projeto-detail-form">
+                {% csrf_token %}
+                <div class="projeto-detail-field">
+                    <label for="{{ trabalhador_form.empregado.id_for_label }}">{% trans "Empregado" %}</label>
                     {{ trabalhador_form.empregado }}
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Data de início" %}</label>
+                <div class="projeto-detail-field">
+                    <label for="{{ trabalhador_form.data_inicio.id_for_label }}">{% trans "Data de início" %}</label>
                     {{ trabalhador_form.data_inicio }}
                 </div>
-                <div class="flex items-end">
-                    <button type="submit"
-                            class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow w-full">
-                        ➕ {% trans "Associar" %}
-                    </button>
+                <div class="projeto-detail-form-submit">
+                    <button type="submit" class="projeto-btn">{% trans "Associar" %}</button>
                 </div>
             </form>
 
             {% if trabalhadores_envolvidos %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="projeto-detail-card-grid">
                     {% for ligacao in trabalhadores_envolvidos %}
-                        <div class="bg-white border border-gray-200 rounded-xl p-4">
-                            <div class="font-bold text-gray-800 sf-break-word">{{ ligacao.empregado.nome }}</div>
-                            <div class="text-sm text-gray-600 mt-1">
-                                {% trans "Função:" %} {{ ligacao.empregado.get_funcao_display|default:ligacao.empregado.funcao|default:"-" }}
-                            </div>
-                            <div class="text-sm text-gray-600">
-                                {% trans "Início:" %} {{ ligacao.data_inicio|date:"d/m/Y"|default:"-" }}
-                            </div>
-                            <div class="text-sm text-gray-600">
-                                {% trans "Estado:" %} {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Inativo" %}{% endif %}
-                            </div>
-                            <div class="mt-3 flex gap-3 flex-wrap items-center">
-                                <a href="{{ ligacao.empregado.get_absolute_url }}"
-                                   class="text-blue-600 hover:underline font-semibold">
-                                    {% trans "Ver empregado" %}
-                                </a>
+                        <div class="projeto-detail-mini-card">
+                            <h3 class="projeto-detail-mini-title sf-break-word">{{ ligacao.empregado.nome }}</h3>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Função:" %}</strong> {{ ligacao.empregado.get_funcao_display|default:ligacao.empregado.funcao|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Início:" %}</strong> {{ ligacao.data_inicio|date:"d/m/Y"|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Estado:" %}</strong> {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Inativo" %}{% endif %}</p>
+                            <div class="projeto-detail-inline-actions">
+                                <a href="{{ ligacao.empregado.get_absolute_url }}" class="projeto-btn-inline">{% trans "Ver empregado" %}</a>
                                 <form method="post" action="{% url 'projetos:projeto_remover_empregado' projeto.pk ligacao.pk %}" data-confirm-submit="{% trans 'Remover este trabalhador da equipa ativa do projeto?' %}">
                                     {% csrf_token %}
-                                    <button type="submit"
-                                            class="text-red-600 hover:underline font-semibold">
-                                        {% trans "Terminar associação" %}
-                                    </button>
+                                    <button type="submit" class="projeto-btn-inline projeto-btn-danger">{% trans "Terminar associação" %}</button>
                                 </form>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">{% trans "Ainda não existem trabalhadores envolvidos neste projeto." %}</p>
+                <div class="projeto-detail-empty">{% trans "Ainda não existem trabalhadores envolvidos neste projeto." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- MAPA -->
         {{ projeto_mapa|json_script:"projeto-data" }}
         {{ furos_mapa|json_script:"furos-data" }}
 
-        {% if furos_mapa %}
-        <div class="projeto-detail-map-shell">
-            <div class="projeto-detail-map-toolbar">
-                <button id="prevFuroBtn" type="button" class="projeto-detail-map-btn projeto-detail-map-btn-nav">
-                    ◀
-                </button>
-
-                <button id="nextFuroBtn" type="button" class="projeto-detail-map-btn projeto-detail-map-btn-nav">
-                    ▶
-                </button>
-
-                <div id="furoInfo" class="projeto-detail-map-info">
-                    {% trans "Nenhum furo selecionado" %}
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">🗺️ {% trans "Mapa dos furos" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Navegue entre os furos com coordenadas disponíveis e abra diretamente o detalhe do ponto selecionado." %}</p>
                 </div>
-
-                <button id="abrirFuroBtn" type="button" class="projeto-detail-map-btn projeto-detail-map-btn-open">
-                    {% trans "Abrir Furo" %}
-                </button>
             </div>
 
-            <div id="map" class="w-full h-96 rounded-lg shadow-md"></div>
-        </div>
-        {% else %}
-        <p class="text-gray-500 mt-4">{% trans "Nenhum furo deste projeto tem coordenadas para mostrar no mapa." %}</p>
-        {% endif %}
-
-        <!-- FUROS DO PROJETO -->
-        <div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Furos do Projeto" %}</h2>
-            {% if projeto.furos.exists %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {% for furo in projeto.furos.all %}
-                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
-                    <h3 class="font-semibold text-gray-800 sf-break-word">{% blocktrans with contador=forloop.counter nome=furo.nome %}Furo {{ contador }}: {{ nome }}{% endblocktrans %}</h3>
-                    <p><strong>{% trans "Profundidade Atual:" %}</strong> {{ furo.profundidade_atual }} m</p>
-                    <p><strong>{% trans "Profundidade Alvo:" %}</strong> {{ furo.profundidade_alvo_atual|default:furo.profundidade_alvo_inicial|default:"-" }} m</p>
-                    <p><strong>{% trans "Inclinação atual/planeada:" %}</strong> {{ furo.inclinacao_real_atual|default:furo.inclinacao_planeada_atual|default:furo.inclinacao_planeada_inicial|default:"-" }}°</p>
-                    <p><strong>{% trans "Azimute atual/planeado:" %}</strong> {{ furo.azimute_real_atual|default:furo.azimute_planeado_atual|default:furo.azimute_planeado_inicial|default:"-" }}°</p>
-                    <p><strong>{% trans "Sistema Coord.:" %}</strong> {{ furo.get_sistema_coordenadas_display }}</p>
-
-                    <div class="flex gap-2 flex-wrap pt-2">
-                        <a href="{{ furo.get_absolute_url }}" 
-                           class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                           {% trans "Ver Detalhes" %}
-                        </a>
-                        <a href="{% url 'projetos:medicao_create' furo.pk %}" 
-                           class="inline-block bg-violet-600 text-white px-3 py-1 rounded-lg hover:bg-violet-700 transition text-sm font-semibold">
-                           {% trans "Nova Medição" %}
-                        </a>
+            {% if furos_mapa %}
+                <div class="projeto-detail-map-card">
+                    <div class="projeto-detail-map-shell">
+                        <div class="projeto-detail-map-toolbar">
+                            <button id="prevFuroBtn" type="button" class="projeto-detail-map-btn">◀</button>
+                            <button id="nextFuroBtn" type="button" class="projeto-detail-map-btn">▶</button>
+                            <div id="furoInfo" class="projeto-detail-map-info">{% trans "Nenhum furo selecionado" %}</div>
+                            <button id="abrirFuroBtn" type="button" class="projeto-detail-map-btn">↗</button>
+                        </div>
+                        <div id="map" class="w-full h-96 rounded-lg shadow-md"></div>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
             {% else %}
-            <p class="text-gray-500">{% trans "Nenhum furo registado neste projeto." %}</p>
+                <div class="projeto-detail-empty">{% trans "Nenhum furo deste projeto tem coordenadas para mostrar no mapa." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- MÁQUINAS DO PROJETO -->
-        <div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Máquinas Associadas" %}</h2>
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">{% trans "Furos do projeto" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Estado técnico resumido dos furos registados neste projeto." %}</p>
+                </div>
+            </div>
+
+            {% if projeto.furos.exists %}
+                <div class="projeto-detail-card-grid">
+                    {% for furo in projeto.furos.all %}
+                        <div class="projeto-detail-mini-card">
+                            <h3 class="projeto-detail-mini-title sf-break-word">
+                                {% blocktrans with contador=forloop.counter nome=furo.nome %}Furo {{ contador }}: {{ nome }}{% endblocktrans %}
+                            </h3>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Profundidade atual:" %}</strong> {{ furo.profundidade_atual }} m</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Profundidade alvo:" %}</strong> {{ furo.profundidade_alvo_atual|default:furo.profundidade_alvo_inicial|default:"-" }} m</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Inclinação:" %}</strong> {{ furo.inclinacao_real_atual|default:furo.inclinacao_planeada_atual|default:furo.inclinacao_planeada_inicial|default:"-" }}°</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Azimute:" %}</strong> {{ furo.azimute_real_atual|default:furo.azimute_planeado_atual|default:furo.azimute_planeado_inicial|default:"-" }}°</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Sistema de coordenadas:" %}</strong> {{ furo.get_sistema_coordenadas_display }}</p>
+                            <div class="projeto-detail-inline-actions">
+                                <a href="{{ furo.get_absolute_url }}" class="projeto-btn-inline">{% trans "Ver detalhes" %}</a>
+                                <a href="{% url 'projetos:medicao_create' furo.pk %}" class="projeto-btn-inline">{% trans "Nova medição" %}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="projeto-detail-empty">{% trans "Nenhum furo registado neste projeto." %}</div>
+            {% endif %}
+        </section>
+
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">{% trans "Máquinas associadas" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Equipamentos ligados ao projeto com acesso rápido ao respetivo detalhe." %}</p>
+                </div>
+            </div>
 
             {% if projeto.maquinas.exists %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {% for maquina in projeto.maquinas.all %}
-                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
-                    <h3 class="font-semibold text-gray-800">{{ maquina.nome }}</h3>
-
-                    <p><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
-                    <p><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
-                    <p><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
-                    <p><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
-                    <p><strong>{% trans "Horímetro:" %}</strong> {{ maquina.horimetro|default:"0" }}</p>
-                    <p><strong>{% trans "Localização:" %}</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
-
-                    {% if maquina.projeto_atual %}
-                        <p><strong>{% trans "Projeto Atual:" %}</strong> {{ maquina.projeto_atual.nome }}</p>
-                    {% endif %}
-
-                    <div class="flex gap-2 flex-wrap pt-2">
-                        <a href="{% url 'projetos:maquina_detail' maquina.id %}" 
-                        class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                        {% trans "Ver Detalhes" %}
-                        </a>
-
-                        <a href="{% url 'projetos:maquina_update' maquina.id %}" 
-                        class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
-                        {% trans "Editar" %}
-                        </a>
-                    </div>
+                <div class="projeto-detail-card-grid">
+                    {% for maquina in projeto.maquinas.all %}
+                        <div class="projeto-detail-mini-card">
+                            <h3 class="projeto-detail-mini-title sf-break-word">{{ maquina.nome }}</h3>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Horímetro:" %}</strong> {{ maquina.horimetro|default:"0" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Localização:" %}</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
+                            {% if maquina.projeto_atual %}
+                                <p class="projeto-detail-mini-copy"><strong>{% trans "Projeto atual:" %}</strong> {{ maquina.projeto_atual.nome }}</p>
+                            {% endif %}
+                            <div class="projeto-detail-inline-actions">
+                                <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="projeto-btn-inline">{% trans "Ver detalhes" %}</a>
+                                <a href="{% url 'projetos:maquina_update' maquina.id %}" class="projeto-btn-inline">{% trans "Editar" %}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
             {% else %}
-            <p class="text-gray-500">{% trans "Nenhuma máquina associada a este projeto." %}</p>
+                <div class="projeto-detail-empty">{% trans "Nenhuma máquina associada a este projeto." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- MATERIAIS DO PROJETO -->
-        <div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Materiais Associados" %}</h2>
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">{% trans "Materiais associados" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Stock e materiais já associados à frente de obra deste projeto." %}</p>
+                </div>
+            </div>
 
             {% if projeto.materiais.exists %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {% for material in projeto.materiais.all %}
-                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition space-y-2">
-                    <h3 class="font-semibold text-gray-800 sf-break-word">{{ material.nome }}</h3>
-
-                    <p><strong>{% trans "Furo:" %}</strong>
-                        {% if material.furo %}
-                            <a href="{{ material.furo.get_absolute_url }}"
-                            class="text-blue-600 hover:underline font-semibold">
-                                {{ material.furo.nome }}
-                            </a>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </p>
-
-                    <p><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
-                    <p><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
-                    <p><strong>{% trans "Quantidade:" %}</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
-                    <p><strong>{% trans "Valor:" %}</strong> {{ material.valor|floatformat:2 }} €</p>
-                    <p><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
-                    <p><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
-
-                    <div class="flex gap-2 flex-wrap pt-2">
-                        <a href="{% url 'projetos:material_detail' material.id %}" 
-                        class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                        {% trans "Ver Detalhes" %}
-                        </a>
-
-                        <a href="{% url 'projetos:material_update' material.id %}" 
-                        class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
-                        {% trans "Editar" %}
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-gray-500">{% trans "Nenhum material associado a este projeto." %}</p>
-            {% endif %}
-        </div>
-
-        <!-- LEVANTAMENTOS DE MATERIAL DO PROJETO -->
-        <div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Levantamentos de Material" %}</h2>
-
-            {% if levantamentos %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                    <thead class="bg-gray-100 text-gray-700">
-                        <tr>
-                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Empregado" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Material" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Quantidade" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for levantamento in levantamentos %}
-                        <tr class="border-t border-gray-200">
-                            <td class="px-4 py-3">{{ levantamento.data }}</td>
-                            <td class="px-4 py-3">{{ levantamento.empregado.nome }}</td>
-                            <td class="px-4 py-3">
-                                <a href="{% url 'projetos:material_detail' levantamento.material.id %}"
-                                class="text-blue-600 hover:underline font-semibold">
-                                    {{ levantamento.material.nome }}
-                                </a>
-                            </td>
-                            <td class="px-4 py-3">{{ levantamento.quantidade }}</td>
-                            <td class="px-4 py-3">
-                                {% if levantamento.furo %}
-                                    <a href="{{ levantamento.furo.get_absolute_url }}"
-                                    class="text-blue-600 hover:underline">
-                                        {{ levantamento.furo.nome }}
-                                    </a>
+                <div class="projeto-detail-card-grid">
+                    {% for material in projeto.materiais.all %}
+                        <div class="projeto-detail-mini-card">
+                            <h3 class="projeto-detail-mini-title sf-break-word">{{ material.nome }}</h3>
+                            <p class="projeto-detail-mini-copy">
+                                <strong>{% trans "Furo:" %}</strong>
+                                {% if material.furo %}
+                                    <a href="{{ material.furo.get_absolute_url }}">{{ material.furo.nome }}</a>
                                 {% else %}
                                     -
                                 {% endif %}
-                            </td>
-                            <td class="px-4 py-3">{{ levantamento.observacoes|default:"-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Quantidade:" %}</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Valor:" %}</strong> {{ material.valor|floatformat:2 }} €</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
+                            <p class="projeto-detail-mini-copy"><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
+                            <div class="projeto-detail-inline-actions">
+                                <a href="{% url 'projetos:material_detail' material.id %}" class="projeto-btn-inline">{% trans "Ver detalhes" %}</a>
+                                <a href="{% url 'projetos:material_update' material.id %}" class="projeto-btn-inline">{% trans "Editar" %}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
-            <p class="text-gray-500">{% trans "Ainda não existem levantamentos de material neste projeto." %}</p>
+                <div class="projeto-detail-empty">{% trans "Nenhum material associado a este projeto." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- BOTÃO VOLTAR -->
-        <div class="mt-6">
-            <a href="{% url 'projetos:projeto_list' %}" 
-               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-               🔙 {% trans "Voltar à Lista de Projetos" %}
-            </a>
-        </div>
+        <section class="projeto-detail-section">
+            <div class="projeto-detail-section-head">
+                <div>
+                    <h2 class="projeto-detail-section-title">{% trans "Levantamentos de material" %}</h2>
+                    <p class="projeto-detail-section-copy">{% trans "Últimos movimentos de saída de material associados a este projeto." %}</p>
+                </div>
+            </div>
 
+            {% if levantamentos %}
+                <div class="projeto-detail-table-card">
+                    <div class="projeto-detail-table-wrap">
+                        <table class="projeto-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Empregado" %}</th>
+                                    <th>{% trans "Material" %}</th>
+                                    <th>{% trans "Quantidade" %}</th>
+                                    <th>{% trans "Furo" %}</th>
+                                    <th>{% trans "Observações" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for levantamento in levantamentos %}
+                                    <tr>
+                                        <td>{{ levantamento.data }}</td>
+                                        <td>{{ levantamento.empregado.nome }}</td>
+                                        <td>
+                                            <a href="{% url 'projetos:material_detail' levantamento.material.id %}">
+                                                {{ levantamento.material.nome }}
+                                            </a>
+                                        </td>
+                                        <td>{{ levantamento.quantidade }}</td>
+                                        <td>
+                                            {% if levantamento.furo %}
+                                                <a href="{{ levantamento.furo.get_absolute_url }}">{{ levantamento.furo.nome }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ levantamento.observacoes|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="projeto-detail-empty">{% trans "Ainda não existem levantamentos de material neste projeto." %}</div>
+            {% endif %}
+        </section>
+
+        <div class="projeto-detail-footer">
+            <a href="{% url 'projetos:projeto_list' %}" class="projeto-btn">{% trans "Voltar à lista de projetos" %}</a>
+        </div>
     </div>
-
 </section>
+
 <div
     id="projeto-detail-config"
     data-furo-placeholder="00000000-0000-0000-0000-000000000000"

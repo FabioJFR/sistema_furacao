@@ -1,192 +1,317 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Detalhes da Máquina" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/maquina_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_detail.css' %}?v=20260512-1515">
 {% endblock %}
 
 {% block content %}
-<div class="mqd-wrap">
+<section class="mqd-page">
+    <div class="mqd-shell">
+        <div class="mqd-top">
+            <div class="mqd-heading">
+                <a href="{% url 'projetos:maquina_list' %}" class="mqd-back">← {% trans "Voltar às máquinas" %}</a>
+                <h1 class="mqd-title">🛠️ {{ maquina.nome }}</h1>
+                <p class="mqd-subtitle">
+                    <strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}
+                    {% if maquina.projeto_atual %} | <strong>{% trans "Projeto atual:" %}</strong> {{ maquina.projeto_atual.nome }}{% endif %}
+                </p>
+            </div>
 
-    <div class="mqd-top">
-        <h1>{{ maquina.nome }}</h1>
-
-        <div class="mqd-actions">
-            <a href="{% url 'projetos:avaria_maquina_create_admin' %}?maquina={{ maquina.id }}" class="mqd-btn mqd-btn-alert">
-                🚨 {% trans "Registar avaria" %}
-            </a>
-
-            <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mqd-btn mqd-btn-edit">
-                ✏️ {% trans "Editar" %}
-            </a>
-
-            <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mqd-btn mqd-btn-delete">
-                🗑️ {% trans "Apagar" %}
-            </a>
-        </div>
-    </div>
-
-    <div class="mqd-grid">
-        <div>
-            <p><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
-            <p><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
-            <p><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
-            <p><strong>{% trans "Nº Série:" %}</strong> {{ maquina.numero_serie|default:"-" }}</p>
-            <p><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
-            <p><strong>{% trans "Ativa:" %}</strong> {% if maquina.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
-        </div>
-
-        <div>
-            <p><strong>{% trans "Matrícula:" %}</strong> {{ maquina.matricula|default:"-" }}</p>
-            <p><strong>{% trans "Quilómetros:" %}</strong> {{ maquina.km|default:"0" }}</p>
-            <p><strong>{% trans "Horímetro:" %}</strong> {{ maquina.horimetro|default:"0" }}</p>
-            <p><strong>{% trans "Ano Registo:" %}</strong> {{ maquina.ano_registo|default:"-" }}</p>
-            <p><strong>{% trans "Valor:" %}</strong> {{ maquina.valor|floatformat:2 }} €</p>
-            <p><strong>{% trans "Localização Atual:" %}</strong> {{ maquina.localizacao_atual|default:"-" }}</p>
-        </div>
-
-        <div>
-            <p><strong>{% trans "Data Compra:" %}</strong> {{ maquina.data_compra|default:"-" }}</p>
-            <p><strong>{% trans "Data Registo:" %}</strong> {{ maquina.data_registo|default:"-" }}</p>
-            <p><strong>{% trans "Data Revisão:" %}</strong> {{ maquina.data_revisao|default:"-" }}</p>
-            <p><strong>{% trans "Seguro:" %}</strong> {{ maquina.seguro|default:"-" }}</p>
-            <p><strong>{% trans "Validade Seguro:" %}</strong> {{ maquina.data_seguro|default:"-" }}</p>
-            <p><strong>{% trans "Validade IUC:" %}</strong> {{ maquina.data_iuc|default:"-" }}</p>
-            <p><strong>{% trans "Total de metros realizados:" %}</strong> {{ total_metros_realizados_maquina }} m</p>
-            <p><strong>{% trans "Trabalhadores que já operaram:" %}</strong> {{ total_trabalhadores_maquina }}</p>
-        </div>
-    </div>
-
-    <div class="mqd-section mqd-section-project">
-        <h3>{% trans "Projeto Atual" %}</h3>
-        {% if maquina.projeto_atual %}
-            <div class="mqd-soft-card">
-                <a href="{{ maquina.projeto_atual.get_absolute_url }}" class="mqd-link-blue">
-                    {{ maquina.projeto_atual.nome }}
+            <div class="mqd-actions">
+                <a href="{% url 'projetos:avaria_maquina_create_admin' %}?maquina={{ maquina.id }}" class="mqd-btn">
+                    {% trans "Registar avaria" %}
+                </a>
+                <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mqd-btn">
+                    {% trans "Editar" %}
+                </a>
+                <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mqd-btn mqd-btn-danger">
+                    {% trans "Apagar" %}
                 </a>
             </div>
-        {% else %}
-            <p class="mqd-soft-text">{% trans "Sem projeto atual." %}</p>
-        {% endif %}
-    </div>
-
-    <div class="mqd-section">
-        <h3>{% trans "Projetos Associados" %}</h3>
-        {% if maquina.projetos.all %}
-            <div class="mqd-pill-wrap">
-                {% for projeto in maquina.projetos.all %}
-                    <a href="{{ projeto.get_absolute_url }}" class="mqd-pill">
-                        {{ projeto.nome }}
-                    </a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="mqd-soft-text">{% trans "Sem projetos associados." %}</p>
-        {% endif %}
-    </div>
-
-    <div class="mqd-section">
-        <h3>{% trans "Furos Associados" %}</h3>
-        {% if maquina.furos.all %}
-            <div class="mqd-pill-wrap">
-                {% for furo in maquina.furos.all %}
-                    <a href="{{ furo.get_absolute_url }}" class="mqd-pill">
-                        {{ furo.nome }}
-                    </a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="mqd-soft-text">{% trans "Sem furos associados." %}</p>
-        {% endif %}
-    </div>
-
-    <div class="mqd-section">
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-            <h3>{% trans "Turnos da Máquina" %}</h3>
-            <a href="{% url 'projetos:maquina_turno_create' maquina.id %}" class="mqd-btn mqd-btn-edit">
-                🕒 {% trans "Adicionar turno" %}
-            </a>
         </div>
-        {% if turnos_maquina %}
-            <div class="mqd-pill-wrap">
-                {% for turno_item in turnos_maquina %}
-                    <div class="mqd-soft-card">
-                        <strong>{{ turno_item.get_turno_display }}</strong>
-                        · {{ turno_item.intervalo_display }}
-                        {% if turno_item.atravessa_meia_noite %}
-                            <div class="mqd-soft-text">{% trans "Termina no dia seguinte." %}</div>
-                        {% endif %}
-                        <div class="mt-3 flex items-center gap-2 flex-wrap">
-                            <a href="{% url 'projetos:maquina_turno_update' maquina.id turno_item.id %}" class="mqd-btn mqd-btn-edit">
-                                ✏️ {% trans "Editar turno" %}
-                            </a>
-                            <a href="{% url 'projetos:maquina_turno_delete' maquina.id turno_item.id %}" class="mqd-btn mqd-btn-delete">
-                                🗑️ {% trans "Apagar turno" %}
-                            </a>
+
+        <div class="mqd-summary">
+            <div class="mqd-summary-card">
+                <div class="mqd-summary-label">{% trans "Estado atual" %}</div>
+                <div class="mqd-summary-value">{{ maquina.get_estado_display }}</div>
+                <div class="mqd-summary-copy">
+                    {% if maquina.ativo %}
+                        {% trans "Máquina ativa para operação." %}
+                    {% else %}
+                        {% trans "Máquina sem atividade operacional." %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mqd-summary-card">
+                <div class="mqd-summary-label">{% trans "Metros realizados" %}</div>
+                <div class="mqd-summary-value">{{ total_metros_realizados_maquina }}</div>
+                <div class="mqd-summary-copy">{% trans "Acumulado operacional registado." %}</div>
+            </div>
+            <div class="mqd-summary-card">
+                <div class="mqd-summary-label">{% trans "Operadores" %}</div>
+                <div class="mqd-summary-value">{{ total_trabalhadores_maquina }}</div>
+                <div class="mqd-summary-copy">{% trans "Trabalhadores que já operaram esta máquina." %}</div>
+            </div>
+        </div>
+
+        <section class="mqd-section">
+            <div class="mqd-section-head">
+                <div>
+                    <h2 class="mqd-section-title">{% trans "Dados principais" %}</h2>
+                    <p class="mqd-section-copy">{% trans "Identificação, operação e dados administrativos essenciais da máquina." %}</p>
+                </div>
+            </div>
+
+            <div class="mqd-overview-grid">
+                <div class="mqd-card">
+                    <h3 class="mqd-card-title">{% trans "Identificação" %}</h3>
+                    <dl class="mqd-list">
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Tipo" %}</dt>
+                            <dd class="mqd-value">{{ maquina.tipo|default:"-" }}</dd>
                         </div>
-                    </div>
-                {% endfor %}
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Marca" %}</dt>
+                            <dd class="mqd-value">{{ maquina.marca|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Modelo" %}</dt>
+                            <dd class="mqd-value">{{ maquina.modelo|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Número de série" %}</dt>
+                            <dd class="mqd-value">{{ maquina.numero_serie|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Matrícula" %}</dt>
+                            <dd class="mqd-value">{{ maquina.matricula|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="mqd-card">
+                    <h3 class="mqd-card-title">{% trans "Operação" %}</h3>
+                    <dl class="mqd-list">
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Quilómetros" %}</dt>
+                            <dd class="mqd-value">{{ maquina.km|default:"0" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Horímetro" %}</dt>
+                            <dd class="mqd-value">{{ maquina.horimetro|default:"0" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Localização atual" %}</dt>
+                            <dd class="mqd-value">{{ maquina.localizacao_atual|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Ativa" %}</dt>
+                            <dd class="mqd-value">{% if maquina.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Ano de registo" %}</dt>
+                            <dd class="mqd-value">{{ maquina.ano_registo|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="mqd-card">
+                    <h3 class="mqd-card-title">{% trans "Custos e validade" %}</h3>
+                    <dl class="mqd-list">
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Valor" %}</dt>
+                            <dd class="mqd-value">{{ maquina.valor|floatformat:2 }} €</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Data de compra" %}</dt>
+                            <dd class="mqd-value">{{ maquina.data_compra|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Data de registo" %}</dt>
+                            <dd class="mqd-value">{{ maquina.data_registo|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Seguro" %}</dt>
+                            <dd class="mqd-value">{{ maquina.seguro|default:"-" }}</dd>
+                        </div>
+                        <div class="mqd-item">
+                            <dt class="mqd-label">{% trans "Validades" %}</dt>
+                            <dd class="mqd-value">
+                                {% trans "Seguro:" %} {{ maquina.data_seguro|default:"-" }}<br>
+                                {% trans "IUC:" %} {{ maquina.data_iuc|default:"-" }}<br>
+                                {% trans "Revisão:" %} {{ maquina.data_revisao|default:"-" }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
             </div>
-        {% else %}
-            <p class="mqd-soft-text">
-                {% trans "Sem turnos configurados. Quando definir um turno nesta máquina, os planeamentos dessa máquina passam a obedecer obrigatoriamente a esse horário." %}
-            </p>
+        </section>
+
+        <section class="mqd-section">
+            <div class="mqd-section-head">
+                <div>
+                    <h2 class="mqd-section-title">{% trans "Contexto operacional" %}</h2>
+                    <p class="mqd-section-copy">{% trans "Projeto atual e associações operacionais relacionadas com esta máquina." %}</p>
+                </div>
+            </div>
+
+            <div class="mqd-card-grid">
+                <div class="mqd-mini-card">
+                    <h3 class="mqd-mini-title">{% trans "Projeto atual" %}</h3>
+                    {% if maquina.projeto_atual %}
+                        <p class="mqd-mini-copy"><a href="{{ maquina.projeto_atual.get_absolute_url }}">{{ maquina.projeto_atual.nome }}</a></p>
+                    {% else %}
+                        <p class="mqd-mini-copy">{% trans "Sem projeto atual." %}</p>
+                    {% endif %}
+                </div>
+
+                <div class="mqd-mini-card">
+                    <h3 class="mqd-mini-title">{% trans "Projetos associados" %}</h3>
+                    {% if maquina.projetos.all %}
+                        <div class="mqd-chip-list">
+                            {% for projeto in maquina.projetos.all %}
+                                <a href="{{ projeto.get_absolute_url }}" class="mqd-chip">{{ projeto.nome }}</a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mqd-mini-copy">{% trans "Sem projetos associados." %}</p>
+                    {% endif %}
+                </div>
+
+                <div class="mqd-mini-card">
+                    <h3 class="mqd-mini-title">{% trans "Furos associados" %}</h3>
+                    {% if maquina.furos.all %}
+                        <div class="mqd-chip-list">
+                            {% for furo in maquina.furos.all %}
+                                <a href="{{ furo.get_absolute_url }}" class="mqd-chip">{{ furo.nome }}</a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mqd-mini-copy">{% trans "Sem furos associados." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="mqd-section">
+            <div class="mqd-section-head">
+                <div>
+                    <h2 class="mqd-section-title">{% trans "Turnos da máquina" %}</h2>
+                    <p class="mqd-section-copy">{% trans "Horários operacionais definidos especificamente para esta máquina." %}</p>
+                </div>
+                <a href="{% url 'projetos:maquina_turno_create' maquina.id %}" class="mqd-btn">
+                    {% trans "Adicionar turno" %}
+                </a>
+            </div>
+
+            {% if turnos_maquina %}
+                <div class="mqd-card-grid">
+                    {% for turno_item in turnos_maquina %}
+                        <div class="mqd-mini-card">
+                            <h3 class="mqd-mini-title">{{ turno_item.get_turno_display }}</h3>
+                            <p class="mqd-mini-copy">{{ turno_item.intervalo_display }}</p>
+                            {% if turno_item.atravessa_meia_noite %}
+                                <p class="mqd-mini-copy">{% trans "Termina no dia seguinte." %}</p>
+                            {% endif %}
+                            <div class="mqd-inline-actions">
+                                <a href="{% url 'projetos:maquina_turno_update' maquina.id turno_item.id %}" class="mqd-btn-inline">
+                                    {% trans "Editar turno" %}
+                                </a>
+                                <a href="{% url 'projetos:maquina_turno_delete' maquina.id turno_item.id %}" class="mqd-btn-inline mqd-btn-inline-danger">
+                                    {% trans "Apagar turno" %}
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mqd-empty">
+                    {% trans "Sem turnos configurados. Quando definir um turno nesta máquina, os planeamentos dessa máquina passam a obedecer obrigatoriamente a esse horário." %}
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="mqd-section">
+            <div class="mqd-section-head">
+                <div>
+                    <h2 class="mqd-section-title">{% trans "Avarias registadas" %}</h2>
+                    <p class="mqd-section-copy">{% trans "Ocorrências abertas ou concluídas para esta máquina." %}</p>
+                </div>
+            </div>
+
+            {% if avarias %}
+                <div class="mqd-card-grid">
+                    {% for avaria in avarias %}
+                        <div class="mqd-mini-card">
+                            <h3 class="mqd-mini-title">{{ avaria.get_status_display }}</h3>
+                            <p class="mqd-mini-copy">
+                                {{ avaria.data_inicio|date:"d/m/Y H:i" }}
+                                {% if avaria.data_fim %} - {{ avaria.data_fim|date:"d/m/Y H:i" }}{% endif %}
+                            </p>
+                            <p class="mqd-mini-copy">{{ avaria.descricao }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mqd-empty">{% trans "Sem avarias registadas." %}</div>
+            {% endif %}
+        </section>
+
+        <section class="mqd-section">
+            <div class="mqd-section-head">
+                <div>
+                    <h2 class="mqd-section-title">{% trans "Histórico operacional" %}</h2>
+                    <p class="mqd-section-copy">{% trans "Resumo cronológico da atividade operacional associada à máquina." %}</p>
+                </div>
+            </div>
+
+            {% if eventos_operacionais %}
+                <div class="mqd-table-card">
+                    <div class="mqd-table-wrap">
+                        <table class="mqd-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Evento" %}</th>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Projeto" %}</th>
+                                    <th>{% trans "Furo" %}</th>
+                                    <th>{% trans "Empregado" %}</th>
+                                    <th>{% trans "Metros" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evento in eventos_operacionais %}
+                                    <tr>
+                                        <td>{{ evento.get_tipo_evento_display }}</td>
+                                        <td>{{ evento.data_evento|date:"d/m/Y" }}</td>
+                                        <td>{% if evento.projeto %}{{ evento.projeto.nome }}{% else %}-{% endif %}</td>
+                                        <td>{% if evento.furo %}{{ evento.furo.nome }}{% else %}-{% endif %}</td>
+                                        <td>{% if evento.empregado %}{{ evento.empregado.nome }}{% else %}-{% endif %}</td>
+                                        <td>{% if evento.metros_furados %}{{ evento.metros_furados }} m{% else %}-{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="mqd-empty">{% trans "Sem histórico operacional registado." %}</div>
+            {% endif %}
+        </section>
+
+        {% if maquina.observacoes %}
+            <section class="mqd-section">
+                <div class="mqd-section-head">
+                    <div>
+                        <h2 class="mqd-section-title">{% trans "Observações" %}</h2>
+                    </div>
+                </div>
+                <div class="mqd-note">{{ maquina.observacoes|linebreaksbr }}</div>
+            </section>
         {% endif %}
     </div>
-
-    <div class="mqd-section">
-        <h3>{% trans "Avarias da máquina" %}</h3>
-        {% if avarias %}
-            <div class="mqd-pill-wrap">
-                {% for avaria in avarias %}
-                    <div class="mqd-soft-card">
-                        <strong>{{ avaria.get_status_display }}</strong> · {{ avaria.data_inicio|date:"d/m/Y H:i" }}
-                        {% if avaria.data_fim %} → {{ avaria.data_fim|date:"d/m/Y H:i" }}{% endif %}
-                        <div class="mqd-soft-text">{{ avaria.descricao }}</div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="mqd-soft-text">{% trans "Sem avarias registadas." %}</p>
-        {% endif %}
-    </div>
-
-    <div class="mqd-section">
-        <h3>{% trans "Histórico operacional da máquina" %}</h3>
-        {% if eventos_operacionais %}
-            <div class="mqd-pill-wrap">
-                {% for evento in eventos_operacionais %}
-                    <div class="mqd-soft-card">
-                        <strong>{{ evento.get_tipo_evento_display }}</strong>
-                        · {{ evento.data_evento|date:"d/m/Y" }}
-                        {% if evento.projeto %} · {% trans "Projeto" %}: {{ evento.projeto.nome }}{% endif %}
-                        {% if evento.furo %} · {% trans "Furo" %}: {{ evento.furo.nome }}{% endif %}
-                        {% if evento.empregado %} · {% trans "Empregado" %}: {{ evento.empregado.nome }}{% endif %}
-                        {% if evento.metros_furados %} · {{ evento.metros_furados }} m{% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="mqd-soft-text">{% trans "Sem histórico operacional registado." %}</p>
-        {% endif %}
-    </div>
-
-    {% if maquina.observacoes %}
-    <div class="mqd-section">
-        <h3>{% trans "Observações" %}</h3>
-        <div class="mqd-soft-card mqd-observ">
-            {{ maquina.observacoes }}
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="mqd-footer">
-        <a href="{% url 'projetos:maquina_list' %}" class="mqd-btn-back">
-            🔙 {% trans "Voltar à Lista de Máquinas" %}
-        </a>
-    </div>
-
-</div>
+</section>
 {% endblock %}

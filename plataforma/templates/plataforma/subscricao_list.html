@@ -29,7 +29,7 @@
         <div class="card-value">{{ subscricoes_ativas }}</div>
     </div>
     <div class="card">
-        <div class="card-title">{% trans "Pendentes" %}</div>
+        <div class="card-title">{% trans "Subscrições pendentes" %}</div>
         <div class="card-value">{{ subscricoes_pendentes }}</div>
     </div>
     <div class="card">
@@ -40,55 +40,92 @@
         <div class="card-title">{% trans "Canceladas" %}</div>
         <div class="card-value">{{ subscricoes_canceladas }}</div>
     </div>
+    <div class="card">
+        <div class="card-title">{% trans "Contas admin ativadas" %}</div>
+        <div class="card-value">{{ contas_admin_ativadas }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">{% trans "Contas admin por ativar" %}</div>
+        <div class="card-value">{{ contas_admin_por_ativar }}</div>
+    </div>
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>{% trans "Empresa" %}</th>
-            <th>{% trans "Plano" %}</th>
-            <th>{% trans "Período" %}</th>
-            <th>{% trans "Estado" %}</th>
-            <th>{% trans "Valor" %}</th>
-            <th>{% trans "Início" %}</th>
-            <th>{% trans "Próxima renovação" %}</th>
-            <th>{% trans "Ações" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for s in subscricoes %}
+<div class="table-wrap">
+    <table>
+        <thead>
             <tr>
-                <td>{{ s.empresa.nome }}</td>
-                <td>{{ s.plano.nome }}</td>
-                <td>{{ s.periodo_cobranca_label }}</td>
-                <td>
-                    <span class="badge {{ s.estado }}">
-                        {{ s.get_estado_display }}
-                    </span>
-                </td>
-                <td>{{ s.valor }}€</td>
-                <td>{{ s.data_inicio }}</td>
-                <td>{{ s.proxima_renovacao|default:s.data_fim }}</td>
-                <td>
-                    <a href="{% url 'plataforma:empresa_detail' s.empresa.pk %}">{% trans "Ver empresa" %}</a>
-                    |
-                    <a href="{% url 'plataforma:empresa_alterar_plano' s.empresa.pk %}">{% trans "Editar subscrição" %}</a>
-                    {% if request.user.is_superuser and s.pagamento_pendente %}
-                        {% if s.pagamento_pendente.valor > 0 %}
-                            |
-                            <a href="{% url 'plataforma:financas_paypal_checkout_pagamento' s.pagamento_pendente.pk %}">{% trans "Pagar com PayPal" %}</a>
+                <th>{% trans "Empresa" %}</th>
+                <th>{% trans "Plano" %}</th>
+                <th>{% trans "Período" %}</th>
+                <th>{% trans "Estado da subscrição" %}</th>
+                <th>{% trans "Conta admin" %}</th>
+                <th>{% trans "Último login" %}</th>
+                <th>{% trans "Valor" %}</th>
+                <th>{% trans "Início" %}</th>
+                <th>{% trans "Próxima renovação" %}</th>
+                <th>{% trans "Ações" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in subscricoes %}
+                <tr>
+                    <td>{{ s.empresa.nome }}</td>
+                    <td>{{ s.plano.nome }}</td>
+                    <td>{{ s.periodo_cobranca_label }}</td>
+                    <td>
+                        <span class="badge {{ s.estado }}">
+                            {{ s.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if s.conta_admin %}
+                            <div class="account-cell">
+                                <strong>{{ s.conta_admin.user.username }}</strong>
+                                <span class="account-meta">
+                                    {% if s.conta_admin.user.is_active %}
+                                        <span class="badge activated">{% trans "Ativada" %}</span>
+                                    {% else %}
+                                        <span class="badge pending-account">{% trans "Por ativar" %}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
                         {% else %}
-                            |
-                            <span>{% trans "Plano gratuito" %}</span>
+                            <span class="account-meta">—</span>
                         {% endif %}
-                    {% endif %}
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="8">{% trans "Sem subscrições" %}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                    </td>
+                    <td>
+                        {% if s.conta_admin and s.conta_admin.user.last_login %}
+                            {{ s.conta_admin.user.last_login|date:"d/m/Y H:i" }}
+                        {% elif s.conta_admin %}
+                            <span class="account-meta">{% trans "Nunca iniciou sessão" %}</span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>{{ s.valor }}€</td>
+                    <td>{{ s.data_inicio }}</td>
+                    <td>{{ s.proxima_renovacao|default:s.data_fim }}</td>
+                    <td>
+                        <a href="{% url 'plataforma:empresa_detail' s.empresa.pk %}">{% trans "Ver empresa" %}</a>
+                        |
+                        <a href="{% url 'plataforma:empresa_alterar_plano' s.empresa.pk %}">{% trans "Editar subscrição" %}</a>
+                        {% if request.user.is_superuser and s.pagamento_pendente %}
+                            {% if s.pagamento_pendente.valor > 0 %}
+                                |
+                                <a href="{% url 'plataforma:financas_paypal_checkout_pagamento' s.pagamento_pendente.pk %}">{% trans "Pagar com PayPal" %}</a>
+                            {% else %}
+                                |
+                                <span>{% trans "Plano gratuito" %}</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="10">{% trans "Sem subscrições" %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

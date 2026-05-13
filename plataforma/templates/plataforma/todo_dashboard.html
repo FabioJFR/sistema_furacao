@@ -20,10 +20,12 @@
 {% block plataforma_content %}
     <section class="todo-notes">
         <article class="todo-note-card">
+            <div class="todo-note-label">{% trans "Arquitetura" %}</div>
             <h2>{% trans "Estado Global (Selectors/Services)" %}</h2>
             <p>{{ notas.selectors_services }}</p>
         </article>
         <article class="todo-note-card">
+            <div class="todo-note-label">{% trans "Internacionalização" %}</div>
             <h2>{% trans "Estado Global (Traduções)" %}</h2>
             <p>{{ notas.traducao }}</p>
         </article>
@@ -32,12 +34,20 @@
     <section class="todo-grid">
         {% for area in areas %}
             <article class="todo-card">
-                <h3>{{ area.nome }}</h3>
-                <p>{{ area.descricao }}</p>
-                <p class="todo-status"><strong>{% trans "Estado da lógica" %}:</strong> {{ area.estado_logica }}</p>
-                <a href="{% url 'plataforma:todo_area_detail' area.slug %}" class="btn btn-primary">
-                    {% trans "Abrir detalhes" %}
-                </a>
+                <div class="todo-card-head">
+                    <div class="todo-card-kicker">{% trans "Área" %}</div>
+                    <h3>{{ area.nome }}</h3>
+                </div>
+                <p class="todo-card-copy">{{ area.descricao }}</p>
+                <div class="todo-status">
+                    <span class="todo-status-label">{% trans "Estado da lógica" %}</span>
+                    <strong>{{ area.estado_logica }}</strong>
+                </div>
+                <div class="todo-card-actions">
+                    <a href="{% url 'plataforma:todo_area_detail' area.slug %}" class="btn btn-primary">
+                        {% trans "Abrir detalhes" %}
+                    </a>
+                </div>
             </article>
         {% endfor %}
     </section>

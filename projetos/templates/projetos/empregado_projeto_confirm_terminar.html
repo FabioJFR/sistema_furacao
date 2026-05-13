@@ -1,38 +1,36 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Terminar Projeto do Empregado" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260512-0910">
+{% endblock %}
+
 {% block content %}
-<section class="sf-page p-6">
-    <div class="sf-panel space-y-6">
-
-        <h1 class="text-2xl font-bold text-gray-800">{% trans "Terminar Projeto do Empregado" %}</h1>
-
-        <div class="text-gray-700 space-y-2">
-            <p><strong>{% trans "Empregado:" %}</strong> {{ empregado.nome }}</p>
-            <p><strong>{% trans "Projeto:" %}</strong> {{ ligacao.projeto.nome }}</p>
-            <p><strong>{% trans "Início:" %}</strong> {{ ligacao.data_inicio|default:"-" }}</p>
-            <p><strong>{% trans "Estado atual:" %}</strong> {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Concluído" %}{% endif %}</p>
-        </div>
-
-        <p class="text-gray-600">
-            {% trans "Ao confirmar, esta ligação ficará como concluída. Se não houver data de fim, será usada a data de hoje." %}
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{{ empregado.get_absolute_url }}" class="cf-back">← {% trans "Voltar ao empregado" %}</a>
+        <div class="cf-kicker">{% trans "Fecho de ligação" %}</div>
+        <h1 class="cf-title">{% trans "Terminar Projeto do Empregado" %}</h1>
+        <p class="cf-copy">
+            {% trans "Ao confirmar, esta ligação ficará concluída. Se ainda não existir data de fim, será usada a data de hoje." %}
         </p>
 
-        <form method="post" class="flex gap-3">
-            {% csrf_token %}
-            <button type="submit"
-                    class="bg-rose-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
-                ✅ {% trans "Confirmar" %}
-            </button>
+        <div class="cf-highlight">
+            <strong>{% trans "Empregado" %}:</strong> {{ empregado.nome }}<br>
+            <strong>{% trans "Projeto" %}:</strong> {{ ligacao.projeto.nome }}<br>
+            <strong>{% trans "Início" %}:</strong> {{ ligacao.data_inicio|default:"-" }}<br>
+            <strong>{% trans "Estado atual" %}:</strong> {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Concluído" %}{% endif %}
+        </div>
 
-            <a href="{{ empregado.get_absolute_url }}"
-               class="bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+        <form method="post" class="cf-actions">
+            {% csrf_token %}
+            <button type="submit" class="cf-btn cf-btn-danger">{% trans "Confirmar" %}</button>
+            <a href="{{ empregado.get_absolute_url }}" class="cf-btn cf-btn-secondary">
                 {% trans "Cancelar" %}
             </a>
         </form>
-
     </div>
 </section>
 {% endblock %}

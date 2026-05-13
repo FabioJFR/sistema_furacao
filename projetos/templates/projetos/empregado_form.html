@@ -1,48 +1,57 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/empregado_form.css' %}?v=20260511-1115">
+{% endblock %}
 
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            {{ titulo }}
-        </h2>
+{% block content %}
+<section class="empf-page">
+    <div class="empf-shell">
+        <div class="empf-top">
+            <div class="empf-heading">
+                <a href="{% url 'projetos:empregado_list' %}" class="empf-back">← {% trans "Voltar aos empregados" %}</a>
+                <h1 class="empf-title">
+                    {% if titulo == "Novo Empregado" %}👷 {% trans "Criar empregado" %}{% else %}✏️ {% trans "Editar empregado" %}{% endif %}
+                </h1>
+                <p class="empf-subtitle">{% trans "Organize o registo do empregado com dados profissionais, identificação contratual, anexos e acesso à plataforma num único formulário claro e estável." %}</p>
+            </div>
+        </div>
 
         {% if titulo == "Novo Empregado" %}
-            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900">
-                <h3 class="font-bold mb-2">{% trans "Acesso definido pelo administrador" %}</h3>
-                <p class="text-sm leading-6">
+            <div class="empf-note">
+                <h3 class="empf-note-title">{% trans "Acesso definido pelo administrador" %}</h3>
+                <p>
                     {% trans "Ao criar um novo empregado, o administrador define o nome de utilizador e a palavra-passe inicial." %}
                     {% trans "Essas credenciais ficam associadas ao empregado para acesso imediato à plataforma." %}
                 </p>
             </div>
         {% elif empregado and not empregado.aprovado %}
-            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-900">
-                <h3 class="font-bold mb-2">{% trans "Registo pendente de aprovação" %}</h3>
-                <p class="text-sm leading-6">
+            <div class="empf-note empf-note-warning">
+                <h3 class="empf-note-title">{% trans "Registo pendente de aprovação" %}</h3>
+                <p>
                     {% trans "Este empregado ainda não está aprovado. A aprovação pode ser feita na área de detalhes do empregado," %}
                     {% trans "onde também ficará visível o utilizador associado." %}
                 </p>
             </div>
         {% endif %}
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" enctype="multipart/form-data" class="empf-form">
             {% csrf_token %}
 
             {% if form.non_field_errors or form.errors %}
-                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
-                    <p class="font-bold mb-2">{% trans "Corrige os erros abaixo antes de guardar." %}</p>
+                <div class="empf-alert">
+                    <p class="empf-alert-title">{% trans "Corrige os erros abaixo antes de guardar." %}</p>
 
                     {% if form.non_field_errors %}
-                        <div class="mb-2">{{ form.non_field_errors }}</div>
+                        <div class="empf-alert-copy">{{ form.non_field_errors }}</div>
                     {% endif %}
 
                     {% for field in form %}
                         {% if field.errors %}
-                            <div class="text-sm mt-1">
+                            <div class="empf-alert-copy">
                                 <strong>{{ field.label }}:</strong> {{ field.errors|striptags }}
                             </div>
                         {% endif %}
@@ -50,248 +59,257 @@
                 </div>
             {% endif %}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+            <div class="empf-card">
+            <div class="empf-card-head">
                 <div>
-                    <label for="id_nome" class="block font-semibold mb-1">{% trans "Nome" %}</label>
-                    {{ form.nome|add_class:"w-full p-2 border rounded" }}
+                    <h2 class="empf-card-title">{% trans "Dados do empregado" %}</h2>
+                    <p class="empf-card-copy">{% trans "Preencha os dados principais, o enquadramento contratual e os ficheiros de suporte do trabalhador." %}</p>
+                </div>
+            </div>
+
+            <div class="empf-grid">
+
+                <div class="empf-field empf-field-full">
+                    <label for="id_nome">{% trans "Nome" %}</label>
+                    {{ form.nome|add_class:"empf-input" }}
                     {% if form.nome.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.nome.errors }}</div>
+                        <div class="empf-error">{{ form.nome.errors }}</div>
                     {% endif %}
                 </div>
 
-                <div>
-                    <label for="id_funcao" class="block font-semibold mb-1">{% trans "Função" %}</label>
-                    {{ form.funcao|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_funcao">{% trans "Função" %}</label>
+                    {{ form.funcao|add_class:"empf-input" }}
                     {% if form.funcao.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.funcao.errors }}</div>
+                        <div class="empf-error">{{ form.funcao.errors }}</div>
                     {% endif %}
                 </div>
 
 
-                <div>
-                    <label for="id_email" class="block font-semibold mb-1">{% trans "Email" %}</label>
-                    {{ form.email|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_email">{% trans "Email" %}</label>
+                    {{ form.email|add_class:"empf-input" }}
                     {% if form.email.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.email.errors }}</div>
+                        <div class="empf-error">{{ form.email.errors }}</div>
                     {% endif %}
                 </div>
 
                 {% if titulo == "Novo Empregado" %}
-                <div>
-                    <label for="id_username" class="block font-semibold mb-1">{% trans "Nome de utilizador" %}</label>
-                    {{ form.username|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_username">{% trans "Nome de utilizador" %}</label>
+                    {{ form.username|add_class:"empf-input" }}
                     {% if form.username.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.username.errors }}</div>
+                        <div class="empf-error">{{ form.username.errors }}</div>
                     {% endif %}
                 </div>
 
-                <div>
-                    <label for="id_password" class="block font-semibold mb-1">{% trans "Palavra-passe inicial" %}</label>
-                    {{ form.password|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_password">{% trans "Palavra-passe inicial" %}</label>
+                    {{ form.password|add_class:"empf-input" }}
                     {% if form.password.help_text %}
-                        <div class="text-gray-500 text-sm mt-1">{{ form.password.help_text }}</div>
+                        <div class="empf-help">{{ form.password.help_text }}</div>
                     {% endif %}
                     {% if form.password.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.password.errors }}</div>
+                        <div class="empf-error">{{ form.password.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.telefone %}
-                <div>
-                    <label for="id_telefone" class="block font-semibold mb-1">{% trans "Telefone" %}</label>
-                    {{ form.telefone|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_telefone">{% trans "Telefone" %}</label>
+                    {{ form.telefone|add_class:"empf-input" }}
                     {% if form.telefone.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.telefone.errors }}</div>
+                        <div class="empf-error">{{ form.telefone.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.data_admissao %}
-                <div>
-                    <label for="id_data_admissao" class="block font-semibold mb-1">{% trans "Data de Admissão" %}</label>
-                    {{ form.data_admissao|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_data_admissao">{% trans "Data de Admissão" %}</label>
+                    {{ form.data_admissao|add_class:"empf-input" }}
                     {% if form.data_admissao.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.data_admissao.errors }}</div>
+                        <div class="empf-error">{{ form.data_admissao.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.data_inicio_contrato %}
-                <div>
-                    <label for="id_data_inicio_contrato" class="block font-semibold mb-1">{% trans "Início do Contrato" %}</label>
-                    {{ form.data_inicio_contrato|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_data_inicio_contrato">{% trans "Início do Contrato" %}</label>
+                    {{ form.data_inicio_contrato|add_class:"empf-input" }}
                     {% if form.data_inicio_contrato.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.data_inicio_contrato.errors }}</div>
+                        <div class="empf-error">{{ form.data_inicio_contrato.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.data_fim_contrato %}
-                <div>
-                    <label for="id_data_fim_contrato" class="block font-semibold mb-1">{% trans "Fim do Contrato" %}</label>
-                    {{ form.data_fim_contrato|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_data_fim_contrato">{% trans "Fim do Contrato" %}</label>
+                    {{ form.data_fim_contrato|add_class:"empf-input" }}
                     {% if form.data_fim_contrato.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.data_fim_contrato.errors }}</div>
+                        <div class="empf-error">{{ form.data_fim_contrato.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.nif %}
-                <div>
-                    <label for="id_nif" class="block font-semibold mb-1">{% trans "NIF" %}</label>
-                    {{ form.nif|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_nif">{% trans "NIF" %}</label>
+                    {{ form.nif|add_class:"empf-input" }}
                     {% if form.nif.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.nif.errors }}</div>
+                        <div class="empf-error">{{ form.nif.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.nib %}
-                <div>
-                    <label for="id_nib" class="block font-semibold mb-1">{% trans "NIB / IBAN" %}</label>
-                    {{ form.nib|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_nib">{% trans "NIB / IBAN" %}</label>
+                    {{ form.nib|add_class:"empf-input" }}
                     {% if form.nib.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.nib.errors }}</div>
+                        <div class="empf-error">{{ form.nib.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.nacionalidade %}
-                <div>
-                    <label for="id_nacionalidade" class="block font-semibold mb-1">{% trans "Nacionalidade" %}</label>
-                    {{ form.nacionalidade|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_nacionalidade">{% trans "Nacionalidade" %}</label>
+                    {{ form.nacionalidade|add_class:"empf-input" }}
                     {% if form.nacionalidade.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.nacionalidade.errors }}</div>
+                        <div class="empf-error">{{ form.nacionalidade.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.idade %}
-                <div>
-                    <label for="id_idade" class="block font-semibold mb-1">{% trans "Idade" %}</label>
-                    {{ form.idade|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_idade">{% trans "Idade" %}</label>
+                    {{ form.idade|add_class:"empf-input" }}
                     {% if form.idade.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.idade.errors }}</div>
+                        <div class="empf-error">{{ form.idade.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.salario %}
-                <div>
-                    <label for="id_salario" class="block font-semibold mb-1">{% trans "Salário" %}</label>
-                    {{ form.salario|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field">
+                    <label for="id_salario">{% trans "Salário" %}</label>
+                    {{ form.salario|add_class:"empf-input" }}
                     {% if form.salario.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.salario.errors }}</div>
+                        <div class="empf-error">{{ form.salario.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.dias_ferias_anuais %}
-                <div>
-                    <label for="id_dias_ferias_anuais" class="block font-semibold mb-1">{% trans "Dias de Férias / Ano" %}</label>
-                    {{ form.dias_ferias_anuais|add_class:"w-full p-2 border rounded" }}
-                    <p class="text-sm text-gray-600 mt-1">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
+                <div class="empf-field">
+                    <label for="id_dias_ferias_anuais">{% trans "Dias de Férias / Ano" %}</label>
+                    {{ form.dias_ferias_anuais|add_class:"empf-input" }}
+                    <p class="empf-help">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
                     {% if form.dias_ferias_anuais.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.dias_ferias_anuais.errors }}</div>
+                        <div class="empf-error">{{ form.dias_ferias_anuais.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.aplicar_salario_base_funcao %}
-                <div class="md:col-span-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900">
-                    <label for="id_aplicar_salario_base_funcao" class="font-semibold inline-flex items-center gap-2">
+                <div class="empf-note empf-field-full empf-note-warning">
+                    <label for="id_aplicar_salario_base_funcao" class="empf-check">
                         {{ form.aplicar_salario_base_funcao }}
                         <span>{{ form.aplicar_salario_base_funcao.label }}</span>
                     </label>
-                    <p class="text-sm mt-1">{{ form.aplicar_salario_base_funcao.help_text }}</p>
-                    <p class="text-sm mt-1">
+                    <p class="empf-help">{{ form.aplicar_salario_base_funcao.help_text }}</p>
+                    <p class="empf-help">
                         {% trans "Nota: quando a função é alterada, o salário também é atualizado automaticamente pelo valor base dessa função." %}
                     </p>
                     {% if form.aplicar_salario_base_funcao.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.aplicar_salario_base_funcao.errors }}</div>
+                        <div class="empf-error">{{ form.aplicar_salario_base_funcao.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.curriculo %}
-                <div class="md:col-span-2">
-                    <label for="id_curriculo" class="block font-semibold mb-1">{% trans "Currículo" %}</label>
-                    {{ form.curriculo|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field empf-field-full">
+                    <label for="id_curriculo">{% trans "Currículo" %}</label>
+                    {{ form.curriculo|add_class:"empf-input" }}
                     {% if empregado and empregado.curriculo %}
-                        <p class="text-sm text-gray-600 mt-1">
+                        <p class="empf-help">
                             {% trans "Atual:" %}
-                            <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline">
+                            <a href="{{ empregado.curriculo.url }}" target="_blank" class="empf-file-link">
                                 {% trans "Ver ficheiro" %}
                             </a>
                         </p>
                     {% endif %}
                     {% if form.curriculo.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.curriculo.errors }}</div>
+                        <div class="empf-error">{{ form.curriculo.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.contrato %}
-                <div class="md:col-span-2">
-                    <label for="id_contrato" class="block font-semibold mb-1">{% trans "Contrato" %}</label>
-                    {{ form.contrato|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field empf-field-full">
+                    <label for="id_contrato">{% trans "Contrato" %}</label>
+                    {{ form.contrato|add_class:"empf-input" }}
                     {% if empregado and empregado.contrato %}
-                        <p class="text-sm text-gray-600 mt-1">
+                        <p class="empf-help">
                             {% trans "Atual:" %}
-                            <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline">
+                            <a href="{{ empregado.contrato.url }}" target="_blank" class="empf-file-link">
                                 {% trans "Ver ficheiro" %}
                             </a>
                         </p>
                     {% endif %}
                     {% if form.contrato.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.contrato.errors }}</div>
+                        <div class="empf-error">{{ form.contrato.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.morada %}
-                <div class="md:col-span-2">
-                    <label for="id_morada" class="block font-semibold mb-1">{% trans "Morada" %}</label>
-                    {{ form.morada|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field empf-field-full">
+                    <label for="id_morada">{% trans "Morada" %}</label>
+                    {{ form.morada|add_class:"empf-input" }}
                     {% if form.morada.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.morada.errors }}</div>
+                        <div class="empf-error">{{ form.morada.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
                 {% if form.alertas %}
-                <div class="md:col-span-2">
-                    <label for="id_alertas" class="block font-semibold mb-1">{% trans "Alertas (JSON)" %}</label>
-                    {{ form.alertas|add_class:"w-full p-2 border rounded" }}
+                <div class="empf-field empf-field-full">
+                    <label for="id_alertas">{% trans "Alertas (JSON)" %}</label>
+                    {{ form.alertas|add_class:"empf-input" }}
                     {% if form.alertas.errors %}
-                        <div class="text-red-600 text-sm mt-1">{{ form.alertas.errors }}</div>
+                        <div class="empf-error">{{ form.alertas.errors }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
             </div>
 
+            </div>
+
             {% if empregado and empregado.user %}
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
+                <div class="empf-note">
                     <p><strong>{% trans "Utilizador associado:" %}</strong> {{ empregado.user.username }}</p>
-                    <p class="mt-1 text-gray-600">
+                    <p class="empf-help">
                         {% trans "A palavra-passe não é mostrada aqui por segurança. Se precisares de entregar novo acesso," %}
                         {% trans "redefine a palavra-passe do utilizador associado." %}
                     </p>
                 </div>
             {% endif %}
-            <button type="submit" class="btn btn-success mt-4 w-full text-center">
-                💾 {% trans "Salvar" %}
-            </button>
+            <div class="empf-actions">
+                <a href="{% url 'projetos:empregado_list' %}" class="empf-btn empf-btn-secondary">
+                    {% trans "Voltar à Lista" %}
+                </a>
+                <button type="submit" class="empf-btn empf-btn-primary">
+                    {% trans "Salvar" %}
+                </button>
+            </div>
         </form>
-
-        <div class="mt-4 text-center">
-            <a href="{% url 'projetos:empregado_list' %}" class="btn btn-primary">
-                🔙 {% trans "Voltar à Lista" %}
-            </a>
-        </div>
     </div>
 </section>
 {% endblock %}

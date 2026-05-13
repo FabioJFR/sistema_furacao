@@ -9,67 +9,68 @@
 {% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
+<section class="projeto-page">
+    <div class="projeto-shell">
+        <div class="projeto-hero">
+            <h1 class="projeto-page-title">📁 {% trans "Projetos" %}</h1>
+            <a href="{% url 'projetos:projeto_create' %}" class="projeto-create-btn">
+               + {% trans "Criar Projeto" %}
+            </a>
+        </div>
 
-    <!-- CABEÇALHO -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">📂 {% trans "Projetos" %}</h1>
-        <a href="{% url 'projetos:projeto_create' %}" 
-           class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
-           ➕ {% trans "Criar Projeto" %}
-        </a>
-    </div>
-
-    <!-- LISTA DE PROJETOS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="projeto-grid">
         {% for projeto in projetos %}
         <div id="projeto-{{ forloop.counter0 }}"
-             class="projeto-card projeto-card-interactive bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition space-y-2">
-            <h2 class="font-bold text-xl text-gray-800 sf-break-word">{{ projeto.nome }}</h2>
-            <p><strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}</p>
-            <p><strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}</p>
-            <p><strong>{% trans "País:" %}</strong> {{ projeto.pais }}</p>
-            <div class="flex gap-2 mt-2">
+             class="projeto-card projeto-card-interactive">
+            <h2 class="projeto-card-title sf-break-word">{{ projeto.nome }}</h2>
+            <div class="projeto-card-meta">
+                <p><strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}</p>
+                <p><strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}</p>
+                <p><strong>{% trans "País:" %}</strong> {{ projeto.pais }}</p>
+            </div>
+            <div class="projeto-card-actions">
                 <a href="{% url 'projetos:projeto_detail_legacy' projeto.pk %}" 
-                   class="flex-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition text-center">
+                   class="projeto-action-btn">
                    🔎 {% trans "Detalhes" %}
                 </a>
                 <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
-                   class="flex-1 bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition text-center">
+                   class="projeto-action-btn">
                    ✏️ {% trans "Editar" %}
                 </a>
             </div>
         </div>
         {% empty %}
-        <p class="text-gray-500 col-span-3">{% trans "Nenhum projeto encontrado." %}</p>
+        <div class="projeto-empty">{% trans "Nenhum projeto encontrado." %}</div>
         {% endfor %}
-    </div>
-
-    <!-- MAPA DE PROJETOS -->
-    <h2 class="mt-12 mb-4 text-2xl font-bold text-gray-800">🗺️ {% trans "Mapa de Projetos" %}</h2>
-    <div class="projeto-map-shell">
-        <div class="projeto-map-toolbar">
-            <button id="prevProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-nav">
-                ◀
-            </button>
-
-            <button id="nextProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-nav">
-                ▶
-            </button>
-
-            <div id="projetoInfo" class="projeto-map-info">
-                {% trans "Nenhum projeto selecionado" %}
-            </div>
-
-            <button id="abrirProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-open">
-                ↗
-            </button>
-
         </div>
 
-        <div id="map" class="w-full h-96 rounded-xl shadow-md"></div>
-    </div>
+        <div class="projeto-map-section">
+            <h2 class="projeto-map-title">🗺️ {% trans "Mapa de Projetos" %}</h2>
+            <div class="projeto-map-card">
+            <div class="projeto-map-shell">
+                <div class="projeto-map-toolbar">
+                    <button id="prevProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-nav">
+                        ◀
+                    </button>
 
+                    <button id="nextProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-nav">
+                        ▶
+                    </button>
+
+                    <div id="projetoInfo" class="projeto-map-info">
+                        {% trans "Nenhum projeto selecionado" %}
+                    </div>
+
+                    <button id="abrirProjetoBtn" type="button" class="projeto-map-btn projeto-map-btn-open">
+                        ↗
+                    </button>
+
+                </div>
+                <div id="map" class="w-full h-96 rounded-xl shadow-md"></div>
+            </div>
+        </div>
+        </div>
+    </div>
 </section>
 {{ projetos|json_script:"projetos-data" }}
 <div

@@ -1,6 +1,6 @@
 {% extends "projetos/base.html" %}
+{% load static i18n %}
 
-{% load static  i18n %}
 {% block title %}
     {% if page_title %}
         {{ page_title }}
@@ -10,360 +10,479 @@
 {% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/furo_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/furo_detail.css' %}?v=20260512-1610">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 {% endblock %}
 
 {% block content %}
-<section class="furo-detail-page">
-<div class="furo-shell">
-    {{ furo_mapa|json_script:"furo-data" }}
+<section class="sf-page furo-detail-page">
+    <div class="page-card sf-page-wide">
+        {{ furo_mapa|json_script:"furo-data" }}
 
-    <nav class="text-sm text-gray-500 mb-3">
-        <a href="{% url 'projetos:dashboard' %}" class="hover:text-gray-700">{% trans "Dashboard" %}</a>
-        <span class="mx-2">/</span>
-        <a href="{% url 'projetos:furo_list' %}" class="hover:text-gray-700">{% trans "Furos" %}</a>
-        <span class="mx-2">/</span>
-        <span class="text-gray-700 font-semibold sf-break-word">{{ furo.nome }}</span>
-    </nav>
+        <nav class="sf-breadcrumb">
+            <a href="{% url 'projetos:furo_list' %}">{% trans "Furos" %}</a>
+            <span>›</span>
+            <span class="sf-break-word">{{ furo.nome }}</span>
+        </nav>
 
-    <div class="furo-header">
-        <div class="furo-title-wrap">
-            <h1 class="sf-break-word">{% blocktrans with nome=furo.nome %}Furo {{ nome }}{% endblocktrans %}</h1>
-            <p class="furo-subtitle">{% blocktrans with projeto_nome=furo.projeto.nome %}Projeto {{ projeto_nome }} · acompanhamento técnico, equipa e produção do furo.{% endblocktrans %}</p>
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Gestão de Furos" %}</p>
+                <h1 class="sf-page-title sf-break-word">{{ furo.nome }}</h1>
+                <p class="sf-page-description">
+                    {% blocktrans with projeto_nome=furo.projeto.nome %}Projeto {{ projeto_nome }} com acompanhamento técnico, planeamento, produção, equipa e contexto geológico num único detalhe operacional.{% endblocktrans %}
+                </p>
+            </div>
+
+            <div class="sf-page-actions">
+                <a href="{% url 'projetos:furo_update' furo.id %}" class="btn btn-primary">{% trans "Editar furo" %}</a>
+                <a href="{% url 'projetos:furo_delete' furo.id %}" class="btn btn-danger">{% trans "Apagar furo" %}</a>
+            </div>
         </div>
-        <div class="furo-status-badge">
-            <span>{% trans "Estado" %}</span>
-            <strong>{{ furo.get_estado_display }}</strong>
-        </div>
-    </div>
 
-    <section class="furo-section">
-        <h2 class="furo-section-title">{% trans "Dados Gerais do Furo" %}</h2>
-        <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Projeto" %}</span><span class="furo-stat-value">{{ furo.projeto.nome }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Tipo" %}</span><span class="furo-stat-value">{{ furo.get_tipo_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade inicial" %}</span><span class="furo-stat-value">{{ furo.profundidade_inicial }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade atual" %}</span><span class="furo-stat-value">{{ furo.profundidade_atual }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade máxima" %}</span><span class="furo-stat-value">{{ furo.profundidade_maxima_atingida }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Total de horas" %}</span><span class="furo-stat-value">{{ total_horas_registos_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Magnetismo" %}</span><span class="furo-stat-value">{{ furo.magnetismo|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Latitude" %}</span><span class="furo-stat-value">{{ furo.latitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Longitude" %}</span><span class="furo-stat-value">{{ furo.longitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Altitude" %}</span><span class="furo-stat-value">{{ furo.altitude|default:"-" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Sistema de coordenadas" %}</span><span class="furo-stat-value">{{ furo.get_sistema_coordenadas_display }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data de criação (sistema)" %}</span><span class="furo-stat-value">{{ furo.data|date:"d/m/Y H:i" }}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Início real do furo (1.º relatório)" %}</span><span class="furo-stat-value">{% if data_inicio_real_furo %}{{ data_inicio_real_furo|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Média de metros por dia" %}</span><span class="furo-stat-value">{{ media_metros_por_dia_furo|default:"0" }} m/dia</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Data fim da operação" %}</span><span class="furo-stat-value">{% if furo.data_fim_operacao %}{{ furo.data_fim_operacao|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
+        <div class="sf-stat-grid">
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Estado" %}</div>
+                <div class="sf-stat-value">{{ furo.get_estado_display }}</div>
+                <div class="sf-stat-copy">{% trans "Situação operacional atual do furo." %}</div>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Profundidade atual" %}</div>
+                <div class="sf-stat-value">{{ furo.profundidade_atual }} m</div>
+                <div class="sf-stat-copy">{% trans "Profundidade registada mais recente." %}</div>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Média por dia" %}</div>
+                <div class="sf-stat-value">{{ media_metros_por_dia_furo|default:"0" }} m</div>
+                <div class="sf-stat-copy">{% trans "Produção média diária apurada para este furo." %}</div>
+            </div>
         </div>
-    </section>
 
-    {% if memoria_zona_alerta %}
-    <section class="furo-section">
-        <h2 class="furo-section-title">{% trans "Memória Operacional da Zona" %}</h2>
-        <div class="furo-memory-box">
-            <p class="furo-memory-intro">
-                {% trans "A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto." %}
-            </p>
-            <div class="furo-grid">
-                {% for item in memoria_zona_alerta %}
-                    <div class="furo-stat-card furo-memory-card">
-                        <span class="furo-stat-label">{{ item.nome }}</span>
-                        <span class="furo-stat-value">{{ item.projeto }}</span>
-                        <div class="furo-memory-meta">
-                            {% trans "Estado:" %} <strong>{{ item.estado }}</strong><br>
-                            {% trans "Profundidade máxima:" %} <strong>{{ item.profundidade_maxima_atingida }} m</strong><br>
-                            {% trans "Metros furados:" %} <strong>{{ item.metros_furados }} m</strong><br>
-                            {% trans "Medições:" %} <strong>{{ item.total_medicoes }}</strong> · {% trans "Registos:" %} <strong>{{ item.total_registos }}</strong><br>
-                            {% trans "Despesa direta:" %} <strong>{{ item.total_despesas }} €</strong><br>
-                            {% if item.distancia_km is not None %}{% trans "Distância:" %} <strong>{{ item.distancia_km }} km</strong><br>{% endif %}
-                            {% if item.mesma_localizacao_textual %}<strong>{% trans "Mesma localização textual" %}</strong><br>{% endif %}
-                            {% trans "Localização:" %} <strong>{{ item.localizacao }}</strong>
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Dados gerais do furo" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Resumo operativo e técnico com contexto de projeto, profundidades, coordenadas e tempos acumulados." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="sf-overview-grid">
+                <div class="sf-overview-card">
+                    <h3 class="sf-overview-title">{% trans "Contexto" %}</h3>
+                    <dl class="sf-detail-list">
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Projeto" %}</dt>
+                            <dd class="sf-detail-value"><a href="{{ furo.projeto.get_absolute_url }}">{{ furo.projeto.nome }}</a></dd>
                         </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Tipo" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.get_tipo_display }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Sistema de coordenadas" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.get_sistema_coordenadas_display }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Data de criação" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.data|date:"d/m/Y H:i" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="sf-overview-card">
+                    <h3 class="sf-overview-title">{% trans "Profundidades e tempos" %}</h3>
+                    <dl class="sf-detail-list">
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Profundidade inicial" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.profundidade_inicial }} m</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Profundidade máxima" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.profundidade_maxima_atingida }} m</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Total de horas" %}</dt>
+                            <dd class="sf-detail-value">{{ total_horas_registos_display }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Início real" %}</dt>
+                            <dd class="sf-detail-value">{% if data_inicio_real_furo %}{{ data_inicio_real_furo|date:"d/m/Y" }}{% else %}-{% endif %}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Fim da operação" %}</dt>
+                            <dd class="sf-detail-value">{% if furo.data_fim_operacao %}{{ furo.data_fim_operacao|date:"d/m/Y" }}{% else %}-{% endif %}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="sf-overview-card">
+                    <h3 class="sf-overview-title">{% trans "Coordenadas e leitura" %}</h3>
+                    <dl class="sf-detail-list">
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Latitude" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.latitude|default:"-" }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Longitude" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.longitude|default:"-" }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Altitude" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.altitude|default:"-" }}</dd>
+                        </div>
+                        <div class="sf-detail-item">
+                            <dt class="sf-detail-label">{% trans "Magnetismo" %}</dt>
+                            <dd class="sf-detail-value">{{ furo.magnetismo|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        {% if memoria_zona_alerta %}
+            <section class="sf-section-card furo-memory-section">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Memória operacional da zona" %}</h2>
+                        <p class="sf-section-description">
+                            {% trans "Fuross relacionados nesta zona para recordar problemas, resultados e decisões operacionais já ocorridas." %}
+                        </p>
                     </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
+                </div>
 
-    <section class="furo-section">
-        <h2 class="furo-section-title">{% trans "Planeamento Inicial" %}</h2>
-        <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade alvo inicial" %}</span><span class="furo-stat-value">{{ furo.profundidade_alvo_inicial }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação planeada inicial" %}</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_inicial }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute planeado inicial" %}</span><span class="furo-stat-value">{{ furo.azimute_planeado_inicial }}°</span></div>
-        </div>
-    </section>
+                <div class="sf-note-card furo-memory-note">
+                    {% trans "A plataforma encontrou furos relacionados nesta zona. Isto ajuda a lembrar o que já aconteceu aqui e pode evitar repetir problemas antigos sem contexto." %}
+                </div>
 
-    <section class="furo-section">
-        <h2 class="furo-section-title">{% trans "Planeamento Atual" %}</h2>
-        <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Profundidade alvo atual" %}</span><span class="furo-stat-value">{{ furo.profundidade_alvo_atual }} m</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação planeada atual" %}</span><span class="furo-stat-value">{{ furo.inclinacao_planeada_atual|default:"-" }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute planeado atual" %}</span><span class="furo-stat-value">{{ furo.azimute_planeado_atual|default:"-" }}°</span></div>
-        </div>
-    </section>
-
-    <section class="furo-section">
-        <h2 class="furo-section-title">{% trans "Estado Real Atual" %}</h2>
-        <div class="furo-grid">
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Inclinação real atual" %}</span><span class="furo-stat-value">{{ furo.inclinacao_real_atual|default:"-" }}°</span></div>
-            <div class="furo-stat-card"><span class="furo-stat-label">{% trans "Azimute real atual" %}</span><span class="furo-stat-value">{{ furo.azimute_real_atual|default:"-" }}°</span></div>
-        </div>
-    </section>
-
-    <section class="furo-map-wrap">
-        <h2 class="furo-section-title">{% trans "Mapa do Furo" %}</h2>
-        <div class="furo-map-card">
-            <div id="map"></div>
-        </div>
-        <div class="furo-actions">
-            <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="furo-action-btn btn-3d">{% trans "Ver Trajetória 3D" %}</a>
-            <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="furo-action-btn btn-team">➕ {% trans "Adicionar Trabalhador ao Furo" %}</a>
-            <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="furo-action-btn btn-history">🕘 {% trans "Histórico de Configurações" %}</a>
-            <a href="{% url 'projetos:medicao_create' furo.id %}" class="furo-action-btn btn-measure">📏 {% trans "Adicionar Medição" %}</a>
-            <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="furo-action-btn btn-team">{% trans "Geologia e Drone" %}</a>
-            {% if furo.estado != "concluido" %}
-            <form method="post" action="{% url 'projetos:furo_terminar' furo.id %}" class="inline">
-                {% csrf_token %}
-                <button type="submit" class="furo-action-btn btn-history">{% trans "Terminar Furo" %}</button>
-            </form>
-            {% else %}
-            <form method="post" action="{% url 'projetos:furo_reativar' furo.id %}" class="inline">
-                {% csrf_token %}
-                <button type="submit" class="furo-action-btn btn-team">{% trans "Reativar Furo" %}</button>
-            </form>
-            {% endif %}
-        </div>
-    </section>
-
-    <div class="furo-panels">
-        <div class="furo-panel">
-            <h3>{% trans "Materiais usados" %}</h3>
-            <ul class="furo-list">
-                {% for material in furo.materiais.all %}
-                    <li class="furo-list-item">
-                        <div class="furo-list-main">{{ material.nome }}</div>
-                        <div class="furo-list-sub">{% blocktrans with quantidade=material.quantidade valor=material.valor %}Quantidade: {{ quantidade }} · Valor: {{ valor }} €{% endblocktrans %}</div>
-                    </li>
-                {% empty %}
-                    <li class="furo-empty">{% trans "Nenhum material registado." %}</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="furo-panel">
-            <h3>{% trans "Máquinas usadas" %}</h3>
-            <ul class="furo-list">
-                {% for maquina in furo.maquinas.all %}
-                    <li class="furo-list-item">
-                        <div class="furo-list-main">{{ maquina.nome }}</div>
-                        <div class="furo-list-sub">
-                            {% if maquina.modelo %}
-                                {{ maquina.modelo }}
-                            {% else %}
-                                {% trans "Sem modelo" %}
+                <div class="sf-card-grid">
+                    {% for item in memoria_zona_alerta %}
+                        <div class="sf-mini-card furo-memory-card">
+                            <h3 class="sf-mini-card-title sf-break-word">{{ item.nome }}</h3>
+                            <p class="sf-mini-card-copy"><strong>{{ item.projeto }}</strong></p>
+                            <p class="sf-mini-card-copy">{% trans "Estado:" %} {{ item.estado }}</p>
+                            <p class="sf-mini-card-copy">{% trans "Profundidade máxima:" %} {{ item.profundidade_maxima_atingida }} m</p>
+                            <p class="sf-mini-card-copy">{% trans "Metros furados:" %} {{ item.metros_furados }} m</p>
+                            <p class="sf-mini-card-copy">{% trans "Medições:" %} {{ item.total_medicoes }} · {% trans "Registos:" %} {{ item.total_registos }}</p>
+                            <p class="sf-mini-card-copy">{% trans "Despesa direta:" %} {{ item.total_despesas }} €</p>
+                            {% if item.distancia_km is not None %}
+                                <p class="sf-mini-card-copy">{% trans "Distância:" %} {{ item.distancia_km }} km</p>
                             {% endif %}
-                            · {{ maquina.get_estado_display|default:maquina.estado }}
+                            {% if item.mesma_localizacao_textual %}
+                                <p class="sf-mini-card-copy"><strong>{% trans "Mesma localização textual" %}</strong></p>
+                            {% endif %}
+                            <p class="sf-mini-card-copy">{% trans "Localização:" %} {{ item.localizacao }}</p>
                         </div>
-                    </li>
-                {% empty %}
-                    <li class="furo-empty">{% trans "Nenhuma máquina registada." %}</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="furo-panel">
-            <h3>{% trans "Empregados envolvidos" %}</h3>
-            <ul class="furo-list">
-                {% for ligacao in furo.ligacoes_empregados.all %}
-                    <li class="furo-list-item">
-                        <div class="furo-list-main">{{ ligacao.empregado.nome }}</div>
-                        <div class="furo-list-sub">{{ ligacao.get_funcao_display }}</div>
-                        <div class="furo-mini-actions">
-                            <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}" class="furo-mini-btn btn-edit">{% trans "Editar" %}</a>
-                            <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}" class="furo-mini-btn btn-delete">{% trans "Remover" %}</a>
-                        </div>
-                    </li>
-                {% empty %}
-                    <li class="furo-empty">{% trans "Nenhum empregado registado neste furo." %}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <section class="furo-table-card">
-        <div class="furo-table-header">
-            <div>
-                <h2>{% trans "Medições" %}</h2>
-                <p>{% trans "Histórico técnico das medições registadas para este furo." %}</p>
-            </div>
-        </div>
-        <div class="furo-table-wrap">
-            <table class="furo-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Profundidade" %}</th>
-                        <th>{% trans "Inclinação real" %}</th>
-                        <th>{% trans "Azimute real" %}</th>
-                        <th>{% trans "Magnetismo" %}</th>
-                        <th>{% trans "Latitude" %}</th>
-                        <th>{% trans "Longitude" %}</th>
-                        <th>{% trans "Altitude" %}</th>
-                        <th>{% trans "Imagem" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-            {% for medicao in medicoes %}
-                <tr>
-                    <td>{{ medicao.criado_em|date:"d/m/Y H:i" }}</td>
-                    <td>{{ medicao.profundidade_medida|default:"-" }} m</td>
-                    <td>{{ medicao.inclinacao_real_medida|default:"-" }}°</td>
-                    <td>{{ medicao.azimute_real_medido|default:"-" }}°</td>
-                    <td>{{ medicao.magnetismo|default:"-" }}</td>
-                    <td>{{ medicao.latitude|default:"-" }}</td>
-                    <td>{{ medicao.longitude|default:"-" }}</td>
-                    <td>{{ medicao.altitude|default:"-" }}</td>
-                    <td>
-                        {% if medicao.imagem %}
-                            <img src="{{ medicao.imagem.url }}" class="furo-thumb" data-modal-image="{{ medicao.imagem.url }}">
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                 </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="9" class="furo-empty">{% trans "Nenhuma medição registada." %}</td>
-                </tr>
-            {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="furo-table-card">
-        <div class="furo-table-header">
-            <div>
-                <h2>{% trans "Logging Geológico" %}</h2>
-                <p>{% trans "Resumo recente do fluxo geológico do furo e integração com missões DJI Mini 4 Pro." %}</p>
-            </div>
-            <div>
-                <a href="{% url 'geologia:log_create' furo.id %}" class="furo-action-btn btn-measure">{% trans "Novo Log" %}</a>
-            </div>
-        </div>
-        <div class="furo-table-wrap">
-            <table class="furo-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Intervalo" %}</th>
-                        <th>{% trans "Litologia" %}</th>
-                        <th>{% trans "RQD" %}</th>
-                        <th>{% trans "Recuperação" %}</th>
-                        <th>{% trans "Drone" %}</th>
-                        <th>{% trans "Ações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for log in logs_geologicos_recentes %}
-                    <tr>
-                        <td>{{ log.data_registo|date:"d/m/Y" }}</td>
-                        <td>{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</td>
-                        <td>{{ log.litologia_principal }}</td>
-                        <td>{{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</td>
-                        <td>{{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</td>
-                        <td>{{ log.missao_drone.titulo|default:"-" }}</td>
-                        <td><a href="{% url 'geologia:log_detail' log.id %}" class="furo-link">{% trans "Abrir" %}</a></td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="7" class="furo-empty">{% trans "Ainda não existem logs geológicos para este furo." %}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% if missoes_drone_recentes %}
-            <div class="furo-drone-recent-wrap">
-                <h3 class="furo-drone-recent-title">{% trans "Missões Drone Recentes" %}</h3>
-                <ul class="furo-list">
-                    {% for missao in missoes_drone_recentes %}
-                        <li class="furo-list-item">
-                            <div class="furo-list-main">{{ missao.titulo }}</div>
-                            <div class="furo-list-sub">{{ missao.data_voo|date:"d/m/Y" }} · {{ missao.get_status_display }} · {{ missao.equipamento }}</div>
-                        </li>
                     {% endfor %}
-                </ul>
-            </div>
+                </div>
+            </section>
         {% endif %}
-    </section>
 
-    <section class="furo-table-card">
-        <div class="furo-table-header">
-            <div>
-                <h2>{% trans "Levantamentos de Material" %}</h2>
-                <p>{% trans "Movimentos de material associados a este furo." %}</p>
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Planeamento e estado real" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Comparação entre o plano original, o plano atual e o estado real medido do furo." %}
+                    </p>
+                </div>
             </div>
-        </div>
 
-        {% if levantamentos %}
-            <div class="furo-table-wrap">
-                <table class="furo-table">
-                    <thead>
-                        <tr>
-                            <th>{% trans "Data" %}</th>
-                            <th>{% trans "Empregado" %}</th>
-                            <th>{% trans "Material" %}</th>
-                            <th>{% trans "Quantidade" %}</th>
-                            <th>{% trans "Projeto" %}</th>
-                            <th>{% trans "Observações" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for levantamento in levantamentos %}
+            <div class="sf-card-grid">
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Planeamento inicial" %}</h3>
+                    <p class="sf-mini-card-copy">{% trans "Profundidade alvo:" %} {{ furo.profundidade_alvo_inicial }} m</p>
+                    <p class="sf-mini-card-copy">{% trans "Inclinação:" %} {{ furo.inclinacao_planeada_inicial }}°</p>
+                    <p class="sf-mini-card-copy">{% trans "Azimute:" %} {{ furo.azimute_planeado_inicial }}°</p>
+                </div>
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Planeamento atual" %}</h3>
+                    <p class="sf-mini-card-copy">{% trans "Profundidade alvo:" %} {{ furo.profundidade_alvo_atual }} m</p>
+                    <p class="sf-mini-card-copy">{% trans "Inclinação:" %} {{ furo.inclinacao_planeada_atual|default:"-" }}°</p>
+                    <p class="sf-mini-card-copy">{% trans "Azimute:" %} {{ furo.azimute_planeado_atual|default:"-" }}°</p>
+                </div>
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Estado real atual" %}</h3>
+                    <p class="sf-mini-card-copy">{% trans "Inclinação real:" %} {{ furo.inclinacao_real_atual|default:"-" }}°</p>
+                    <p class="sf-mini-card-copy">{% trans "Azimute real:" %} {{ furo.azimute_real_atual|default:"-" }}°</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Mapa e ações rápidas" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Localização do furo, acesso à trajetória 3D, medições, geologia, histórico e gestão de equipa." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="furo-map-card">
+                <div id="map"></div>
+            </div>
+
+            <div class="sf-page-actions" style="margin-top: 18px;">
+                <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-primary">{% trans "Ver trajetória 3D" %}</a>
+                <a href="{% url 'projetos:furo_adicionar_empregado' furo.id %}" class="btn btn-primary">{% trans "Adicionar trabalhador" %}</a>
+                <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="btn btn-primary">{% trans "Histórico de configurações" %}</a>
+                <a href="{% url 'projetos:medicao_create' furo.id %}" class="btn btn-primary">{% trans "Adicionar medição" %}</a>
+                <a href="{% url 'geologia:furo_dashboard' furo.id %}" class="btn btn-primary">{% trans "Geologia e drone" %}</a>
+                {% if furo.estado != "concluido" %}
+                    <form method="post" action="{% url 'projetos:furo_terminar' furo.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">{% trans "Terminar furo" %}</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'projetos:furo_reativar' furo.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">{% trans "Reativar furo" %}</button>
+                    </form>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Recursos e equipa" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Materiais, máquinas e trabalhadores diretamente ligados a este furo." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="sf-card-grid">
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Materiais usados" %}</h3>
+                    {% if furo.materiais.all %}
+                        <div class="furo-stack-list">
+                            {% for material in furo.materiais.all %}
+                                <div class="furo-stack-item">
+                                    <div class="furo-stack-title">{{ material.nome }}</div>
+                                    <div class="furo-stack-copy">{% blocktrans with quantidade=material.quantidade valor=material.valor %}Quantidade: {{ quantidade }} · Valor: {{ valor }} €{% endblocktrans %}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="sf-empty-state">{% trans "Nenhum material registado." %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Máquinas usadas" %}</h3>
+                    {% if furo.maquinas.all %}
+                        <div class="furo-stack-list">
+                            {% for maquina in furo.maquinas.all %}
+                                <div class="furo-stack-item">
+                                    <div class="furo-stack-title">{{ maquina.nome }}</div>
+                                    <div class="furo-stack-copy">
+                                        {% if maquina.modelo %}{{ maquina.modelo }}{% else %}{% trans "Sem modelo" %}{% endif %}
+                                        · {{ maquina.get_estado_display|default:maquina.estado }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="sf-empty-state">{% trans "Nenhuma máquina registada." %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="sf-mini-card">
+                    <h3 class="sf-mini-card-title">{% trans "Empregados envolvidos" %}</h3>
+                    {% if furo.ligacoes_empregados.all %}
+                        <div class="furo-stack-list">
+                            {% for ligacao in furo.ligacoes_empregados.all %}
+                                <div class="furo-stack-item">
+                                    <div class="furo-stack-title">{{ ligacao.empregado.nome }}</div>
+                                    <div class="furo-stack-copy">{{ ligacao.get_funcao_display }}</div>
+                                    <div class="sf-actions-inline" style="margin-top: 10px;">
+                                        <a href="{% url 'projetos:furo_editar_empregado' ligacao.id %}" class="btn btn-primary">{% trans "Editar" %}</a>
+                                        <a href="{% url 'projetos:furo_remover_empregado' ligacao.id %}" class="btn btn-danger">{% trans "Remover" %}</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="sf-empty-state">{% trans "Nenhum empregado registado neste furo." %}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Medições" %}</h2>
+                    <p class="sf-section-description">{% trans "Histórico técnico das medições registadas para este furo." %}</p>
+                </div>
+            </div>
+            <div class="sf-table-card">
+                <div class="sf-table-wrap">
+                    <table class="sf-table">
+                        <thead>
                             <tr>
-                                <td>{{ levantamento.data|date:"d/m/Y" }}</td>
-                                <td>{{ levantamento.empregado.nome }}</td>
-                                <td>
-                                    <a href="{% url 'projetos:material_detail' levantamento.material.id %}" class="furo-link">
-                                        {{ levantamento.material.nome }}
-                                    </a>
-                                </td>
-                                <td>{{ levantamento.quantidade }}</td>
-                                <td>
-                                    {% if levantamento.projeto %}
-                                        <a href="{{ levantamento.projeto.get_absolute_url }}" class="furo-link">
-                                            {{ levantamento.projeto.nome }}
-                                        </a>
-                                    {% else %}
-                                        {% trans "Stock" %}
-                                    {% endif %}
-                                </td>
-                                <td>{{ levantamento.observacoes|default:"-" }}</td>
+                                <th>{% trans "Data" %}</th>
+                                <th>{% trans "Profundidade" %}</th>
+                                <th>{% trans "Inclinação real" %}</th>
+                                <th>{% trans "Azimute real" %}</th>
+                                <th>{% trans "Magnetismo" %}</th>
+                                <th>{% trans "Latitude" %}</th>
+                                <th>{% trans "Longitude" %}</th>
+                                <th>{% trans "Altitude" %}</th>
+                                <th>{% trans "Imagem" %}</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for medicao in medicoes %}
+                                <tr>
+                                    <td>{{ medicao.criado_em|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ medicao.profundidade_medida|default:"-" }} m</td>
+                                    <td>{{ medicao.inclinacao_real_medida|default:"-" }}°</td>
+                                    <td>{{ medicao.azimute_real_medido|default:"-" }}°</td>
+                                    <td>{{ medicao.magnetismo|default:"-" }}</td>
+                                    <td>{{ medicao.latitude|default:"-" }}</td>
+                                    <td>{{ medicao.longitude|default:"-" }}</td>
+                                    <td>{{ medicao.altitude|default:"-" }}</td>
+                                    <td>
+                                        {% if medicao.imagem %}
+                                            <img src="{{ medicao.imagem.url }}" class="furo-thumb" data-modal-image="{{ medicao.imagem.url }}">
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="9" class="furo-empty-cell">{% trans "Nenhuma medição registada." %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        {% else %}
-            <div class="furo-empty furo-empty-table">{% trans "Ainda não existem levantamentos de material neste furo." %}</div>
-        {% endif %}
-    </section>
+        </section>
 
-    <div class="furo-footer-actions">
-        <a href="{% url 'projetos:furo_update' furo.id %}" class="furo-action-btn btn-edit">✏️ {% trans "Editar Furo" %}</a>
-        <a href="{% url 'projetos:furo_delete' furo.id %}" class="furo-action-btn btn-delete">🗑️ {% trans "Apagar Furo" %}</a>
-        <a href="{% url 'projetos:furo_list' %}" class="furo-action-btn btn-back">🔙 {% trans "Voltar" %}</a>
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Logging geológico" %}</h2>
+                    <p class="sf-section-description">{% trans "Resumo recente do fluxo geológico do furo e integração com missões DJI Mini 4 Pro." %}</p>
+                </div>
+                <a href="{% url 'geologia:log_create' furo.id %}" class="btn btn-primary">{% trans "Novo log" %}</a>
+            </div>
+            <div class="sf-table-card">
+                <div class="sf-table-wrap">
+                    <table class="sf-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Data" %}</th>
+                                <th>{% trans "Intervalo" %}</th>
+                                <th>{% trans "Litologia" %}</th>
+                                <th>{% trans "RQD" %}</th>
+                                <th>{% trans "Recuperação" %}</th>
+                                <th>{% trans "Drone" %}</th>
+                                <th>{% trans "Ações" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs_geologicos_recentes %}
+                                <tr>
+                                    <td>{{ log.data_registo|date:"d/m/Y" }}</td>
+                                    <td>{{ log.intervalo_de }} m - {{ log.intervalo_ate }} m</td>
+                                    <td>{{ log.litologia_principal }}</td>
+                                    <td>{{ log.rqd_percent|default:"-" }}{% if log.rqd_percent %}%{% endif %}</td>
+                                    <td>{{ log.recuperacao_testemunho_percent|default:"-" }}{% if log.recuperacao_testemunho_percent %}%{% endif %}</td>
+                                    <td>{{ log.missao_drone.titulo|default:"-" }}</td>
+                                    <td><a href="{% url 'geologia:log_detail' log.id %}" class="furo-link">{% trans "Abrir" %}</a></td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="furo-empty-cell">{% trans "Ainda não existem logs geológicos para este furo." %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if missoes_drone_recentes %}
+                <div class="furo-recent-missions">
+                    <h3 class="sf-overview-title">{% trans "Missões drone recentes" %}</h3>
+                    <div class="furo-stack-list">
+                        {% for missao in missoes_drone_recentes %}
+                            <div class="furo-stack-item">
+                                <div class="furo-stack-title">{{ missao.titulo }}</div>
+                                <div class="furo-stack-copy">{{ missao.data_voo|date:"d/m/Y" }} · {{ missao.get_status_display }} · {{ missao.equipamento }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Levantamentos de material" %}</h2>
+                    <p class="sf-section-description">{% trans "Movimentos de material associados a este furo." %}</p>
+                </div>
+            </div>
+
+            {% if levantamentos %}
+                <div class="sf-table-card">
+                    <div class="sf-table-wrap">
+                        <table class="sf-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Empregado" %}</th>
+                                    <th>{% trans "Material" %}</th>
+                                    <th>{% trans "Quantidade" %}</th>
+                                    <th>{% trans "Projeto" %}</th>
+                                    <th>{% trans "Observações" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for levantamento in levantamentos %}
+                                    <tr>
+                                        <td>{{ levantamento.data|date:"d/m/Y" }}</td>
+                                        <td>{{ levantamento.empregado.nome }}</td>
+                                        <td>
+                                            <a href="{% url 'projetos:material_detail' levantamento.material.id %}" class="furo-link">
+                                                {{ levantamento.material.nome }}
+                                            </a>
+                                        </td>
+                                        <td>{{ levantamento.quantidade }}</td>
+                                        <td>
+                                            {% if levantamento.projeto %}
+                                                <a href="{{ levantamento.projeto.get_absolute_url }}" class="furo-link">
+                                                    {{ levantamento.projeto.nome }}
+                                                </a>
+                                            {% else %}
+                                                {% trans "Stock" %}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ levantamento.observacoes|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="sf-empty-state">{% trans "Ainda não existem levantamentos de material neste furo." %}</div>
+            {% endif %}
+        </section>
+
+        <div class="sf-page-actions">
+            <a href="{% url 'projetos:furo_list' %}" class="btn btn-primary">{% trans "Voltar à lista de furos" %}</a>
+        </div>
     </div>
-
-</div>
 </section>
 
-<!-- Modal imagem -->
 <div id="overlay" class="furo-modal-overlay"></div>
 <div id="modal" class="furo-modal">
     <img id="modal_img">
@@ -371,7 +490,6 @@
         <button id="furo-modal-close" class="furo-modal-close">{% trans "Fechar" %}</button>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_scripts %}

@@ -18,6 +18,9 @@
     <a href="{% url 'plataforma:onboarding_empresa' %}" class="btn btn-primary">{% trans "Criar nova empresa" %}</a>
     <a href="{% url 'plataforma:plano_list' %}" class="btn btn-light">{% trans "Gerir planos" %}</a>
     <a href="{% url 'dispositivos:dashboard' %}" class="btn btn-light">{% trans "Dispositivos" %}</a>
+    {% if request.user.is_superuser %}
+    <a href="{% url 'plataforma:riscos_deploy_dashboard' %}" class="btn btn-light">{% trans "Riscos de deploy" %}</a>
+    {% endif %}
 {% endblock %}
 
 {% block plataforma_content %}
@@ -51,6 +54,21 @@
             <div class="metric-label">{% trans "Planos ativos" %}</div>
             <div class="metric-value">{{ planos_ativos|default:0 }}</div>
             <div class="metric-note">{% trans "Planos comerciais disponíveis para subscrição." %}</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">{% trans "Contas ativadas" %}</div>
+            <div class="metric-value">{{ contas_ativadas|default:0 }}</div>
+            <div class="metric-note">{% trans "Contas de clientes com email confirmado." %}</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">{% trans "Contas por ativar" %}</div>
+            <div class="metric-value">{{ contas_por_ativar|default:0 }}</div>
+            <div class="metric-note">{% trans "Contas criadas que ainda não confirmaram o email." %}</div>
+        </div>
+        <div class="card">
+            <div class="metric-label">{% trans "Utilizadores online agora" %}</div>
+            <div class="metric-value">{{ utilizadores_online_total|default:0 }}</div>
+            <div class="metric-note">{% trans "Sessões autenticadas atualmente ativas na plataforma." %}</div>
         </div>
         {% if request.user.is_superuser %}
         <div class="card">
@@ -175,6 +193,10 @@
                         <strong>{% trans "TO DO" %}</strong>
                         <span>{% trans "Acompanhar roadmap e estado de evolução por app." %}</span>
                     </a>
+                    <a href="{% url 'plataforma:riscos_deploy_dashboard' %}" class="quick-link">
+                        <strong>{% trans "Riscos de deploy" %}</strong>
+                        <span>{% trans "Consultar riscos, mitigação e checklist operacional antes de publicar." %}</span>
+                    </a>
                     <a href="{% url 'inspecao_ai:hub' %}" class="quick-link">
                         <strong>{% trans "AI Visual" %}</strong>
                         <span>{% trans "Aceder ao centro principal da AI visual." %}</span>
@@ -228,6 +250,64 @@
             {% else %}
                 <div class="empty">
                     {% trans "Não existem alertas de renovação neste momento." %}
+                </div>
+            {% endif %}
+
+            <div class="section-title section-title-spaced">
+                <div>
+                    <h2>{% trans "Utilizadores online agora" %}</h2>
+                    <p>{% trans "Leitura em tempo real baseada em sessões autenticadas ativas." %}</p>
+                </div>
+            </div>
+
+            {% if utilizadores_online %}
+                <div class="panel-list">
+                    {% for user in utilizadores_online %}
+                        <div class="quick-link">
+                            <strong>{{ user.username }}</strong>
+                            <span>
+                                {% if user.perfil_plataforma and user.perfil_plataforma.empresa %}
+                                    {{ user.perfil_plataforma.empresa.nome }} ·
+                                {% endif %}
+                                {% if user.perfil_plataforma %}
+                                    {{ user.perfil_plataforma.get_tipo_acesso_display }}
+                                {% else %}
+                                    {% trans "Conta de plataforma" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    {% trans "Não existem utilizadores autenticados online neste momento." %}
+                </div>
+            {% endif %}
+
+            <div class="section-title section-title-spaced">
+                <div>
+                    <h2>{% trans "Últimos logins" %}</h2>
+                    <p>{% trans "Histórico recente de acessos autenticados ao site." %}</p>
+                </div>
+            </div>
+
+            {% if ultimos_logins %}
+                <div class="panel-list">
+                    {% for user in ultimos_logins %}
+                        <div class="quick-link">
+                            <strong>{{ user.username }}</strong>
+                            <span>
+                                {% if user.perfil_plataforma and user.perfil_plataforma.empresa %}
+                                    {{ user.perfil_plataforma.empresa.nome }} ·
+                                {% endif %}
+                                {{ user.last_login|date:"d/m/Y H:i" }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    {% trans "Ainda não existem logins registados." %}
                 </div>
             {% endif %}
         </div>

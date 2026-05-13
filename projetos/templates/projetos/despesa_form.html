@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}
     {% if titulo %}
@@ -9,82 +9,141 @@
     {% endif %}
 {% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="sf-page">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">
-            💶
-            {% if titulo %}
-                {{ titulo }}
-            {% else %}
-                {% trans "Adicionar despesa" %}
+<section class="of-page">
+    <div class="of-shell">
+        <div class="of-top">
+            <div class="of-heading">
+                {% if voltar_url %}
+                    <a href="{% url voltar_url %}" class="of-back">
+                        ← {% trans "Voltar às despesas" %}
+                    </a>
+                {% endif %}
+                <h1 class="of-title">
+                    {% if titulo %}
+                        {{ titulo }}
+                    {% else %}
+                        {% trans "Adicionar despesa" %}
+                    {% endif %}
+                </h1>
+                <p class="of-subtitle">{% trans "Regista a despesa com contexto suficiente para manter controlo financeiro, rastreabilidade operacional e organização documental." %}</p>
+            </div>
+        </div>
+
+        <div class="of-card of-card-wide">
+            {% if form.non_field_errors %}
+                <div class="of-alert">
+                    {{ form.non_field_errors }}
+                </div>
             {% endif %}
-        </h1>
-        <p class="text-sm text-gray-600 mt-1">{% trans "Regista uma nova despesa associada ao modelo financeiro." %}</p>
+
+            <div class="of-banner">
+                <strong>{% trans "Dica:" %}</strong>
+                <span>{% trans "Se o tipo for máquina, projeto ou furo, seleciona o respetivo campo. Para combustível, serviços, alimentação e outros custos gerais, podes guardar sem associação operacional." %}</span>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="of-form">
+                {% csrf_token %}
+
+                <div class="of-section">
+                    <div class="of-section-head">
+                        <div>
+                            <h2 class="of-section-title">{% trans "Categoria, tipo e valor" %}</h2>
+                        </div>
+                        <p class="of-section-copy">{% trans "Define o enquadramento financeiro da despesa e o valor a registar." %}</p>
+                    </div>
+                    <div class="of-grid">
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Categoria" %}</label>
+                            {{ form.categoria|add_class:"of-input" }}
+                            {% if form.categoria.errors %}<div class="of-errors">{{ form.categoria.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Tipo" %}</label>
+                            {{ form.tipo|add_class:"of-input" }}
+                            {% if form.tipo.errors %}<div class="of-errors">{{ form.tipo.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field of-field-span-2">
+                            <label class="of-label">{% trans "Descrição" %}</label>
+                            {{ form.descricao|add_class:"of-input" }}
+                            {% if form.descricao.errors %}<div class="of-errors">{{ form.descricao.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Valor (€)" %}</label>
+                            {{ form.valor|add_class:"of-input" }}
+                            {% if form.valor.errors %}<div class="of-errors">{{ form.valor.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Data" %}</label>
+                            {{ form.data|add_class:"of-input" }}
+                            {% if form.data.errors %}<div class="of-errors">{{ form.data.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="of-section">
+                    <div class="of-section-head">
+                        <div>
+                            <h2 class="of-section-title">{% trans "Contexto operacional" %}</h2>
+                        </div>
+                        <p class="of-section-copy">{% trans "Escolhe apenas um contexto operacional quando a despesa estiver ligada a uma operação concreta." %}</p>
+                    </div>
+                    <div class="of-grid">
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Projeto" %}</label>
+                            {{ form.projeto|add_class:"of-input" }}
+                            {% if form.projeto.errors %}<div class="of-errors">{{ form.projeto.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Furo" %}</label>
+                            {{ form.furo|add_class:"of-input" }}
+                            {% if form.furo.errors %}<div class="of-errors">{{ form.furo.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field of-field-span-2">
+                            <label class="of-label">{% trans "Máquina" %}</label>
+                            {{ form.maquina|add_class:"of-input" }}
+                            {% if form.maquina.errors %}<div class="of-errors">{{ form.maquina.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="of-section">
+                    <div class="of-section-head">
+                        <div>
+                            <h2 class="of-section-title">{% trans "Comprovativo e observações" %}</h2>
+                        </div>
+                        <p class="of-section-copy">{% trans "Anexa o documento de suporte e regista qualquer contexto útil para consulta futura." %}</p>
+                    </div>
+                    <div class="of-grid">
+                        <div class="of-field">
+                            <label class="of-label">{% trans "Comprovativo" %}</label>
+                            {{ form.comprovativo|add_class:"of-input" }}
+                            {% if form.comprovativo.errors %}<div class="of-errors">{{ form.comprovativo.errors }}</div>{% endif %}
+                        </div>
+                        <div class="of-field of-field-span-2">
+                            <label class="of-label">{% trans "Observações" %}</label>
+                            {{ form.observacoes|add_class:"of-input" }}
+                            {% if form.observacoes.errors %}<div class="of-errors">{{ form.observacoes.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="of-actions">
+                    {% if voltar_url %}
+                        <a href="{% url voltar_url %}" class="of-btn of-btn-secondary">
+                            {% trans "Cancelar" %}
+                        </a>
+                    {% endif %}
+                    <button type="submit" class="of-btn of-btn-primary">
+                        {% trans "Guardar despesa" %}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form method="post" enctype="multipart/form-data" class="space-y-5 sf-panel">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
-                {{ form.non_field_errors }}
-            </div>
-        {% endif %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Categoria" %}</label>
-                {{ form.categoria|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Tipo" %}</label>
-                {{ form.tipo|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Descrição" %}</label>
-                {{ form.descricao|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Valor (€)" %}</label>
-                {{ form.valor|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Data" %}</label>
-                {{ form.data|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Projeto" %}</label>
-                {{ form.projeto|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Furo" %}</label>
-                {{ form.furo|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Máquina" %}</label>
-                {{ form.maquina|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Comprovativo" %}</label>
-                {{ form.comprovativo|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Observações" %}</label>
-                {{ form.observacoes|add_class:"w-full p-2 border rounded bg-white" }}
-            </div>
-        </div>
-
-        <div class="flex justify-end gap-3 pt-2">
-            {% if voltar_url %}
-                <a href="{% url voltar_url %}" class="btn btn-light">
-                    {% trans "Voltar sem gravar" %}
-                </a>
-            {% endif %}
-            <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                {% trans "Guardar despesa" %}
-            </button>
-        </div>
-    </form>
-</div>
+</section>
 {% endblock %}

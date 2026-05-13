@@ -1,110 +1,82 @@
-{% extends 'projetos/base.html' %}
-{% load i18n %}
+{% extends "projetos/base.html" %}
+{% load static i18n %}
 
 {% block title %}{% trans "Medições" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/medicao_list.css' %}?v=20260512-1645">
+{% endblock %}
+
 {% block content %}
-<section class="sf-page">
-
-    <!-- HEADER -->
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">📊 {% trans "Medições" %}</h1>
-        <a href="{% url 'projetos:furo_list' %}" 
-           class="flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow w-48">
-            🕳️ {% trans "Ir para Furos" %}
-        </a>
-    </div>
-
-    {% if medicoes %}
-    <div class="sf-panel">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        
-        {% for medicao in medicoes %}
-
-        <!-- CARD -->
-        <div class="rounded-xl shadow-md hover:shadow-xl transition duration-200 overflow-hidden border-l-4 
-            {% if medicao.magnetismo|default_if_none:0 > 50 %}
-                border-red-500
-            {% elif medicao.magnetismo|default_if_none:0 > 20 %}
-                border-yellow-400
-            {% else %}
-                border-green-500
-            {% endif %}
-        ">
-
-            <div class="p-5 bg-white flex flex-col justify-between h-full">
-
-                <!-- HEADER CARD -->
-                <div class="mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">
-                        {% trans "Medição" %} #{{ medicao.id }}
-                    </h2>
-                    <p class="text-sm text-gray-500">
-                        {{ medicao.nome_furo }}
-                    </p>
-                </div>
-
-                <!-- DADOS -->
-                <div class="space-y-2 text-sm text-gray-700">
-                    <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade_medida|default_if_none:"-" }} m</p>
-                    <p><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao_real_medida|default_if_none:"-" }}°</p>
-                    <p><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute_real_medido|default_if_none:"-" }}°</p>
-                    <p>
-                        <strong>{% trans "Magnetismo:" %}</strong> 
-                        <span class="
-                            font-semibold
-                            {% if medicao.magnetismo|default_if_none:0 > 50 %}
-                                text-red-600
-                            {% elif medicao.magnetismo|default_if_none:0 > 20 %}
-                                text-yellow-600
-                            {% else %}
-                                text-green-600
-                            {% endif %}
-                        ">
-                            {{ medicao.magnetismo|default_if_none:"-" }}
-                        </span>
-                    </p>
-                </div>
-
-                <!-- BOTÕES -->
-                <div class="flex gap-2 mt-5">
-                    <a href="{% url 'projetos:medicao_update' medicao.id %}" 
-                       class="flex-1 flex items-center justify-center bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-500 transition text-sm font-semibold">
-                        ✏️ {% trans "Editar" %}
-                    </a>
-                    <a href="{% url 'projetos:medicao_delete' medicao.id %}" 
-                       class="flex-1 flex items-center justify-center bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-600 transition text-sm font-semibold">
-                        🗑️ {% trans "Apagar" %}
-                    </a>
-                </div>
-
-                {% if medicao.furo %}
-                <div class="mt-3">
-                    <a href="{{ medicao.furo.get_absolute_url }}" 
-                       class="block text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
-                        🔍 {% trans "Ver Furo" %}
-                    </a>
-                </div>
-                {% endif %}
-
+<section class="med-page">
+    <div class="med-wrap">
+        <div class="med-hero">
+            <div>
+                <h1 class="med-title">📏 {% trans "Medições" %}</h1>
             </div>
-        </div>
-
-        {% endfor %}
-    </div>
-    </div>
-
-    {% else %}
-    <div class="sf-panel text-center">
-        <p class="text-gray-500 text-lg">{% trans "Nenhuma medição registrada." %}</p>
-        <div class="mt-4">
-            <a href="{% url 'projetos:furo_list' %}" 
-               class="inline-flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                🕳️ {% trans "Ir para Furos" %}
+            <a href="{% url 'projetos:furo_list' %}" class="med-top-btn">
+                {% trans "Ir para Furos" %}
             </a>
         </div>
-    </div>
-    {% endif %}
 
+        <div class="med-table-card">
+            {% if medicoes %}
+                <div class="med-table-wrap">
+                    <table class="med-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Medição" %}</th>
+                                <th>{% trans "Furo" %}</th>
+                                <th>{% trans "Profundidade" %}</th>
+                                <th>{% trans "Inclinação" %}</th>
+                                <th>{% trans "Azimute" %}</th>
+                                <th>{% trans "Magnetismo" %}</th>
+                                <th>{% trans "Ações" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medicao in medicoes %}
+                                <tr>
+                                    <td class="med-measure-col">#{{ medicao.id }}</td>
+                                    <td>
+                                        {% if medicao.furo %}
+                                            <a href="{{ medicao.furo.get_absolute_url }}" class="med-link">{{ medicao.nome_furo|default:medicao.furo.nome }}</a>
+                                        {% else %}
+                                            {{ medicao.nome_furo|default:"-" }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ medicao.profundidade_medida|default_if_none:"-" }} m</td>
+                                    <td>{{ medicao.inclinacao_real_medida|default_if_none:"-" }}°</td>
+                                    <td>{{ medicao.azimute_real_medido|default_if_none:"-" }}°</td>
+                                    <td>
+                                        <span class="med-badge
+                                            {% if medicao.magnetismo|default_if_none:0 > 50 %}med-badge-alert
+                                            {% elif medicao.magnetismo|default_if_none:0 > 20 %}med-badge-warn
+                                            {% else %}med-badge-ok{% endif %}">
+                                            {{ medicao.magnetismo|default_if_none:"-" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="med-actions">
+                                            <a href="{% url 'projetos:medicao_update' medicao.id %}" class="med-btn">
+                                                {% trans "Editar" %}
+                                            </a>
+                                            <a href="{% url 'projetos:medicao_delete' medicao.id %}" class="med-btn med-btn-danger">
+                                                {% trans "Apagar" %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="med-empty">
+                    {% trans "Nenhuma medição registada." %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </section>
 {% endblock %}

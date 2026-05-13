@@ -1,55 +1,104 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n widget_tweaks %}
 
 {% block title %}{% trans "Editar Meus Dados" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/meus_dados.css' %}?v=20260513-1245">
+{% endblock %}
+
 {% block content %}
-<div class="space-y-6">
-    <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">✏️ {% trans "Editar Meus Dados" %}</h1>
-            <p class="text-gray-500 mt-1">{% trans "Atualiza os teus dados da conta individual." %}</p>
+<section class="mdp-page">
+    <div class="mdp-shell">
+        <div class="mdp-top">
+            <div class="mdp-heading">
+                <a href="{% url 'projetos:meus_dados_empregado' %}" class="mdp-back">
+                    ← {% trans "Voltar aos meus dados" %}
+                </a>
+                <h1 class="mdp-title">✏️ {% trans "Editar Meus Dados" %}</h1>
+                <p class="mdp-subtitle">{% trans "Atualiza os teus dados da conta individual." %}</p>
+            </div>
         </div>
-        <a href="{% url 'projetos:meus_dados_empregado' %}"
-           class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-            🔙 {% trans "Voltar" %}
-        </a>
-    </div>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
-            {% csrf_token %}
+        <section class="mdp-form-card">
+            <form method="post" enctype="multipart/form-data" class="mdp-form">
+                {% csrf_token %}
 
-            {% if form.errors %}
-                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
-                    {{ form.errors }}
+                {% if form.errors %}
+                    <div class="mdp-form-errors">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="mdp-form-grid">
+                    <div class="mdp-form-field">
+                        <label>{% trans "Nome" %}</label>
+                        {{ form.nome|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Especialidade" %}</label>
+                        {{ form.especialidade|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Email" %}</label>
+                        {{ form.email|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Telefone" %}</label>
+                        {{ form.telefone|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Data de nascimento" %}</label>
+                        {{ form.data_nascimento|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Início de atividade" %}</label>
+                        {{ form.data_inicio_atividade|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Idade" %}</label>
+                        {{ form.idade|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Morada" %}</label>
+                        {{ form.morada|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Nacionalidade" %}</label>
+                        {{ form.nacionalidade|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "NIF" %}</label>
+                        {{ form.nif|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Currículo" %}</label>
+                        {{ form.curriculo|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field">
+                        <label>{% trans "Documento" %}</label>
+                        {{ form.contrato|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field mdp-form-field-full">
+                        <label>{% trans "Biografia" %}</label>
+                        {{ form.biografia|add_class:"mdp-input" }}
+                    </div>
+                    <div class="mdp-form-field mdp-form-field-full">
+                        <label>{% trans "Observações" %}</label>
+                        {{ form.observacoes|add_class:"mdp-input" }}
+                    </div>
                 </div>
-            {% endif %}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Nome" %}</label>{{ form.nome }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Especialidade" %}</label>{{ form.especialidade }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Email" %}</label>{{ form.email }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Telefone" %}</label>{{ form.telefone }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Data de nascimento" %}</label>{{ form.data_nascimento }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Início de atividade" %}</label>{{ form.data_inicio_atividade }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Idade" %}</label>{{ form.idade }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Morada" %}</label>{{ form.morada }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Nacionalidade" %}</label>{{ form.nacionalidade }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "NIF" %}</label>{{ form.nif }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Currículo" %}</label>{{ form.curriculo }}</div>
-                <div><label class="block font-semibold text-gray-700 mb-1">{% trans "Documento" %}</label>{{ form.contrato }}</div>
-                <div class="md:col-span-2"><label class="block font-semibold text-gray-700 mb-1">{% trans "Biografia" %}</label>{{ form.biografia }}</div>
-                <div class="md:col-span-2"><label class="block font-semibold text-gray-700 mb-1">{% trans "Observações" %}</label>{{ form.observacoes }}</div>
-            </div>
-
-            <div>
-                <button type="submit"
-                        class="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
-                    💾 {% trans "Guardar Alterações" %}
-                </button>
-            </div>
-        </form>
+                <div class="mdp-form-actions">
+                    <a href="{% url 'projetos:meus_dados_empregado' %}" class="mdp-btn mdp-btn-secondary">
+                        {% trans "Cancelar" %}
+                    </a>
+                    <button type="submit" class="mdp-btn mdp-btn-primary">
+                        {% trans "Guardar Alterações" %}
+                    </button>
+                </div>
+            </form>
+        </section>
     </div>
-</div>
+</section>
 {% endblock %}

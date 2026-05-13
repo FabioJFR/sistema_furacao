@@ -1,0 +1,86 @@
+{% extends "plataforma/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Riscos de Deploy" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/riscos_deploy.css' %}">
+{% endblock %}
+
+{% block page_title %}{% trans "Riscos de Deploy" %}{% endblock %}
+
+{% block page_description %}
+    {% trans "Quadro de atenção operacional para releases, deploys e validação pós-publicação da plataforma." %}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">{% trans "Voltar à dashboard" %}</a>
+{% endblock %}
+
+{% block plataforma_content %}
+    <section class="deploy-risk-notes">
+        {% for item in resumo %}
+            <article class="deploy-risk-note-card">
+                <div class="deploy-risk-note-label">{{ item.titulo }}</div>
+                <p>{{ item.descricao }}</p>
+            </article>
+        {% endfor %}
+    </section>
+
+    <section class="deploy-risk-grid">
+        <article class="deploy-risk-card">
+            <div class="deploy-risk-kicker">{% trans "Antes do deploy" %}</div>
+            <h2>{% trans "Checklist pré-deploy" %}</h2>
+            <ul class="deploy-risk-list">
+                {% for item in checklist_pre_deploy %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+
+        <article class="deploy-risk-card">
+            <div class="deploy-risk-kicker">{% trans "Depois do deploy" %}</div>
+            <h2>{% trans "Checklist pós-deploy" %}</h2>
+            <ul class="deploy-risk-list">
+                {% for item in checklist_pos_deploy %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+    </section>
+
+    <section class="deploy-risk-table-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Visão consolidada" %}</div>
+                <h2>{% trans "Riscos e mitigação" %}</h2>
+            </div>
+            <p>{% trans "Usa esta tabela como referência rápida antes de publicar alterações relevantes." %}</p>
+        </div>
+
+        <div class="deploy-risk-table-wrap">
+            <table class="deploy-risk-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Risco" %}</th>
+                        <th>{% trans "Impacto" %}</th>
+                        <th>{% trans "Probabilidade" %}</th>
+                        <th>{% trans "Mitigação recomendada" %}</th>
+                        <th>{% trans "Dono sugerido" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for risco in riscos %}
+                        <tr>
+                            <td class="deploy-risk-title">{{ risco.titulo }}</td>
+                            <td><span class="deploy-risk-pill deploy-risk-pill-impacto">{{ risco.impacto }}</span></td>
+                            <td><span class="deploy-risk-pill deploy-risk-pill-probabilidade">{{ risco.probabilidade }}</span></td>
+                            <td>{{ risco.mitigacao }}</td>
+                            <td>{{ risco.dono }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

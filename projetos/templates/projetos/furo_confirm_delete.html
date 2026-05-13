@@ -1,18 +1,40 @@
 {% extends 'projetos/base.html' %}
-{% load i18n %}
-{% block title %}{% trans "Apagar Furo" %}{% endblock %}
-{% block content %}
-<section class="sf-page p-6">
-    <div class="sf-panel space-y-6 text-center">
-        <h2 class="text-2xl font-bold">🗑️ {% trans "Apagar Furo" %}</h2>
-        <p>{% blocktrans with furo_nome=furo.nome %}Tem certeza que deseja apagar o furo <strong>{{ furo_nome }}</strong>?{% endblocktrans %}</p>
+{% load static i18n %}
 
-        <form method="POST">
+{% block title %}{% trans "Apagar Furo" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260513-1120">
+{% endblock %}
+
+{% block content %}
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{{ furo.get_absolute_url }}" class="cf-back">
+            ← {% trans "Voltar ao furo" %}
+        </a>
+
+        <div class="cf-kicker">{% trans "Ação irreversível" %}</div>
+        <h1 class="cf-title">{% trans "Apagar furo" %}</h1>
+        <p class="cf-copy">
+            {% blocktrans with furo_nome=furo.nome %}
+                Está prestes a apagar o furo "{{ furo_nome }}". Esta ação remove o registo principal e pode afetar medições, contexto operacional e histórico associado.
+            {% endblocktrans %}
+        </p>
+
+        <div class="cf-highlight">
+            <strong>{% trans "Furo" %}:</strong> {{ furo.nome }}<br>
+            <strong>{% trans "Projeto" %}:</strong> {{ furo.projeto.nome|default:"-" }}
+        </div>
+
+        <form method="post" class="cf-actions">
             {% csrf_token %}
-            <div class="flex gap-3 mt-4">
-                <button type="submit" class="flex-1 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 rounded-lg shadow">{% trans "Sim, apagar" %}</button>
-                <a href="{% url 'projetos:furo_list' %}" class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">{% trans "Cancelar" %}</a>
-            </div>
+            <button type="submit" class="cf-btn cf-btn-danger">
+                {% trans "Sim, apagar" %}
+            </button>
+            <a href="{{ furo.get_absolute_url }}" class="cf-btn cf-btn-secondary">
+                {% trans "Cancelar" %}
+            </a>
         </form>
     </div>
 </section>

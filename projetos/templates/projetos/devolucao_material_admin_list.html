@@ -1,67 +1,81 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Devoluções de Material" %}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/stock_movements.css' %}">
+{% endblock %}
 
-        <h1 class="text-2xl font-bold text-gray-800">↩️ {% trans "Devoluções de Material" %}</h1>
+{% block content %}
+<section class="sm-page">
+    <div class="sm-shell">
+        <div class="sm-hero">
+            <div>
+                <div class="sm-eyebrow">{% trans "Stock e devoluções" %}</div>
+                <h1 class="sm-title">{% trans "Devoluções de Material" %}</h1>
+                <p class="sm-subtitle">
+                    {% trans "Consulte os materiais devolvidos ao stock e verifique rapidamente em que projeto ou furo cada movimento ficou registado." %}
+                </p>
+            </div>
+        </div>
 
         {% if devolucoes %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                    <thead class="bg-gray-100 text-gray-700">
+            <div class="sm-table-card">
+                <div class="sm-table-wrap">
+                    <table class="sm-table">
+                        <thead>
                         <tr>
-                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Empregado" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Material" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Quantidade" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Empregado" %}</th>
+                            <th>{% trans "Material" %}</th>
+                            <th>{% trans "Quantidade" %}</th>
+                            <th>{% trans "Projeto" %}</th>
+                            <th>{% trans "Furo" %}</th>
+                            <th>{% trans "Observações" %}</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         {% for devolucao in devolucoes %}
-                            <tr class="border-t border-gray-200">
-                                <td class="px-4 py-3">{{ devolucao.data }}</td>
-                                <td class="px-4 py-3">{{ devolucao.empregado.nome }}</td>
-                                <td class="px-4 py-3">
-                                    <a href="{% url 'projetos:material_detail' devolucao.material.id %}" class="text-blue-600 hover:underline">
+                            <tr>
+                                <td>{{ devolucao.data }}</td>
+                                <td>{{ devolucao.empregado.nome }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:material_detail' devolucao.material.id %}" class="sm-link">
                                         {{ devolucao.material.nome }}
                                     </a>
                                 </td>
-                                <td class="px-4 py-3">{{ devolucao.quantidade }}</td>
-                                <td class="px-4 py-3">
+                                <td>{{ devolucao.quantidade }}</td>
+                                <td>
                                     {% if devolucao.projeto %}
-                                        <a href="{{ devolucao.projeto.get_absolute_url }}" class="text-blue-600 hover:underline">
+                                        <a href="{{ devolucao.projeto.get_absolute_url }}" class="sm-link">
                                             {{ devolucao.projeto.nome }}
                                         </a>
                                     {% else %}
                                         {% trans "Stock" %}
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td>
                                     {% if devolucao.furo %}
-                                        <a href="{{ devolucao.furo.get_absolute_url }}" class="text-blue-600 hover:underline">
+                                        <a href="{{ devolucao.furo.get_absolute_url }}" class="sm-link">
                                             {{ devolucao.furo.nome }}
                                         </a>
                                     {% else %}
                                         -
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3">{{ devolucao.observacoes|default:"-" }}</td>
+                                <td>{{ devolucao.observacoes|default:"-" }}</td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         {% else %}
-            <p class="text-gray-500">{% trans "Ainda não existem devoluções registadas." %}</p>
+            <div class="sm-empty">
+                {% trans "Ainda não existem devoluções registadas." %}
+            </div>
         {% endif %}
-
     </div>
 </section>
 {% endblock %}

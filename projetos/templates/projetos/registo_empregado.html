@@ -1,52 +1,79 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
-{% load static %}
+{% load static widget_tweaks i18n %}
 <!-- registo_empregado.html-->
 {% block title %}{% trans "Registo" %}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            {% trans "Registo de Empregado" %}
-        </h2>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
 
-        <form method="POST" class="space-y-4">
+{% block content %}
+<section class="of-page">
+    <div class="of-card">
+        <div class="of-hero">
+            <div>
+                <div class="of-eyebrow">{% trans "Acesso à plataforma" %}</div>
+                <h1 class="of-title">{% trans "Registo de Empregado" %}</h1>
+                <p class="of-subtitle">{% trans "Submeta o pedido de registo com os seus dados profissionais para a empresa validar e ativar o seu acesso operacional." %}</p>
+            </div>
+            <div class="of-hero-card">
+                <div class="of-hero-kicker">{% trans "Como funciona" %}</div>
+                <div class="of-hero-value">{% trans "Pedido + validação" %}</div>
+                <p class="of-hero-copy">{% trans "Depois do envio, a empresa revê os dados antes de aprovar o acesso ao sistema." %}</p>
+            </div>
+        </div>
+
+        <div class="of-banner">
+            <strong>{% trans "Nota:" %}</strong>
+            <span>{% trans "Preencha os dados com atenção. Os campos variáveis da função e especialidade adaptam-se automaticamente durante o registo." %}</span>
+        </div>
+
+        <form method="POST" class="of-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <div class="of-alert">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            {% for field in form %}
-                <div {% if field.name == 'empresa_nome' %}id="empresaNomeWrap"{% endif %}{% if field.name == 'funcao' %} id="funcaoWrap"{% endif %}{% if field.name == 'especialidade' %} id="especialidadeWrap"{% endif %}>
-                    <label class="block font-semibold mb-1">{{ field.label }}</label>
-                    {{ field|add_class:"w-full p-2 border rounded" }}
+            <div class="of-section">
+                <div class="of-section-head">
+                    <div>
+                        <div class="of-section-eyebrow">{% trans "Dados profissionais" %}</div>
+                        <h2 class="of-section-title">{% trans "Informação do pedido" %}</h2>
+                    </div>
+                    <p class="of-section-copy">{% trans "Estes dados ajudam a empresa a enquadrar o pedido, a função pretendida e o contexto de integração." %}</p>
+                </div>
+                <div class="of-grid">
+                {% for field in form %}
+                <div class="of-field {% if field.name == 'empresa_nome' or field.name == 'especialidade' %}of-field-span-2{% endif %}" {% if field.name == 'empresa_nome' %}id="empresaNomeWrap"{% endif %}{% if field.name == 'funcao' %} id="funcaoWrap"{% endif %}{% if field.name == 'especialidade' %} id="especialidadeWrap"{% endif %}>
+                    <label class="of-label">{{ field.label }}</label>
+                    {{ field|add_class:"of-input" }}
 
                     {% if field.help_text %}
-                        <p class="text-sm text-gray-500 mt-1">{{ field.help_text|safe }}</p>
+                        <p class="of-help">{{ field.help_text|safe }}</p>
                     {% endif %}
 
                     {% if field.errors %}
-                        <div class="text-red-600 text-sm mt-1">
+                        <div class="of-errors">
                             {{ field.errors }}
                         </div>
                     {% endif %}
                 </div>
-            {% endfor %}
+                {% endfor %}
+                </div>
+            </div>
 
-            <button type="submit" class="btn btn-success w-full text-center">
-                📩 {% trans "Enviar Registo" %}
-            </button>
+            <div class="of-actions">
+                <a href="{% url 'login' %}" class="of-btn of-btn-secondary">
+                    {% trans "Voltar ao Login" %}
+                </a>
+                <button type="submit" class="of-btn of-btn-primary">
+                    {% trans "Enviar Registo" %}
+                </button>
+            </div>
         </form>
-
-        <div class="mt-4 text-center">
-            <a href="{% url 'login' %}" class="btn btn-primary">
-                🔙 {% trans "Voltar ao Login" %}
-            </a>
-        </div>
     </div>
 </section>
 {% endblock %}

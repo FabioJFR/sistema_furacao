@@ -1,94 +1,80 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
+{% load i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/empregado_update.css' %}">
-{% endblock %}
-
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="eu-shell">
-        <h2 class="eu-title">{{ titulo }}</h2>
-
-        <form method="POST" class="eu-form">
-            {% csrf_token %}
-            {% if form.non_field_errors %}
-                <div class="eu-global-errors">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <div>
-                <label for="id_nome" class="block font-semibold mb-1">{% trans "Nome" %}</label>
-                {{ form.nome }}
-                {% if form.nome.errors %}
-                    <div class="eu-errors">{{ form.nome.errors }}</div>
-                {% endif %}
+<section class="sf-page">
+    <div class="page-card sf-page-narrow">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Empregados" %}</p>
+                <h1 class="sf-page-title">{{ titulo }}</h1>
+                <p class="sf-page-description">{% trans "Atualize os dados principais do trabalhador num formulário simples e limpo." %}</p>
             </div>
-
-            <div>
-                <label for="id_funcao" class="block font-semibold mb-1">{% trans "Função" %}</label>
-                {{ form.funcao }}
-                {% if form.funcao.errors %}
-                    <div class="eu-errors">{{ form.funcao.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="id_email" class="block font-semibold mb-1">{% trans "Email" %}</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="eu-errors">{{ form.email.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="id_data_admissao" class="block font-semibold mb-1">{% trans "Data de Admissão" %}</label>
-                {{ form.data_admissao }}
-                {% if form.data_admissao.errors %}
-                    <div class="eu-errors">{{ form.data_admissao.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="id_salario" class="block font-semibold mb-1">{% trans "Salário" %}</label>
-                {{ form.salario }}
-                {% if form.salario.errors %}
-                    <div class="eu-errors">{{ form.salario.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="id_dias_ferias_anuais" class="block font-semibold mb-1">{% trans "Dias de Férias / Ano" %}</label>
-                {{ form.dias_ferias_anuais }}
-                <p class="text-sm mt-1">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
-                {% if form.dias_ferias_anuais.errors %}
-                    <div class="eu-errors">{{ form.dias_ferias_anuais.errors }}</div>
-                {% endif %}
-            </div>
-
-            <div class="p-3 border border-amber-200 rounded bg-amber-50 text-amber-900">
-                <label for="id_aplicar_salario_base_funcao" class="font-semibold">
-                    {{ form.aplicar_salario_base_funcao }} {{ form.aplicar_salario_base_funcao.label }}
-                </label>
-                <p class="text-sm mt-1">{{ form.aplicar_salario_base_funcao.help_text }}</p>
-                {% if form.aplicar_salario_base_funcao.errors %}
-                    <div class="eu-errors">{{ form.aplicar_salario_base_funcao.errors }}</div>
-                {% endif %}
-            </div>
-
-            <button type="submit" class="eu-btn-save">
-                💾 {% trans "Salvar Alterações" %}
-            </button>
-        </form>
-
-        <div class="eu-footer">
-            <a href="{% url 'projetos:empregados_list' %}" class="eu-link-back">
-                🔙 {% trans "Voltar à Lista" %}
-            </a>
         </div>
+
+        <section class="sf-section-card">
+            <form method="post" class="sf-page" style="gap:16px;">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div style="color:#b91c1c;font-size:0.92rem;">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="sf-field">
+                    <label for="id_nome">{% trans "Nome" %}</label>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.nome.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-field">
+                    <label for="id_funcao">{% trans "Função" %}</label>
+                    {{ form.funcao }}
+                    {% if form.funcao.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.funcao.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-field">
+                    <label for="id_email">{% trans "Email" %}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.email.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-field">
+                    <label for="id_data_admissao">{% trans "Data de admissão" %}</label>
+                    {{ form.data_admissao }}
+                    {% if form.data_admissao.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.data_admissao.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-field">
+                    <label for="id_salario">{% trans "Salário" %}</label>
+                    {{ form.salario }}
+                    {% if form.salario.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.salario.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-field">
+                    <label for="id_dias_ferias_anuais">{% trans "Dias de férias / ano" %}</label>
+                    {{ form.dias_ferias_anuais }}
+                    <p class="sf-muted-text" style="margin:0;font-size:0.92rem;">{% trans "Por defeito cada trabalhador tem 22 dias disponíveis por ano." %}</p>
+                    {% if form.dias_ferias_anuais.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.dias_ferias_anuais.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-note-card">
+                    <label style="display:flex;align-items:flex-start;gap:10px;">
+                        {{ form.aplicar_salario_base_funcao }}
+                        <span>
+                            <strong>{{ form.aplicar_salario_base_funcao.label }}</strong><br>
+                            <span class="sf-muted-text" style="font-size:0.92rem;">{{ form.aplicar_salario_base_funcao.help_text }}</span>
+                        </span>
+                    </label>
+                    {% if form.aplicar_salario_base_funcao.errors %}<div style="color:#b91c1c;font-size:0.92rem;">{{ form.aplicar_salario_base_funcao.errors }}</div>{% endif %}
+                </div>
+
+                <div class="sf-page-actions">
+                    <button type="submit" class="btn btn-primary">{% trans "Salvar alterações" %}</button>
+                    <a href="{% url 'projetos:empregado_list' %}" class="btn btn-primary">{% trans "Voltar à lista" %}</a>
+                </div>
+            </form>
+        </section>
     </div>
 </section>
 {% endblock %}

@@ -1,168 +1,167 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<section class="max-w-4xl mx-auto p-6">
-    <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
-
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">{{ titulo }}</h1>
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Perfuração" %}</p>
+                <h1 class="sf-page-title">{{ titulo }}</h1>
                 {% if empregado_obj %}
-                    <p class="text-gray-500 mt-1">{% blocktrans with nome=empregado_obj.nome %}Empregado: {{ nome }}{% endblocktrans %}</p>
+                    <p class="sf-page-description">{% blocktrans with nome=empregado_obj.nome %}Empregado: {{ nome }}{% endblocktrans %}</p>
                 {% endif %}
             </div>
         </div>
 
-        <form method="post" class="space-y-6">
+        <form method="post" class="sf-page" style="gap: 18px;">
             {% csrf_token %}
 
             {% if form.errors %}
-                <div class="bg-red-100 border border-red-200 text-red-700 p-4 rounded-lg">
+                <div class="sf-empty-state" style="border-color:#fecaca;color:#b91c1c;background:#fff5f5;">
                     {{ form.errors }}
                 </div>
             {% endif %}
 
-            <div>
-                <label class="block font-semibold text-gray-700 mb-1">{% trans "Furo" %}</label>
-                {{ form.furo }}
-            </div>
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Contexto" %}</h2>
+                    </div>
+                </div>
+                <div class="sf-field">
+                    <label for="{{ form.furo.id_for_label }}">{% trans "Furo" %}</label>
+                    {{ form.furo }}
+                </div>
+            </section>
 
-            <div class="space-y-4">
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="block font-semibold text-gray-700 mb-2">{% trans "Tubo" %}</div>
-                    {{ form.comprimento_tubo }}
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Conjunto de fundo" %}</h2>
+                    </div>
                 </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Karoutier (m)" %}</label>
+                <div class="sf-page" style="gap: 14px;">
+                    <div class="sf-field">
+                        <label for="{{ form.comprimento_tubo.id_for_label }}">{% trans "Tubo (m)" %}</label>
+                        {{ form.comprimento_tubo }}
+                    </div>
+
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_karoutier.id_for_label }}">{% trans "Karoutier (m)" %}</label>
                             {{ form.comprimento_karoutier }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_karoutier.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_karoutier }}
                         </div>
                     </div>
-                </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Acrescento (m)" %}</label>
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_acrescento.id_for_label }}">{% trans "Acrescento (m)" %}</label>
                             {{ form.comprimento_acrescento }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_acrescento.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_acrescento }}
                         </div>
                     </div>
-                </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Calibrador (m)" %}</label>
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_calibrador.id_for_label }}">{% trans "Calibrador (m)" %}</label>
                             {{ form.comprimento_calibrador }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_calibrador.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_calibrador }}
                         </div>
                     </div>
-                </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Record (m)" %}</label>
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_record.id_for_label }}">{% trans "Record (m)" %}</label>
                             {{ form.comprimento_record }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_record.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_record }}
                         </div>
                     </div>
+
+                    <div class="sf-field">
+                        <label for="{{ form.comprimento_bit.id_for_label }}">{% trans "Bit (m)" %}</label>
+                        {{ form.comprimento_bit }}
+                    </div>
+
+                    <div class="sf-field">
+                        <label for="{{ form.comprimento_caixa_mola.id_for_label }}">{% trans "Caixa de mola (m)" %}</label>
+                        {{ form.comprimento_caixa_mola }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Tubo interior" %}</h2>
+                    </div>
                 </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="block font-semibold text-gray-700 mb-2">{% trans "Bit (m)" %}</div>
-                    {{ form.comprimento_bit }}
-                </div>
-
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="block font-semibold text-gray-700 mb-2">{% trans "Caixa de mola (m)" %}</div>
-                    {{ form.comprimento_caixa_mola }}
-                </div>
-
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Tubo interior (m)" %}</label>
+                <div class="sf-page" style="gap: 14px;">
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_tubo_interior.id_for_label }}">{% trans "Tubo interior (m)" %}</label>
                             {{ form.comprimento_tubo_interior }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_tubo_interior.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_tubo_interior }}
                         </div>
                     </div>
-                </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_180px] gap-4 items-end">
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Acrescento do tubo interior (m)" %}</label>
+                    <div class="sf-form-grid">
+                        <div class="sf-field">
+                            <label for="{{ form.comprimento_acrescento_tubo_interior.id_for_label }}">{% trans "Acrescento do tubo interior (m)" %}</label>
                             {{ form.comprimento_acrescento_tubo_interior }}
                         </div>
-                        <div>
-                            <label class="block font-semibold text-gray-700 mb-1">{% trans "Quantidade" %}</label>
+                        <div class="sf-field">
+                            <label for="{{ form.quantidade_acrescento_tubo_interior.id_for_label }}">{% trans "Quantidade" %}</label>
                             {{ form.quantidade_acrescento_tubo_interior }}
                         </div>
                     </div>
-                </div>
 
-                <div class="rounded-lg border border-gray-200 p-4">
-                    <div class="block font-semibold text-gray-700 mb-2">{% trans "Cabeça de interior (m)" %}</div>
-                    {{ form.comprimento_cabeca_interior }}
+                    <div class="sf-field">
+                        <label for="{{ form.comprimento_cabeca_interior.id_for_label }}">{% trans "Cabeça de interior (m)" %}</label>
+                        {{ form.comprimento_cabeca_interior }}
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                    <div class="text-sm text-blue-700 font-semibold">{% trans "Comprimento total do Conjunto de Fundo" %}</div>
-                    <div id="total-conjunto-fundo-preview" class="text-2xl font-bold text-blue-900 mt-1">0.00 m</div>
-                    <p class="text-sm text-blue-700 mt-2">
-                        {% trans "Soma de Karoutier, acrescento, calibrador, record e bit." %}
-                    </p>
+            <div class="sf-overview-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                <div class="sf-overview-card">
+                    <h2 class="sf-overview-title">{% trans "Total do conjunto de fundo" %}</h2>
+                    <div id="total-conjunto-fundo-preview" class="sf-stat-value">0.00 m</div>
+                    <p class="sf-stat-copy">{% trans "Soma de Karoutier, acrescento, calibrador, record e bit." %}</p>
                 </div>
-                <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                    <div class="text-sm text-emerald-700 font-semibold">{% trans "Comprimento total do Tubo Interior" %}</div>
-                    <div id="total-tubo-interior-preview" class="text-2xl font-bold text-emerald-900 mt-1">0.00 m</div>
-                    <p class="text-sm text-emerald-700 mt-2">
-                        {% trans "Soma de caixa de mola, tubo interior, acrescento do tubo interior e cabeça de interior." %}
-                    </p>
+                <div class="sf-overview-card">
+                    <h2 class="sf-overview-title">{% trans "Total do tubo interior" %}</h2>
+                    <div id="total-tubo-interior-preview" class="sf-stat-value">0.00 m</div>
+                    <p class="sf-stat-copy">{% trans "Soma de caixa de mola, tubo interior, acrescento do tubo interior e cabeça de interior." %}</p>
                 </div>
             </div>
 
-            <div class="flex gap-3 flex-wrap pt-4">
-                <button type="submit"
-                        class="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
-                    💾 {% trans "Guardar" %}
-                </button>
-
+            <div class="sf-page-actions">
+                <button type="submit" class="btn btn-primary">{% trans "Guardar" %}</button>
                 {% if modo_admin %}
-                    <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}"
-                       class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                        🔙 {% trans "Voltar" %}
-                    </a>
+                    <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado_obj.pk %}" class="btn btn-primary">{% trans "Voltar" %}</a>
                 {% else %}
-                    <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}"
-                       class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                        🔙 {% trans "Voltar" %}
-                    </a>
+                    <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" class="btn btn-primary">{% trans "Voltar" %}</a>
                 {% endif %}
             </div>
         </form>

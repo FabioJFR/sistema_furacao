@@ -1,28 +1,40 @@
 {% extends 'projetos/base.html' %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Apagar Material" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/material_confirm_delete.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260513-1115">
 {% endblock %}
 
 {% block content %}
-<section class="sf-page p-6">
-<div class="mtd-wrap">
-    <h1>{% trans "Apagar Material" %}</h1>
-    <p>{% blocktrans with nome=material.nome %}Tem a certeza que deseja apagar "<strong>{{ nome }}</strong>"?{% endblocktrans %}</p>
-
-    <form method="post" class="mtd-form">
-        {% csrf_token %}
-        <button type="submit" class="mtd-btn mtd-btn-delete">
-            🗑️ {% trans "Sim, apagar" %}
-        </button>
-
-        <a href="{% url 'projetos:material_detail' material.id %}" class="mtd-btn mtd-btn-cancel">
-            🔙 {% trans "Cancelar" %}
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{% url 'projetos:material_detail' material.id %}" class="cf-back">
+            ← {% trans "Voltar ao material" %}
         </a>
-    </form>
-</div>
+
+        <div class="cf-kicker">{% trans "Ação irreversível" %}</div>
+        <h1 class="cf-title">{% trans "Apagar material" %}</h1>
+        <p class="cf-copy">
+            {% blocktrans with nome=material.nome %}
+                Está prestes a remover o material "{{ nome }}". Esta ação pode afetar histórico, referências e movimentos já associados.
+            {% endblocktrans %}
+        </p>
+
+        <div class="cf-highlight">
+            <strong>{% trans "Material" %}:</strong> {{ material.nome }}
+        </div>
+
+        <form method="post" class="cf-actions">
+            {% csrf_token %}
+            <button type="submit" class="cf-btn cf-btn-danger">
+                {% trans "Sim, apagar" %}
+            </button>
+            <a href="{% url 'projetos:material_detail' material.id %}" class="cf-btn cf-btn-secondary">
+                {% trans "Cancelar" %}
+            </a>
+        </form>
+    </div>
 </section>
 {% endblock %}

@@ -1,54 +1,253 @@
 {% extends 'projetos/base.html' %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/maquina_form.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_form.css' %}?v=20260512-1535">
 {% endblock %}
 
 {% block content %}
-<div class="mqf-wrap">
+<section class="mqf-page">
+    <div class="mqf-shell">
+        <div class="mqf-top">
+            <div class="mqf-heading">
+                <a href="{% if maquina %}{{ maquina.get_absolute_url }}{% else %}{% url 'projetos:maquina_list' %}{% endif %}" class="mqf-back">
+                    ← {% if maquina %}{% trans "Voltar à máquina" %}{% else %}{% trans "Voltar às máquinas" %}{% endif %}
+                </a>
+                <h1 class="mqf-title">
+                    {% if maquina %}✏️ {% trans "Editar máquina" %}{% else %}🛠️ {% trans "Criar máquina" %}{% endif %}
+                </h1>
+                <p class="mqf-subtitle">
+                    {% if maquina %}
+                        {% trans "Atualize os dados operacionais, documentais e de afetação desta máquina sem sair deste formulário." %}
+                    {% else %}
+                        {% trans "Registe uma nova máquina com os dados essenciais de operação, documentação e ligação aos projetos da empresa." %}
+                    {% endif %}
+                </p>
+            </div>
+            {% if maquina %}
+                <div class="mqf-top-actions">
+                    <a href="{{ maquina.get_absolute_url }}" class="mqf-btn mqf-btn-primary">
+                        {% trans "Ver máquina" %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
 
-    <h2 class="mqf-title">{{ titulo }}</h2>
-
-    <form method="POST" class="mqf-form">
+        <form method="POST" class="mqf-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
             <div class="mqf-global-errors">
-                {{ form.non_field_errors }}
+                {% for erro in form.non_field_errors %}
+                    <div>{{ erro }}</div>
+                {% endfor %}
             </div>
         {% endif %}
 
-        <div class="mqf-grid">
-            {% for field in form %}
+        <div class="mqf-section">
+            <div class="mqf-section-head">
                 <div>
-                    <label class="mqf-label">
-                        {{ field.label }}
-                    </label>
-
-                    {{ field }}
-
-                    {% if field.errors %}
-                        <div class="mqf-errors">
-                            {{ field.errors }}
-                        </div>
-                    {% endif %}
+                    <h2 class="mqf-section-title">{% trans "Projetos e furos ligados" %}</h2>
                 </div>
-            {% endfor %}
+                <p class="mqf-section-copy">
+                    {% trans "Defina onde esta máquina pode operar e qual o projeto atualmente em curso." %}
+                </p>
+            </div>
+            <div class="mqf-grid mqf-grid-wide">
+                <div class="mqf-field mqf-field-span-2 mqf-field-multi">
+                    <label class="mqf-label" for="{{ form.projetos.id_for_label }}">{{ form.projetos.label }}</label>
+                    {{ form.projetos }}
+                    <div class="mqf-multi-note">{% trans "Dica: use Cmd no Mac ou Ctrl no Windows para selecionar vários itens." %}</div>
+                    <div class="mqf-hint">{% trans "Pode selecionar vários projetos associados à mesma máquina." %}</div>
+                    {% if form.projetos.errors %}<div class="mqf-errors">{{ form.projetos.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.projeto_atual.id_for_label }}">{{ form.projeto_atual.label }}</label>
+                    {{ form.projeto_atual }}
+                    <div class="mqf-hint">{% trans "Use este campo para identificar o projeto em que a máquina está a trabalhar neste momento." %}</div>
+                    {% if form.projeto_atual.errors %}<div class="mqf-errors">{{ form.projeto_atual.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field mqf-field-multi">
+                    <label class="mqf-label" for="{{ form.furos.id_for_label }}">{{ form.furos.label }}</label>
+                    {{ form.furos }}
+                    <div class="mqf-multi-note">{% trans "Dica: use Cmd no Mac ou Ctrl no Windows para selecionar vários itens." %}</div>
+                    <div class="mqf-hint">{% trans "Associe os furos relevantes para facilitar planeamento e relatórios." %}</div>
+                    {% if form.furos.errors %}<div class="mqf-errors">{{ form.furos.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mqf-section">
+            <div class="mqf-section-head">
+                <div>
+                    <h2 class="mqf-section-title">{% trans "Ficha principal da máquina" %}</h2>
+                </div>
+                <p class="mqf-section-copy">
+                    {% trans "Os dados abaixo são usados para pesquisa, detalhe da máquina e organização da operação." %}
+                </p>
+            </div>
+            <div class="mqf-grid">
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}<div class="mqf-errors">{{ form.nome.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                    {{ form.tipo }}
+                    {% if form.tipo.errors %}<div class="mqf-errors">{{ form.tipo.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.marca.id_for_label }}">{{ form.marca.label }}</label>
+                    {{ form.marca }}
+                    {% if form.marca.errors %}<div class="mqf-errors">{{ form.marca.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.modelo.id_for_label }}">{{ form.modelo.label }}</label>
+                    {{ form.modelo }}
+                    {% if form.modelo.errors %}<div class="mqf-errors">{{ form.modelo.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.numero_serie.id_for_label }}">{{ form.numero_serie.label }}</label>
+                    {{ form.numero_serie }}
+                    {% if form.numero_serie.errors %}<div class="mqf-errors">{{ form.numero_serie.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.matricula.id_for_label }}">{{ form.matricula.label }}</label>
+                    {{ form.matricula }}
+                    {% if form.matricula.errors %}<div class="mqf-errors">{{ form.matricula.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                    {{ form.estado }}
+                    {% if form.estado.errors %}<div class="mqf-errors">{{ form.estado.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field mqf-field-checkbox">
+                    <label class="mqf-label" for="{{ form.ativo.id_for_label }}">{{ form.ativo.label }}</label>
+                    <label class="mqf-checkbox-card" for="{{ form.ativo.id_for_label }}">
+                        {{ form.ativo }}
+                        <span>
+                            <strong>{% trans "Máquina ativa" %}</strong>
+                            <small>{% trans "Disponível para uso e seleção em processos da empresa." %}</small>
+                        </span>
+                    </label>
+                    {% if form.ativo.errors %}<div class="mqf-errors">{{ form.ativo.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mqf-section">
+            <div class="mqf-section-head">
+                <div>
+                    <h2 class="mqf-section-title">{% trans "Contadores e localização" %}</h2>
+                </div>
+                <p class="mqf-section-copy">
+                    {% trans "Use estes campos para controlo operacional, manutenção e análise de custos por máquina." %}
+                </p>
+            </div>
+            <div class="mqf-grid">
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.km.id_for_label }}">{{ form.km.label }}</label>
+                    {{ form.km }}
+                    {% if form.km.errors %}<div class="mqf-errors">{{ form.km.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.horimetro.id_for_label }}">{{ form.horimetro.label }}</label>
+                    {{ form.horimetro }}
+                    {% if form.horimetro.errors %}<div class="mqf-errors">{{ form.horimetro.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.ano_registo.id_for_label }}">{{ form.ano_registo.label }}</label>
+                    {{ form.ano_registo }}
+                    {% if form.ano_registo.errors %}<div class="mqf-errors">{{ form.ano_registo.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.valor.id_for_label }}">{{ form.valor.label }}</label>
+                    {{ form.valor }}
+                    {% if form.valor.errors %}<div class="mqf-errors">{{ form.valor.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field mqf-field-span-2">
+                    <label class="mqf-label" for="{{ form.localizacao_atual.id_for_label }}">{{ form.localizacao_atual.label }}</label>
+                    {{ form.localizacao_atual }}
+                    {% if form.localizacao_atual.errors %}<div class="mqf-errors">{{ form.localizacao_atual.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mqf-section">
+            <div class="mqf-section-head">
+                <div>
+                    <h2 class="mqf-section-title">{% trans "Datas, seguro e conformidade" %}</h2>
+                </div>
+                <p class="mqf-section-copy">
+                    {% trans "Mantenha estes dados atualizados para reduzir falhas de controlo e facilitar auditoria interna." %}
+                </p>
+            </div>
+            <div class="mqf-grid">
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.data_compra.id_for_label }}">{{ form.data_compra.label }}</label>
+                    {{ form.data_compra }}
+                    {% if form.data_compra.errors %}<div class="mqf-errors">{{ form.data_compra.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.data_registo.id_for_label }}">{{ form.data_registo.label }}</label>
+                    {{ form.data_registo }}
+                    {% if form.data_registo.errors %}<div class="mqf-errors">{{ form.data_registo.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.data_revisao.id_for_label }}">{{ form.data_revisao.label }}</label>
+                    {{ form.data_revisao }}
+                    {% if form.data_revisao.errors %}<div class="mqf-errors">{{ form.data_revisao.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.seguro.id_for_label }}">{{ form.seguro.label }}</label>
+                    {{ form.seguro }}
+                    {% if form.seguro.errors %}<div class="mqf-errors">{{ form.seguro.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.data_seguro.id_for_label }}">{{ form.data_seguro.label }}</label>
+                    {{ form.data_seguro }}
+                    {% if form.data_seguro.errors %}<div class="mqf-errors">{{ form.data_seguro.errors }}</div>{% endif %}
+                </div>
+                <div class="mqf-field">
+                    <label class="mqf-label" for="{{ form.data_iuc.id_for_label }}">{{ form.data_iuc.label }}</label>
+                    {{ form.data_iuc }}
+                    {% if form.data_iuc.errors %}<div class="mqf-errors">{{ form.data_iuc.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mqf-section">
+            <div class="mqf-section-head">
+                <div>
+                    <h2 class="mqf-section-title">{% trans "Observações operacionais" %}</h2>
+                </div>
+                <p class="mqf-section-copy">
+                    {% trans "Registe contexto útil como restrições, histórico relevante, preferências de operação ou alertas de manutenção." %}
+                </p>
+            </div>
+            <div class="mqf-grid">
+                <div class="mqf-field mqf-field-span-2">
+                    <label class="mqf-label" for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}<div class="mqf-errors">{{ form.observacoes.errors }}</div>{% endif %}
+                </div>
+            </div>
         </div>
 
         <div class="mqf-actions">
-            <button type="submit" class="mqf-btn mqf-btn-save">
-                💾 {% trans "Salvar" %}
+            <button type="submit" class="mqf-btn mqf-btn-primary">
+                {% if maquina %}{% trans "Salvar alterações" %}{% else %}{% trans "Criar máquina" %}{% endif %}
             </button>
 
-            <a href="{% url 'projetos:maquina_list' %}" class="mqf-btn mqf-btn-back">
-                🔙 {% trans "Voltar" %}
+            <a href="{% if maquina %}{{ maquina.get_absolute_url }}{% else %}{% url 'projetos:maquina_list' %}{% endif %}" class="mqf-btn mqf-btn-secondary">
+                {% trans "Cancelar" %}
             </a>
         </div>
 
-    </form>
-</div>
+        </form>
+    </div>
+</section>
 {% endblock %}

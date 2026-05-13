@@ -45,18 +45,18 @@ class MedicaoForm(forms.ModelForm):
             "observacoes",
         ]
         widgets = {
-            "profundidade_medida": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "inclinacao_real_medida": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "azimute_real_medido": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "magnetismo": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "imagem": forms.FileInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
-            "latitude": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
-            "longitude": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.000001}),
-            "altitude": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "tipo_rocha": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
-            "cor": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
-            "dureza": forms.NumberInput(attrs={"class": "border rounded px-3 py-2 w-full", "step": 0.01}),
-            "observacoes": forms.Textarea(attrs={"class": "border rounded px-3 py-2 w-full", "rows": 3}),
+            "profundidade_medida": forms.NumberInput(attrs={"step": 0.01}),
+            "inclinacao_real_medida": forms.NumberInput(attrs={"step": 0.01}),
+            "azimute_real_medido": forms.NumberInput(attrs={"step": 0.01}),
+            "magnetismo": forms.NumberInput(attrs={"step": 0.01}),
+            "imagem": forms.FileInput(),
+            "latitude": forms.NumberInput(attrs={"step": 0.000001}),
+            "longitude": forms.NumberInput(attrs={"step": 0.000001}),
+            "altitude": forms.NumberInput(attrs={"step": 0.01}),
+            "tipo_rocha": forms.TextInput(),
+            "cor": forms.TextInput(),
+            "dureza": forms.NumberInput(attrs={"step": 0.01}),
+            "observacoes": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean_profundidade_medida(self):

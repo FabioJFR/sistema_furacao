@@ -1,66 +1,133 @@
 .todo-notes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.todo-notes-detail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .todo-note-card,
 .todo-card,
 .todo-section-card {
-    background: var(--panel-bg, #ffffff);
-    border: 1px solid var(--border-color, #d7dee8);
-    border-radius: 14px;
-    padding: 1rem;
+    background: var(--card, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
+}
+
+.todo-note-label,
+.todo-card-kicker,
+.todo-section-kicker {
+    color: var(--muted, #6b7280);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 .todo-note-card h2,
 .todo-section-card h2 {
-    font-size: 1rem;
-    margin-bottom: 0.6rem;
-    color: var(--text-strong, #1b365d);
+    margin: 10px 0 10px;
+    color: #173e66;
+    font-size: 1.05rem;
+    line-height: 1.2;
+}
+
+.todo-note-card p,
+.todo-card-copy,
+.todo-section-card li {
+    color: #42566f;
+    line-height: 1.6;
 }
 
 .todo-note-card p {
     margin: 0;
-    color: var(--text-soft, #3f566f);
 }
 
 .todo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 18px;
 }
 
-.todo-card h3 {
-    margin: 0 0 0.55rem;
-    font-size: 1.06rem;
-    color: var(--text-strong, #173e66);
+.todo-card {
+    display: grid;
+    gap: 14px;
 }
 
-.todo-card p {
-    margin: 0 0 0.7rem;
-    color: var(--text-soft, #42566f);
+.todo-card-head h3 {
+    margin: 10px 0 0;
+    color: #173e66;
+    font-size: 1.18rem;
+    line-height: 1.15;
+}
+
+.todo-card-copy {
+    margin: 0;
 }
 
 .todo-status {
-    padding: 0.6rem;
-    background: var(--surface-soft, #f5f8fb);
-    border-radius: 10px;
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    background: #f5f8fb;
+    border: 1px solid #e1e9f1;
+    border-radius: 12px;
+}
+
+.todo-status-label {
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.todo-status strong {
+    color: #173e66;
+    font-size: 0.95rem;
+}
+
+.todo-card-actions {
+    display: flex;
+    justify-content: flex-start;
 }
 
 .todo-sections {
     display: grid;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
 }
 
 .todo-section-card ul {
     margin: 0;
     padding-left: 1.1rem;
-    color: var(--text-soft, #3e5470);
 }
 
 .todo-section-card li + li {
-    margin-top: 0.45rem;
+    margin-top: 0.55rem;
+}
+
+.todo-section-card-done {
+    border-top: 4px solid #16a34a;
+}
+
+.todo-section-card-next {
+    border-top: 4px solid #2563eb;
+}
+
+.todo-section-card-pending {
+    border-top: 4px solid #d97706;
+}
+
+@media (max-width: 1100px) {
+    .todo-notes-detail,
+    .todo-sections {
+        grid-template-columns: 1fr;
+    }
 }

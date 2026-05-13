@@ -1,9 +1,13 @@
 from datetime import timedelta
 
+from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
 from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
-from plataforma.models import Empresa, FuroArquivadoPlataforma, Plano, SubscricaoEmpresa
+from plataforma.models import Empresa, FuroArquivadoPlataforma, PerfilPlataforma, Plano, SubscricaoEmpresa
+
+User = get_user_model()
 
 
 def obter_empresas_dashboard_qs():
@@ -101,3 +105,45 @@ def obter_metricas_empresas_dashboard(empresas_qs):
         "planos_ativos": Plano.objects.filter(ativo=True).count(),
         "total_furos_arquivados_plataforma": furos_arquivados_qs.count(),
     }
+
+
+def _obter_user_ids_online():
+    user_ids = set()
+    for session in Session.objects.filter(expire_date__gte=timezone.now()):
+        user_id = session.get_decoded().get("_auth_user_id")
+        if user_id:
+            user_ids.add(int(user_id))
+    return user_ids
+
+
+def obter_metricas_contas_dashboard():
+    perfis_qs = PerfilPlataforma.objects.exclude(
+        tipo_acesso__in=["platform_owner", "platform_admin"]
+    )
+    return {
+        "contas_ativadas": perfis_qs.filter(user__is_active=True).count(),
+        "contas_por_ativar": perfis_qs.filter(user__is_active=False).count(),
+        "utilizadores_online_total": len(_obter_user_ids_online()),
+    }
+
+
+def listar_utilizadores_online(limit=8):
+    user_ids = _obter_user_ids_online()
+    if not user_ids:
+        return []
+
+    return list(
+        User.objects
+        .filter(pk__in=user_ids)
+        .select_related("perfil_plataforma", "perfil_plataforma__empresa")
+        .order_by("username")[:limit]
+    )
+
+
+def listar_ultimos_logins(limit=10):
+    return list(
+        User.objects
+        .filter(last_login__isnull=False)
+        .select_related("perfil_plataforma", "perfil_plataforma__empresa")
+        .order_by("-last_login")[:limit]
+    )

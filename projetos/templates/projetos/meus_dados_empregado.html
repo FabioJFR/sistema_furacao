@@ -1,222 +1,197 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Meus Dados" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/meus_dados.css' %}?v=20260513-1245">
+{% endblock %}
+
 {% block content %}
-<div class="space-y-6">
-
-    <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">👤 {% trans "Meus Dados" %}</h1>
-            <p class="text-gray-500 mt-1">{% trans "Consulta dos teus dados pessoais, profissionais e atividade no sistema." %}</p>
-        </div>
-
-        <a href="{% url 'projetos:meus_dados_empregado_editar' %}"
-           class="bg-amber-500 text-white px-5 py-2 rounded-lg hover:bg-amber-600 transition shadow font-semibold">
-            ✏️ {% trans "Editar Dados" %}
-        </a>
-    </div>
-
-    <!-- DADOS PESSOAIS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Dados Pessoais" %}</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>{% trans "Nome:" %}</strong> {{ empregado.nome|default:"-" }}</div>
-            <div><strong>{% trans "Email:" %}</strong> {{ empregado.email|default:"-" }}</div>
-            <div><strong>{% trans "Telefone:" %}</strong> {{ empregado.telefone|default:"-" }}</div>
-            <div><strong>{% trans "Idade:" %}</strong> {{ empregado.idade|default:"-" }}</div>
-            <div><strong>{% trans "Nacionalidade:" %}</strong> {{ empregado.nacionalidade|default:"-" }}</div>
-            <div><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</div>
-            <div class="md:col-span-2"><strong>{% trans "Morada:" %}</strong> {{ empregado.morada|default:"-" }}</div>
-        </div>
-    </div>
-
-    <!-- DADOS PROFISSIONAIS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Dados Profissionais" %}</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:empregado.funcao|default:"-" }}</div>
-            <div><strong>{% trans "Data de Admissão:" %}</strong> {{ empregado.data_admissao|default:"-" }}</div>
-            <div><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default_if_none:"-" }}</div>
-            <div><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default:"-" }}</div>
-            <div><strong>{% trans "Horas Mensais:" %}</strong> {{ empregado.horas_mensais|default:"-" }}</div>
-            <div><strong>{% trans "Horas Extra:" %}</strong> {{ empregado.horas_extra|default:"-" }}</div>
-            <div><strong>{% trans "Horas Trabalhadas no Mês:" %}</strong> {{ empregado.horas_trabalhadas_mes|default:"-" }}</div>
-            <div><strong>{% trans "Horas Totais:" %}</strong> {{ empregado.horas_total|default:"-" }}</div>
-            <div><strong>{% trans "Férias anuais:" %}</strong> {{ empregado.dias_ferias_anuais }}</div>
-            <div><strong>{% trans "Férias gozadas (ano atual):" %}</strong> {{ empregado.dias_ferias_gozados_ano_atual }}</div>
-            <div><strong>{% trans "Férias disponíveis (ano atual):" %}</strong> {{ empregado.dias_ferias_disponiveis_ano_atual }}</div>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Plano e Pagamentos" %}</h2>
-        {% if empresa_associada %}
-            <div class="mb-4">
-                <strong class="block mb-2">{% trans "Logo da empresa:" %}</strong>
-                {% if empresa_associada.logo %}
-                    <img
-                        src="{{ empresa_associada.logo.url }}"
-                        alt="{% trans 'Logo da empresa' %}"
-                        class="max-h-20 w-auto rounded-lg border border-gray-200 bg-white p-1"
-                    >
-                {% else %}
-                    <span class="text-gray-500">{% trans "Sem logo definido." %}</span>
-                {% endif %}
+<section class="mdp-page">
+    <div class="mdp-shell">
+        <div class="mdp-top">
+            <div class="mdp-heading">
+                <h1 class="mdp-title">👤 {% trans "Meus Dados" %}</h1>
+                <p class="mdp-subtitle">{% trans "Consulta dos teus dados pessoais, profissionais e atividade no sistema." %}</p>
             </div>
-        {% endif %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div>
-                <strong>{% trans "Empresa associada:" %}</strong>
+            <div class="mdp-top-actions">
+                <a href="{% url 'projetos:meus_dados_empregado_editar' %}" class="mdp-btn mdp-btn-primary">
+                    {% trans "Editar Dados" %}
+                </a>
+            </div>
+        </div>
+
+        <div class="mdp-grid">
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Dados Pessoais" %}</h2>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Nome" %}</span><strong>{{ empregado.nome|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Email" %}</span><strong>{{ empregado.email|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Telefone" %}</span><strong>{{ empregado.telefone|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Idade" %}</span><strong>{{ empregado.idade|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Nacionalidade" %}</span><strong>{{ empregado.nacionalidade|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "NIF" %}</span><strong>{{ empregado.nif|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item mdp-detail-item-full"><span class="mdp-label">{% trans "Morada" %}</span><strong>{{ empregado.morada|default:"-" }}</strong></div>
+                </div>
+            </section>
+
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Dados Profissionais" %}</h2>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Função" %}</span><strong>{{ empregado.get_funcao_display|default:empregado.funcao|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Data de Admissão" %}</span><strong>{{ empregado.data_admissao|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Salário" %}</span><strong>{{ empregado.salario|default_if_none:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Horas Diárias" %}</span><strong>{{ empregado.horas_diarias|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Horas Mensais" %}</span><strong>{{ empregado.horas_mensais|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Horas Extra" %}</span><strong>{{ empregado.horas_extra|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Horas Trabalhadas no Mês" %}</span><strong>{{ empregado.horas_trabalhadas_mes|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Horas Totais" %}</span><strong>{{ empregado.horas_total|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Férias anuais" %}</span><strong>{{ empregado.dias_ferias_anuais }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Férias gozadas (ano atual)" %}</span><strong>{{ empregado.dias_ferias_gozados_ano_atual }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Férias disponíveis (ano atual)" %}</span><strong>{{ empregado.dias_ferias_disponiveis_ano_atual }}</strong></div>
+                </div>
+            </section>
+
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Plano e Pagamentos" %}</h2>
                 {% if empresa_associada %}
-                    {{ empresa_associada.nome_comercial|default:empresa_associada.nome|default:"-" }}
-                {% else %}
-                    -
+                    <div class="mdp-company-logo">
+                        <span class="mdp-label">{% trans "Logo da empresa" %}</span>
+                        {% if empresa_associada.logo %}
+                            <img src="{{ empresa_associada.logo.url }}" alt="{% trans 'Logo da empresa' %}">
+                        {% else %}
+                            <div class="mdp-empty-inline">{% trans "Sem logo definido." %}</div>
+                        {% endif %}
+                    </div>
                 {% endif %}
-            </div>
-            <div>
-                <strong>{% trans "Plano atual:" %}</strong>
-                {% if plano_atual %}
-                    {{ plano_atual.nome }}
-                {% else %}
-                    -
-                {% endif %}
-            </div>
-            <div>
-                <strong>{% trans "Conta desde:" %}</strong>
-                {{ data_inicio_plano|date:"d/m/Y"|default:"-" }}
-            </div>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Empresa associada" %}</span>
+                        <strong>{% if empresa_associada %}{{ empresa_associada.nome_comercial|default:empresa_associada.nome|default:"-" }}{% else %}-{% endif %}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Plano atual" %}</span>
+                        <strong>{% if plano_atual %}{{ plano_atual.nome }}{% else %}-{% endif %}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Conta desde" %}</span>
+                        <strong>{{ data_inicio_plano|date:"d/m/Y"|default:"-" }}</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Documentos" %}</h2>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Currículo" %}</span>
+                        {% if empregado.curriculo %}
+                            <a href="{{ empregado.curriculo.url }}" target="_blank" rel="noopener" class="mdp-link">{% trans "Ver ficheiro" %}</a>
+                        {% else %}
+                            <strong>-</strong>
+                        {% endif %}
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Contrato" %}</span>
+                        {% if empregado.contrato %}
+                            <a href="{{ empregado.contrato.url }}" target="_blank" rel="noopener" class="mdp-link">{% trans "Ver ficheiro" %}</a>
+                        {% else %}
+                            <strong>-</strong>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
 
-    <!-- DOCUMENTOS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Documentos" %}</h2>
+        <section class="mdp-stats">
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Registos" %}</div>
+                <div class="mdp-stat-value">{{ total_registos|default:0 }}</div>
+            </article>
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Levantamentos" %}</div>
+                <div class="mdp-stat-value">{{ total_levantamentos|default:0 }}</div>
+            </article>
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Devoluções" %}</div>
+                <div class="mdp-stat-value">{{ total_devolucoes|default:0 }}</div>
+            </article>
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Configurações Criadas" %}</div>
+                <div class="mdp-stat-value">{{ total_configuracoes|default:0 }}</div>
+            </article>
+        </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div>
-                <strong>{% trans "Currículo:" %}</strong>
-                {% if empregado.curriculo %}
-                    <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">{% trans "Ver ficheiro" %}</a>
-                {% else %}
-                    -
-                {% endif %}
+        <section class="mdp-table-card">
+            <div class="mdp-section-head">
+                <h2 class="mdp-card-title">📁 {% trans "Projetos em que estiveste envolvido" %}</h2>
             </div>
-
-            <div>
-                <strong>{% trans "Contrato:" %}</strong>
-                {% if empregado.contrato %}
-                    <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline ml-2">{% trans "Ver ficheiro" %}</a>
-                {% else %}
-                    -
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- INTERAÇÃO COM A APLICAÇÃO -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Interação com a Aplicação" %}</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Registos" %}</div>
-                <div class="text-2xl font-bold">{{ total_registos|default:0 }}</div>
-            </div>
-
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Levantamentos" %}</div>
-                <div class="text-2xl font-bold">{{ total_levantamentos|default:0 }}</div>
-            </div>
-
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Devoluções" %}</div>
-                <div class="text-2xl font-bold">{{ total_devolucoes|default:0 }}</div>
-            </div>
-
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Configurações Criadas" %}</div>
-                <div class="text-2xl font-bold">{{ total_configuracoes|default:0 }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PROJETOS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">📁 {% trans "Projetos em que estiveste envolvido" %}</h2>
-
-        {% if projetos_historico %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-100 text-gray-700">
-                        <tr>
-                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Início" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Fim" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ligacao in projetos_historico %}
-                            <tr class="border-t">
-                                <td class="px-4 py-3">{{ ligacao.projeto.nome }}</td>
-                                <td class="px-4 py-3">{{ ligacao.data_inicio|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ ligacao.data_fim|default:"-" }}</td>
-                                <td class="px-4 py-3">
-                                    {% if ligacao.ativo %}
-                                        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                            {% trans "Ativo" %}
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                            {% trans "Concluído" %}
-                                        </span>
-                                    {% endif %}
-                                </td>
+            {% if projetos_historico %}
+                <div class="mdp-table-wrap">
+                    <table class="mdp-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Projeto" %}</th>
+                                <th>{% trans "Início" %}</th>
+                                <th>{% trans "Fim" %}</th>
+                                <th>{% trans "Estado" %}</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for ligacao in projetos_historico %}
+                                <tr>
+                                    <td>{{ ligacao.projeto.nome }}</td>
+                                    <td>{{ ligacao.data_inicio|default:"-" }}</td>
+                                    <td>{{ ligacao.data_fim|default:"-" }}</td>
+                                    <td>
+                                        {% if ligacao.ativo %}
+                                            <span class="mdp-pill mdp-pill-active">{% trans "Ativo" %}</span>
+                                        {% else %}
+                                            <span class="mdp-pill">{% trans "Concluído" %}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mdp-empty">{% trans "Ainda não existem projetos associados." %}</div>
+            {% endif %}
+        </section>
+
+        <section class="mdp-table-card">
+            <div class="mdp-section-head">
+                <h2 class="mdp-card-title">🕳 {% trans "Furos em que trabalhaste" %}</h2>
             </div>
-        {% else %}
-            <p class="text-gray-500">{% trans "Ainda não existem projetos associados." %}</p>
-        {% endif %}
-    </div>
-
-    <!-- FUROS -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">🕳 {% trans "Furos em que trabalhaste" %}</h2>
-
-        {% if furos_resumo %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-100 text-gray-700">
-                        <tr>
-                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Metros Furados" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Horas Trabalhadas" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in furos_resumo %}
-                            <tr class="border-t">
-                                <td class="px-4 py-3">{{ item.projeto__nome|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ item.furo__nome|default:"-" }}</td>
-                                <td class="px-4 py-3 font-semibold">{{ item.total_metros|default:0|floatformat:2 }} m</td>
-                                <td class="px-4 py-3">{{ item.total_horas|default:0|floatformat:2 }}</td>
+            {% if furos_resumo %}
+                <div class="mdp-table-wrap">
+                    <table class="mdp-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Projeto" %}</th>
+                                <th>{% trans "Furo" %}</th>
+                                <th>{% trans "Metros Furados" %}</th>
+                                <th>{% trans "Horas Trabalhadas" %}</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-gray-500">{% trans "Ainda não existem furos registados para este empregado." %}</p>
-        {% endif %}
+                        </thead>
+                        <tbody>
+                            {% for item in furos_resumo %}
+                                <tr>
+                                    <td>{{ item.projeto__nome|default:"-" }}</td>
+                                    <td>{{ item.furo__nome|default:"-" }}</td>
+                                    <td>{{ item.total_metros|default:0|floatformat:2 }} m</td>
+                                    <td>{{ item.total_horas|default:0|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mdp-empty">{% trans "Ainda não existem furos registados para este empregado." %}</div>
+            {% endif %}
+        </section>
     </div>
-
-</div>
+</section>
 {% endblock %}

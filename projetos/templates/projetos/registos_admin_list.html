@@ -1,26 +1,33 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Registos de Produção" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/stock_movements.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="max-w-7xl mx-auto p-6">
-
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-        <h1 class="text-2xl font-bold text-gray-800">📊 {% trans "Registos de Produção" %}</h1>
-        <a href="{% url 'projetos:relatorio_turno_admin_list' %}"
-           class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700">
-            📘 {% trans "Fichas Técnicas" %}
-        </a>
-    </div>
-
-    <!-- FILTROS -->
-    <div class="bg-white rounded-xl shadow p-4 mb-6">
-        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-
+<section class="sm-page">
+    <div class="sm-shell">
+        <div class="sm-hero">
             <div>
-                <label class="block text-sm font-semibold mb-1">{% trans "Empregado" %}</label>
-                <select name="empregado" class="w-full p-2 border rounded">
+                <div class="sm-eyebrow">{% trans "Produção e controlo" %}</div>
+                <h1 class="sm-title">{% trans "Registos de Produção" %}</h1>
+                <p class="sm-subtitle">
+                    {% trans "Filtre e acompanhe os registos operacionais da empresa com visão consolidada de horas, metros, paragens e detalhe técnico por turno." %}
+                </p>
+            </div>
+            <a href="{% url 'projetos:relatorio_turno_admin_list' %}" class="sm-action">
+                {% trans "Fichas Técnicas" %}
+            </a>
+        </div>
+
+        <div class="sm-filter-card">
+            <form method="get" class="sm-filter-grid">
+                <div class="sm-field">
+                    <label for="id_empregado" class="sm-label">{% trans "Empregado" %}</label>
+                    <select id="id_empregado" name="empregado" class="sm-input">
                     <option value="">{% trans "Todos" %}</option>
                     {% for e in empregados %}
                         <option value="{{ e.id }}" {% if filtros.empregado == e.id|stringformat:"s" %}selected{% endif %}>
@@ -30,9 +37,11 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">{% trans "Projeto" %}</label>
-                <select name="projeto" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="sm-field">
+                    <label for="id_projeto" class="sm-label">{% trans "Projeto" %}</label>
+                    <select id="id_projeto" name="projeto" class="sm-input">
                     <option value="">{% trans "Todos" %}</option>
                     {% for p in projetos %}
                         <option value="{{ p.id }}" {% if filtros.projeto == p.id|stringformat:"s" %}selected{% endif %}>
@@ -42,9 +51,11 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">{% trans "Furo" %}</label>
-                <select name="furo" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="sm-field">
+                    <label for="id_furo" class="sm-label">{% trans "Furo" %}</label>
+                    <select id="id_furo" name="furo" class="sm-input">
                     <option value="">{% trans "Todos" %}</option>
                     {% for f in furos %}
                         <option value="{{ f.id }}" {% if filtros.furo == f.id|stringformat:"s" %}selected{% endif %}>
@@ -54,135 +65,139 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">{% trans "Data início" %}</label>
-                <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="w-full p-2 border rounded">
-            </div>
+                </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">{% trans "Data fim" %}</label>
-                <input type="date" name="data_fim" value="{{ filtros.data_fim }}" class="w-full p-2 border rounded">
-            </div>
+                <div class="sm-field">
+                    <label for="id_data_inicio" class="sm-label">{% trans "Data início" %}</label>
+                    <input id="id_data_inicio" type="date" name="data_inicio" value="{{ filtros.data_inicio }}" class="sm-input">
+                </div>
 
-            <div class="md:col-span-5 flex gap-3 pt-2">
-                <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
-                <a href="{% url 'projetos:registos_admin_list' %}" class="btn btn-warning">{% trans "Limpar" %}</a>
-            </div>
-        </form>
-    </div>
+                <div class="sm-field">
+                    <label for="id_data_fim" class="sm-label">{% trans "Data fim" %}</label>
+                    <input id="id_data_fim" type="date" name="data_fim" value="{{ filtros.data_fim }}" class="sm-input">
+                </div>
 
-    <!-- TOTAIS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">{% trans "Total de Horas" %}</div>
-            <div class="text-2xl font-bold">{{ total_horas|floatformat:2 }}</div>
+                <div class="sm-field sm-field-span-5">
+                    <div class="sm-filter-actions">
+                        <button type="submit" class="sm-btn sm-btn-primary">{% trans "Filtrar" %}</button>
+                        <a href="{% url 'projetos:registos_admin_list' %}" class="sm-btn sm-btn-secondary">{% trans "Limpar" %}</a>
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">{% trans "Total de Metros" %}</div>
-            <div class="text-2xl font-bold">{{ total_metros|floatformat:2 }} m</div>
+        <div class="sm-stats">
+            <div class="sm-stat-card">
+                <div class="sm-stat-label">{% trans "Total de Horas" %}</div>
+                <div class="sm-stat-value">{{ total_horas|floatformat:2 }}</div>
+            </div>
+            <div class="sm-stat-card">
+                <div class="sm-stat-label">{% trans "Total de Metros" %}</div>
+                <div class="sm-stat-value">{{ total_metros|floatformat:2 }} m</div>
+            </div>
+            <div class="sm-stat-card">
+                <div class="sm-stat-label">{% trans "Total de Paragem" %}</div>
+                <div class="sm-stat-value">{{ total_paragem|floatformat:2 }} h</div>
+            </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-gray-500 text-sm">{% trans "Total de Paragem" %}</div>
-            <div class="text-2xl font-bold">{{ total_paragem|floatformat:2 }} h</div>
-        </div>
-    </div>
-
-    <!-- TABELA -->
-    <div class="bg-white rounded-xl shadow p-4 overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="text-left border-b">
-                    <th class="py-2">{% trans "Ações" %}</th>
-                    <th class="py-2">{% trans "Data" %}</th>
-                    <th class="py-2">{% trans "Empregado" %}</th>
-                    <th class="py-2">{% trans "Planeamento" %}</th>
-                    <th class="py-2">{% trans "Projeto" %}</th>
-                    <th class="py-2">{% trans "Furo" %}</th>
-                    <th class="py-2">{% trans "Início" %}</th>
-                    <th class="py-2">{% trans "Início Pausa" %}</th>
-                    <th class="py-2">{% trans "Fim Pausa" %}</th>
-                    <th class="py-2">{% trans "Fim" %}</th>
-                    <th class="py-2">{% trans "Horas" %}</th>
-                    <th class="py-2">{% trans "Paragem" %}</th>
-                    <th class="py-2">{% trans "Tipo Paragem" %}</th>
-                    <th class="py-2">{% trans "Metros" %}</th>
-                    <th class="py-2">{% trans "Furadas" %}</th>
-                    <th class="py-2">{% trans "Avanço Furadas" %}</th>
-                    <th class="py-2">{% trans "Recuperação Furadas" %}</th>
-                    <th class="py-2">{% trans "Foto" %}</th>
-                    <th class="py-2">{% trans "Observações" %}</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="sm-table-card">
+            <div class="sm-table-wrap">
+                <table class="sm-table" style="min-width: 1700px;">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Ações" %}</th>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Empregado" %}</th>
+                            <th>{% trans "Planeamento" %}</th>
+                            <th>{% trans "Projeto" %}</th>
+                            <th>{% trans "Furo" %}</th>
+                            <th>{% trans "Início" %}</th>
+                            <th>{% trans "Início Pausa" %}</th>
+                            <th>{% trans "Fim Pausa" %}</th>
+                            <th>{% trans "Fim" %}</th>
+                            <th>{% trans "Horas" %}</th>
+                            <th>{% trans "Paragem" %}</th>
+                            <th>{% trans "Tipo Paragem" %}</th>
+                            <th>{% trans "Metros" %}</th>
+                            <th>{% trans "Furadas" %}</th>
+                            <th>{% trans "Avanço Furadas" %}</th>
+                            <th>{% trans "Recuperação Furadas" %}</th>
+                            <th>{% trans "Foto" %}</th>
+                            <th>{% trans "Observações" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                 {% for r in registos %}
-                <tr class="border-b align-top">
-                    <td class="py-2">
+                <tr>
+                    <td>
+                        <div class="sm-cell-stack">
                         {% if r.tem_relatorio_tecnico %}
                         <a href="{% url 'projetos:relatorio_turno_admin_detail' r.id %}"
-                           class="mb-2 inline-block rounded-lg bg-sky-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-sky-700">
+                           class="sm-btn sm-btn-success">
                             {% trans "Ficha Técnica" %}
                         </a>
                         {% endif %}
                         <a href="{% url 'projetos:registo_admin_update' r.id %}"
-                           class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
+                           class="sm-btn sm-btn-secondary">
                             {% trans "Corrigir" %}
                         </a>
+                        </div>
                     </td>
-                    <td class="py-2">{{ r.data }}</td>
-                    <td class="py-2">{{ r.empregado.nome }}</td>
-                    <td class="py-2">{{ r.planeamento_turno.nome_efetivo|default:"-" }}</td>
-                    <td class="py-2">{{ r.projeto.nome|default:"-" }}</td>
-                    <td class="py-2">{{ r.furo.nome|default:"-" }}</td>
-                    <td class="py-2">{{ r.hora_inicio|default:"-" }}</td>
-                    <td class="py-2">{{ r.hora_inicio_pausa|default:"-" }}</td>
-                    <td class="py-2">{{ r.hora_fim_pausa|default:"-" }}</td>
-                    <td class="py-2">{{ r.hora_fim|default:"-" }}</td>
-                    <td class="py-2">{{ r.horas_trabalhadas|floatformat:2 }}</td>
-                    <td class="py-2">{{ r.horas_paragem|floatformat:2 }}</td>
-                    <td class="py-2">{{ r.get_tipo_paragem_display|default:"-" }}</td>
-                    <td class="py-2">{{ r.metros_furados|floatformat:2 }}</td>
-                    <td class="py-2">
+                    <td>{{ r.data }}</td>
+                    <td>{{ r.empregado.nome }}</td>
+                    <td>{{ r.planeamento_turno.nome_efetivo|default:"-" }}</td>
+                    <td>{{ r.projeto.nome|default:"-" }}</td>
+                    <td>{{ r.furo.nome|default:"-" }}</td>
+                    <td>{{ r.hora_inicio|default:"-" }}</td>
+                    <td>{{ r.hora_inicio_pausa|default:"-" }}</td>
+                    <td>{{ r.hora_fim_pausa|default:"-" }}</td>
+                    <td>{{ r.hora_fim|default:"-" }}</td>
+                    <td>{{ r.horas_trabalhadas|floatformat:2 }}</td>
+                    <td>{{ r.horas_paragem|floatformat:2 }}</td>
+                    <td>{{ r.get_tipo_paragem_display|default:"-" }}</td>
+                    <td>{{ r.metros_furados|floatformat:2 }}</td>
+                    <td>
                         {% with total_furadas=r.furacoes|length %}
-                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if total_furadas == 0 %}bg-rose-100 text-rose-700{% elif total_furadas <= 2 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                        <span class="sm-pill {% if total_furadas == 0 %}sm-pill-danger{% elif total_furadas <= 2 %}sm-pill-warning{% else %}sm-pill-success{% endif %}">
                             {{ total_furadas }}
                         </span>
                         {% endwith %}
                     </td>
-                    <td class="py-2">
-                        <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                    <td>
+                        <span class="sm-pill sm-pill-info">
                             {{ r.furacao_avanco|default:"0"|floatformat:2 }}
                         </span>
                     </td>
-                    <td class="py-2">
+                    <td>
                         {% with avanco=r.furacao_avanco|default_if_none:0 recuperacao=r.furacao_recuperacao|default_if_none:0 %}
-                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if recuperacao == 0 %}bg-rose-100 text-rose-700{% elif recuperacao < avanco %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                        <span class="sm-pill {% if recuperacao == 0 %}sm-pill-danger{% elif recuperacao < avanco %}sm-pill-warning{% else %}sm-pill-success{% endif %}">
                             {{ recuperacao|floatformat:2 }}
                         </span>
                         {% endwith %}
                     </td>
-                    <td class="py-2">
+                    <td>
                         {% if r.relatorio_foto %}
-                            <a href="{{ r.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
+                            <a href="{{ r.relatorio_foto.url }}" target="_blank" class="sm-link">
                                 {% trans "Ver" %}
                             </a>
                         {% else %}
                             -
                         {% endif %}
                     </td>
-                    <td class="py-2">{{ r.observacoes|default:"-" }}</td>
+                    <td>{{ r.observacoes|default:"-" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="19" class="py-4 text-center text-gray-500">
+                    <td colspan="19" style="text-align:center;color:#64748b;">
                         {% trans "Sem registos encontrados." %}
                     </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
 </section>
 {% endblock %}

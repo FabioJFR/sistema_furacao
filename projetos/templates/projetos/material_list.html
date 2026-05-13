@@ -1,86 +1,115 @@
-{% extends 'projetos/base.html' %}
+{% extends "projetos/base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "Lista de Materiais" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/material_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/material_list.css' %}?v=20260512-1710">
 {% endblock %}
 
 {% block content %}
-<section class="ml-wrap">
-
-    <div class="ml-top">
-        <h1>{% trans "Lista de Materiais" %}</h1>
-
-        <a href="{% url 'projetos:material_create' %}" class="ml-btn ml-btn-add">
-            ➕ {% trans "Adicionar Novo Material" %}
-        </a>
-    </div>
-
-    <div class="ml-filter-card">
-        <form method="get" class="ml-filter-form">
-            <div class="ml-filter-field">
-                <label class="ml-filter-label">{% trans "Nome do Material" %}</label>
-                <input type="text"
-                       name="nome"
-                       value="{{ filtros.nome }}"
-                       placeholder="{% trans 'Ex.: tubo, broca, haste...' %}"
-                       class="ml-filter-input">
-            </div>
-
-            <div class="ml-filter-actions">
-                <button type="submit" class="ml-btn-filter">{% trans "Filtrar" %}</button>
-
-                <a href="{% url 'projetos:material_list' %}" class="ml-btn-clear">{% trans "Limpar" %}</a>
-            </div>
-        </form>
-    </div>
-
-    {% if materiais %}
-    <div class="ml-grid">
-        {% for material in materiais %}
-        <div class="ml-card">
+<section class="mat-page">
+    <div class="mat-wrap">
+        <div class="mat-hero">
             <div>
-                <h2>{{ material.nome }}</h2>
-
-                <p><strong>{% trans "Projeto:" %}</strong> {{ material.projeto.nome }}</p>
-
-
-                <p><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
-                <p><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
-                <p><strong>{% trans "Nº Série:" %}</strong> {{ material.numero_serie|default:"-" }}</p>
-
-                <p><strong>{% trans "Quantidade:" %}</strong> {{ material.quantidade }} {{ material.unidade|default:"" }}</p>
-                <p><strong>{% trans "Diâmetro:" %}</strong> {{ material.diametro|default:"0"|floatformat:2 }}</p>
-                <p><strong>{% trans "Valor:" %}</strong> €{{ material.valor|floatformat:2 }}</p>
-
-                <p><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
-                <p><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
-                <p><strong>{% trans "Localização:" %}</strong> {{ material.localizacao|default:"-" }}</p>
+                <h1 class="mat-title">📦 {% trans "Materiais" %}</h1>
             </div>
-
-            <div class="ml-card-actions">
-                <a href="{% url 'projetos:material_detail' material.id %}" class="ml-action ml-action-view">
-                    🔍 {% trans "Ver" %}
-                </a>
-
-                <a href="{% url 'projetos:material_update' material.id %}" class="ml-action ml-action-edit">
-                    ✏️ {% trans "Editar" %}
-                </a>
-
-                <a href="{% url 'projetos:material_delete' material.id %}" class="ml-action ml-action-delete">
-                    🗑️ {% trans "Apagar" %}
-                </a>
-            </div>
+            <a href="{% url 'projetos:material_create' %}" class="mat-create-btn">
+                + {% trans "Criar Material" %}
+            </a>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="ml-empty">
-        {% trans "Nenhum material registado." %}
-    </div>
-    {% endif %}
 
+        <div class="mat-filter-card">
+            <form method="get" class="mat-filter-form">
+                <div class="mat-filter-field">
+                    <label class="mat-filter-label">{% trans "Nome do material" %}</label>
+                    <input
+                        type="text"
+                        name="nome"
+                        value="{{ filtros.nome }}"
+                        placeholder="{% trans 'Ex.: tubo, broca, haste...' %}"
+                        class="mat-filter-input"
+                    >
+                </div>
+
+                <div class="mat-filter-actions">
+                    <button type="submit" class="mat-filter-btn">{% trans "Filtrar" %}</button>
+                    <a href="{% url 'projetos:material_list' %}" class="mat-clear-btn">{% trans "Limpar" %}</a>
+                </div>
+            </form>
+        </div>
+
+        {% if materiais %}
+            <div class="mat-grid">
+                {% for material in materiais %}
+                    <article class="mat-card">
+                        <div class="mat-card-head">
+                            <div class="mat-eyebrow">{% trans "Material" %}</div>
+                            <h2 class="mat-card-title sf-break-word">{{ material.nome }}</h2>
+                        </div>
+
+                        <div class="mat-meta">
+                            <div class="mat-meta-item mat-meta-item-full">
+                                <span class="mat-meta-label">{% trans "Projeto" %}</span>
+                                <span class="mat-meta-value">{{ material.projeto.nome }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Tipo" %}</span>
+                                <span class="mat-meta-value">{{ material.tipo|default:"-" }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Marca" %}</span>
+                                <span class="mat-meta-value">{{ material.marca|default:"-" }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Nº série" %}</span>
+                                <span class="mat-meta-value">{{ material.numero_serie|default:"-" }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Quantidade" %}</span>
+                                <span class="mat-meta-value">{{ material.quantidade }} {{ material.unidade|default:"" }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Diâmetro" %}</span>
+                                <span class="mat-meta-value">{{ material.diametro|default:"0"|floatformat:2 }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Valor" %}</span>
+                                <span class="mat-meta-value">€{{ material.valor|floatformat:2 }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Fornecedor" %}</span>
+                                <span class="mat-meta-value">{{ material.fornecedor|default:"-" }}</span>
+                            </div>
+                            <div class="mat-meta-item">
+                                <span class="mat-meta-label">{% trans "Estado" %}</span>
+                                <span class="mat-meta-value">{{ material.get_estado_display }}</span>
+                            </div>
+                            <div class="mat-meta-item mat-meta-item-full">
+                                <span class="mat-meta-label">{% trans "Localização" %}</span>
+                                <span class="mat-meta-value">{{ material.localizacao|default:"-" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mat-actions">
+                            <a href="{% url 'projetos:material_detail' material.id %}" class="mat-btn">
+                                {% trans "Detalhes" %}
+                            </a>
+                            <a href="{% url 'projetos:material_update' material.id %}" class="mat-btn">
+                                {% trans "Editar" %}
+                            </a>
+                            <a href="{% url 'projetos:material_delete' material.id %}" class="mat-btn mat-btn-danger">
+                                {% trans "Apagar" %}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="mat-empty">
+                {% trans "Nenhum material registado." %}
+            </div>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}

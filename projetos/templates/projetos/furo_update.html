@@ -1,41 +1,301 @@
 {% extends "projetos/base.html" %}
-{% load static  i18n %}
+{% load static i18n %}
+
+{% block title %}{% trans "Editar Furo" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/furo_update.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/furo_form.css' %}?v=20260512-1625">
 {% endblock %}
 
 {% block content %}
-<div class="fu-shell">
-    <div class="fu-card">
+<section class="ff-page">
+    <div class="ff-shell">
+        <div class="ff-top">
+            <div class="ff-heading">
+                <a href="{{ furo.get_absolute_url }}" class="ff-back">← {% trans "Voltar ao furo" %}</a>
+                <h1 class="ff-title">🕳️ {% trans "Editar furo" %}</h1>
+                <p class="ff-subtitle">
+                    {% trans "Atualize a identificação, profundidades, direção e localização do furo sem sair deste formulário." %}
+                </p>
+            </div>
+            <div class="ff-top-actions">
+                <a href="{{ furo.get_absolute_url }}" class="ff-btn ff-btn-primary">{% trans "Ver furo" %}</a>
+            </div>
+        </div>
 
-        <h1 class="fu-title">{% blocktrans with nome=form.instance.nome %}Editar Furo: {{ nome }}{% endblocktrans %}</h1>
+        {% if form.non_field_errors %}
+            <div class="ff-error-global">
+                {% for erro in form.non_field_errors %}
+                    <div>{{ erro }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-        <form method="POST" enctype="multipart/form-data" class="fu-form">
+        <form method="POST" enctype="multipart/form-data" class="ff-form">
             {% csrf_token %}
-            
-            {% for field in form %}
-                <div class="fu-field">
-                    <label for="{{ field.id_for_label }}" class="fu-label">{{ field.label }}</label>
-                    {{ field }}  <!-- já vai herdar a classe definida no forms.py -->
-                    {% if field.errors %}
-                        <p class="fu-errors">{{ field.errors }}</p>
+
+            <div class="ff-section">
+                <div class="ff-section-head">
+                    <div>
+                        <h2 class="ff-section-title">{% trans "Ficha base do furo" %}</h2>
+                    </div>
+                    <p class="ff-section-copy">
+                        {% trans "Defina o enquadramento principal do furo antes de rever profundidades e coordenadas." %}
+                    </p>
+                </div>
+                <div class="ff-grid">
+                    {% if form.projeto %}
+                        <div class="ff-field">
+                            <label for="{{ form.projeto.id_for_label }}" class="ff-label">{{ form.projeto.label }}</label>
+                            {{ form.projeto }}
+                            {% if form.projeto.help_text %}<small class="ff-help">{{ form.projeto.help_text }}</small>{% endif %}
+                            {% if form.projeto.errors %}<div class="ff-errors">{{ form.projeto.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.nome %}
+                        <div class="ff-field">
+                            <label for="{{ form.nome.id_for_label }}" class="ff-label">{{ form.nome.label }}</label>
+                            {{ form.nome }}
+                            {% if form.nome.help_text %}<small class="ff-help">{{ form.nome.help_text }}</small>{% endif %}
+                            {% if form.nome.errors %}<div class="ff-errors">{{ form.nome.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.tipo %}
+                        <div class="ff-field">
+                            <label for="{{ form.tipo.id_for_label }}" class="ff-label">{{ form.tipo.label }}</label>
+                            {{ form.tipo }}
+                            {% if form.tipo.help_text %}<small class="ff-help">{{ form.tipo.help_text }}</small>{% endif %}
+                            {% if form.tipo.errors %}<div class="ff-errors">{{ form.tipo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.estado %}
+                        <div class="ff-field">
+                            <label for="{{ form.estado.id_for_label }}" class="ff-label">{{ form.estado.label }}</label>
+                            {{ form.estado }}
+                            {% if form.estado.help_text %}<small class="ff-help">{{ form.estado.help_text }}</small>{% endif %}
+                            {% if form.estado.errors %}<div class="ff-errors">{{ form.estado.errors }}</div>{% endif %}
+                        </div>
                     {% endif %}
                 </div>
-            {% endfor %}
+            </div>
 
-            <div class="fu-actions">
-                <button type="submit" class="fu-btn fu-btn-save">💾 {% trans "Salvar" %}</button>
+            <div class="ff-section">
+                <div class="ff-section-head">
+                    <div>
+                        <h2 class="ff-section-title">{% trans "Planeamento e avanço" %}</h2>
+                    </div>
+                    <p class="ff-section-copy">
+                        {% trans "Reveja profundidade inicial, objetivo e progresso atual para manter o acompanhamento técnico coerente." %}
+                    </p>
+                </div>
+                <div class="ff-grid">
+                    {% if form.profundidade_inicial %}
+                        <div class="ff-field">
+                            <label for="{{ form.profundidade_inicial.id_for_label }}" class="ff-label">{{ form.profundidade_inicial.label }}</label>
+                            {{ form.profundidade_inicial }}
+                            {% if form.profundidade_inicial.errors %}<div class="ff-errors">{{ form.profundidade_inicial.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.profundidade_alvo_inicial %}
+                        <div class="ff-field">
+                            <label for="{{ form.profundidade_alvo_inicial.id_for_label }}" class="ff-label">{{ form.profundidade_alvo_inicial.label }}</label>
+                            {{ form.profundidade_alvo_inicial }}
+                            {% if form.profundidade_alvo_inicial.errors %}<div class="ff-errors">{{ form.profundidade_alvo_inicial.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.profundidade_alvo_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.profundidade_alvo_atual.id_for_label }}" class="ff-label">{{ form.profundidade_alvo_atual.label }}</label>
+                            {{ form.profundidade_alvo_atual }}
+                            {% if form.profundidade_alvo_atual.errors %}<div class="ff-errors">{{ form.profundidade_alvo_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.profundidade_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.profundidade_atual.id_for_label }}" class="ff-label">{{ form.profundidade_atual.label }}</label>
+                            {{ form.profundidade_atual }}
+                            {% if form.profundidade_atual.errors %}<div class="ff-errors">{{ form.profundidade_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.profundidade_maxima_atingida %}
+                        <div class="ff-field ff-field-span-2">
+                            <label for="{{ form.profundidade_maxima_atingida.id_for_label }}" class="ff-label">{{ form.profundidade_maxima_atingida.label }}</label>
+                            {{ form.profundidade_maxima_atingida }}
+                            {% if form.profundidade_maxima_atingida.errors %}<div class="ff-errors">{{ form.profundidade_maxima_atingida.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
 
-                <a href="{{ furo.get_absolute_url }}" class="fu-btn fu-btn-cancel">❌ {% trans "Cancelar" %}</a>
+            <div class="ff-section">
+                <div class="ff-section-head">
+                    <div>
+                        <h2 class="ff-section-title">{% trans "Inclinação, azimute e magnetismo" %}</h2>
+                    </div>
+                    <p class="ff-section-copy">
+                        {% trans "Separe o planeado do real para manter um histórico técnico mais útil e consistente." %}
+                    </p>
+                </div>
+                <div class="ff-grid">
+                    {% if form.inclinacao_planeada_inicial %}
+                        <div class="ff-field">
+                            <label for="{{ form.inclinacao_planeada_inicial.id_for_label }}" class="ff-label">{{ form.inclinacao_planeada_inicial.label }}</label>
+                            {{ form.inclinacao_planeada_inicial }}
+                            {% if form.inclinacao_planeada_inicial.errors %}<div class="ff-errors">{{ form.inclinacao_planeada_inicial.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.inclinacao_planeada_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.inclinacao_planeada_atual.id_for_label }}" class="ff-label">{{ form.inclinacao_planeada_atual.label }}</label>
+                            {{ form.inclinacao_planeada_atual }}
+                            {% if form.inclinacao_planeada_atual.errors %}<div class="ff-errors">{{ form.inclinacao_planeada_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.inclinacao_real_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.inclinacao_real_atual.id_for_label }}" class="ff-label">{{ form.inclinacao_real_atual.label }}</label>
+                            {{ form.inclinacao_real_atual }}
+                            {% if form.inclinacao_real_atual.errors %}<div class="ff-errors">{{ form.inclinacao_real_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.azimute_planeado_inicial %}
+                        <div class="ff-field">
+                            <label for="{{ form.azimute_planeado_inicial.id_for_label }}" class="ff-label">{{ form.azimute_planeado_inicial.label }}</label>
+                            {{ form.azimute_planeado_inicial }}
+                            {% if form.azimute_planeado_inicial.errors %}<div class="ff-errors">{{ form.azimute_planeado_inicial.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.azimute_planeado_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.azimute_planeado_atual.id_for_label }}" class="ff-label">{{ form.azimute_planeado_atual.label }}</label>
+                            {{ form.azimute_planeado_atual }}
+                            {% if form.azimute_planeado_atual.errors %}<div class="ff-errors">{{ form.azimute_planeado_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.azimute_real_atual %}
+                        <div class="ff-field">
+                            <label for="{{ form.azimute_real_atual.id_for_label }}" class="ff-label">{{ form.azimute_real_atual.label }}</label>
+                            {{ form.azimute_real_atual }}
+                            {% if form.azimute_real_atual.errors %}<div class="ff-errors">{{ form.azimute_real_atual.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.magnetismo %}
+                        <div class="ff-field ff-field-span-2">
+                            <label for="{{ form.magnetismo.id_for_label }}" class="ff-label">{{ form.magnetismo.label }}</label>
+                            {{ form.magnetismo }}
+                            {% if form.magnetismo.errors %}<div class="ff-errors">{{ form.magnetismo.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ff-section">
+                <div class="ff-section-head">
+                    <div>
+                        <h2 class="ff-section-title">{% trans "Localização geográfica e sistema" %}</h2>
+                    </div>
+                    <p class="ff-section-copy">
+                        {% trans "Preencha aqui a referência espacial do furo para compatibilidade com mapas, relatórios e análises." %}
+                    </p>
+                </div>
+                <div class="ff-grid">
+                    {% if form.latitude %}
+                        <div class="ff-field">
+                            <label for="{{ form.latitude.id_for_label }}" class="ff-label">{{ form.latitude.label }}</label>
+                            {{ form.latitude }}
+                            {% if form.latitude.errors %}<div class="ff-errors">{{ form.latitude.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.longitude %}
+                        <div class="ff-field">
+                            <label for="{{ form.longitude.id_for_label }}" class="ff-label">{{ form.longitude.label }}</label>
+                            {{ form.longitude }}
+                            {% if form.longitude.errors %}<div class="ff-errors">{{ form.longitude.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.altitude %}
+                        <div class="ff-field">
+                            <label for="{{ form.altitude.id_for_label }}" class="ff-label">{{ form.altitude.label }}</label>
+                            {{ form.altitude }}
+                            {% if form.altitude.errors %}<div class="ff-errors">{{ form.altitude.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.sistema_coordenadas %}
+                        <div class="ff-field">
+                            <label for="{{ form.sistema_coordenadas.id_for_label }}" class="ff-label">{{ form.sistema_coordenadas.label }}</label>
+                            {{ form.sistema_coordenadas }}
+                            {% if form.sistema_coordenadas.errors %}<div class="ff-errors">{{ form.sistema_coordenadas.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.origem_este %}
+                        <div class="ff-field">
+                            <label for="{{ form.origem_este.id_for_label }}" class="ff-label">{{ form.origem_este.label }}</label>
+                            {{ form.origem_este }}
+                            {% if form.origem_este.errors %}<div class="ff-errors">{{ form.origem_este.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.origem_norte %}
+                        <div class="ff-field">
+                            <label for="{{ form.origem_norte.id_for_label }}" class="ff-label">{{ form.origem_norte.label }}</label>
+                            {{ form.origem_norte }}
+                            {% if form.origem_norte.errors %}<div class="ff-errors">{{ form.origem_norte.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.origem_tvd %}
+                        <div class="ff-field">
+                            <label for="{{ form.origem_tvd.id_for_label }}" class="ff-label">{{ form.origem_tvd.label }}</label>
+                            {{ form.origem_tvd }}
+                            {% if form.origem_tvd.errors %}<div class="ff-errors">{{ form.origem_tvd.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.localizacao %}
+                        <div class="ff-field">
+                            <label for="{{ form.localizacao.id_for_label }}" class="ff-label">{{ form.localizacao.label }}</label>
+                            {{ form.localizacao }}
+                            {% if form.localizacao.errors %}<div class="ff-errors">{{ form.localizacao.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% if form.local_sondagem %}
+                        <div class="ff-field ff-field-span-2">
+                            <label for="{{ form.local_sondagem.id_for_label }}" class="ff-label">{{ form.local_sondagem.label }}</label>
+                            {{ form.local_sondagem }}
+                            {% if form.local_sondagem.errors %}<div class="ff-errors">{{ form.local_sondagem.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ff-section">
+                <div class="ff-section-head">
+                    <div>
+                        <h2 class="ff-section-title">{% trans "Notas de campo e detalhe adicional" %}</h2>
+                    </div>
+                    <p class="ff-section-copy">
+                        {% trans "Use este espaço para registar contexto útil que ajude a equipa a interpretar o furo mais tarde." %}
+                    </p>
+                </div>
+                <div class="ff-grid">
+                    {% if form.detalhes %}
+                        <div class="ff-field ff-field-span-2">
+                            <label for="{{ form.detalhes.id_for_label }}" class="ff-label">{{ form.detalhes.label }}</label>
+                            {{ form.detalhes }}
+                            {% if form.detalhes.help_text %}<small class="ff-help">{{ form.detalhes.help_text }}</small>{% endif %}
+                            {% if form.detalhes.errors %}<div class="ff-errors">{{ form.detalhes.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ff-actions">
+                <button type="submit" class="ff-btn ff-btn-primary">
+                    {% trans "Salvar alterações" %}
+                </button>
+
+                <a href="{{ furo.get_absolute_url }}" class="ff-btn ff-btn-secondary">
+                    {% trans "Cancelar" %}
+                </a>
             </div>
         </form>
-
     </div>
-</div>
-{% if form.errors %}
-    <div class="fu-form-errors">
-        {{ form.errors }}
-    </div>
-{% endif %}
+</section>
 {% endblock %}

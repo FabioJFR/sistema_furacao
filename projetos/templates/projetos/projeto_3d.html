@@ -1,34 +1,45 @@
-{% extends 'projetos/base.html' %}
+{% extends "projetos/base.html" %}
 {% load i18n %}
-<!--projetos_3d.html-->
+
 {% block title %}{% trans "Visualização 3D" %} - {{ projeto.nome }}{% endblock %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
-        🖥️ {% blocktrans with nome=projeto.nome %}Visualização 3D do Projeto: {{ nome }}{% endblocktrans %}
-    </h1>
-
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-600 mb-6">
-        {% if graph %}
-            <div id="graph">
-                {{ graph|safe }}
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Modelação 3D" %}</p>
+                <h1 class="sf-page-title sf-break-word">
+                    {% blocktrans with nome=projeto.nome %}Visualização 3D do projeto {{ nome }}{% endblocktrans %}
+                </h1>
+                <p class="sf-page-description">
+                    {% trans "Área de leitura tridimensional do projeto para explorar furos e medições numa perspetiva mais espacial, mantendo o enquadramento visual de gestão." %}
+                </p>
             </div>
-        {% else %}
-            <div class="text-center py-10 text-gray-600">
-                <h2 class="text-xl font-semibold mb-2">{% trans "Sem dados 3D disponíveis" %}</h2>
-                <p>{% trans "Este projeto ainda não possui furos com medições para visualização 3D." %}</p>
+        </div>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Cena 3D" %}</h2>
+                </div>
             </div>
-        {% endif %}
-    </div>
 
-    <div class="text-center">
-        <a href="{{ projeto.get_absolute_url }}" 
-           class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
-            🔙 {% trans "Voltar ao Projeto" %}
-        </a>
-    </div>
+            {% if graph %}
+                <div id="graph">
+                    {{ graph|safe }}
+                </div>
+            {% else %}
+                <div class="sf-empty-state">
+                    <strong>{% trans "Sem dados 3D disponíveis." %}</strong><br>
+                    {% trans "Este projeto ainda não possui furos com medições para visualização 3D." %}
+                </div>
+            {% endif %}
+        </section>
 
+        <div class="sf-page-actions">
+            <a href="{{ projeto.get_absolute_url }}" class="btn btn-primary">{% trans "Voltar ao projeto" %}</a>
+        </div>
+    </div>
 </section>
 {% endblock %}

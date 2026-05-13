@@ -3,7 +3,7 @@
 /* GRID DE MÉTRICAS */
 .grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     margin-bottom: 25px;
 }
@@ -84,6 +84,26 @@ td {
 .badge.cancelada {
     background: #e5e7eb;
     color: #374151;
+}
+
+.badge.activated {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.badge.pending-account {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.account-cell {
+    display: grid;
+    gap: 6px;
+}
+
+.account-meta {
+    color: var(--muted);
+    font-size: 12px;
 }
 
 /* EMPTY STATE */

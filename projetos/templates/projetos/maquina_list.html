@@ -1,64 +1,85 @@
-{% extends 'projetos/base.html' %}
+{% extends "projetos/base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "Lista de Máquinas" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/maquina_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/maquina_list.css' %}?v=20260512-1205">
 {% endblock %}
 
 {% block content %}
-<div class="mql-wrap">
-    <div class="mql-top">
-        <h1>{% trans "Lista de Máquinas" %}</h1>
-
-        <a href="{% url 'projetos:maquina_create' %}" class="mql-btn-add">
-            ➕ {% trans "Adicionar Nova Máquina" %}
-        </a>
-    </div>
-
-    {% if maquinas %}
-    <div class="mql-grid">
-        {% for maquina in maquinas %}
-        <div class="mql-card">
-
+<section class="maq-page">
+    <div class="maq-wrap">
+        <div class="maq-hero">
             <div>
-                <h2>{{ maquina.nome }}</h2>
-
-                <p><strong>{% trans "Tipo:" %}</strong> {{ maquina.tipo|default:"-" }}</p>
-                <p><strong>{% trans "Marca:" %}</strong> {{ maquina.marca|default:"-" }}</p>
-                <p><strong>{% trans "Modelo:" %}</strong> {{ maquina.modelo|default:"-" }}</p>
-                <p><strong>{% trans "Ano:" %}</strong> {{ maquina.ano_registo|default:"-" }}</p>
-                <p><strong>{% trans "Estado:" %}</strong> {{ maquina.get_estado_display }}</p>
-                <p><strong>{% trans "Projeto Atual:" %}</strong>
-                    {% if maquina.projeto_atual %}
-                        {{ maquina.projeto_atual.nome }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </p>
+                <h1 class="maq-title">🛠️ {% trans "Máquinas" %}</h1>
             </div>
-
-            <div class="mql-actions">
-                <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="mql-action mql-action-view">
-                    🔍 {% trans "Ver" %}
-                </a>
-
-                <a href="{% url 'projetos:maquina_update' maquina.id %}" class="mql-action mql-action-edit">
-                    ✏️ {% trans "Editar" %}
-                </a>
-
-                <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="mql-action mql-action-delete">
-                    🗑️ {% trans "Apagar" %}
-                </a>
-            </div>
+            <a href="{% url 'projetos:maquina_create' %}" class="maq-create-btn">
+                + {% trans "Criar Máquina" %}
+            </a>
         </div>
-        {% endfor %}
+
+        {% if maquinas %}
+            <div class="maq-grid">
+                {% for maquina in maquinas %}
+                    <article class="maq-card">
+                        <div class="maq-card-head">
+                            <div class="maq-eyebrow">{% trans "Máquina" %}</div>
+                            <h2 class="maq-card-title">{{ maquina.nome|default:"-" }}</h2>
+                        </div>
+
+                        <div class="maq-meta">
+                            <div class="maq-meta-item">
+                                <span class="maq-meta-label">{% trans "Tipo" %}</span>
+                                <span class="maq-meta-value">{{ maquina.tipo|default:"-" }}</span>
+                            </div>
+                            <div class="maq-meta-item">
+                                <span class="maq-meta-label">{% trans "Marca" %}</span>
+                                <span class="maq-meta-value">{{ maquina.marca|default:"-" }}</span>
+                            </div>
+                            <div class="maq-meta-item">
+                                <span class="maq-meta-label">{% trans "Modelo" %}</span>
+                                <span class="maq-meta-value">{{ maquina.modelo|default:"-" }}</span>
+                            </div>
+                            <div class="maq-meta-item">
+                                <span class="maq-meta-label">{% trans "Ano" %}</span>
+                                <span class="maq-meta-value">{{ maquina.ano_registo|default:"-" }}</span>
+                            </div>
+                            <div class="maq-meta-item">
+                                <span class="maq-meta-label">{% trans "Estado" %}</span>
+                                <span class="maq-meta-value">{{ maquina.get_estado_display|default:"-" }}</span>
+                            </div>
+                            <div class="maq-meta-item maq-meta-item-full">
+                                <span class="maq-meta-label">{% trans "Projeto atual" %}</span>
+                                <span class="maq-meta-value">
+                                    {% if maquina.projeto_atual %}
+                                        {{ maquina.projeto_atual.nome }}
+                                    {% else %}
+                                        {% trans "Sem projeto ativo" %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="maq-actions">
+                            <a href="{% url 'projetos:maquina_detail' maquina.id %}" class="maq-btn">
+                                {% trans "Detalhes" %}
+                            </a>
+                            <a href="{% url 'projetos:maquina_update' maquina.id %}" class="maq-btn">
+                                {% trans "Editar" %}
+                            </a>
+                            <a href="{% url 'projetos:maquina_delete' maquina.id %}" class="maq-btn maq-btn-danger">
+                                {% trans "Apagar" %}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="maq-empty">
+                {% trans "Nenhuma máquina registada." %}
+            </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="mql-empty">
-        {% trans "Nenhuma máquina registada." %}
-    </div>
-    {% endif %}
-</div>
+</section>
 {% endblock %}

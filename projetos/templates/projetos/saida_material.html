@@ -1,40 +1,79 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}{% trans "Saída de Material" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="max-w-xl mx-auto p-6">
-
-    <div class="bg-white rounded-xl shadow-lg p-6">
-
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">📤 {% trans "Saída de Material" %}</h1>
-
-        <p class="mb-6 text-gray-600">
-            {% trans "Material:" %} <span class="font-semibold text-gray-900">{{ material.nome }}</span>
-        </p>
-
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-
-            <div>
-                {{ form.as_p }}
-            </div>
-
-            <div class="flex gap-3 mt-4">
-                <a href="{% url 'projetos:materiais_list' %}"
-                   class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition font-semibold text-center w-full">
-                    🔙 {% trans "Voltar" %}
+<section class="of-page">
+    <div class="of-shell">
+        <div class="of-top">
+            <div class="of-heading">
+                <a href="{% url 'projetos:material_detail' material.id %}" class="of-back">
+                    ← {% trans "Voltar ao material" %}
                 </a>
-
-                <button type="submit"
-                        class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-semibold w-full">
-                    ✔️ {% trans "Registar saída" %}
-                </button>
+                <h1 class="of-title">📤 {% trans "Saída de Material" %}</h1>
+                <p class="of-subtitle">{% trans "Regista a saída de stock com clareza para manter consumos, histórico operacional e controlo de inventário alinhados." %}</p>
             </div>
-        </form>
+            <div class="of-top-actions">
+                <a href="{% url 'projetos:material_detail' material.id %}" class="of-btn of-btn-secondary of-btn-top">
+                    {% trans "Ver material" %}
+                </a>
+            </div>
+        </div>
 
+        <div class="of-card of-card-wide">
+            <div class="of-banner">
+                <strong>{% trans "Material:" %}</strong>
+                <span>{{ material.nome }}</span>
+            </div>
+
+            <form method="post" class="of-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="of-alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="of-banner">
+                    <strong>{% trans "Nota:" %}</strong>
+                    <span>{% trans "Confirma a quantidade antes de guardar. Este registo impacta diretamente o stock disponível do material." %}</span>
+                </div>
+
+                <div class="of-section">
+                    <div class="of-section-head">
+                        <div>
+                            <h2 class="of-section-title">{% trans "Dados da saída" %}</h2>
+                        </div>
+                        <p class="of-section-copy">{% trans "Preenche apenas o necessário para que a saída fique registada de forma rápida e correta." %}</p>
+                    </div>
+                    <div class="of-grid">
+                        {% for field in form %}
+                            <div class="{% if field.name == 'observacoes' %}of-field of-field-span-2{% else %}of-field{% endif %}">
+                                <label class="of-label">{{ field.label }}</label>
+                                {{ field|add_class:"of-input" }}
+                                {% if field.help_text %}<small class="of-help">{{ field.help_text }}</small>{% endif %}
+                                {% if field.errors %}<div class="of-errors">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="of-actions">
+                    <a href="{% url 'projetos:material_detail' material.id %}" class="of-btn of-btn-secondary">
+                        {% trans "Cancelar" %}
+                    </a>
+                    <button type="submit" class="of-btn of-btn-primary">
+                        {% trans "Registar saída" %}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-
 </section>
 {% endblock %}

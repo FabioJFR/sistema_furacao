@@ -4,34 +4,35 @@
 {% block title %}{% trans "Remover Trabalhador do Furo" %}{% endblock %}
 
 {% block content %}
-<section class="max-w-2xl mx-auto p-6">
-    <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
-
-        <div>
-            <h1 class="text-2xl font-bold text-red-600">🗑️ {% trans "Remover Trabalhador do Furo" %}</h1>
-            <p class="text-gray-600 mt-2">{% trans "Tens a certeza que queres remover esta ligação?" %}</p>
+<section class="sf-page">
+    <div class="page-card sf-page-narrow">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Furos" %}</p>
+                <h1 class="sf-page-title">{% trans "Remover trabalhador do furo" %}</h1>
+                <p class="sf-page-description">{% trans "Confirme a remoção desta ligação operacional." %}</p>
+            </div>
         </div>
 
-        <div class="bg-gray-50 border rounded-lg p-4 text-gray-700 space-y-2">
-            <div><strong>{% trans "Furo:" %}</strong> {{ furo.nome }}</div>
-            <div><strong>{% trans "Trabalhador:" %}</strong> {{ ligacao.empregado.nome }}</div>
-            <div><strong>{% trans "Função:" %}</strong> {{ ligacao.get_funcao_display }}</div>
-            <div><strong>{% trans "Ativo:" %}</strong> {% if ligacao.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</div>
-        </div>
+        <section class="sf-section-card">
+            <div class="sf-overview-grid" style="grid-template-columns: 1fr;">
+                <div class="sf-overview-card">
+                    <h2 class="sf-overview-title">{% trans "Ligação a remover" %}</h2>
+                    <dl class="sf-detail-list">
+                        <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Furo" %}</dt><dd class="sf-detail-value">{{ furo.nome }}</dd></div>
+                        <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Trabalhador" %}</dt><dd class="sf-detail-value">{{ ligacao.empregado.nome }}</dd></div>
+                        <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Função" %}</dt><dd class="sf-detail-value">{{ ligacao.get_funcao_display }}</dd></div>
+                        <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Ativo" %}</dt><dd class="sf-detail-value">{% if ligacao.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</dd></div>
+                    </dl>
+                </div>
+            </div>
 
-        <form method="post" class="flex gap-3 flex-wrap">
-            {% csrf_token %}
-            <button type="submit"
-                    class="bg-rose-600 text-white px-5 py-2 rounded-lg hover:bg-rose-600 transition shadow font-semibold">
-                {% trans "Confirmar Remoção" %}
-            </button>
-
-            <a href="{{ furo.get_absolute_url }}"
-               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                {% trans "Cancelar" %}
-            </a>
-        </form>
-
+            <form method="post" class="sf-page-actions" style="margin-top: 18px;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">{% trans "Confirmar remoção" %}</button>
+                <a href="{{ furo.get_absolute_url }}" class="btn btn-primary">{% trans "Cancelar" %}</a>
+            </form>
+        </section>
     </div>
 </section>
 {% endblock %}

@@ -1,120 +1,131 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Meus Registos" %}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/stock_movements.css' %}">
+{% endblock %}
 
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">{% trans "Meus Registos Diários" %}</h1>
-            <div class="flex flex-wrap gap-2">
-                <a href="{% url 'projetos:registo_diario_create' %}"
-                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                    ➕ {% trans "Novo Registo" %}
-                </a>
+{% block content %}
+<section class="sm-page">
+    <div class="sm-shell">
+        <div class="sm-hero">
+            <div>
+                <div class="sm-eyebrow">{% trans "Operação diária" %}</div>
+                <h1 class="sm-title">{% trans "Meus Registos Diários" %}</h1>
+                <p class="sm-subtitle">
+                    {% trans "Acompanhe horas, pausas, avanço, recuperação e anexos de cada turno num painel mais legível e rápido de consultar." %}
+                </p>
             </div>
+            <a href="{% url 'projetos:registo_diario_create' %}" class="sm-action">
+                {% trans "Novo Registo" %}
+            </a>
         </div>
 
-        <div class="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+        <div class="sm-note">
             {% trans "A ficha técnica de cada turno está disponível dentro do próprio registo, na coluna de ações." %}
         </div>
 
         {% if registos %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                    <thead class="bg-gray-100 text-gray-700">
+            <div class="sm-table-card">
+                <div class="sm-table-wrap">
+                    <table class="sm-table" style="min-width: 1600px;">
+                        <thead>
                         <tr>
-                            <th class="text-left px-4 py-3">{% trans "Data" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Planeamento" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Furo" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Início" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Início Pausa" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Fim Pausa" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Fim" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Horas" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Paragem" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Tipo Paragem" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Metros" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Furadas" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Avanço Furadas" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Recuperação Furadas" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Foto" %}</th>
-                            <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
+                            <th>{% trans "Data" %}</th>
+                            <th>{% trans "Planeamento" %}</th>
+                            <th>{% trans "Projeto" %}</th>
+                            <th>{% trans "Furo" %}</th>
+                            <th>{% trans "Início" %}</th>
+                            <th>{% trans "Início Pausa" %}</th>
+                            <th>{% trans "Fim Pausa" %}</th>
+                            <th>{% trans "Fim" %}</th>
+                            <th>{% trans "Horas" %}</th>
+                            <th>{% trans "Paragem" %}</th>
+                            <th>{% trans "Tipo Paragem" %}</th>
+                            <th>{% trans "Metros" %}</th>
+                            <th>{% trans "Furadas" %}</th>
+                            <th>{% trans "Avanço Furadas" %}</th>
+                            <th>{% trans "Recuperação Furadas" %}</th>
+                            <th>{% trans "Foto" %}</th>
+                            <th>{% trans "Ações" %}</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         {% for registo in registos %}
-                            <tr class="border-t border-gray-200">
-                                <td class="px-4 py-3">{{ registo.data }}</td>
-                                <td class="px-4 py-3">{{ registo.planeamento_turno.nome_efetivo|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.projeto.nome|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.furo.nome|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.hora_inicio|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.hora_inicio_pausa|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.hora_fim_pausa|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.hora_fim|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.horas_trabalhadas|floatformat:2 }}</td>
-                                <td class="px-4 py-3">{{ registo.horas_paragem|floatformat:2 }}</td>
-                                <td class="px-4 py-3">{{ registo.get_tipo_paragem_display|default:"-" }}</td>
-                                <td class="px-4 py-3">{{ registo.metros_furados|floatformat:2 }}</td>
-                                <td class="px-4 py-3">
+                            <tr>
+                                <td>{{ registo.data }}</td>
+                                <td>{{ registo.planeamento_turno.nome_efetivo|default:"-" }}</td>
+                                <td>{{ registo.projeto.nome|default:"-" }}</td>
+                                <td>{{ registo.furo.nome|default:"-" }}</td>
+                                <td>{{ registo.hora_inicio|default:"-" }}</td>
+                                <td>{{ registo.hora_inicio_pausa|default:"-" }}</td>
+                                <td>{{ registo.hora_fim_pausa|default:"-" }}</td>
+                                <td>{{ registo.hora_fim|default:"-" }}</td>
+                                <td>{{ registo.horas_trabalhadas|floatformat:2 }}</td>
+                                <td>{{ registo.horas_paragem|floatformat:2 }}</td>
+                                <td>{{ registo.get_tipo_paragem_display|default:"-" }}</td>
+                                <td>{{ registo.metros_furados|floatformat:2 }}</td>
+                                <td>
                                     {% with total_furadas=registo.furacoes|length %}
-                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if total_furadas == 0 %}bg-rose-100 text-rose-700{% elif total_furadas <= 2 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                    <span class="sm-pill {% if total_furadas == 0 %}sm-pill-danger{% elif total_furadas <= 2 %}sm-pill-warning{% else %}sm-pill-success{% endif %}">
                                         {{ total_furadas }}
                                     </span>
                                     {% endwith %}
                                 </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                                <td>
+                                    <span class="sm-pill sm-pill-info">
                                         {{ registo.furacao_avanco|default:"0"|floatformat:2 }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td>
                                     {% with avanco=registo.furacao_avanco|default_if_none:0 recuperacao=registo.furacao_recuperacao|default_if_none:0 %}
-                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {% if recuperacao == 0 %}bg-rose-100 text-rose-700{% elif recuperacao < avanco %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                    <span class="sm-pill {% if recuperacao == 0 %}sm-pill-danger{% elif recuperacao < avanco %}sm-pill-warning{% else %}sm-pill-success{% endif %}">
                                         {{ recuperacao|floatformat:2 }}
                                     </span>
                                     {% endwith %}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td>
                                     {% if registo.relatorio_foto %}
-                                        <a href="{{ registo.relatorio_foto.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                        <a href="{{ registo.relatorio_foto.url }}" target="_blank" class="sm-link">
                                             {% trans "Ver" %}
                                         </a>
                                     {% else %}
                                         -
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td>
+                                    <div class="sm-cell-stack">
                                     {% if registo.tem_relatorio_tecnico %}
                                         <a href="{% url 'projetos:relatorio_turno_detail' registo.id %}"
-                                           class="mb-2 inline-block bg-sky-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-sky-700 transition">
+                                           class="sm-btn sm-btn-success">
                                             {% trans "Ficha Técnica" %}
                                         </a>
                                     {% endif %}
                                     <a href="{% url 'projetos:registo_diario_update' registo.id %}"
-                                       class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
+                                       class="sm-btn sm-btn-secondary">
                                         {% trans "Editar" %}
                                     </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="17" class="px-4 py-6 text-center text-gray-500">
+                                <td colspan="17" style="text-align:center;color:#64748b;">
                                     {% trans "Ainda não existem registos diários." %}
                                 </td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         {% else %}
-            <p class="text-gray-500">{% trans "Ainda não existem registos diários." %}</p>
+            <div class="sm-empty">
+                {% trans "Ainda não existem registos diários." %}
+            </div>
         {% endif %}
-
     </div>
 </section>
 {% endblock %}

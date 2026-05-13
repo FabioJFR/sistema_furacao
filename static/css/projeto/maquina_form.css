@@ -1,85 +1,290 @@
-.mqf-wrap {
-    max-width: 900px;
-    margin: 40px auto;
-    background: var(--card);
-    border: 1px solid var(--border);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-    color: var(--text);
+.mqf-page {
+    padding: 24px 15px 36px;
+}
+
+.mqf-shell {
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
+}
+
+.mqf-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.mqf-heading {
+    display: grid;
+    gap: 10px;
+    max-width: 1120px;
+}
+
+.mqf-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #334c68;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 800;
 }
 
 .mqf-title {
-    text-align: center;
-    margin-bottom: 25px;
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(1.95rem, 2.4vw, 2.7rem);
+    line-height: 1.08;
+    font-weight: 900;
+}
+
+.mqf-subtitle {
+    margin: 0;
+    color: #334155;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 68ch;
+}
+
+.mqf-top-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: auto;
 }
 
 .mqf-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: grid;
+    gap: 22px;
 }
 
 .mqf-global-errors {
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 10px;
-    border-radius: 6px;
+    display: grid;
+    gap: 6px;
+    padding: 14px 16px;
+    border: 1px solid #efc3c3;
+    border-radius: 16px;
+    background: #fff5f5;
+    color: #9f2d2d;
+    font-size: 0.92rem;
+    font-weight: 700;
 }
 
-.mqf-grid {
+.mqf-section {
+    border: 1px solid #dbe3ec;
+    border-radius: 24px;
+    padding: 24px 26px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.mqf-section-head {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    color: var(--text);
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.mqf-section-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.45rem;
+    line-height: 1.15;
+    font-weight: 900;
+}
+
+.mqf-section-copy {
+    max-width: 62ch;
+    margin: 0;
+    color: #475569;
+    font-size: 0.93rem;
+    line-height: 1.5;
+}
+
+.mqf-grid,
+.mqf-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 22px;
+}
+
+.mqf-field {
+    display: grid;
+    gap: 8px;
+}
+
+.mqf-field-span-2 {
+    grid-column: span 2;
 }
 
 .mqf-label {
+    color: #0f172a;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.mqf-hint {
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.mqf-multi-note {
+    color: #334c68;
+    font-size: 0.8rem;
     font-weight: 700;
-    margin-bottom: 4px;
-    display: block;
-    color: var(--text);
 }
 
 .mqf-errors {
-    color: #b91c1c;
-    font-size: 13px;
-    margin-top: 4px;
+    color: #a83f3f;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.mqf-grid input:not([type="checkbox"]),
+.mqf-grid select,
+.mqf-grid textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 14px;
+    border: 1px solid #cfd9e4;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111827;
+    font: inherit;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mqf-grid textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.mqf-grid input:not([type="checkbox"]):focus,
+.mqf-grid select:focus,
+.mqf-grid textarea:focus {
+    border-color: #7f9bb5;
+    box-shadow: 0 0 0 4px rgba(127, 155, 181, 0.16);
+}
+
+.mqf-grid select[multiple] {
+    min-height: 132px;
+    padding: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+}
+
+.mqf-grid select[multiple] option {
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.mqf-grid select[multiple] option:checked {
+    background: #334c68 linear-gradient(0deg, #334c68 0%, #334c68 100%);
+    color: #ffffff;
+}
+
+.mqf-field-multi .mqf-hint {
+    margin-top: -2px;
+}
+
+.mqf-field-checkbox {
+    align-content: end;
+}
+
+.mqf-checkbox-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #cfd9e4;
+    border-radius: 16px;
+    background: #f8fbfd;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.mqf-checkbox-card span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mqf-checkbox-card small {
+    color: #64748b;
+    line-height: 1.45;
+}
+
+.mqf-grid input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #334c68;
+    margin-top: 2px;
 }
 
 .mqf-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 10px;
 }
 
 .mqf-btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: 700;
-    transition: background 0.2s;
-}
-
-.mqf-btn-save {
-    background-color: var(--btn-industrial);
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
     border: none;
-    cursor: pointer;
-}
-
-.mqf-btn-save:hover {
-    background: var(--btn-industrial-hover);
-}
-
-.mqf-btn-back {
-    background-color: #64748b;
-    color: #fff;
+    border-radius: 14px;
     text-decoration: none;
-    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
 }
 
-.mqf-btn-back:hover {
-    background: #475569;
+.mqf-btn:hover {
+    transform: translateY(-1px);
+}
+
+.mqf-btn-primary {
+    background: #334c68;
+    color: #ffffff;
+}
+
+.mqf-btn-primary:hover {
+    background: #283f59;
+}
+
+.mqf-btn-secondary {
+    background: #eef3f8;
+    color: #334c68;
+}
+
+.mqf-btn-secondary:hover {
+    background: #dde7f0;
+}
+
+@media (max-width: 920px) {
+    .mqf-grid,
+    .mqf-grid-wide {
+        grid-template-columns: 1fr;
+    }
+
+    .mqf-section {
+        padding: 20px 18px;
+    }
+
+    .mqf-section-head {
+        flex-direction: column;
+    }
+
+    .mqf-field-span-2 {
+        grid-column: span 1;
+    }
 }

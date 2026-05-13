@@ -1,50 +1,42 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Apagar Projeto" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260513-1210">
+{% endblock %}
+
 {% block content %}
-<section class="sf-page p-6">
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{{ projeto.get_absolute_url }}" class="cf-back">
+            ← {% trans "Voltar ao projeto" %}
+        </a>
 
-    <div class="sf-panel border-t-4 border-red-500">
-
-        <!-- Título -->
-        <h2 class="text-2xl font-bold text-center mb-4">
-            ⚠️ {% trans "Confirmar Exclusão" %}
-        </h2>
-
-        <!-- Mensagem -->
-        <p class="text-center text-gray-600 mb-6">
-            {% trans "Tem certeza que deseja apagar o projeto:" %}
+        <div class="cf-kicker">{% trans "Ação irreversível" %}</div>
+        <h1 class="cf-title">{% trans "Apagar projeto" %}</h1>
+        <p class="cf-copy">
+            {% blocktrans with nome=projeto.nome %}
+                Está prestes a apagar o projeto "{{ nome }}". Esta ação pode afetar furos, equipas associadas, contexto operacional e histórico ligado a este registo.
+            {% endblocktrans %}
         </p>
 
-        <p class="text-center text-lg font-semibold text-gray-900 mb-6">
-            {{ projeto.nome }}
-        </p>
+        <div class="cf-highlight">
+            <strong>{% trans "Projeto" %}:</strong> {{ projeto.nome }}<br>
+            <strong>{% trans "Cliente" %}:</strong> {{ projeto.cliente|default:"-" }}<br>
+            <strong>{% trans "Localização" %}:</strong> {{ projeto.cidade|default:"-" }}{% if projeto.cidade and projeto.pais %}, {% endif %}{{ projeto.pais|default:"-" }}
+        </div>
 
-        <p class="text-center text-sm text-red-600 mb-6">
-            {% trans "Esta ação não pode ser desfeita!" %}
-        </p>
-
-        <!-- FORM -->
-        <form method="POST" class="flex gap-3">
+        <form method="post" class="cf-actions">
             {% csrf_token %}
-
-            <!-- Apagar -->
-            <button type="submit" 
-                class="flex-1 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 rounded-lg shadow">
-                🗑️ {% trans "Apagar" %}
+            <button type="submit" class="cf-btn cf-btn-danger">
+                {% trans "Apagar" %}
             </button>
-
-            <!-- Cancelar -->
-            <a href="{{ projeto.get_absolute_url }}" 
-               class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow text-center">
-                ❌ {% trans "Cancelar" %}
+            <a href="{{ projeto.get_absolute_url }}" class="cf-btn cf-btn-secondary">
+                {% trans "Cancelar" %}
             </a>
-
         </form>
-
     </div>
-
 </section>
 {% endblock %}

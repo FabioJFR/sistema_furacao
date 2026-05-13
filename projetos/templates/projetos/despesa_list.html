@@ -1,83 +1,114 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}{% trans "Minhas despesas" %}{% endblock %}
+{% block title %}
+    {% if titulo %}
+        {{ titulo }}
+    {% else %}
+        {% trans "Minhas despesas" %}
+    {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/despesa_list.css' %}?v=20260512-1815">
+{% endblock %}
 
 {% block content %}
-<div class="sf-page">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">
-            💶
-            {% if titulo %}
-                {{ titulo }}
-            {% else %}
-                {% trans "Minhas despesas" %}
-            {% endif %}
-        </h1>
-        <p class="text-sm text-gray-600 mt-1">{% trans "Lista de despesas registadas no modelo de despesas da plataforma." %}</p>
-        {% if adicionar_url %}
-            <div class="mt-4">
-                <a href="{% url adicionar_url %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                    ➕ {% trans "Adicionar despesa" %}
-                </a>
+<section class="dsl-page">
+    <div class="dsl-wrap">
+        <div class="dsl-hero">
+            <div class="dsl-heading">
+                <h1 class="dsl-title">💶
+                    {% if titulo %}
+                        {{ titulo }}
+                    {% else %}
+                        {% trans "Minhas despesas" %}
+                    {% endif %}
+                </h1>
+                <p class="dsl-subtitle">
+                    {% trans "Acompanhe despesas operacionais, contexto associado e valores registados num formato simples e fácil de consultar." %}
+                </p>
             </div>
-        {% endif %}
-    </div>
+            {% if adicionar_url %}
+                <a href="{% url adicionar_url %}" class="dsl-top-btn">
+                    + {% trans "Adicionar despesa" %}
+                </a>
+            {% endif %}
+        </div>
 
-    {% if despesas %}
-        <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-            <table class="min-w-full text-sm">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr>
-                        <th class="px-4 py-3 text-left">{% trans "Data" %}</th>
-                        <th class="px-4 py-3 text-left">{% trans "Categoria" %}</th>
-                        <th class="px-4 py-3 text-left">{% trans "Tipo" %}</th>
-                        <th class="px-4 py-3 text-left w-1/4">{% trans "Descrição" %}</th>
-                        <th class="px-4 py-3 text-left">{% trans "Projeto/Furo/Máquina" %}</th>
-                        <th class="px-4 py-3 text-right">{% trans "Valor (€)" %}</th>
-                        {% if is_admin_user %}
-                            <th class="px-4 py-3 text-right w-56">{% trans "Ações" %}</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for despesa in despesas %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3">{{ despesa.data|date:"d/m/Y" }}</td>
-                            <td class="px-4 py-3">{{ despesa.get_categoria_display }}</td>
-                            <td class="px-4 py-3">{{ despesa.get_tipo_display }}</td>
-                            <td class="px-4 py-3 max-w-xs sf-break-word">{{ despesa.descricao }}</td>
-                            <td class="px-4 py-3">
-                                {% if despesa.projeto %}{% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}{% endif %}
-                                {% if despesa.furo %}{% blocktrans with nome=despesa.furo.nome %}Furo: {{ nome }}{% endblocktrans %}{% endif %}
-                                {% if despesa.maquina %}{% blocktrans with nome=despesa.maquina.nome %}Máquina: {{ nome }}{% endblocktrans %}{% endif %}
-                                {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}{% trans "Geral" %}{% endif %}
-                            </td>
-                            <td class="px-4 py-3 text-right font-semibold">{{ despesa.valor|floatformat:2 }}</td>
-                            {% if is_admin_user %}
-                                <td class="px-4 py-3 w-56">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{% url 'projetos:despesa_detail_admin' despesa.id %}" class="btn btn-primary text-xs px-3 py-1.5">
-                                            {% trans "Ver" %}
-                                        </a>
-                                        <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="btn btn-warning text-xs px-3 py-1.5">
-                                            {% trans "Editar" %}
-                                        </a>
-                                        <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="btn btn-danger text-xs px-3 py-1.5">
-                                            {% trans "Apagar" %}
-                                        </a>
-                                    </div>
-                                </td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="dsl-table-card">
+            {% if despesas %}
+                <div class="dsl-table-wrap">
+                    <table class="dsl-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Data" %}</th>
+                                <th>{% trans "Categoria" %}</th>
+                                <th>{% trans "Tipo" %}</th>
+                                <th>{% trans "Descrição" %}</th>
+                                <th>{% trans "Projeto / Furo / Máquina" %}</th>
+                                <th class="dsl-th-right">{% trans "Valor (€)" %}</th>
+                                {% if is_admin_user %}
+                                    <th class="dsl-th-right">{% trans "Ações" %}</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for despesa in despesas %}
+                                <tr>
+                                    <td class="dsl-date">{{ despesa.data|date:"d/m/Y" }}</td>
+                                    <td>{{ despesa.get_categoria_display }}</td>
+                                    <td>{{ despesa.get_tipo_display }}</td>
+                                    <td class="dsl-description">{{ despesa.descricao }}</td>
+                                    <td>
+                                        <div class="dsl-context">
+                                            {% if despesa.projeto %}
+                                                <span class="dsl-chip">
+                                                    {% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}
+                                                </span>
+                                            {% endif %}
+                                            {% if despesa.furo %}
+                                                <span class="dsl-chip">
+                                                    {% blocktrans with nome=despesa.furo.nome %}Furo: {{ nome }}{% endblocktrans %}
+                                                </span>
+                                            {% endif %}
+                                            {% if despesa.maquina %}
+                                                <span class="dsl-chip">
+                                                    {% blocktrans with nome=despesa.maquina.nome %}Máquina: {{ nome }}{% endblocktrans %}
+                                                </span>
+                                            {% endif %}
+                                            {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}
+                                                <span class="dsl-chip dsl-chip-muted">{% trans "Geral" %}</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="dsl-value">{{ despesa.valor|floatformat:2 }}</td>
+                                    {% if is_admin_user %}
+                                        <td class="dsl-actions-cell">
+                                            <div class="dsl-actions">
+                                                <a href="{% url 'projetos:despesa_detail_admin' despesa.id %}" class="dsl-btn">
+                                                    {% trans "Ver" %}
+                                                </a>
+                                                <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="dsl-btn">
+                                                    {% trans "Editar" %}
+                                                </a>
+                                                <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="dsl-btn dsl-btn-danger">
+                                                    {% trans "Apagar" %}
+                                                </a>
+                                            </div>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="dsl-empty">
+                    {% trans "Ainda não existem despesas para mostrar." %}
+                </div>
+            {% endif %}
         </div>
-    {% else %}
-        <div class="sf-panel text-gray-600">
-            {% trans "Ainda não existem despesas para mostrar." %}
-        </div>
-    {% endif %}
-</div>
+    </div>
+</section>
 {% endblock %}

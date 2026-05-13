@@ -1,23 +1,40 @@
 {% extends 'projetos/base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Apagar Medição" %} #{{ medicao.id }}{% endblock %}
 
-{% block content %}
-<section class="sf-panel mt-6 text-center">
-    <h1 class="text-2xl font-bold mb-4 text-gray-900">🗑️ {% trans "Apagar Medição" %} #{{ medicao.id }}</h1>
-    <p class="mb-6 text-gray-600">{% trans "Tem certeza que deseja apagar esta medição?" %}</p>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260513-1225">
+{% endblock %}
 
-    <form method="post" class="flex flex-col sm:flex-row justify-center gap-4">
-        {% csrf_token %}
-        <button type="submit" 
-                class="flex-1 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 px-4 rounded shadow">
-            {% trans "Apagar" %}
-        </button>
-        <a href="{% url 'projetos:medicao_list' %}" 
-           class="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded shadow">
-            {% trans "Cancelar" %}
+{% block content %}
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{% url 'projetos:medicao_list' %}" class="cf-back">
+            ← {% trans "Voltar às medições" %}
         </a>
-    </form>
+
+        <div class="cf-kicker">{% trans "Ação irreversível" %}</div>
+        <h1 class="cf-title">{% trans "Apagar medição" %} #{{ medicao.id }}</h1>
+        <p class="cf-copy">
+            {% trans "Está prestes a apagar esta medição. Esta ação remove o registo técnico associado à leitura guardada." %}
+        </p>
+
+        <div class="cf-highlight">
+            <strong>{% trans "Medição" %}:</strong> #{{ medicao.id }}<br>
+            <strong>{% trans "Furo" %}:</strong> {{ medicao.furo.nome|default:medicao.nome_furo|default:"-" }}<br>
+            <strong>{% trans "Profundidade" %}:</strong> {{ medicao.profundidade_medida|default_if_none:"-" }}
+        </div>
+
+        <form method="post" class="cf-actions">
+            {% csrf_token %}
+            <button type="submit" class="cf-btn cf-btn-danger">
+                {% trans "Apagar" %}
+            </button>
+            <a href="{% url 'projetos:medicao_list' %}" class="cf-btn cf-btn-secondary">
+                {% trans "Cancelar" %}
+            </a>
+        </form>
+    </div>
 </section>
 {% endblock %}

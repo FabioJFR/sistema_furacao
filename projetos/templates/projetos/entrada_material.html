@@ -1,62 +1,79 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static widget_tweaks i18n %}
 
 {% block title %}{% trans "Entrada de Material" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
-
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">📥 {% trans "Entrada de Material" %}</h1>
-            <p class="text-gray-600 mt-1">
-                <strong>{% trans "Material:" %}</strong> {{ material.nome }}
-            </p>
-        </div>
-
-        <form method="post" class="space-y-5">
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-                <div class="bg-red-100 border border-red-200 text-red-700 p-3 rounded-lg">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {% for field in form %}
-                    <div class="{% if field.name == 'observacoes' %}md:col-span-2{% endif %}">
-                        <label class="block font-semibold text-gray-700 mb-1">
-                            {{ field.label }}
-                        </label>
-
-                        {{ field }}
-
-                        {% if field.help_text %}
-                            <small class="text-gray-500">{{ field.help_text }}</small>
-                        {% endif %}
-
-                        {% if field.errors %}
-                            <div class="text-red-600 text-sm mt-1">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+<section class="of-page">
+    <div class="of-shell">
+        <div class="of-top">
+            <div class="of-heading">
+                <a href="{% url 'projetos:material_detail' material.id %}" class="of-back">
+                    ← {% trans "Voltar ao material" %}
+                </a>
+                <h1 class="of-title">📥 {% trans "Entrada de Material" %}</h1>
+                <p class="of-subtitle">{% trans "Regista entradas de stock para manter quantidades atualizadas e histórico de movimentos consistente." %}</p>
             </div>
-
-            <div class="flex gap-3 flex-wrap mt-4">
-                <button type="submit"
-                        class="flex-1 bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition shadow font-semibold">
-                    💾 {% trans "Registar Entrada" %}
-                </button>
-                <a href="{% url 'projetos:materiais_list' %}"
-                   class="flex-1 bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold text-center">
-                    🔙 {% trans "Voltar" %}
+            <div class="of-top-actions">
+                <a href="{% url 'projetos:material_detail' material.id %}" class="of-btn of-btn-secondary of-btn-top">
+                    {% trans "Ver material" %}
                 </a>
             </div>
-        </form>
+        </div>
 
+        <div class="of-card of-card-wide">
+            <div class="of-banner">
+                <strong>{% trans "Material:" %}</strong>
+                <span>{{ material.nome }}</span>
+            </div>
+
+            <form method="post" class="of-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="of-alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="of-banner">
+                    <strong>{% trans "Nota:" %}</strong>
+                    <span>{% trans "Regista a quantidade real recebida. Se necessário, deixa uma observação para explicar a origem da reposição." %}</span>
+                </div>
+
+                <div class="of-section">
+                    <div class="of-section-head">
+                        <div>
+                            <h2 class="of-section-title">{% trans "Dados da entrada" %}</h2>
+                        </div>
+                        <p class="of-section-copy">{% trans "Preenche apenas o essencial para registar a entrada rapidamente e sem ambiguidade." %}</p>
+                    </div>
+                    <div class="of-grid">
+                        {% for field in form %}
+                            <div class="{% if field.name == 'observacoes' %}of-field of-field-span-2{% else %}of-field{% endif %}">
+                                <label class="of-label">{{ field.label }}</label>
+                                {{ field|add_class:"of-input" }}
+                                {% if field.help_text %}<small class="of-help">{{ field.help_text }}</small>{% endif %}
+                                {% if field.errors %}<div class="of-errors">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="of-actions">
+                    <a href="{% url 'projetos:material_detail' material.id %}" class="of-btn of-btn-secondary">
+                        {% trans "Cancelar" %}
+                    </a>
+                    <button type="submit" class="of-btn of-btn-primary">
+                        {% trans "Registar Entrada" %}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </section>
 {% endblock %}

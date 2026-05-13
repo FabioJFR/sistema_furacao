@@ -1,42 +1,143 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Detalhes da despesa" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/despesa_detail.css' %}?v=20260512-1825">
+{% endblock %}
+
 {% block content %}
-<div class="sf-page">
-    <div class="sf-panel max-w-3xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">💶 {% trans "Detalhes da despesa" %}</h1>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div><strong>{% trans "Data" %}:</strong> {{ despesa.data|date:"d/m/Y" }}</div>
-            <div><strong>{% trans "Categoria" %}:</strong> {{ despesa.get_categoria_display }}</div>
-            <div><strong>{% trans "Tipo" %}:</strong> {{ despesa.get_tipo_display }}</div>
-            <div><strong>{% trans "Valor (€)" %}:</strong> {{ despesa.valor|floatformat:2 }}</div>
-            <div class="md:col-span-2"><strong>{% trans "Descrição" %}:</strong> {{ despesa.descricao }}</div>
-            <div class="md:col-span-2">
-                <strong>{% trans "Projeto/Furo/Máquina" %}:</strong>
-                {% if despesa.projeto %}{% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}{% endif %}
-                {% if despesa.furo %}{% blocktrans with nome=despesa.furo.nome %} Furo: {{ nome }}{% endblocktrans %}{% endif %}
-                {% if despesa.maquina %}{% blocktrans with nome=despesa.maquina.nome %} Máquina: {{ nome }}{% endblocktrans %}{% endif %}
-                {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}{% trans "Geral" %}{% endif %}
+<section class="dsd-page">
+    <div class="dsd-shell">
+        <div class="dsd-top">
+            <div class="dsd-heading">
+                <a href="{% url 'projetos:despesa_list_admin' %}" class="dsd-back">
+                    ← {% trans "Voltar às despesas" %}
+                </a>
+                <h1 class="dsd-title">💶 {% trans "Detalhes da despesa" %}</h1>
+                <p class="dsd-subtitle">
+                    {% trans "Consulte o enquadramento financeiro, o contexto operacional associado e a documentação desta despesa." %}
+                </p>
             </div>
-            {% if despesa.observacoes %}
-                <div class="md:col-span-2"><strong>{% trans "Observações" %}:</strong> {{ despesa.observacoes }}</div>
-            {% endif %}
-            {% if despesa.comprovativo %}
-                <div class="md:col-span-2">
-                    <strong>{% trans "Comprovativo" %}:</strong>
-                    <a href="{{ despesa.comprovativo.url }}" target="_blank" class="underline">{% trans "Abrir ficheiro" %}</a>
-                </div>
-            {% endif %}
+            <div class="dsd-top-actions">
+                <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="dsd-btn dsd-btn-primary">
+                    {% trans "Editar" %}
+                </a>
+                <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="dsd-btn dsd-btn-danger">
+                    {% trans "Apagar" %}
+                </a>
+            </div>
         </div>
 
-        <div class="mt-6 flex gap-2 flex-wrap">
-            <a href="{% url 'projetos:despesa_update_admin' despesa.id %}" class="btn btn-warning">{% trans "Editar" %}</a>
-            <a href="{% url 'projetos:despesa_delete_admin' despesa.id %}" class="btn btn-danger">{% trans "Apagar" %}</a>
-            <a href="{% url 'projetos:despesa_list_admin' %}" class="btn btn-primary">{% trans "Voltar" %}</a>
+        <div class="dsd-stats">
+            <div class="dsd-stat-card">
+                <div class="dsd-stat-label">{% trans "Valor" %}</div>
+                <div class="dsd-stat-value">{{ despesa.valor|floatformat:2 }} €</div>
+                <div class="dsd-stat-copy">{% trans "Valor registado para esta despesa." %}</div>
+            </div>
+            <div class="dsd-stat-card">
+                <div class="dsd-stat-label">{% trans "Data" %}</div>
+                <div class="dsd-stat-value">{{ despesa.data|date:"d/m/Y" }}</div>
+                <div class="dsd-stat-copy">{% trans "Data associada ao registo financeiro." %}</div>
+            </div>
+            <div class="dsd-stat-card">
+                <div class="dsd-stat-label">{% trans "Tipo" %}</div>
+                <div class="dsd-stat-value">{{ despesa.get_tipo_display }}</div>
+                <div class="dsd-stat-copy">{{ despesa.get_categoria_display }}</div>
+            </div>
         </div>
+
+        <section class="dsd-section">
+            <div class="dsd-section-head">
+                <div>
+                    <h2 class="dsd-section-title">{% trans "Dados gerais da despesa" %}</h2>
+                    <p class="dsd-section-copy">
+                        {% trans "Resumo financeiro e operacional base deste registo." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="dsd-grid">
+                <article class="dsd-card">
+                    <h3 class="dsd-card-title">{% trans "Classificação" %}</h3>
+                    <dl class="dsd-detail-list">
+                        <div class="dsd-detail-item">
+                            <dt class="dsd-detail-label">{% trans "Categoria" %}</dt>
+                            <dd class="dsd-detail-value">{{ despesa.get_categoria_display }}</dd>
+                        </div>
+                        <div class="dsd-detail-item">
+                            <dt class="dsd-detail-label">{% trans "Tipo" %}</dt>
+                            <dd class="dsd-detail-value">{{ despesa.get_tipo_display }}</dd>
+                        </div>
+                        <div class="dsd-detail-item">
+                            <dt class="dsd-detail-label">{% trans "Data" %}</dt>
+                            <dd class="dsd-detail-value">{{ despesa.data|date:"d/m/Y" }}</dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <article class="dsd-card">
+                    <h3 class="dsd-card-title">{% trans "Contexto operacional" %}</h3>
+                    <div class="dsd-chip-list">
+                        {% if despesa.projeto %}
+                            <span class="dsd-chip">
+                                {% blocktrans with nome=despesa.projeto.nome %}Projeto: {{ nome }}{% endblocktrans %}
+                            </span>
+                        {% endif %}
+                        {% if despesa.furo %}
+                            <span class="dsd-chip">
+                                {% blocktrans with nome=despesa.furo.nome %}Furo: {{ nome }}{% endblocktrans %}
+                            </span>
+                        {% endif %}
+                        {% if despesa.maquina %}
+                            <span class="dsd-chip">
+                                {% blocktrans with nome=despesa.maquina.nome %}Máquina: {{ nome }}{% endblocktrans %}
+                            </span>
+                        {% endif %}
+                        {% if not despesa.projeto and not despesa.furo and not despesa.maquina %}
+                            <span class="dsd-chip dsd-chip-muted">{% trans "Geral" %}</span>
+                        {% endif %}
+                    </div>
+                </article>
+
+                <article class="dsd-card dsd-card-span-2">
+                    <h3 class="dsd-card-title">{% trans "Descrição" %}</h3>
+                    <p class="dsd-note">{{ despesa.descricao }}</p>
+                </article>
+            </div>
+        </section>
+
+        {% if despesa.observacoes or despesa.comprovativo %}
+            <section class="dsd-section">
+                <div class="dsd-section-head">
+                    <div>
+                        <h2 class="dsd-section-title">{% trans "Suporte e notas" %}</h2>
+                        <p class="dsd-section-copy">
+                            {% trans "Documentação anexa e observações adicionais ligadas a esta despesa." %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dsd-grid">
+                    {% if despesa.observacoes %}
+                        <article class="dsd-card">
+                            <h3 class="dsd-card-title">{% trans "Observações" %}</h3>
+                            <p class="dsd-note">{{ despesa.observacoes }}</p>
+                        </article>
+                    {% endif %}
+
+                    {% if despesa.comprovativo %}
+                        <article class="dsd-card">
+                            <h3 class="dsd-card-title">{% trans "Comprovativo" %}</h3>
+                            <a href="{{ despesa.comprovativo.url }}" target="_blank" rel="noopener" class="dsd-file-link">
+                                {% trans "Abrir ficheiro" %}
+                            </a>
+                        </article>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
     </div>
-</div>
+</section>
 {% endblock %}

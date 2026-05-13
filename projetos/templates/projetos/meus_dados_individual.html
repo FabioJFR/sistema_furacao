@@ -1,83 +1,85 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Meus Dados" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/meus_dados.css' %}?v=20260513-1245">
+{% endblock %}
+
 {% block content %}
-<div class="space-y-6">
-    <div class="bg-white rounded-xl shadow p-6 flex justify-between items-center flex-wrap gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">👤 {% trans "Meus Dados" %}</h1>
-            <p class="text-gray-500 mt-1">{% trans "Consulta dos teus dados pessoais na conta individual." %}</p>
+<section class="mdp-page">
+    <div class="mdp-shell">
+        <div class="mdp-top">
+            <div class="mdp-heading">
+                <h1 class="mdp-title">👤 {% trans "Meus Dados" %}</h1>
+                <p class="mdp-subtitle">{% trans "Consulta dos teus dados pessoais na conta individual." %}</p>
+            </div>
+            <div class="mdp-top-actions">
+                <a href="{% url 'projetos:meus_dados_empregado_editar' %}" class="mdp-btn mdp-btn-primary">
+                    {% trans "Editar Dados" %}
+                </a>
+            </div>
         </div>
-        <a href="{% url 'projetos:meus_dados_empregado_editar' %}"
-           class="bg-amber-500 text-white px-5 py-2 rounded-lg hover:bg-amber-600 transition shadow font-semibold">
-            ✏️ {% trans "Editar Dados" %}
-        </a>
-    </div>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Dados Pessoais" %}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div><strong>{% trans "Nome:" %}</strong> {{ individual.nome|default:"-" }}</div>
-            <div><strong>{% trans "Email:" %}</strong> {{ individual.email|default:"-" }}</div>
-            <div><strong>{% trans "Telefone:" %}</strong> {{ individual.telefone|default:"-" }}</div>
-            <div><strong>{% trans "Especialidade:" %}</strong> {{ individual.especialidade|default:"-" }}</div>
-            <div><strong>{% trans "Data de nascimento:" %}</strong> {{ individual.data_nascimento|default:"-" }}</div>
-            <div><strong>{% trans "Início de atividade:" %}</strong> {{ individual.data_inicio_atividade|default:"-" }}</div>
-            <div><strong>{% trans "Nacionalidade:" %}</strong> {{ individual.nacionalidade|default:"-" }}</div>
-            <div><strong>{% trans "NIF:" %}</strong> {{ individual.nif|default:"-" }}</div>
-            <div class="md:col-span-2"><strong>{% trans "Morada:" %}</strong> {{ individual.morada|default:"-" }}</div>
-            <div class="md:col-span-2"><strong>{% trans "Biografia:" %}</strong> {{ individual.biografia|default:"-" }}</div>
-        </div>
-    </div>
+        <div class="mdp-grid mdp-grid-narrow">
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Dados Pessoais" %}</h2>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Nome" %}</span><strong>{{ individual.nome|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Email" %}</span><strong>{{ individual.email|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Telefone" %}</span><strong>{{ individual.telefone|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Especialidade" %}</span><strong>{{ individual.especialidade|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Data de nascimento" %}</span><strong>{{ individual.data_nascimento|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Início de atividade" %}</span><strong>{{ individual.data_inicio_atividade|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "Nacionalidade" %}</span><strong>{{ individual.nacionalidade|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item"><span class="mdp-label">{% trans "NIF" %}</span><strong>{{ individual.nif|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item mdp-detail-item-full"><span class="mdp-label">{% trans "Morada" %}</span><strong>{{ individual.morada|default:"-" }}</strong></div>
+                    <div class="mdp-detail-item mdp-detail-item-full"><span class="mdp-label">{% trans "Biografia" %}</span><strong>{{ individual.biografia|default:"-" }}</strong></div>
+                </div>
+            </section>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Resumo" %}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Registos" %}</div>
-                <div class="text-2xl font-bold">{{ total_registos|default:0 }}</div>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Horas" %}</div>
-                <div class="text-2xl font-bold">{{ total_horas|default:0|floatformat:2 }}</div>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-gray-500 text-sm">{% trans "Total Metros" %}</div>
-                <div class="text-2xl font-bold">{{ total_metros|default:0|floatformat:2 }} m</div>
-            </div>
+            <section class="mdp-card">
+                <h2 class="mdp-card-title">{% trans "Plano e Pagamentos" %}</h2>
+                <div class="mdp-detail-grid">
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Plano atual" %}</span>
+                        <strong>{% if plano_atual %}{{ plano_atual.nome }}{% else %}-{% endif %}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Conta desde" %}</span>
+                        <strong>{{ data_inicio_plano|date:"d/m/Y"|default:"-" }}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Termina em" %}</span>
+                        <strong>{{ data_fim_plano|date:"d/m/Y"|default:"-" }}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Data limite de pagamento" %}</span>
+                        <strong>{{ proximo_pagamento|date:"d/m/Y"|default:"-" }}</strong>
+                    </div>
+                    <div class="mdp-detail-item">
+                        <span class="mdp-label">{% trans "Tipo de conta" %}</span>
+                        <strong>{% trans "Individual" %}</strong>
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Plano e Pagamentos" %}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div>
-                <strong>{% trans "Plano atual:" %}</strong>
-                {% if plano_atual %}
-                    {{ plano_atual.nome }}
-                {% else %}
-                    -
-                {% endif %}
-            </div>
-            <div>
-                <strong>{% trans "Conta desde:" %}</strong>
-                {{ data_inicio_plano|date:"d/m/Y"|default:"-" }}
-            </div>
-            <div>
-                <strong>{% trans "Termina em:" %}</strong>
-                {{ data_fim_plano|date:"d/m/Y"|default:"-" }}
-            </div>
-            <div>
-                <strong>{% trans "Data Limite de pagamento:" %}</strong>
-                {{ proximo_pagamento|date:"d/m/Y"|default:"-" }}
-            </div>
-            <div>
-                <strong>{% trans "Tipo de conta:" %}</strong>
-                {% trans "Individual" %}
-            </div>
-        </div>
+        <section class="mdp-stats mdp-stats-compact">
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Registos" %}</div>
+                <div class="mdp-stat-value">{{ total_registos|default:0 }}</div>
+            </article>
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Horas" %}</div>
+                <div class="mdp-stat-value">{{ total_horas|default:0|floatformat:2 }}</div>
+            </article>
+            <article class="mdp-stat-card">
+                <div class="mdp-stat-label">{% trans "Total Metros" %}</div>
+                <div class="mdp-stat-value">{{ total_metros|default:0|floatformat:2 }} m</div>
+            </article>
+        </section>
     </div>
-</div>
+</section>
 {% endblock %}

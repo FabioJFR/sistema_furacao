@@ -1,17 +1,30 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks  i18n %}
+{% load static widget_tweaks i18n %}
 <!-- registo_diario_form.html -->
 
 {% block title %}{{ titulo }}{% endblock %}
 
-{% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
-            {{ titulo }}
-        </h2>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/flow_forms.css' %}">
+{% endblock %}
 
-        <div class="mb-6 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+{% block content %}
+<section class="of-page">
+    <div class="of-card of-card-wide">
+        <div class="of-hero">
+            <div>
+                <div class="of-eyebrow">{% trans "Registo Operacional" %}</div>
+                <h1 class="of-title">{{ titulo }}</h1>
+                <p class="of-subtitle">{% trans "Preencha o registo do turno com contexto operacional, seleção de planeamento e detalhe técnico suficiente para consulta futura." %}</p>
+            </div>
+            <div class="of-hero-card">
+                <div class="of-hero-kicker">{% trans "Fluxo recomendado" %}</div>
+                <div class="of-hero-value">{% trans "Planeamento + execução" %}</div>
+                <p class="of-hero-copy">{% trans "Use o planeamento quando existir e depois complete pausas, avanço, recuperação, ocorrências e anexos do turno." %}</p>
+            </div>
+        </div>
+
+        <div class="of-banner">
             <div class="font-semibold text-base mb-1">{% trans "Registo operacional a partir de planeamento" %}</div>
             <p>
                 {% trans "Se selecionar um planeamento, o sistema herda automaticamente o projeto, o furo, a data e o horário base do turno cumprido." %}
@@ -21,7 +34,7 @@
             </p>
         </div>
 
-        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        <div class="of-section" style="margin-bottom: 24px; border-color:#b7e4cf; background:linear-gradient(180deg, rgba(236, 253, 245, 0.86) 0%, rgba(255,255,255,1) 100%);">
             <div class="flex items-center justify-between gap-3 flex-wrap">
                 <div>
                     <h3 class="text-lg font-bold text-emerald-900">{% trans "Turnos disponíveis para esta data" %}</h3>
@@ -80,21 +93,21 @@
             {% endif %}
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" enctype="multipart/form-data" class="of-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <div class="of-alert">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
             {% if relatorio_form.non_field_errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <div class="of-alert">
                     {{ relatorio_form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div class="of-section">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-900">{% trans "Registo operacional" %}</h3>
                     <p class="text-sm text-gray-600">{% trans "Horas, pausas, avanço do turno, observações e anexos principais." %}</p>
@@ -129,7 +142,7 @@
                 </div>
             </div>
 
-            <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+            <div class="of-section" style="border-color:#c7d2fe; background:linear-gradient(180deg, rgba(238, 242, 255, 0.88) 0%, rgba(255,255,255,1) 100%);">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-indigo-900">{% trans "Relatório técnico do turno" %}</h3>
                     <p class="text-sm text-indigo-800">{% trans "Este bloco é opcional. Use-o quando precisar de guardar informação técnica detalhada do turno para consulta e exportação posterior." %}</p>
@@ -357,7 +370,7 @@
             </div>
 
             {% if form.instance.pk and form.instance.fotos_amostra.all %}
-                <div class="mt-6">
+                <div class="of-section">
                     <h3 class="text-lg font-bold text-gray-800 mb-3">{% trans "Fotos de Amostra já guardadas" %}</h3>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -376,16 +389,15 @@
                 </div>
             {% endif %}
 
-            <button type="submit" class="btn btn-success mt-4 w-full text-center">
-                💾 {% trans "Guardar Registo" %}
-            </button>
+            <div class="of-actions">
+                <a href="{% url 'projetos:registo_diario_list' %}" class="of-btn of-btn-secondary">
+                    {% trans "Voltar" %}
+                </a>
+                <button type="submit" class="of-btn of-btn-primary">
+                    {% trans "Guardar Registo" %}
+                </button>
+            </div>
         </form>
-
-        <div class="mt-4 text-center">
-            <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-primary">
-                🔙 {% trans "Voltar" %}
-            </a>
-        </div>
     </div>
 </section>
 {{ form.planeamentos_mapa|json_script:"planeamentos-turno-data" }}

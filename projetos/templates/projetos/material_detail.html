@@ -1,200 +1,256 @@
-{% extends 'projetos/base.html' %}
-{% load static  i18n %}
+{% extends "projetos/base.html" %}
+{% load static i18n %}
 
 {% block title %}{% trans "Detalhes do Material" %}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/projeto/material_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/projeto/material_detail.css' %}?v=20260512-1722">
 {% endblock %}
 
 {% block content %}
-<div class="mdt-wrap">
+<section class="matd-page">
+    <div class="matd-shell">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <a href="{% url 'projetos:material_list' %}" class="matd-back">← {% trans "Voltar aos materiais" %}</a>
+                <h1 class="sf-page-title sf-break-word">📦 {{ material.nome }}</h1>
+                <p class="sf-page-description">
+                    {% trans "Consulte stock, enquadramento operacional e movimentos deste material num único detalhe operacional." %}
+                </p>
+            </div>
 
-    <div class="mdt-top">
-        <h2>{{ material.nome }}</h2>
-
-        <div class="mdt-actions">
-            <a href="{% url 'projetos:material_update' material.id %}" class="mdt-btn mdt-btn-edit">
-                ✏️ {% trans "Editar" %}
-            </a>
-
-            <a href="{% url 'projetos:material_delete' material.id %}" class="mdt-btn mdt-btn-delete">
-                🗑️ {% trans "Apagar" %}
-            </a>
-        </div>
-    </div>
-
-    <div class="mdt-grid">
-
-        <div>
-            <p><strong>{% trans "Projeto:" %}</strong>
-                {% if material.projeto %}
-                    <a href="{{ material.projeto.get_absolute_url }}" class="mdt-link">
-                        {{ material.projeto.nome }}
-                    </a>
-                {% else %}
-                    {% trans "Stock" %}
-                {% endif %}
-            </p>
-
-            <p><strong>{% trans "Furo:" %}</strong>
-                {% if material.furo %}
-                    <a href="{{ material.furo.get_absolute_url }}" class="mdt-link">
-                        {{ material.furo.nome }}
-                    </a>
-                {% else %}
-                    -
-                {% endif %}
-            </p>
-
-            <p><strong>{% trans "Tipo:" %}</strong> {{ material.tipo|default:"-" }}</p>
-            <p><strong>{% trans "Marca:" %}</strong> {{ material.marca|default:"-" }}</p>
-            <p><strong>{% trans "Número de Série:" %}</strong> {{ material.numero_serie|default:"-" }}</p>
+            <div class="sf-page-actions">
+                <a href="{% url 'projetos:material_update' material.id %}" class="btn btn-primary">
+                    {% trans "Editar" %}
+                </a>
+                <a href="{% url 'projetos:material_delete' material.id %}" class="btn btn-danger">
+                    {% trans "Apagar" %}
+                </a>
+            </div>
         </div>
 
-        <div>
-            <p><strong>{% trans "Quantidade em stock:" %}</strong>
-                <span class="mdt-stock {% if material.quantidade > 10 %}mdt-stock-ok{% elif material.quantidade > 0 %}mdt-stock-low{% else %}mdt-stock-zero{% endif %}">
-                    {{ material.quantidade }}
-                </span>
-                {{ material.unidade|default:"" }}
-            </p>
-
-            <p><strong>{% trans "Diâmetro:" %}</strong> {{ material.diametro|floatformat:2 }}</p>
-            <p><strong>{% trans "Valor:" %}</strong> {{ material.valor|floatformat:2 }}€</p>
-            <p><strong>{% trans "Estado:" %}</strong> {{ material.get_estado_display }}</p>
-            <p><strong>{% trans "Ativo:" %}</strong> {% if material.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
+        <div class="sf-stat-grid">
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Stock atual" %}</div>
+                <div class="sf-stat-value">{{ material.quantidade }}</div>
+                <div class="sf-stat-copy">{{ material.unidade|default:"" }}</div>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Estado" %}</div>
+                <div class="sf-stat-value">{{ material.get_estado_display }}</div>
+                <div class="sf-stat-copy">
+                    {% if material.ativo %}
+                        {% trans "Material ativo para utilização." %}
+                    {% else %}
+                        {% trans "Material inativo." %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Valor unitário" %}</div>
+                <div class="sf-stat-value">{{ material.valor|floatformat:2 }} €</div>
+                <div class="sf-stat-copy">{% trans "Referência económica atualmente registada." %}</div>
+            </div>
         </div>
 
-        <div>
-            <p><strong>{% trans "Fornecedor:" %}</strong> {{ material.fornecedor|default:"-" }}</p>
-            <p><strong>{% trans "Localização:" %}</strong> {{ material.localizacao|default:"-" }}</p>
-            <p><strong>{% trans "Data Compra:" %}</strong> {{ material.data_compra|default:"-" }}</p>
-        </div>
-    </div>
-
-    {% if material.observacoes %}
-    <div class="mdt-section-observacoes">
-        <h3 class="mdt-observ-title">{% trans "Observações" %}</h3>
-        <div class="mdt-observ-box">
-            {{ material.observacoes }}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- HISTÓRICO DE LEVANTAMENTOS -->
-    <div class="mdt-section">
-        <h2 class="mdt-section-title">{% trans "Histórico de Levantamentos" %}</h2>
-
-        {% if levantamentos %}
-        <div class="mdt-table-wrap">
-            <table class="mdt-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Empregado" %}</th>
-                        <th>{% trans "Quantidade" %}</th>
-                        <th>{% trans "Projeto" %}</th>
-                        <th>{% trans "Furo" %}</th>
-                        <th>{% trans "Observações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for levantamento in levantamentos %}
-                    <tr>
-                        <td>{{ levantamento.data }}</td>
-                        <td>{{ levantamento.empregado.nome }}</td>
-                        <td>{{ levantamento.quantidade }}</td>
-
-                        <td>
-                            {% if levantamento.projeto %}
-                                <a href="{{ levantamento.projeto.get_absolute_url }}" class="mdt-link">
-                                    {{ levantamento.projeto.nome }}
-                                </a>
+        <div class="sf-overview-grid">
+            <section class="sf-overview-card">
+                <h2 class="sf-overview-title">{% trans "Contexto" %}</h2>
+                <dl class="sf-detail-list">
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Projeto" %}</dt>
+                        <dd class="sf-detail-value">
+                            {% if material.projeto %}
+                                <a href="{{ material.projeto.get_absolute_url }}">{{ material.projeto.nome }}</a>
                             {% else %}
                                 {% trans "Stock" %}
                             {% endif %}
-                        </td>
-
-                        <td>
-                            {% if levantamento.furo %}
-                                <a href="{{ levantamento.furo.get_absolute_url }}" class="mdt-link">
-                                    {{ levantamento.furo.nome }}
-                                </a>
+                        </dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Furo" %}</dt>
+                        <dd class="sf-detail-value">
+                            {% if material.furo %}
+                                <a href="{{ material.furo.get_absolute_url }}">{{ material.furo.nome }}</a>
                             {% else %}
                                 -
                             {% endif %}
-                        </td>
+                        </dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Fornecedor" %}</dt>
+                        <dd class="sf-detail-value">{{ material.fornecedor|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Localização" %}</dt>
+                        <dd class="sf-detail-value">{{ material.localizacao|default:"-" }}</dd>
+                    </div>
+                </dl>
+            </section>
 
-                        <td>{{ levantamento.observacoes|default:"-" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <section class="sf-overview-card">
+                <h2 class="sf-overview-title">{% trans "Identificação" %}</h2>
+                <dl class="sf-detail-list">
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Tipo" %}</dt>
+                        <dd class="sf-detail-value">{{ material.tipo|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Marca" %}</dt>
+                        <dd class="sf-detail-value">{{ material.marca|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Número de série" %}</dt>
+                        <dd class="sf-detail-value">{{ material.numero_serie|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Diâmetro" %}</dt>
+                        <dd class="sf-detail-value">{{ material.diametro|floatformat:2 }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="sf-overview-card">
+                <h2 class="sf-overview-title">{% trans "Aquisição" %}</h2>
+                <dl class="sf-detail-list">
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Data de compra" %}</dt>
+                        <dd class="sf-detail-value">{{ material.data_compra|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Ativo" %}</dt>
+                        <dd class="sf-detail-value">{% if material.ativo %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Quantidade disponível" %}</dt>
+                        <dd class="sf-detail-value">{{ material.quantidade }} {{ material.unidade|default:"" }}</dd>
+                    </div>
+                </dl>
+            </section>
         </div>
-        {% else %}
-        <p class="mdt-empty">{% trans "Ainda não existem levantamentos para este material." %}</p>
+
+        {% if material.observacoes %}
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Observações" %}</h2>
+                    </div>
+                </div>
+                <div class="sf-note-card">{{ material.observacoes|linebreaksbr }}</div>
+            </section>
         {% endif %}
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Histórico de levantamentos" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Saídas deste material para operação, por empregado, projeto e furo." %}
+                    </p>
+                </div>
+            </div>
+
+            {% if levantamentos %}
+                <div class="sf-table-card">
+                    <div class="sf-table-wrap">
+                        <table class="sf-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Empregado" %}</th>
+                                    <th>{% trans "Quantidade" %}</th>
+                                    <th>{% trans "Projeto" %}</th>
+                                    <th>{% trans "Furo" %}</th>
+                                    <th>{% trans "Observações" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for levantamento in levantamentos %}
+                                    <tr>
+                                        <td>{{ levantamento.data }}</td>
+                                        <td>{{ levantamento.empregado.nome }}</td>
+                                        <td>{{ levantamento.quantidade }}</td>
+                                        <td>
+                                            {% if levantamento.projeto %}
+                                                <a href="{{ levantamento.projeto.get_absolute_url }}">{{ levantamento.projeto.nome }}</a>
+                                            {% else %}
+                                                {% trans "Stock" %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if levantamento.furo %}
+                                                <a href="{{ levantamento.furo.get_absolute_url }}">{{ levantamento.furo.nome }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ levantamento.observacoes|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="sf-empty-state">{% trans "Ainda não existem levantamentos para este material." %}</div>
+            {% endif %}
+        </section>
+
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Histórico de devoluções" %}</h2>
+                    <p class="sf-section-description">
+                        {% trans "Entradas de devolução já registadas para este material." %}
+                    </p>
+                </div>
+            </div>
+
+            {% if devolucoes %}
+                <div class="sf-table-card">
+                    <div class="sf-table-wrap">
+                        <table class="sf-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Empregado" %}</th>
+                                    <th>{% trans "Quantidade" %}</th>
+                                    <th>{% trans "Projeto" %}</th>
+                                    <th>{% trans "Furo" %}</th>
+                                    <th>{% trans "Observações" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for devolucao in devolucoes %}
+                                    <tr>
+                                        <td>{{ devolucao.data }}</td>
+                                        <td>{{ devolucao.empregado.nome }}</td>
+                                        <td>{{ devolucao.quantidade }}</td>
+                                        <td>
+                                            {% if devolucao.projeto %}
+                                                <a href="{{ devolucao.projeto.get_absolute_url }}">{{ devolucao.projeto.nome }}</a>
+                                            {% else %}
+                                                {% trans "Stock" %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if devolucao.furo %}
+                                                <a href="{{ devolucao.furo.get_absolute_url }}">{{ devolucao.furo.nome }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ devolucao.observacoes|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="sf-empty-state">{% trans "Ainda não existem devoluções para este material." %}</div>
+            {% endif %}
+        </section>
     </div>
-
-    <!-- HISTORICO DE DEVOLUÇÔES -->
-    <div class="mdt-section">
-        <h2 class="mdt-section-title">{% trans "Histórico de Devoluções" %}</h2>
-
-        {% if devolucoes %}
-        <div class="mdt-table-wrap">
-            <table class="mdt-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Empregado" %}</th>
-                        <th>{% trans "Quantidade" %}</th>
-                        <th>{% trans "Projeto" %}</th>
-                        <th>{% trans "Furo" %}</th>
-                        <th>{% trans "Observações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for devolucao in devolucoes %}
-                    <tr>
-                        <td>{{ devolucao.data }}</td>
-                        <td>{{ devolucao.empregado.nome }}</td>
-                        <td>{{ devolucao.quantidade }}</td>
-                        <td>
-                            {% if devolucao.projeto %}
-                                <a href="{{ devolucao.projeto.get_absolute_url }}" class="mdt-link">
-                                    {{ devolucao.projeto.nome }}
-                                </a>
-                            {% else %}
-                                {% trans "Stock" %}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if devolucao.furo %}
-                                <a href="{{ devolucao.furo.get_absolute_url }}" class="mdt-link">
-                                    {{ devolucao.furo.nome }}
-                                </a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>{{ devolucao.observacoes|default:"-" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="mdt-empty">{% trans "Ainda não existem devoluções para este material." %}</p>
-        {% endif %}
-    </div>
-
-
-    <div class="mdt-back-wrap">
-        <a href="{% url 'projetos:material_list' %}" class="mdt-btn mdt-btn-back">
-            🔙 {% trans "Voltar à Lista" %}
-        </a>
-    </div>
-
-</div>
+</section>
 {% endblock %}

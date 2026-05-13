@@ -1,4 +1,4 @@
-from plataforma.models import PagamentoEmpresa, SubscricaoEmpresa
+from plataforma.models import PagamentoEmpresa, PerfilPlataforma, SubscricaoEmpresa
 
 
 def listar_subscricoes():
@@ -37,3 +37,44 @@ def mapear_pagamentos_pendentes_por_subscricao(subscricoes):
         if chave not in mapa:
             mapa[chave] = pagamento
     return mapa
+
+
+def mapear_contas_admin_por_empresa(subscricoes):
+    empresa_ids = [str(s.empresa_id) for s in subscricoes if getattr(s, "empresa_id", None)]
+    if not empresa_ids:
+        return {}
+
+    perfis = (
+        PerfilPlataforma.objects
+        .select_related("user", "empresa")
+        .filter(
+            empresa_id__in=empresa_ids,
+            tipo_acesso="empresa_admin",
+        )
+        .order_by("criado_em", "user__date_joined")
+    )
+
+    mapa = {}
+    for perfil in perfis:
+        chave = str(perfil.empresa_id)
+        if chave not in mapa:
+            mapa[chave] = perfil
+    return mapa
+
+
+def obter_metricas_ativacao_contas(subscricoes):
+    empresa_ids = [str(s.empresa_id) for s in subscricoes if getattr(s, "empresa_id", None)]
+    if not empresa_ids:
+        return {
+            "contas_admin_ativadas": 0,
+            "contas_admin_por_ativar": 0,
+        }
+
+    perfis = PerfilPlataforma.objects.filter(
+        empresa_id__in=empresa_ids,
+        tipo_acesso="empresa_admin",
+    )
+    return {
+        "contas_admin_ativadas": perfis.filter(user__is_active=True).count(),
+        "contas_admin_por_ativar": perfis.filter(user__is_active=False).count(),
+    }

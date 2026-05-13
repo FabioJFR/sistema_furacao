@@ -1,32 +1,32 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Aprovar Empregado" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/confirm_card.css' %}?v=20260512-0910">
+{% endblock %}
+
 {% block content %}
-<section class="sf-page p-6">
-    <div class="sf-panel space-y-6">
-        <h1 class="text-2xl font-bold text-gray-800">{% trans "Aprovar Empregado" %}</h1>
-
-        <div class="text-gray-700 space-y-2">
-            <p><strong>{% trans "Nome:" %}</strong> {{ empregado.nome }}</p>
-            <p><strong>{% trans "Email:" %}</strong> {{ empregado.email|default:"-" }}</p>
-            <p><strong>{% trans "Função:" %}</strong> {{ empregado.funcao|default:"-" }}</p>
-        </div>
-
-        <p class="text-gray-600">
-            {% trans "Tem a certeza que deseja aprovar este empregado?" %}
+<section class="cf-page">
+    <div class="cf-shell">
+        <a href="{% url 'projetos:empregado_pendentes' %}" class="cf-back">← {% trans "Voltar aos pendentes" %}</a>
+        <div class="cf-kicker cf-kicker-success">{% trans "Validação de acesso" %}</div>
+        <h1 class="cf-title">{% trans "Aprovar Empregado" %}</h1>
+        <p class="cf-copy">
+            {% trans "Ao aprovar este empregado, o registo fica pronto para integração no fluxo operacional da empresa." %}
         </p>
 
-        <form method="post" class="flex gap-3 flex-wrap">
-            {% csrf_token %}
-            <button type="submit"
-                    class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                ✅ {% trans "Aprovar" %}
-            </button>
+        <div class="cf-highlight cf-highlight-success">
+            <strong>{% trans "Nome" %}:</strong> {{ empregado.nome }}<br>
+            <strong>{% trans "Email" %}:</strong> {{ empregado.email|default:"-" }}<br>
+            <strong>{% trans "Função" %}:</strong> {{ empregado.funcao|default:"-" }}
+        </div>
 
-            <a href="{% url 'projetos:empregado_pendentes' %}"
-               class="bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-gray-600 transition shadow">
+        <form method="post" class="cf-actions">
+            {% csrf_token %}
+            <button type="submit" class="cf-btn cf-btn-success">{% trans "Aprovar" %}</button>
+            <a href="{% url 'projetos:empregado_pendentes' %}" class="cf-btn cf-btn-secondary">
                 {% trans "Cancelar" %}
             </a>
         </form>

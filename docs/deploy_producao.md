@@ -87,3 +87,21 @@ Checklist de segurança antes de abrir ao público:
 pg_dump -h 127.0.0.1 -U <db_user> -d <db_name> > backup_$(date +%F_%H%M).sql
 tar -czf media_backup_$(date +%F_%H%M).tar.gz media/
 ```
+
+## 8) Riscos e pontos de atenção
+
+| Risco | Impacto | Probabilidade | Mitigação recomendada | Dono sugerido |
+|---|---|---:|---|---|
+| Website público | Alto | Alta | Validar homepage, planos, registo, feedback, metadata e `robots.txt` após cada alteração | Produto / Frontend / QA |
+| Integração entre apps | Alto | Alta | Executar smoke tests ponta a ponta por perfil e por contexto de empresa | Backend / QA |
+| Migrations e estado da base de dados | Alto | Média-alta | Testar instalação limpa e upgrade sobre base existente antes de deploy | Backend / DevOps |
+| Jobs e relatórios agendados | Médio-alto | Média | Confirmar `systemd` ativo, execução real do timer, logs e tratamento de falhas | DevOps / Backend |
+| Segurança de URL e uploads | Alto | Média | Validar casos reais de upload e acesso por perfil além dos testes automáticos | Backend / QA |
+| Setup local e bootstrap | Médio | Média-alta | Documentar bootstrap, seeds mínimas e dependências de `media/` e ficheiros locais | Backend / DevOps |
+| Fluxos operacionais densos | Médio-alto | Média | Rever casos reais de geologia, cartografia, 3D, assiduidade, contratos e compliance | Produto / Backend / QA |
+
+Leitura rápida:
+
+- Mais crítico: `website público`, `integração entre apps`, `migrations`
+- Mais traiçoeiro: `jobs agendados` e `segurança`, porque podem falhar sem ser imediatamente óbvio
+- Mais estrutural: `setup local`, porque afeta onboarding, testes e reprodutibilidade

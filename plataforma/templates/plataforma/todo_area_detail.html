@@ -18,8 +18,27 @@
 {% endblock %}
 
 {% block plataforma_content %}
+    <section class="todo-notes todo-notes-detail">
+        <article class="todo-note-card">
+            <div class="todo-note-label">{% trans "Estado" %}</div>
+            <h2>{% trans "Estado da lógica nesta app" %}</h2>
+            <p>{{ area.estado_logica }}</p>
+        </article>
+        <article class="todo-note-card">
+            <div class="todo-note-label">{% trans "Traduções" %}</div>
+            <h2>{% trans "Nota de tradução" %}</h2>
+            <p>{{ notas.traducao }}</p>
+        </article>
+        <article class="todo-note-card">
+            <div class="todo-note-label">{% trans "Arquitetura" %}</div>
+            <h2>{% trans "Nota de arquitetura" %}</h2>
+            <p>{{ notas.selectors_services }}</p>
+        </article>
+    </section>
+
     <section class="todo-sections">
-        <article class="todo-section-card">
+        <article class="todo-section-card todo-section-card-done">
+            <div class="todo-section-kicker">{% trans "Concluído" %}</div>
             <h2>{% trans "Já foi feito" %}</h2>
             <ul>
                 {% for item in area.feito %}
@@ -28,7 +47,8 @@
             </ul>
         </article>
 
-        <article class="todo-section-card">
+        <article class="todo-section-card todo-section-card-next">
+            <div class="todo-section-kicker">{% trans "Em foco" %}</div>
             <h2>{% trans "Próximos passos" %}</h2>
             <ul>
                 {% for item in area.proximos_passos %}
@@ -37,28 +57,14 @@
             </ul>
         </article>
 
-        <article class="todo-section-card">
+        <article class="todo-section-card todo-section-card-pending">
+            <div class="todo-section-kicker">{% trans "Pendências" %}</div>
             <h2>{% trans "O que falta fazer" %}</h2>
             <ul>
                 {% for item in area.falta_fazer %}
                     <li>{{ item }}</li>
                 {% endfor %}
             </ul>
-        </article>
-    </section>
-
-    <section class="todo-notes">
-        <article class="todo-note-card">
-            <h2>{% trans "Estado da lógica nesta app" %}</h2>
-            <p>{{ area.estado_logica }}</p>
-        </article>
-        <article class="todo-note-card">
-            <h2>{% trans "Nota de tradução" %}</h2>
-            <p>{{ notas.traducao }}</p>
-        </article>
-        <article class="todo-note-card">
-            <h2>{% trans "Nota de arquitetura" %}</h2>
-            <p>{{ notas.selectors_services }}</p>
         </article>
     </section>
 {% endblock %}

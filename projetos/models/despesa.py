@@ -179,9 +179,34 @@ class Despesa(models.Model):
                 "tipo": "A despesa deve estar associada a apenas um: máquina, projeto ou furo."
             })
 
-        if self.tipo != "geral" and len(preenchidos) == 0:
+        if self.tipo == "maquina" and not self.maquina:
             raise ValidationError({
-                "tipo": "A despesa deve estar associada a uma máquina, projeto ou furo, exceto se for do tipo geral."
+                "maquina": "Seleciona a máquina a que esta despesa está associada."
+            })
+
+        if self.tipo == "projeto" and not self.projeto:
+            raise ValidationError({
+                "projeto": "Seleciona o projeto a que esta despesa está associada."
+            })
+
+        if self.tipo == "furo" and not self.furo:
+            raise ValidationError({
+                "furo": "Seleciona o furo a que esta despesa está associada."
+            })
+
+        if self.tipo == "maquina" and (self.projeto or self.furo):
+            raise ValidationError({
+                "tipo": "Uma despesa do tipo máquina só deve estar ligada à máquina selecionada."
+            })
+
+        if self.tipo == "projeto" and (self.maquina or self.furo):
+            raise ValidationError({
+                "tipo": "Uma despesa do tipo projeto só deve estar ligada ao projeto selecionado."
+            })
+
+        if self.tipo == "furo" and (self.maquina or self.projeto):
+            raise ValidationError({
+                "tipo": "Uma despesa do tipo furo só deve estar ligada ao furo selecionado."
             })
 
         if self.valor is not None and self.valor < 0:

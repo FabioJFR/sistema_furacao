@@ -1,121 +1,102 @@
-{% extends 'projetos/base.html' %}
+{% extends "projetos/base.html" %}
 {% load i18n %}
 
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">📊 {% trans "Minhas Medições" %}</h1>
-            <p class="text-gray-500 mt-2">{% trans "Medições dos furos aos quais estás associado ou onde já tens registos." %}</p>
-        </div>
-        <a href="{% url 'projetos:meus_furos_empregado' %}"
-           class="flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow w-48">
-            🕳️ {% trans "Ver Meus Furos" %}
-        </a>
-    </div>
-
-    <form method="get" class="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Por furo" %}</label>
-                <select name="furo" class="w-full rounded-lg border-gray-300">
-                    <option value="">{% trans "Todos" %}</option>
-                    {% for furo in furos_filtro %}
-                        <option value="{{ furo.id }}" {% if filtros.furo == furo.id|stringformat:"s" %}selected{% endif %}>{{ furo.nome }}</option>
-                    {% endfor %}
-                </select>
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Medições" %}</p>
+                <h1 class="sf-page-title">{% trans "Minhas medições" %}</h1>
+                <p class="sf-page-description">{% trans "Medições dos furos aos quais estás associado ou onde já tens registos." %}</p>
             </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Por nome" %}</label>
-                <input type="text" name="nome" value="{{ filtros.nome }}" class="w-full rounded-lg border-gray-300" placeholder="{% trans 'Nome do furo' %}">
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Por projeto" %}</label>
-                <select name="projeto" class="w-full rounded-lg border-gray-300">
-                    <option value="">{% trans "Todos" %}</option>
-                    {% for projeto in projetos_filtro %}
-                        <option value="{{ projeto.id }}" {% if filtros.projeto == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Profundidade mín." %}</label>
-                <input type="number" step="0.01" name="profundidade_min" value="{{ filtros.profundidade_min }}" class="w-full rounded-lg border-gray-300" placeholder="0">
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Profundidade máx." %}</label>
-                <input type="number" step="0.01" name="profundidade_max" value="{{ filtros.profundidade_max }}" class="w-full rounded-lg border-gray-300" placeholder="9999">
+            <div class="sf-page-actions">
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">{% trans "Ver meus furos" %}</a>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 mt-3">
-            <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-900 transition">
-                {% trans "Filtrar" %}
-            </button>
-            <a href="{% url 'projetos:medicao_list_empregado' %}" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-200 transition">
-                {% trans "Limpar" %}
-            </a>
-        </div>
-    </form>
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <h2 class="sf-section-title">{% trans "Filtros" %}</h2>
+                </div>
+            </div>
 
-    {% if medicoes %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for medicao in medicoes %}
-                <div class="rounded-xl shadow-md hover:shadow-xl transition duration-200 overflow-hidden border-l-4 bg-white
-                    {% if medicao.magnetismo and medicao.magnetismo > 50 %}
-                        border-red-500
-                    {% elif medicao.magnetismo and medicao.magnetismo > 20 %}
-                        border-yellow-400
-                    {% else %}
-                        border-green-500
-                    {% endif %}
-                ">
-                    <div class="p-5 flex flex-col justify-between h-full">
-                        <div class="mb-4">
-                            <h2 class="text-lg font-bold text-gray-800">
-                                {{ medicao.nome_furo_snapshot|default:medicao.furo.nome }}
-                            </h2>
-                            <p class="text-sm text-gray-500">
-                                {{ medicao.furo.projeto.nome }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-2 text-sm text-gray-700">
-                            <p><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade_medida|default:"-" }} m</p>
-                            <p><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao_real_medida|default:"-" }}°</p>
-                            <p><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute_real_medido|default:"-" }}°</p>
-                            <p><strong>{% trans "Magnetismo:" %}</strong> {{ medicao.magnetismo|default:"-" }}</p>
-                            <p><strong>{% trans "Criada em:" %}</strong> {{ medicao.criado_em|date:"d/m/Y H:i" }}</p>
-                        </div>
-
-                        <div class="mt-5 space-y-2">
-                            <a href="{% url 'projetos:medicao_detail_empregado' medicao.id %}"
-                               class="block text-center bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition text-sm font-semibold">
-                                🔍 {% trans "Ver Medição" %}
-                            </a>
-                            <a href="{% url 'projetos:furo_detail_empregado' medicao.furo.id %}"
-                               class="block text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
-                                🕳️ {% trans "Ver Furo" %}
-                            </a>
-                        </div>
+            <form method="get" class="sf-page" style="gap:16px;">
+                <div class="sf-card-grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+                    <div class="sf-field">
+                        <label>{% trans "Por furo" %}</label>
+                        <select name="furo">
+                            <option value="">{% trans "Todos" %}</option>
+                            {% for furo in furos_filtro %}
+                                <option value="{{ furo.id }}" {% if filtros.furo == furo.id|stringformat:"s" %}selected{% endif %}>{{ furo.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="sf-field">
+                        <label>{% trans "Por nome" %}</label>
+                        <input type="text" name="nome" value="{{ filtros.nome }}" placeholder="{% trans 'Nome do furo' %}">
+                    </div>
+                    <div class="sf-field">
+                        <label>{% trans "Por projeto" %}</label>
+                        <select name="projeto">
+                            <option value="">{% trans "Todos" %}</option>
+                            {% for projeto in projetos_filtro %}
+                                <option value="{{ projeto.id }}" {% if filtros.projeto == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="sf-field">
+                        <label>{% trans "Profundidade mín." %}</label>
+                        <input type="number" step="0.01" name="profundidade_min" value="{{ filtros.profundidade_min }}" placeholder="0">
+                    </div>
+                    <div class="sf-field">
+                        <label>{% trans "Profundidade máx." %}</label>
+                        <input type="number" step="0.01" name="profundidade_max" value="{{ filtros.profundidade_max }}" placeholder="9999">
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="text-center mt-10 bg-white rounded-xl shadow-sm p-8">
-            <p class="text-gray-500 text-lg">{% trans "Ainda não tens medições disponíveis." %}</p>
-            <div class="mt-4">
-                <a href="{% url 'projetos:meus_furos_empregado' %}"
-                   class="inline-flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                    🕳️ {% trans "Ver Meus Furos" %}
-                </a>
+
+                <div class="sf-page-actions">
+                    <button type="submit" class="btn btn-primary">{% trans "Filtrar" %}</button>
+                    <a href="{% url 'projetos:medicao_list_empregado' %}" class="btn btn-primary">{% trans "Limpar" %}</a>
+                </div>
+            </form>
+        </section>
+
+        {% if medicoes %}
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
+                        <h2 class="sf-section-title">{% trans "Resultados" %}</h2>
+                    </div>
+                </div>
+
+                <div class="sf-card-grid">
+                    {% for medicao in medicoes %}
+                        <div class="sf-mini-card">
+                            <h3 class="sf-mini-card-title">{{ medicao.nome_furo_snapshot|default:medicao.furo.nome }}</h3>
+                            <p class="sf-mini-card-copy">{{ medicao.furo.projeto.nome }}</p>
+                            <p class="sf-mini-card-copy"><strong>{% trans "Profundidade:" %}</strong> {{ medicao.profundidade_medida|default:"-" }} m</p>
+                            <p class="sf-mini-card-copy"><strong>{% trans "Inclinação:" %}</strong> {{ medicao.inclinacao_real_medida|default:"-" }}°</p>
+                            <p class="sf-mini-card-copy"><strong>{% trans "Azimute:" %}</strong> {{ medicao.azimute_real_medido|default:"-" }}°</p>
+                            <p class="sf-mini-card-copy"><strong>{% trans "Magnetismo:" %}</strong> {{ medicao.magnetismo|default:"-" }}</p>
+                            <p class="sf-mini-card-copy"><strong>{% trans "Criada em:" %}</strong> {{ medicao.criado_em|date:"d/m/Y H:i" }}</p>
+                            <div class="sf-actions-inline" style="margin-top:14px;">
+                                <a href="{% url 'projetos:medicao_detail_empregado' medicao.id %}" class="btn btn-primary">{% trans "Ver medição" %}</a>
+                                <a href="{% url 'projetos:furo_detail_empregado' medicao.furo.id %}" class="btn btn-primary">{% trans "Ver furo" %}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% else %}
+            <div class="sf-empty-state">
+                {% trans "Ainda não tens medições disponíveis." %}
+                <div class="sf-page-actions" style="margin-top:14px;">
+                    <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">{% trans "Ver meus furos" %}</a>
+                </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </section>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "projetos/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}
     {% if page_title %}
@@ -9,401 +9,326 @@
     {% endif %}
 {% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/empregado_detail.css' %}?v=20260511-1125">
+{% endblock %}
+
 {% block content %}
-<section class="container mx-auto p-6">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
-
-        <nav class="text-sm text-gray-500">
-            <a href="{% url 'projetos:dashboard' %}" class="hover:text-blue-600">{% trans "Dashboard" %}</a>
-            <span class="mx-2">/</span>
-            <a href="{% url 'projetos:empregado_list' %}" class="hover:text-blue-600">{% trans "Empregados" %}</a>
-            <span class="mx-2">/</span>
-            <span class="text-gray-800 font-medium">{{ empregado.nome }}</span>
-        </nav>
-
-        <!-- HEADER -->
-        <div class="flex justify-between items-center flex-wrap gap-3">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">{{ empregado.nome }}</h2>
-                <p class="mt-1 text-sm text-gray-500">{% trans "Painel completo do trabalhador, projetos, documentos e configurações associadas." %}</p>
+<section class="ed-page">
+    <div class="ed-shell">
+        <div class="ed-top">
+            <div class="ed-heading">
+                <a href="{% url 'projetos:empregado_list' %}" class="ed-back">← {% trans "Voltar aos empregados" %}</a>
+                <h1 class="ed-title">👷 {{ empregado.nome }}</h1>
+                <p class="ed-subtitle">
+                    <strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:"-" }}
+                    {% if empregado.email %} | <strong>{% trans "Email:" %}</strong> {{ empregado.email }}{% endif %}
+                    {% if empregado.telefone %} | <strong>{% trans "Telefone:" %}</strong> {{ empregado.telefone }}{% endif %}
+                </p>
             </div>
 
-            <div class="flex gap-3 flex-wrap">
-                <a href="{% url 'projetos:empregado_adicionar_projeto' empregado.id %}" 
-                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition shadow">
-                    ➕ {% trans "Associar Projeto" %}
-                </a>
+            <div class="ed-actions">
+                <a href="{% url 'projetos:empregado_adicionar_projeto' empregado.id %}" class="ed-btn">{% trans "Associar projeto" %}</a>
                 {% if not empregado.aprovado %}
-                    <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}" class="inline">
+                    <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}">
                         {% csrf_token %}
-                        <button type="submit"
-                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                            ✅ {% trans "Aprovar Registo" %}
-                        </button>
+                        <button type="submit" class="ed-btn">{% trans "Aprovar registo" %}</button>
                     </form>
                 {% endif %}
-                <a href="{% url 'projetos:empregado_update' empregado.id %}" 
-                   class="bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition shadow">
-                    ✏️ {% trans "Editar" %}
-                </a>
-
-                <a href="{% url 'projetos:empregado_delete' empregado.id %}" 
-                   class="bg-rose-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-rose-600 transition shadow">
-                    🗑️ {% trans "Apagar" %}
-                </a>
+                <a href="{% url 'projetos:empregado_update' empregado.id %}" class="ed-btn">{% trans "Editar" %}</a>
+                <a href="{% url 'projetos:empregado_delete' empregado.id %}" class="ed-btn ed-btn-danger">{% trans "Apagar" %}</a>
             </div>
         </div>
 
-        <!-- ACESSO À PLATAFORMA -->
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-blue-900 mb-4">{% trans "Acesso à Plataforma" %}</h3>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-                <p>
-                    <strong>{% trans "Estado de aprovação:" %}</strong>
-                    {% if empregado.aprovado %}
-                        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                            {% trans "Aprovado" %}
-                        </span>
-                    {% else %}
-                        <span class="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold">
-                            {% trans "Pendente" %}
-                        </span>
-                    {% endif %}
-                </p>
-
-                <p><strong>{% trans "Data de aprovação:" %}</strong> {{ empregado.data_aprovacao|default:"-" }}</p>
-                <p>
-                    <strong>{% trans "Nome de utilizador:" %}</strong>
+        <div class="ed-summary">
+            <div class="ed-summary-card">
+                <div class="ed-summary-label">{% trans "Aprovação" %}</div>
+                <div class="ed-summary-value">{% if empregado.aprovado %}{% trans "Aprovado" %}{% else %}{% trans "Pendente" %}{% endif %}</div>
+                <div class="ed-summary-copy">{{ empregado.data_aprovacao|default:"-" }}</div>
+            </div>
+            <div class="ed-summary-card">
+                <div class="ed-summary-label">{% trans "Utilizador" %}</div>
+                <div class="ed-summary-value">
                     {% if empregado.user and empregado.user.username %}
                         {{ empregado.user.username }}
                     {% else %}
-                        {{ username_gerado|default_if_none:"-" }}
+                        -
                     {% endif %}
-                </p>
-                <p><strong>{% trans "Ligado a utilizador:" %}</strong> {% if empregado.user %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</p>
+                </div>
+                <div class="ed-summary-copy">{% if empregado.user %}{% trans "Ligado a utilizador" %}{% else %}{% trans "Sem utilizador associado" %}{% endif %}</div>
             </div>
-
-            <div class="mt-4 text-sm text-blue-900 bg-white border border-blue-100 rounded-lg p-4">
-                <p class="font-semibold mb-1">{% trans "Nota importante" %}</p>
-                <p>
-                    {% trans "A palavra-passe temporária é mostrada ao administrador no momento da criação ou aprovação do empregado." %}
-                    {% trans "Se precisares de entregar novo acesso ao empregado, o mais seguro é redefinir a palavra-passe no utilizador associado." %}
-                </p>
-            </div>
-            {% if not empregado.user %}
-            <div class="mt-4">
-                <form method="post" action="{% url 'projetos:empregado_ligar_utilizador' empregado.id %}">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                        👤 {% trans "Criar/Ligar utilizador" %}
-                    </button>
-                </form>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- DADOS DO EMPREGADO -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>{% trans "Função:" %}</strong> {{ empregado.get_funcao_display|default:"-" }}</p>
-            <p><strong>{% trans "Email:" %}</strong> {{ empregado.email|default:"-" }}</p>
-            <p><strong>{% trans "Data de Admissão:" %}</strong> {{ empregado.data_admissao|default:"-" }}</p>
-            <p><strong>{% trans "Idade:" %}</strong> {{ empregado.idade|default:"-" }}</p>
-            <p><strong>{% trans "Nacionalidade:" %}</strong> {{ empregado.nacionalidade|default:"-" }}</p>
-            <p><strong>{% trans "NIF:" %}</strong> {{ empregado.nif|default:"-" }}</p>
-            <p><strong>{% trans "Salário:" %}</strong> {{ empregado.salario|default_if_none:"-" }}</p>
-            <p><strong>{% trans "Horas Diárias:" %}</strong> {{ empregado.horas_diarias|default_if_none:"-" }}</p>
-            <p><strong>{% trans "Férias anuais:" %}</strong> {{ empregado.dias_ferias_anuais }}</p>
-            <p><strong>{% trans "Férias gozadas (ano atual):" %}</strong> {{ empregado.dias_ferias_gozados_ano_atual }}</p>
-            <p><strong>{% trans "Férias disponíveis (ano atual):" %}</strong> {{ empregado.dias_ferias_disponiveis_ano_atual }}</p>
-        </div>
-
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Médias Operacionais" %}</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-                <p><strong>{% trans "Média de metros por dia:" %}</strong> {{ medias_operacionais.media_metros_por_dia }} m</p>
-                <p><strong>{% trans "Média de metros por furo:" %}</strong> {{ medias_operacionais.media_metros_por_furo }} m</p>
-                <p><strong>{% trans "Média de metros por projeto:" %}</strong> {{ medias_operacionais.media_metros_por_projeto }} m</p>
-                <p><strong>{% trans "Média de horas por dia:" %}</strong> {{ medias_operacionais.media_horas_por_dia }} h</p>
-                <p><strong>{% trans "Média de horas semanais:" %}</strong> {{ medias_operacionais.media_horas_semanais }} h</p>
-                <p><strong>{% trans "Média de horas mensais:" %}</strong> {{ medias_operacionais.media_horas_mensais }} h</p>
-                <p><strong>{% trans "Média de horas anuais:" %}</strong> {{ medias_operacionais.media_horas_anuais }} h</p>
-                <p><strong>{% trans "Dias com registo:" %}</strong> {{ medias_operacionais.dias_com_registo }}</p>
-                <p><strong>{% trans "Furos com registo:" %}</strong> {{ medias_operacionais.furos_com_registo }}</p>
-                <p><strong>{% trans "Projetos com registo:" %}</strong> {{ medias_operacionais.projetos_com_registo }}</p>
+            <div class="ed-summary-card">
+                <div class="ed-summary-label">{% trans "Projetos atuais" %}</div>
+                <div class="ed-summary-value">{{ empregado.projetos_atuais|length }}</div>
+                <div class="ed-summary-copy">{% trans "Projeto(s) com associação ativa." %}</div>
             </div>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Avarias e Reparações" %}</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-700 mb-4">
-                <p><strong>{% trans "Total atribuídas:" %}</strong> {{ total_avarias_atribuidas }}</p>
-                <p><strong>{% trans "Em aberto/reparação:" %}</strong> {{ total_avarias_abertas }}</p>
-                <p><strong>{% trans "Resolvidas:" %}</strong> {{ total_avarias_resolvidas }}</p>
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Acesso à plataforma" %}</h2>
+                    <p class="ed-section-copy">{% trans "Estado de aprovação, utilizador associado e ação administrativa para acesso à plataforma." %}</p>
+                </div>
+            </div>
+
+            <div class="ed-grid ed-grid-3">
+                <div class="ed-card">
+                    <h3 class="ed-card-title">{% trans "Aprovação" %}</h3>
+                    <dl class="ed-list">
+                        <div class="ed-item">
+                            <dt class="ed-label">{% trans "Estado" %}</dt>
+                            <dd class="ed-value">{% if empregado.aprovado %}{% trans "Aprovado" %}{% else %}{% trans "Pendente" %}{% endif %}</dd>
+                        </div>
+                        <div class="ed-item">
+                            <dt class="ed-label">{% trans "Data de aprovação" %}</dt>
+                            <dd class="ed-value">{{ empregado.data_aprovacao|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="ed-card">
+                    <h3 class="ed-card-title">{% trans "Utilizador" %}</h3>
+                    <dl class="ed-list">
+                        <div class="ed-item">
+                            <dt class="ed-label">{% trans "Nome de utilizador" %}</dt>
+                            <dd class="ed-value">
+                                {% if empregado.user and empregado.user.username %}
+                                    {{ empregado.user.username }}
+                                {% else %}
+                                    {{ username_gerado|default_if_none:"-" }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="ed-item">
+                            <dt class="ed-label">{% trans "Ligado a utilizador" %}</dt>
+                            <dd class="ed-value">{% if empregado.user %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="ed-note">
+                    <p>{% trans "A palavra-passe temporária é mostrada ao administrador no momento da criação ou aprovação do empregado. Se precisares de entregar novo acesso, o mais seguro é redefinir a palavra-passe no utilizador associado." %}</p>
+                    {% if not empregado.user %}
+                        <div class="ed-inline-actions">
+                            <form method="post" action="{% url 'projetos:empregado_ligar_utilizador' empregado.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="ed-btn">{% trans "Criar/Ligar utilizador" %}</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Dados do empregado" %}</h2>
+                    <p class="ed-section-copy">{% trans "Informação pessoal, contratual e enquadramento do trabalhador." %}</p>
+                </div>
+            </div>
+
+            <div class="ed-grid ed-grid-3">
+                <div class="ed-card">
+                    <h3 class="ed-card-title">{% trans "Perfil" %}</h3>
+                    <dl class="ed-list">
+                        <div class="ed-item"><dt class="ed-label">{% trans "Função" %}</dt><dd class="ed-value">{{ empregado.get_funcao_display|default:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Email" %}</dt><dd class="ed-value">{{ empregado.email|default:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Nacionalidade" %}</dt><dd class="ed-value">{{ empregado.nacionalidade|default:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "NIF" %}</dt><dd class="ed-value">{{ empregado.nif|default:"-" }}</dd></div>
+                    </dl>
+                </div>
+
+                <div class="ed-card">
+                    <h3 class="ed-card-title">{% trans "Contrato e horários" %}</h3>
+                    <dl class="ed-list">
+                        <div class="ed-item"><dt class="ed-label">{% trans "Data de admissão" %}</dt><dd class="ed-value">{{ empregado.data_admissao|default:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Salário" %}</dt><dd class="ed-value">{{ empregado.salario|default_if_none:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Horas diárias" %}</dt><dd class="ed-value">{{ empregado.horas_diarias|default_if_none:"-" }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Idade" %}</dt><dd class="ed-value">{{ empregado.idade|default:"-" }}</dd></div>
+                    </dl>
+                </div>
+
+                <div class="ed-card">
+                    <h3 class="ed-card-title">{% trans "Férias" %}</h3>
+                    <dl class="ed-list">
+                        <div class="ed-item"><dt class="ed-label">{% trans "Férias anuais" %}</dt><dd class="ed-value">{{ empregado.dias_ferias_anuais }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Férias gozadas" %}</dt><dd class="ed-value">{{ empregado.dias_ferias_gozados_ano_atual }}</dd></div>
+                        <div class="ed-item"><dt class="ed-label">{% trans "Férias disponíveis" %}</dt><dd class="ed-value">{{ empregado.dias_ferias_disponiveis_ano_atual }}</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Médias operacionais" %}</h2>
+                </div>
+            </div>
+
+            <div class="ed-stats">
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Metros por dia" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_metros_por_dia }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Metros por furo" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_metros_por_furo }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Metros por projeto" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_metros_por_projeto }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Horas por dia" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_horas_por_dia }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Horas semanais" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_horas_semanais }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Horas mensais" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_horas_mensais }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Horas anuais" %}</div><div class="ed-stat-value">{{ medias_operacionais.media_horas_anuais }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Dias com registo" %}</div><div class="ed-stat-value">{{ medias_operacionais.dias_com_registo }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Furos com registo" %}</div><div class="ed-stat-value">{{ medias_operacionais.furos_com_registo }}</div></div>
+            </div>
+        </section>
+
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Avarias e reparações" %}</h2>
+                </div>
+            </div>
+
+            <div class="ed-stats ed-stats-compact">
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Total atribuídas" %}</div><div class="ed-stat-value">{{ total_avarias_atribuidas }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Em aberto/reparação" %}</div><div class="ed-stat-value">{{ total_avarias_abertas }}</div></div>
+                <div class="ed-stat-card"><div class="ed-stat-label">{% trans "Resolvidas" %}</div><div class="ed-stat-value">{{ total_avarias_resolvidas }}</div></div>
             </div>
 
             {% if avarias_atribuidas %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                        <thead class="bg-gray-100 text-gray-700">
-                            <tr>
-                                <th class="text-left px-4 py-3">{% trans "Data" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Máquina" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Projeto/Furo" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Descrição" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Solução" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for avaria in avarias_atribuidas %}
-                                <tr class="border-t border-gray-200">
-                                    <td class="px-4 py-3 text-gray-700">
-                                        {{ avaria.data_inicio|date:"d/m/Y H:i" }}
-                                    </td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">
-                                        {{ avaria.maquina.nome|default:"-" }}
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-700">
-                                        {{ avaria.projeto.nome|default:"-" }}{% if avaria.furo %} / {{ avaria.furo.nome }}{% endif %}
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        {% if avaria.status == "resolvida" %}
-                                            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                {% trans "Resolvida" %}
-                                            </span>
-                                        {% elif avaria.status == "em_reparacao" %}
-                                            <span class="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                {% trans "Em reparação" %}
-                                            </span>
-                                        {% else %}
-                                            <span class="inline-block bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                {% trans "Aberta" %}
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-700">{{ avaria.descricao|default:"-" }}</td>
-                                    <td class="px-4 py-3 text-gray-700">{{ avaria.solucao|default:"-" }}</td>
+                <div class="ed-table-card">
+                    <div class="ed-table-wrap">
+                        <table class="ed-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Data" %}</th>
+                                    <th>{% trans "Máquina" %}</th>
+                                    <th>{% trans "Projeto/Furo" %}</th>
+                                    <th>{% trans "Estado" %}</th>
+                                    <th>{% trans "Descrição" %}</th>
+                                    <th>{% trans "Solução" %}</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for avaria in avarias_atribuidas %}
+                                    <tr>
+                                        <td>{{ avaria.data_inicio|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ avaria.maquina.nome|default:"-" }}</td>
+                                        <td>{{ avaria.projeto.nome|default:"-" }}{% if avaria.furo %} / {{ avaria.furo.nome }}{% endif %}</td>
+                                        <td>{{ avaria.get_status_display|default:avaria.status }}</td>
+                                        <td>{{ avaria.descricao|default:"-" }}</td>
+                                        <td>{{ avaria.solucao|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% else %}
-                <p class="text-gray-500">{% trans "Este empregado ainda não tem avarias atribuídas para reparação." %}</p>
+                <div class="ed-empty">{% trans "Este empregado ainda não tem avarias atribuídas para reparação." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- PROJETOS ATUAIS -->
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Projetos Atuais" %}</h3>
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Projetos atuais" %}</h2>
+                </div>
+            </div>
 
             {% if empregado.projetos_atuais %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="ed-grid ed-grid-3">
                     {% for projeto in empregado.projetos_atuais %}
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                            <p class="font-semibold text-gray-800">{{ projeto.nome }}</p>
-                            <p class="text-sm text-gray-600">{{ projeto.cidade|default:"-" }}, {{ projeto.pais|default:"-" }}</p>
-
-                            <div class="mt-3">
-                                <a href="{{ projeto.get_absolute_url }}" 
-                                   class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                                   {% trans "Ver Projeto" %}
-                                </a>
+                        <div class="ed-mini-card">
+                            <h3 class="ed-card-title sf-break-word">{{ projeto.nome }}</h3>
+                            <p class="ed-copy">{{ projeto.cidade|default:"-" }}, {{ projeto.pais|default:"-" }}</p>
+                            <div class="ed-inline-actions">
+                                <a href="{{ projeto.get_absolute_url }}" class="ed-btn">{% trans "Ver projeto" %}</a>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">{% trans "Sem projetos atuais." %}</p>
+                <div class="ed-empty">{% trans "Sem projetos atuais." %}</div>
             {% endif %}
-        </div>
+        </section>
 
-        <!-- HISTÓRICO -->
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">{% trans "Histórico de Projetos" %}</h3>
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Histórico de projetos" %}</h2>
+                </div>
+            </div>
 
             {% if empregado.ligacoes_projetos.all %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                        <thead class="bg-gray-100 text-gray-700">
-                            <tr>
-                                <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Início" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Fim" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Estado" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ligacao in empregado.ligacoes_projetos.all %}
-                                <tr class="border-t border-gray-200">
-                                    <td class="px-4 py-3 font-medium text-gray-800">
-                                        {{ ligacao.projeto.nome }}
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-700">
-                                        {{ ligacao.data_inicio|default:"-" }}
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-700">
-                                        {{ ligacao.data_fim|default:"-" }}
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        {% if ligacao.ativo %}
-                                            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                {% trans "Atual" %}
-                                            </span>
-                                        {% else %}
-                                            <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                                {% trans "Concluído" %}
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2 flex-wrap">
-                                            <a href="{% url 'projetos:empregado_editar_projeto' empregado.id ligacao.id %}"
-                                            class="inline-block bg-amber-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-amber-500 transition">
-                                                {% trans "Editar" %}
-                                            </a>
-
-                                            {% if ligacao.ativo %}
-                                                <a href="{% url 'projetos:empregado_terminar_projeto' empregado.id ligacao.id %}"
-                                                class="inline-block bg-rose-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-rose-600 transition">
-                                                    {% trans "Terminar" %}
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </td>
+                <div class="ed-table-card">
+                    <div class="ed-table-wrap">
+                        <table class="ed-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Projeto" %}</th>
+                                    <th>{% trans "Início" %}</th>
+                                    <th>{% trans "Fim" %}</th>
+                                    <th>{% trans "Estado" %}</th>
+                                    <th>{% trans "Ações" %}</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for ligacao in empregado.ligacoes_projetos.all %}
+                                    <tr>
+                                        <td>{{ ligacao.projeto.nome }}</td>
+                                        <td>{{ ligacao.data_inicio|default:"-" }}</td>
+                                        <td>{{ ligacao.data_fim|default:"-" }}</td>
+                                        <td>{% if ligacao.ativo %}{% trans "Atual" %}{% else %}{% trans "Concluído" %}{% endif %}</td>
+                                        <td>
+                                            <div class="ed-inline-actions">
+                                                <a href="{% url 'projetos:empregado_editar_projeto' empregado.id ligacao.id %}" class="ed-btn">{% trans "Editar" %}</a>
+                                                {% if ligacao.ativo %}
+                                                    <a href="{% url 'projetos:empregado_terminar_projeto' empregado.id ligacao.id %}" class="ed-btn ed-btn-danger">{% trans "Terminar" %}</a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% else %}
-                <p class="text-gray-500">{% trans "Sem histórico de projetos." %}</p>
+                <div class="ed-empty">{% trans "Sem histórico de projetos." %}</div>
             {% endif %}
-        </div>
-        
-        <!--  CONFIGURAÇÃO DE PERFURAÇÃO -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">{% trans "Configurações de Perfuração" %}</h2>
+        </section>
 
-                <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado.pk %}"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    {% trans "Ver / Editar" %}
-                </a>
+        <section class="ed-section">
+            <div class="ed-section-head">
+                <div>
+                    <h2 class="ed-section-title">{% trans "Configurações de perfuração" %}</h2>
+                </div>
+                <a href="{% url 'projetos:configuracao_perfuracao_list_admin' empregado.pk %}" class="ed-btn">{% trans "Ver / Editar" %}</a>
             </div>
 
             {% if empregado.configuracoes_perfuracao.all %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                <div class="ed-grid ed-grid-3">
                     {% for config in empregado.configuracoes_perfuracao.all %}
-                        <div class="border rounded-lg p-4">
-                            <div><strong>{% trans "Furo:" %}</strong> {{ config.furo.nome }}</div>
-                            <div><strong>{% trans "Tubo:" %}</strong> {{ config.comprimento_tubo }} m</div>
-                            <div><strong>{% trans "Karoutier:" %}</strong> {{ config.comprimento_karoutier }} m</div>
-                            <div><strong>{% trans "Acrescento:" %}</strong> {{ config.comprimento_acrescento }} m</div>
-                            <div><strong>{% trans "Calibrador:" %}</strong> {{ config.comprimento_calibrador }} m</div>
-                            <div><strong>{% trans "Record:" %}</strong> {{ config.comprimento_record }} m</div>
-                            <div><strong>{% trans "Bit:" %}</strong> {{ config.comprimento_bit }} m</div>
-                            <div><strong>{% trans "Caixa de mola:" %}</strong> {{ config.comprimento_caixa_mola }} m</div>
-                            <div><strong>{% trans "Tubo interior:" %}</strong> {{ config.comprimento_tubo_interior }} m</div>
-                            <div><strong>{% trans "Cabeça de interior:" %}</strong> {{ config.comprimento_cabeca_interior }} m</div>
-                            <div><strong>{% trans "Atualizado em:" %}</strong> {{ config.atualizado_em }}</div>
-                            <div><strong>{% trans "Atualizado por:" %}</strong> {{ config.atualizado_por|default:"-" }}</div>
+                        <div class="ed-mini-card">
+                            <h3 class="ed-card-title">{% trans "Furo:" %} {{ config.furo.nome }}</h3>
+                            <p class="ed-copy">{% trans "Tubo:" %} {{ config.comprimento_tubo }} m</p>
+                            <p class="ed-copy">{% trans "Karoutier:" %} {{ config.comprimento_karoutier }} m</p>
+                            <p class="ed-copy">{% trans "Acrescento:" %} {{ config.comprimento_acrescento }} m</p>
+                            <p class="ed-copy">{% trans "Calibrador:" %} {{ config.comprimento_calibrador }} m</p>
+                            <p class="ed-copy">{% trans "Record:" %} {{ config.comprimento_record }} m</p>
+                            <p class="ed-copy">{% trans "Bit:" %} {{ config.comprimento_bit }} m</p>
+                            <p class="ed-copy">{% trans "Caixa de mola:" %} {{ config.comprimento_caixa_mola }} m</p>
+                            <p class="ed-copy">{% trans "Tubo interior:" %} {{ config.comprimento_tubo_interior }} m</p>
+                            <p class="ed-copy">{% trans "Cabeça de interior:" %} {{ config.comprimento_cabeca_interior }} m</p>
+                            <p class="ed-copy">{% trans "Atualizado em:" %} {{ config.atualizado_em }}</p>
+                            <p class="ed-copy">{% trans "Atualizado por:" %} {{ config.atualizado_por|default:"-" }}</p>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">{% trans "Ainda não existem configurações de perfuração para este empregado." %}</p>
+                <div class="ed-empty">{% trans "Ainda não existem configurações de perfuração para este empregado." %}</div>
             {% endif %}
-        </div>
-
-        <!-- FICHEIROS DO EMPREGADO -->
-        <div class="bg-gray-50 rounded-xl p-5 shadow-sm">
-            <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
-                <h3 class="text-xl font-bold text-gray-800">{% trans "Ficheiros do Empregado" %}</h3>
-
-                <a href="{% url 'projetos:empregado_adicionar_ficheiro' empregado.id %}" 
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow">
-                    📎 {% trans "Adicionar Ficheiro" %}
-                </a>
-            </div>
-
-            {% if empregado.curriculo or empregado.contrato %}
-            <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {% if empregado.curriculo %}
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <p class="font-semibold text-gray-800">{% trans "Currículo principal" %}</p>
-                    <a href="{{ empregado.curriculo.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
-                        {% trans "Ver ficheiro" %}
-                    </a>
-                </div>
-                {% endif %}
-
-                {% if empregado.contrato %}
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <p class="font-semibold text-gray-800">{% trans "Contrato principal" %}</p>
-                    <a href="{{ empregado.contrato.url }}" target="_blank" class="text-blue-600 hover:underline text-sm">
-                        {% trans "Ver ficheiro" %}
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% if empregado.ficheiros.all %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
-                        <thead class="bg-gray-100 text-gray-700">
-                            <tr>
-                                <th class="text-left px-4 py-3">{% trans "Tipo" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Título" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Upload" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Observações" %}</th>
-                                <th class="text-left px-4 py-3">{% trans "Ações" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ficheiro in empregado.ficheiros.all %}
-                                <tr class="border-t border-gray-200">
-                                    <td class="px-4 py-3">{{ ficheiro.get_tipo_display }}</td>
-                                    <td class="px-4 py-3">{{ ficheiro.titulo|default:"-" }}</td>
-                                    <td class="px-4 py-3">{{ ficheiro.data_upload }}</td>
-                                    <td class="px-4 py-3">{{ ficheiro.observacoes|default:"-" }}</td>
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2 flex-wrap">
-                                            <a href="{{ ficheiro.ficheiro.url }}" target="_blank"
-                                            class="inline-block bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
-                                                {% trans "Ver" %}
-                                            </a>
-
-                                            <a href="{% url 'projetos:empregado_apagar_ficheiro' empregado.id ficheiro.id %}"
-                                            class="inline-block bg-rose-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-rose-600 transition">
-                                                {% trans "Apagar" %}
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-gray-500">{% trans "Sem ficheiros adicionais." %}</p>
-            {% endif %}
-        </div>
-
-        <!-- CONFIGURAÇÃO MATERIAL PERFURAÇÃO -->
-
-        <!-- VOLTAR -->
-        <div class="pt-2">
-            <a href="{% url 'projetos:empregado_list' %}" 
-               class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition shadow font-semibold">
-                🔙 {% trans "Voltar à Lista" %}
-            </a>
-        </div>
-
+        </section>
     </div>
 </section>
 {% endblock %}

@@ -1,0 +1,126 @@
+.cf-page {
+    padding: 24px 15px 36px;
+}
+
+.cf-shell {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    display: grid;
+    gap: 16px;
+    border: 1px solid #dbe3ec;
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+    padding: 24px 26px;
+}
+
+.cf-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #334c68;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.cf-kicker {
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cf-kicker-success {
+    color: #047857;
+}
+
+.cf-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(1.7rem, 2vw, 2.2rem);
+    line-height: 1.1;
+    font-weight: 900;
+}
+
+.cf-copy {
+    margin: 0;
+    color: #475569;
+    line-height: 1.55;
+}
+
+.cf-highlight {
+    padding: 16px 18px;
+    border: 1px solid #dbe3ec;
+    border-radius: 18px;
+    background: #f8fafc;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.cf-highlight-success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.cf-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.cf-btn-secondary {
+    background: #eef3f8;
+    color: #334c68;
+}
+
+.cf-btn-secondary:hover {
+    background: #dde7f0;
+    transform: translateY(-1px);
+}
+
+.cf-btn-danger {
+    background: #a83f3f;
+    color: #ffffff;
+}
+
+.cf-btn-danger:hover {
+    background: #8c3030;
+    transform: translateY(-1px);
+}
+
+.cf-btn-success {
+    background: #334c68;
+    color: #ffffff;
+}
+
+.cf-btn-success:hover {
+    background: #283f59;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+    .cf-shell {
+        padding: 20px 18px;
+    }
+}
