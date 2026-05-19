@@ -12,8 +12,7 @@
     <div class="sm-shell">
         <div class="sm-hero">
             <div>
-                <div class="sm-eyebrow">{% trans "Área do empregado" %}</div>
-                <h1 class="sm-title">{% trans "Meus Levantamentos de Material" %}</h1>
+                <h1 class="sm-title">📦 {% trans "Meus Levantamentos de Material" %}</h1>
                 <p class="sm-subtitle">
                     {% trans "Consulte rapidamente os levantamentos que já registou e confirme onde o material foi aplicado ou consumido." %}
                 </p>
@@ -25,12 +24,21 @@
 
         {% if levantamentos %}
             <div class="sm-table-card">
-                <div class="sm-table-wrap">
+                <div class="sm-table-header">
+                    <div>
+                        <h2 class="sm-section-title">{% trans "Histórico de levantamentos" %}</h2>
+                        <p class="sm-section-copy">{% trans "Lista pessoal dos levantamentos já registados com material, quantidade e destino operacional." %}</p>
+                    </div>
+                    <div class="sm-results-chip">
+                        {{ levantamentos|length }} {% trans "resultado(s)" %}
+                    </div>
+                </div>
+                <div class="sm-table-wrap sm-table-wrap-scroll">
                     <table class="sm-table">
                         <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
-                            <th>{% trans "Material" %}</th>
+                            <th>{% trans "Contexto" %}</th>
                             <th>{% trans "Quantidade" %}</th>
                             <th>{% trans "Projeto" %}</th>
                             <th>{% trans "Furo" %}</th>
@@ -40,9 +48,15 @@
                         <tbody>
                         {% for levantamento in levantamentos %}
                             <tr>
-                                <td>{{ levantamento.data }}</td>
-                                <td>{{ levantamento.material.nome }}</td>
-                                <td>{{ levantamento.quantidade }}</td>
+                                <td>
+                                    <div class="sm-data-primary">{{ levantamento.data }}</div>
+                                </td>
+                                <td>
+                                    <div class="sm-data-primary">{{ levantamento.material.nome }}</div>
+                                </td>
+                                <td>
+                                    <span class="sm-pill sm-pill-info">{{ levantamento.quantidade }}</span>
+                                </td>
                                 <td>
                                     {% if levantamento.projeto %}
                                         {{ levantamento.projeto.nome }}
@@ -57,7 +71,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td>{{ levantamento.observacoes|default:"-" }}</td>
+                                <td><div class="sm-observation">{{ levantamento.observacoes|default:"-" }}</div></td>
                             </tr>
                         {% endfor %}
                         </tbody>

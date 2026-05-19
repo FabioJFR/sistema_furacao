@@ -2,7 +2,7 @@
 {% load static  i18n %}
 
 {% block title %}{% trans "Features" %}{% endblock %}
-{% block page_title %}{% trans "Gestão de Features" %}{% endblock %}
+{% block page_title %}🧩 {% trans "Gestão de Features" %}{% endblock %}
 {% block page_description %}
     {% trans "Controla as funcionalidades ativas por empresa ou conta individual. O superuser mantém acesso global, independentemente destas flags." %}
 {% endblock %}
@@ -11,18 +11,28 @@
 {% endblock %}
 
 {% block plataforma_content %}
+    <section class="features-intro">
+        <div class="features-intro-copy">
+            <h2>{% trans "Mapa de ativação por entidade" %}</h2>
+            <p>{% trans "Usa esta área para confirmar a base do plano, perceber os overrides já aplicados e decidir o estado final de cada feature para empresas ou contas individuais." %}</p>
+        </div>
+        <div class="features-intro-chip">
+            <span>{% trans "Overrides em tempo real" %}</span>
+        </div>
+    </section>
+
     <div class="grid-cards features-stats-grid">
-        <div class="card">
+        <div class="card features-stat-card">
             <div class="metric-label">{% trans "Empresas configuráveis" %}</div>
             <div class="metric-value">{{ entidades_empresa|length }}</div>
             <div class="metric-note">{% trans "Entidades com plano empresarial ou gestão manual." %}</div>
         </div>
-        <div class="card">
+        <div class="card features-stat-card">
             <div class="metric-label">{% trans "Contas individuais" %}</div>
             <div class="metric-value">{{ entidades_individuais|length }}</div>
             <div class="metric-note">{% trans "Perfis individuais com features controláveis." %}</div>
         </div>
-        <div class="card">
+        <div class="card features-stat-card">
             <div class="metric-label">{% trans "Features no catálogo" %}</div>
             <div class="metric-value">{{ total_features_catalogo }}</div>
             <div class="metric-note">{% trans "Conjunto atual de funcionalidades configuráveis." %}</div>
@@ -30,46 +40,64 @@
     </div>
 
     <div class="features-layout">
-        <div class="features-card">
-            <h2>{% trans "Empresas" %}</h2>
+        <aside class="features-card features-sidebar-card">
+            <div class="features-section-head">
+                <h2>{% trans "Empresas" %}</h2>
+                <span class="features-section-count">{{ entidades_empresa|length }}</span>
+            </div>
             <p class="features-note">{% trans "Escolhe uma empresa para ver a base do plano e os overrides aplicados." %}</p>
             <div class="entity-list">
                 {% for item in entidades_empresa %}
                     <a href="?tipo=empresa&alvo={{ item.pk }}" class="entity-link {% if tipo_alvo == 'empresa' and alvo and alvo.pk == item.pk %}active{% endif %}">
-                        <strong>{{ item.label }}</strong>
+                        <span class="entity-title">{{ item.label }}</span>
                         <span class="entity-meta">{{ item.subtitulo }}</span>
-                        <span class="entity-count">{{ item.features_ativas }} {% trans "features ativas" %}</span>
+                        <span class="entity-count">{{ item.features_ativas }} {% trans "ativas" %}</span>
                     </a>
                 {% empty %}
-                    <div class="entity-meta">{% trans "Ainda não existem empresas para configurar." %}</div>
+                    <div class="features-empty">{% trans "Ainda não existem empresas para configurar." %}</div>
                 {% endfor %}
             </div>
 
-            <h2 class="features-individuais-title">{% trans "Contas individuais" %}</h2>
+            <div class="features-section-head features-individuais-title">
+                <h2>{% trans "Contas individuais" %}</h2>
+                <span class="features-section-count">{{ entidades_individuais|length }}</span>
+            </div>
             <p class="features-note">{% trans "Aqui podes ativar features para perfis individuais sem empresa associada." %}</p>
             <div class="entity-list">
                 {% for item in entidades_individuais %}
                     <a href="?tipo=individual&alvo={{ item.pk }}" class="entity-link {% if tipo_alvo == 'individual' and alvo and alvo.pk == item.pk %}active{% endif %}">
-                        <strong>{{ item.label }}</strong>
+                        <span class="entity-title">{{ item.label }}</span>
                         <span class="entity-meta">{{ item.subtitulo }}</span>
-                        <span class="entity-count">{{ item.features_ativas }} {% trans "features ativas" %}</span>
+                        <span class="entity-count">{{ item.features_ativas }} {% trans "ativas" %}</span>
                     </a>
                 {% empty %}
-                    <div class="entity-meta">{% trans "Ainda não existem contas individuais para configurar." %}</div>
+                    <div class="features-empty">{% trans "Ainda não existem contas individuais para configurar." %}</div>
                 {% endfor %}
             </div>
-        </div>
+        </aside>
 
         <div class="features-card">
             {% if alvo %}
-                <h2>
-                    {% trans "Features de" %}
-                    {% if tipo_alvo == "empresa" %}
-                        {{ alvo.nome }}
-                    {% else %}
-                        {{ alvo.user.get_full_name|default:alvo.user.username }}
-                    {% endif %}
-                </h2>
+                <div class="features-target-banner">
+                    <div>
+                        <span class="features-target-kicker">
+                            {% if tipo_alvo == "empresa" %}
+                                {% trans "Empresa selecionada" %}
+                            {% else %}
+                                {% trans "Conta individual selecionada" %}
+                            {% endif %}
+                        </span>
+                        <h2>
+                            {% trans "Features de" %}
+                            {% if tipo_alvo == "empresa" %}
+                                {{ alvo.nome }}
+                            {% else %}
+                                {{ alvo.user.get_full_name|default:alvo.user.username }}
+                            {% endif %}
+                        </h2>
+                    </div>
+                    <span class="features-target-summary">{{ total_features_catalogo }} {% trans "no catálogo" %}</span>
+                </div>
                 <p class="features-note">
                     {% trans "Cada checkbox define o estado final da feature para esta entidade. Sem override, vale a base do plano ou o valor default do sistema." %}
                 </p>
@@ -87,7 +115,7 @@
                                     <div class="feature-row">
                                         <label class="feature-head">
                                             <input type="checkbox" name="features" value="{{ item.key }}" {% if item.ativa_final %}checked{% endif %}>
-                                            <div>
+                                            <div class="feature-body">
                                                 <div class="feature-label">{{ item.label }}</div>
                                                 <div class="feature-desc">{{ item.description }}</div>
                                                 <div class="feature-badges">
@@ -120,10 +148,12 @@
                     </div>
                 </form>
             {% else %}
-                <h2>{% trans "Seleciona uma entidade" %}</h2>
-                <p class="features-note">
-                    {% trans "Escolhe uma empresa ou conta individual no painel lateral para ver as features atuais e ajustar os checkboxes." %}
-                </p>
+                <div class="features-empty-state">
+                    <h2>{% trans "Seleciona uma entidade" %}</h2>
+                    <p class="features-note">
+                        {% trans "Escolhe uma empresa ou conta individual no painel lateral para ver as features atuais e ajustar os checkboxes." %}
+                    </p>
+                </div>
             {% endif %}
         </div>
     </div>

@@ -25,21 +25,21 @@ class BaseMovimentoFinanceiroForm(forms.ModelForm):
             "observacoes",
         ]
         widgets = {
-            "categoria": forms.Select(attrs={"class": "finance-field"}),
-            "metodo_pagamento": forms.Select(attrs={"class": "finance-field"}),
-            "valor_bruto": forms.NumberInput(attrs={"class": "finance-field", "step": "0.01", "min": "0"}),
-            "valor_desconto": forms.NumberInput(attrs={"class": "finance-field", "step": "0.01", "min": "0"}),
-            "valor_imposto": forms.NumberInput(attrs={"class": "finance-field", "step": "0.01", "min": "0"}),
-            "moeda": forms.TextInput(attrs={"class": "finance-field"}),
-            "descricao": forms.TextInput(attrs={"class": "finance-field"}),
-            "numero_documento": forms.TextInput(attrs={"class": "finance-field"}),
-            "entidade_nome": forms.TextInput(attrs={"class": "finance-field"}),
-            "referencia": forms.TextInput(attrs={"class": "finance-field"}),
-            "data_competencia": forms.DateInput(attrs={"class": "finance-field", "type": "date"}),
-            "data_vencimento": forms.DateInput(attrs={"class": "finance-field", "type": "date"}),
-            "data_pagamento": forms.DateInput(attrs={"class": "finance-field", "type": "date"}),
-            "estado": forms.Select(attrs={"class": "finance-field"}),
-            "observacoes": forms.Textarea(attrs={"class": "finance-field", "rows": 3}),
+            "categoria": forms.Select(),
+            "metodo_pagamento": forms.Select(),
+            "valor_bruto": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
+            "valor_desconto": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
+            "valor_imposto": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
+            "moeda": forms.TextInput(),
+            "descricao": forms.TextInput(),
+            "numero_documento": forms.TextInput(),
+            "entidade_nome": forms.TextInput(),
+            "referencia": forms.TextInput(),
+            "data_competencia": forms.DateInput(attrs={"type": "date"}),
+            "data_vencimento": forms.DateInput(attrs={"type": "date"}),
+            "data_pagamento": forms.DateInput(attrs={"type": "date"}),
+            "estado": forms.Select(),
+            "observacoes": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
@@ -70,7 +70,7 @@ class EntradaValorForm(BaseMovimentoFinanceiroForm):
         ("outro", "Outro"),
     ]
 
-    categoria = forms.ChoiceField(choices=CATEGORIAS, widget=forms.Select(attrs={"class": "finance-field"}))
+    categoria = forms.ChoiceField(choices=CATEGORIAS, widget=forms.Select())
 
     def save(self, commit=True):
         movimento = super().save(commit=False)
@@ -98,7 +98,7 @@ class SaidaValorForm(BaseMovimentoFinanceiroForm):
         ("outro", "Outro"),
     ]
 
-    categoria = forms.ChoiceField(choices=CATEGORIAS, widget=forms.Select(attrs={"class": "finance-field"}))
+    categoria = forms.ChoiceField(choices=CATEGORIAS, widget=forms.Select())
 
     def save(self, commit=True):
         movimento = super().save(commit=False)

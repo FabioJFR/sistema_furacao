@@ -12,12 +12,11 @@
     <div class="sm-shell">
         <div class="sm-hero">
             <div>
-                <div class="sm-eyebrow">{% trans "Empregados" %}</div>
                 <h1 class="sm-title">
                     {% if titulo %}
-                        {{ titulo }}
+                        📝 {{ titulo }}
                     {% else %}
-                        {% trans "Empregados pendentes de aprovação" %}
+                        📝 {% trans "Empregados pendentes de aprovação" %}
                     {% endif %}
                 </h1>
                 <p class="sm-subtitle">{% trans "Área de validação de novos registos antes de entrarem como trabalhadores aprovados na plataforma." %}</p>
@@ -27,13 +26,22 @@
 
         {% if empregados %}
             <div class="sm-table-card">
+                <div class="sm-table-header">
+                    <div>
+                        <h2 class="sm-section-title">{% trans "Lista de pendentes" %}</h2>
+                        <p class="sm-section-copy">{% trans "Valide rapidamente novos colaboradores, reveja os dados principais e aprove ou rejeite cada pedido." %}</p>
+                    </div>
+                    <div class="sm-results-chip">
+                        {{ empregados|length }} {% trans "resultado(s)" %}
+                    </div>
+                </div>
                 <div class="sm-table-wrap">
                     <table class="sm-table">
                             <thead>
                                 <tr>
-                                    <th>{% trans "Nome" %}</th>
-                                    <th>{% trans "Email" %}</th>
-                                    <th>{% trans "Função" %}</th>
+                                    <th>{% trans "Colaborador" %}</th>
+                                    <th>{% trans "Contacto" %}</th>
+                                    <th>{% trans "Perfil" %}</th>
                                     <th>{% trans "Registo" %}</th>
                                     <th>{% trans "Estado" %}</th>
                                     <th>{% trans "Data admissão" %}</th>
@@ -43,14 +51,22 @@
                             <tbody>
                                 {% for empregado in empregados %}
                                     <tr>
-                                        <td>{{ empregado.nome }}</td>
-                                        <td>{{ empregado.email|default:"-" }}</td>
-                                        <td>{{ empregado.get_funcao_display|default:"-" }}</td>
-                                        <td>{{ empregado.data_registo|date:"d/m/Y H:i"|default:"-" }}</td>
-                                        <td><span class="sm-pill sm-pill-warning">{% trans "Pendente" %}</span></td>
-                                        <td>{{ empregado.data_admissao|date:"d/m/Y"|default:"-" }}</td>
                                         <td>
-                                            <div class="sm-filter-actions">
+                                            <div class="sm-data-primary">{{ empregado.nome }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="sm-data-secondary">{{ empregado.email|default:"-" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="sm-data-primary">{{ empregado.get_funcao_display|default:"-" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="sm-data-primary">{{ empregado.data_registo|date:"d/m/Y H:i"|default:"-" }}</div>
+                                        </td>
+                                        <td><span class="sm-pill sm-pill-warning">{% trans "Pendente" %}</span></td>
+                                        <td><div class="sm-data-primary">{{ empregado.data_admissao|date:"d/m/Y"|default:"-" }}</div></td>
+                                        <td>
+                                            <div class="sm-cell-stack">
                                                 <a href="{{ empregado.get_absolute_url }}" class="sm-btn sm-btn-secondary">{% trans "Ver" %}</a>
                                                 <form method="post" action="{% url 'projetos:empregado_aprovar' empregado.id %}">
                                                     {% csrf_token %}

@@ -26,9 +26,9 @@ class MaquinaAvariaAdminUpdateForm(forms.ModelForm):
         model = MaquinaAvaria
         fields = ["responsavel_empregado", "status", "solucao"]
         widgets = {
-            "responsavel_empregado": forms.Select(attrs={"class": "form-control"}),
-            "status": forms.Select(attrs={"class": "form-control"}),
-            "solucao": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            "responsavel_empregado": forms.Select(),
+            "status": forms.Select(),
+            "solucao": forms.Textarea(attrs={"rows": 4}),
         }
 
     def __init__(self, *args, empresa_id=None, **kwargs):
@@ -45,6 +45,6 @@ class MaquinaAvariaEmpregadoUpdateForm(forms.ModelForm):
         model = MaquinaAvaria
         fields = ["status", "solucao"]
         widgets = {
-            "status": forms.Select(attrs={"class": "form-control"}),
-            "solucao": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            "status": forms.Select(),
+            "solucao": forms.Textarea(attrs={"rows": 4}),
         }

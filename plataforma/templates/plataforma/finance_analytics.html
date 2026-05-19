@@ -1,8 +1,11 @@
 {% extends "plataforma/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
-{% block page_title %}{{ titulo }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/finance_analytics.css' %}">
+{% endblock %}
+{% block page_title %}💶 {{ titulo }}{% endblock %}
 
 {% block page_description %}
 {% trans "Resumo financeiro da plataforma com entradas, saídas e movimentos recentes." %}
@@ -13,43 +16,45 @@
 {% endblock %}
 
 {% block plataforma_content %}
-<div class="grid-cards">
-    <div class="card">
-        <div class="metric-label">{% trans "Total de movimentos" %}</div>
-        <div class="metric-value">{{ total_movimentos }}</div>
+<div class="fa-page">
+    <div class="fa-metrics">
+    <div class="fa-metric-card">
+        <div class="fa-metric-label">{% trans "Total de movimentos" %}</div>
+        <div class="fa-metric-value">{{ total_movimentos }}</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Entradas" %}</div>
-        <div class="metric-value">{{ total_entradas }}€</div>
+    <div class="fa-metric-card">
+        <div class="fa-metric-label">{% trans "Entradas" %}</div>
+        <div class="fa-metric-value">{{ total_entradas }}€</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Saídas" %}</div>
-        <div class="metric-value">{{ total_saidas }}€</div>
+    <div class="fa-metric-card">
+        <div class="fa-metric-label">{% trans "Saídas" %}</div>
+        <div class="fa-metric-value">{{ total_saidas }}€</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Saldo" %}</div>
-        <div class="metric-value">{{ saldo }}€</div>
+    <div class="fa-metric-card fa-metric-card-balance">
+        <div class="fa-metric-label">{% trans "Saldo" %}</div>
+        <div class="fa-metric-value">{{ saldo }}€</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Pendentes" %}</div>
-        <div class="metric-value">{{ movimentos_pendentes }}</div>
+    <div class="fa-metric-card">
+        <div class="fa-metric-label">{% trans "Pendentes" %}</div>
+        <div class="fa-metric-value">{{ movimentos_pendentes }}</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Pagos" %}</div>
-        <div class="metric-value">{{ movimentos_pagos }}</div>
+    <div class="fa-metric-card">
+        <div class="fa-metric-label">{% trans "Pagos" %}</div>
+        <div class="fa-metric-value">{{ movimentos_pagos }}</div>
     </div>
 </div>
 
-<div class="card">
-    <div class="section-title">
+<div class="fa-table-card">
+    <div class="fa-table-header">
         <div>
-                    <h2>{% trans "Últimos movimentos" %}</h2>
-                    <p>{% trans "Visão rápida dos registos financeiros mais recentes." %}</p>
+            <h2 class="fa-section-title">{% trans "Últimos movimentos" %}</h2>
+            <p class="fa-section-copy">{% trans "Visão rápida dos registos financeiros mais recentes da plataforma, com destino, estado e vencimento." %}</p>
         </div>
+        <div class="fa-results-chip">{{ ultimos_movimentos|length }} {% trans "movimento(s)" %}</div>
     </div>
 
-    <div class="table-wrap">
-        <table>
+    <div class="fa-table-wrap">
+        <table class="fa-table">
             <thead>
                 <tr>
                     <th>{% trans "Destino" %}</th>
@@ -64,9 +69,9 @@
                 {% for movimento in ultimos_movimentos %}
                     <tr>
                         <td>{{ movimento.destino_label }}</td>
-                        <td>{{ movimento.get_tipo_movimento_display }}</td>
+                        <td><span class="fa-type">{{ movimento.get_tipo_movimento_display }}</span></td>
                         <td>
-                            <span class="badge badge-{{ movimento.estado }}">
+                            <span class="fa-badge fa-badge-{{ movimento.estado }}">
                                 {{ movimento.get_estado_display }}
                             </span>
                         </td>
@@ -76,11 +81,12 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="6">{% trans "Ainda não existem movimentos financeiros registados." %}</td>
+                        <td colspan="6" class="fa-empty">{% trans "Ainda não existem movimentos financeiros registados." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+</div>
 </div>
 {% endblock %}

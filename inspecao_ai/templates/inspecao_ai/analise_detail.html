@@ -1,230 +1,212 @@
 {% extends base_template %}
-{% load static  i18n %}
+{% load static i18n %}
 
 {% block title %}{{ analise.nome }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/pages.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="flex items-start justify-between gap-4 flex-wrap mb-6">
-    <div>
-        <h1 class="text-3xl font-bold text-slate-900">{{ analise.nome }}</h1>
-        <p class="text-slate-600 mt-2">
-            {{ analise.get_tipo_documento_display }} · {{ analise.criado_em|date:"d/m/Y H:i" }}
-        </p>
-    </div>
-    <div class="flex flex-wrap gap-3">
-        <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Retroceder" %}</a>
-        {% if not analise.guardada %}
-            <form method="post" action="{% url 'inspecao_ai:analise_guardar' analise.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">{% trans "Guardar análise" %}</button>
-            </form>
-        {% endif %}
-        <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-secondary">{% trans "Nova análise com motor atual" %}</button>
-        </form>
-    </div>
-</div>
-
-{% if not analise.guardada %}
-    <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
-        {% trans "Esta análise ainda não foi guardada no histórico. Revê o resultado e carrega em" %} <strong>{% trans "Guardar análise" %}</strong> {% trans "se quiseres mantê-la." %}
-    </div>
-{% endif %}
-
-<div class="mb-6 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-900">
-    {% trans "O botão" %} <strong>{% trans "Nova análise com motor atual" %}</strong> {% trans "cria uma análise nova com a mesma foto, usando as melhorias mais recentes da AI. A análise atual não é alterada." %}
-</div>
-
-{% if analise.tipo_documento == "relatorio_trabalhador" %}
-    <div class="mb-6 rounded-2xl border border-violet-200 bg-violet-50 p-4">
-        <div class="text-violet-900 font-semibold mb-3">{% trans "Reanálise rápida por zona do relatório" %}</div>
-        <div class="text-violet-800 text-sm mb-4">
-            {% trans "Usa estes atalhos para criar uma nova análise focada só numa zona do relatório, sem voltares ao formulário." %}
+<div class="ai-mobile-scale ia-page-shell">
+    <section class="ia-page-header">
+        <div class="ia-page-header-copy">
+            <h1>🔎 {{ analise.nome }}</h1>
+            <p>{{ analise.get_tipo_documento_display }} · {{ analise.criado_em|date:"d/m/Y H:i" }}</p>
         </div>
-        <div class="flex flex-wrap gap-3">
-            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="relatorio_focus" value="data">
-                <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Data" %}</button>
-            </form>
-            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="relatorio_focus" value="turno">
-                <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Turno" %}</button>
-            </form>
-            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="relatorio_focus" value="equipa">
-                <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Equipa" %}</button>
-            </form>
-            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="relatorio_focus" value="observacoes">
-                <button type="submit" class="btn btn-secondary">{% trans "Focar área central do relatório" %}</button>
-            </form>
-        </div>
-    </div>
-{% endif %}
-
-{% if sugestoes_reprocessamento %}
-    <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-        <div class="text-emerald-900 font-semibold mb-3">{% trans "Próxima ação sugerida pela validação" %}</div>
-        <div class="space-y-3">
-            {% for sugestao in sugestoes_reprocessamento %}
-                <div class="rounded-xl border border-emerald-200 bg-white px-4 py-3 flex items-start justify-between gap-4 flex-wrap">
-                    <div>
-                        <div class="font-medium text-slate-900">{{ sugestao.label }}</div>
-                        <div class="text-sm text-slate-600 mt-1">{{ sugestao.reason }}</div>
-                    </div>
-                    <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="relatorio_focus" value="{{ sugestao.focus }}">
-                        <button type="submit" class="btn btn-primary">{% trans "Executar sugestão" %}</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
-
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <div>
-                <h2 class="text-xl font-semibold text-slate-900">{% trans "Imagem original" %}</h2>
-                <p class="text-sm text-slate-500 mt-1">{% trans "Foto base usada na análise. Podes ajustar a visualização no browser sem alterar o ficheiro." %}</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <label class="text-sm text-slate-600">{% trans "Zoom" %}
-                <input id="image-zoom" type="range" min="1" max="2.5" step="0.1" value="1" class="w-full mt-2">
-            </label>
-            <label class="text-sm text-slate-600">{% trans "Contraste" %}
-                <input id="image-contrast" type="range" min="0.7" max="2" step="0.05" value="1" class="w-full mt-2">
-            </label>
-            <label class="text-sm text-slate-600">{% trans "Luminosidade" %}
-                <input id="image-brightness" type="range" min="0.7" max="1.8" step="0.05" value="1" class="w-full mt-2">
-            </label>
-        </div>
-        <div class="relative inline-block w-full overflow-auto rounded-xl border border-slate-200 bg-slate-50">
-            <img id="analise-imagem-original" src="{{ analise.imagem_original.url }}" alt="{{ analise.nome }}" class="w-full rounded-xl border border-slate-200 origin-top-left transition-transform duration-150">
-            {% if analise.metadados.area_prioritaria_bbox and analise.metadados.largura and analise.metadados.altura %}
-                {% widthratio analise.metadados.area_prioritaria_bbox.x_min analise.metadados.largura 100 as area_left_original %}
-                {% widthratio analise.metadados.area_prioritaria_bbox.y_min analise.metadados.altura 100 as area_top_original %}
-                {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge_original %}
-                {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge_original %}
-                <div
-                    class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay"
-                    data-left="{{ area_left_original }}"
-                    data-top="{{ area_top_original }}"
-                    data-right-edge="{{ area_right_edge_original }}"
-                    data-bottom-edge="{{ area_bottom_edge_original }}"
-                ></div>
-                    <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">{% trans "Área prioritária da AI" %}</div>
+        <div class="ia-page-actions">
+            <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Retroceder" %}</a>
+            {% if not analise.guardada %}
+                <form method="post" action="{% url 'inspecao_ai:analise_guardar' analise.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">{% trans "Guardar análise" %}</button>
+                </form>
             {% endif %}
+            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">{% trans "Nova análise com motor atual" %}</button>
+            </form>
         </div>
+    </section>
+
+    {% if not analise.guardada %}
+        <div class="ia-note-banner ia-note-banner-warning">
+            {% trans "Esta análise ainda não foi guardada no histórico. Revê o resultado e carrega em" %} <strong>{% trans "Guardar análise" %}</strong> {% trans "se quiseres mantê-la." %}
+        </div>
+    {% endif %}
+
+    <div class="ia-note-banner ia-note-banner-info">
+        {% trans "O botão" %} <strong>{% trans "Nova análise com motor atual" %}</strong> {% trans "cria uma análise nova com a mesma foto, usando as melhorias mais recentes da AI. A análise atual não é alterada." %}
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="mb-4">
-            <h2 class="text-xl font-semibold text-slate-900">{% trans "Imagem processada" %}</h2>
-            <p class="text-sm text-slate-500 mt-1">{% trans "Vista com guias e caixas da AI para perceber onde a leitura foi tentada." %}</p>
-        </div>
-        {% if analise.imagem_processada %}
-            <div class="relative inline-block w-full overflow-auto rounded-xl border border-slate-200 bg-slate-50">
-                <img id="analise-imagem-processada" src="{{ analise.imagem_processada.url }}" alt="Imagem processada" class="w-full rounded-xl border border-slate-200 origin-top-left transition-transform duration-150">
-                {% if analise.metadados.area_prioritaria_bbox and analise.metadados.largura and analise.metadados.altura %}
-                    {% widthratio analise.metadados.area_prioritaria_bbox.x_min analise.metadados.largura 100 as area_left %}
-                    {% widthratio analise.metadados.area_prioritaria_bbox.y_min analise.metadados.altura 100 as area_top %}
-                    {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge %}
-                    {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge %}
-                    <div
-                        class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay"
-                        data-left="{{ area_left }}"
-                        data-top="{{ area_top }}"
-                        data-right-edge="{{ area_right_edge }}"
-                        data-bottom-edge="{{ area_bottom_edge }}"
-                    ></div>
-                    <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">
-                        {% trans "Área prioritária da AI" %}
+
+    {% if analise.tipo_documento == "relatorio_trabalhador" %}
+        <section class="ia-section-card">
+            <div class="ia-section-head">
+                <h2>{% trans "Reanálise rápida por zona do relatório" %}</h2>
+                <p>{% trans "Usa estes atalhos para criar uma nova análise focada só numa zona do relatório, sem voltares ao formulário." %}</p>
+            </div>
+            <div class="ia-quick-actions-grid">
+                <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="relatorio_focus" value="data">
+                    <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Data" %}</button>
+                </form>
+                <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="relatorio_focus" value="turno">
+                    <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Turno" %}</button>
+                </form>
+                <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="relatorio_focus" value="equipa">
+                    <button type="submit" class="btn btn-secondary">{% trans "Focar área superior - Equipa" %}</button>
+                </form>
+                <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="relatorio_focus" value="observacoes">
+                    <button type="submit" class="btn btn-secondary">{% trans "Focar área central do relatório" %}</button>
+                </form>
+            </div>
+        </section>
+    {% endif %}
+
+    {% if sugestoes_reprocessamento %}
+        <section class="ia-section-card">
+            <div class="ia-section-head">
+                <h2>{% trans "Próxima ação sugerida pela validação" %}</h2>
+            </div>
+            <div class="ia-data-stack">
+                {% for sugestao in sugestoes_reprocessamento %}
+                    <div class="ia-info-card">
+                        <div class="ia-section-head-spread">
+                            <div>
+                                <div class="ia-table-title">{{ sugestao.label }}</div>
+                                <div class="ia-table-meta">{{ sugestao.reason }}</div>
+                            </div>
+                            <form method="post" action="{% url 'inspecao_ai:analise_reprocessar' analise.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="relatorio_focus" value="{{ sugestao.focus }}">
+                                <button type="submit" class="btn btn-primary">{% trans "Executar sugestão" %}</button>
+                            </form>
+                        </div>
                     </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="ia-detail-grid-2">
+        <div class="ia-visual-panel">
+            <div class="ia-section-head">
+                <h2>{% trans "Imagem original" %}</h2>
+                <p>{% trans "Foto base usada na análise. Podes ajustar a visualização no browser sem alterar o ficheiro." %}</p>
+            </div>
+            <div class="ia-visual-controls">
+                <label class="text-sm text-slate-600">{% trans "Zoom" %}
+                    <input id="image-zoom" type="range" min="1" max="2.5" step="0.1" value="1" class="w-full mt-2">
+                </label>
+                <label class="text-sm text-slate-600">{% trans "Contraste" %}
+                    <input id="image-contrast" type="range" min="0.7" max="2" step="0.05" value="1" class="w-full mt-2">
+                </label>
+                <label class="text-sm text-slate-600">{% trans "Luminosidade" %}
+                    <input id="image-brightness" type="range" min="0.7" max="1.8" step="0.05" value="1" class="w-full mt-2">
+                </label>
+            </div>
+            <div class="ia-visual-stage">
+                <img id="analise-imagem-original" src="{{ analise.imagem_original.url }}" alt="{{ analise.nome }}" class="w-full rounded-xl border border-slate-200 origin-top-left transition-transform duration-150">
+                {% if analise.metadados.area_prioritaria_bbox and analise.metadados.largura and analise.metadados.altura %}
+                    {% widthratio analise.metadados.area_prioritaria_bbox.x_min analise.metadados.largura 100 as area_left_original %}
+                    {% widthratio analise.metadados.area_prioritaria_bbox.y_min analise.metadados.altura 100 as area_top_original %}
+                    {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge_original %}
+                    {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge_original %}
+                    <div class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay" data-left="{{ area_left_original }}" data-top="{{ area_top_original }}" data-right-edge="{{ area_right_edge_original }}" data-bottom-edge="{{ area_bottom_edge_original }}"></div>
+                    <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">{% trans "Área prioritária da AI" %}</div>
                 {% endif %}
             </div>
-            {% if analise.metadados.area_prioritaria_bbox %}
-                <div class="mt-3 text-sm text-sky-700">
-                    {% trans "Área prioritária guardada:" %}
-                    <strong>
-                        x={{ analise.metadados.area_prioritaria_bbox.x_min }},
-                        y={{ analise.metadados.area_prioritaria_bbox.y_min }},
-                        x2={{ analise.metadados.area_prioritaria_bbox.x_max }},
-                        y2={{ analise.metadados.area_prioritaria_bbox.y_max }}
-                    </strong>
+        </div>
+
+        <div class="ia-visual-panel">
+            <div class="ia-section-head">
+                <h2>{% trans "Imagem processada" %}</h2>
+                <p>{% trans "Vista com guias e caixas da AI para perceber onde a leitura foi tentada." %}</p>
+            </div>
+            {% if analise.imagem_processada %}
+                <div class="ia-visual-stage">
+                    <img id="analise-imagem-processada" src="{{ analise.imagem_processada.url }}" alt="Imagem processada" class="w-full rounded-xl border border-slate-200 origin-top-left transition-transform duration-150">
+                    {% if analise.metadados.area_prioritaria_bbox and analise.metadados.largura and analise.metadados.altura %}
+                        {% widthratio analise.metadados.area_prioritaria_bbox.x_min analise.metadados.largura 100 as area_left %}
+                        {% widthratio analise.metadados.area_prioritaria_bbox.y_min analise.metadados.altura 100 as area_top %}
+                        {% widthratio analise.metadados.area_prioritaria_bbox.x_max analise.metadados.largura 100 as area_right_edge %}
+                        {% widthratio analise.metadados.area_prioritaria_bbox.y_max analise.metadados.altura 100 as area_bottom_edge %}
+                        <div class="absolute border-2 border-sky-500 bg-sky-400/10 rounded-lg pointer-events-none ai-priority-overlay" data-left="{{ area_left }}" data-top="{{ area_top }}" data-right-edge="{{ area_right_edge }}" data-bottom-edge="{{ area_bottom_edge }}"></div>
+                        <div class="absolute left-3 top-3 rounded-lg bg-sky-600/90 text-white text-xs px-3 py-1.5 shadow-sm">{% trans "Área prioritária da AI" %}</div>
+                    {% endif %}
                 </div>
-            {% endif %}
-        {% else %}
-            <div class="rounded-xl border border-dashed border-slate-300 p-8 text-slate-500">
-                {% trans "Ainda não existe imagem processada para esta análise." %}
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 max-h-[240px] overflow-hidden">
-        <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4">
-            <div class="flex items-center gap-2">
-                        <div class="text-sm text-slate-500 uppercase tracking-wide">{% trans "Estado" %}</div>
-                        <div class="text-xs text-slate-400">{% trans "Mostra o resultado geral, confiança e rotação aplicada." %}</div>
-            </div>
-        </div>
-        <div class="max-h-[178px] overflow-y-auto px-5 py-4">
-            <div class="text-2xl font-bold text-slate-900">{{ analise.get_estado_display }}</div>
-            <div class="mt-3 text-slate-600">{% trans "Marcador predominante:" %} <strong>{{ analise.get_marcador_predominante_display }}</strong></div>
-            <div class="mt-2 text-slate-600">{% trans "Texto detetado:" %} <strong>{% if analise.texto_detectado %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong></div>
-            <div class="mt-2 text-slate-600">{% trans "Confiança média:" %} <strong>{% if analise.confianca_media %}{{ analise.confianca_media|floatformat:2 }}{% else %}-{% endif %}</strong></div>
-            <div class="mt-2 text-slate-600">{% trans "Rotação aplicada:" %} <strong>{{ analise.metadados.rotacao_aplicada_graus|default:0 }}°</strong></div>
-        </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 max-h-[240px] overflow-hidden">
-        <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4">
-            <div class="flex items-center gap-2">
-                        <div class="text-sm text-slate-500 uppercase tracking-wide">{% trans "Contexto" %}</div>
-                        <div class="text-xs text-slate-400">{% trans "Mostra de onde veio a análise, que motor foi usado e que zona foi focada." %}</div>
-            </div>
-        </div>
-        <div class="max-h-[178px] overflow-y-auto px-5 py-4 text-slate-700">
-            <div><strong>{% trans "Projeto:" %}</strong> {% if analise.projeto %}{{ analise.projeto.nome }}{% else %}-{% endif %}</div>
-            <div class="mt-2"><strong>{% trans "Furo:" %}</strong> {% if analise.furo %}{{ analise.furo.nome }}{% else %}-{% endif %}</div>
-            <div class="mt-2"><strong>{% trans "Criado por:" %}</strong> {% if analise.criado_por %}{{ analise.criado_por.username }}{% else %}-{% endif %}</div>
-            <div class="mt-2"><strong>{% trans "Motor:" %}</strong> {{ analise.motor_analise }}</div>
-            {% if analise.metadados.opcoes_entrada.relatorio_focus %}
-                <div class="mt-2"><strong>{% trans "Zona focada:" %}</strong> {{ analise.metadados.opcoes_entrada.relatorio_focus }}</div>
+                {% if analise.metadados.area_prioritaria_bbox %}
+                    <div class="ia-table-meta" style="margin-top:12px;">
+                        {% trans "Área prioritária guardada:" %}
+                        <strong>x={{ analise.metadados.area_prioritaria_bbox.x_min }}, y={{ analise.metadados.area_prioritaria_bbox.y_min }}, x2={{ analise.metadados.area_prioritaria_bbox.x_max }}, y2={{ analise.metadados.area_prioritaria_bbox.y_max }}</strong>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="ia-empty-state">{% trans "Ainda não existe imagem processada para esta análise." %}</div>
             {% endif %}
         </div>
-    </div>
-</div>
+    </section>
 
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 max-h-[320px] overflow-hidden mb-6">
-    <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4">
-        <div class="flex items-center gap-2">
-            <div class="text-sm text-slate-500 uppercase tracking-wide">{% trans "Texto extraído / leitura estimada" %}</div>
-            <div class="text-xs text-slate-400">{% trans "Resume o que a AI conseguiu ler ou, quando não consegue, descreve a zona identificada." %}</div>
+    <section class="ia-detail-grid-2">
+        <div class="ia-detail-scroll-card">
+            <div class="ia-detail-scroll-head">
+                <div class="ia-table-title">{% trans "Estado" %}</div>
+                <div class="ia-table-meta">{% trans "Mostra o resultado geral, confiança e rotação aplicada." %}</div>
+            </div>
+            <div class="ia-detail-scroll-body">
+                <div class="ia-metric-value" style="font-size:2rem;">{{ analise.get_estado_display }}</div>
+                <div class="ia-data-chip-meta">{% trans "Marcador predominante:" %} <strong>{{ analise.get_marcador_predominante_display }}</strong></div>
+                <div class="ia-data-chip-meta">{% trans "Texto detetado:" %} <strong>{% if analise.texto_detectado %}{% trans "Sim" %}{% else %}{% trans "Não" %}{% endif %}</strong></div>
+                <div class="ia-data-chip-meta">{% trans "Confiança média:" %} <strong>{% if analise.confianca_media %}{{ analise.confianca_media|floatformat:2 }}{% else %}-{% endif %}</strong></div>
+                <div class="ia-data-chip-meta">{% trans "Rotação aplicada:" %} <strong>{{ analise.metadados.rotacao_aplicada_graus|default:0 }}°</strong></div>
+            </div>
         </div>
-    </div>
-    <div class="max-h-[258px] overflow-y-auto px-5 py-4 text-slate-700 whitespace-pre-line">
-        {% if analise.texto_extraido_bruto %}
-            {{ analise.texto_extraido_bruto }}
-        {% else %}
-            {% trans "Ainda sem OCR literal final. A análise atual já separa as zonas estruturais, tenta uma leitura heurística e prepara a imagem processada." %}
-        {% endif %}
-    </div>
-</div>
 
-{% if resumo_ai_relatorio %}
-    <div class="bg-white rounded-2xl shadow-sm border border-cyan-200 p-5 mb-6">
-        <h2 class="text-xl font-semibold text-slate-900 mb-3">{% trans "Resumo AI do relatório" %}</h2>
-        <div class="text-sm text-slate-500 mb-4">{% trans "Resumo estruturado do que a AI conseguiu identificar entre campos impressos e preenchimento manual do trabalhador." %}</div>
-            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 mb-4">
+        <div class="ia-detail-scroll-card">
+            <div class="ia-detail-scroll-head">
+                <div class="ia-table-title">{% trans "Contexto" %}</div>
+                <div class="ia-table-meta">{% trans "Mostra de onde veio a análise, que motor foi usado e que zona foi focada." %}</div>
+            </div>
+            <div class="ia-detail-scroll-body">
+                <div class="ia-data-chip-meta"><strong>{% trans "Projeto:" %}</strong> {% if analise.projeto %}{{ analise.projeto.nome }}{% else %}-{% endif %}</div>
+                <div class="ia-data-chip-meta"><strong>{% trans "Furo:" %}</strong> {% if analise.furo %}{{ analise.furo.nome }}{% else %}-{% endif %}</div>
+                <div class="ia-data-chip-meta"><strong>{% trans "Criado por:" %}</strong> {% if analise.criado_por %}{{ analise.criado_por.username }}{% else %}-{% endif %}</div>
+                <div class="ia-data-chip-meta"><strong>{% trans "Motor:" %}</strong> {{ analise.motor_analise }}</div>
+                {% if analise.metadados.opcoes_entrada.relatorio_focus %}
+                    <div class="ia-data-chip-meta"><strong>{% trans "Zona focada:" %}</strong> {{ analise.metadados.opcoes_entrada.relatorio_focus }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="ia-detail-scroll-card">
+        <div class="ia-detail-scroll-head">
+            <div class="ia-table-title">{% trans "Texto extraído / leitura estimada" %}</div>
+            <div class="ia-table-meta">{% trans "Resume o que a AI conseguiu ler ou, quando não consegue, descreve a zona identificada." %}</div>
+        </div>
+        <div class="ia-detail-scroll-body text-slate-700 whitespace-pre-line">
+            {% if analise.texto_extraido_bruto %}
+                {{ analise.texto_extraido_bruto }}
+            {% else %}
+                {% trans "Ainda sem OCR literal final. A análise atual já separa as zonas estruturais, tenta uma leitura heurística e prepara a imagem processada." %}
+            {% endif %}
+        </div>
+    </section>
+
+    {% if resumo_ai_relatorio %}
+        <section class="ia-section-card">
+            <div class="ia-section-head">
+                <h2>{% trans "Resumo AI do relatório" %}</h2>
+                <p>{% trans "Resumo estruturado do que a AI conseguiu identificar entre campos impressos e preenchimento manual do trabalhador." %}</p>
+            </div>
+            <div class="ia-note-banner">
                 <strong>{% trans "Furo associado ao relatório:" %}</strong>
                 {% if analise.furo %}
                     {{ analise.furo.nome }}
@@ -232,148 +214,136 @@
                 {% else %}
                     {% trans "Ainda sem furo associado" %}
                 {% endif %}
-            <div class="mt-2 text-slate-500">
-                {% trans "Esta associação é importante para interpretar o relatório no contexto certo e guardar depois a leitura final no furo correspondente." %}
+                <div class="ia-table-meta" style="margin-top:8px;">{% trans "Esta associação é importante para interpretar o relatório no contexto certo e guardar depois a leitura final no furo correspondente." %}</div>
             </div>
-        </div>
-        <div class="space-y-2">
-            {% for linha in resumo_ai_relatorio %}
-                <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm text-cyan-950">
-                    {{ linha }}
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
-
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
-    <div class="mb-4">
-            <h2 class="text-xl font-semibold text-slate-900">{% trans "Campos extraídos pela AI" %}</h2>
-            <p class="text-sm text-slate-500 mt-1">{% trans "Mostra onde a AI detetou campos, o que acha que leu e permite validar manualmente o valor correto." %}</p>
-    </div>
-    {% if analise.campos_extraidos.campos %}
-        <form method="post" action="{% url 'inspecao_ai:analise_corrigir_campos' analise.pk %}" class="space-y-3">
-            {% csrf_token %}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-slate-500">{% trans "Campos validados" %}</div>
-                    <div class="mt-2 text-2xl font-bold text-slate-900">{{ resumo_validacao.total_validados }}</div>
-                </div>
-                <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-emerald-700">{% trans "AI acertou" %}</div>
-                    <div class="mt-2 text-2xl font-bold text-emerald-900">{{ resumo_validacao.total_acertos }}</div>
-                </div>
-                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-rose-700">{% trans "AI falhou" %}</div>
-                    <div class="mt-2 text-2xl font-bold text-rose-900">{{ resumo_validacao.total_falhas }}</div>
-                </div>
-                <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <div class="text-xs uppercase tracking-wide text-sky-700">{% trans "Taxa de acerto" %}</div>
-                    <div class="mt-2 text-2xl font-bold text-sky-900">
-                        {% if resumo_validacao.taxa_acerto != None %}{{ resumo_validacao.taxa_acerto }}%{% else %}-{% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                {% trans "Podes validar manualmente o valor correto de cada campo. Isto ajuda a rever a análise e prepara dados úteis para a AI aprender mais tarde." %}
-            </div>
-            {% for campo in resumo_validacao.campos %}
-                <div class="rounded-xl border p-4 {% if campo.comparacao_estado == 'acertou' %}border-emerald-200 bg-emerald-50/40{% elif campo.comparacao_estado == 'falhou' %}border-rose-200 bg-rose-50/40{% else %}border-slate-200{% endif %}">
-                    <div class="font-semibold text-slate-900">{{ campo.campo }}</div>
-                    <div class="text-slate-700 mt-2">{{ campo.valor_lido|default:"-" }}</div>
-                    {% if campo.campo_impresso %}
-                        <div class="text-sm text-indigo-700 mt-2">
-                            {{ campo.campo_impresso }}
-                        </div>
-                    {% endif %}
-                    {% if campo.valor_preenchido_trabalhador %}
-                        <div class="text-sm text-violet-700 mt-2">
-                            {% trans "Valor escrito pelo trabalhador:" %} <strong>{{ campo.valor_preenchido_trabalhador }}</strong>
-                        </div>
-                    {% endif %}
-                    <div class="mt-3">
-                        {% if campo.comparacao_estado == "acertou" %}
-                            <span class="inline-flex rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">{% trans "AI acertou" %}</span>
-                        {% elif campo.comparacao_estado == "falhou" %}
-                            <span class="inline-flex rounded-full bg-rose-100 text-rose-800 text-xs font-semibold px-3 py-1">{% trans "AI falhou" %}</span>
-                        {% else %}
-                            <span class="inline-flex rounded-full bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1">{% trans "Sem validação" %}</span>
-                        {% endif %}
-                    </div>
-                    {% if campo.campo_semantico %}
-                        <div class="text-sm text-sky-700 mt-2">{% trans "Campo interpretado:" %} <strong>{{ campo.campo_semantico }}</strong></div>
-                    {% endif %}
-                    {% if campo.valor_metrico_estimado %}
-                        <div class="text-sm text-emerald-700 mt-2">{% trans "Medida estimada:" %} <strong>{{ campo.valor_metrico_estimado }}</strong></div>
-                    {% endif %}
-                    {% if campo.origem_valor_metrico %}
-                        <div class="text-sm text-amber-700 mt-2">{% trans "Origem da medida:" %} <strong>{{ campo.origem_valor_metrico }}</strong>{% if campo.passo_metrico_estimado %} · {% trans "passo estimado:" %} <strong>{{ campo.passo_metrico_estimado }}</strong>{% endif %}</div>
-                    {% endif %}
-                    <div class="text-sm text-slate-500 mt-2">
-                        {% trans "Leitura: estimada" %} ·
-                        {% if campo.ocr_aceite %}{% trans "OCR: aceite" %} ·{% else %}{% trans "OCR: não fiável" %} ·{% endif %}
-                        {% if campo.tipo_conteudo %}{% trans "Tipo:" %} {{ campo.tipo_conteudo }} · {% endif %}
-                        {% if campo.tipo_zona %}{% trans "Zona:" %} {{ campo.tipo_zona }} · {% endif %}
-                        {% trans "Confiança:" %} {{ campo.confianca|floatformat:2 }}
-                    </div>
-                    <div class="mt-4">
-                        <label class="form-label">{% trans "Valor validado pelo utilizador" %}</label>
-                        <input type="text" name="campo_validado_{{ forloop.counter0 }}" value="{{ campo.valor_validado|default:'' }}" class="form-control" placeholder="{% trans 'Escreve aqui o valor correto, se o conheceres' %}">
-                        {% if campo.validado_utilizador and campo.valor_validado %}
-                            <div class="mt-2 text-sm text-emerald-700">{% trans "Valor validado atual:" %} <strong>{{ campo.valor_validado }}</strong></div>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-            <div class="flex flex-wrap gap-3">
-                <button type="submit" class="btn btn-primary">{% trans "Guardar correções dos campos" %}</button>
-            </div>
-        </form>
-    {% else %}
-        <div class="text-slate-500">{% trans "Ainda não existem campos extraídos estruturados nesta análise." %}</div>
-    {% endif %}
-</div>
-
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="mb-4">
-            <h2 class="text-xl font-semibold text-slate-900">{% trans "Deteções guardadas" %}</h2>
-            <p class="text-sm text-slate-500 mt-1">{% trans "Lista das caixas e zonas persistidas para esta análise." %}</p>
-        </div>
-        {% if analise.deteccoes.all %}
-            <div class="space-y-3">
-                {% for deteccao in analise.deteccoes.all %}
-                    <div class="rounded-xl border border-slate-200 p-4">
-                        <div class="font-semibold text-slate-900">{{ deteccao.get_tipo_deteccao_display }}</div>
-                        <div class="text-slate-600 mt-2">
-                            {% trans "Cor:" %} <strong>{{ deteccao.get_marcador_cor_display }}</strong>
-                            {% if deteccao.confianca %} · {% trans "Confiança:" %} <strong>{{ deteccao.confianca|floatformat:2 }}</strong>{% endif %}
-                        </div>
-                        <div class="text-slate-600 mt-2">{% trans "Zona sugerida:" %} {{ deteccao.texto_sugerido|default:"-" }}</div>
-                        <div class="text-slate-500 mt-2 text-sm">{% trans "BBox:" %} {{ deteccao.caixa_delimitadora }}</div>
-                    </div>
+            <div class="ia-chip-list" style="margin-top:16px;">
+                {% for linha in resumo_ai_relatorio %}
+                    <div class="ia-data-chip" style="border-color:#a5f3fc; background:#ecfeff;">{{ linha }}</div>
                 {% endfor %}
             </div>
-        {% else %}
-            <div class="text-slate-500">{% trans "Sem deteções persistidas nesta análise." %}</div>
-        {% endif %}
-    </div>
+        </section>
+    {% endif %}
 
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="mb-4">
-            <h2 class="text-xl font-semibold text-slate-900">{% trans "Metadados" %}</h2>
-            <p class="text-sm text-slate-500 mt-1">{% trans "Detalhe técnico completo da análise, útil para rever o pipeline e os resultados do OCR." %}</p>
+    <section class="ia-section-card">
+        <div class="ia-section-head">
+            <h2>{% trans "Campos extraídos pela AI" %}</h2>
+            <p>{% trans "Mostra onde a AI detetou campos, o que acha que leu e permite validar manualmente o valor correto." %}</p>
         </div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">{{ analise.metadados }}</div>
-        {% if analise.observacoes %}
-            <h3 class="text-lg font-semibold text-slate-900 mt-5 mb-3">{% trans "Observações" %}</h3>
-            <div class="text-slate-700 whitespace-pre-line">{{ analise.observacoes }}</div>
+        {% if analise.campos_extraidos.campos %}
+            <form method="post" action="{% url 'inspecao_ai:analise_corrigir_campos' analise.pk %}" class="ia-data-stack">
+                {% csrf_token %}
+                <div class="ia-validation-summary">
+                    <div class="ia-validation-card">
+                        <div class="ia-metric-label">{% trans "Campos validados" %}</div>
+                        <div class="ia-metric-value" style="font-size:1.9rem;">{{ resumo_validacao.total_validados }}</div>
+                    </div>
+                    <div class="ia-validation-card" style="border-color:#a7f3d0; background:#ecfdf5;">
+                        <div class="ia-metric-label ia-metric-label-success">{% trans "AI acertou" %}</div>
+                        <div class="ia-metric-value ia-metric-value-success" style="font-size:1.9rem;">{{ resumo_validacao.total_acertos }}</div>
+                    </div>
+                    <div class="ia-validation-card" style="border-color:#fecdd3; background:#fff1f2;">
+                        <div class="ia-metric-label ia-metric-label-danger">{% trans "AI falhou" %}</div>
+                        <div class="ia-metric-value ia-metric-value-danger" style="font-size:1.9rem;">{{ resumo_validacao.total_falhas }}</div>
+                    </div>
+                    <div class="ia-validation-card" style="border-color:#bfdbfe; background:#eff6ff;">
+                        <div class="ia-metric-label" style="color:#1d4ed8;">{% trans "Taxa de acerto" %}</div>
+                        <div class="ia-metric-value" style="font-size:1.9rem; color:#1e3a8a;">{% if resumo_validacao.taxa_acerto != None %}{{ resumo_validacao.taxa_acerto }}%{% else %}-{% endif %}</div>
+                    </div>
+                </div>
+                <div class="ia-note-banner ia-note-banner-success">
+                    {% trans "Podes validar manualmente o valor correto de cada campo. Isto ajuda a rever a análise e prepara dados úteis para a AI aprender mais tarde." %}
+                </div>
+                {% for campo in resumo_validacao.campos %}
+                    <div class="ia-validation-field {% if campo.comparacao_estado == 'acertou' %}is-success{% elif campo.comparacao_estado == 'falhou' %}is-danger{% endif %}">
+                        <div class="ia-table-title">{{ campo.campo }}</div>
+                        <div class="ia-data-chip-meta" style="font-size:1rem; color:#0f172a;">{{ campo.valor_lido|default:"-" }}</div>
+                        {% if campo.campo_impresso %}
+                            <div class="ia-data-chip-meta" style="color:#4338ca;">{{ campo.campo_impresso }}</div>
+                        {% endif %}
+                        {% if campo.valor_preenchido_trabalhador %}
+                            <div class="ia-data-chip-meta" style="color:#6d28d9;">{% trans "Valor escrito pelo trabalhador:" %} <strong>{{ campo.valor_preenchido_trabalhador }}</strong></div>
+                        {% endif %}
+                        <div style="margin-top:12px;">
+                            {% if campo.comparacao_estado == "acertou" %}
+                                <span class="ia-state-badge is-success">{% trans "AI acertou" %}</span>
+                            {% elif campo.comparacao_estado == "falhou" %}
+                                <span class="ia-state-badge is-danger">{% trans "AI falhou" %}</span>
+                            {% else %}
+                                <span class="ia-state-badge is-neutral">{% trans "Sem validação" %}</span>
+                            {% endif %}
+                        </div>
+                        {% if campo.campo_semantico %}
+                            <div class="ia-data-chip-meta" style="color:#0369a1;">{% trans "Campo interpretado:" %} <strong>{{ campo.campo_semantico }}</strong></div>
+                        {% endif %}
+                        {% if campo.valor_metrico_estimado %}
+                            <div class="ia-data-chip-meta" style="color:#047857;">{% trans "Medida estimada:" %} <strong>{{ campo.valor_metrico_estimado }}</strong></div>
+                        {% endif %}
+                        {% if campo.origem_valor_metrico %}
+                            <div class="ia-data-chip-meta" style="color:#b45309;">{% trans "Origem da medida:" %} <strong>{{ campo.origem_valor_metrico }}</strong>{% if campo.passo_metrico_estimado %} · {% trans "passo estimado:" %} <strong>{{ campo.passo_metrico_estimado }}</strong>{% endif %}</div>
+                        {% endif %}
+                        <div class="ia-data-chip-meta">
+                            {% trans "Leitura: estimada" %} ·
+                            {% if campo.ocr_aceite %}{% trans "OCR: aceite" %} ·{% else %}{% trans "OCR: não fiável" %} ·{% endif %}
+                            {% if campo.tipo_conteudo %}{% trans "Tipo:" %} {{ campo.tipo_conteudo }} · {% endif %}
+                            {% if campo.tipo_zona %}{% trans "Zona:" %} {{ campo.tipo_zona }} · {% endif %}
+                            {% trans "Confiança:" %} {{ campo.confianca|floatformat:2 }}
+                        </div>
+                        <div style="margin-top:14px;">
+                            <label class="form-label">{% trans "Valor validado pelo utilizador" %}</label>
+                            <input type="text" name="campo_validado_{{ forloop.counter0 }}" value="{{ campo.valor_validado|default:'' }}" class="form-control" placeholder="{% trans 'Escreve aqui o valor correto, se o conheceres' %}">
+                            {% if campo.validado_utilizador and campo.valor_validado %}
+                                <div class="ia-data-chip-meta" style="color:#047857;">{% trans "Valor validado atual:" %} <strong>{{ campo.valor_validado }}</strong></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="ia-action-row">
+                    <button type="submit" class="btn btn-primary">{% trans "Guardar correções dos campos" %}</button>
+                </div>
+            </form>
+        {% else %}
+            <div class="ia-empty-state">{% trans "Ainda não existem campos extraídos estruturados nesta análise." %}</div>
         {% endif %}
-        {% if analise.erro_analise %}
-            <h3 class="text-lg font-semibold text-rose-700 mt-5 mb-3">{% trans "Erro de análise" %}</h3>
-            <div class="text-rose-700 whitespace-pre-line">{{ analise.erro_analise }}</div>
-        {% endif %}
-    </div>
+    </section>
+
+    <section class="ia-detail-grid-2">
+        <div class="ia-section-card">
+            <div class="ia-section-head">
+                <h2>{% trans "Deteções guardadas" %}</h2>
+                <p>{% trans "Lista das caixas e zonas persistidas para esta análise." %}</p>
+            </div>
+            {% if analise.deteccoes.all %}
+                <div class="ia-chip-list">
+                    {% for deteccao in analise.deteccoes.all %}
+                        <div class="ia-info-card">
+                            <div class="ia-table-title">{{ deteccao.get_tipo_deteccao_display }}</div>
+                            <div class="ia-data-chip-meta">{% trans "Cor:" %} <strong>{{ deteccao.get_marcador_cor_display }}</strong>{% if deteccao.confianca %} · {% trans "Confiança:" %} <strong>{{ deteccao.confianca|floatformat:2 }}</strong>{% endif %}</div>
+                            <div class="ia-data-chip-meta">{% trans "Zona sugerida:" %} {{ deteccao.texto_sugerido|default:"-" }}</div>
+                            <div class="ia-table-meta">{% trans "BBox:" %} {{ deteccao.caixa_delimitadora }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="ia-empty-state">{% trans "Sem deteções persistidas nesta análise." %}</div>
+            {% endif %}
+        </div>
+
+        <div class="ia-section-card">
+            <div class="ia-section-head">
+                <h2>{% trans "Metadados" %}</h2>
+                <p>{% trans "Detalhe técnico completo da análise, útil para rever o pipeline e os resultados do OCR." %}</p>
+            </div>
+            <div class="ia-meta-box whitespace-pre-wrap">{{ analise.metadados }}</div>
+            {% if analise.observacoes %}
+                <h3 class="text-lg font-semibold text-slate-900 mt-5 mb-3">{% trans "Observações" %}</h3>
+                <div class="text-slate-700 whitespace-pre-line">{{ analise.observacoes }}</div>
+            {% endif %}
+            {% if analise.erro_analise %}
+                <h3 class="text-lg font-semibold text-rose-700 mt-5 mb-3">{% trans "Erro de análise" %}</h3>
+                <div class="text-rose-700 whitespace-pre-line">{{ analise.erro_analise }}</div>
+            {% endif %}
+        </div>
+    </section>
 </div>
 <script src="{% static 'js/inspecao_ai/analise_detail.js' %}"></script>
 {% endblock %}

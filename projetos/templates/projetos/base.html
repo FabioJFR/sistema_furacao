@@ -86,7 +86,10 @@
                             <a href="{% url 'plataforma:onboarding_empresa' %}" role="menuitem">🏢 {% trans "Nova Empresa" %}</a>
                             <a href="{% url 'plataforma:plano_list' %}" role="menuitem">💳 {% trans "Planos" %}</a>
                             <a href="{% url 'plataforma:subscricao_list' %}" role="menuitem">🧾 {% trans "Subscrições" %}</a>
-                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças" %}</a>
+                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças da Plataforma" %}</a>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'plataforma:financas_paypal_config' %}" role="menuitem">🅿️ {% trans "Conta PayPal" %}</a>
+                            {% endif %}
                             <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
                             <a href="{% url 'dispositivos:dashboard' %}" role="menuitem">📡 {% trans "Dispositivos" %}</a>
                             {% if request.user.is_superuser %}
@@ -153,10 +156,6 @@
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Finanças' %}">
                             <a href="{% url 'projetos:despesa_list_admin' %}" role="menuitem">💶 {% trans "Minhas despesas" %}</a>
                             <a href="{% url 'projetos:definicoes_financeiras_admin' %}" role="menuitem">⚙️ {% trans "Definições financeiras" %}</a>
-                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">📊 {% trans "Finanças da Plataforma" %}</a>
-                            {% if request.user.is_superuser %}
-                                <a href="{% url 'plataforma:financas_paypal_config' %}" role="menuitem">🅿️ {% trans "Conta PayPal" %}</a>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -178,7 +177,6 @@
                             <a href="{% url 'projetos:graficos_rentabilidade_dashboard' %}" role="menuitem">📈 {% trans "Rentabilidade" %}</a>
                             <a href="{% url 'projetos:graficos_produtividade_dashboard' %}" role="menuitem">👥 {% trans "Produtividade Equipa" %}</a>
                             <a href="{% url 'projetos:graficos_alertas_dashboard' %}" role="menuitem">🚨 {% trans "Alertas Operacionais" %}</a>
-                            <a href="{% url 'plataforma:features_dashboard' %}" role="menuitem">🧩 {% trans "Features" %}</a>
                         </div>
                     </div>
 

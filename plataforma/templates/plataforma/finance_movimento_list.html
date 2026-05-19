@@ -1,8 +1,13 @@
 {% extends "plataforma/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{{ titulo }}{% endblock %}
-{% block page_title %}{{ titulo }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plataforma/finance_movimento_list.css' %}">
+{% endblock %}
+{% block page_title %}
+{% if tipo_pagina == "entrada" %}💶 {{ titulo }}{% else %}💸 {{ titulo }}{% endif %}
+{% endblock %}
 
 {% block page_description %}
 {{ descricao }}
@@ -13,12 +18,13 @@
 {% endblock %}
 
 {% block plataforma_content %}
+<div class="fm-page">
 {% if tipo_pagina == "saida" %}
-    <div class="card card-mb-24">
-        <div class="section-title">
+    <div class="fm-form-card">
+        <div class="fm-section-head">
             <div>
-                <h2>{% if movimento_edicao %}{% trans "Editar despesa" %}{% else %}{% trans "Adicionar despesa" %}{% endif %}</h2>
-                <p>
+                <h2 class="fm-section-title">{% if movimento_edicao %}{% trans "Editar despesa" %}{% else %}{% trans "Adicionar despesa" %}{% endif %}</h2>
+                <p class="fm-section-copy">
                     {% if movimento_edicao %}
                         {% trans "Estás a editar uma despesa já registada da plataforma." %}
                     {% else %}
@@ -34,18 +40,18 @@
                 <input type="hidden" name="movimento_id" value="{{ movimento_edicao.pk }}">
             {% endif %}
             {% for field in form %}
-                <div class="finance-form-field {% if field.name == 'observacoes' %}finance-form-field--full{% endif %}">
+                <div class="fm-form-field {% if field.name == 'observacoes' %}fm-form-field--full{% endif %}">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.help_text %}
-                        <span class="finance-help">{{ field.help_text }}</span>
+                        <span class="fm-help">{{ field.help_text }}</span>
                     {% endif %}
                     {% if field.errors %}
-                        <div class="finance-error">{{ field.errors }}</div>
+                        <div class="fm-error">{{ field.errors }}</div>
                     {% endif %}
                 </div>
             {% endfor %}
-            <div class="finance-form-actions">
+            <div class="fm-form-actions">
                 <button type="submit" class="btn btn-primary">{% if movimento_edicao %}{% trans "Guardar alterações" %}{% else %}{% trans "Guardar despesa" %}{% endif %}</button>
                 {% if movimento_edicao %}
                     <a href="{% url 'plataforma:financas_saida_list' %}" class="btn btn-light">{% trans "Cancelar edição" %}</a>
@@ -55,35 +61,36 @@
     </div>
 {% endif %}
 
-<div class="grid-cards grid-cards-four">
-    <div class="card">
-        <div class="metric-label">{% trans "Total de movimentos" %}</div>
-        <div class="metric-value">{{ total_movimentos }}</div>
+<div class="fm-metrics">
+    <div class="fm-metric-card">
+        <div class="fm-metric-label">{% trans "Total de movimentos" %}</div>
+        <div class="fm-metric-value">{{ total_movimentos }}</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Valor total" %}</div>
-        <div class="metric-value">{{ total_valor }}€</div>
+    <div class="fm-metric-card">
+        <div class="fm-metric-label">{% trans "Valor total" %}</div>
+        <div class="fm-metric-value">{{ total_valor }}€</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Pagos" %}</div>
-        <div class="metric-value">{{ total_pagos }}</div>
+    <div class="fm-metric-card">
+        <div class="fm-metric-label">{% trans "Pagos" %}</div>
+        <div class="fm-metric-value">{{ total_pagos }}</div>
     </div>
-    <div class="card">
-        <div class="metric-label">{% trans "Pendentes" %}</div>
-        <div class="metric-value">{{ total_pendentes }}</div>
+    <div class="fm-metric-card">
+        <div class="fm-metric-label">{% trans "Pendentes" %}</div>
+        <div class="fm-metric-value">{{ total_pendentes }}</div>
     </div>
 </div>
 
-<div class="card">
-    <div class="section-title">
+<div class="fm-table-card">
+    <div class="fm-table-header">
         <div>
-            <h2>{{ titulo }}</h2>
-            <p>{% trans "Consulta os registos financeiros mais recentes desta categoria." %}</p>
+            <h2 class="fm-section-title">{{ titulo }}</h2>
+            <p class="fm-section-copy">{% trans "Consulta os registos financeiros mais recentes desta categoria, com estado, valor e destino." %}</p>
         </div>
+        <div class="fm-results-chip">{{ movimentos|length }} {% trans "resultado(s)" %}</div>
     </div>
 
-    <div class="table-wrap">
-        <table>
+    <div class="fm-table-wrap">
+        <table class="fm-table">
             <thead>
                 <tr>
                     <th>{% trans "Destino" %}</th>
@@ -103,11 +110,11 @@
                     <tr>
                         <td>
                             {% if movimento.empresa_id %}
-                                <span class="empresa-nome">{{ movimento.empresa.nome }}</span>
-                                <span class="empresa-meta">{% trans "Empresa" %}</span>
+                                <span class="fm-destino-nome">{{ movimento.empresa.nome }}</span>
+                                <span class="fm-destino-meta">{% trans "Empresa" %}</span>
                             {% elif movimento.perfil_plataforma_id %}
-                                <span class="empresa-nome">{{ movimento.perfil_plataforma.user.username }}</span>
-                                <span class="empresa-meta">{% trans "Individual" %}</span>
+                                <span class="fm-destino-nome">{{ movimento.perfil_plataforma.user.username }}</span>
+                                <span class="fm-destino-meta">{% trans "Individual" %}</span>
                             {% else %}
                                 —
                             {% endif %}
@@ -115,7 +122,7 @@
                         <td>{{ movimento.get_categoria_display }}</td>
                         <td>{{ movimento.get_tipo_movimento_display }}</td>
                         <td>
-                            <span class="badge badge-{{ movimento.estado }}">
+                            <span class="fm-badge fm-badge-{{ movimento.estado }}">
                                 {{ movimento.get_estado_display }}
                             </span>
                         </td>
@@ -130,11 +137,12 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="{% if tipo_pagina == "saida" %}10{% else %}9{% endif %}">{% trans "Ainda não existem movimentos registados nesta área." %}</td>
+                        <td colspan="{% if tipo_pagina == "saida" %}10{% else %}9{% endif %}" class="fm-empty">{% trans "Ainda não existem movimentos registados nesta área." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+</div>
 </div>
 {% endblock %}

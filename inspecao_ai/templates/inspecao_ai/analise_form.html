@@ -1,12 +1,16 @@
 {% extends base_template %}
-{% load widget_tweaks  i18n %}
+{% load widget_tweaks i18n %}
 {% load static %}
 
 {% block title %}{% trans "Nova análise AI" %}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/pages.css' %}">
+{% endblock %}
 
 {% block content %}
 <div
-    class="max-w-4xl mx-auto"
+    class="ai-mobile-scale ia-form-shell"
     id="ai-analise-form-root"
     data-imagem-input-id="{{ form.imagem_original.id_for_label }}"
     data-area-x-id="{{ form.area_x_percent.id_for_label }}"
@@ -18,14 +22,17 @@
     data-tipo-documento-id="{{ form.tipo_documento.id_for_label }}"
     data-save-preset-url="{% url 'inspecao_ai:zona_preset_guardar' %}"
 >
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-slate-900">{{ titulo_pagina }}</h1>
-        <p class="text-slate-600 mt-2">
-            {% trans "Envia uma fotografia de telemóvel. Para caixas, a análise procura marcações de metros nas pontas, divisórias e tacos de madeira das filas. Para relatórios, a AI separa cabeçalho impresso, campos manuscritos superiores, zona central manuscrita e rodapé impresso." %}
-        </p>
-    </div>
+    <section class="ia-page-header">
+        <div class="ia-page-header-copy">
+            <h1>📸 {{ titulo_pagina }}</h1>
+            <p>{% trans "Envia uma fotografia de telemóvel. Para caixas, a análise procura marcações de metros nas pontas, divisórias e tacos de madeira das filas. Para relatórios, a AI separa cabeçalho impresso, campos manuscritos superiores, zona central manuscrita e rodapé impresso." %}</p>
+        </div>
+        <div class="ia-page-actions">
+            <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Voltar ao histórico" %}</a>
+        </div>
+    </section>
 
-    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+    <form method="post" enctype="multipart/form-data" class="ia-form-card" style="display:flex; flex-direction:column; gap:20px;">
         {% csrf_token %}
         {% if form.non_field_errors %}
             <div class="rounded-xl bg-rose-50 text-rose-700 border border-rose-200 p-4">
@@ -33,7 +40,7 @@
             </div>
         {% endif %}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="ia-form-grid">
             <div>
                 <label class="form-label">{% trans "Nome da análise" %}</label>
                 {{ form.nome }}
@@ -57,27 +64,19 @@
             <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                 {{ form.auto_corrigir_inclinacao }}
                 <div>
-                    <label for="{{ form.auto_corrigir_inclinacao.id_for_label }}" class="font-medium text-slate-900">
-                        {% trans "Corrigir inclinação automaticamente" %}
-                    </label>
-                    <div class="text-sm text-slate-500">
-                        {% trans "Útil quando a foto da caixa vem um pouco torta." %}
-                    </div>
+                    <label for="{{ form.auto_corrigir_inclinacao.id_for_label }}" class="font-medium text-slate-900">{% trans "Corrigir inclinação automaticamente" %}</label>
+                    <div class="text-sm text-slate-500">{% trans "Útil quando a foto da caixa vem um pouco torta." %}</div>
                 </div>
             </div>
             <div>
                 <label class="form-label">{% trans "Rotação manual" %}</label>
                 {{ form.rotacao_manual }}
-                <div class="text-slate-500 text-sm mt-2">
-                    {% trans "Se souberes que a foto está rodada, podes forçar a correção antes da análise." %}
-                </div>
+                <div class="text-slate-500 text-sm mt-2">{% trans "Se souberes que a foto está rodada, podes forçar a correção antes da análise." %}</div>
             </div>
-            <div class="md:col-span-2">
+            <div class="ia-form-span-2">
                 <label class="form-label">{% trans "Campo prioritário do relatório" %}</label>
                 {{ form.relatorio_focus }}
-                <div class="text-slate-500 text-sm mt-2">
-                    {% trans "Nos relatórios, podes orientar a AI para procurar primeiro uma zona específica como data, turno, equipa ou observações." %}
-                </div>
+                <div class="text-slate-500 text-sm mt-2">{% trans "Nos relatórios, podes orientar a AI para procurar primeiro uma zona específica como data, turno, equipa ou observações." %}</div>
             </div>
         </div>
 
@@ -86,32 +85,26 @@
             {{ form.imagem_original }}
             {{ form.report_zone_json }}
             {{ form.custom_text_zones_json }}
-            <div class="text-sm text-slate-500 mt-2">
-                {% trans "Usa uma fotografia frontal e bem iluminada. No caso dos relatórios, tenta apanhar a folha completa para a AI distinguir as zonas." %}
-            </div>
+            <div class="text-sm text-slate-500 mt-2">{% trans "Usa uma fotografia frontal e bem iluminada. No caso dos relatórios, tenta apanhar a folha completa para a AI distinguir as zonas." %}</div>
             <div class="text-rose-600 text-sm mt-1">{{ form.imagem_original.errors }}</div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 p-5 space-y-4">
-            <div>
-                    <div class="text-base font-semibold text-slate-900">{% trans "Seleção guiada da área" %}</div>
-                    <div class="text-sm text-slate-500 mt-1">
-                    {% trans "Primeiro marca a zona total do relatório. Depois passa para a fase seguinte e cria as zonas nomeadas onde queres que a AI tente interpretar texto." %}
+        <div class="ia-section-card">
+            <div class="ia-table-title">{% trans "Seleção guiada da área" %}</div>
+            <div class="ia-table-meta" style="margin-top:6px;">{% trans "Primeiro marca a zona total do relatório. Depois passa para a fase seguinte e cria as zonas nomeadas onde queres que a AI tente interpretar texto." %}</div>
+
+            <div class="ia-form-grid" style="margin-top:16px;">
+                <div class="ia-soft-panel">
+                    <div class="ia-table-title">{% trans "Fase 1" %}</div>
+                    <div class="ia-table-meta">{% trans "Selecionar a moldura geral do relatório na foto." %}</div>
+                </div>
+                <div class="ia-soft-panel">
+                    <div class="ia-table-title">{% trans "Fase 2" %}</div>
+                    <div class="ia-table-meta">{% trans "Criar várias zonas nomeadas para leitura orientada da AI." %}</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-                    <div class="text-sm font-semibold text-slate-900">{% trans "Fase 1" %}</div>
-                    <div class="text-sm text-slate-600 mt-1">{% trans "Selecionar a moldura geral do relatório na foto." %}</div>
-                </div>
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-                    <div class="text-sm font-semibold text-slate-900">{% trans "Fase 2" %}</div>
-                    <div class="text-sm text-slate-600 mt-1">{% trans "Criar várias zonas nomeadas para leitura orientada da AI." %}</div>
-                </div>
-            </div>
-
-            <div id="ai-area-preview-shell" class="hidden">
+            <div id="ai-area-preview-shell" class="hidden" style="margin-top:16px;">
                 <div id="ai-area-preview-stage" class="relative inline-block max-w-full border border-slate-200 rounded-xl overflow-hidden bg-slate-50 select-none">
                     <img id="ai-area-preview-image" alt="{% trans 'Pré-visualização da imagem' %}" class="block max-w-full h-auto">
                     <div id="ai-report-preview-rect" class="absolute border-[3px] border-sky-500 bg-sky-400/15 hidden">
@@ -125,26 +118,22 @@
                     </div>
                     <div id="ai-custom-zones-layer" class="absolute inset-0 pointer-events-none"></div>
                 </div>
-                <div class="text-xs text-slate-500 mt-2">
-                    {% trans "Clica e arrasta na imagem. A ação depende da fase ativa." %}
-                </div>
+                <div class="text-xs text-slate-500 mt-2">{% trans "Clica e arrasta na imagem. A ação depende da fase ativa." %}</div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div class="rounded-2xl border border-slate-200 p-4 space-y-4">
-                    <div class="flex flex-wrap gap-3">
+            <div class="ia-form-grid" style="margin-top:20px;">
+                <div class="ia-soft-panel" style="display:flex; flex-direction:column; gap:16px;">
+                    <div class="ia-action-row">
                         <button type="button" id="ai-step-report" class="btn btn-secondary">{% trans "Fase 1: zona do relatório" %}</button>
                         <button type="button" id="ai-step-zones" class="btn btn-secondary">{% trans "Fase 2: zonas AI" %}</button>
                         <button type="button" id="ai-area-full-image" class="btn btn-secondary">{% trans "Usar imagem completa" %}</button>
                         <button type="button" id="ai-step-next" class="btn btn-primary">{% trans "Passar para zonas AI" %}</button>
                     </div>
 
-                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                        <div class="text-sm font-semibold text-slate-900">{% trans "Área prioritária global da AI" %}</div>
-                        <div class="text-sm text-slate-500 mt-1">
-                            {% trans "Mantém estes campos para dizer à AI onde deve procurar primeiro, além das zonas nomeadas." %}
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div class="ia-soft-panel">
+                        <div class="ia-table-title">{% trans "Área prioritária global da AI" %}</div>
+                        <div class="ia-table-meta">{% trans "Mantém estes campos para dizer à AI onde deve procurar primeiro, além das zonas nomeadas." %}</div>
+                        <div class="ia-form-grid-4" style="margin-top:16px;">
                             <div>
                                 <label class="form-label">{% trans "X (%)" %}</label>
                                 {{ form.area_x_percent }}
@@ -165,11 +154,11 @@
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 p-4 space-y-4">
-                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-3">
-                        <div class="text-sm font-semibold text-slate-900">{% trans "Memória de zonas guardadas" %}</div>
-                        <div class="text-sm text-slate-500">{% trans "Guarda um conjunto de retângulos para reutilizar noutras análises do mesmo tipo." %}</div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="ia-soft-panel" style="display:flex; flex-direction:column; gap:16px;">
+                    <div class="ia-soft-panel">
+                        <div class="ia-table-title">{% trans "Memória de zonas guardadas" %}</div>
+                        <div class="ia-table-meta">{% trans "Guarda um conjunto de retângulos para reutilizar noutras análises do mesmo tipo." %}</div>
+                        <div class="ia-form-grid" style="margin-top:12px;">
                             <div>
                                 <label class="form-label">{% trans "Preset guardado" %}</label>
                                 <select id="ai-preset-select" class="form-control">
@@ -181,7 +170,7 @@
                                 <input type="text" id="ai-preset-name" class="form-control" placeholder="{% trans 'Ex.: Relatório turno noite padrão' %}">
                             </div>
                         </div>
-                        <div class="flex flex-wrap gap-3">
+                        <div class="ia-action-row" style="margin-top:12px;">
                             <button type="button" id="ai-apply-preset" class="btn btn-secondary">{% trans "Aplicar preset" %}</button>
                             <button type="button" id="ai-save-preset" class="btn btn-primary">{% trans "Guardar na memória" %}</button>
                         </div>
@@ -189,16 +178,14 @@
                     </div>
 
                     <div>
-                        <div class="text-sm font-semibold text-slate-900">{% trans "Zona do relatório guardada" %}</div>
-                        <div id="ai-report-zone-summary" class="text-sm text-slate-500 mt-1">
-                            {% trans "Ainda não definiste a moldura total do relatório." %}
-                        </div>
+                        <div class="ia-table-title">{% trans "Zona do relatório guardada" %}</div>
+                        <div id="ai-report-zone-summary" class="text-sm text-slate-500 mt-1">{% trans "Ainda não definiste a moldura total do relatório." %}</div>
                     </div>
 
-                    <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 space-y-3">
-                        <div class="text-sm font-semibold text-amber-900">{% trans "Nova zona nomeada da AI" %}</div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="md:col-span-2">
+                    <div class="ia-soft-panel ia-soft-panel-warning">
+                        <div class="ia-table-title">{% trans "Nova zona nomeada da AI" %}</div>
+                        <div class="ia-form-grid" style="margin-top:12px;">
+                            <div class="ia-form-span-2">
                                 <label class="form-label">{% trans "Nome da zona" %}</label>
                                 <input type="text" id="ai-zone-name" class="form-control" placeholder="{% trans 'Ex.: Data, Turno, Furação linha 1, assinatura' %}">
                             </div>
@@ -219,7 +206,7 @@
                                 <input type="number" id="ai-zone-h" class="form-control" step="0.1" min="0" max="100">
                             </div>
                         </div>
-                        <div class="flex flex-wrap gap-3">
+                        <div class="ia-action-row" style="margin-top:12px;">
                             <button type="button" id="ai-save-zone" class="btn btn-primary">{% trans "Guardar retângulo" %}</button>
                             <button type="button" id="ai-clear-draft-zone" class="btn btn-secondary">{% trans "Limpar retângulo atual" %}</button>
                         </div>
@@ -227,11 +214,9 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 p-4">
-                <div class="text-sm font-semibold text-slate-900">{% trans "Retângulos guardados para leitura da AI" %}</div>
-                <div class="text-sm text-slate-500 mt-1">
-                    {% trans "Estes retângulos são usados para orientar a AI e ficam guardados com a análise." %}
-                </div>
+            <div class="ia-soft-panel" style="margin-top:20px;">
+                <div class="ia-table-title">{% trans "Retângulos guardados para leitura da AI" %}</div>
+                <div class="ia-table-meta">{% trans "Estes retângulos são usados para orientar a AI e ficam guardados com a análise." %}</div>
                 <div id="ai-custom-zones-list" class="mt-4 space-y-2 text-sm text-slate-600">
                     <div class="text-slate-400">{% trans "Ainda não existem zonas nomeadas guardadas." %}</div>
                 </div>
@@ -244,11 +229,11 @@
             <div class="text-rose-600 text-sm mt-1">{{ form.observacoes.errors }}</div>
         </div>
 
-        <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-900 text-sm">
+        <div class="ia-soft-panel ia-soft-panel-info" style="color:#1e3a8a;">
             {% trans "Nesta fase a app já destaca zonas-chave da imagem e guarda imagem processada. Nas caixas, também avalia os tacos de madeira onde os metros podem estar escritos. Nos relatórios, a AI segmenta campos impressos e manuscritos por zonas para preparar a extração de valores." %}
         </div>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="ia-action-row">
             <button type="submit" class="btn btn-primary">{% trans "Analisar fotografia" %}</button>
             <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Cancelar" %}</a>
         </div>

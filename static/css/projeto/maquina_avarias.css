@@ -1,70 +1,412 @@
-.mav-wrap {
-    width: 100%;
-    margin: 20px 0;
+.mav-page {
+    padding: 24px 15px 36px;
 }
 
-.mav-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 22px;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-    color: #0f172a;
+.mav-shell {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.mav-shell-form {
+    max-width: 1280px;
+}
+
+.mav-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
 }
 
 .mav-title {
     margin: 0;
     color: #0f172a;
-    font-weight: 800;
+    font-size: clamp(1.95rem, 2.4vw, 2.7rem);
+    line-height: 1.08;
+    font-weight: 900;
 }
 
 .mav-subtitle {
+    max-width: 72ch;
+    margin: 14px 0 0;
     color: #475569;
+    line-height: 1.65;
+}
+
+.mav-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.mav-stat-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.mav-stat-label {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.mav-stat-value {
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 900;
+}
+
+.mav-stat-copy {
+    margin-top: 6px;
+    color: #64748b;
+    line-height: 1.55;
+}
+
+.mav-table-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.mav-table-header {
+    padding: 20px 20px 0;
+}
+
+.mav-section-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.2rem;
+}
+
+.mav-section-copy {
+    margin: 8px 0 0;
+    color: #64748b;
+    line-height: 1.55;
 }
 
 .mav-table-wrap {
-    margin-top: 18px;
     overflow-x: auto;
+    padding: 18px 20px 20px;
 }
 
 .mav-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 1100px;
+    border-collapse: collapse;
     font-size: 0.92rem;
     color: #1e293b;
 }
 
-.mav-table thead tr {
-    border-bottom: 1px solid #e2e8f0;
-    color: #475569;
-    text-align: left;
+.mav-table thead {
+    background: #f8fafc;
 }
 
-.mav-table tbody tr {
-    border-bottom: 1px solid #f1f5f9;
+.mav-table th {
+    text-align: left;
+    padding: 13px 14px;
+    color: #475569;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.mav-table td {
+    padding: 14px;
+    border-top: 1px solid #e5edf5;
+    color: #0f172a;
     vertical-align: top;
 }
 
-.mav-table th,
-.mav-table td {
-    padding: 10px 12px 10px 0;
+.mav-table tbody tr:first-child td {
+    border-top: 0;
 }
 
-.mav-inline-box {
-    margin-top: 16px;
-    border-radius: 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 14px;
+.mav-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.mav-data-primary {
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.mav-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.mav-pill-aberta {
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+.mav-pill-em_reparacao {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.mav-pill-resolvida {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.mav-observation {
+    max-width: 34ch;
     color: #334155;
+    line-height: 1.55;
+}
+
+.mav-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #334c68;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.mav-action-btn:hover {
+    background: #283f59;
+    transform: translateY(-1px);
+}
+
+.mav-back-btn,
+.mav-submit-btn,
+.mav-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    padding: 14px 22px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 800;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.mav-back-btn,
+.mav-submit-btn {
+    background: #334c68;
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.09);
+}
+
+.mav-back-btn:hover,
+.mav-submit-btn:hover {
+    background: #283f59;
+    transform: translateY(-1px);
+}
+
+.mav-secondary-btn {
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #d7e1ea;
+}
+
+.mav-secondary-btn:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.mav-form-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.95fr) minmax(420px, 1.05fr);
+    gap: 20px;
+}
+
+.mav-form-grid-single {
+    grid-template-columns: minmax(320px, 0.85fr) minmax(420px, 1.15fr);
+}
+
+.mav-context-card,
+.mav-form-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.mav-context-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.mav-context-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mav-context-item-full {
+    grid-column: 1 / -1;
+}
+
+.mav-context-label {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.mav-form {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.mav-field {
+    display: grid;
+    gap: 8px;
+}
+
+.mav-label {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.mav-form select,
+.mav-form textarea {
+    width: 100%;
+    border: 1px solid #d7e1ea;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111827;
+    padding: 12px 14px;
+    font: inherit;
+    outline: none;
+    box-shadow: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.mav-form select {
+    min-height: 48px;
+}
+
+.mav-form textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.mav-form select:focus,
+.mav-form textarea:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 4px rgba(127, 155, 181, 0.16);
+    background: #fcfeff;
+}
+
+.mav-form-card select,
+.mav-form-card textarea {
+    width: 100%;
+    border: 1px solid #d7e1ea;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111827;
+    padding: 12px 14px;
+    font: inherit;
+    outline: none;
+    box-shadow: none;
+}
+
+.mav-form ul.errorlist {
+    margin: 0;
+    padding-left: 18px;
+    color: #b91c1c;
+    font-size: 0.84rem;
+}
+
+.mav-form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 6px;
 }
 
 .mav-empty {
-    margin-top: 14px;
-    border-radius: 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 14px;
-    color: #64748b;
+    width: 100%;
+    max-width: 620px;
+    padding: 20px 22px;
+    border-radius: 18px;
+    border: 1px solid #d3dde7;
+    background: #ffffff;
+    color: #334155;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
+@media (max-width: 920px) {
+    .mav-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mav-form-grid,
+    .mav-form-grid-single,
+    .mav-context-list {
+        grid-template-columns: 1fr;
+    }
+
+    .mav-table-header {
+        padding: 18px 18px 0;
+    }
+
+    .mav-table-wrap {
+        padding: 16px 18px 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mav-page {
+        padding: 14px 0 28px;
+    }
+
+    .mav-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .mav-form-actions {
+        flex-direction: column;
+    }
+
+    .mav-back-btn,
+    .mav-submit-btn,
+    .mav-secondary-btn {
+        width: 100%;
+    }
+
+    .mav-table-header {
+        padding: 16px 16px 0;
+    }
+
+    .mav-table-wrap {
+        padding: 14px 16px 16px;
+    }
+}

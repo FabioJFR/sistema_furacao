@@ -12,8 +12,7 @@
     <div class="sm-shell">
         <div class="sm-hero">
             <div>
-                <div class="sm-eyebrow">{% trans "Área do empregado" %}</div>
-                <h1 class="sm-title">{% trans "Minhas Devoluções de Material" %}</h1>
+                <h1 class="sm-title">↩️ {% trans "Minhas Devoluções de Material" %}</h1>
                 <p class="sm-subtitle">
                     {% trans "Tenha uma visão rápida das devoluções registadas por si e confirme para que projeto ou stock cada movimento foi devolvido." %}
                 </p>
@@ -25,12 +24,21 @@
 
         {% if devolucoes %}
             <div class="sm-table-card">
-                <div class="sm-table-wrap">
+                <div class="sm-table-header">
+                    <div>
+                        <h2 class="sm-section-title">{% trans "Histórico de devoluções" %}</h2>
+                        <p class="sm-section-copy">{% trans "Lista pessoal das devoluções já registadas com material, quantidade e destino do movimento." %}</p>
+                    </div>
+                    <div class="sm-results-chip">
+                        {{ devolucoes|length }} {% trans "resultado(s)" %}
+                    </div>
+                </div>
+                <div class="sm-table-wrap sm-table-wrap-scroll">
                     <table class="sm-table">
                         <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
-                            <th>{% trans "Material" %}</th>
+                            <th>{% trans "Contexto" %}</th>
                             <th>{% trans "Quantidade" %}</th>
                             <th>{% trans "Projeto" %}</th>
                             <th>{% trans "Furo" %}</th>
@@ -40,9 +48,15 @@
                         <tbody>
                         {% for devolucao in devolucoes %}
                             <tr>
-                                <td>{{ devolucao.data }}</td>
-                                <td>{{ devolucao.material.nome }}</td>
-                                <td>{{ devolucao.quantidade }}</td>
+                                <td>
+                                    <div class="sm-data-primary">{{ devolucao.data }}</div>
+                                </td>
+                                <td>
+                                    <div class="sm-data-primary">{{ devolucao.material.nome }}</div>
+                                </td>
+                                <td>
+                                    <span class="sm-pill sm-pill-info">{{ devolucao.quantidade }}</span>
+                                </td>
                                 <td>
                                     {% if devolucao.projeto %}
                                         {{ devolucao.projeto.nome }}
@@ -57,7 +71,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td>{{ devolucao.observacoes|default:"-" }}</td>
+                                <td><div class="sm-observation">{{ devolucao.observacoes|default:"-" }}</div></td>
                             </tr>
                         {% endfor %}
                         </tbody>

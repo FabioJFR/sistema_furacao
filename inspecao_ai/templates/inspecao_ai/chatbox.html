@@ -4,23 +4,28 @@
 
 {% block title %}{% trans "Chatbox AI" %}{% endblock %}
 {% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/mobile_pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/inspecao_ai/pages.css' %}">
 <link rel="stylesheet" href="{% static 'css/inspecao_ai/chatbox.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="flex items-start justify-between gap-4 flex-wrap mb-6">
-    <div>
-        <h1 class="text-3xl font-bold text-slate-900">{% trans "Chatbox AI" %}</h1>
-        <p class="text-slate-600 mt-2">
+<div class="ai-mobile-scale ia-page-shell">
+<section class="ia-page-header">
+    <div class="ia-page-header-copy">
+        <h1>💬 {% trans "Chatbox AI" %}</h1>
+        <p>
             {% trans "Assistente contextual da empresa. Responde com base nos dados de furos, despesas, máquinas, materiais, empregados, eventos e também faz cálculo matemático." %}
         </p>
     </div>
-    <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">{% trans "Voltar à AI" %}</a>
-</div>
+    <div class="ia-page-actions">
+        <a href="{% url 'inspecao_ai:hub' %}" class="btn btn-secondary">{% trans "Voltar à AI" %}</a>
+    </div>
+</section>
 
 <div class="grid grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)] gap-6">
     <aside class="space-y-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="ia-info-card">
             <h2 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Resumo atual" %}</h2>
             <div class="space-y-2 text-sm text-slate-700">
                 <div><strong>{% trans "Projetos:" %}</strong> {{ resumo_chat.total_projetos }}</div>
@@ -34,7 +39,7 @@
         </div>
 
         {% if memoria_furo_contexto and memoria_furo_contexto.furo_referencia %}
-            <div class="bg-amber-50 rounded-2xl shadow-sm border border-amber-200 p-5">
+            <div class="ia-info-card" style="border-color:#fde68a; background:#fff9eb;">
                 <h2 class="text-lg font-semibold text-amber-900 mb-3">{% trans "Memória da zona em foco" %}</h2>
                 <div class="space-y-2 text-sm text-amber-900">
                     <div><strong>{% trans "Furo:" %}</strong> {{ memoria_furo_contexto.furo_referencia.nome }}</div>
@@ -53,7 +58,7 @@
             </div>
         {% endif %}
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="ia-info-card">
             <h2 class="text-lg font-semibold text-slate-900 mb-3">{% trans "Conversas" %}</h2>
             <div class="space-y-2">
                 {% for item in sessoes %}
@@ -146,6 +151,7 @@
             </div>
         </form>
     </section>
+</div>
 </div>
 {% endblock %}
 {% block extra_scripts %}

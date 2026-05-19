@@ -1,65 +1,79 @@
 {% extends "projetos/base.html" %}
-{% load widget_tweaks i18n %}
+{% load i18n %}
 {% load static %}
 
 {% block title %}{% trans "Definições Financeiras" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/definicoes_financeiras.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="sf-panel">
-    <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-gray-800">💶 {% trans "Definições Financeiras" %}</h2>
-        <p class="text-sm text-gray-600 mt-2">
+<section class="fin-page">
+    <div class="fin-shell">
+        <div class="fin-hero">
+            <div>
+                <h1 class="fin-title">💶 {% trans "Definições Financeiras" %}</h1>
+                <p class="fin-subtitle">
             {% trans "Define os valores financeiros de cada projeto e consulta os totais no quadro geral." %}
         </p>
     </div>
+        </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="text-sm text-slate-600 font-semibold">{% trans "Custo por metro empresa" %}</div>
-            <div class="text-2xl font-bold text-slate-900 mt-2">{{ metricas_financeiras.custo_empresa }} €</div>
+    <div class="fin-metrics">
+        <div class="fin-metric-card">
+            <div class="fin-metric-label">{% trans "Custo por metro empresa" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.custo_empresa }} €</div>
         </div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="text-sm text-slate-600 font-semibold">{% trans "Valor total cobrado ao cliente" %}</div>
-            <div class="text-2xl font-bold text-slate-900 mt-2">{{ metricas_financeiras.cobrado_cliente }} €</div>
+        <div class="fin-metric-card">
+            <div class="fin-metric-label">{% trans "Valor total cobrado ao cliente" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.cobrado_cliente }} €</div>
         </div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="text-sm text-slate-600 font-semibold">{% trans "Valor total gasto em furos" %}</div>
-            <div class="text-2xl font-bold text-slate-900 mt-2">{{ metricas_financeiras.gasto_furo }} €</div>
+        <div class="fin-metric-card">
+            <div class="fin-metric-label">{% trans "Valor total gasto em furos" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.gasto_furo }} €</div>
         </div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="text-sm text-slate-600 font-semibold">{% trans "Valor total gasto em máquinas" %}</div>
-            <div class="text-2xl font-bold text-slate-900 mt-2">{{ metricas_financeiras.gasto_maquinas }} €</div>
+        <div class="fin-metric-card">
+            <div class="fin-metric-label">{% trans "Valor total gasto em máquinas" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.gasto_maquinas }} €</div>
         </div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="text-sm text-slate-600 font-semibold">{% trans "Valor total gasto em materiais" %}</div>
-            <div class="text-2xl font-bold text-slate-900 mt-2">{{ metricas_financeiras.gasto_materiais }} €</div>
+        <div class="fin-metric-card">
+            <div class="fin-metric-label">{% trans "Valor total gasto em materiais" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.gasto_materiais }} €</div>
         </div>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-            <div class="text-sm text-emerald-700 font-semibold">{% trans "Margem total estimada" %}</div>
-            <div class="text-2xl font-bold text-emerald-900 mt-2">{{ metricas_financeiras.margem_total }} €</div>
+        <div class="fin-metric-card fin-metric-card-positive">
+            <div class="fin-metric-label">{% trans "Margem total estimada" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.margem_total }} €</div>
         </div>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-            <div class="text-sm text-emerald-700 font-semibold">{% trans "Margem por metro estimada" %}</div>
-            <div class="text-2xl font-bold text-emerald-900 mt-2">{{ metricas_financeiras.margem_por_metro }} €</div>
+        <div class="fin-metric-card fin-metric-card-positive">
+            <div class="fin-metric-label">{% trans "Margem por metro estimada" %}</div>
+            <div class="fin-metric-value">{{ metricas_financeiras.margem_por_metro }} €</div>
         </div>
     </div>
 
-    <div class="mt-4 overflow-x-auto border border-gray-200 rounded-xl bg-white">
-        <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
+    <div class="fin-section-card">
+        <div class="fin-section-head">
+            <div>
+                <h2 class="fin-section-title">{% trans "Parâmetros por projeto" %}</h2>
+                <p class="fin-section-copy">{% trans "Define custo por metro ao cliente e outros gastos associados para cada projeto." %}</p>
+            </div>
+        </div>
+        <div class="fin-table-wrap">
+        <table class="fin-table">
+            <thead>
                 <tr>
-                    <th class="text-left px-4 py-3">{% trans "Projeto" %}</th>
-                    <th class="text-left px-4 py-3">{% trans "Custo por metro cliente" %}</th>
-                    <th class="text-left px-4 py-3">{% trans "Outros valores gastos associados" %}</th>
-                    <th class="text-left px-4 py-3">{% trans "Ação" %}</th>
+                    <th>{% trans "Projeto" %}</th>
+                    <th>{% trans "Custo por metro cliente" %}</th>
+                    <th>{% trans "Outros valores gastos associados" %}</th>
+                    <th>{% trans "Ação" %}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for projeto in projetos_empresa %}
-                <tr class="border-t border-gray-100">
-                    <td class="px-4 py-3 font-semibold text-gray-800">{{ projeto.nome }}</td>
-                    <td class="px-4 py-3">
-                        <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                <tr>
+                    <td class="fin-project-name">{{ projeto.nome }}</td>
+                    <td>
+                        <form method="POST" class="fin-inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="form_scope" value="projeto_financas">
                             <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
@@ -70,10 +84,10 @@
                                 name="custo_por_metro_cliente_override"
                                 value="{{ projeto.custo_por_metro_cliente_override|default_if_none:'' }}"
                                 placeholder="{% trans 'Ex.: 95.00' %}"
-                                class="w-full p-2 border rounded bg-white"
+                                class="fin-input"
                             >
                     </td>
-                    <td class="px-4 py-3">
+                    <td>
                             <input
                                 type="number"
                                 step="0.01"
@@ -81,21 +95,20 @@
                                 name="outros_valores_gastos_associados"
                                 value="{{ projeto.outros_valores_gastos_associados|default_if_none:'0.00' }}"
                                 placeholder="{% trans 'Ex.: 1500.00' %}"
-                                class="w-full p-2 border rounded bg-white"
+                                class="fin-input"
                             >
                     </td>
-                    <td class="px-4 py-3">
-                            <button type="submit" class="bg-amber-600 text-white px-3 py-2 rounded hover:bg-amber-700 transition">
+                    <td>
+                            <button type="submit" class="fin-save-btn">
                                 {% trans "Guardar projeto" %}
                             </button>
                         </form>
                     </td>
                 </tr>
-                <tr class="bg-slate-50/50 border-b border-gray-100">
-                    <td colspan="4" class="px-4 py-3 text-sm text-slate-700">
-                        <div class="font-semibold text-slate-800 mb-1">{% trans "Definições atuais" %}</div>
-                        <div class="flex flex-wrap gap-x-6 gap-y-1">
-                            <span>
+                <tr class="fin-table-subrow">
+                    <td colspan="4">
+                        <div class="fin-subrow-grid">
+                            <span class="fin-subrow-item">
                                 {% trans "Custo por metro cliente atual" %}:
                                 <strong>
                                     {% if projeto.custo_por_metro_cliente_override is not None %}
@@ -105,11 +118,11 @@
                                     {% endif %}
                                 </strong>
                             </span>
-                            <span>
+                            <span class="fin-subrow-item">
                                 {% trans "Outros valores gastos atuais" %}:
                                 <strong>{{ projeto.outros_valores_gastos_associados|default_if_none:"0.00" }} €</strong>
                             </span>
-                            <span>
+                            <span class="fin-subrow-item">
                                 {% trans "Última atualização" %}:
                                 <strong>{{ projeto.atualizado_em|date:"d/m/Y H:i" }}</strong>
                             </span>
@@ -118,56 +131,61 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">{% trans "Sem projetos disponíveis." %}</td>
+                    <td colspan="4" class="fin-table-empty">{% trans "Sem projetos disponíveis." %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    </div>
 
-    <div class="mt-6 border border-slate-200 rounded-xl bg-slate-50 p-5">
-        <h3 class="text-lg font-bold text-slate-900 mb-3">{% trans "Geral" %}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div class="bg-white border border-slate-200 rounded-lg p-3">
-                <div class="text-slate-600">{% trans "Soma custo por metro cliente (projetos)" %}</div>
-                <div class="text-xl font-bold text-slate-900 mt-1">{{ total_custo_metro_definido }} €</div>
+    <div class="fin-section-card fin-summary-card">
+        <h2 class="fin-section-title">{% trans "Geral" %}</h2>
+        <div class="fin-summary-grid">
+            <div class="fin-summary-item">
+                <div class="fin-summary-label">{% trans "Soma custo por metro cliente (projetos)" %}</div>
+                <div class="fin-summary-value">{{ total_custo_metro_definido }} €</div>
             </div>
-            <div class="bg-white border border-slate-200 rounded-lg p-3">
-                <div class="text-slate-600">{% trans "Soma outros valores gastos (projetos)" %}</div>
-                <div class="text-xl font-bold text-slate-900 mt-1">{{ total_outros_gastos_definidos }} €</div>
+            <div class="fin-summary-item">
+                <div class="fin-summary-label">{% trans "Soma outros valores gastos (projetos)" %}</div>
+                <div class="fin-summary-value">{{ total_outros_gastos_definidos }} €</div>
             </div>
-            <div class="bg-white border border-slate-200 rounded-lg p-3">
-                <div class="text-slate-600">{% trans "Total geral definido" %}</div>
-                <div class="text-xl font-bold text-slate-900 mt-1">{{ total_geral_definido }} €</div>
+            <div class="fin-summary-item">
+                <div class="fin-summary-label">{% trans "Total geral definido" %}</div>
+                <div class="fin-summary-value">{{ total_geral_definido }} €</div>
             </div>
         </div>
     </div>
 
-    <div class="mt-6 border border-slate-200 rounded-xl bg-white p-5">
-        <h3 class="text-lg font-bold text-slate-900 mb-2">{% trans "Ordenado base por função" %}</h3>
-        <p class="text-sm text-slate-600 mb-4">
+    <div class="fin-section-card">
+        <div class="fin-section-head">
+            <div>
+                <h2 class="fin-section-title">{% trans "Ordenado base por função" %}</h2>
+                <p class="fin-section-copy">
             {% trans "Define o ordenado base de referência para cada função de empregado." %}
         </p>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-gray-50 text-gray-700">
+            </div>
+        </div>
+        <div class="fin-table-wrap">
+            <table class="fin-table fin-table-salary">
+                <thead>
                     <tr>
-                        <th class="text-left px-4 py-3">{% trans "Função" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Ordenado base (€)" %}</th>
-                        <th class="text-left px-4 py-3">{% trans "Ação" %}</th>
+                        <th>{% trans "Função" %}</th>
+                        <th>{% trans "Ordenado base (€)" %}</th>
+                        <th>{% trans "Ação" %}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in funcoes_salario %}
-                    <tr class="border-t border-gray-100">
-                        <td class="px-4 py-3">
-                            <div class="font-medium text-slate-800">{{ item.nome }}</div>
-                            <div class="text-xs text-slate-500 mt-1">
+                    <tr>
+                        <td>
+                            <div class="fin-project-name">{{ item.nome }}</div>
+                            <div class="fin-salary-note">
                                 {% trans "Salário definido atualmente" %}: <strong>{{ item.salario_base }} €</strong>
                             </div>
                         </td>
-                        <td class="px-4 py-3">
-                            <form method="POST" class="flex flex-wrap items-center gap-2">
+                        <td>
+                            <form method="POST" class="fin-inline-form fin-inline-form-salary">
                                 {% csrf_token %}
                                 <input type="hidden" name="form_scope" value="funcao_salario">
                                 <input type="hidden" name="funcao" value="{{ item.codigo }}">
@@ -177,11 +195,11 @@
                                     min="0"
                                     name="salario_base"
                                     value="{{ item.salario_base }}"
-                                    class="w-44 p-2 border rounded bg-white"
+                                    class="fin-input fin-input-salary"
                                 >
                         </td>
-                        <td class="px-4 py-3">
-                                <button type="submit" class="bg-amber-600 text-white px-3 py-2 rounded hover:bg-amber-700 transition">
+                        <td>
+                                <button type="submit" class="fin-save-btn">
                                     {% trans "Guardar função" %}
                                 </button>
                             </form>

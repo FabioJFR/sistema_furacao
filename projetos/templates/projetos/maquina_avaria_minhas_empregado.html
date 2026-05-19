@@ -8,14 +8,25 @@
 {% endblock %}
 
 {% block content %}
-<section class="mav-wrap">
-    <div class="mav-card">
-        <h1 class="mav-title text-2xl">{% trans "Minhas Avarias de Máquina" %}</h1>
-        <p class="mav-subtitle text-sm mt-1">{% trans "Avarias onde foste definido como responsável." %}</p>
+<section class="mav-page">
+    <div class="mav-shell">
+        <div class="mav-hero">
+            <div>
+                <h1 class="mav-title">🛠️ {% trans "Minhas Avarias de Máquina" %}</h1>
+                <p class="mav-subtitle">{% trans "Avarias onde foste definido como responsável, com acesso rápido para atualização de estado e solução." %}</p>
+            </div>
+        </div>
 
         {% if avarias %}
-            <div class="mav-table-wrap">
-                <table class="mav-table">
+            <div class="mav-table-card">
+                <div class="mav-table-header">
+                    <div>
+                        <h2 class="mav-section-title">{% trans "Avarias atribuídas" %}</h2>
+                        <p class="mav-section-copy">{% trans "Consulta as ocorrências atribuídas a ti e mantém o estado atualizado conforme o avanço da reparação." %}</p>
+                    </div>
+                </div>
+                <div class="mav-table-wrap">
+                    <table class="mav-table">
                     <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
@@ -30,23 +41,32 @@
                     <tbody>
                         {% for avaria in avarias %}
                             <tr>
-                                <td>{{ avaria.data_inicio|date:"d/m/Y H:i" }}</td>
-                                <td>{{ avaria.maquina.nome }}</td>
-                                <td>{{ avaria.get_status_display }}</td>
+                                <td>
+                                    <div class="mav-data-primary">{{ avaria.data_inicio|date:"d/m/Y H:i" }}</div>
+                                </td>
+                                <td>
+                                    <div class="mav-data-primary">{{ avaria.maquina.nome }}</div>
+                                </td>
+                                <td>
+                                    <span class="mav-pill mav-pill-{{ avaria.status }}">{{ avaria.get_status_display }}</span>
+                                </td>
                                 <td>{{ avaria.projeto.nome|default:"-" }}</td>
                                 <td>{{ avaria.furo.nome|default:"-" }}</td>
-                                <td class="sf-break-word">{{ avaria.descricao }}</td>
+                                <td class="sf-break-word">
+                                    <div class="mav-observation">{{ avaria.descricao }}</div>
+                                </td>
                                 <td>
-                                    <a href="{% url 'projetos:avaria_maquina_update_empregado' avaria.pk %}" class="btn btn-light">{% trans "Atualizar estado" %}</a>
+                                    <a href="{% url 'projetos:avaria_maquina_update_empregado' avaria.pk %}" class="mav-action-btn">{% trans "Atualizar estado" %}</a>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            </div>
         {% else %}
-            <div class="mav-empty text-sm">{% trans "Não tens avarias atribuídas neste momento." %}</div>
+            <div class="mav-empty">{% trans "Não tens avarias atribuídas neste momento." %}</div>
         {% endif %}
-    </div>
+</div>
 </section>
 {% endblock %}
