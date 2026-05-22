@@ -29,10 +29,20 @@
                     <option value="{{ plano.id }}"
                         data-periodos="{{ plano.periodos_cobranca_disponiveis_normalizados|join:',' }}"
                         {% if empresa.plano and plano.id == empresa.plano.id %}selected{% endif %}>
-                        {{ plano.nome }} - {{ plano.preco_mensal }}€/{% trans "mês" %}{% if plano.preco_anual %} - {{ plano.preco_anual }}€/{% trans "ano" %}{% endif %}
+                        {{ plano.nome }}{% if plano.trial_contexto.is_trial %} · {{ plano.trial_contexto.badge }}{% endif %} - {{ plano.preco_mensal }}€/{% trans "mês" %}{% if plano.preco_anual %} - {{ plano.preco_anual }}€/{% trans "ano" %}{% endif %}
                     </option>
                 {% endfor %}
             </select>
+        </div>
+
+        <div class="eap-info">
+            <div class="eap-info-row">
+                <strong>{% trans "Leitura do plano atual:" %}</strong>
+                {{ plano_trial_contexto.badge }}
+            </div>
+            <div class="eap-note">
+                <strong>{% trans "Nota comercial:" %}</strong> {{ plano_trial_contexto.mensagem_longa }}
+            </div>
         </div>
 
         <div class="eap-field">

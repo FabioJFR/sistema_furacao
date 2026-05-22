@@ -567,7 +567,7 @@
 @media (max-width: 640px) {
     .sm-page,
     .cc-page {
-        padding: 14px 0 28px;
+        padding: 12px 0 26px;
     }
 
     .sm-shell,
@@ -578,7 +578,14 @@
 
     .sm-title,
     .cc-title {
-        font-size: 1.8rem;
+        font-size: 1.68rem;
+    }
+
+    .sm-subtitle,
+    .sm-section-copy,
+    .sm-stat-copy {
+        font-size: 0.92rem;
+        line-height: 1.5;
     }
 
     .sm-filter-grid {
@@ -604,11 +611,92 @@
         width: 100%;
     }
 
+    .sm-action,
+    .sm-btn {
+        min-width: 0;
+        padding: 12px 14px;
+    }
+
     .sm-table-header {
         padding: 16px 16px 0;
     }
 
     .sm-table-wrap {
         padding: 14px 16px 16px;
+    }
+
+    .sm-table-wrap-scroll {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .sm-table-mobile {
+        min-width: 0;
+    }
+
+    .sm-table-mobile thead {
+        display: none;
+    }
+
+    .sm-table-mobile,
+    .sm-table-mobile tbody,
+    .sm-table-mobile tr,
+    .sm-table-mobile td {
+        display: block;
+        width: 100%;
+    }
+
+    .sm-table-mobile tbody {
+        display: grid;
+        gap: 14px;
+    }
+
+    .sm-table-mobile tr {
+        border: 1px solid #e5edf5;
+        border-radius: 16px;
+        padding: 14px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .sm-table-mobile td {
+        border-top: 0;
+        padding: 0;
+    }
+
+    .sm-table-mobile td + td {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #eef3f8;
+    }
+
+    .sm-table-mobile td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 6px;
+        color: #64748b;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .sm-table-mobile .sm-cell-stack .sm-btn {
+        width: 100%;
+    }
+
+    .sm-table-mobile .sm-observation {
+        max-width: none;
+    }
+
+    .sm-table-mobile .sm-production-grid {
+        min-width: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sm-filter-card,
+    .sm-table-card,
+    .sm-stat-card {
+        border-radius: 16px;
     }
 }

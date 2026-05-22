@@ -10,7 +10,7 @@ from plataforma.views.empresas import (
     remover_logo_empresa,
 )
 from plataforma.views.planos import plano_list, plano_create, plano_update, plano_toggle_ativo
-from plataforma.views.subscricoes import subscricao_list
+from plataforma.views.subscricoes import subscricao_list, reenviar_ativacao_conta_admin
 from plataforma.views.financas import (
     financas_analytics,
     financas_paypal_cancelado,
@@ -49,6 +49,11 @@ urlpatterns = [
     path("empresa/<uuid:pk>/logo/atualizar/", atualizar_logo_empresa, name="empresa_logo_atualizar"),
     path("empresa/<uuid:pk>/logo/remover/", remover_logo_empresa, name="empresa_logo_remover"),
     path("subscricoes/", subscricao_list, name="subscricao_list"),
+    path(
+        "subscricoes/conta-admin/<uuid:perfil_id>/reenviar-ativacao/",
+        reenviar_ativacao_conta_admin,
+        name="subscricao_reenviar_ativacao",
+    ),
     path("financas/entradas/", financas_entrada_list, name="financas_entrada_list"),
     path("financas/saidas/", financas_saida_list, name="financas_saida_list"),
     path("financas/saidas/<uuid:pk>/editar/", financas_saida_list, name="financas_saida_update"),

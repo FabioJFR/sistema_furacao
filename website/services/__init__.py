@@ -34,6 +34,16 @@ class ResultadoRegisto:
     tipo_conta: str | None = None
 
 
+@dataclass
+class DiagnosticoEmail:
+    backend: str
+    from_email: str
+    smtp_configurado: bool
+    entrega_real_ativa: bool
+    base_url_configurada: bool
+    problemas: list[str]
+
+
 def adicionar_meses(data_base, meses):
     mes = data_base.month - 1 + meses
     ano = data_base.year + mes // 12
@@ -133,6 +143,42 @@ def _resolver_from_email():
     if backend == "django.core.mail.backends.smtp.EmailBackend" and email_host_user:
         return email_host_user
     return default_from_email or email_host_user or "noreply@sistemafuracao.local"
+
+
+def diagnosticar_email_transacional():
+    backend = (getattr(settings, "EMAIL_BACKEND", "") or "").strip()
+    host = (getattr(settings, "EMAIL_HOST", "") or "").strip()
+    host_user = (getattr(settings, "EMAIL_HOST_USER", "") or "").strip()
+    site_base_url = (getattr(settings, "SITE_BASE_URL", "") or "").strip()
+    problemas = []
+
+    smtp_configurado = backend == "django.core.mail.backends.smtp.EmailBackend" and bool(host and host_user)
+    entrega_real_ativa = smtp_configurado and backend not in {
+        "django.core.mail.backends.console.EmailBackend",
+        "django.core.mail.backends.locmem.EmailBackend",
+        "django.core.mail.backends.filebased.EmailBackend",
+        "django.core.mail.backends.dummy.EmailBackend",
+    }
+
+    if not entrega_real_ativa:
+        problemas.append(
+            _("EMAIL_BACKEND não está apontado para SMTP real com host e utilizador definidos.")
+        )
+    if not site_base_url and not settings.DEBUG and not settings.ALLOWED_HOSTS:
+        problemas.append(
+            _("SITE_BASE_URL ou ALLOWED_HOSTS válidos são necessários para gerar links absolutos de confirmação.")
+        )
+    if not (getattr(settings, "DEFAULT_FROM_EMAIL", "") or "").strip():
+        problemas.append(_("DEFAULT_FROM_EMAIL está vazio."))
+
+    return DiagnosticoEmail(
+        backend=backend,
+        from_email=_resolver_from_email(),
+        smtp_configurado=smtp_configurado,
+        entrega_real_ativa=entrega_real_ativa,
+        base_url_configurada=bool(site_base_url or settings.ALLOWED_HOSTS),
+        problemas=problemas,
+    )
 
 
 def enviar_email_confirmacao_conta(*, user, request=None):
@@ -343,3 +389,10 @@ def reenviar_confirmacao_por_email(*, email, request=None):
         enviados += 1
 
     return enviados
+
+
+def reenviar_confirmacao_utilizador(*, user, request=None):
+    if not user or user.is_active:
+        return False
+    enviar_email_confirmacao_conta(user=user, request=request)
+    return True

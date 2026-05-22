@@ -3,6 +3,9 @@
     const periodoSelect = document.getElementById("id_ciclo_subscricao");
     const valorSubscricaoInput = document.getElementById("id_valor_subscricao");
     const criarSubscricaoCheckbox = document.getElementById("id_criar_subscricao_inicial");
+    const trialBox = document.getElementById("onb-trial-box");
+    const trialTitle = document.getElementById("onb-trial-title");
+    const trialMessage = document.getElementById("onb-trial-message");
 
     if (!planoSelect || !periodoSelect || !valorSubscricaoInput) {
         return;
@@ -45,6 +48,28 @@
         valorSubscricaoInput.removeAttribute("aria-disabled");
     }
 
+    function atualizarLeituraPlano() {
+        if (!trialBox || !trialTitle || !trialMessage) {
+            return;
+        }
+
+        const planoId = planoSelect.value;
+        const precos = planosPrecos[planoId];
+
+        if (!planoId || !precos) {
+            trialBox.classList.remove("is-trial", "is-paid");
+            trialTitle.textContent = "Plano comercial";
+            trialMessage.textContent = "Seleciona um plano para veres aqui se a conta arranca em modo trial/prova ou já em subscrição comercial.";
+            return;
+        }
+
+        const isTrial = Boolean(precos.is_trial);
+        trialBox.classList.toggle("is-trial", isTrial);
+        trialBox.classList.toggle("is-paid", !isTrial);
+        trialTitle.textContent = isTrial ? "Trial / prova" : "Plano comercial";
+        trialMessage.textContent = precos.mensagem_trial;
+    }
+
     function atualizarPeriodosDisponiveis() {
         const option = planoSelect.selectedOptions?.[0];
         const periodos = (planosPeriodos[option?.value] || [1, 12]).map(String);
@@ -60,6 +85,7 @@
         }
 
         atualizarValorSubscricao();
+        atualizarLeituraPlano();
     }
 
     planoSelect.addEventListener("change", atualizarPeriodosDisponiveis);

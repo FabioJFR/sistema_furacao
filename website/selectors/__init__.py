@@ -1,6 +1,7 @@
 import re
 
 from plataforma.models import Plano
+from plataforma.selectors.planos import construir_contexto_trial_plano
 
 
 def listar_planos_ativos():
@@ -19,8 +20,41 @@ def construir_planos_contexto(planos_qs):
             "periodos": plano.periodos_cobranca_disponiveis_normalizados,
             "preco_mensal": str(plano.preco_mensal or 0),
             "preco_anual": str(plano.preco_anual or 0),
+            "trial_badge": construir_contexto_trial_plano(plano)["badge"],
+            "trial_message": construir_contexto_trial_plano(plano)["mensagem_curta"],
         }
         for plano in planos_qs
+    }
+
+
+def construir_tipos_conta_contexto():
+    return {
+        "empresa": {
+            "label": "Empresa",
+            "titulo": "Conta empresa",
+            "descricao": (
+                "Pensada para equipas, operação com projetos e gestão comercial inicial "
+                "da empresa dentro da plataforma."
+            ),
+            "checklist": [
+                "Definir o nome da empresa e o responsável inicial.",
+                "Escolher um plano compatível com conta empresa.",
+                "Receber o email de ativação e confirmar a conta admin.",
+            ],
+        },
+        "individual": {
+            "label": "Individual",
+            "titulo": "Conta individual",
+            "descricao": (
+                "Indicada para utilização pessoal, avaliação individual da plataforma "
+                "e arranque sem estrutura multiutilizador."
+            ),
+            "checklist": [
+                "Preencher apenas os teus dados pessoais base.",
+                "Escolher um plano compatível com conta individual.",
+                "Confirmar o email e entrar diretamente na tua área pessoal.",
+            ],
+        },
     }
 
 

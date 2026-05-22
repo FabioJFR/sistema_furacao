@@ -25,10 +25,16 @@
     <meta property="og:url" content="{{ public_current_url }}">
     <meta property="og:site_name" content="Sistema de Furação">
     <meta property="og:image" content="{{ public_logo_url }}">
+    <meta property="og:image:alt" content="{{ public_logo_alt }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ page_title_text }}">
     <meta name="twitter:description" content="{{ page_description }}">
     <meta name="twitter:image" content="{{ public_logo_url }}">
+    <meta name="twitter:image:alt" content="{{ public_logo_alt }}">
+    <meta itemprop="name" content="Sistema de Furação">
+    <meta itemprop="description" content="{{ page_description }}">
+    <meta itemprop="image" content="{{ public_logo_url }}">
+    <link rel="image_src" href="{{ public_logo_url }}">
     <script type="application/ld+json">{{ organization_schema_json|safe }}</script>
     <link rel="stylesheet" href="{% static 'css/website/home.css' %}">
 </head>
@@ -51,6 +57,17 @@
             </nav>
 
             <div class="topbar-actions">
+                <form action="{% url 'set_language' %}" method="post" class="language-switcher">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <label for="id_public_language" class="language-switcher__label">{% trans "Idioma" %}</label>
+                    <select id="id_public_language" name="language" class="language-switcher__select" onchange="this.form.submit()">
+                        {% get_current_language as CURRENT_LANGUAGE %}
+                        {% for option in public_language_options %}
+                            <option value="{{ option.code }}" {% if option.code == CURRENT_LANGUAGE %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
                 <a href="{% url 'website:planos' %}" class="btn btn-light">{% trans "Ver planos" %}</a>
                 <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>

@@ -298,6 +298,7 @@ _AREAS_TODO = {
             "Suporte a biblioteca de documentos para contexto operacional da IA.",
             "Exportação/limpeza de datasets IA disponível na área de úteis (superuser).",
             "Melhorias na experiência do chatbox e base para fluxos de respostas guiadas clicáveis.",
+            "Revisão visual do submenu `AI` concluída: `AI Visual`, `Chatbox`, `Biblioteca PDF`, `Memória Operacional`, `Nova análise`, `Histórico AI` e detalhe da análise agora seguem a mesma linguagem visual.",
         ],
         "proximos_passos": [
             "Aumentar qualidade de OCR e pipelines por zona configurável.",
@@ -389,10 +390,16 @@ _AREAS_TODO = {
             "Ajustes recentes de conteúdo e posicionamento de funcionalidades principais.",
             "Páginas públicas principais já com uso consistente de tags de tradução.",
             "Revisão de consistência i18n na jornada pública (home, planos, login e registo).",
+            "Homepage pública reforçada com seletor de idioma no topo e metadata pública mais explícita para logo/identidade (`og`, `twitter`, `image_src` e schema `Organization/WebSite`).",
+            "Troca de idioma já exposta em toda a jornada pública principal (`home`, `info`, `planos`, `login` e `registo`), incluindo assunto do email de recuperação traduzível por locale.",
+            "Seletor público de idioma já limitado aos idiomas realmente prontos (`Português` e `English`), evitando opções incompletas no website.",
+            "Varredura pública de tradução inglesa já reforçada no circuito principal e legal: `Home`, `Planos`, `Login`, `Registo`, `Sobre`, `Feedback`, `Contactos`, `Termos & Condições` e `Política de Privacidade`.",
         ],
         "proximos_passos": [
             "Refinar copy comercial por idioma (tom e clareza), mantendo consistência com o produto.",
             "Melhorar prova social, métricas e CTA para conversão.",
+            "Continuar tradução e revisão i18n das páginas internas da plataforma com foco em textos ainda hardcoded, mensagens técnicas e validações de backend.",
+            "Expandir idiomas públicos adicionais apenas depois de existir cobertura real de catálogo e revisão funcional por idioma.",
         ],
         "falta_fazer": [
             "Funil de aquisição com tracking mais profundo e eventos padronizados.",
@@ -452,13 +459,14 @@ _AREAS_TODO = {
             "Configuração de pagamentos PayPal integrada na plataforma.",
             "Página de sugestões e canais de feedback já disponíveis para utilizadores.",
             "Menu e navegação por perfil bastante evoluídos (empresa, empregado, individual e superuser).",
+            "Onboarding de empresa evoluído com checklist visual, orientação por passos e estrutura de criação inicial mais clara para plataforma admin.",
+            "Dashboard comercial inicial já visível na dashboard da plataforma, com métricas de ativação, conversão para operação e retenção atual por plano.",
+            "Versão trial/prova já clarificada na UI: planos sem cobrança aparecem identificados em `Planos`, `Onboarding` e detalhe/alteração de plano da empresa, com mensagens in-app sobre arranque em prova vs plano comercial.",
+            "UX mobile refinada nas páginas operacionais mais densas (`Registos de Produção`, `Levantamentos` e `Devoluções`): tabelas largas passam a cartões empilhados no telemóvel, com leitura mais clara por bloco.",
+            "Fluxo de ativação por email reforçado na operação de plataforma: a lista de `Subscrições` mostra diagnóstico rápido SMTP/links absolutos e permite reenviar a ativação para contas admin pendentes.",
+            "Onboarding guiado por tipo de conta já melhorado no registo público: `Empresa` e `Individual` têm cartões de escolha, checklist inicial e leitura dinâmica do plano selecionado.",
         ],
         "proximos_passos": [
-            "Concluir fluxo robusto de verificação de email e monitorização de entregabilidade SMTP.",
-            "Melhorar onboarding guiado por tipo de conta (empresa vs individual) com checklist inicial.",
-            "Criar dashboard comercial com métricas de ativação, retenção e conversão por plano.",
-            "Definir versão trial/prova com limites de features e mensagens in-app claras.",
-            "Refinar UX mobile em páginas operacionais com maior densidade de informação.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",
@@ -489,7 +497,7 @@ def obter_notas_transversais_todo():
         ),
         "traducao": (
             "Estado atual de tradução: revisão ampla concluída nos templates visíveis do utilizador, incluindo Projetos, IA, Geologia, Plataforma e Website. "
-            "Pontos pendentes concentram-se sobretudo em mensagens de backend/validação e alguns textos técnicos internos, não no menu principal."
+            "No circuito público, `Português` e `English` já estão expostos com cobertura reforçada nas páginas principais e legais; os pontos pendentes concentram-se sobretudo em mensagens de backend/validação e alguns textos técnicos internos, não no menu principal."
         ),
         "governanca_execucao": (
             "As páginas TO DO foram expandidas para cobertura global ('para tudo'): apps funcionais + frentes transversais de Infra/Deploy, Segurança/Qualidade e Produto/Comercial. "

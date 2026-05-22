@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="sm-table-wrap sm-table-wrap-scroll">
-                    <table class="sm-table">
+                    <table class="sm-table sm-table-mobile">
                         <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
@@ -48,30 +48,30 @@
                         <tbody>
                         {% for devolucao in devolucoes %}
                             <tr>
-                                <td>
+                                <td data-label="{% trans 'Data' %}">
                                     <div class="sm-data-primary">{{ devolucao.data }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Contexto' %}">
                                     <div class="sm-data-primary">{{ devolucao.material.nome }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Quantidade' %}">
                                     <span class="sm-pill sm-pill-info">{{ devolucao.quantidade }}</span>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Projeto' %}">
                                     {% if devolucao.projeto %}
                                         {{ devolucao.projeto.nome }}
                                     {% else %}
                                         {% trans "Stock" %}
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Furo' %}">
                                     {% if devolucao.furo %}
                                         {{ devolucao.furo.nome }}
                                     {% else %}
                                         -
                                     {% endif %}
                                 </td>
-                                <td><div class="sm-observation">{{ devolucao.observacoes|default:"-" }}</div></td>
+                                <td data-label="{% trans 'Observações' %}"><div class="sm-observation">{{ devolucao.observacoes|default:"-" }}</div></td>
                             </tr>
                         {% endfor %}
                         </tbody>

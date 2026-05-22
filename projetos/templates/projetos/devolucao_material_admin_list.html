@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="sm-table-wrap sm-table-wrap-scroll">
-                    <table class="sm-table">
+                    <table class="sm-table sm-table-mobile">
                         <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
@@ -45,10 +45,10 @@
                         <tbody>
                         {% for devolucao in devolucoes %}
                             <tr>
-                                <td>
+                                <td data-label="{% trans 'Data' %}">
                                     <div class="sm-data-primary">{{ devolucao.data }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Contexto' %}">
                                     <div class="sm-data-primary">{{ devolucao.empregado.nome }}</div>
                                     <div class="sm-data-secondary">
                                         {% trans "Material:" %}
@@ -57,10 +57,10 @@
                                         </a>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Quantidade' %}">
                                     <span class="sm-pill sm-pill-info">{{ devolucao.quantidade }}</span>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Projeto' %}">
                                     {% if devolucao.projeto %}
                                         <a href="{{ devolucao.projeto.get_absolute_url }}" class="sm-link">
                                             {{ devolucao.projeto.nome }}
@@ -69,7 +69,7 @@
                                         {% trans "Stock" %}
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Furo' %}">
                                     {% if devolucao.furo %}
                                         <a href="{{ devolucao.furo.get_absolute_url }}" class="sm-link">
                                             {{ devolucao.furo.nome }}
@@ -78,7 +78,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td><div class="sm-observation">{{ devolucao.observacoes|default:"-" }}</div></td>
+                                <td data-label="{% trans 'Observações' %}"><div class="sm-observation">{{ devolucao.observacoes|default:"-" }}</div></td>
                             </tr>
                         {% endfor %}
                         </tbody>

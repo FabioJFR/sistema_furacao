@@ -34,6 +34,10 @@
         <div class="stat-label">{% trans "Tipo individual" %}</div>
         <div class="stat-value">{{ planos_individuais|default:0 }}</div>
     </div>
+    <div class="stat-box">
+        <div class="stat-label">{% trans "Planos trial / prova" %}</div>
+        <div class="stat-value">{{ planos_trial|default:0 }}</div>
+    </div>
 </div>
 
 <div class="card">
@@ -58,9 +62,13 @@
                         <tr>
                             <td>
                                 <span class="plano-nome">{{ plano.nome }}</span>
+                                {% if plano.trial_contexto.is_trial %}
+                                    <span class="plano-badge-trial">{{ plano.trial_contexto.badge }}</span>
+                                {% endif %}
                                 {% if plano.descricao %}
                                     <span class="plano-meta">{{ plano.descricao }}</span>
                                 {% endif %}
+                                <span class="plano-meta">{{ plano.trial_contexto.mensagem_curta }}</span>
                             </td>
                             <td>
                                 <span class="badge badge-{{ plano.tipo }}">{{ plano.get_tipo_display }}</span>

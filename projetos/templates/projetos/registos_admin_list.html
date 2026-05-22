@@ -118,7 +118,7 @@
                 </div>
             </div>
             <div class="sm-table-wrap">
-                <table class="sm-table sm-table-wide">
+                <table class="sm-table sm-table-wide sm-table-mobile">
                     <thead>
                         <tr>
                             <th>{% trans "Ações" %}</th>
@@ -135,7 +135,7 @@
                     <tbody>
                         {% for r in registos %}
                             <tr>
-                                <td>
+                                <td data-label="{% trans 'Ações' %}">
                                     <div class="sm-cell-stack">
                                         {% if r.tem_relatorio_tecnico %}
                                             <a href="{% url 'projetos:relatorio_turno_admin_detail' r.id %}" class="sm-btn sm-btn-success">
@@ -147,26 +147,26 @@
                                         </a>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Data' %}">
                                     <div class="sm-data-primary">{{ r.data }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Contexto' %}">
                                     <div class="sm-data-primary">{{ r.empregado.nome }}</div>
                                     <div class="sm-data-secondary">{% trans "Planeamento:" %} {{ r.planeamento_turno.nome_efetivo|default:"-" }}</div>
                                     <div class="sm-data-secondary">{% trans "Projeto:" %} {{ r.projeto.nome|default:"-" }}</div>
                                     <div class="sm-data-secondary">{% trans "Furo:" %} {{ r.furo.nome|default:"-" }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Horário' %}">
                                     <div class="sm-data-secondary">{% trans "Início:" %} {{ r.hora_inicio|default:"-" }}</div>
                                     <div class="sm-data-secondary">{% trans "Pausa:" %} {{ r.hora_inicio_pausa|default:"-" }} → {{ r.hora_fim_pausa|default:"-" }}</div>
                                     <div class="sm-data-secondary">{% trans "Fim:" %} {{ r.hora_fim|default:"-" }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Horas' %}">
                                     <div class="sm-data-primary">{{ r.horas_trabalhadas|floatformat:2 }} h</div>
                                     <div class="sm-data-secondary">{% trans "Paragem:" %} {{ r.horas_paragem|floatformat:2 }} h</div>
                                 </td>
-                                <td>{{ r.get_tipo_paragem_display|default:"-" }}</td>
-                                <td>
+                                <td data-label="{% trans 'Tipo Paragem' %}">{{ r.get_tipo_paragem_display|default:"-" }}</td>
+                                <td data-label="{% trans 'Produção' %}">
                                     <div class="sm-production-grid">
                                         <div class="sm-production-item">
                                             <span class="sm-production-label">{% trans "Metros" %}</span>
@@ -194,7 +194,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Foto' %}">
                                     {% if r.relatorio_foto %}
                                         <a href="{{ r.relatorio_foto.url }}" target="_blank" class="sm-link">
                                             {% trans "Ver" %}
@@ -203,7 +203,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Observações' %}">
                                     <div class="sm-observation">{{ r.observacoes|default:"-" }}</div>
                                 </td>
                             </tr>

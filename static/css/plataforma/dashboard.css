@@ -132,6 +132,53 @@
             gap: 22px;
         }
 
+        .commercial-card {
+            margin-bottom: 28px;
+        }
+
+        .commercial-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .commercial-stat {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .commercial-stat-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .commercial-stat-value {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .commercial-stat-note {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .commercial-table-wrap {
+            margin-top: 2px;
+        }
+
+        .empty-inline {
+            padding: 16px;
+            margin: 6px 0;
+        }
+
         .section-title {
             display: flex;
             justify-content: space-between;
@@ -298,6 +345,10 @@
             }
 
             .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .commercial-metrics {
                 grid-template-columns: 1fr;
             }
 

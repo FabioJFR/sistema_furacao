@@ -79,6 +79,77 @@
         {% endif %}
     </div>
 
+    <div class="card commercial-card">
+        <div class="section-title">
+            <div>
+                <h2>{% trans "Radar comercial" %}</h2>
+                <p>{% trans "Leitura atual de ativação, conversão para operação e retenção da base por plano." %}</p>
+            </div>
+        </div>
+
+        <div class="commercial-metrics">
+            <div class="commercial-stat">
+                <span class="commercial-stat-label">{% trans "Ativação de contas admin" %}</span>
+                <strong class="commercial-stat-value">{{ metricas_comerciais.taxa_ativacao_contas }}%</strong>
+                <span class="commercial-stat-note">
+                    {{ contas_ativadas|default:0 }} / {{ metricas_comerciais.total_admins_cliente|default:0 }}
+                    {% trans "contas admin com email confirmado." %}
+                </span>
+            </div>
+            <div class="commercial-stat">
+                <span class="commercial-stat-label">{% trans "Conversão para operação" %}</span>
+                <strong class="commercial-stat-value">{{ metricas_comerciais.taxa_conversao_operacional }}%</strong>
+                <span class="commercial-stat-note">{% trans "Empresas já em estado comercial ativo sobre a base total." %}</span>
+            </div>
+            <div class="commercial-stat">
+                <span class="commercial-stat-label">{% trans "Retenção atual da base" %}</span>
+                <strong class="commercial-stat-value">{{ metricas_comerciais.taxa_retencao_base }}%</strong>
+                <span class="commercial-stat-note">{% trans "Empresas ainda presentes na base, excluindo canceladas." %}</span>
+            </div>
+        </div>
+
+        <div class="table-wrap commercial-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Plano" %}</th>
+                        <th>{% trans "Empresas" %}</th>
+                        <th>{% trans "Ativas" %}</th>
+                        <th>{% trans "Em teste" %}</th>
+                        <th>{% trans "Admins ativados" %}</th>
+                        <th>{% trans "Conversão" %}</th>
+                        <th>{% trans "Retenção" %}</th>
+                        <th>{% trans "Ativação" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plano in planos_comerciais %}
+                        <tr>
+                            <td>
+                                <span class="empresa-nome">{{ plano.plano_nome }}</span>
+                            </td>
+                            <td>{{ plano.empresas_total }}</td>
+                            <td>{{ plano.empresas_ativas }}</td>
+                            <td>{{ plano.empresas_em_teste }}</td>
+                            <td>{{ plano.admins_ativados }} / {{ plano.admins_total }}</td>
+                            <td><span class="badge badge-teste">{{ plano.taxa_conversao }}%</span></td>
+                            <td><span class="badge badge-ativa">{{ plano.taxa_retencao }}%</span></td>
+                            <td><span class="badge badge-suspensa">{{ plano.taxa_ativacao }}%</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty empty-inline">
+                                    {% trans "Ainda não existem planos com dados comerciais suficientes para análise." %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="layout">
         <div class="card">
             <div class="section-title">

@@ -96,7 +96,7 @@
                     </div>
                 </div>
                 <div class="sm-table-wrap sm-table-wrap-scroll">
-                    <table class="sm-table">
+                    <table class="sm-table sm-table-mobile">
                         <thead>
                         <tr>
                             <th>{% trans "Data" %}</th>
@@ -110,17 +110,17 @@
                         <tbody>
                         {% for levantamento in levantamentos %}
                             <tr>
-                                <td>
+                                <td data-label="{% trans 'Data' %}">
                                     <div class="sm-data-primary">{{ levantamento.data }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Contexto' %}">
                                     <div class="sm-data-primary">{{ levantamento.empregado.nome }}</div>
                                     <div class="sm-data-secondary">{% trans "Material:" %} {{ levantamento.material.nome }}</div>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Quantidade' %}">
                                     <span class="sm-pill sm-pill-info">{{ levantamento.quantidade }}</span>
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Projeto' %}">
                                     {% if levantamento.projeto %}
                                         <a href="{{ levantamento.projeto.get_absolute_url }}" class="sm-link">
                                             {{ levantamento.projeto.nome }}
@@ -129,7 +129,7 @@
                                         {% trans "Stock" %}
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="{% trans 'Furo' %}">
                                     {% if levantamento.furo %}
                                         <a href="{{ levantamento.furo.get_absolute_url }}" class="sm-link">
                                             {{ levantamento.furo.nome }}
@@ -138,7 +138,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td><div class="sm-observation">{{ levantamento.observacoes|default:"-" }}</div></td>
+                                <td data-label="{% trans 'Observações' %}"><div class="sm-observation">{{ levantamento.observacoes|default:"-" }}</div></td>
                             </tr>
                         {% endfor %}
                         </tbody>

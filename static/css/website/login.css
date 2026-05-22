@@ -15,6 +15,33 @@ body {
     max-width: 460px;
 }
 
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #dbe2ea;
+    margin: 0 auto 14px;
+}
+
+.language-switcher__label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.language-switcher__select {
+    border: none;
+    background: transparent;
+    color: #111827;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+
 .title {
     text-align: center;
     margin: 0 0 18px;

@@ -30,7 +30,21 @@
 <body>
     <div class="container">
         <a href="{% url 'website:home' %}" class="top-link">← {% trans "Voltar à Home" %}</a>
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher language-switcher-register">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label for="id_public_language_registo" class="language-switcher__label">{% trans "Idioma" %}</label>
+            <select id="id_public_language_registo" name="language" class="language-switcher__select" onchange="this.form.submit()">
+                {% get_current_language as CURRENT_LANGUAGE %}
+                {% for option in public_language_options %}
+                    <option value="{{ option.code }}" {% if option.code == CURRENT_LANGUAGE %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </form>
         <h1>{% trans "Criar conta" %}</h1>
+        <p class="page-intro">
+            {% trans "Escolhe o tipo de conta certo, segue a checklist inicial e entra na plataforma com o plano ajustado ao teu arranque." %}
+        </p>
 
         {% if messages %}
             <div class="messages">
@@ -62,9 +76,35 @@
                 <div class="row">
                     <label>{% trans "Tipo de conta" %}</label>
                     <select name="tipo_conta" id="id_tipo_conta">
-                        <option value="empresa" {% if dados.tipo_conta == 'empresa' %}selected{% endif %}>{% trans "Empresa" %}</option>
+                        <option value="empresa" {% if dados.tipo_conta == 'empresa' or not dados.tipo_conta %}selected{% endif %}>{% trans "Empresa" %}</option>
                         <option value="individual" {% if dados.tipo_conta == 'individual' %}selected{% endif %}>{% trans "Individual" %}</option>
                     </select>
+                </div>
+
+                <div class="account-guide-grid">
+                    <button type="button" class="account-guide-card" data-account-card="empresa">
+                        <span class="account-guide-kicker">{% trans "Conta guiada" %}</span>
+                        <strong>{{ tipos_conta_contexto.empresa.titulo }}</strong>
+                        <p>{{ tipos_conta_contexto.empresa.descricao }}</p>
+                    </button>
+                    <button type="button" class="account-guide-card" data-account-card="individual">
+                        <span class="account-guide-kicker">{% trans "Conta guiada" %}</span>
+                        <strong>{{ tipos_conta_contexto.individual.titulo }}</strong>
+                        <p>{{ tipos_conta_contexto.individual.descricao }}</p>
+                    </button>
+                </div>
+
+                <div class="account-guide-panel" id="account-guide-panel">
+                    <div class="account-guide-panel__head">
+                        <strong id="account-guide-title">{{ tipos_conta_contexto.empresa.titulo }}</strong>
+                        <span id="account-guide-label" class="account-guide-badge">{{ tipos_conta_contexto.empresa.label }}</span>
+                    </div>
+                    <p id="account-guide-description">{{ tipos_conta_contexto.empresa.descricao }}</p>
+                    <ul id="account-guide-checklist" class="account-guide-list">
+                        {% for item in tipos_conta_contexto.empresa.checklist %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
                 <div class="row">
@@ -123,6 +163,11 @@
                     {% trans "O tipo de conta deve corresponder ao plano selecionado. O valor é calculado automaticamente e fica registado para faturação e relatórios futuros." %}
                 </p>
 
+                <div class="plan-guide-box" id="plan-guide-box">
+                    <strong id="plan-guide-title">{% trans "Plano selecionado" %}</strong>
+                    <p id="plan-guide-message">{% trans "Seleciona um plano para veres aqui o enquadramento comercial e o comportamento inicial da conta." %}</p>
+                </div>
+
                 <div class="row">
                     <label>{% trans "Password" %}</label>
                     <input type="password" name="password1">
@@ -158,6 +203,7 @@
         </div>
     </div>
     {{ planos_contexto|json_script:"planos-contexto-data" }}
+    {{ tipos_conta_contexto|json_script:"tipos-conta-contexto-data" }}
     <script src="{% static 'js/website/registo.js' %}"></script>
 </body>
 </html>

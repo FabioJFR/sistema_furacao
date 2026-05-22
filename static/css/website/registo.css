@@ -11,6 +11,40 @@ body {
     padding: 32px 24px;
 }
 
+.page-intro {
+    margin: 10px 0 22px;
+    color: #475569;
+    line-height: 1.6;
+    max-width: 60ch;
+}
+
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #dbe2ea;
+    margin-bottom: 14px;
+}
+
+.language-switcher__label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.language-switcher__select {
+    border: none;
+    background: transparent;
+    color: #111827;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+
 .card {
     background: white;
     border-radius: 16px;
@@ -108,6 +142,120 @@ select {
     margin-bottom: 16px;
     color: #6b7280;
     font-size: 14px;
+}
+
+.account-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 10px 0 18px;
+}
+
+.account-guide-card {
+    border: 1px solid #dbe3f0;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.account-guide-card:hover {
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.account-guide-card.is-active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.account-guide-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.account-guide-card strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #111827;
+    font-size: 17px;
+}
+
+.account-guide-card p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+.account-guide-panel,
+.plan-guide-box {
+    margin-bottom: 18px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 1px solid #dbe3f0;
+    background: #f8fafc;
+}
+
+.account-guide-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.account-guide-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.account-guide-panel p,
+.plan-guide-box p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.account-guide-list {
+    margin: 12px 0 0;
+    padding-left: 18px;
+    color: #334155;
+}
+
+.account-guide-list li + li {
+    margin-top: 8px;
+}
+
+.plan-guide-box.is-trial {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.plan-guide-box.is-paid {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+}
+
+.plan-guide-box strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #111827;
 }
 
 .field-readonly {
@@ -222,5 +370,15 @@ select {
     .btn {
         font-size: 16px;
         min-height: 46px;
+    }
+
+    .account-guide-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-guide-panel__head,
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

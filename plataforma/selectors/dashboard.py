@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -124,6 +125,102 @@ def obter_metricas_contas_dashboard():
         "contas_ativadas": perfis_qs.filter(user__is_active=True).count(),
         "contas_por_ativar": perfis_qs.filter(user__is_active=False).count(),
         "utilizadores_online_total": len(_obter_user_ids_online()),
+    }
+
+
+def _percentual(parte, total):
+    if not total:
+        return 0
+    return round((parte / total) * 100)
+
+
+def obter_metricas_comerciais_dashboard(empresas_qs):
+    empresas = list(
+        empresas_qs.values(
+            "id",
+            "nome",
+            "plano_id",
+            "plano__nome",
+            "status",
+            "subscricao_atual_estado",
+        )
+    )
+    perfis_admin = list(
+        PerfilPlataforma.objects
+        .filter(tipo_acesso="empresa_admin", empresa_id__isnull=False)
+        .values("empresa_id", "user__is_active")
+    )
+
+    ativacao_por_empresa = defaultdict(lambda: {"ativadas": 0, "total": 0})
+    for perfil in perfis_admin:
+        bucket = ativacao_por_empresa[perfil["empresa_id"]]
+        bucket["total"] += 1
+        if perfil["user__is_active"]:
+            bucket["ativadas"] += 1
+
+    linhas_planos = {}
+    totais = {
+        "empresas": 0,
+        "ativas": 0,
+        "retidas": 0,
+        "admins_total": 0,
+        "admins_ativados": 0,
+    }
+
+    for empresa in empresas:
+        plano_id = empresa["plano_id"] or "sem-plano"
+        estado_comercial = resolver_estado_comercial_empresa(
+            status_empresa=empresa["status"],
+            estado_subscricao=empresa["subscricao_atual_estado"],
+        )
+        linha = linhas_planos.setdefault(
+            plano_id,
+            {
+                "plano_nome": empresa["plano__nome"] or "Sem plano",
+                "empresas_total": 0,
+                "empresas_ativas": 0,
+                "empresas_em_teste": 0,
+                "empresas_retidas": 0,
+                "admins_total": 0,
+                "admins_ativados": 0,
+            },
+        )
+        linha["empresas_total"] += 1
+        totais["empresas"] += 1
+
+        if estado_comercial == "ativa":
+            linha["empresas_ativas"] += 1
+            totais["ativas"] += 1
+        if estado_comercial == "teste":
+            linha["empresas_em_teste"] += 1
+        if estado_comercial != "cancelada":
+            linha["empresas_retidas"] += 1
+            totais["retidas"] += 1
+
+        ativacao = ativacao_por_empresa.get(empresa["id"], {"ativadas": 0, "total": 0})
+        linha["admins_total"] += ativacao["total"]
+        linha["admins_ativados"] += ativacao["ativadas"]
+        totais["admins_total"] += ativacao["total"]
+        totais["admins_ativados"] += ativacao["ativadas"]
+
+    planos = []
+    for linha in linhas_planos.values():
+        linha["taxa_conversao"] = _percentual(linha["empresas_ativas"], linha["empresas_total"])
+        linha["taxa_retencao"] = _percentual(linha["empresas_retidas"], linha["empresas_total"])
+        linha["taxa_ativacao"] = _percentual(linha["admins_ativados"], linha["admins_total"])
+        planos.append(linha)
+
+    planos.sort(key=lambda item: (-item["empresas_total"], item["plano_nome"].lower()))
+
+    return {
+        "metricas_comerciais": {
+            "taxa_ativacao_contas": _percentual(totais["admins_ativados"], totais["admins_total"]),
+            "taxa_conversao_operacional": _percentual(totais["ativas"], totais["empresas"]),
+            "taxa_retencao_base": _percentual(totais["retidas"], totais["empresas"]),
+            "total_admins_cliente": totais["admins_total"],
+            "total_planos_comerciais": len(planos),
+        },
+        "planos_comerciais": planos,
     }
 
 

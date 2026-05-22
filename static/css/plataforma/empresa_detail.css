@@ -101,6 +101,48 @@
     color: #166534;
 }
 
+.empresa-badge--trial {
+    background: #dbeafe;
+    color: #1d4ed8;
+    margin-left: 8px;
+}
+
+.empresa-badge--paid {
+    background: #ecfdf5;
+    color: #166534;
+    margin-left: 8px;
+}
+
+.empresa-plan-highlight {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #dbe3f0;
+    background: #f8fafc;
+}
+
+.empresa-plan-highlight strong {
+    color: #111827;
+}
+
+.empresa-plan-highlight span {
+    color: #51667e;
+    line-height: 1.6;
+}
+
+.empresa-plan-highlight--trial {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.empresa-plan-highlight--paid {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+}
+
 .empresa-renovacao-form {
     margin-top: 16px;
     padding-top: 16px;

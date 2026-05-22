@@ -114,6 +114,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 "projetos.context_processors.menu_context",
+                "website.context_processors.public_i18n",
             ],
         },
     },

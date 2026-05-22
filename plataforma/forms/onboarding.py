@@ -1,6 +1,7 @@
 from django import forms
 
 from plataforma.selectors.forms import listar_planos_ativos_nome_qs
+from plataforma.selectors.planos import plano_e_trial
 
 
 class OnboardingEmpresaForm(forms.Form):
@@ -159,6 +160,12 @@ class OnboardingEmpresaForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["plano"].queryset = listar_planos_ativos_nome_qs()
+        self.fields["plano"].label_from_instance = self._label_plano
+
+    @staticmethod
+    def _label_plano(plano):
+        sufixo = " · Trial / prova" if plano_e_trial(plano) else ""
+        return f"{plano.nome}{sufixo}"
 
     def clean_nome_empresa(self):
         valor = self.cleaned_data.get("nome_empresa", "").strip()

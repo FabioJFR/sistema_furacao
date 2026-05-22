@@ -5,6 +5,7 @@ from plataforma.selectors.subscricoes import (
     obter_metricas_ativacao_contas,
     obter_metricas_subscricoes,
 )
+from website.services import diagnosticar_email_transacional
 
 
 def construir_contexto_subscricao_list(*, perfil):
@@ -21,6 +22,7 @@ def construir_contexto_subscricao_list(*, perfil):
     return {
         "perfil": perfil,
         "subscricoes": subscricoes,
+        "diagnostico_email": diagnosticar_email_transacional(),
         **metricas,
         **metricas_ativacao,
     }

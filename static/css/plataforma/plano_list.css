@@ -74,6 +74,18 @@
     font-size: 12px;
 }
 
+.plano-badge-trial {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 800;
+}
+
 .badge-ativo {
     background: var(--success-bg);
     color: var(--success-text);

@@ -42,34 +42,56 @@ def _website_public_meta(request, *, title="", description="", robots="index,fol
     base_url = _website_base_url(request)
     logo_url = f"{base_url}{PUBLIC_LOGO_STATIC_PATH}"
     current_url = request.build_absolute_uri()
+    organization_id = f"{base_url}/#organization"
+    website_id = f"{base_url}/#website"
+    image_id = f"{base_url}/#logo"
     schema = {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Sistema de Furação",
-        "alternateName": "Sistema Furação",
-        "url": f"{base_url}/",
-        "logo": {
-            "@type": "ImageObject",
-            "url": logo_url,
-            "contentUrl": logo_url,
-            "width": 1024,
-            "height": 1024,
-        },
-        "email": "sistemafuracao@gmail.com",
-        "telephone": "+351928044839",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "customer support",
-            "email": "sistemafuracao@gmail.com",
-            "telephone": "+351928044839",
-            "availableLanguage": ["pt-PT", "en"],
-        },
-        "description": description or "Plataforma profissional para operacoes de diamond drilling.",
+        "@graph": [
+            {
+                "@type": "ImageObject",
+                "@id": image_id,
+                "url": logo_url,
+                "contentUrl": logo_url,
+                "caption": "Sistema de Furação",
+                "width": 1024,
+                "height": 1024,
+            },
+            {
+                "@type": "Organization",
+                "@id": organization_id,
+                "name": "Sistema de Furação",
+                "alternateName": "Sistema Furacao",
+                "url": f"{base_url}/",
+                "logo": {"@id": image_id},
+                "image": {"@id": image_id},
+                "email": "sistemafuracao@gmail.com",
+                "telephone": "+351928044839",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "email": "sistemafuracao@gmail.com",
+                    "telephone": "+351928044839",
+                    "availableLanguage": ["pt-PT", "en", "es", "fr", "de", "zh-Hans"],
+                },
+                "description": description or "Plataforma profissional para operacoes de diamond drilling.",
+            },
+            {
+                "@type": "WebSite",
+                "@id": website_id,
+                "url": f"{base_url}/",
+                "name": "Sistema de Furação",
+                "alternateName": "Sistema Furacao",
+                "publisher": {"@id": organization_id},
+                "inLanguage": [code for code, _ in settings.LANGUAGES],
+            },
+        ],
     }
     return {
         "public_site_url": f"{base_url}/",
         "public_current_url": current_url,
         "public_logo_url": logo_url,
+        "public_logo_alt": "Logo Sistema de Furação",
         "page_title_text": title,
         "page_description": description,
         "page_robots": robots,
@@ -387,6 +409,7 @@ def politica_privacidade(request):
 def registo(request):
     planos_qs = selectors.listar_planos_ativos()
     planos_contexto = selectors.construir_planos_contexto(planos_qs)
+    tipos_conta_contexto = selectors.construir_tipos_conta_contexto()
 
     if request.method == "POST":
         resultado = services.executar_registo(
@@ -404,6 +427,7 @@ def registo(request):
                     "planos": planos_qs,
                     "dados": request.POST,
                     "planos_contexto": planos_contexto,
+                    "tipos_conta_contexto": tipos_conta_contexto,
                 },
             )
 
@@ -421,6 +445,7 @@ def registo(request):
         {
             "planos": planos_qs,
             "planos_contexto": planos_contexto,
+            "tipos_conta_contexto": tipos_conta_contexto,
             **_website_public_meta(
                 request,
                 title="Registo | Sistema de Furação",

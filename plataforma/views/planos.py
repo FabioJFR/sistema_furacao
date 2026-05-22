@@ -7,7 +7,12 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from plataforma.decorators import platform_admin_required
-from plataforma.selectors.planos import listar_planos_dashboard, obter_plano_por_pk
+from plataforma.selectors.planos import (
+    enriquecer_planos_com_contexto_trial,
+    listar_planos_dashboard,
+    obter_plano_por_pk,
+    plano_e_trial,
+)
 from plataforma.services.planos import (
     alternar_plano_ativo,
     processar_fluxo_form_plano,
@@ -19,12 +24,14 @@ from plataforma.services.planos import (
 @platform_admin_required
 def plano_list(request):
     planos = listar_planos_dashboard()
+    enriquecer_planos_com_contexto_trial(planos)
 
     context = {
         "planos": planos,
         "planos_ativos": planos.filter(ativo=True).count(),
         "planos_empresa": planos.filter(tipo="empresa").count(),
         "planos_individuais": planos.filter(tipo="individual").count(),
+        "planos_trial": sum(1 for plano in planos if plano_e_trial(plano)),
     }
 
     return render(request, "plataforma/plano_list.html", context)

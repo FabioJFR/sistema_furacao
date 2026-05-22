@@ -5,7 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from plataforma.decorators import platform_admin_required
-from plataforma.selectors.planos import construir_planos_periodos_precos, listar_planos_ativos
+from plataforma.selectors.planos import (
+    construir_planos_periodos_precos,
+    listar_planos_ativos,
+)
 from plataforma.services.onboarding import (
     processar_fluxo_onboarding_empresa,
 )

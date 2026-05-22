@@ -25,13 +25,25 @@
     <meta property="og:url" content="{{ public_current_url }}">
     <meta property="og:site_name" content="Sistema de Furação">
     <meta property="og:image" content="{{ public_logo_url }}">
+    <meta property="og:image:alt" content="{{ public_logo_alt }}">
     <link rel="stylesheet" href="{% static 'css/website/planos.css' %}">
 </head>
 <body>
     <div class="container">
         <div class="topbar">
             <h1>{% trans "Planos" %}</h1>
-            <div>
+            <div class="topbar-actions">
+                <form action="{% url 'set_language' %}" method="post" class="language-switcher">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <label for="id_public_language_planos" class="language-switcher__label">{% trans "Idioma" %}</label>
+                    <select id="id_public_language_planos" name="language" class="language-switcher__select" onchange="this.form.submit()">
+                        {% get_current_language as CURRENT_LANGUAGE %}
+                        {% for option in public_language_options %}
+                            <option value="{{ option.code }}" {% if option.code == CURRENT_LANGUAGE %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
                 <a href="{% url 'website:home' %}" class="btn btn-light">{% trans "Voltar" %}</a>
                 <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Entrar" %}</a>
             </div>

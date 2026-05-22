@@ -8,6 +8,7 @@ from plataforma.selectors.dashboard import (
     listar_utilizadores_online,
     obter_alertas_renovacao_qs,
     obter_empresas_dashboard_qs,
+    obter_metricas_comerciais_dashboard,
     obter_metricas_contas_dashboard,
     obter_metricas_empresas_dashboard,
 )
@@ -25,6 +26,7 @@ def dashboard_plataforma(request):
     empresas_qs = obter_empresas_dashboard_qs()
     metricas = obter_metricas_empresas_dashboard(empresas_qs)
     metricas_contas = obter_metricas_contas_dashboard()
+    metricas_comerciais = obter_metricas_comerciais_dashboard(empresas_qs)
     empresas_recentes = enriquecer_empresas_dashboard(list(empresas_qs[:12]))
     alertas_renovacao = obter_alertas_renovacao_qs()
     utilizadores_online = listar_utilizadores_online()
@@ -34,6 +36,7 @@ def dashboard_plataforma(request):
         "perfil": perfil,
         **metricas,
         **metricas_contas,
+        **metricas_comerciais,
         "empresas": empresas_recentes,
         "alertas_renovacao": alertas_renovacao,
         "utilizadores_online": utilizadores_online,

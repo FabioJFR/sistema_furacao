@@ -10,7 +10,12 @@ from plataforma.selectors.empresas import (
     obter_empresa_com_plano,
     obter_subscricao_atual_empresa,
 )
-from plataforma.selectors.planos import listar_planos_para_admin, obter_plano_ativo
+from plataforma.selectors.planos import (
+    construir_contexto_trial_plano,
+    enriquecer_planos_com_contexto_trial,
+    listar_planos_para_admin,
+    obter_plano_ativo,
+)
 from plataforma.services import empresas as empresas_service
 
 # TODO futuro:
@@ -35,6 +40,7 @@ def empresa_detail_plataforma(request, pk):
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
     movimentos_financeiros = listar_movimentos_financeiros_empresa(empresa, limit=5)
     alerta_renovacao = empresas_service.calcular_alerta_renovacao(subscricao_atual)
+    plano_trial_contexto = construir_contexto_trial_plano(getattr(empresa, "plano", None))
 
     # =========================
     # MÉTRICAS BASE (placeholder para evolução)
@@ -60,6 +66,7 @@ def empresa_detail_plataforma(request, pk):
         "subscricao_atual": subscricao_atual,
         "movimentos_financeiros": movimentos_financeiros,
         "alerta_renovacao": alerta_renovacao,
+        "plano_trial_contexto": plano_trial_contexto,
     }
 
     return render(request, "plataforma/empresa_detail.html", context)
@@ -95,6 +102,7 @@ def alterar_plano_empresa(request, pk):
 
     empresa = obter_empresa_com_plano(pk)
     planos = listar_planos_para_admin()
+    enriquecer_planos_com_contexto_trial(planos)
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
 
     if request.method == "POST":
@@ -126,6 +134,7 @@ def alterar_plano_empresa(request, pk):
         "subscricao_atual": subscricao_atual,
         "estados_empresa": Empresa.STATUS_CHOICES,
         "titulo": f"Alterar Plano - {empresa.nome}",
+        "plano_trial_contexto": construir_contexto_trial_plano(getattr(empresa, "plano", None)),
     }
 
     return render(request, "plataforma/empresa_alterar_plano.html", context)

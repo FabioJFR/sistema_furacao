@@ -71,10 +71,19 @@
             <strong>{% trans "Plano:" %}</strong>
             {% if empresa.plano %}
                 {{ empresa.plano.nome }}
+                <span class="empresa-badge {% if plano_trial_contexto.is_trial %}empresa-badge--trial{% else %}empresa-badge--paid{% endif %}">
+                    {{ plano_trial_contexto.badge }}
+                </span>
             {% else %}
                 {% trans "Sem plano" %}
             {% endif %}
         </div>
+        {% if empresa.plano %}
+            <div class="empresa-plan-highlight {% if plano_trial_contexto.is_trial %}empresa-plan-highlight--trial{% else %}empresa-plan-highlight--paid{% endif %}">
+                <strong>{{ plano_trial_contexto.badge }}</strong>
+                <span>{{ plano_trial_contexto.mensagem_longa }}</span>
+            </div>
+        {% endif %}
 
         <div class="empresa-row"><strong>{% trans "Data início:" %}</strong> {{ empresa.data_inicio }}</div>
         <div class="empresa-row"><strong>{% trans "Data fim:" %}</strong> {{ empresa.data_fim }}</div>

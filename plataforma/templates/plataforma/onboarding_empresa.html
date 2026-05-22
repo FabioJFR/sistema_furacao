@@ -18,6 +18,14 @@
 
 {% block plataforma_content %}
 <div class="onb-wrap">
+    <section class="onb-intro">
+        <div class="onb-intro-copy">
+            <h2>{% trans "Checklist de arranque" %}</h2>
+            <p>{% trans "Usa este fluxo para criar a empresa, preparar a conta administradora e deixar a subscrição inicial coerente logo no primeiro passo." %}</p>
+        </div>
+        <div class="onb-intro-chip">{% trans "Onboarding guiado" %}</div>
+    </section>
+
     {% if form.non_field_errors %}
         <div class="onb-error-box">
             {{ form.non_field_errors }}
@@ -27,64 +35,198 @@
     <form method="post" enctype="multipart/form-data" class="onb-grid">
         {% csrf_token %}
 
-        <div class="onb-card">
-            <h2>{% trans "Empresa" %}</h2>
+        <aside class="onb-guide-card">
+            <div class="onb-guide-block">
+                <div class="onb-guide-kicker">{% trans "Passo 1" %}</div>
+                <h3>{% trans "Identidade da empresa" %}</h3>
+                <p>{% trans "Preenche os dados mínimos da empresa e, se já existir branding, adiciona o logo para o ambiente ficar pronto logo de início." %}</p>
+            </div>
 
-            {% for field in form %}
-                {% if field.name in "nome_empresa nif email_empresa telefone morada pais cidade observacoes logo_empresa" %}
-                    <div class="onb-field">
-                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                            <span class="onb-help">{{ field.help_text }}</span>
-                        {% endif %}
-                        {% if field.errors %}
-                            <div class="onb-error">{{ field.errors }}</div>
-                        {% endif %}
+            <div class="onb-guide-block">
+                <div class="onb-guide-kicker">{% trans "Passo 2" %}</div>
+                <h3>{% trans "Conta administradora" %}</h3>
+                <p>{% trans "Cria a primeira conta que vai entrar no sistema, receber o email de ativação e gerir a operação inicial da empresa." %}</p>
+            </div>
+
+            <div class="onb-guide-block">
+                <div class="onb-guide-kicker">{% trans "Passo 3" %}</div>
+                <h3>{% trans "Plano e estado inicial" %}</h3>
+                <p>{% trans "Define se a empresa começa em teste ou ativa, e se já deve sair com subscrição criada para cobrança e renovação." %}</p>
+            </div>
+
+            <div class="onb-guide-note">
+                <strong>{% trans "Sugestão prática:" %}</strong>
+                {% trans "Para contas novas, o fluxo mais seguro costuma ser empresa em teste + criação da conta admin + validação do email antes de ativar o plano final." %}
+            </div>
+        </aside>
+
+        <div class="onb-main">
+            <div class="onb-card">
+                <div class="onb-card-head">
+                    <div class="onb-card-step">{% trans "1" %}</div>
+                    <div>
+                        <h2>{% trans "Empresa" %}</h2>
+                        <p>{% trans "Base legal, contactos e informação geral da nova conta empresarial." %}</p>
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+                </div>
 
-        <div class="onb-card">
-            <h2>{% trans "Administrador inicial" %}</h2>
-
-            {% for field in form %}
-                {% if field.name in "nome_admin username_admin email_admin password_admin tipo_acesso" %}
+                <div class="onb-fields-grid">
                     <div class="onb-field">
-                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                            <span class="onb-help">{{ field.help_text }}</span>
-                        {% endif %}
-                        {% if field.errors %}
-                            <div class="onb-error">{{ field.errors }}</div>
-                        {% endif %}
+                        <label for="{{ form.nome_empresa.id_for_label }}" class="onb-label">{{ form.nome_empresa.label }}</label>
+                        {{ form.nome_empresa }}
+                        {% if form.nome_empresa.help_text %}<span class="onb-help">{{ form.nome_empresa.help_text }}</span>{% endif %}
+                        {% if form.nome_empresa.errors %}<div class="onb-error">{{ form.nome_empresa.errors }}</div>{% endif %}
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="onb-card onb-card-full">
-            <h2>{% trans "Plano e faturação inicial" %}</h2>
-
-            {% for field in form %}
-                {% if field.name in "plano ciclo_subscricao estado_empresa criar_subscricao_inicial valor_subscricao" %}
                     <div class="onb-field">
-                        <label for="{{ field.id_for_label }}" class="onb-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                            <span class="onb-help">{{ field.help_text }}</span>
-                        {% endif %}
-                        {% if field.errors %}
-                            <div class="onb-error">{{ field.errors }}</div>
-                        {% endif %}
+                        <label for="{{ form.nif.id_for_label }}" class="onb-label">{{ form.nif.label }}</label>
+                        {{ form.nif }}
+                        {% if form.nif.help_text %}<span class="onb-help">{{ form.nif.help_text }}</span>{% endif %}
+                        {% if form.nif.errors %}<div class="onb-error">{{ form.nif.errors }}</div>{% endif %}
                     </div>
-                {% endif %}
-            {% endfor %}
+                    <div class="onb-field">
+                        <label for="{{ form.email_empresa.id_for_label }}" class="onb-label">{{ form.email_empresa.label }}</label>
+                        {{ form.email_empresa }}
+                        {% if form.email_empresa.help_text %}<span class="onb-help">{{ form.email_empresa.help_text }}</span>{% endif %}
+                        {% if form.email_empresa.errors %}<div class="onb-error">{{ form.email_empresa.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.telefone.id_for_label }}" class="onb-label">{{ form.telefone.label }}</label>
+                        {{ form.telefone }}
+                        {% if form.telefone.help_text %}<span class="onb-help">{{ form.telefone.help_text }}</span>{% endif %}
+                        {% if form.telefone.errors %}<div class="onb-error">{{ form.telefone.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field onb-field-span-2">
+                        <label for="{{ form.morada.id_for_label }}" class="onb-label">{{ form.morada.label }}</label>
+                        {{ form.morada }}
+                        {% if form.morada.help_text %}<span class="onb-help">{{ form.morada.help_text }}</span>{% endif %}
+                        {% if form.morada.errors %}<div class="onb-error">{{ form.morada.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.pais.id_for_label }}" class="onb-label">{{ form.pais.label }}</label>
+                        {{ form.pais }}
+                        {% if form.pais.help_text %}<span class="onb-help">{{ form.pais.help_text }}</span>{% endif %}
+                        {% if form.pais.errors %}<div class="onb-error">{{ form.pais.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.cidade.id_for_label }}" class="onb-label">{{ form.cidade.label }}</label>
+                        {{ form.cidade }}
+                        {% if form.cidade.help_text %}<span class="onb-help">{{ form.cidade.help_text }}</span>{% endif %}
+                        {% if form.cidade.errors %}<div class="onb-error">{{ form.cidade.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.logo_empresa.id_for_label }}" class="onb-label">{{ form.logo_empresa.label }}</label>
+                        {{ form.logo_empresa }}
+                        {% if form.logo_empresa.help_text %}<span class="onb-help">{{ form.logo_empresa.help_text }}</span>{% endif %}
+                        {% if form.logo_empresa.errors %}<div class="onb-error">{{ form.logo_empresa.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field onb-field-span-2">
+                        <label for="{{ form.observacoes.id_for_label }}" class="onb-label">{{ form.observacoes.label }}</label>
+                        {{ form.observacoes }}
+                        {% if form.observacoes.help_text %}<span class="onb-help">{{ form.observacoes.help_text }}</span>{% endif %}
+                        {% if form.observacoes.errors %}<div class="onb-error">{{ form.observacoes.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="onb-card">
+                <div class="onb-card-head">
+                    <div class="onb-card-step">{% trans "2" %}</div>
+                    <div>
+                        <h2>{% trans "Administrador inicial" %}</h2>
+                        <p>{% trans "Credenciais da primeira pessoa responsável por entrar e ativar a conta." %}</p>
+                    </div>
+                </div>
+
+                <div class="onb-fields-grid">
+                    <div class="onb-field">
+                        <label for="{{ form.nome_admin.id_for_label }}" class="onb-label">{{ form.nome_admin.label }}</label>
+                        {{ form.nome_admin }}
+                        {% if form.nome_admin.help_text %}<span class="onb-help">{{ form.nome_admin.help_text }}</span>{% endif %}
+                        {% if form.nome_admin.errors %}<div class="onb-error">{{ form.nome_admin.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.username_admin.id_for_label }}" class="onb-label">{{ form.username_admin.label }}</label>
+                        {{ form.username_admin }}
+                        {% if form.username_admin.help_text %}<span class="onb-help">{{ form.username_admin.help_text }}</span>{% endif %}
+                        {% if form.username_admin.errors %}<div class="onb-error">{{ form.username_admin.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.email_admin.id_for_label }}" class="onb-label">{{ form.email_admin.label }}</label>
+                        {{ form.email_admin }}
+                        {% if form.email_admin.help_text %}<span class="onb-help">{{ form.email_admin.help_text }}</span>{% endif %}
+                        {% if form.email_admin.errors %}<div class="onb-error">{{ form.email_admin.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.password_admin.id_for_label }}" class="onb-label">{{ form.password_admin.label }}</label>
+                        {{ form.password_admin }}
+                        {% if form.password_admin.help_text %}<span class="onb-help">{{ form.password_admin.help_text }}</span>{% endif %}
+                        {% if form.password_admin.errors %}<div class="onb-error">{{ form.password_admin.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field onb-field-span-2">
+                        <label for="{{ form.tipo_acesso.id_for_label }}" class="onb-label">{{ form.tipo_acesso.label }}</label>
+                        {{ form.tipo_acesso }}
+                        {% if form.tipo_acesso.help_text %}<span class="onb-help">{{ form.tipo_acesso.help_text }}</span>{% endif %}
+                        {% if form.tipo_acesso.errors %}<div class="onb-error">{{ form.tipo_acesso.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="onb-card onb-card-full">
+                <div class="onb-card-head">
+                    <div class="onb-card-step">{% trans "3" %}</div>
+                    <div>
+                        <h2>{% trans "Plano e faturação inicial" %}</h2>
+                        <p>{% trans "Configuração comercial inicial da conta, com estado operacional e eventual subscrição logo à saída." %}</p>
+                    </div>
+                </div>
+
+                <div class="onb-fields-grid">
+                    <div class="onb-field">
+                        <label for="{{ form.plano.id_for_label }}" class="onb-label">{{ form.plano.label }}</label>
+                        {{ form.plano }}
+                        {% if form.plano.help_text %}<span class="onb-help">{{ form.plano.help_text }}</span>{% endif %}
+                        {% if form.plano.errors %}<div class="onb-error">{{ form.plano.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.ciclo_subscricao.id_for_label }}" class="onb-label">{{ form.ciclo_subscricao.label }}</label>
+                        {{ form.ciclo_subscricao }}
+                        {% if form.ciclo_subscricao.help_text %}<span class="onb-help">{{ form.ciclo_subscricao.help_text }}</span>{% endif %}
+                        {% if form.ciclo_subscricao.errors %}<div class="onb-error">{{ form.ciclo_subscricao.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.estado_empresa.id_for_label }}" class="onb-label">{{ form.estado_empresa.label }}</label>
+                        {{ form.estado_empresa }}
+                        {% if form.estado_empresa.help_text %}<span class="onb-help">{{ form.estado_empresa.help_text }}</span>{% endif %}
+                        {% if form.estado_empresa.errors %}<div class="onb-error">{{ form.estado_empresa.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field">
+                        <label for="{{ form.valor_subscricao.id_for_label }}" class="onb-label">{{ form.valor_subscricao.label }}</label>
+                        {{ form.valor_subscricao }}
+                        {% if form.valor_subscricao.help_text %}<span class="onb-help">{{ form.valor_subscricao.help_text }}</span>{% endif %}
+                        {% if form.valor_subscricao.errors %}<div class="onb-error">{{ form.valor_subscricao.errors }}</div>{% endif %}
+                    </div>
+                    <div class="onb-field onb-field-span-2">
+                        <div class="onb-trial-box" id="onb-trial-box">
+                            <strong id="onb-trial-title">{% trans "Plano comercial" %}</strong>
+                            <p id="onb-trial-message">{% trans "Seleciona um plano para veres aqui se a conta arranca em modo trial/prova ou já em subscrição comercial." %}</p>
+                        </div>
+                    </div>
+                    <div class="onb-field onb-field-span-2">
+                        <div class="onb-check-card">
+                            {{ form.criar_subscricao_inicial }}
+                            <div>
+                                <label for="{{ form.criar_subscricao_inicial.id_for_label }}" class="onb-label onb-label-inline">{{ form.criar_subscricao_inicial.label }}</label>
+                                {% if form.criar_subscricao_inicial.help_text %}<span class="onb-help">{{ form.criar_subscricao_inicial.help_text }}</span>{% endif %}
+                                {% if form.criar_subscricao_inicial.errors %}<div class="onb-error">{{ form.criar_subscricao_inicial.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="onb-actions">
+            <a href="{% url 'plataforma:dashboard' %}" class="btn btn-light">{% trans "Cancelar" %}</a>
             <button type="submit" class="onb-submit">
                 {% trans "Criar empresa" %}
             </button>
