@@ -5,8 +5,8 @@
 ```bash
 cd /var/www/sistema_furacao
 git fetch origin
-git checkout release-v0.9.7
-git pull origin release-v0.9.7
+git checkout main
+git pull origin main
 ```
 
 ## 2) Virtualenv e dependências
