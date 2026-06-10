@@ -22,7 +22,7 @@
                     <input
                         id="ajuda-search"
                         type="search"
-                        placeholder="{% trans 'Ex.: férias, novo registo, compras, relatórios, máquinas...' %}"
+                        placeholder="{% if sf_mvp_operacional_focus %}{% trans 'Ex.: furo, novo registo, máquina, materiais, medições...' %}{% else %}{% trans 'Ex.: férias, novo registo, compras, relatórios, máquinas...' %}{% endif %}"
                         class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                         data-ajuda-search
                     >
@@ -133,7 +133,11 @@
                     <p class="mt-2 text-sm text-slate-600">{{ perfil.descricao }}</p>
                 </div>
                 {% if perfil.chave == "empresa" and is_admin_user %}
+                {% if sf_mvp_operacional_focus %}
+                <a href="{% url 'projetos:projeto_list' %}" class="btn btn-primary">{% trans "Abrir Operação" %}</a>
+                {% else %}
                 <a href="{% url 'projetos:gestao_hub' %}" class="btn btn-primary">{% trans "Abrir Gestão" %}</a>
+                {% endif %}
                 {% elif perfil.chave == "empregado" and is_empregado_user %}
                 <a href="{% url 'projetos:area_empregado' %}" class="btn btn-primary">{% trans "Abrir Minha Área" %}</a>
                 {% elif perfil.chave == "individual" %}
@@ -213,7 +217,11 @@
     </div>
 
     <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600" data-ajuda-empty hidden>
+        {% if sf_mvp_operacional_focus %}
+        {% trans "Nenhum tutorial corresponde à tua procura. Tenta outras palavras, como furo, registo, materiais, medições ou máquinas." %}
+        {% else %}
         {% trans "Nenhum tutorial corresponde à tua procura. Tenta outras palavras, como férias, registo, materiais, relatórios ou máquinas." %}
+        {% endif %}
     </div>
 </section>
 

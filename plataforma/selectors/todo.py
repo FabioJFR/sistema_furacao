@@ -79,6 +79,7 @@ _AREAS_TODO = {
             "Suporte a contas individual e empregado com regras específicas de acesso.",
             "CONCLUIDO · [EMPREGADO · DASHBOARD] `Minha Área` reorganizada com zona de acessos rápidos para registos, turnos, projetos, furos e configurações, mantendo as ações prioritárias no topo.",
             "CONCLUIDO · [INDIVIDUAL · DASHBOARD] `Minha Área` alinhada visualmente com a operação: métricas, ações principais e atalhos para registos, despesas, materiais, notificações e perfil.",
+            "CONCLUIDO · [INDIVIDUAL · MVP] `Minha Área` da conta individual passa a priorizar registos, furos, medições e materiais quando `SF_MVP_OPERACIONAL_FOCUS` está ativo; despesas ficam reservadas ao modo completo.",
             "CONCLUIDO · [EMPREGADO · FUROS] Detalhe do furo passa a mostrar `Configuração de Inicio de Furo` como configuração partilhada do furo, editável por empregados autorizados e com histórico preservado.",
             "CONCLUIDO · [EMPREGADO · FUROS] Atalhos `Minhas Configurações` e `Histórico Configurações` retirados do submenu `Operação`; lista de furos passa a expor ações `Configuração` e `Histórico` por furo.",
             "CONCLUIDO · [EMPREGADO · FUROS] Submenu `Operação > Meus Furos` passa a abrir a lista pessoal do empregado, onde as ações de configuração/histórico por furo estão visíveis.",
@@ -588,6 +589,8 @@ _AREAS_TODO = {
             "CONCLUIDO · [NAVEGACAO · RESPONSIVO] Atalho `Online` recuado no desktop e respetivo submenu configurado para abrir à direita do atalho.",
             "CONCLUIDO · [MVP · FOCO PRODUTO] Decisão registada: o MVP passa a focar controlo de operações no terreno; módulos comerciais/financeiros/ERP ficam preservados como pós-MVP e saem do fluxo principal.",
             "CONCLUIDO · [MVP · NAVEGACAO] Modo `SF_MVP_OPERACIONAL_FOCUS` criado para manter o menu da empresa focado em `Operação` e `Registos`, movendo `Planeamento` para Operação e ocultando `Gestão`, `Finanças` e `Analytics` do menu principal.",
+            "CONCLUIDO · [MVP · DASHBOARD INDIVIDUAL] Conta individual refinada para deixar despesas em segundo plano e destacar ações de terreno no modo MVP.",
+            "CONCLUIDO · [MVP · AJUDA] Centro de Ajuda passa a respeitar `SF_MVP_OPERACIONAL_FOCUS`, destacando arranque operacional, furos, registos, materiais e ocorrências em vez de promover módulos ERP/pós-MVP.",
         ],
         "proximos_passos": [
             "[MVP · CORE] Rever dashboards de empresa/empregado para destacar apenas estado diário de furos, registos, turnos, máquinas, materiais e medições.",

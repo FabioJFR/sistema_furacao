@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils.text import slugify
@@ -14,6 +15,42 @@ def _artigo_ajuda(*, titulo, categoria, resumo, passos, palavras_chave="", rota=
         "rota": rota,
         "acao_label": acao_label,
     }
+
+
+_ARTIGOS_POS_MVP_POR_PERFIL = {
+    "empresa": {
+        "Centro de Gestão",
+        "Clientes & Contratos",
+        "Compras & Fornecedores",
+        "Compliance & Segurança",
+        "Relatórios Executivos",
+        "Finanças",
+        "Analytics, AI e 3D",
+    },
+    "individual": {
+        "Minhas Despesas",
+    },
+}
+
+
+def _filtrar_ajuda_mvp(ajuda_por_perfil):
+    if not getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", False):
+        return ajuda_por_perfil
+
+    ajuda_filtrada = []
+    for perfil in ajuda_por_perfil:
+        titulos_ocultos = _ARTIGOS_POS_MVP_POR_PERFIL.get(perfil["chave"], set())
+        ajuda_filtrada.append(
+            {
+                **perfil,
+                "artigos": [
+                    artigo
+                    for artigo in perfil["artigos"]
+                    if artigo["titulo"] not in titulos_ocultos
+                ],
+            }
+        )
+    return ajuda_filtrada
 
 
 def _ajuda_por_perfil():
@@ -321,14 +358,14 @@ def _ajuda_por_perfil():
                 _artigo_ajuda(
                     titulo="Configurações de Perfuração",
                     categoria="Operação",
-                    resumo="Guarda configurações técnicas usadas em furos e reaproveita esse histórico quando voltares ao mesmo contexto.",
+                    resumo="Cada furo guarda a sua configuração técnica, editável pela equipa que trabalha nesse furo e preservada em histórico.",
                     passos=[
-                        "Abre Minhas Configurações para criar ou rever parâmetros usados.",
-                        "Consulta o histórico se precisares de recuperar uma configuração anterior.",
-                        "Aplica a configuração correta ao contexto do furo e do turno.",
+                        "Abre Meus Furos e escolhe o furo certo.",
+                        "Usa Configuração para criar ou alterar a configuração de perfuração associada ao furo.",
+                        "Consulta Histórico de Configuração no mesmo contexto para rever alterações anteriores.",
                     ],
-                    palavras_chave="configurações perfuração histórico parâmetros operação",
-                    rota="projetos:configuracao_perfuracao_list_empregado",
+                    palavras_chave="configurações perfuração histórico parâmetros furo operação",
+                    rota="projetos:meus_furos_empregado",
                 ),
                 _artigo_ajuda(
                     titulo="Meus Projetos e Meus Furos",
@@ -571,6 +608,46 @@ def _ajuda_por_perfil():
 
 
 def _guias_destaque_ajuda():
+    if getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", False):
+        return [
+            {
+                "titulo": "Arranque operacional",
+                "subtitulo": "Para empresas",
+                "descricao": "Guia rápido para criar a base mínima do piloto: projeto, furos, equipa, máquina e planeamento inicial.",
+                "passos": [
+                    "Criar o projeto e os furos que vão ser acompanhados no terreno.",
+                    "Associar empregados, máquina e turnos ao trabalho previsto.",
+                    "Validar se cada furo tem configuração de perfuração pronta para uso.",
+                ],
+                "rota": "projetos:projeto_list",
+                "palavras_chave": "mvp projeto furos equipa máquina planeamento configuração",
+            },
+            {
+                "titulo": "Registos em detalhe",
+                "subtitulo": "Para empregados e individuais",
+                "descricao": "Guia para preencher turnos, furadas, ocorrências, equipa e rever a ficha técnica depois de guardar.",
+                "passos": [
+                    "Selecionar o planeamento quando existir.",
+                    "Preencher o registo operacional e a informação técnica do turno.",
+                    "Consultar depois em Meus Registos ou Registos de Produção.",
+                ],
+                "rota": "projetos:registo_diario_create",
+                "palavras_chave": "registos ficha técnica turno furadas ocorrências equipa",
+            },
+            {
+                "titulo": "Materiais e ocorrências",
+                "subtitulo": "Para terreno",
+                "descricao": "Guia para manter rastreio de materiais, levantamentos, devoluções e avarias ligadas à operação real.",
+                "passos": [
+                    "Consultar materiais disponíveis antes do turno.",
+                    "Registar levantamentos e devoluções quando houver movimento físico.",
+                    "Abrir avarias de máquina logo que exista uma falha operacional.",
+                ],
+                "rota": "projetos:materiais_disponiveis_empregado",
+                "palavras_chave": "materiais levantamentos devoluções avarias terreno operação",
+            },
+        ]
+
     return [
         {
             "titulo": "Planeamento em detalhe",
@@ -612,6 +689,34 @@ def _guias_destaque_ajuda():
 
 
 def _faq_ajuda():
+    if getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", False):
+        return [
+            {
+                "pergunta": "Não vejo uma opção no menu. O que devo confirmar?",
+                "resposta": "No modo MVP operacional, algumas áreas comerciais, financeiras e administrativas ficam fora do fluxo principal. Confirma o tipo de conta e procura primeiro em Operação, Registos, Furos, Materiais, Máquinas e Notificações.",
+            },
+            {
+                "pergunta": "Como encontro rapidamente um tutorial específico?",
+                "resposta": "Usa a caixa de procura no topo da Ajuda. Escreve palavras como furo, registo, máquina, material, turno, medição ou configuração. A página filtra os artigos e salta para o primeiro resultado encontrado.",
+            },
+            {
+                "pergunta": "Onde acompanho pedidos de férias?",
+                "resposta": "O trabalhador acompanha em Calendário de Turnos e Notificações. A empresa pode acompanhar pela área de RH/Assiduidade quando esse módulo estiver disponível no modo completo.",
+            },
+            {
+                "pergunta": "Qual é a diferença entre Registo Diário e Ficha Técnica?",
+                "resposta": "O Registo Diário é o registo principal do turno. A ficha técnica está integrada nesse mesmo registo e guarda o detalhe operacional e técnico, como furadas, ocorrências, polímeros, equipa e notas do turno.",
+            },
+            {
+                "pergunta": "Quem pode exportar relatórios e ficheiros?",
+                "resposta": "As exportações mais sensíveis ficam reservadas à empresa. No MVP, o foco é garantir primeiro boa captura operacional no terreno antes de consolidar documentação executiva.",
+            },
+            {
+                "pergunta": "O que faço se um dado foi lançado errado?",
+                "resposta": "Sempre que possível, edita o registo existente em vez de apagar. Assim manténs melhor continuidade de histórico e reduzes o risco de perder contexto importante da operação.",
+            },
+        ]
+
     return [
         {
             "pergunta": "Não vejo uma opção no menu. O que devo confirmar?",
@@ -737,7 +842,7 @@ def obter_ajuda_contextual(nome_rota):
         return None
 
     artigos_por_rota = {}
-    for perfil in _ajuda_por_perfil():
+    for perfil in _filtrar_ajuda_mvp(_ajuda_por_perfil()):
         for artigo in perfil["artigos"]:
             rota = artigo.get("rota")
             if not rota:
@@ -860,6 +965,17 @@ def obter_ajuda_contextual(nome_rota):
         "plataforma:subscricao_list": "projetos:gestao_hub",
     }
 
+    if getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", False):
+        aliases.update(
+            {
+                "projetos:dashboard": "projetos:projeto_list",
+                "plataforma:onboarding_empresa": "projetos:projeto_list",
+                "plataforma:plano_list": "projetos:projeto_list",
+                "plataforma:subscricao_list": "projetos:projeto_list",
+                "projetos:despesa_create_empregado": "projetos:area_empregado",
+            }
+        )
+
     rota_base = aliases.get(nome_rota, nome_rota)
     contexto = artigos_por_rota.get(rota_base)
     if not contexto:
@@ -874,7 +990,7 @@ def obter_ajuda_contextual(nome_rota):
 
 @login_required
 def ajuda(request):
-    ajuda_por_perfil = _ajuda_por_perfil()
+    ajuda_por_perfil = _filtrar_ajuda_mvp(_ajuda_por_perfil())
     return render(
         request,
         "projetos/ajuda.html",
