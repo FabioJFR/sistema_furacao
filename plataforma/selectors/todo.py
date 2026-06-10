@@ -591,9 +591,10 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · NAVEGACAO] Modo `SF_MVP_OPERACIONAL_FOCUS` criado para manter o menu da empresa focado em `Operação` e `Registos`, movendo `Planeamento` para Operação e ocultando `Gestão`, `Finanças` e `Analytics` do menu principal.",
             "CONCLUIDO · [MVP · DASHBOARD INDIVIDUAL] Conta individual refinada para deixar despesas em segundo plano e destacar ações de terreno no modo MVP.",
             "CONCLUIDO · [MVP · AJUDA] Centro de Ajuda passa a respeitar `SF_MVP_OPERACIONAL_FOCUS`, destacando arranque operacional, furos, registos, materiais e ocorrências em vez de promover módulos ERP/pós-MVP.",
+            "CONCLUIDO · [MVP · DASHBOARD EMPRESA] Dashboard principal da empresa ganha centro operacional com ações rápidas e checklist de piloto para projetos/furos, equipa, máquina, registos, materiais e medições.",
         ],
         "proximos_passos": [
-            "[MVP · CORE] Rever dashboards de empresa/empregado para destacar apenas estado diário de furos, registos, turnos, máquinas, materiais e medições.",
+            "[MVP · CORE] Rever dashboard de empregado para destacar estado diário de furos, turnos, máquinas, materiais, medições e próximo registo esperado.",
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
             "[MVP · PRODUTO] Criar checklist de piloto: 1 empresa, 1 projeto, 2 furos, 2 empregados, 1 máquina, registos diários, medições, avarias e relatório técnico do turno.",
         ],
