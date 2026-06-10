@@ -20,9 +20,10 @@ class DashboardPerfisTemplateTests(SimpleTestCase):
             "is_empregado_user": True,
             "perfil_plataforma": SimpleNamespace(tipo_acesso=tipo_acesso),
             "empregado_menu_funcao": "operador",
+            "sf_mvp_operacional_focus": True,
         }
 
-    def test_dashboard_individual_expoe_acoes_operacionais_rapidas(self):
+    def test_dashboard_individual_em_foco_mvp_prioriza_acoes_de_terreno(self):
         contexto = self._contexto_base(tipo_acesso="individual")
         contexto.update({
             "individual": SimpleNamespace(
@@ -38,9 +39,31 @@ class DashboardPerfisTemplateTests(SimpleTestCase):
         html = render_to_string("projetos/area_individual.html", contexto)
 
         self.assertIn("Acessos rápidos", html)
-        self.assertIn(reverse("projetos:despesa_create_empregado"), html)
+        self.assertIn(reverse("projetos:meus_furos_empregado"), html)
+        self.assertIn(reverse("projetos:medicao_list_empregado"), html)
         self.assertIn(reverse("projetos:material_create_empregado"), html)
         self.assertIn(reverse("projetos:meus_dados_empregado"), html)
+        self.assertNotIn(reverse("projetos:despesa_create_empregado"), html)
+        self.assertNotIn(reverse("projetos:despesa_list_empregado"), html)
+
+    def test_dashboard_individual_modo_completo_mantem_despesas(self):
+        contexto = self._contexto_base(tipo_acesso="individual")
+        contexto["sf_mvp_operacional_focus"] = False
+        contexto.update({
+            "individual": SimpleNamespace(
+                nome="Profissional Independente",
+                especialidade="Perfuração",
+                ativo=True,
+            ),
+            "horas_total": 14,
+            "metros_total": 32,
+            "total_registos": 3,
+        })
+
+        html = render_to_string("projetos/area_individual.html", contexto)
+
+        self.assertIn(reverse("projetos:despesa_create_empregado"), html)
+        self.assertIn(reverse("projetos:despesa_list_empregado"), html)
 
     def test_dashboard_empregado_agrupa_fluxos_em_acessos_rapidos(self):
         contexto = self._contexto_base(tipo_acesso="empregado")

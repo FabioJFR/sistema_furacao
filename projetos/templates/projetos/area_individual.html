@@ -10,11 +10,13 @@
             <div class="sf-page-heading">
                 <p class="sf-page-kicker">{% trans "Conta individual" %}</p>
                 <h1 class="sf-page-title sf-break-word">{% blocktrans with nome=individual.nome %}Bem-vindo, {{ nome }}{% endblocktrans %}</h1>
-                <p class="sf-page-description">{% trans "A tua área independente para registar atividade, controlar custos e acompanhar o trabalho técnico." %}</p>
+                <p class="sf-page-description">{% trans "A tua área independente para registar atividade e acompanhar o trabalho técnico no terreno." %}</p>
             </div>
             <div class="sf-page-actions">
                 <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">{% trans "Novo registo" %}</a>
-                <a href="{% url 'projetos:despesa_create_empregado' %}" class="btn btn-primary">{% trans "Nova despesa" %}</a>
+                {% if not sf_mvp_operacional_focus %}
+                    <a href="{% url 'projetos:despesa_create_empregado' %}" class="btn btn-primary">{% trans "Nova despesa" %}</a>
+                {% endif %}
             </div>
         </div>
 
@@ -50,10 +52,15 @@
                     <span class="sf-shortcut-label">{% trans "Meus registos" %}</span>
                     <span class="sf-shortcut-copy">{% trans "Consultar e acompanhar atividade." %}</span>
                 </a>
-                <a href="{% url 'projetos:despesa_list_empregado' %}" class="sf-shortcut-card">
-                    <span class="sf-shortcut-icon">💶</span>
-                    <span class="sf-shortcut-label">{% trans "Despesas" %}</span>
-                    <span class="sf-shortcut-copy">{% trans "Controlar os teus custos." %}</span>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">🕳️</span>
+                    <span class="sf-shortcut-label">{% trans "Furos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Consultar furos, evolução e detalhe técnico." %}</span>
+                </a>
+                <a href="{% url 'projetos:medicao_list_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📊</span>
+                    <span class="sf-shortcut-label">{% trans "Medições" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Acompanhar medições e desvios registados." %}</span>
                 </a>
                 <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" class="sf-shortcut-card">
                     <span class="sf-shortcut-icon">📦</span>
@@ -65,6 +72,13 @@
                     <span class="sf-shortcut-label">{% trans "Novo material" %}</span>
                     <span class="sf-shortcut-copy">{% trans "Adicionar material ao inventário." %}</span>
                 </a>
+                {% if not sf_mvp_operacional_focus %}
+                    <a href="{% url 'projetos:despesa_list_empregado' %}" class="sf-shortcut-card">
+                        <span class="sf-shortcut-icon">💶</span>
+                        <span class="sf-shortcut-label">{% trans "Despesas" %}</span>
+                        <span class="sf-shortcut-copy">{% trans "Controlar os teus custos." %}</span>
+                    </a>
+                {% endif %}
                 <a href="{% url 'projetos:notificacoes_empregado' %}" class="sf-shortcut-card">
                     <span class="sf-shortcut-icon">🔔</span>
                     <span class="sf-shortcut-label">{% trans "Notificações" %}</span>
@@ -81,7 +95,7 @@
         <div class="sf-overview-grid sf-overview-grid-dual">
             <section class="sf-overview-card">
                 <h2 class="sf-overview-title">{% trans "Conta individual" %}</h2>
-                <p class="sf-mini-card-copy">{% trans "Esta conta funciona sem vínculo a uma empresa. Podes criar registos, gerir despesas e manter materiais no teu próprio contexto operacional." %}</p>
+                <p class="sf-mini-card-copy">{% trans "Esta conta funciona sem vínculo a uma empresa. Podes criar registos, acompanhar furos, consultar medições e manter materiais no teu próprio contexto operacional." %}</p>
             </section>
             <section class="sf-overview-card">
                 <h2 class="sf-overview-title">{% trans "Perfil profissional" %}</h2>
