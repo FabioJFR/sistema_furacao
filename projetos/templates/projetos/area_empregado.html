@@ -60,13 +60,76 @@
                     <span class="sf-shortcut-label">{% trans "Furos" %}</span>
                     <span class="sf-shortcut-copy">{% trans "Consultar furos, evolução e detalhe técnico." %}</span>
                 </a>
-                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" class="sf-shortcut-card">
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="sf-shortcut-card">
                     <span class="sf-shortcut-icon">⚙️</span>
-                    <span class="sf-shortcut-label">{% trans "Perfuração" %}</span>
-                    <span class="sf-shortcut-copy">{% trans "Rever as configurações usadas no trabalho." %}</span>
+                    <span class="sf-shortcut-label">{% trans "Configuração por furo" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Editar configuração e histórico no furo certo." %}</span>
+                </a>
+                <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📦</span>
+                    <span class="sf-shortcut-label">{% trans "Materiais" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Ver stock, levantamentos e devoluções." %}</span>
+                </a>
+                <a href="{% url 'projetos:medicao_list_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📐</span>
+                    <span class="sf-shortcut-label">{% trans "Medições" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Consultar medições ligadas aos furos." %}</span>
+                </a>
+                <a href="{% url 'projetos:avaria_maquina_create_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">🛠️</span>
+                    <span class="sf-shortcut-label">{% trans "Avaria" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Registar falha de máquina no momento." %}</span>
                 </a>
             </div>
         </section>
+
+        {% if sf_mvp_operacional_focus %}
+        <section class="sf-section-card">
+            <div class="sf-section-head">
+                <div>
+                    <p class="sf-page-kicker">{% trans "Antes de iniciar" %}</p>
+                    <h2 class="sf-section-title">{% trans "Preparação do turno" %}</h2>
+                    <p class="sf-section-description">{% trans "Confirma o furo, a máquina e os materiais antes de lançar o próximo registo diário." %}</p>
+                </div>
+                <div class="sf-actions-inline">
+                    <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">{% trans "Lançar registo" %}</a>
+                    {% if turno_referencia and turno_referencia.furo_id %}
+                        <a href="{% url 'projetos:furo_detail_empregado' turno_referencia.furo_id %}" class="btn btn-primary">{% trans "Abrir furo" %}</a>
+                    {% else %}
+                        <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">{% trans "Ver furos" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="sf-shortcut-grid">
+                <div class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">1</span>
+                    <span class="sf-shortcut-label">{% trans "Confirmar contexto" %}</span>
+                    <span class="sf-shortcut-copy">
+                        {% if turno_referencia %}
+                            {% blocktrans with projeto=turno_referencia.projeto_nome furo=turno_referencia.furo_nome %}Projeto {{ projeto }} · Furo {{ furo }}{% endblocktrans %}
+                        {% else %}
+                            {% trans "Sem turno planeado. Usa Meus Furos para escolher o contexto." %}
+                        {% endif %}
+                    </span>
+                </div>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">2</span>
+                    <span class="sf-shortcut-label">{% trans "Rever configuração" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "A configuração de perfuração vive no furo e deve estar atualizada antes do trabalho." %}</span>
+                </a>
+                <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">3</span>
+                    <span class="sf-shortcut-label">{% trans "Validar materiais" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Confirma consumíveis, levantamentos e devoluções ligados ao turno." %}</span>
+                </a>
+                <a href="{% url 'projetos:medicao_list_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">4</span>
+                    <span class="sf-shortcut-label">{% trans "Consultar medições" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Usa a leitura técnica recente para evitar trabalhar às cegas." %}</span>
+                </a>
+            </div>
+        </section>
+        {% endif %}
 
         <div class="sf-stat-grid">
             <div class="sf-stat-card"><div class="sf-stat-label">{% trans "Horas hoje" %}</div><div class="sf-stat-value">{{ horas_hoje|floatformat:2 }}</div></div>
@@ -97,6 +160,12 @@
                     {% if turno_referencia.notas %}
                         <div class="sf-note-card" style="margin-top:14px;">{{ turno_referencia.notas }}</div>
                     {% endif %}
+                    <div class="sf-actions-inline" style="margin-top:14px;">
+                        <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">{% trans "Novo registo" %}</a>
+                        {% if turno_referencia.furo_id %}
+                            <a href="{% url 'projetos:furo_detail_empregado' turno_referencia.furo_id %}" class="btn btn-primary">{% trans "Detalhe do furo" %}</a>
+                        {% endif %}
+                    </div>
                 {% else %}
                     <div class="sf-empty-state">{% trans "Ainda não tens um turno em curso ou um próximo turno planeado atribuído." %}</div>
                 {% endif %}
@@ -115,6 +184,11 @@
                     </dl>
                     {% if ultimo_turno_furo_referencia.notas_curta %}
                         <div class="sf-note-card" style="margin-top:14px;">{{ ultimo_turno_furo_referencia.notas_curta }}</div>
+                    {% endif %}
+                    {% if ultimo_turno_furo_referencia.furo_id %}
+                        <div class="sf-actions-inline" style="margin-top:14px;">
+                            <a href="{% url 'projetos:furo_detail_empregado' ultimo_turno_furo_referencia.furo_id %}" class="btn btn-primary">{% trans "Abrir furo" %}</a>
+                        </div>
                     {% endif %}
                 {% else %}
                     <div class="sf-empty-state">{% trans "Ainda não existe contexto suficiente para mostrar o último turno do furo." %}</div>

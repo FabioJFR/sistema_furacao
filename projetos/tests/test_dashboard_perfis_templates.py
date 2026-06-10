@@ -94,6 +94,11 @@ class DashboardPerfisTemplateTests(SimpleTestCase):
         html = render_to_string("projetos/area_empregado.html", contexto)
 
         self.assertIn("Rotina operacional", html)
+        self.assertIn("Preparação do turno", html)
         self.assertIn(reverse("projetos:calendario_turnos_empregado"), html)
         self.assertIn(reverse("projetos:meus_projetos_empregado"), html)
-        self.assertIn(reverse("projetos:configuracao_perfuracao_list_empregado"), html)
+        self.assertIn(reverse("projetos:meus_furos_empregado"), html)
+        self.assertIn(reverse("projetos:materiais_disponiveis_empregado"), html)
+        self.assertIn(reverse("projetos:medicao_list_empregado"), html)
+        self.assertIn(reverse("projetos:avaria_maquina_create_empregado"), html)
+        self.assertNotIn(reverse("projetos:configuracao_perfuracao_list_empregado"), html)
