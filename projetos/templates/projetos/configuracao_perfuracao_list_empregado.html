@@ -1,7 +1,7 @@
 {% extends "projetos/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Minhas Configurações de Perfuração" %}{% endblock %}
+{% block title %}{% trans "Configurações dos Furos" %}{% endblock %}
 
 {% block content %}
 <section class="sf-page">
@@ -9,9 +9,9 @@
         <div class="sf-page-header">
             <div class="sf-page-heading">
                 <p class="sf-page-kicker">{% trans "Perfuração" %}</p>
-                <h1 class="sf-page-title">{% trans "Minhas configurações de perfuração" %}</h1>
+                <h1 class="sf-page-title">{% trans "Configurações dos furos" %}</h1>
                 <p class="sf-page-description">
-                    {% blocktrans with nome=empregado.nome %}Área do empregado {{ nome }} para consultar e gerir as suas configurações de perfuração.{% endblocktrans %}
+                    {% blocktrans with nome=empregado.nome %}Área do empregado {{ nome }} para consultar e gerir as configurações partilhadas dos furos onde trabalha.{% endblocktrans %}
                 </p>
             </div>
 
@@ -38,6 +38,7 @@
                                     <th>{% trans "Furo" %}</th>
                                     <th>{% trans "Conjunto de fundo" %}</th>
                                     <th>{% trans "Tubo interior" %}</th>
+                                    <th>{% trans "Última alteração por" %}</th>
                                     <th>{% trans "Atualizado em" %}</th>
                                     <th>{% trans "Ações" %}</th>
                                 </tr>
@@ -48,6 +49,7 @@
                                         <td>{{ config.furo.nome }}</td>
                                         <td>{{ config.comprimento_total_conjunto_fundo|floatformat:2 }} m</td>
                                         <td>{{ config.comprimento_total_tubo_interior|floatformat:2 }} m</td>
+                                        <td>{{ config.empregado.nome|default:"-" }}</td>
                                         <td>{{ config.atualizado_em|default:"-" }}</td>
                                         <td>
                                             <div class="sf-actions-inline">

@@ -13,15 +13,20 @@
     const furoPlaceholder = config.dataset.furoPlaceholder || "00000000-0000-0000-0000-000000000000";
     const furoSlugPlaceholder = config.dataset.furoSlugPlaceholder || "furo-slug-placeholder";
     const furoDetailBaseUrl = config.dataset.furoDetailBaseUrl || "";
+    const empresaContexto = config.dataset.empresaContexto || "";
     const projetoMapa = JSON.parse(projetoDataNode.textContent || "{}");
     const furos = JSON.parse(furosDataNode.textContent || "[]")
         .map((furo) => ({ ...furo, lat: Number(furo.lat), lon: Number(furo.lon) }))
         .filter((furo) => Number.isFinite(furo.lat) && Number.isFinite(furo.lon));
 
     function furoDetailUrl(id, slug) {
-        return furoDetailBaseUrl
+        const url = furoDetailBaseUrl
             .replace(furoPlaceholder, String(id))
             .replace(furoSlugPlaceholder, String(slug || id));
+        if (empresaContexto) {
+            return `${url}?empresa_contexto=${encodeURIComponent(empresaContexto)}`;
+        }
+        return url;
     }
 
     let centroLat = Number(projetoMapa.lat);

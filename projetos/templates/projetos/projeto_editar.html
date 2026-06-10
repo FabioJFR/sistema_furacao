@@ -12,14 +12,14 @@
     <div class="projeto-shell projeto-form-shell">
         <div class="projeto-form-top">
             <div class="projeto-form-heading">
-                <a href="{{ projeto.get_absolute_url }}" class="projeto-form-back">← {% trans "Voltar ao projeto" %}</a>
+                <a href="{{ projeto.get_absolute_url }}{{ empresa_contexto_query }}" class="projeto-form-back">← {% trans "Voltar ao projeto" %}</a>
                 <h1 class="projeto-page-title">✏️ {% trans "Editar projeto" %}</h1>
                 <p class="projeto-form-subtitle">
                     {% trans "Atualize os dados base do projeto, a localização operacional e as notas internas sem sair deste formulário." %}
                 </p>
             </div>
             <div class="projeto-form-actions">
-                <a href="{{ projeto.get_absolute_url }}" class="projeto-btn-primary">{% trans "Ver projeto" %}</a>
+                <a href="{{ projeto.get_absolute_url }}{{ empresa_contexto_query }}" class="projeto-btn-primary">{% trans "Ver projeto" %}</a>
             </div>
         </div>
 
@@ -102,7 +102,7 @@
 
                 <div class="projeto-form-footer">
                     <button type="submit" class="projeto-btn-primary">{% trans "Salvar alterações" %}</button>
-                    <a href="{{ projeto.get_absolute_url }}" class="projeto-btn-secondary">{% trans "Cancelar" %}</a>
+                    <a href="{{ projeto.get_absolute_url }}{{ empresa_contexto_query }}" class="projeto-btn-secondary">{% trans "Cancelar" %}</a>
                 </div>
             </form>
         </section>

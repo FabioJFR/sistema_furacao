@@ -25,6 +25,7 @@
             <h2 class="text-lg font-bold mb-3">{% trans "Valores que serão restaurados" %}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div><strong>{% trans "Medida Morta:" %}</strong> {{ historico.medida_morta }}</div>
                 <div><strong>{% trans "Tubo:" %}</strong> {{ historico.comprimento_tubo }}</div>
                 <div><strong>{% trans "Karoutier:" %}</strong> {{ historico.comprimento_karoutier }} × {{ historico.quantidade_karoutier|default:1 }}</div>
                 <div><strong>{% trans "Acrescento:" %}</strong> {{ historico.comprimento_acrescento }} × {{ historico.quantidade_acrescento|default:1 }}</div>

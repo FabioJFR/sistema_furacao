@@ -37,6 +37,9 @@ Obrigatório em produção:
 - `DJANGO_SECURE_HSTS_SECONDS=31536000`
 - `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True`
 - `DJANGO_SECURE_HSTS_PRELOAD=True`
+- `RATE_LIMIT_TRUST_X_FORWARDED_FOR=True` apenas quando o reverse proxy controla `X-Forwarded-For`
+- `DJANGO_CACHE_BACKEND=django.core.cache.backends.filebased.FileBasedCache`
+- `DJANGO_CACHE_LOCATION=/var/cache/sistema_furacao/django` com diretório legível/escrevível pelo serviço
 - `UPLOAD_VIRUS_SCAN_ENABLED=True`
 - `UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True`
 
@@ -78,6 +81,8 @@ Checklist de segurança antes de abrir ao público:
 - confirmar `SECRET_KEY` longa e aleatória
 - confirmar HTTPS funcional ponta a ponta
 - confirmar `check --deploy` sem warnings
+- confirmar que o proxy sobrescreve `X-Forwarded-For` antes de ativar `RATE_LIMIT_TRUST_X_FORWARDED_FOR`
+- confirmar que a cache configurada é partilhada pelos workers que aplicam rate limiting
 - confirmar antivírus (`clamscan`) instalado e acessível pelo serviço
 - confirmar bridge keys de drones apenas por header `X-Bridge-Key`
 

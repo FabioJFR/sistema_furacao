@@ -52,6 +52,7 @@
                 <a href="{% url 'projetos:projeto_list' %}" class="projeto-detail-back">← {% trans "Voltar aos projetos" %}</a>
                 <h1 class="projeto-page-title sf-break-word">📁 {{ projeto.nome }}</h1>
                 <p class="projeto-detail-subtitle">
+                    {% if empresa_contexto_query %}<strong>{% trans "Empresa:" %}</strong> {{ projeto.empresa.nome }} | {% endif %}
                     <strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}
                     {% if projeto.cidade %} | <strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}{% endif %}
                     {% if projeto.pais %} | <strong>{% trans "País:" %}</strong> {{ projeto.pais }}{% endif %}
@@ -59,9 +60,9 @@
             </div>
 
             <div class="projeto-detail-actions">
-                <a href="{% url 'projetos:projeto_3d' projeto.pk %}" class="projeto-btn">{% trans "Ver 3D" %}</a>
-                <a href="{% url 'projetos:projeto_update' projeto.pk %}" class="projeto-btn">{% trans "Editar" %}</a>
-                <a href="{% url 'projetos:projeto_delete' projeto.pk %}" class="projeto-btn projeto-btn-danger">{% trans "Apagar" %}</a>
+                <a href="{% url 'projetos:projeto_3d' projeto.pk %}{{ empresa_contexto_query }}" class="projeto-btn">{% trans "Ver 3D" %}</a>
+                <a href="{% url 'projetos:projeto_update' projeto.pk %}{{ empresa_contexto_query }}" class="projeto-btn">{% trans "Editar" %}</a>
+                <a href="{% url 'projetos:projeto_delete' projeto.pk %}{{ empresa_contexto_query }}" class="projeto-btn projeto-btn-danger">{% trans "Apagar" %}</a>
             </div>
         </div>
 
@@ -137,7 +138,7 @@
                 <div class="projeto-detail-badge">{{ trabalhadores_envolvidos|length }} {% trans "trabalhador(es)" %}</div>
             </div>
 
-            <form method="post" action="{% url 'projetos:projeto_adicionar_empregado' projeto.pk %}" class="projeto-detail-form">
+            <form method="post" action="{% url 'projetos:projeto_adicionar_empregado' projeto.pk %}{{ empresa_contexto_query }}" class="projeto-detail-form">
                 {% csrf_token %}
                 <div class="projeto-detail-field">
                     <label for="{{ trabalhador_form.empregado.id_for_label }}">{% trans "Empregado" %}</label>
@@ -162,7 +163,7 @@
                             <p class="projeto-detail-mini-copy"><strong>{% trans "Estado:" %}</strong> {% if ligacao.ativo %}{% trans "Ativo" %}{% else %}{% trans "Inativo" %}{% endif %}</p>
                             <div class="projeto-detail-inline-actions">
                                 <a href="{{ ligacao.empregado.get_absolute_url }}" class="projeto-btn-inline">{% trans "Ver empregado" %}</a>
-                                <form method="post" action="{% url 'projetos:projeto_remover_empregado' projeto.pk ligacao.pk %}" data-confirm-submit="{% trans 'Remover este trabalhador da equipa ativa do projeto?' %}">
+                                <form method="post" action="{% url 'projetos:projeto_remover_empregado' projeto.pk ligacao.pk %}{{ empresa_contexto_query }}" data-confirm-submit="{% trans 'Remover este trabalhador da equipa ativa do projeto?' %}">
                                     {% csrf_token %}
                                     <button type="submit" class="projeto-btn-inline projeto-btn-danger">{% trans "Terminar associação" %}</button>
                                 </form>
@@ -371,6 +372,7 @@
     data-furo-placeholder="00000000-0000-0000-0000-000000000000"
     data-furo-slug-placeholder="furo-slug-placeholder"
     data-furo-detail-base-url="{% url 'projetos:furo_detail' '00000000-0000-0000-0000-000000000000' 'furo-slug-placeholder' %}"
+    data-empresa-contexto="{% if empresa_contexto_query %}{{ projeto.empresa_id }}{% endif %}"
 ></div>
 {% endblock %}
 

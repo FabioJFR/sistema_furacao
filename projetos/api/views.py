@@ -29,6 +29,22 @@ def _resolver_empresa_api(request):
     )
 
 
+def _resolver_limit(request, *, default, maximum):
+    raw_limit = request.GET.get("limit")
+    if raw_limit in (None, ""):
+        return default, None
+
+    try:
+        limit = int(raw_limit)
+    except (TypeError, ValueError):
+        return None, Response(
+            {"erro": "Parâmetro 'limit' inválido. Usa um número inteiro."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    return min(max(limit, 1), maximum), None
+
+
 class FuroListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -40,7 +56,9 @@ class FuroListAPIView(APIView):
         estado = (request.GET.get("estado") or "").strip()
         projeto_id = (request.GET.get("projeto_id") or "").strip()
         nome = (request.GET.get("q") or "").strip()
-        limit = min(max(int(request.GET.get("limit", 100) or 100), 1), 500)
+        limit, erro_limit = _resolver_limit(request, default=100, maximum=500)
+        if erro_limit:
+            return erro_limit
 
         queryset = listar_furos_api_qs(empresa)
         if estado:
@@ -76,7 +94,9 @@ class FuroVersaoListAPIView(APIView):
 
         furo = obter_furo_api(pk=pk, empresa=empresa)
         origem = (request.GET.get("origem") or "").strip()
-        limit = min(max(int(request.GET.get("limit", 50) or 50), 1), 200)
+        limit, erro_limit = _resolver_limit(request, default=50, maximum=200)
+        if erro_limit:
+            return erro_limit
 
         queryset = listar_versoes_furo_api_qs(furo=furo, empresa=empresa)
         if origem:

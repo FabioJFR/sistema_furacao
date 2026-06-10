@@ -60,10 +60,12 @@ def preparar_form_configuracao_perfuracao(
     empresa,
     atualizado_por,
     instance=None,
+    initial=None,
 ):
     form = form_class(
         post_data if request_method == "POST" else None,
         instance=instance,
+        initial=initial if request_method != "POST" else None,
         empregado=empregado,
     )
     form.instance.empregado = empregado
@@ -81,6 +83,7 @@ def processar_fluxo_form_configuracao_perfuracao(
     empresa,
     atualizado_por,
     instance=None,
+    initial=None,
     acao_historico,
     observacoes_historico,
 ):
@@ -92,6 +95,7 @@ def processar_fluxo_form_configuracao_perfuracao(
         empresa=empresa,
         atualizado_por=atualizado_por,
         instance=instance,
+        initial=initial,
     )
     if request_method != "POST":
         return {

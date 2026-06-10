@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from projetos.validators.furo import validar_inclinacoes_por_tipo_furo
 from .projeto import Projeto
 
 
@@ -202,16 +203,16 @@ class Furo(models.Model):
                 "profundidade_alvo_inicial": "A profundidade alvo inicial não pode ser menor que a profundidade inicial."
             })
 
-        if self.tipo == "superficie":
-            erros_inclinacao = {}
-            if self.inclinacao_planeada_inicial is not None and self.inclinacao_planeada_inicial > 0:
-                erros_inclinacao["inclinacao_planeada_inicial"] = "Para furos de Superfície, a inclinação não pode ser positiva."
-            if self.inclinacao_planeada_atual is not None and self.inclinacao_planeada_atual > 0:
-                erros_inclinacao["inclinacao_planeada_atual"] = "Para furos de Superfície, a inclinação não pode ser positiva."
-            if self.inclinacao_real_atual is not None and self.inclinacao_real_atual > 0:
-                erros_inclinacao["inclinacao_real_atual"] = "Para furos de Superfície, a inclinação não pode ser positiva."
-            if erros_inclinacao:
-                raise ValidationError(erros_inclinacao)
+        erros_inclinacao = validar_inclinacoes_por_tipo_furo(
+            tipo=self.tipo,
+            valores={
+                "inclinacao_planeada_inicial": self.inclinacao_planeada_inicial,
+                "inclinacao_planeada_atual": self.inclinacao_planeada_atual,
+                "inclinacao_real_atual": self.inclinacao_real_atual,
+            },
+        )
+        if erros_inclinacao:
+            raise ValidationError(erros_inclinacao)
 
         if self.latitude is not None and not (-90 <= self.latitude <= 90):
             raise ValidationError({

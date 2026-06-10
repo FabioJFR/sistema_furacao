@@ -158,6 +158,73 @@ class DeteccaoImagemAI(models.Model):
         return f"{self.analise.nome} - deteção {self.ordem}"
 
 
+class ExemploTreinoAI(models.Model):
+    ORIGEM_CHOICES = [
+        ("validacao_manual", "Validação manual"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        related_name="exemplos_treino_ai",
+    )
+    analise = models.ForeignKey(
+        AnaliseImagemAI,
+        on_delete=models.CASCADE,
+        related_name="exemplos_treino",
+    )
+    validado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exemplos_treino_ai_validados",
+    )
+    tipo_documento = models.CharField(max_length=40, choices=AnaliseImagemAI.TIPO_DOCUMENTO_CHOICES)
+    campo_semantico = models.CharField(max_length=80)
+    indice_campo = models.PositiveIntegerField()
+    versao_rotulo = models.PositiveIntegerField(default=1)
+    ativo = models.BooleanField(default=True)
+    origem = models.CharField(max_length=30, choices=ORIGEM_CHOICES, default="validacao_manual")
+    entrada_modelo = models.JSONField(default=dict, blank=True)
+    valor_previsto = models.TextField(blank=True)
+    rotulo_validado = models.TextField()
+    acertou_previsao = models.BooleanField(null=True, blank=True)
+    motor_analise = models.CharField(max_length=80, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-criado_em"]
+        verbose_name = "Exemplo de treino AI"
+        verbose_name_plural = "Exemplos de treino AI"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["analise", "indice_campo", "versao_rotulo"],
+                name="unique_exemplo_treino_ai_analise_campo_versao",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["empresa", "tipo_documento", "ativo"], name="idx_treino_ai_empresa_tipo"),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.analise_id and self.analise.empresa_id != self.empresa_id:
+            raise ValidationError({"empresa": "A análise e o exemplo de treino devem pertencer à mesma empresa."})
+
+    def save(self, *args, **kwargs):
+        if self.analise_id:
+            self.empresa = self.analise.empresa
+            self.tipo_documento = self.analise.tipo_documento
+            self.motor_analise = self.analise.motor_analise
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.analise.nome} - {self.campo_semantico} v{self.versao_rotulo}"
+
+
 class AnaliseZonaPresetAI(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     empresa = models.ForeignKey(

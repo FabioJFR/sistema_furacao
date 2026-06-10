@@ -18,6 +18,7 @@ from projetos.selectors.historico_configuracao import (
     obter_historico_configuracao_por_furo,
     obter_historico_configuracao_por_pk,
 )
+from projetos.selectors.empregados import empregado_tem_acesso_furo
 from projetos.services.historico_configuracao_perfuracao import (
     construir_comparacao_historico,
     restaurar_configuracao_a_partir_historico,
@@ -95,7 +96,8 @@ def _utilizador_pode_ver_historico(request, historico):
     permitido = bool(
         empregado and
         empregado.empresa_id and
-        historico.empregado_id == empregado.id and
+        historico.furo_id and
+        empregado_tem_acesso_furo(empregado, historico.furo) and
         historico.empresa_id == empregado.empresa_id
     )
     if permitido:
@@ -166,7 +168,6 @@ def historico_configuracao_list_admin(request, pk):
 
 
 @login_required
-@admin_required
 def historico_configuracao_list_furo_admin(request, furo_id):
     logger.info(
         "Entrada na view historico_configuracao_list_furo_admin. user_id=%s, username='%s', furo_id=%s",
@@ -174,12 +175,30 @@ def historico_configuracao_list_furo_admin(request, furo_id):
         request.user.username,
         furo_id,
     )
-    empresa, resposta_erro = _obter_empresa_admin_historico(request)
-    if resposta_erro:
-        logger.warning("Acesso bloqueado na view historico_configuracao_list_furo_admin. user_id=%s", request.user.id)
-        return resposta_erro
+    contexto_admin = obter_contexto_admin_projetos(request.user)
+    empregado = None
+    if contexto_admin:
+        empresa = contexto_admin.empresa
+        furo = obter_furo_historico_por_pk_empresa(furo_id, empresa)
+        modo_admin = True
+    else:
+        empregado, resposta_erro = _obter_empregado_autenticado_historico(request)
+        if resposta_erro:
+            logger.warning("Acesso bloqueado na view historico_configuracao_list_furo_admin. user_id=%s", request.user.id)
+            return resposta_erro
+        empresa = empregado.empresa
+        furo = obter_furo_historico_por_pk_empresa(furo_id, empresa)
+        if not empregado_tem_acesso_furo(empregado, furo):
+            logger.warning(
+                "Empregado sem acesso ao histórico de configuração do furo. user_id=%s, empregado_id=%s, furo_id=%s",
+                request.user.id,
+                empregado.id,
+                furo.id,
+            )
+            messages.error(request, "Não tens permissão para ver o histórico deste furo.")
+            return redirect("projetos:meus_furos_empregado")
+        modo_admin = False
 
-    furo = obter_furo_historico_por_pk_empresa(furo_id, empresa)
     historicos = obter_historico_configuracao_por_furo(furo, empresa=empresa)
 
     logger.info(
@@ -192,6 +211,8 @@ def historico_configuracao_list_furo_admin(request, furo_id):
     return render(request, "projetos/historico_configuracao_list_furo_admin.html", {
         "furo": furo,
         "historicos": historicos,
+        "modo_admin": modo_admin,
+        "empregado_obj": empregado,
     })
 
 
@@ -289,9 +310,13 @@ def historico_configuracao_restaurar(request, pk):
         return redirect("projetos:redirect_after_login")
 
     if request.method == "POST":
+        empregado_alteracao = None
+        if not is_admin:
+            empregado_alteracao, _ = resolver_empregado_por_user_ou_email(request.user)
         configuracao = restaurar_configuracao_a_partir_historico(
             historico=historico,
             utilizador=request.user,
+            empregado_alteracao=empregado_alteracao,
         )
 
         logger.info(

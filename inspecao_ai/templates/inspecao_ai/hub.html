@@ -13,7 +13,7 @@
     <div class="ia-hub-header-copy">
         <h1>🤖 {% trans "AI Visual" %}</h1>
         <p>
-            {% trans "Espaço para analisar fotografias de telemóvel, localizar texto a marcador em caixas cilíndricas e preparar a base para OCR de relatórios manuscritos." %}
+            {% trans "Fundação do futuro modelo IA do sistema: reunir dados validados para reconhecer padrões, prever resultados e apoiar decisões operacionais com segurança." %}
         </p>
     </div>
     <div class="ia-hub-actions">
@@ -22,6 +22,22 @@
         <a href="{% url 'inspecao_ai:memoria_operacional' %}" class="btn btn-secondary">{% trans "Memória Operacional" %}</a>
         <a href="{% url 'inspecao_ai:analise_create' %}" class="btn btn-primary">{% trans "Nova análise" %}</a>
         <a href="{% url 'inspecao_ai:analise_list' %}" class="btn btn-secondary">{% trans "Ver histórico" %}</a>
+    </div>
+</section>
+
+<section class="ia-model-vision" aria-label="{% trans 'Objetivo do modelo IA' %}">
+    <div class="ia-model-vision-copy">
+        <span class="ia-model-state">{% trans "Fundação de dados em construção" %}</span>
+        <h2>{% trans "Objetivo: IA treinada com dados reais do sistema" %}</h2>
+        <p>
+            {% trans "A análise visual e as validações atuais alimentam a preparação do dataset. Ainda não existe um modelo treinado em produção; a evolução prevista passa por treino, avaliação, previsões explicáveis e decisão assistida com revisão humana." %}
+        </p>
+    </div>
+    <div class="ia-model-roadmap">
+        <div class="ia-model-step"><strong>{% trans "1. Dados" %}</strong><span>{% trans "labels, qualidade e isolamento" %}</span></div>
+        <div class="ia-model-step"><strong>{% trans "2. Treino" %}</strong><span>{% trans "baselines e métricas" %}</span></div>
+        <div class="ia-model-step"><strong>{% trans "3. Previsão" %}</strong><span>{% trans "confiança e explicação" %}</span></div>
+        <div class="ia-model-step"><strong>{% trans "4. Decisão" %}</strong><span>{% trans "aprovação e auditoria" %}</span></div>
     </div>
 </section>
 
@@ -43,12 +59,120 @@
     </div>
 </section>
 
+<section class="ia-section-card ia-dataset-card">
+    <div class="ia-section-head ia-section-head-spread">
+        <div>
+            <h2>{% trans "Curadoria do dataset rotulado" %}</h2>
+            <p>
+                {% trans "Exemplos confirmados por utilizadores para preparar o primeiro modelo. O split é indicativo e deverá ser aplicado por análise ou projeto para evitar fuga de dados." %}
+            </p>
+        </div>
+        <span class="ia-state-badge {% if dashboard_dataset.pronto_baseline %}is-success{% else %}is-warning{% endif %}">
+            {% if dashboard_dataset.pronto_baseline %}{% trans "Pronto para baseline" %}{% else %}{% trans "A recolher dados" %}{% endif %}
+        </span>
+    </div>
+
+    <div class="ia-learning-metrics">
+        <div class="ia-learning-card">
+            <div class="ia-learning-label">{% trans "Exemplos ativos" %}</div>
+            <div class="ia-learning-value">{{ dashboard_dataset.total_ativos }}</div>
+        </div>
+        <div class="ia-learning-card ia-learning-card-info">
+            <div class="ia-learning-label ia-learning-label-info">{% trans "Análises fonte" %}</div>
+            <div class="ia-learning-value ia-learning-value-info">{{ dashboard_dataset.total_analises }}</div>
+        </div>
+        <div class="ia-learning-card">
+            <div class="ia-learning-label">{% trans "Rótulos revistos" %}</div>
+            <div class="ia-learning-value">{{ dashboard_dataset.total_revisoes }}</div>
+        </div>
+        <div class="ia-learning-card {% if dashboard_dataset.total_conflitos %}ia-learning-card-danger{% else %}ia-learning-card-success{% endif %}">
+            <div class="ia-learning-label {% if dashboard_dataset.total_conflitos %}ia-learning-label-danger{% else %}ia-learning-label-success{% endif %}">{% trans "Conflitos ativos" %}</div>
+            <div class="ia-learning-value {% if dashboard_dataset.total_conflitos %}ia-learning-value-danger{% else %}ia-learning-value-success{% endif %}">{{ dashboard_dataset.total_conflitos }}</div>
+        </div>
+    </div>
+
+    <div class="ia-panels-grid">
+        <div class="ia-panel-card">
+            <h3>{% trans "Prontidão para baseline" %}</h3>
+            <div class="ia-dataset-checks">
+                {% for item in dashboard_dataset.checks_prontidao %}
+                    <div class="ia-dataset-check">
+                        <span>{{ item.label }}</span>
+                        <span class="ia-state-badge {% if item.ok %}is-success{% else %}is-warning{% endif %}">
+                            {% if item.ok %}{% trans "Cumprido" %}{% else %}{% trans "Pendente" %}{% endif %}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="ia-dataset-split">
+                <strong>{% trans "Split sugerido" %}</strong>
+                <span>{% trans "Treino" %} {{ dashboard_dataset.split_sugerido.treino }}</span>
+                <span>{% trans "Validação" %} {{ dashboard_dataset.split_sugerido.validacao }}</span>
+                <span>{% trans "Teste" %} {{ dashboard_dataset.split_sugerido.teste }}</span>
+            </div>
+        </div>
+        <div class="ia-panel-card">
+            <h3>{% trans "Cobertura por documento" %}</h3>
+            <div class="ia-stack-list">
+                {% for item in dashboard_dataset.por_documento %}
+                    <div class="ia-data-chip">
+                        <div class="ia-data-chip-title">{{ item.label }}</div>
+                        <div class="ia-data-chip-meta">{% trans "Exemplos ativos:" %} <strong>{{ item.total }}</strong></div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if dashboard_dataset.documentos_sem_exemplos %}
+                <p class="ia-dataset-warning">{% trans "Sem exemplos:" %} {{ dashboard_dataset.documentos_sem_exemplos|join:", " }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="ia-panels-grid ia-panels-grid-bottom">
+        <div class="ia-panel-card">
+            <h3>{% trans "Campos rotulados" %}</h3>
+            {% if dashboard_dataset.por_campo %}
+                <div class="ia-stack-list">
+                    {% for item in dashboard_dataset.por_campo %}
+                        <div class="ia-data-chip">
+                            <div class="ia-data-chip-title">{{ item.label }}</div>
+                            <div class="ia-data-chip-meta">{% trans "Exemplos ativos:" %} <strong>{{ item.total }}</strong></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="ia-empty-inline">{% trans "Ainda não existem exemplos rotulados ativos." %}</div>
+            {% endif %}
+        </div>
+        <div class="ia-panel-card">
+            <h3>{% trans "Rótulos revistos" %}</h3>
+            {% if dashboard_dataset.revisoes %}
+                <div class="ia-stack-list">
+                    {% for item in dashboard_dataset.revisoes %}
+                        <div class="ia-data-chip">
+                            <div class="ia-data-chip-title">{{ item.campo }} · {{ item.analise_nome }}</div>
+                            <div class="ia-data-chip-meta">
+                                {% trans "Versões:" %} <strong>{{ item.versoes }}</strong> ·
+                                {% trans "Rótulos distintos:" %} <strong>{{ item.rotulos_distintos }}</strong>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="ia-empty-inline">{% trans "Ainda não existem revisões históricas de rótulos." %}</div>
+            {% endif %}
+            {% if dashboard_dataset.total_conflitos %}
+                <p class="ia-dataset-danger">{% trans "Existem rótulos ativos incompatíveis para o mesmo campo. Resolve-os antes do treino." %}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
 <section class="ia-section-card">
     <div class="ia-section-head">
         <div>
             <h2>{% trans "Aprendizagem da AI" %}</h2>
             <p>
-                {% trans "Resumo das validações manuais feitas nos campos extraídos." %}
+                {% trans "Resumo das validações manuais: estes exemplos rotulados são matéria-prima para treino futuro, não evidência de um modelo já treinado." %}
             </p>
         </div>
     </div>

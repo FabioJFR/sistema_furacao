@@ -4,6 +4,7 @@ from inspecao_ai.models import (
     ChatMensagemAI,
     ChatSessaoAI,
     DeteccaoImagemAI,
+    ExemploTreinoAI,
     MemoriaTrabalhoAI,
 )
 
@@ -11,9 +12,9 @@ from inspecao_ai.models import (
 INSPECAO_AI_MODEL_MAP = {
     "AnaliseImagemAI": AnaliseImagemAI,
     "DeteccaoImagemAI": DeteccaoImagemAI,
+    "ExemploTreinoAI": ExemploTreinoAI,
     "AnaliseZonaPresetAI": AnaliseZonaPresetAI,
     "MemoriaTrabalhoAI": MemoriaTrabalhoAI,
     "ChatSessaoAI": ChatSessaoAI,
     "ChatMensagemAI": ChatMensagemAI,
 }
-

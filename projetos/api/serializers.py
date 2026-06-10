@@ -70,4 +70,3 @@ class FuroVersaoSerializer(serializers.ModelSerializer):
             "criado_em",
         ]
         read_only_fields = fields
-

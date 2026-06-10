@@ -28,11 +28,84 @@
     justify-content: flex-end;
 }
 
+.ia-model-vision {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.3fr) minmax(300px, 1fr);
+    gap: 24px;
+    align-items: center;
+    padding: 26px;
+    margin-bottom: 24px;
+    border: 1px solid #b8d3d1;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 96% 4%, rgba(14, 116, 114, .15), transparent 40%),
+        linear-gradient(132deg, #f2fbf8 0%, #f6fbff 100%);
+    box-shadow: 0 18px 42px rgba(15, 54, 65, .08);
+}
+
+.ia-model-state {
+    display: inline-flex;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #d8f3eb;
+    color: #11645f;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.ia-model-vision-copy h2 {
+    margin: 14px 0 8px;
+    color: #10333c;
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+.ia-model-vision-copy p {
+    margin: 0;
+    color: #48636b;
+    line-height: 1.65;
+}
+
+.ia-model-roadmap {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ia-model-step {
+    min-height: 76px;
+    padding: 14px;
+    border: 1px solid rgba(17, 100, 95, .14);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .72);
+}
+
+.ia-model-step strong {
+    display: block;
+    color: #124f52;
+    font-size: .9rem;
+}
+
+.ia-model-step span {
+    display: block;
+    margin-top: 6px;
+    color: #5b7178;
+    font-size: .84rem;
+    line-height: 1.35;
+}
+
 .ia-metrics-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 24px;
+}
+
+@media (max-width: 920px) {
+    .ia-model-vision {
+        grid-template-columns: 1fr;
+    }
 }
 
 .ia-metric-card,
@@ -104,6 +177,13 @@
 .ia-section-card {
     padding: 24px;
     margin-bottom: 24px;
+}
+
+.ia-dataset-card {
+    border-color: #c5dedb;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(13, 148, 136, .08), transparent 34%),
+        #fff;
 }
 
 .ia-section-head {
@@ -185,6 +265,61 @@
 
 .ia-panels-grid-bottom {
     margin-top: 18px;
+}
+
+.ia-dataset-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ia-dataset-check {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    color: #334155;
+    font-size: .92rem;
+}
+
+.ia-dataset-split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    align-items: center;
+    margin-top: 16px;
+    color: #475569;
+    font-size: .92rem;
+}
+
+.ia-dataset-split span {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #e8f5f3;
+    color: #145b58;
+    font-weight: 700;
+}
+
+.ia-dataset-warning,
+.ia-dataset-danger {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.ia-dataset-warning {
+    background: #fff7ed;
+    color: #9a3412;
+}
+
+.ia-dataset-danger {
+    background: #fff1f2;
+    color: #9f1239;
 }
 
 .ia-panel-card {
@@ -348,8 +483,13 @@
 }
 
 @media (max-width: 780px) {
+    .ia-model-roadmap {
+        grid-template-columns: 1fr;
+    }
+
     .ia-hub-header,
     .ia-section-head-spread,
+    .ia-dataset-check,
     .ia-validation-row,
     .ia-analysis-head {
         flex-direction: column;

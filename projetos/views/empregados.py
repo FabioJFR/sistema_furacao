@@ -48,6 +48,7 @@ from projetos.selectors.empregados import (
     empregado_tem_acesso_furo,
     empregado_tem_acesso_projeto,
     obter_contexto_area_empregado,
+    obter_configuracao_inicio_furo_empregado,
     obter_furo_empregado,
     obter_furos_projeto_empregado,
     obter_lista_furos_empregado,
@@ -926,6 +927,7 @@ def furo_detail_empregado(request, pk):
 
     medicoes = obter_medicoes_furo_empregado(empregado, furo)
     registos = obter_registos_furo_empregado(empregado, furo)
+    configuracao_inicio_furo = obter_configuracao_inicio_furo_empregado(empregado, furo)
     levantamentos = obter_levantamentos_furo_empregado(empregado, furo)
     levantamentos_furo = obter_levantamentos_furo_empresa(empregado, furo)
     devolucoes = obter_devolucoes_furo_empregado(empregado, furo)
@@ -942,6 +944,7 @@ def furo_detail_empregado(request, pk):
         "furo": furo,
         "medicoes": medicoes,
         "registos": registos,
+        "configuracao_inicio_furo": configuracao_inicio_furo,
         "levantamentos": levantamentos,
         "levantamentos_furo": levantamentos_furo,
         "devolucoes": devolucoes,
@@ -1067,8 +1070,8 @@ def medicao_detail_empregado(request, pk):
             "Empregado sem permissão para medicao_detail_empregado. user_id=%s, empregado_id=%s, medicao_id=%s, furo_id=%s",
             request.user.id,
             empregado.id,
-            medicao.id,
-            medicao.furo_id,
+            getattr(medicao, "id", pk),
+            getattr(medicao, "furo_id", None),
         )
         messages.error(request, "Não tens permissão para ver esta medição.")
         return redirect("projetos:medicao_list_empregado")

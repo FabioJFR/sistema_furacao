@@ -37,6 +37,18 @@
                         <div class="projeto-card-actions">
                             <a href="{% url 'projetos:furo_detail_empregado' furo.id %}" class="sm-btn sm-btn-success">{% trans "Ver detalhes" %}</a>
                             <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="sm-btn sm-btn-secondary">{% trans "Ver 3D" %}</a>
+                            {% with configs_furo=furo.configuracoes_perfuracao.all %}
+                                {% if configs_furo %}
+                                    {% for config in configs_furo %}
+                                        {% if forloop.first %}
+                                            <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' config.pk %}" class="sm-btn sm-btn-secondary">{% trans "Configuração" %}</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}?furo={{ furo.pk }}" class="sm-btn sm-btn-secondary">{% trans "Configuração" %}</a>
+                                {% endif %}
+                            {% endwith %}
+                            <a href="{% url 'projetos:historico_furo_list' furo.id %}" class="sm-btn sm-btn-secondary">{% trans "Histórico" %}</a>
                         </div>
                     </div>
                 {% endfor %}

@@ -2,6 +2,7 @@ from django import forms
 
 from ..models.furo import Furo
 from ..selectors.forms import listar_projetos_empresa_qs, resolver_empresa_id
+from ..validators.furo import validar_inclinacoes_por_tipo_furo
 
 
 def _resolver_empresa_id(empresa):
@@ -48,21 +49,14 @@ def _adicionar_erro_valor_negativo(form, campo_nome, valor, mensagem="O valor n�
 
 
 def _validar_inclinacao_por_tipo(form, cleaned_data):
-    tipo = (cleaned_data.get("tipo") or "").strip().lower()
-    if tipo != "superficie":
-        return
-
-    regras = [
-        ("inclinacao_planeada_inicial", "Para furos de Superfície, a inclinação não pode ser positiva."),
-        ("inclinacao_planeada_atual", "Para furos de Superfície, a inclinação não pode ser positiva."),
-        ("inclinacao_real_atual", "Para furos de Superfície, a inclinação não pode ser positiva."),
-    ]
-    for campo, mensagem in regras:
+    erros = validar_inclinacoes_por_tipo_furo(
+        tipo=cleaned_data.get("tipo"),
+        valores=cleaned_data,
+    )
+    for campo, mensagem in erros.items():
         if campo not in cleaned_data:
             continue
-        valor = cleaned_data.get(campo)
-        if valor is not None and valor > 0:
-            form.add_error(campo, mensagem)
+        form.add_error(campo, mensagem)
 
 
 class BaseFuroForm(forms.ModelForm):

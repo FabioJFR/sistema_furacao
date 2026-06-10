@@ -50,49 +50,51 @@
     </div>
 </div>
 
-<div class="email-health-card">
-    <div>
-        <h2>{% trans "Estado do email transacional" %}</h2>
-        <p>{% trans "Leitura rápida da configuração usada para enviar emails de ativação e respetivos links de confirmação." %}</p>
+{% if diagnostico_email %}
+    <div class="email-health-card">
+        <div>
+            <h2>{% trans "Estado do email transacional" %}</h2>
+            <p>{% trans "Leitura rápida da configuração usada para enviar emails de ativação e respetivos links de confirmação." %}</p>
+        </div>
+        <div class="email-health-grid">
+            <div class="email-health-item">
+                <span class="card-title">{% trans "Backend" %}</span>
+                <strong>{{ diagnostico_email.backend|default:"—" }}</strong>
+            </div>
+            <div class="email-health-item">
+                <span class="card-title">{% trans "From email" %}</span>
+                <strong>{{ diagnostico_email.from_email|default:"—" }}</strong>
+            </div>
+            <div class="email-health-item">
+                <span class="card-title">{% trans "SMTP real" %}</span>
+                <strong>
+                    {% if diagnostico_email.entrega_real_ativa %}
+                        <span class="badge activated">{% trans "Ativo" %}</span>
+                    {% else %}
+                        <span class="badge pending-account">{% trans "Por rever" %}</span>
+                    {% endif %}
+                </strong>
+            </div>
+            <div class="email-health-item">
+                <span class="card-title">{% trans "Links absolutos" %}</span>
+                <strong>
+                    {% if diagnostico_email.base_url_configurada %}
+                        <span class="badge activated">{% trans "OK" %}</span>
+                    {% else %}
+                        <span class="badge pending-account">{% trans "Incompleto" %}</span>
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+        {% if diagnostico_email.problemas %}
+            <div class="email-health-alert">
+                {% for problema in diagnostico_email.problemas %}
+                    <div>{{ problema }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
-    <div class="email-health-grid">
-        <div class="email-health-item">
-            <span class="card-title">{% trans "Backend" %}</span>
-            <strong>{{ diagnostico_email.backend|default:"—" }}</strong>
-        </div>
-        <div class="email-health-item">
-            <span class="card-title">{% trans "From email" %}</span>
-            <strong>{{ diagnostico_email.from_email|default:"—" }}</strong>
-        </div>
-        <div class="email-health-item">
-            <span class="card-title">{% trans "SMTP real" %}</span>
-            <strong>
-                {% if diagnostico_email.entrega_real_ativa %}
-                    <span class="badge activated">{% trans "Ativo" %}</span>
-                {% else %}
-                    <span class="badge pending-account">{% trans "Por rever" %}</span>
-                {% endif %}
-            </strong>
-        </div>
-        <div class="email-health-item">
-            <span class="card-title">{% trans "Links absolutos" %}</span>
-            <strong>
-                {% if diagnostico_email.base_url_configurada %}
-                    <span class="badge activated">{% trans "OK" %}</span>
-                {% else %}
-                    <span class="badge pending-account">{% trans "Incompleto" %}</span>
-                {% endif %}
-            </strong>
-        </div>
-    </div>
-    {% if diagnostico_email.problemas %}
-        <div class="email-health-alert">
-            {% for problema in diagnostico_email.problemas %}
-                <div>{{ problema }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
+{% endif %}
 
 <div class="table-wrap">
     <table>
@@ -114,7 +116,7 @@
             {% for s in subscricoes %}
                 <tr>
                     <td>{{ s.empresa.nome }}</td>
-                    <td>{{ s.plano.nome }}</td>
+                    <td>{% if s.plano %}{{ s.plano.nome }}{% else %}—{% endif %}</td>
                     <td>{{ s.periodo_cobranca_label }}</td>
                     <td>
                         <span class="badge {{ s.estado }}">

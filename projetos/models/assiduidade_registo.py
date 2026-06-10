@@ -62,9 +62,13 @@ class AssiduidadeRegisto(models.Model):
         super().clean()
         if not self.empresa_id:
             raise ValidationError({"empresa": "O registo deve estar associado a uma empresa."})
-        if self.empregado and self.empregado.empresa_id != self.empresa_id:
+
+        empregado = self.empregado if self.empregado_id else None
+        projeto = self.projeto if self.projeto_id else None
+
+        if empregado and empregado.empresa_id != self.empresa_id:
             raise ValidationError({"empregado": "O empregado deve pertencer à mesma empresa."})
-        if self.projeto and self.projeto.empresa_id != self.empresa_id:
+        if projeto and projeto.empresa_id != self.empresa_id:
             raise ValidationError({"projeto": "O projeto deve pertencer à mesma empresa."})
         if self.data_fim and self.data_fim < self.data_inicio:
             raise ValidationError({"data_fim": "A data fim não pode ser anterior à data início."})

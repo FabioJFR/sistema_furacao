@@ -16,7 +16,7 @@ def listar_entidades_features():
     empresas = Empresa.objects.select_related("plano").order_by("nome")
     perfis_individuais = (
         PerfilPlataforma.objects.select_related("user")
-        .filter(tipo_acesso="individual", ativo=True)
+        .filter(tipo_acesso="individual", ativo=True, user__is_active=True)
         .order_by("user__username")
     )
     return empresas, perfis_individuais

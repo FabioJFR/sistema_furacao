@@ -12,7 +12,14 @@ from django.utils.translation import gettext as _
 
 from core.permissions import admin_required
 from projetos.forms import ClienteComercialForm, ClienteContratoAdendaForm, ClienteContratoAnexoForm, ClienteContratoForm
-from projetos.models import ClienteContrato, ClienteContratoAdenda, ClienteContratoAnexo, ClienteContratoWorkflowHistorico, Projeto
+from projetos.models import (
+    ClienteComercial,
+    ClienteContrato,
+    ClienteContratoAdenda,
+    ClienteContratoAnexo,
+    ClienteContratoWorkflowHistorico,
+    Projeto,
+)
 from projetos.selectors.clientes_contratos import (
     listar_adendas_cliente_contrato,
     listar_anexos_cliente_contrato,
@@ -357,6 +364,17 @@ def cliente_comercial_update(request):
     empresa, resposta_erro = _resolver_empresa_admin_clientes(request)
     if resposta_erro:
         return resposta_erro
+
+    cliente_tem_contexto_empresa = ClienteContrato.objects.filter(
+        empresa=empresa,
+        nome_cliente__iexact=nome_cliente,
+    ).exists() or ClienteComercial.objects.filter(
+        empresa=empresa,
+        nome_cliente__iexact=nome_cliente,
+    ).exists()
+    if not cliente_tem_contexto_empresa:
+        messages.error(request, "Cliente não encontrado na tua empresa.")
+        return redirect("projetos:cliente_contrato_painel_clientes")
 
     ficha_cliente, _ = obter_ou_criar_ficha_cliente_comercial(empresa=empresa, nome_cliente=nome_cliente)
     form = ClienteComercialForm(request.POST or None, instance=ficha_cliente)

@@ -297,6 +297,7 @@ def furo_list(request):
         if resposta_empregado:
             logger.warning("Acesso bloqueado por contexto de empregado na view furo_list. user_id=%s", request.user.id)
             return resposta_empregado
+        return redirect("projetos:meus_furos_empregado")
 
     furos = listar_furos_para_utilizador(
         empresa_id=empresa_id,

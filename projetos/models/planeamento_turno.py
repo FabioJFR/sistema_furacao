@@ -126,24 +126,29 @@ class PlaneamentoTurno(models.Model):
         if not self.empresa_id:
             raise ValidationError({"empresa": "O planeamento deve estar associado a uma empresa."})
 
-        if self.projeto and self.projeto.empresa_id != self.empresa_id:
+        projeto = self.projeto if self.projeto_id else None
+        furo = self.furo if self.furo_id else None
+        empregado = self.empregado if self.empregado_id else None
+        maquina = self.maquina if self.maquina_id else None
+
+        if projeto and projeto.empresa_id != self.empresa_id:
             raise ValidationError({"projeto": "O projeto deve pertencer à mesma empresa."})
 
-        if self.furo and self.furo.empresa_id != self.empresa_id:
+        if furo and furo.empresa_id != self.empresa_id:
             raise ValidationError({"furo": "O furo deve pertencer à mesma empresa."})
-        if self.furo and self.furo.projeto_id != self.projeto_id:
+        if furo and furo.projeto_id != self.projeto_id:
             raise ValidationError({"furo": "O furo deve pertencer ao projeto selecionado."})
 
-        if self.empregado and self.empregado.empresa_id != self.empresa_id:
+        if empregado and empregado.empresa_id != self.empresa_id:
             raise ValidationError({"empregado": "O empregado deve pertencer à mesma empresa."})
 
-        if self.maquina and self.maquina.empresa_id != self.empresa_id:
+        if maquina and maquina.empresa_id != self.empresa_id:
             raise ValidationError({"maquina": "A máquina deve pertencer à mesma empresa."})
 
         turno_maquina = None
-        if self.maquina_id and self.turno:
+        if maquina and self.turno:
             turno_maquina = (
-                self.maquina.turnos_maquina.filter(turno=self.turno, ativo=True)
+                maquina.turnos_maquina.filter(turno=self.turno, ativo=True)
                 .order_by("-atualizado_em")
                 .first()
             )
@@ -162,7 +167,7 @@ class PlaneamentoTurno(models.Model):
                 raise ValidationError(
                     {
                         "hora_inicio": (
-                            f"Para a máquina '{self.maquina.nome}', o turno "
+                            f"Para a máquina '{maquina.nome}', o turno "
                             f"'{turno_maquina.get_turno_display()}' tem de começar às "
                             f"{turno_maquina.hora_inicio.strftime('%H:%M')}."
                         )
@@ -172,7 +177,7 @@ class PlaneamentoTurno(models.Model):
                 raise ValidationError(
                     {
                         "hora_fim": (
-                            f"Para a máquina '{self.maquina.nome}', o turno "
+                            f"Para a máquina '{maquina.nome}', o turno "
                             f"'{turno_maquina.get_turno_display()}' tem de terminar às "
                             f"{turno_maquina.hora_fim.strftime('%H:%M')}."
                         )
@@ -182,7 +187,7 @@ class PlaneamentoTurno(models.Model):
                 raise ValidationError(
                     {
                         "data_fim": (
-                            f"Para a máquina '{self.maquina.nome}', o turno "
+                            f"Para a máquina '{maquina.nome}', o turno "
                             f"'{turno_maquina.get_turno_display()}' termina no dia seguinte."
                         )
                     }

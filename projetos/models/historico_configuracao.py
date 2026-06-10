@@ -56,6 +56,12 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
     )
 
     # Snapshot dos valores da configuração no momento da alteração
+    medida_morta = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     comprimento_tubo = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -209,6 +215,7 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
             furo=configuracao.furo,
             empresa_id=getattr(configuracao, "empresa_id", None),
             acao=acao,
+            medida_morta=cls._normalizar_decimal_historico(configuracao.medida_morta),
             comprimento_tubo=cls._normalizar_decimal_historico(configuracao.comprimento_tubo),
             comprimento_karoutier=cls._normalizar_decimal_historico(configuracao.comprimento_karoutier),
             quantidade_karoutier=getattr(configuracao, "quantidade_karoutier", 1),
@@ -256,11 +263,6 @@ class HistoricoConfiguracaoPerfuracao(models.Model):
         if self.furo and self.empresa_id and self.furo.empresa_id != self.empresa_id:
             raise ValidationError({
                 "empresa": "A empresa do histórico deve ser a mesma do furo."
-            })
-
-        if self.configuracao and self.empregado_id and self.configuracao.empregado_id != self.empregado_id:
-            raise ValidationError({
-                "empregado": "O empregado do histórico deve ser o mesmo da configuração."
             })
 
         if self.configuracao and self.furo_id and self.configuracao.furo_id != self.furo_id:

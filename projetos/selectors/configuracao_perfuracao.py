@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from projetos.models import ConfiguracaoPerfuracaoEmpregado, Empregados
+from projetos.models import ConfiguracaoPerfuracaoEmpregado, EmpregadoFuro, Empregados, RegistoDiarioEmpregado
 
 
 # TODO futuro:
@@ -22,7 +22,6 @@ def _filtrar_configuracoes_por_empresa(queryset, empresa=None):
     return queryset.filter(
         empresa_id=empresa_id,
         furo__empresa_id=empresa_id,
-        empregado__empresa_id=empresa_id,
     )
 
 
@@ -37,7 +36,14 @@ def _obter_queryset_base_configuracoes():
 
 
 def obter_lista_configuracoes_perfuracao_empregado(empregado, empresa=None):
-    queryset = _obter_queryset_base_configuracoes().filter(empregado=empregado)
+    furo_ids_associados = EmpregadoFuro.objects.filter(empregado=empregado).values_list("furo_id", flat=True)
+    furo_ids_registos = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo__isnull=False,
+    ).values_list("furo_id", flat=True)
+    queryset = _obter_queryset_base_configuracoes().filter(
+        furo_id__in=list(furo_ids_associados) + list(furo_ids_registos)
+    )
     queryset = _filtrar_configuracoes_por_empresa(queryset, empresa)
 
     return queryset.order_by("furo__nome")
@@ -57,11 +63,27 @@ def obter_empregado_por_pk_empresa(pk, empresa):
 
 
 def obter_configuracao_perfuracao_empregado(pk, empregado):
+    furo_ids_associados = EmpregadoFuro.objects.filter(empregado=empregado).values_list("furo_id", flat=True)
+    furo_ids_registos = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo__isnull=False,
+    ).values_list("furo_id", flat=True)
     return get_object_or_404(
         _obter_queryset_base_configuracoes(),
         pk=pk,
-        empregado=empregado,
         empresa=empregado.empresa,
+        furo_id__in=list(furo_ids_associados) + list(furo_ids_registos),
+    )
+
+
+def obter_configuracao_perfuracao_furo_empregado(furo, empregado):
+    return (
+        _obter_queryset_base_configuracoes()
+        .filter(
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .first()
     )
 
 

@@ -5,7 +5,12 @@ from plataforma.selectors.subscricoes import (
     obter_metricas_ativacao_contas,
     obter_metricas_subscricoes,
 )
+import logging
+
 from website.services import diagnosticar_email_transacional
+
+
+logger = logging.getLogger(__name__)
 
 
 def construir_contexto_subscricao_list(*, perfil):
@@ -19,10 +24,16 @@ def construir_contexto_subscricao_list(*, perfil):
     metricas = obter_metricas_subscricoes(listar_subscricoes())
     metricas_ativacao = obter_metricas_ativacao_contas(subscricoes)
 
+    try:
+        diagnostico_email = diagnosticar_email_transacional()
+    except Exception:
+        logger.exception("Erro ao diagnosticar email transacional na lista de subscricoes.")
+        diagnostico_email = None
+
     return {
         "perfil": perfil,
         "subscricoes": subscricoes,
-        "diagnostico_email": diagnosticar_email_transacional(),
+        "diagnostico_email": diagnostico_email,
         **metricas,
         **metricas_ativacao,
     }

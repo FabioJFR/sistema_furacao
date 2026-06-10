@@ -25,6 +25,42 @@
     font-weight: 900;
 }
 
+.projeto-global-note {
+    max-width: 660px;
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 0.94rem;
+    line-height: 1.55;
+}
+
+.projeto-create-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.projeto-create-context label {
+    width: 100%;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.projeto-create-context select {
+    min-width: 220px;
+    min-height: 48px;
+    padding: 0 13px;
+    border: 1px solid #cad5e2;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #1e293b;
+    font-weight: 700;
+}
+
 .projeto-create-btn {
     display: inline-flex;
     align-items: center;
@@ -240,6 +276,11 @@
 
     .projeto-create-btn {
         min-width: 0;
+        width: 100%;
+    }
+
+    .projeto-create-context,
+    .projeto-create-context select {
         width: 100%;
     }
 

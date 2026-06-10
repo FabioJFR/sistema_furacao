@@ -4,10 +4,17 @@ from django.http import HttpResponse
 
 
 def _client_ip(request):
+    remote_addr = (request.META.get("REMOTE_ADDR") or "").strip()
+    if not getattr(settings, "RATE_LIMIT_TRUST_X_FORWARDED_FOR", False):
+        return remote_addr or "unknown"
+
     forwarded_for = (request.META.get("HTTP_X_FORWARDED_FOR") or "").strip()
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-    return (request.META.get("REMOTE_ADDR") or "unknown").strip() or "unknown"
+    if not forwarded_for:
+        return remote_addr or "unknown"
+
+    forwarded_ips = [ip.strip() for ip in forwarded_for.split(",") if ip.strip()]
+    # O último valor é o endereço acrescentado/sobrescrito pelo proxy mais próximo.
+    return forwarded_ips[-1] if forwarded_ips else (remote_addr or "unknown")
 
 
 class SensitivePostRateLimitMiddleware:

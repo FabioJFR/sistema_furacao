@@ -145,7 +145,10 @@ def listar_empregados_furo_form_qs(*, empresa=None, furo=None, is_edicao=False):
 
 def listar_furos_configuracao_perfuracao_qs(*, empregado=None, empresa=None):
     if empregado is None:
-        return Furo.objects.none()
+        queryset = Furo.objects.all()
+        if empresa is not None:
+            queryset = queryset.filter(empresa_id=resolver_empresa_id(empresa))
+        return queryset.order_by("nome")
 
     furo_ids_associados = EmpregadoFuro.objects.filter(empregado=empregado).values_list("furo_id", flat=True)
     furo_ids_registos = RegistoDiarioEmpregado.objects.filter(

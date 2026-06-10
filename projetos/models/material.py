@@ -185,35 +185,38 @@ class LevantamentoMaterial(models.Model):
     def clean(self):
         super().clean()
 
-        if self.empregado and not self.empregado.empresa_id:
+        empregado = self.empregado if self.empregado_id else None
+        material = self.material if self.material_id else None
+
+        if empregado and not empregado.empresa_id:
             raise ValidationError({
                 "empregado": "O empregado deve estar associado a uma empresa."
             })
 
-        if self.material and not self.material.empresa_id:
+        if material and not material.empresa_id:
             raise ValidationError({
                 "material": "O material deve estar associado a uma empresa."
             })
 
-        if self.empregado and self.empregado.empresa_id:
-            if self.empresa_id and self.empresa_id != self.empregado.empresa_id:
+        if empregado and empregado.empresa_id:
+            if self.empresa_id and self.empresa_id != empregado.empresa_id:
                 raise ValidationError({
                     "empresa": "A empresa deve ser a mesma do empregado."
                 })
 
-        if self.material and self.material.empresa_id:
-            if self.empresa_id and self.empresa_id != self.material.empresa_id:
+        if material and material.empresa_id:
+            if self.empresa_id and self.empresa_id != material.empresa_id:
                 raise ValidationError({
                     "empresa": "A empresa deve ser a mesma do material."
                 })
 
-        if self.material and self.empregado:
-            if self.material.empresa_id != self.empregado.empresa_id:
+        if material and empregado:
+            if material.empresa_id != empregado.empresa_id:
                 raise ValidationError({
                     "material": "O material não pertence à empresa do empregado."
                 })
 
-        if self.projeto and self.material and self.material.projeto_id and self.projeto_id != self.material.projeto_id:
+        if self.projeto and material and material.projeto_id and self.projeto_id != material.projeto_id:
             raise ValidationError({
                 "projeto": "O projeto do levantamento deve ser o mesmo do material."
             })
@@ -295,35 +298,38 @@ class DevolucaoMaterial(models.Model):
     def clean(self):
         super().clean()
 
-        if self.empregado and not self.empregado.empresa_id:
+        empregado = self.empregado if self.empregado_id else None
+        material = self.material if self.material_id else None
+
+        if empregado and not empregado.empresa_id:
             raise ValidationError({
                 "empregado": "O empregado deve estar associado a uma empresa."
             })
 
-        if self.material and not self.material.empresa_id:
+        if material and not material.empresa_id:
             raise ValidationError({
                 "material": "O material deve estar associado a uma empresa."
             })
 
-        if self.empregado and self.empregado.empresa_id:
-            if self.empresa_id and self.empresa_id != self.empregado.empresa_id:
+        if empregado and empregado.empresa_id:
+            if self.empresa_id and self.empresa_id != empregado.empresa_id:
                 raise ValidationError({
                     "empresa": "A empresa deve ser a mesma do empregado."
                 })
 
-        if self.material and self.material.empresa_id:
-            if self.empresa_id and self.empresa_id != self.material.empresa_id:
+        if material and material.empresa_id:
+            if self.empresa_id and self.empresa_id != material.empresa_id:
                 raise ValidationError({
                     "empresa": "A empresa deve ser a mesma do material."
                 })
 
-        if self.material and self.empregado:
-            if self.material.empresa_id != self.empregado.empresa_id:
+        if material and empregado:
+            if material.empresa_id != empregado.empresa_id:
                 raise ValidationError({
                     "material": "O material não pertence à empresa do empregado."
                 })
 
-        if self.projeto and self.material and self.material.projeto_id and self.projeto_id != self.material.projeto_id:
+        if self.projeto and material and material.projeto_id and self.projeto_id != material.projeto_id:
             raise ValidationError({
                 "projeto": "O projeto da devolução deve ser o mesmo do material."
             })

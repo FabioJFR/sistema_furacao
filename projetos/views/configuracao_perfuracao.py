@@ -10,9 +10,11 @@ from projetos.forms.configuracao_perfuracao import ConfiguracaoPerfuracaoEmprega
 from projetos.selectors.configuracao_perfuracao import (
     obter_configuracao_perfuracao_admin,
     obter_configuracao_perfuracao_empregado,
+    obter_configuracao_perfuracao_furo_empregado,
     obter_empregado_por_pk_empresa,
     obter_lista_configuracoes_perfuracao_empregado,
 )
+from projetos.selectors.forms import listar_furos_configuracao_perfuracao_qs
 from projetos.selectors.historico_configuracao import (
     obter_historico_configuracao_por_configuracao,
     obter_ultimo_historico_da_configuracao,
@@ -146,6 +148,23 @@ def configuracao_perfuracao_create_empregado(request):
         logger.warning("Acesso bloqueado na view configuracao_perfuracao_create_empregado. user_id=%s", request.user.id)
         return resposta_erro
 
+    furo_inicial = None
+    furo_id = request.POST.get("furo") if request.method == "POST" else request.GET.get("furo")
+    configuracao_existente = None
+    if furo_id:
+        furo_inicial = (
+            listar_furos_configuracao_perfuracao_qs(empregado=empregado, empresa=empregado.empresa)
+            .filter(pk=furo_id)
+            .first()
+        )
+        if furo_inicial:
+            configuracao_existente = obter_configuracao_perfuracao_furo_empregado(
+                furo=furo_inicial,
+                empregado=empregado,
+            )
+            if configuracao_existente and request.method == "GET":
+                return redirect("projetos:configuracao_perfuracao_update_empregado", pk=configuracao_existente.pk)
+
     fluxo = processar_fluxo_form_configuracao_perfuracao(
         request_method=request.method,
         post_data=request.POST,
@@ -153,20 +172,35 @@ def configuracao_perfuracao_create_empregado(request):
         empregado=empregado,
         empresa=empregado.empresa,
         atualizado_por=request.user,
-        acao_historico="criado",
-        observacoes_historico="Configuração criada.",
+        instance=configuracao_existente,
+        initial={"furo": furo_inicial} if furo_inicial else None,
+        acao_historico="editado" if configuracao_existente else "criado",
+        observacoes_historico=(
+            "Configuração editada a partir do formulário de criação."
+            if configuracao_existente else
+            "Configuração criada."
+        ),
     )
     form = fluxo["form"]
     resultado = fluxo["resultado"]
     if resultado:
+        configuracao_foi_atualizada = bool(configuracao_existente)
         resposta = _processar_form_configuracao(
             request=request,
             empresa=empregado.empresa,
             empregado=empregado,
             resultado=resultado,
-            sucesso_msg="Configuração de perfuração criada com sucesso.",
+            sucesso_msg=(
+                "Configuração de perfuração atualizada com sucesso."
+                if configuracao_foi_atualizada else
+                "Configuração de perfuração criada com sucesso."
+            ),
             erro_msg="Erro ao criar a configuração de perfuração. Verifique os dados.",
-            log_sucesso="Configuração de perfuração criada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s",
+            log_sucesso=(
+                "Configuração de perfuração atualizada a partir do formulário de criação por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s"
+                if configuracao_foi_atualizada else
+                "Configuração de perfuração criada com sucesso por empregado. user_id=%s, empresa_id=%s, empregado_id=%s, configuracao_id=%s"
+            ),
             log_erro="Erro ao criar configuração de perfuração por empregado. user_id=%s, erros=%s",
             redirect_name="projetos:configuracao_perfuracao_list_empregado",
             redirect_kwargs={},

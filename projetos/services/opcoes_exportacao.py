@@ -8,7 +8,7 @@ from decimal import Decimal
 from uuid import UUID
 from xml.sax.saxutils import escape as xml_escape
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 
 from projetos.selectors.opcoes import (
     qs_despesas_exportacao,

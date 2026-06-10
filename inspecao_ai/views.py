@@ -19,6 +19,7 @@ from .selectors.analises import (
     obter_analise_empresa,
     obter_analise_reprocessar_empresa,
 )
+from .selectors.training import listar_exemplos_treino_empresa
 from .selectors.chat import (
     obter_furo_contexto_chat,
 )
@@ -29,6 +30,7 @@ from .services.chat import (
 )
 from .services.biblioteca import construir_contexto_biblioteca
 from .services.analises import construir_contexto_analise_detail, construir_contexto_analise_list
+from .services.dataset_quality import construir_contexto_qualidade_dataset
 
 def _base_template_inspecao(request):
     return "plataforma/base.html" if request.user.is_superuser else "projetos/base.html"
@@ -50,6 +52,7 @@ def hub(request):
     analises_qs = listar_analises_recentes_hub_qs(empresa)
     analises = dl.filtrar_analises_visiveis(list(analises_qs))
     dashboard_aprendizagem = dl.construir_dashboard_aprendizagem_ai(analises)
+    dashboard_dataset = construir_contexto_qualidade_dataset(listar_exemplos_treino_empresa(empresa))
     return _render_inspecao(
         request,
         "inspecao_ai/hub.html",
@@ -59,6 +62,7 @@ def hub(request):
             "total_revisao": sum(1 for item in analises if item.estado == "revisao_manual"),
             "analises_recentes": analises[:6],
             "dashboard_aprendizagem": dashboard_aprendizagem,
+            "dashboard_dataset": dashboard_dataset,
         },
     )
 
@@ -301,8 +305,8 @@ def analise_corrigir_campos(request, pk):
         return resposta_erro
 
     analise = obter_analise_empresa(pk=pk, empresa=empresa)
-    wf.guardar_correcoes_campos(analise, request.POST)
-    messages.success(request, "As correções manuais da análise foram guardadas.")
+    wf.guardar_correcoes_campos(analise, request.POST, utilizador=request.user)
+    messages.success(request, "As correções manuais foram guardadas e preparadas como exemplos rotulados para treino.")
     return redirect("inspecao_ai:analise_detail", pk=analise.pk)
 
 

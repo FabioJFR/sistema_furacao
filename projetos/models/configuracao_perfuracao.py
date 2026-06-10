@@ -30,6 +30,8 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
         related_name="configuracoes_perfuracao",
     )
 
+    medida_morta = models.FloatField(default=0.0)
+
     # String de perfuração
     comprimento_tubo = models.FloatField(default=3.0)
     comprimento_karoutier = models.FloatField(default=0.0)
@@ -60,13 +62,10 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
     )
 
     class Meta:
-        # TODO futuro:
-        # - avaliar se unique_together deve permitir histórico por data
-        # - criar índice por furo para otimização
-        unique_together = ("empregado", "furo")
+        unique_together = ("furo",)
         ordering = ["furo__nome"]
-        verbose_name = "Configuração de Perfuração do Empregado"
-        verbose_name_plural = "Configurações de Perfuração dos Empregados"
+        verbose_name = "Configuração de Perfuração do Furo"
+        verbose_name_plural = "Configurações de Perfuração dos Furos"
 
     def __str__(self):
         nome_empregado = self.empregado.nome if self.empregado_id and self.empregado else "-"
@@ -113,7 +112,7 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
             if self.empregado.empresa_id and self.furo.empresa_id:
                 if self.empregado.empresa_id != self.furo.empresa_id:
                     raise ValidationError({
-                        "furo": "O empregado e o furo devem pertencer à mesma empresa."
+                        "furo": "O empregado que altera a configuração deve pertencer à mesma empresa do furo."
                     })
 
         if self.empresa_id:
@@ -128,6 +127,7 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
                 })
 
         for field_name in [
+            "medida_morta",
             "comprimento_tubo",
             "comprimento_karoutier",
             "comprimento_acrescento",
@@ -160,10 +160,10 @@ class ConfiguracaoPerfuracaoEmpregado(models.Model):
                 })
 
     def save(self, *args, **kwargs):
-        if self.empregado and self.empregado.empresa_id:
-            self.empresa_id = self.empregado.empresa_id
-        elif self.furo and self.furo.empresa_id:
+        if self.furo and self.furo.empresa_id:
             self.empresa_id = self.furo.empresa_id
+        elif self.empregado and self.empregado.empresa_id:
+            self.empresa_id = self.empregado.empresa_id
 
         self.full_clean()
         super().save(*args, **kwargs)

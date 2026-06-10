@@ -11,7 +11,7 @@
                 <p class="sf-page-kicker">{% trans "Perfuração" %}</p>
                 <h1 class="sf-page-title">{% trans "Detalhe da configuração de perfuração" %}</h1>
                 <p class="sf-page-description">
-                    {% blocktrans with empregado_nome=configuracao.empregado.nome furo_nome=configuracao.furo.nome %}Empregado: {{ empregado_nome }}. Furo: {{ furo_nome }}.{% endblocktrans %}
+                    {% blocktrans with empregado_nome=configuracao.empregado.nome furo_nome=configuracao.furo.nome %}Furo: {{ furo_nome }}. Última alteração por: {{ empregado_nome }}.{% endblocktrans %}
                 </p>
             </div>
 
@@ -32,13 +32,13 @@
             <section class="sf-overview-card">
                 <h2 class="sf-overview-title">{% trans "Conjunto de fundo" %}</h2>
                 <dl class="sf-detail-list">
+                    <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Medida Morta" %}</dt><dd class="sf-detail-value">{{ configuracao.medida_morta }} m</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Tubo" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_tubo }} m</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Karoutier" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_karoutier }} m × {{ configuracao.quantidade_karoutier }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Acrescento" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_acrescento }} m × {{ configuracao.quantidade_acrescento }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Calibrador" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_calibrador }} m × {{ configuracao.quantidade_calibrador }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Record" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_record }} m × {{ configuracao.quantidade_record }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Bit" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_bit }} m</dd></div>
-                    <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Caixa de mola" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_caixa_mola }} m</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Total" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_total_conjunto_fundo|floatformat:2 }} m</dd></div>
                 </dl>
             </section>
@@ -46,6 +46,7 @@
             <section class="sf-overview-card">
                 <h2 class="sf-overview-title">{% trans "Tubo interior" %}</h2>
                 <dl class="sf-detail-list">
+                    <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Caixa de mola" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_caixa_mola }} m</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Tubo interior" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_tubo_interior }} m × {{ configuracao.quantidade_tubo_interior }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Acrescento tubo interior" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_acrescento_tubo_interior }} m × {{ configuracao.quantidade_acrescento_tubo_interior }}</dd></div>
                     <div class="sf-detail-item"><dt class="sf-detail-label">{% trans "Cabeça de interior" %}</dt><dd class="sf-detail-value">{{ configuracao.comprimento_cabeca_interior }} m</dd></div>

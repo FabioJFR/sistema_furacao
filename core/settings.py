@@ -204,6 +204,20 @@ PASSWORD_RESET_RATE_LIMIT_MAX_ATTEMPTS = int(
 PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS = int(
     env("PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS", "600")
 )
+# Só confiar no IP encaminhado quando o proxy reverso controla este header.
+RATE_LIMIT_TRUST_X_FORWARDED_FOR = env_bool(
+    "RATE_LIMIT_TRUST_X_FORWARDED_FOR",
+    False,
+)
+CACHES = {
+    "default": {
+        "BACKEND": env(
+            "DJANGO_CACHE_BACKEND",
+            "django.core.cache.backends.locmem.LocMemCache",
+        ),
+        "LOCATION": env("DJANGO_CACHE_LOCATION", "sistema-furacao-cache"),
+    }
+}
 
 # Upload Security
 UPLOAD_VIRUS_SCAN_ENABLED = env_bool("UPLOAD_VIRUS_SCAN_ENABLED", False)
@@ -244,6 +258,11 @@ SITE_BASE_URL = env("SITE_BASE_URL", "")
 
 # Pagamentos (PayPal) - base de configuração para integração de checkout.
 PAYPAL_ENABLED = env_bool("PAYPAL_ENABLED", False)
+
+# Produto
+# Mantém a navegação focada no MVP de operação de terreno. Os módulos de gestão
+# comercial/financeira continuam no código, mas saem do fluxo principal.
+SF_MVP_OPERACIONAL_FOCUS = env_bool("SF_MVP_OPERACIONAL_FOCUS", True)
 PAYPAL_MODE = env("PAYPAL_MODE", "sandbox")  # sandbox | live
 PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", "")
 PAYPAL_CLIENT_SECRET = env("PAYPAL_CLIENT_SECRET", "")

@@ -19,6 +19,7 @@ from .selectors.access import (
 )
 from .selectors.memoria import aplicar_filtros_memoria_qs, listar_furos_memoria_operacional_qs
 from .services.presets import guardar_preset_zonas_service
+from .services.training_examples import sincronizar_exemplos_validacao
 from .services import executar_analise_imagem
 
 
@@ -186,7 +187,7 @@ def guardar_preset_zonas(*, empresa, user, nome, tipo_documento, report_zone_raw
     return preset
 
 
-def guardar_correcoes_campos(analise, request_post):
+def guardar_correcoes_campos(analise, request_post, utilizador=None):
     campos_extraidos = dict(analise.campos_extraidos or {})
     campos = list(campos_extraidos.get("campos") or [])
     corrigidos = 0
@@ -200,6 +201,7 @@ def guardar_correcoes_campos(analise, request_post):
     campos_extraidos["tem_validacao_utilizador"] = corrigidos > 0
     analise.campos_extraidos = campos_extraidos
     analise.save(update_fields=["campos_extraidos", "atualizado_em"])
+    sincronizar_exemplos_validacao(analise=analise, campos=campos, utilizador=utilizador)
     return analise
 
 

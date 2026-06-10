@@ -27,14 +27,46 @@
 
             <div class="sf-page-actions">
                 <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">{% trans "Novo registo" %}</a>
-                <a href="{% url 'projetos:registo_diario_list' %}" class="btn btn-primary">{% trans "Meus registos" %}</a>
-                <a href="{% url 'projetos:calendario_turnos_empregado' %}" class="btn btn-primary">{% trans "Calendário de turnos" %}</a>
                 <a href="{% url 'projetos:notificacoes_empregado' %}" class="btn btn-primary">{% trans "Notificações" %}{% if total_notificacoes_empregado_abertas_menu %} ({{ total_notificacoes_empregado_abertas_menu }}){% endif %}</a>
-                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" class="btn btn-primary">{% trans "Configurações de perfuração" %}</a>
-                <a href="{% url 'projetos:meus_projetos_empregado' %}" class="btn btn-primary">{% trans "Meus projetos" %}</a>
-                <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">{% trans "Meus furos" %}</a>
             </div>
         </div>
+
+        <section class="sf-section-card sf-workbench">
+            <div class="sf-section-head">
+                <div>
+                    <p class="sf-page-kicker">{% trans "Rotina operacional" %}</p>
+                    <h2 class="sf-section-title">{% trans "Acessos rápidos" %}</h2>
+                    <p class="sf-section-description">{% trans "Regista atividade, consulta planeamento e abre o contexto técnico sem procurar pelos menus." %}</p>
+                </div>
+            </div>
+            <div class="sf-shortcut-grid">
+                <a href="{% url 'projetos:registo_diario_list' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📋</span>
+                    <span class="sf-shortcut-label">{% trans "Meus registos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Consultar o histórico diário já submetido." %}</span>
+                </a>
+                <a href="{% url 'projetos:calendario_turnos_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">🗓️</span>
+                    <span class="sf-shortcut-label">{% trans "Turnos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Ver planeamento, presença e pedidos." %}</span>
+                </a>
+                <a href="{% url 'projetos:meus_projetos_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📁</span>
+                    <span class="sf-shortcut-label">{% trans "Projetos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Abrir as frentes de trabalho atribuídas." %}</span>
+                </a>
+                <a href="{% url 'projetos:meus_furos_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">🕳️</span>
+                    <span class="sf-shortcut-label">{% trans "Furos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Consultar furos, evolução e detalhe técnico." %}</span>
+                </a>
+                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">⚙️</span>
+                    <span class="sf-shortcut-label">{% trans "Perfuração" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Rever as configurações usadas no trabalho." %}</span>
+                </a>
+            </div>
+        </section>
 
         <div class="sf-stat-grid">
             <div class="sf-stat-card"><div class="sf-stat-label">{% trans "Horas hoje" %}</div><div class="sf-stat-value">{{ horas_hoje|floatformat:2 }}</div></div>

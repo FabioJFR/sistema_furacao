@@ -21,8 +21,12 @@
     const nextBtn = document.getElementById("nextProjetoBtn");
     const abrirBtn = document.getElementById("abrirProjetoBtn");
 
-    function projetoDetailUrl(id) {
-        return projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(id));
+    function projetoDetailUrl(projeto) {
+        const url = projetoDetailBaseUrl.replace(projetoDetailPlaceholder, String(projeto.id));
+        if (config.dataset.visaoGlobal === "true" && projeto.empresa_id) {
+            return `${url}?empresa_contexto=${encodeURIComponent(projeto.empresa_id)}`;
+        }
+        return url;
     }
 
     projetos.forEach((projeto, index) => {
@@ -40,7 +44,7 @@
         marker.bindPopup(`<strong>${projeto.nome}</strong><br>${projeto.cidade || "-"}, ${projeto.pais || "-"}`);
         marker.on("click", () => selecionarProjeto(index, true));
         marker.on("dblclick", () => {
-            window.location.href = projetoDetailUrl(projeto.id);
+            window.location.href = projetoDetailUrl(projeto);
         });
         marcadores.push({ index, marker });
     });
@@ -99,7 +103,7 @@
         }
         const projeto = projetos[projetoIndex];
         info.innerHTML = `
-            <a href="${projetoDetailUrl(projeto.id)}" class="projeto-map-link">
+            <a href="${projetoDetailUrl(projeto)}" class="projeto-map-link">
                 ${projeto.nome}
             </a><br>
             Cliente: ${projeto.cliente || "-"} |
@@ -154,13 +158,13 @@
         if (!projetos.length) {
             return;
         }
-        window.location.href = projetoDetailUrl(projetos[projetoIndex].id);
+        window.location.href = projetoDetailUrl(projetos[projetoIndex]);
     });
 
     document.querySelectorAll(".projeto-card").forEach((card, index) => {
         card.addEventListener("click", () => selecionarProjeto(index, true));
         card.addEventListener("dblclick", () => {
-            window.location.href = projetoDetailUrl(projetos[index].id);
+            window.location.href = projetoDetailUrl(projetos[index]);
         });
     });
 

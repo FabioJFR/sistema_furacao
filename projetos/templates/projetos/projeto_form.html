@@ -16,6 +16,7 @@
                 <h1 class="projeto-page-title">📁 {% trans "Criar projeto" %}</h1>
                 <p class="projeto-form-subtitle">
                     {% trans "Registe um novo projeto com a identificação principal, estado operacional e localização de referência." %}
+                    {% if empresa_contexto %}<br><strong>{% trans "Empresa:" %}</strong> {{ empresa_contexto.nome }}{% endif %}
                 </p>
             </div>
         </div>

@@ -15,6 +15,7 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
         model = ConfiguracaoPerfuracaoEmpregado
         fields = [
             "furo",
+            "medida_morta",
             "comprimento_tubo",
             "comprimento_karoutier",
             "quantidade_karoutier",
@@ -34,6 +35,7 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
         ]
         widgets = {
             "furo": forms.Select(attrs={"class": "form-control"}),
+            "medida_morta": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "comprimento_tubo": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "comprimento_karoutier": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "quantidade_karoutier": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "1"}),
@@ -65,10 +67,17 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
         else:
             self.fields["furo"].queryset = listar_furos_configuracao_perfuracao_qs(empregado=None, empresa=self.empresa)
 
+        if self.instance and self.instance.pk:
+            self.fields["furo"].disabled = True
+
     def clean(self):
         cleaned_data = super().clean()
 
+        is_edicao = bool(self.instance and self.instance.pk)
         furo = cleaned_data.get("furo")
+        if is_edicao:
+            furo = self.instance.furo
+            cleaned_data["furo"] = furo
 
         if self.empregado is not None and self.empresa is not None:
             empresa_id = _resolver_empresa_id(self.empresa)
@@ -84,6 +93,8 @@ class ConfiguracaoPerfuracaoEmpregadoForm(forms.ModelForm):
             if value is not None and value < 0:
                 if field_name.startswith("quantidade_"):
                     self.add_error(field_name, "A quantidade não pode ser negativa.")
+                elif field_name == "medida_morta":
+                    self.add_error(field_name, "A medida morta não pode ser negativa.")
                 else:
                     self.add_error(field_name, "O comprimento não pode ser negativo.")
 

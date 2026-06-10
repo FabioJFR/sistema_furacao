@@ -10,7 +10,7 @@
 {% block content %}
 <section class="cf-page">
     <div class="cf-shell">
-        <a href="{{ projeto.get_absolute_url }}" class="cf-back">
+        <a href="{{ projeto.get_absolute_url }}{{ empresa_contexto_query }}" class="cf-back">
             ← {% trans "Voltar ao projeto" %}
         </a>
 
@@ -33,7 +33,7 @@
             <button type="submit" class="cf-btn cf-btn-danger">
                 {% trans "Apagar" %}
             </button>
-            <a href="{{ projeto.get_absolute_url }}" class="cf-btn cf-btn-secondary">
+            <a href="{{ projeto.get_absolute_url }}{{ empresa_contexto_query }}" class="cf-btn cf-btn-secondary">
                 {% trans "Cancelar" %}
             </a>
         </form>

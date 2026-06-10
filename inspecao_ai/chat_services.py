@@ -1,11 +1,9 @@
-import ast
 import math
-import operator
-import re
-from pathlib import Path
-from datetime import date, datetime, time
-from decimal import Decimal
 
+from inspecao_ai.chat_knowledge import resposta_base_conhecimento as _resposta_base_conhecimento
+from inspecao_ai.chat_math import avaliar_expressao_segura as _avaliar_expressao_segura
+from inspecao_ai.chat_math import parece_calculo as _parece_calculo
+from inspecao_ai.chat_serialization import normalizar_json_chat
 from inspecao_ai.selectors.chat import (
     contar_medicoes_empresa,
     contar_registos_empresa,
@@ -30,52 +28,7 @@ from inspecao_ai.selectors.chat import (
 )
 
 
-SAFE_BIN_OPS = {
-    ast.Add: operator.add,
-    ast.Sub: operator.sub,
-    ast.Mult: operator.mul,
-    ast.Div: operator.truediv,
-    ast.Pow: operator.pow,
-    ast.Mod: operator.mod,
-    ast.FloorDiv: operator.floordiv,
-}
-
-SAFE_UNARY_OPS = {
-    ast.UAdd: operator.pos,
-    ast.USub: operator.neg,
-}
-
-SAFE_FUNCTIONS = {
-    "sqrt": math.sqrt,
-    "sin": math.sin,
-    "cos": math.cos,
-    "tan": math.tan,
-    "log": math.log,
-    "log10": math.log10,
-    "exp": math.exp,
-    "abs": abs,
-    "round": round,
-    "pi": lambda: math.pi,
-    "e": lambda: math.e,
-}
-
-KNOWLEDGE_BASE_ROOT = Path(__file__).resolve().parent.parent / "knowledge_base"
 FURO_MEMORY_RADIUS_KM = 0.35
-EXTENSOES_TEXTO_DIRETO = {
-    ".md",
-    ".txt",
-    ".json",
-    ".csv",
-    ".log",
-    ".ini",
-    ".cfg",
-    ".yaml",
-    ".yml",
-    ".xml",
-    ".html",
-    ".htm",
-}
-
 PROMPT_APROFUNDAR_TEMA = "Quero aprofundar um tema."
 
 
@@ -357,194 +310,6 @@ def construir_resumo_empresa(empresa):
         "maquinas_estados": listar_maquinas_estados(maquinas_qs),
         "memoria_furos": _construir_memoria_furos_empresa(empresa, limite=12),
     }
-
-
-def normalizar_json_chat(valor):
-    if valor is None or isinstance(valor, (str, int, float, bool)):
-        return valor
-    if isinstance(valor, Decimal):
-        return float(valor)
-    if isinstance(valor, (datetime, date, time)):
-        return valor.isoformat()
-    if isinstance(valor, dict):
-        return {str(chave): normalizar_json_chat(item) for chave, item in valor.items()}
-    if isinstance(valor, (list, tuple, set)):
-        return [normalizar_json_chat(item) for item in valor]
-    return str(valor)
-
-
-def _listar_documentos_base_conhecimento():
-    if not KNOWLEDGE_BASE_ROOT.exists():
-        return []
-    documentos = []
-    for path in sorted(KNOWLEDGE_BASE_ROOT.rglob("*")):
-        if not path.is_file():
-            continue
-        documentos.append(
-            {
-                "nome": path.name,
-                "relativo": str(path.relative_to(KNOWLEDGE_BASE_ROOT)),
-                "extensao": path.suffix.lower(),
-                "path": path,
-            }
-        )
-    return documentos
-
-
-def _ler_documento_texto(relativo):
-    path = KNOWLEDGE_BASE_ROOT / relativo
-    if not path.exists() or not path.is_file():
-        return ""
-    if path.suffix.lower() not in EXTENSOES_TEXTO_DIRETO:
-        return ""
-    return path.read_text(encoding="utf-8", errors="ignore")
-
-
-def _ler_conteudo_consultavel_documento(relativo):
-    path = KNOWLEDGE_BASE_ROOT / relativo
-    if not path.exists() or not path.is_file():
-        return ""
-
-    extensao = path.suffix.lower()
-    if extensao in EXTENSOES_TEXTO_DIRETO:
-        return path.read_text(encoding="utf-8", errors="ignore")
-
-    sidecar_txt = path.with_suffix(".txt")
-    if sidecar_txt.exists() and sidecar_txt.is_file():
-        return sidecar_txt.read_text(encoding="utf-8", errors="ignore")
-
-    return ""
-
-
-def _resposta_base_conhecimento(texto):
-    documentos = _listar_documentos_base_conhecimento()
-    if not documentos:
-        return "Ainda não existe base de conhecimento disponível para consulta."
-
-    linhas = [
-        "Tenho acesso à base documental do projeto.",
-        "Documentos disponíveis:",
-    ]
-    for doc in documentos[:12]:
-        linhas.append(f"- {doc['relativo']}")
-
-    docs_pdf = [doc for doc in documentos if doc["extensao"] == ".pdf"]
-    docs_biblioteca = [doc for doc in documentos if doc["relativo"].startswith("pdf/")]
-    if docs_pdf:
-        linhas.extend(
-            [
-                "",
-                "PDFs encontrados na base documental:",
-                *[f"- {doc['relativo']}" for doc in docs_pdf[:12]],
-            ]
-        )
-    if docs_biblioteca:
-        linhas.extend(
-            [
-                "",
-                "Outros documentos encontrados na biblioteca documental:",
-                *[
-                    f"- {doc['relativo']}"
-                    for doc in docs_biblioteca[:12]
-                    if doc["extensao"] != ".pdf"
-                ],
-            ]
-        )
-
-    if any(palavra in texto for palavra in ["drone", "componentes", "especificações", "especificacoes"]):
-        conteudo = _ler_conteudo_consultavel_documento("drone/drone_proprio_componentes.md")
-        if conteudo:
-            resumo = []
-            for raw_line in conteudo.splitlines():
-                line = raw_line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                resumo.append(line)
-                if len(resumo) >= 10:
-                    break
-            if resumo:
-                linhas.extend(
-                    [
-                        "",
-                        "Resumo rápido do documento de drone próprio:",
-                        *[f"- {item}" for item in resumo],
-                    ]
-                )
-
-    if any(
-        palavra in texto
-        for palavra in [
-            "plataforma",
-            "features",
-            "permissoes",
-            "permissões",
-            "go live",
-            "online",
-            "deploy",
-        ]
-    ):
-        conteudo_plataforma = _ler_conteudo_consultavel_documento("plataforma/plataforma_base_funcional.md")
-        conteudo_go_live = _ler_conteudo_consultavel_documento("plataforma/plataforma_go_live_checklist.md")
-        if conteudo_plataforma:
-            resumo_plataforma = []
-            for raw_line in conteudo_plataforma.splitlines():
-                line = raw_line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                resumo_plataforma.append(line)
-                if len(resumo_plataforma) >= 10:
-                    break
-            if resumo_plataforma:
-                linhas.extend(
-                    [
-                        "",
-                        "Resumo rápido da base funcional da plataforma:",
-                        *[f"- {item}" for item in resumo_plataforma],
-                    ]
-                )
-        if conteudo_go_live:
-            resumo_go_live = []
-            for raw_line in conteudo_go_live.splitlines():
-                line = raw_line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                resumo_go_live.append(line)
-                if len(resumo_go_live) >= 8:
-                    break
-            if resumo_go_live:
-                linhas.extend(
-                    [
-                        "",
-                        "Checklist base para colocar a plataforma online:",
-                        *[f"- {item}" for item in resumo_go_live],
-                    ]
-                )
-
-    if any(palavra in texto for palavra in ["pdf", "ficheiro", "arquivo", "documento"]):
-        linhas.extend(
-            [
-                "",
-                "Como a AI consulta documentos nesta base:",
-                "- formatos textuais como `.md`, `.txt`, `.json`, `.csv`, `.log`, `.yaml`, `.yml`, `.xml`, `.html`, `.ini` e `.cfg` podem ser lidos diretamente",
-                "- PDFs e outros formatos não textuais podem ser usados com um `.txt` auxiliar com o mesmo nome",
-                "- exemplo: `manual_operacao.pdf` + `manual_operacao.txt`",
-                "- para leitura profunda de formatos não textuais, este é o fluxo recomendado neste ambiente",
-            ]
-        )
-
-    linhas.extend(
-        [
-            "",
-            "Podes pedir, por exemplo:",
-            "- 'resume o documento do drone próprio'",
-            "- 'resume a base funcional da plataforma'",
-            "- 'o que falta para colocar a plataforma online?'",
-            "- 'que PDFs existem na base de conhecimento?'",
-            "- 'que sensores deve ter o drone?'",
-            "- 'que documentos existem na base de conhecimento?'",
-        ]
-    )
-    return "\n".join(linhas)
 
 
 def _resposta_capacidades(resumo):
@@ -1014,40 +779,6 @@ def _sugestoes_por_tipo(tipo):
         ]
 
     return [_sugestao("Aprofundar um tema", PROMPT_APROFUNDAR_TEMA)]
-
-
-def _parece_calculo(texto):
-    return texto.startswith("calcula") or bool(re.fullmatch(r"[\d\s\.\,\+\-\*\/\(\)\%\^a-zA-Z_]+", texto))
-
-
-def _avaliar_expressao_segura(texto):
-    expr = texto.lower().replace("calcula", "").strip().replace("^", "**").replace(",", ".")
-    if not expr:
-        return None
-    try:
-        node = ast.parse(expr, mode="eval")
-        valor = _eval_node(node.body)
-        if isinstance(valor, float):
-            return round(valor, 6)
-        return valor
-    except Exception:
-        return None
-
-
-def _eval_node(node):
-    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
-        return node.value
-    if isinstance(node, ast.BinOp) and type(node.op) in SAFE_BIN_OPS:
-        return SAFE_BIN_OPS[type(node.op)](_eval_node(node.left), _eval_node(node.right))
-    if isinstance(node, ast.UnaryOp) and type(node.op) in SAFE_UNARY_OPS:
-        return SAFE_UNARY_OPS[type(node.op)](_eval_node(node.operand))
-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in SAFE_FUNCTIONS:
-        func = SAFE_FUNCTIONS[node.func.id]
-        args = [_eval_node(arg) for arg in node.args]
-        return func(*args)
-    if isinstance(node, ast.Name) and node.id in {"pi", "e"}:
-        return SAFE_FUNCTIONS[node.id]()
-    raise ValueError("Expressão não suportada")
 
 
 def _detetar_nome_entidade(texto, nomes):

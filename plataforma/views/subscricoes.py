@@ -33,6 +33,10 @@ def reenviar_ativacao_conta_admin(request, perfil_id):
     if request.method != "POST":
         return redirect("plataforma:subscricao_list")
 
+    if not request.user.is_superuser:
+        messages.error(request, "O reenvio de ativação está reservado ao superuser.")
+        return redirect("plataforma:subscricao_list")
+
     perfil = get_object_or_404(
         PerfilPlataforma.objects.select_related("user", "empresa"),
         pk=perfil_id,

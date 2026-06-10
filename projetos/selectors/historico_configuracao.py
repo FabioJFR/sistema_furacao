@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from projetos.models import Empregados, Furo, HistoricoConfiguracaoPerfuracao
+from projetos.models import EmpregadoFuro, Empregados, Furo, HistoricoConfiguracaoPerfuracao, RegistoDiarioEmpregado
 
 
 def _resolver_empresa_id(empresa):
@@ -33,7 +33,14 @@ def _obter_queryset_base():
 
 
 def obter_historico_configuracao_por_empregado(empregado, empresa=None):
-    queryset = _obter_queryset_base().filter(empregado=empregado)
+    furo_ids_associados = EmpregadoFuro.objects.filter(empregado=empregado).values_list("furo_id", flat=True)
+    furo_ids_registos = RegistoDiarioEmpregado.objects.filter(
+        empregado=empregado,
+        furo__isnull=False,
+    ).values_list("furo_id", flat=True)
+    queryset = _obter_queryset_base().filter(
+        furo_id__in=list(furo_ids_associados) + list(furo_ids_registos)
+    )
     queryset = _filtrar_por_empresa(queryset, empresa, incluir_furo=True)
 
     return queryset.order_by("-criado_em")
@@ -70,7 +77,6 @@ def obter_historico_anterior(historico, empresa=None):
         return None
 
     queryset = _obter_queryset_base().filter(
-        empregado=historico.empregado,
         furo=historico.furo,
         criado_em__lt=historico.criado_em,
     )

@@ -48,6 +48,7 @@
         {% if user.is_authenticated %}
             <nav class="nav-center" id="topNavMenu" role="navigation" aria-label="{% trans 'Menu principal' %}">
                 {% if is_platform_admin %}
+                    {% if not request.user.is_superuser and not sf_mvp_operacional_focus %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -70,6 +71,7 @@
                             <a href="{% url 'projetos:gestao_relatorios_executivos' %}" role="menuitem">📑 {% trans "Relatórios Executivos (auditoria)" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -86,7 +88,9 @@
                             <a href="{% url 'plataforma:onboarding_empresa' %}" role="menuitem">🏢 {% trans "Nova Empresa" %}</a>
                             <a href="{% url 'plataforma:plano_list' %}" role="menuitem">💳 {% trans "Planos" %}</a>
                             <a href="{% url 'plataforma:subscricao_list' %}" role="menuitem">🧾 {% trans "Subscrições" %}</a>
-                            <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças da Plataforma" %}</a>
+                            {% if not sf_mvp_operacional_focus %}
+                                <a href="{% url 'plataforma:financas_analytics' %}" role="menuitem">💶 {% trans "Finanças da Plataforma" %}</a>
+                            {% endif %}
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'plataforma:financas_paypal_config' %}" role="menuitem">🅿️ {% trans "Conta PayPal" %}</a>
                             {% endif %}
@@ -100,6 +104,8 @@
                         </div>
                     </div>
 
+                    {% if not request.user.is_superuser %}
+                    {% if not sf_mvp_operacional_focus %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -120,6 +126,7 @@
                             <a href="{% url 'projetos:material_list' %}" role="menuitem">📦 {% trans "Materiais" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -179,6 +186,7 @@
                             <a href="{% url 'projetos:graficos_alertas_dashboard' %}" role="menuitem">🚨 {% trans "Alertas Operacionais" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -263,6 +271,7 @@
                     {% endif %}
 
                 {% elif is_admin_user %}
+                    {% if not sf_mvp_operacional_focus %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -285,6 +294,7 @@
                             <a href="{% url 'projetos:gestao_relatorios_executivos' %}" role="menuitem">📑 {% trans "Relatórios Executivos" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -299,6 +309,9 @@
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
                             <a href="{% url 'projetos:projeto_list' %}" role="menuitem">📁 {% trans "Projetos" %}</a>
+                            {% if sf_mvp_operacional_focus %}
+                                <a href="{% url 'projetos:planeamento_turno_list' %}" role="menuitem">🗓️ {% trans "Planeamento" %}</a>
+                            {% endif %}
                             <a href="{% url 'projetos:empregado_list' %}" role="menuitem">👷 {% trans "Empregados" %}</a>
                             <a href="{% url 'projetos:maquina_list' %}" role="menuitem">⚙️ {% trans "Máquinas" %}</a>
                             <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Furos" %}</a>
@@ -328,6 +341,7 @@
                         </div>
                     </div>
 
+                    {% if not sf_mvp_operacional_focus %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -347,7 +361,9 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
 
+                    {% if not sf_mvp_operacional_focus %}
                     <div class="nav-item">
                         <button
                             type="button"
@@ -368,6 +384,7 @@
                             <a href="{% url 'projetos:graficos_alertas_dashboard' %}" role="menuitem">🚨 {% trans "Alertas Operacionais" %}</a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="nav-item">
                         <button
@@ -427,14 +444,10 @@
                             ⚙️ {% trans "Operação" %} ▾
                         </button>
                         <div class="dropdown" role="menu" aria-label="{% trans 'Menu Operação' %}">
-                            <a href="{% url 'projetos:furo_list' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
+                            <a href="{% url 'projetos:meus_furos_empregado' %}" role="menuitem">🕳 {% trans "Meus Furos" %}</a>
                             <a href="{% url 'projetos:furo_create' %}" role="menuitem">➕ {% trans "Novo Furo" %}</a>
                             <a href="{% url 'projetos:medicao_list_empregado' %}" role="menuitem">📊 {% trans "Medições" %}</a>
-                            {% if empregado_menu_funcao != "geologo" %}
-                                <a href="{% url 'projetos:configuracao_perfuracao_list_empregado' %}" role="menuitem">⚙️ {% trans "Minhas Configurações" %}</a>
-                                <a href="{% url 'projetos:historico_empregado_list' %}" role="menuitem">🕘 {% trans "Histórico Configurações" %}</a>
-                            {% endif %}
-                            {% if perfil_tipo == "individual" %}
+                            {% if perfil_tipo == "individual" and not sf_mvp_operacional_focus %}
                                 <a href="{% url 'projetos:despesa_list_empregado' %}" role="menuitem">💶 {% trans "Minhas Despesas" %}</a>
                             {% endif %}
                         </div>

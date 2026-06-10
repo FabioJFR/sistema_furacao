@@ -6,8 +6,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from core.permissions import admin_required
+from core.permissions import admin_required, user_is_global_admin
 
+from projetos.selectors.dashboard import obter_empresas_contexto_dashboard
 from projetos.selectors.projetos import (
     obter_contexto_projeto_detail,
     obter_dados_3d_projeto,
@@ -33,7 +34,13 @@ from ..forms.projeto import ProjetoForm
 logger = logging.getLogger("core")
 
 
-def _obter_empresa_admin_projetos(request):
+def _obter_empresa_admin_projetos(request, *, exigir_empresa_global=False):
+    if exigir_empresa_global and user_is_global_admin(request.user):
+        empresa_id = request.GET.get("empresa") or request.GET.get("empresa_contexto")
+        if not empresa_id:
+            messages.info(request, "Seleciona explicitamente a empresa do projeto para continuar.")
+            return None, redirect("projetos:projeto_list")
+
     empresa, resposta_erro = obter_empresa_admin_contexto(
         request=request,
         mensagem_sem_permissao="Não tens permissão para aceder a esta área.",
@@ -52,6 +59,19 @@ def _obter_empresa_admin_projetos(request):
 
 def _empresa_id(empresa):
     return getattr(empresa, "pk", empresa) if empresa is not None else None
+
+
+def _url_projeto_contexto(*, request, projeto, empresa):
+    url = projeto.get_absolute_url()
+    if user_is_global_admin(request.user):
+        return f"{url}?empresa_contexto={empresa.pk}"
+    return url
+
+
+def _query_empresa_contexto(*, request, empresa):
+    if user_is_global_admin(request.user):
+        return f"?empresa_contexto={empresa.pk}"
+    return ""
 
 
 # ----------------- Globo ------------------------------ #
@@ -103,20 +123,21 @@ def projeto_list(request):
         request.user.username,
     )
 
+    visao_global = user_is_global_admin(request.user)
+    if visao_global:
+        context = {
+            "projetos": obter_lista_projetos_serializaveis(),
+            "visao_global": True,
+            "empresas_contexto": obter_empresas_contexto_dashboard(),
+        }
+        return render(request, "projetos/projeto_list.html", context)
+
     empresa, resposta_erro = _obter_empresa_admin_projetos(request)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_list. user_id=%s", request.user.id)
         return resposta_erro
 
-    logger.debug(
-        "Empresa resolvida em projeto_list. user_id=%s, empresa_tipo=%s, empresa_id=%s, empresa_repr=%r",
-        request.user.id,
-        empresa.__class__.__name__ if empresa else None,
-        getattr(empresa, "pk", None),
-        empresa,
-    )
-
-    context = {"projetos": obter_lista_projetos_serializaveis(empresa=empresa)}
+    context = {"projetos": obter_lista_projetos_serializaveis(empresa=empresa), "visao_global": False}
     return render(request, "projetos/projeto_list.html", context)
 
 
@@ -130,7 +151,7 @@ def projeto_update(request, pk):
         pk,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_update. user_id=%s", request.user.id)
@@ -160,7 +181,7 @@ def projeto_update(request, pk):
                 getattr(projeto, "pk", None),
             )
             messages.success(request, resultado["mensagem_sucesso"])
-            return redirect(projeto)
+            return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
         logger.warning(
             "Erro ao atualizar projeto. user_id=%s, erros=%s",
             request.user.id,
@@ -171,6 +192,7 @@ def projeto_update(request, pk):
     return render(request, "projetos/projeto_editar.html", {
         "form": form,
         "projeto": projeto,
+        "empresa_contexto_query": _query_empresa_contexto(request=request, empresa=empresa),
     })
 
 
@@ -183,7 +205,7 @@ def projeto_create(request):
         request.user.username,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_create. user_id=%s", request.user.id)
@@ -219,7 +241,11 @@ def projeto_create(request):
         )
         messages.error(request, resultado["mensagem_erro"])
 
-    return render(request, "projetos/projeto_form.html", {"form": form})
+    return render(request, "projetos/projeto_form.html", {
+        "form": form,
+        "empresa_contexto_query": _query_empresa_contexto(request=request, empresa=empresa),
+        "empresa_contexto": empresa,
+    })
 
 
 @login_required
@@ -232,7 +258,7 @@ def projeto_delete(request, pk):
         pk,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     empresa_id = getattr(empresa, "pk", empresa) if empresa is not None else None
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_delete. user_id=%s", request.user.id)
@@ -253,18 +279,19 @@ def projeto_delete(request, pk):
 
     return render(request, "projetos/projeto_confirm_delete.html", {
         "projeto": projeto,
+        "empresa_contexto_query": _query_empresa_contexto(request=request, empresa=empresa),
     })
 
 
 @login_required
 @admin_required
 def projeto_detail_legacy(request, pk):
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     if resposta_erro:
         return resposta_erro
 
     projeto = obter_projeto(pk, empresa=empresa)
-    return redirect(projeto)
+    return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
 
 
 @login_required
@@ -276,7 +303,7 @@ def projeto_detail(request, pk, slug):
         request.user.username,
         pk,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_detail. user_id=%s", request.user.id)
         return resposta_erro
@@ -285,10 +312,11 @@ def projeto_detail(request, pk, slug):
     projeto = context["projeto"]
 
     if slug != projeto.slug_url:
-        return redirect(projeto)
+        return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
 
     context["trabalhador_form"] = ProjetoEmpregadoForm(empresa=empresa, projeto=context["projeto"])
     context["page_title"] = f"Projeto · {projeto.nome}"
+    context["empresa_contexto_query"] = _query_empresa_contexto(request=request, empresa=empresa)
     logger.info(
         "View projeto_detail carregada com sucesso. user_id=%s, empresa_id=%s, projeto_pk=%s",
         request.user.id,
@@ -308,7 +336,7 @@ def projeto_adicionar_empregado(request, pk):
         pk,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_adicionar_empregado. user_id=%s", request.user.id)
         return resposta_erro
@@ -316,7 +344,7 @@ def projeto_adicionar_empregado(request, pk):
     projeto = obter_projeto(pk, empresa=empresa)
     if request.method != "POST":
         messages.error(request, "Método inválido para associar trabalhador ao projeto.")
-        return redirect(projeto)
+        return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
 
     form = ProjetoEmpregadoForm(request.POST, empresa=empresa, projeto=projeto)
     resultado = processar_acao_associar_empregado_projeto(
@@ -331,7 +359,7 @@ def projeto_adicionar_empregado(request, pk):
     if resultado["mensagem_erro"]:
         messages.error(request, resultado["mensagem_erro"])
 
-    return redirect(projeto)
+    return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
 
 
 @login_required
@@ -345,7 +373,7 @@ def projeto_remover_empregado(request, pk, ligacao_id):
         ligacao_id,
         request.method,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_remover_empregado. user_id=%s", request.user.id)
         return resposta_erro
@@ -363,7 +391,7 @@ def projeto_remover_empregado(request, pk, ligacao_id):
     else:
         messages.error(request, "Método inválido para remover trabalhador do projeto.")
 
-    return redirect(projeto)
+    return redirect(_url_projeto_contexto(request=request, projeto=projeto, empresa=empresa))
 
 
 # ---------------- 3D ----------------
@@ -376,7 +404,7 @@ def projeto_3d(request, pk):
         request.user.username,
         pk,
     )
-    empresa, resposta_erro = _obter_empresa_admin_projetos(request)
+    empresa, resposta_erro = _obter_empresa_admin_projetos(request, exigir_empresa_global=True)
     empresa_id = _empresa_id(empresa)
     if resposta_erro:
         logger.warning("Acesso bloqueado na view projeto_3d. user_id=%s", request.user.id)

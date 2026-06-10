@@ -4,6 +4,7 @@ from projetos.models import ConfiguracaoPerfuracaoEmpregado, HistoricoConfigurac
 
 
 CAMPOS_COMPARACAO_HISTORICO_CONFIGURACAO = [
+    ("medida_morta", "Medida Morta"),
     ("comprimento_tubo", "Tubo"),
     ("comprimento_karoutier", "Karoutier"),
     ("quantidade_karoutier", "Qtd. Karoutier"),
@@ -23,10 +24,11 @@ CAMPOS_COMPARACAO_HISTORICO_CONFIGURACAO = [
 ]
 
 
-def _aplicar_snapshot_historico(configuracao, historico, utilizador):
-    configuracao.empregado = historico.empregado
+def _aplicar_snapshot_historico(configuracao, historico, utilizador, empregado_alteracao=None):
+    configuracao.empregado = empregado_alteracao or historico.empregado
     configuracao.empresa = historico.empresa
     configuracao.furo = historico.furo
+    configuracao.medida_morta = historico.medida_morta
     configuracao.comprimento_tubo = historico.comprimento_tubo
     configuracao.comprimento_karoutier = historico.comprimento_karoutier
     configuracao.quantidade_karoutier = historico.quantidade_karoutier or 1
@@ -48,12 +50,17 @@ def _aplicar_snapshot_historico(configuracao, historico, utilizador):
 
 
 @transaction.atomic
-def restaurar_configuracao_a_partir_historico(*, historico, utilizador):
+def restaurar_configuracao_a_partir_historico(*, historico, utilizador, empregado_alteracao=None):
     configuracao = historico.configuracao
     if configuracao is None:
         configuracao = ConfiguracaoPerfuracaoEmpregado()
 
-    configuracao = _aplicar_snapshot_historico(configuracao, historico, utilizador)
+    configuracao = _aplicar_snapshot_historico(
+        configuracao,
+        historico,
+        utilizador,
+        empregado_alteracao=empregado_alteracao,
+    )
     configuracao.save()
 
     HistoricoConfiguracaoPerfuracao.registar_historico(

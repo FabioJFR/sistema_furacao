@@ -358,6 +358,18 @@ def obter_furo_empregado(pk, empregado):
     return Furo.objects.select_related("projeto").filter(pk=pk, empresa=empregado.empresa).first()
 
 
+def obter_configuracao_inicio_furo_empregado(empregado, furo):
+    return (
+        ConfiguracaoPerfuracaoEmpregado.objects
+        .select_related("furo", "empregado", "atualizado_por")
+        .filter(
+            furo=furo,
+            empresa=empregado.empresa,
+        )
+        .first()
+    )
+
+
 def empregado_tem_acesso_furo(empregado, furo):
     associado = EmpregadoFuro.objects.filter(
         empregado=empregado,
@@ -447,7 +459,7 @@ def obter_lista_furos_empregado(empregado):
     return Furo.objects.select_related("projeto").filter(
         empresa=empregado.empresa,
         id__in=list(furo_ids_associados) + list(furo_ids_registos),
-    ).distinct().order_by("nome")
+    ).prefetch_related("configuracoes_perfuracao").distinct().order_by("nome")
 
 
 def obter_lista_medicoes_empregado(

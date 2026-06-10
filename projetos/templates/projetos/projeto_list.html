@@ -12,10 +12,28 @@
 <section class="projeto-page">
     <div class="projeto-shell">
         <div class="projeto-hero">
-            <h1 class="projeto-page-title">📁 {% trans "Projetos" %}</h1>
-            <a href="{% url 'projetos:projeto_create' %}" class="projeto-create-btn">
-               + {% trans "Criar Projeto" %}
-            </a>
+            <div>
+                <h1 class="projeto-page-title">📁 {% trans "Projetos" %}</h1>
+                {% if visao_global %}
+                    <p class="projeto-global-note">{% trans "Visão global: projetos de todas as empresas. Escolha uma empresa antes de criar um novo projeto." %}</p>
+                {% endif %}
+            </div>
+            {% if visao_global %}
+                <form method="get" action="{% url 'projetos:projeto_create' %}" class="projeto-create-context">
+                    <label for="empresa-contexto-create">{% trans "Empresa do novo projeto" %}</label>
+                    <select id="empresa-contexto-create" name="empresa_contexto" required>
+                        <option value="">{% trans "Selecionar empresa" %}</option>
+                        {% for empresa in empresas_contexto %}
+                            <option value="{{ empresa.pk }}">{{ empresa.nome }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="projeto-create-btn">+ {% trans "Criar Projeto" %}</button>
+                </form>
+            {% else %}
+                <a href="{% url 'projetos:projeto_create' %}" class="projeto-create-btn">
+                   + {% trans "Criar Projeto" %}
+                </a>
+            {% endif %}
         </div>
 
         <div class="projeto-grid">
@@ -24,16 +42,17 @@
              class="projeto-card projeto-card-interactive">
             <h2 class="projeto-card-title sf-break-word">{{ projeto.nome }}</h2>
             <div class="projeto-card-meta">
+                {% if visao_global %}<p><strong>{% trans "Empresa:" %}</strong> {{ projeto.empresa_nome }}</p>{% endif %}
                 <p><strong>{% trans "Cliente:" %}</strong> {{ projeto.cliente }}</p>
                 <p><strong>{% trans "Cidade:" %}</strong> {{ projeto.cidade }}</p>
                 <p><strong>{% trans "País:" %}</strong> {{ projeto.pais }}</p>
             </div>
             <div class="projeto-card-actions">
-                <a href="{% url 'projetos:projeto_detail_legacy' projeto.pk %}" 
+                <a href="{% url 'projetos:projeto_detail_legacy' projeto.pk %}{% if visao_global %}?empresa_contexto={{ projeto.empresa_id }}{% endif %}"
                    class="projeto-action-btn">
                    🔎 {% trans "Detalhes" %}
                 </a>
-                <a href="{% url 'projetos:projeto_update' projeto.pk %}" 
+                <a href="{% url 'projetos:projeto_update' projeto.pk %}{% if visao_global %}?empresa_contexto={{ projeto.empresa_id }}{% endif %}"
                    class="projeto-action-btn">
                    ✏️ {% trans "Editar" %}
                 </a>
@@ -77,6 +96,7 @@
     id="projeto-list-config"
     data-detail-placeholder="00000000-0000-0000-0000-000000000000"
     data-detail-base-url="{% url 'projetos:projeto_detail_legacy' '00000000-0000-0000-0000-000000000000' %}"
+    data-visao-global="{% if visao_global %}true{% else %}false{% endif %}"
 ></div>
 {% endblock %}
 

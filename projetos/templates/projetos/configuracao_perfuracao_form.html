@@ -40,11 +40,27 @@
             <section class="sf-section-card">
                 <div class="sf-section-head">
                     <div>
+                        <h2 class="sf-section-title">{% trans "Máquina" %}</h2>
+                    </div>
+                </div>
+
+                <div class="sf-page" style="gap: 14px;">
+                    <div class="sf-field">
+                        <label for="{{ form.medida_morta.id_for_label }}">{% trans "Medida Morta (m)" %}</label>
+                        {{ form.medida_morta }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="sf-section-card">
+                <div class="sf-section-head">
+                    <div>
                         <h2 class="sf-section-title">{% trans "Conjunto de fundo" %}</h2>
                     </div>
                 </div>
 
                 <div class="sf-page" style="gap: 14px;">
+
                     <div class="sf-field">
                         <label for="{{ form.comprimento_tubo.id_for_label }}">{% trans "Tubo (m)" %}</label>
                         {{ form.comprimento_tubo }}
@@ -98,11 +114,6 @@
                         <label for="{{ form.comprimento_bit.id_for_label }}">{% trans "Bit (m)" %}</label>
                         {{ form.comprimento_bit }}
                     </div>
-
-                    <div class="sf-field">
-                        <label for="{{ form.comprimento_caixa_mola.id_for_label }}">{% trans "Caixa de mola (m)" %}</label>
-                        {{ form.comprimento_caixa_mola }}
-                    </div>
                 </div>
             </section>
 
@@ -114,6 +125,11 @@
                 </div>
 
                 <div class="sf-page" style="gap: 14px;">
+                    <div class="sf-field">
+                        <label for="{{ form.comprimento_caixa_mola.id_for_label }}">{% trans "Caixa de mola (m)" %}</label>
+                        {{ form.comprimento_caixa_mola }}
+                    </div>
+
                     <div class="sf-form-grid">
                         <div class="sf-field">
                             <label for="{{ form.comprimento_tubo_interior.id_for_label }}">{% trans "Tubo interior (m)" %}</label>

@@ -4,43 +4,99 @@
 {% block title %}{% trans "Minha Área" %}{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="bg-white rounded-xl shadow p-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-bold">👋 {% blocktrans with nome=individual.nome %}Bem-vindo, {{ nome }}{% endblocktrans %}</h2>
-                <p class="text-gray-500 mt-1">{% trans "Resumo da tua conta individual." %}</p>
+<section class="sf-page">
+    <div class="page-card sf-page-wide">
+        <div class="sf-page-header">
+            <div class="sf-page-heading">
+                <p class="sf-page-kicker">{% trans "Conta individual" %}</p>
+                <h1 class="sf-page-title sf-break-word">{% blocktrans with nome=individual.nome %}Bem-vindo, {{ nome }}{% endblocktrans %}</h1>
+                <p class="sf-page-description">{% trans "A tua área independente para registar atividade, controlar custos e acompanhar o trabalho técnico." %}</p>
             </div>
+            <div class="sf-page-actions">
+                <a href="{% url 'projetos:registo_diario_create' %}" class="btn btn-primary">{% trans "Novo registo" %}</a>
+                <a href="{% url 'projetos:despesa_create_empregado' %}" class="btn btn-primary">{% trans "Nova despesa" %}</a>
+            </div>
+        </div>
 
-            <div class="flex flex-wrap gap-2">
-                <a href="{% url 'projetos:meus_dados_empregado' %}"
-                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                    👤 {% trans "Meus Dados" %}
+        <div class="sf-stat-grid">
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Total horas" %}</div>
+                <div class="sf-stat-value">{{ horas_total|floatformat:2 }}</div>
+                <p class="sf-stat-copy">{% trans "Horas acumuladas nos teus registos." %}</p>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Total metros" %}</div>
+                <div class="sf-stat-value">{{ metros_total|floatformat:2 }} m</div>
+                <p class="sf-stat-copy">{% trans "Avanço técnico registado." %}</p>
+            </div>
+            <div class="sf-stat-card">
+                <div class="sf-stat-label">{% trans "Total registos" %}</div>
+                <div class="sf-stat-value">{{ total_registos }}</div>
+                <p class="sf-stat-copy">{% trans "Entradas operacionais criadas." %}</p>
+            </div>
+        </div>
+
+        <section class="sf-section-card sf-workbench">
+            <div class="sf-section-head">
+                <div>
+                    <p class="sf-page-kicker">{% trans "Trabalho diário" %}</p>
+                    <h2 class="sf-section-title">{% trans "Acessos rápidos" %}</h2>
+                    <p class="sf-section-description">{% trans "Tudo o que precisas para operar como profissional independente, num único ponto." %}</p>
+                </div>
+            </div>
+            <div class="sf-shortcut-grid">
+                <a href="{% url 'projetos:registo_diario_list' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📋</span>
+                    <span class="sf-shortcut-label">{% trans "Meus registos" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Consultar e acompanhar atividade." %}</span>
+                </a>
+                <a href="{% url 'projetos:despesa_list_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">💶</span>
+                    <span class="sf-shortcut-label">{% trans "Despesas" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Controlar os teus custos." %}</span>
+                </a>
+                <a href="{% url 'projetos:materiais_disponiveis_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">📦</span>
+                    <span class="sf-shortcut-label">{% trans "Materiais" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Ver disponibilidade e movimentos." %}</span>
+                </a>
+                <a href="{% url 'projetos:material_create_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">➕</span>
+                    <span class="sf-shortcut-label">{% trans "Novo material" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Adicionar material ao inventário." %}</span>
+                </a>
+                <a href="{% url 'projetos:notificacoes_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">🔔</span>
+                    <span class="sf-shortcut-label">{% trans "Notificações" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Ver alertas e respostas pendentes." %}</span>
+                </a>
+                <a href="{% url 'projetos:meus_dados_empregado' %}" class="sf-shortcut-card">
+                    <span class="sf-shortcut-icon">👤</span>
+                    <span class="sf-shortcut-label">{% trans "Meus dados" %}</span>
+                    <span class="sf-shortcut-copy">{% trans "Rever os dados da conta." %}</span>
                 </a>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="text-gray-500 text-sm">{% trans "Total Horas" %}</div>
-            <div class="text-2xl font-bold">{{ horas_total|floatformat:2 }}</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="text-gray-500 text-sm">{% trans "Total Metros" %}</div>
-            <div class="text-2xl font-bold">{{ metros_total|floatformat:2 }} m</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="text-gray-500 text-sm">{% trans "Total Registos" %}</div>
-            <div class="text-2xl font-bold">{{ total_registos }}</div>
+        <div class="sf-overview-grid sf-overview-grid-dual">
+            <section class="sf-overview-card">
+                <h2 class="sf-overview-title">{% trans "Conta individual" %}</h2>
+                <p class="sf-mini-card-copy">{% trans "Esta conta funciona sem vínculo a uma empresa. Podes criar registos, gerir despesas e manter materiais no teu próprio contexto operacional." %}</p>
+            </section>
+            <section class="sf-overview-card">
+                <h2 class="sf-overview-title">{% trans "Perfil profissional" %}</h2>
+                <dl class="sf-detail-list">
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Especialidade" %}</dt>
+                        <dd class="sf-detail-value">{{ individual.especialidade|default:"-" }}</dd>
+                    </div>
+                    <div class="sf-detail-item">
+                        <dt class="sf-detail-label">{% trans "Estado" %}</dt>
+                        <dd class="sf-detail-value">{% if individual.ativo %}{% trans "Ativo" %}{% else %}{% trans "Inativo" %}{% endif %}</dd>
+                    </div>
+                </dl>
+            </section>
         </div>
     </div>
-
-    <div class="bg-white rounded-xl shadow p-6">
-        <h3 class="text-lg font-semibold mb-3">{% trans "Conta Individual" %}</h3>
-        <p class="text-gray-600">
-            {% trans "Esta conta não está ligada a nenhuma empresa. Podes usar a tua área pessoal sem depender de contexto empresarial." %}
-        </p>
-    </div>
-</div>
+</section>
 {% endblock %}

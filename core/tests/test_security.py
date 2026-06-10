@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
-from core.security import SensitivePostRateLimitMiddleware
+from core.security import SensitivePostRateLimitMiddleware, _client_ip
 
 
 @override_settings(
@@ -86,3 +86,46 @@ class SensitivePostRateLimitMiddlewareTests(SimpleTestCase):
         request_3 = self.factory.post("/registo/", REMOTE_ADDR="10.0.0.4")
         response_3 = middleware(request_3)
         self.assertEqual(response_3.status_code, 429)
+
+    def test_ignora_x_forwarded_for_por_defeito(self):
+        request = self.factory.post(
+            "/login/",
+            REMOTE_ADDR="10.0.0.5",
+            HTTP_X_FORWARDED_FOR="198.51.100.25",
+        )
+
+        self.assertEqual(_client_ip(request), "10.0.0.5")
+
+    @override_settings(RATE_LIMIT_TRUST_X_FORWARDED_FOR=True)
+    def test_usa_ip_final_do_x_forwarded_for_quando_proxy_e_confiavel(self):
+        request = self.factory.post(
+            "/login/",
+            REMOTE_ADDR="127.0.0.1",
+            HTTP_X_FORWARDED_FOR="203.0.113.9, 198.51.100.25",
+        )
+
+        self.assertEqual(_client_ip(request), "198.51.100.25")
+
+    def test_header_x_forwarded_for_nao_contorna_rate_limit_por_defeito(self):
+        middleware = SensitivePostRateLimitMiddleware(
+            lambda request: HttpResponse("ok")
+        )
+
+        for forwarded_ip in ("198.51.100.1", "198.51.100.2"):
+            response = middleware(
+                self.factory.post(
+                    "/login/",
+                    REMOTE_ADDR="10.0.0.6",
+                    HTTP_X_FORWARDED_FOR=forwarded_ip,
+                )
+            )
+            self.assertEqual(response.status_code, 200)
+
+        response_blocked = middleware(
+            self.factory.post(
+                "/login/",
+                REMOTE_ADDR="10.0.0.6",
+                HTTP_X_FORWARDED_FOR="198.51.100.3",
+            )
+        )
+        self.assertEqual(response_blocked.status_code, 429)

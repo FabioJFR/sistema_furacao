@@ -104,7 +104,7 @@ def obter_lista_projetos(empresa=None):
 
 
 def obter_lista_projetos_serializaveis(empresa=None):
-    return list(
+    projetos = list(
         obter_lista_projetos(empresa=empresa).values(
             "id",
             "pk",
@@ -114,8 +114,13 @@ def obter_lista_projetos_serializaveis(empresa=None):
             "pais",
             "localizacao_lat",
             "localizacao_lon",
+            "empresa_id",
+            "empresa__nome",
         )
     )
+    for projeto in projetos:
+        projeto["empresa_nome"] = projeto.pop("empresa__nome") or "-"
+    return projetos
 
 
 def obter_projetos_globo(empresa=None):

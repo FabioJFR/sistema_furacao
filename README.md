@@ -1,14 +1,16 @@
-# Sistema de Gestão de Diamond Drilling
+# Sistema Furação
 
-Sistema web em **Django** para gestão operacional de projetos de **diamond drilling**, com foco em operação multiempresa, produção, stock, finanças, geologia, IA, visualização 3D e integração com drones.
+Sistema web em **Django** para controlo de operações no terreno em projetos de **diamond drilling**.
+
+O foco do MVP é a operação diária: projetos, furos, equipa, turnos, registos de produção, medições, máquinas, materiais, configuração de perfuração por furo e relatórios técnicos. As áreas comerciais/financeiras mais amplas continuam preservadas no código como módulos pós-MVP, mas não devem liderar a experiência principal enquanto o produto de campo não estiver validado.
 
 ---
 
 ## Estado atual
 
-- Versão atual: **v0.9.7**
+- Versão atual: **v0.9.8**
 - Estado: **desenvolvimento ativo**
-- Foco imediato: **separação de lógica em services/selectors**, **integração de dispositivos** e **estabilização para produção**
+- Foco imediato: **MVP operacional de terreno**, **estabilização em servidor**, **correções de permissões/navegação** e **preparação de dados para IA futura**
 
 ### Stack principal
 
@@ -20,6 +22,20 @@ Sistema web em **Django** para gestão operacional de projetos de **diamond dril
 - **Base de dados:** PostgreSQL
 
 ---
+
+## Release 0.9.8 (resumo)
+
+Principais evoluções consolidadas nesta versão:
+
+- foco de produto reformulado para **MVP operacional de terreno**, evitando que módulos de ERP/financeiro/comercial dominem a experiência principal
+- nova flag `SF_MVP_OPERACIONAL_FOCUS`, ativa por defeito, para manter o menu da empresa focado em `Operação` e `Registos`
+- `Planeamento` passa a estar acessível dentro de `Operação` quando o foco MVP está ativo
+- módulos como `Gestão`, `Finanças`, `Analytics`, clientes/contratos, compras, compliance, salários e preço por metro ficam preservados como **pós-MVP/opcionais**
+- correção defensiva da página `Subscrições` para evitar erro 500 quando o diagnóstico de email transacional falha ou quando existem dados incompletos
+- `Features` passa a listar apenas contas individuais ativadas por email (`user.is_active=True`)
+- reforço de testes de regressão para navegação MVP, dashboard da plataforma, features e subscrições
+- configuração de perfuração por furo consolidada como elemento operacional partilhado por todos os empregados que trabalham no furo
+- `Medida Morta` passa a viver na configuração de perfuração e fica preservada no histórico de configurações
 
 ## Release 0.9.7 (resumo)
 
@@ -77,6 +93,32 @@ Principais evoluções consolidadas nesta versão:
 
 ## Áreas principais
 
+### MVP operacional de terreno
+
+Este é o núcleo que deve orientar o piloto e a validação com utilizadores reais:
+
+- projetos, furos e estado operacional
+- equipa, empregados, turnos e planeamento
+- registos diários de produção e ficha técnica do turno
+- configuração de perfuração por furo, incluindo `Medida Morta`
+- medições, desvios e importação MagCruiser
+- máquinas, avarias e materiais essenciais
+- geologia operacional quando aplicável ao trabalho do dia
+- relatórios técnicos e exportações diretamente ligados ao furo/turno
+
+### Pós-MVP / módulos opcionais
+
+Estas áreas existem no código, mas devem ficar secundárias até o MVP de terreno estar validado:
+
+- despesas detalhadas e definições financeiras
+- salários, payroll e regras de custo interno
+- preço por metro por cliente
+- clientes, contratos e workflow comercial
+- compras e fornecedores
+- compliance avançado, auditorias e ações preventivas/corretivas
+- relatórios executivos financeiros/comerciais
+- dashboards de rentabilidade/analytics não essenciais ao campo
+
 ### Plataforma / multiempresa
 
 - empresas, planos e perfis de acesso
@@ -95,18 +137,16 @@ Principais evoluções consolidadas nesta versão:
 - associação de trabalhadores e máquinas a projetos e furos
 - configuração de perfuração por furo
 
-### Materiais, máquinas e finanças
+### Materiais e máquinas
 
 - materiais por empresa, projeto e furo
 - stock mínimo e alertas de stock baixo
 - máquinas com estados operacionais e alertas
-- despesas por empresa, projeto, furo e máquina
-- indicadores financeiros e custo por metro
 
-### Analytics e relatórios
+### Relatórios técnicos
 
-- dashboards operacionais e financeiros
-- gráficos de produção, despesas e eventos
+- dashboards operacionais
+- gráficos de produção e alertas
 - relatórios em `CSV`, `XLSX`, `JSON` e `PDF`
 - exportação em pacote `ZIP`
 
@@ -211,6 +251,9 @@ Comando de correção quando faltar a tabela de histórico:
 
 ### IA visual
 
+- fundação para um futuro modelo IA treinado com datasets do sistema, orientado a reconhecimento de padrões, previsão de resultados e decisão assistida
+- estado atual: análise heurística e recolha de validações; ainda não existe modelo de machine learning treinado em produção
+- correções manuais das análises geram exemplos rotulados versionados e exportáveis para preparação de datasets de treino
 - upload de fotografia e análise visual
 - deteção por zonas em caixas de amostra
 - deteção por zonas em relatórios retangulares
@@ -414,6 +457,8 @@ Definir no `.env` de produção (obrigatório):
 - `DJANGO_SECURE_HSTS_SECONDS=31536000`
 - `DJANGO_USE_X_FORWARDED_PROTO=True`
 - `DJANGO_USE_X_FORWARDED_HOST=True`
+- `RATE_LIMIT_TRUST_X_FORWARDED_FOR=True` apenas com reverse proxy que controle `X-Forwarded-For`
+- `DJANGO_CACHE_BACKEND` e `DJANGO_CACHE_LOCATION` para cache partilhada de rate limiting entre workers
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
 
 Comandos de validação e preparação:
@@ -446,7 +491,7 @@ Notas importantes:
 - `geologia/`
   - logs geológicos, drone DJI, Drone S_F e missões
 - `inspecao_ai/`
-  - análise visual, chatbox e integração futura com OCR/AI
+  - análise visual, chatbox, preparação de datasets e evolução futura para modelos treinados/preditivos
 - `knowledge_base/`
   - documentos técnicos e funcionais para continuidade
 - `website/`

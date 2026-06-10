@@ -40,6 +40,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">{% trans "Snapshot da configuração" %}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                <div><strong>{% trans "Medida Morta:" %}</strong> {{ historico.medida_morta }} m</div>
                 <div><strong>{% trans "Tubo:" %}</strong> {{ historico.comprimento_tubo }} m</div>
                 <div><strong>{% trans "Karoutier:" %}</strong> {{ historico.comprimento_karoutier }} m × {{ historico.quantidade_karoutier|default:1 }}</div>
                 <div><strong>{% trans "Acrescento:" %}</strong> {{ historico.comprimento_acrescento }} m × {{ historico.quantidade_acrescento|default:1 }}</div>

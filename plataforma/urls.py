@@ -50,7 +50,7 @@ urlpatterns = [
     path("empresa/<uuid:pk>/logo/remover/", remover_logo_empresa, name="empresa_logo_remover"),
     path("subscricoes/", subscricao_list, name="subscricao_list"),
     path(
-        "subscricoes/conta-admin/<uuid:perfil_id>/reenviar-ativacao/",
+        "subscricoes/conta-admin/<int:perfil_id>/reenviar-ativacao/",
         reenviar_ativacao_conta_admin,
         name="subscricao_reenviar_ativacao",
     ),

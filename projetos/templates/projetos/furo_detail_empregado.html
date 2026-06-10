@@ -22,6 +22,11 @@
                 <a href="{% url 'projetos:meus_furos_empregado' %}" class="btn btn-primary">⬅ {% trans "Meus Furos" %}</a>
                 <a href="{% url 'projetos:area_empregado' %}" class="btn btn-warning">🏠 {% trans "Painel" %}</a>
                 <a href="{% url 'projetos:furo_3d_detail' furo.id furo.slug_url %}" class="btn btn-success">🌐 {% trans "Ver 3D" %}</a>
+                {% if configuracao_inicio_furo %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao_inicio_furo.pk %}" class="btn btn-primary">⚙️ {% trans "Configuração" %}</a>
+                {% else %}
+                    <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}?furo={{ furo.pk }}" class="btn btn-primary">⚙️ {% trans "Configuração" %}</a>
+                {% endif %}
                 {% if furo.estado != "concluido" %}
                 <form method="post" action="{% url 'projetos:furo_terminar' furo.id %}" class="inline">
                     {% csrf_token %}
@@ -101,6 +106,102 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+            <div>
+                <p class="text-xs font-bold tracking-widest uppercase text-blue-700 mb-2">{% trans "Configuração do furo" %}</p>
+                <h2 class="text-xl font-bold text-gray-800">⚙️ {% trans "Configuração de Inicio de Furo" %}</h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    {% trans "Medidas partilhadas por todos os empregados que trabalham neste furo." %}
+                </p>
+            </div>
+            {% if configuracao_inicio_furo %}
+                <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao_inicio_furo.pk %}" class="btn btn-primary">{% trans "Alterar configuração" %}</a>
+            {% else %}
+                <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}?furo={{ furo.pk }}" class="btn btn-primary">{% trans "Criar configuração" %}</a>
+            {% endif %}
+        </div>
+
+        {% if configuracao_inicio_furo %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5">
+                <section class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+                    <h3 class="font-bold text-gray-800 mb-3">{% trans "Resumo" %}</h3>
+                    <dl class="space-y-3 text-sm text-gray-700">
+                        <div class="flex justify-between gap-3">
+                            <dt>{% trans "Conjunto de fundo" %}</dt>
+                            <dd class="font-bold">{{ configuracao_inicio_furo.comprimento_total_conjunto_fundo|floatformat:2 }} m</dd>
+                        </div>
+                        <div class="flex justify-between gap-3">
+                            <dt>{% trans "Tubo interior" %}</dt>
+                            <dd class="font-bold">{{ configuracao_inicio_furo.comprimento_total_tubo_interior|floatformat:2 }} m</dd>
+                        </div>
+                        <div class="flex justify-between gap-3">
+                            <dt>{% trans "Medida Morta" %}</dt>
+                            <dd class="font-bold">{{ configuracao_inicio_furo.medida_morta|floatformat:2 }} m</dd>
+                        </div>
+                        <div class="flex justify-between gap-3">
+                            <dt>{% trans "Atualizado" %}</dt>
+                            <dd class="font-bold">{{ configuracao_inicio_furo.atualizado_em|date:"d/m/Y H:i"|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <h3 class="font-bold text-gray-800 mb-3">{% trans "Conjunto de fundo" %}</h3>
+                    <dl class="grid gap-2 text-sm text-gray-700">
+                        <div class="flex justify-between gap-3"><dt>{% trans "Tubo" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_tubo|floatformat:2 }} m</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Karoutier" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_karoutier|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_karoutier }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Acrescento" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_acrescento|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_acrescento }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Calibrador" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_calibrador|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_calibrador }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Record" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_record|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_record }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Bit" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_bit|floatformat:2 }} m</dd></div>
+                    </dl>
+                </section>
+
+                <section class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <h3 class="font-bold text-gray-800 mb-3">{% trans "Tubo interior" %}</h3>
+                    <dl class="grid gap-2 text-sm text-gray-700">
+                        <div class="flex justify-between gap-3"><dt>{% trans "Caixa de mola" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_caixa_mola|floatformat:2 }} m</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Tubo interior" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_tubo_interior|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_tubo_interior }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Acrescento" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_acrescento_tubo_interior|floatformat:2 }} m × {{ configuracao_inicio_furo.quantidade_acrescento_tubo_interior }}</dd></div>
+                        <div class="flex justify-between gap-3"><dt>{% trans "Cabeça de interior" %}</dt><dd class="font-semibold">{{ configuracao_inicio_furo.comprimento_cabeca_interior|floatformat:2 }} m</dd></div>
+                    </dl>
+                </section>
+
+                <section class="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
+                    <div class="rounded-xl bg-white p-3 border border-blue-100 mb-4">
+                        <img src="/media/configuracao_perfuracao/maquina_drilling.png" alt="{% trans 'Máquina de perfuração' %}" class="w-full h-36 object-contain">
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">{% trans "Máquina" %}</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        {% trans "A medida morta é definida na configuração de perfuração partilhada deste furo." %}
+                    </p>
+                    <div class="rounded-xl bg-white border border-blue-100 p-4 mb-3">
+                        <p class="text-xs font-bold uppercase tracking-widest text-blue-700">{% trans "Medida Morta" %}</p>
+                        <p class="text-2xl font-black text-gray-900">{{ configuracao_inicio_furo.medida_morta|floatformat:2 }} m</p>
+                    </div>
+                    <a href="{% url 'projetos:configuracao_perfuracao_update_empregado' configuracao_inicio_furo.pk %}" class="btn btn-primary w-full">{% trans "Alterar configuração" %}</a>
+                </section>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-600">
+                    {% trans "Ainda não existe uma configuração partilhada para este furo. Cria a configuração para que todos os empregados que trabalham neste furo usem as mesmas medidas." %}
+                </div>
+                <section class="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
+                    <div class="rounded-xl bg-white p-3 border border-blue-100 mb-4">
+                        <img src="/media/configuracao_perfuracao/maquina_drilling.png" alt="{% trans 'Máquina de perfuração' %}" class="w-full h-36 object-contain">
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">{% trans "Máquina" %}</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        {% trans "Cria a configuração de perfuração para definir a medida morta deste furo." %}
+                    </p>
+                    <a href="{% url 'projetos:configuracao_perfuracao_create_empregado' %}?furo={{ furo.pk }}" class="btn btn-primary w-full">{% trans "Criar configuração" %}</a>
+                </section>
+            </div>
+        {% endif %}
     </div>
 
     <div class="bg-white rounded-2xl shadow border border-gray-200 p-6 mb-6">

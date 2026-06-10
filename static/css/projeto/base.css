@@ -272,7 +272,13 @@
         .dropdown-user {
             left: 0;
             right: auto;
-            min-width: 180px;
+            min-width: 220px;
+            max-width: calc(100vw - 32px);
+        }
+
+        .dropdown-user a {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-item.open > .dropdown {
@@ -456,7 +462,7 @@
         body.sf-superuser-nav .nav-right {
             flex: 0 0 auto;
             margin-left: auto;
-            margin-right: 18px;
+            margin-right: clamp(128px, 14vw, 180px);
         }
 
         body.sf-platform-admin .user-box,
@@ -500,7 +506,7 @@
 
             body.sf-platform-admin .nav-right,
             body.sf-superuser-nav .nav-right {
-                margin-right: 0;
+                margin-right: clamp(180px, 13vw, 250px);
             }
 
             body.sf-platform-admin .user-box,
@@ -864,6 +870,57 @@
             flex-wrap: wrap;
         }
 
+        .sf-workbench .sf-page-kicker {
+            margin-bottom: 8px;
+        }
+
+        .sf-shortcut-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(174px, 1fr));
+            gap: 12px;
+        }
+
+        .sf-shortcut-card {
+            display: grid;
+            align-content: start;
+            gap: 7px;
+            min-height: 124px;
+            padding: 15px 16px;
+            border: 1px solid #dbe5ef;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #ffffff 0%, #f4f8fb 100%);
+            color: #0f172a;
+            text-decoration: none;
+            transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .sf-shortcut-card:hover {
+            border-color: #9bb9ce;
+            box-shadow: 0 8px 20px rgba(15, 39, 58, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .sf-shortcut-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .sf-shortcut-label {
+            color: #123754;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .sf-shortcut-copy {
+            color: #64748b;
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .sf-overview-grid-dual {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         .sf-form-grid {
             display: grid;
             grid-template-columns: minmax(0, 2fr) minmax(180px, 240px) auto;
@@ -991,7 +1048,8 @@
         @media (max-width: 1040px) {
             .sf-overview-grid,
             .sf-card-grid,
-            .sf-stat-grid {
+            .sf-stat-grid,
+            .sf-overview-grid-dual {
                 grid-template-columns: 1fr;
             }
 
@@ -1389,6 +1447,7 @@
 
             .dropdown-user {
                 min-width: 100%;
+                max-width: none;
             }
         }
 

@@ -6,6 +6,7 @@ from inspecao_ai.models import (
     ChatMensagemAI,
     ChatSessaoAI,
     DeteccaoImagemAI,
+    ExemploTreinoAI,
     MemoriaTrabalhoAI,
 )
 from projetos.models import Despesa, Furo, Medicao, Projeto, RegistoDiarioEmpregado, RegistoDiarioFotoAmostra
@@ -25,6 +26,13 @@ AI_EXPORT_DATASETS = [
         "description": "Caixas delimitadoras, textos sugeridos e metadados das deteções.",
         "model": DeteccaoImagemAI,
         "group": "deteccoes",
+    },
+    {
+        "key": "exemplos_treino_ai",
+        "label": "Exemplos rotulados AI",
+        "description": "Entradas e rótulos validados, versionados para treino e avaliação futura.",
+        "model": ExemploTreinoAI,
+        "group": "treino",
     },
     {
         "key": "presets_zonas_ai",
@@ -100,6 +108,11 @@ AI_EXPORT_DATASETS = [
 
 AI_EXPORT_GROUPS = [
     {
+        "slug": "treino",
+        "label": "Dataset rotulado AI",
+        "description": "Exemplos validados e versionados para preparar treino e avaliação do futuro modelo.",
+    },
+    {
         "slug": "analises",
         "label": "Análises AI",
         "description": "Analises, metadados, campos extraídos e estado de revisão.",
@@ -127,6 +140,7 @@ AI_EXPORT_GROUPS = [
 ]
 
 AI_DELETE_MODELS_BY_GROUP = {
+    "treino": [ExemploTreinoAI],
     "analises": [DeteccaoImagemAI, AnaliseImagemAI],
     "deteccoes": [DeteccaoImagemAI],
     "presets": [AnaliseZonaPresetAI, MemoriaTrabalhoAI],
@@ -141,6 +155,7 @@ AI_DELETE_MODELS_BY_GROUP = {
         Projeto,
         ChatMensagemAI,
         ChatSessaoAI,
+        ExemploTreinoAI,
         AnaliseZonaPresetAI,
         MemoriaTrabalhoAI,
         DeteccaoImagemAI,
@@ -206,4 +221,3 @@ def construir_payload_exportacao_ai():
         "scope": "inspecao_ai",
         "datasets": datasets,
     }
-

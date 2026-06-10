@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -31,6 +32,7 @@ def menu_context(request):
             "total_pedidos_ferias_pendentes_menu": 0,
             "total_notificacoes_empregado_abertas_menu": 0,
             "ajuda_contextual_atual": None,
+            "sf_mvp_operacional_focus": getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", True),
         }
 
     perfil = obter_perfil_ativo_por_user(user)
@@ -138,4 +140,5 @@ def menu_context(request):
         "ajuda_contextual_apenas_utilizadores_recentes": getattr(preferencias, "ajuda_contextual_apenas_utilizadores_recentes", False),
         "empresa_menu_logo_url": empresa_menu_logo_url,
         "ajuda_contextual_atual": ajuda_contextual_atual,
+        "sf_mvp_operacional_focus": getattr(settings, "SF_MVP_OPERACIONAL_FOCUS", True),
     }
