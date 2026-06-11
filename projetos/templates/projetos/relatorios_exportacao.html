@@ -10,12 +10,29 @@
             <div class="space-y-2">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900">📤 {% trans "Relatórios e Exportação" %}</h1>
                 <p class="text-sm md:text-base text-gray-600">
+                    {% if sf_mvp_operacional_focus %}
+                    {% blocktrans with empresa_nome=empresa.nome %}
+                    Área para descarregar relatórios técnicos de terreno da empresa <strong>{{ empresa.nome }}</strong>:
+                    projetos, furos, registos diários, medições, máquinas e materiais. Exportações financeiras e executivas ficam separadas como pós-MVP.
+                    {% endblocktrans %}
+                    {% else %}
                     {% blocktrans with empresa_nome=empresa.nome %}
                     Área para descarregar dados operacionais e financeiros da empresa <strong>{{ empresa.nome }}</strong>
                     em formatos úteis para análise interna, partilha com clientes e integração com outras plataformas.
                     {% endblocktrans %}
+                    {% endif %}
                 </p>
             </div>
+
+            {% if sf_mvp_operacional_focus %}
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                <div class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">{% trans "MVP operacional" %}</div>
+                <h2 class="mt-2 text-xl font-bold text-emerald-950">{% trans "Relatório técnico do turno em primeiro lugar" %}</h2>
+                <p class="mt-2 text-sm leading-6 text-emerald-900">
+                    {% trans "Para o piloto, valida primeiro registos diários, medições, furos, máquinas e materiais. Os pacotes completos continuam disponíveis, mas ficam visualmente separados para não desviar o fluxo principal." %}
+                </p>
+            </div>
+            {% endif %}
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
@@ -36,11 +53,15 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-gray-200 bg-gradient-to-r from-slate-50 to-gray-100 p-5 space-y-4">
+            <div class="rounded-2xl border {% if sf_mvp_operacional_focus %}border-dashed border-slate-300 bg-slate-50{% else %}border-gray-200 bg-gradient-to-r from-slate-50 to-gray-100{% endif %} p-5 space-y-4">
                 <div class="flex flex-col gap-2">
-                    <h2 class="text-lg font-bold text-gray-900">📦 {% trans "Exportar tudo" %}</h2>
+                    <h2 class="text-lg font-bold text-gray-900">📦 {% if sf_mvp_operacional_focus %}{% trans "Pacote completo (modo completo)" %}{% else %}{% trans "Exportar tudo" %}{% endif %}</h2>
                     <p class="text-sm text-gray-600">
+                        {% if sf_mvp_operacional_focus %}
+                        {% trans "Inclui também datasets pós-MVP, como despesas, resumo geral e eventos. Usa apenas quando precisares de auditoria ou arquivo completo." %}
+                        {% else %}
                         {% trans "Gera um ficheiro `.zip` com todos os relatórios da empresa, já separados por dataset e com os filtros atualmente aplicados." %}
+                        {% endif %}
                     </p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -122,6 +143,9 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{% trans "Categoria de despesa" %}</label>
+                    {% if sf_mvp_operacional_focus %}
+                    <p class="mb-2 text-xs text-slate-500">{% trans "Filtro pós-MVP: usado apenas nas exportações financeiras/completas." %}</p>
+                    {% endif %}
                     <select name="categoria_despesa" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-800">
                         {% for valor, label in categorias_despesa %}
                             <option value="{{ valor }}" {% if filtros.categoria_despesa == valor %}selected{% endif %}>{{ label }}</option>
@@ -153,6 +177,110 @@
             </div>
         </div>
 
+        {% if sf_mvp_operacional_focus %}
+        <div class="space-y-4">
+            <div>
+                <div class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{% trans "Núcleo técnico do MVP" %}</div>
+                <h2 class="mt-1 text-2xl font-bold text-slate-900">{% trans "Exportações de terreno" %}</h2>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {% for item in datasets_mvp_core %}
+                <article class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 space-y-5">
+                    <div class="space-y-2">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">{{ item.icone }} {{ item.titulo }}</h2>
+                                <p class="text-sm text-gray-600 mt-1">{{ item.descricao }}</p>
+                            </div>
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                {% blocktrans with total=item.total %}{{ total }} registos{% endblocktrans %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'csv' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                        >
+                            ⬇ CSV
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'xlsx' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white hover:bg-cyan-700 transition"
+                        >
+                            ⬇ XLSX
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'json' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                        >
+                            ⬇ JSON
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'pdf' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-700 transition"
+                        >
+                            ⬇ PDF
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <div class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{% trans "Pós-MVP / modo completo" %}</div>
+                <h2 class="mt-1 text-2xl font-bold text-slate-900">{% trans "Exportações complementares" %}</h2>
+                <p class="mt-2 text-sm text-slate-600">{% trans "Mantidas para auditoria, migração e análise completa, mas não fazem parte do fluxo principal do piloto operacional." %}</p>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {% for item in datasets_pos_mvp %}
+                <article class="bg-white rounded-2xl shadow-md border border-dashed border-gray-300 p-6 space-y-5">
+                    <div class="space-y-2">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">{{ item.icone }} {{ item.titulo }}</h2>
+                                <p class="text-sm text-gray-600 mt-1">{{ item.descricao }}</p>
+                            </div>
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                {% blocktrans with total=item.total %}{{ total }} registos{% endblocktrans %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'csv' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                        >
+                            ⬇ CSV
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'xlsx' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white hover:bg-cyan-700 transition"
+                        >
+                            ⬇ XLSX
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'json' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                        >
+                            ⬇ JSON
+                        </a>
+                        <a
+                            href="{% url 'projetos:relatorios_download' item.key 'pdf' %}?{% if filtros.projeto %}projeto={{ filtros.projeto.pk }}&{% endif %}{% if filtros.furo %}furo={{ filtros.furo.pk }}&{% endif %}{% if filtros.data_inicio %}data_inicio={{ filtros.data_inicio|date:'Y-m-d' }}&{% endif %}{% if filtros.data_fim %}data_fim={{ filtros.data_fim|date:'Y-m-d' }}&{% endif %}{% if filtros.tipo_registo %}tipo_registo={{ filtros.tipo_registo }}&{% endif %}{% if filtros.categoria_despesa %}categoria_despesa={{ filtros.categoria_despesa }}{% endif %}"
+                            class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-700 transition"
+                        >
+                            ⬇ PDF
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+            </div>
+        </div>
+        {% else %}
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {% for item in datasets %}
                 <article class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 space-y-5">
@@ -197,6 +325,7 @@
                 </article>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

@@ -745,6 +745,8 @@ EXPORT_DATASETS = {
     },
 }
 
+MVP_CORE_DATASETS = {"projetos", "furos", "registos", "medicoes", "maquinas", "materiais"}
+
 
 def obter_dataset_exportacao(dataset):
     try:
@@ -761,6 +763,7 @@ def construir_cards_datasets(empresa, filtros):
             "descricao": info["descricao"],
             "icone": info["icone"],
             "total": info["count"](empresa, filtros),
+            "mvp_core": chave in MVP_CORE_DATASETS,
         }
         for chave, info in EXPORT_DATASETS.items()
     ]

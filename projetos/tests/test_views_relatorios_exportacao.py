@@ -4,6 +4,7 @@ import zipfile
 from datetime import date
 
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
 
 from projetos.models import Despesa
@@ -66,6 +67,20 @@ class RelatoriosExportacaoMultiempresaTests(TestCase):
         self.assertContains(response, "1 registos")
         self.assertNotContains(response, self.projeto_externo.nome)
         self.assertNotContains(response, self.furo_externo.nome)
+
+    @override_settings(SF_MVP_OPERACIONAL_FOCUS=True)
+    def test_dashboard_em_mvp_separa_exportacoes_tecnicas_de_pos_mvp(self):
+        response = self.client.get(reverse("projetos:relatorios_exportacao"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Relatório técnico do turno em primeiro lugar")
+        self.assertContains(response, "Exportações de terreno")
+        self.assertContains(response, "Exportações complementares")
+        self.assertContains(response, "Filtro pós-MVP")
+
+        html = response.content.decode("utf-8")
+        self.assertLess(html.index("Exportações de terreno"), html.index("Exportações complementares"))
+        self.assertLess(html.index("Registos"), html.index("Despesas"))
 
     def test_download_csv_de_projetos_nao_exporta_projetos_de_outra_empresa(self):
         response = self.client.get(reverse("projetos:relatorios_download", args=["projetos", "csv"]))

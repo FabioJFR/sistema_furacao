@@ -61,9 +61,12 @@ def construir_filtros_exportacao(*, request, empresa):
 
 def construir_contexto_relatorios_exportacao(*, request, empresa, listar_projetos_fn, listar_furos_fn, construir_cards_fn):
     filtros = construir_filtros_exportacao(request=request, empresa=empresa)
+    datasets = construir_cards_fn(empresa, filtros)
     return {
         "empresa": empresa,
-        "datasets": construir_cards_fn(empresa, filtros),
+        "datasets": datasets,
+        "datasets_mvp_core": [item for item in datasets if item.get("mvp_core")],
+        "datasets_pos_mvp": [item for item in datasets if not item.get("mvp_core")],
         "projetos_filtro": listar_projetos_fn(empresa),
         "furos_filtro": listar_furos_fn(empresa=empresa, projeto=filtros.get("projeto")),
         "tipos_registo": [*TIPOS_REGISTO_CHOICES_EXPORTACAO],

@@ -593,11 +593,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · AJUDA] Centro de Ajuda passa a respeitar `SF_MVP_OPERACIONAL_FOCUS`, destacando arranque operacional, furos, registos, materiais e ocorrências em vez de promover módulos ERP/pós-MVP.",
             "CONCLUIDO · [MVP · DASHBOARD EMPRESA] Dashboard principal da empresa ganha centro operacional com ações rápidas e checklist de piloto para projetos/furos, equipa, máquina, registos, materiais e medições.",
             "CONCLUIDO · [MVP · DASHBOARD EMPREGADO] `Minha Área` do empregado passa a orientar a preparação do turno com furo, configuração por furo, materiais, medições, avarias e próximo registo.",
+            "CONCLUIDO · [MVP · RELATORIOS] `Relatórios e Exportação` separa o núcleo técnico de terreno das exportações complementares/pós-MVP quando `SF_MVP_OPERACIONAL_FOCUS` está ativo.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
             "[MVP · PRODUTO] Criar checklist de piloto: 1 empresa, 1 projeto, 2 furos, 2 empregados, 1 máquina, registos diários, medições, avarias e relatório técnico do turno.",
-            "[MVP · CORE] Rever páginas de relatórios/exportação para separar `Relatório Técnico do Turno` do bloco executivo/financeiro pós-MVP.",
+            "[MVP · CORE] Consolidar uma página/checklist de piloto operacional com progresso visível para empresa e tarefas de validação do MVP.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",
