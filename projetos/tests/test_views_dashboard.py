@@ -22,6 +22,29 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
             "total_maquinas": 1,
             "total_materiais": 3,
             "total_registos": 4,
+            "mvp_piloto": {
+                "percentagem": 60,
+                "concluidos": 6,
+                "total": 10,
+                "itens": [
+                    {
+                        "titulo": "1 projeto criado",
+                        "descricao": "Primeira frente de trabalho aberta.",
+                        "atual": 1,
+                        "meta": 1,
+                        "concluido": True,
+                        "url_name": "projetos:projeto_list",
+                    },
+                    {
+                        "titulo": "Relatório técnico exportável",
+                        "descricao": "Registos técnicos prontos para consulta/exportação.",
+                        "atual": 0,
+                        "meta": 1,
+                        "concluido": False,
+                        "url_name": "projetos:relatorio_turno_admin_list",
+                    },
+                ],
+            },
             "projetos": [],
         }
 
@@ -33,14 +56,16 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
 
         self.assertIn("MVP operacional", html)
         self.assertIn("Painel de controlo do terreno", html)
+        self.assertIn("Validação mínima do MVP de terreno", html)
+        self.assertIn("60%", html)
         self.assertIn("Projetos e Furos", html)
         self.assertIn("Registos", html)
         self.assertIn("Planeamento", html)
         self.assertIn("Máquinas", html)
         self.assertIn("Materiais", html)
         self.assertIn("Medições", html)
-        self.assertIn("Criar projeto", html)
-        self.assertIn("Lançar registos", html)
+        self.assertIn("1 projeto criado", html)
+        self.assertIn("Relatório técnico exportável", html)
 
     def test_dashboard_empresa_modo_completo_nao_mostra_centro_mvp(self):
         html = render_to_string(

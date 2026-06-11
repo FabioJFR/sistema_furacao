@@ -14,6 +14,7 @@ from projetos.models import (
     Maquina,
     MaquinaAvaria,
     Material,
+    Medicao,
     Projeto,
     RegistoDiarioEmpregado,
     SalarioBaseFuncao,
@@ -463,6 +464,112 @@ def obter_cards_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id=N
         "empregados_ativos": empregados_ativos_qs.values("empregado_id").distinct().count(),
         "furos_ativos": furos_ativos_qs.values("furo_id").distinct().count(),
         "projetos_ativos": projetos_ativos_qs.values("projeto_id").distinct().count(),
+    }
+
+
+def _item_checklist_piloto(*, titulo, descricao, atual, meta, url_name):
+    atual_int = int(atual or 0)
+    meta_int = max(int(meta or 1), 1)
+    return {
+        "titulo": titulo,
+        "descricao": descricao,
+        "atual": atual_int,
+        "meta": meta_int,
+        "concluido": atual_int >= meta_int,
+        "percentagem": min(round((atual_int / meta_int) * 100), 100),
+        "url_name": url_name,
+    }
+
+
+def obter_checklist_piloto_operacional(empresa=None):
+    projetos_qs = _filtrar_por_empresa(Projeto.objects.all(), empresa)
+    furos_qs = _filtrar_por_empresa(Furo.objects.all(), empresa)
+    empregados_qs = _filtrar_por_empresa(Empregados.objects.filter(aprovado=True), empresa)
+    maquinas_qs = _filtrar_por_empresa(Maquina.objects.all(), empresa)
+    registos_qs = _filtrar_por_empresa(RegistoDiarioEmpregado.objects.all(), empresa)
+    medicoes_qs = _filtrar_por_empresa(Medicao.objects.all(), empresa)
+    avarias_qs = _filtrar_por_empresa(MaquinaAvaria.objects.all(), empresa)
+    materiais_qs = _filtrar_por_empresa(Material.objects.all(), empresa)
+
+    itens = [
+        _item_checklist_piloto(
+            titulo="1 empresa operacional",
+            descricao="Contexto administrativo ativo para o piloto.",
+            atual=1 if empresa is not None else 0,
+            meta=1,
+            url_name="projetos:definicoes_admin",
+        ),
+        _item_checklist_piloto(
+            titulo="1 projeto criado",
+            descricao="Primeira frente de trabalho aberta.",
+            atual=projetos_qs.count(),
+            meta=1,
+            url_name="projetos:projeto_list",
+        ),
+        _item_checklist_piloto(
+            titulo="2 furos registados",
+            descricao="Furos suficientes para validar operação comparável.",
+            atual=furos_qs.count(),
+            meta=2,
+            url_name="projetos:projeto_list",
+        ),
+        _item_checklist_piloto(
+            titulo="2 empregados aprovados",
+            descricao="Equipa mínima para validar trabalho em terreno.",
+            atual=empregados_qs.count(),
+            meta=2,
+            url_name="projetos:empregado_list",
+        ),
+        _item_checklist_piloto(
+            titulo="1 máquina registada",
+            descricao="Equipamento ligado à operação real.",
+            atual=maquinas_qs.count(),
+            meta=1,
+            url_name="projetos:maquina_list",
+        ),
+        _item_checklist_piloto(
+            titulo="Registos diários",
+            descricao="Base do relatório técnico do turno.",
+            atual=registos_qs.count(),
+            meta=1,
+            url_name="projetos:registos_admin_list",
+        ),
+        _item_checklist_piloto(
+            titulo="Medições técnicas",
+            descricao="Leitura técnica associada aos furos.",
+            atual=medicoes_qs.count(),
+            meta=1,
+            url_name="projetos:medicao_list",
+        ),
+        _item_checklist_piloto(
+            titulo="Avarias testadas",
+            descricao="Fluxo de falha de máquina validado pelo menos uma vez.",
+            atual=avarias_qs.count(),
+            meta=1,
+            url_name="projetos:avaria_maquina_list_admin",
+        ),
+        _item_checklist_piloto(
+            titulo="Materiais controlados",
+            descricao="Stock ou consumível disponível para rastreio.",
+            atual=materiais_qs.count(),
+            meta=1,
+            url_name="projetos:material_list",
+        ),
+        _item_checklist_piloto(
+            titulo="Relatório técnico exportável",
+            descricao="Registos técnicos prontos para consulta/exportação.",
+            atual=registos_qs.count(),
+            meta=1,
+            url_name="projetos:relatorio_turno_admin_list",
+        ),
+    ]
+    concluidos = sum(1 for item in itens if item["concluido"])
+    total = len(itens)
+    return {
+        "itens": itens,
+        "concluidos": concluidos,
+        "total": total,
+        "percentagem": round((concluidos / total) * 100) if total else 0,
     }
 
 

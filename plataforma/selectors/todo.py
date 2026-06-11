@@ -594,11 +594,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · DASHBOARD EMPRESA] Dashboard principal da empresa ganha centro operacional com ações rápidas e checklist de piloto para projetos/furos, equipa, máquina, registos, materiais e medições.",
             "CONCLUIDO · [MVP · DASHBOARD EMPREGADO] `Minha Área` do empregado passa a orientar a preparação do turno com furo, configuração por furo, materiais, medições, avarias e próximo registo.",
             "CONCLUIDO · [MVP · RELATORIOS] `Relatórios e Exportação` separa o núcleo técnico de terreno das exportações complementares/pós-MVP quando `SF_MVP_OPERACIONAL_FOCUS` está ativo.",
+            "CONCLUIDO · [MVP · CHECKLIST PILOTO] Dashboard da empresa passa a mostrar progresso real da validação mínima do piloto operacional: empresa, projeto, 2 furos, 2 empregados, máquina, registos, medições, avarias, materiais e relatório técnico.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
-            "[MVP · PRODUTO] Criar checklist de piloto: 1 empresa, 1 projeto, 2 furos, 2 empregados, 1 máquina, registos diários, medições, avarias e relatório técnico do turno.",
-            "[MVP · CORE] Consolidar uma página/checklist de piloto operacional com progresso visível para empresa e tarefas de validação do MVP.",
+            "[MVP · PRODUTO] Criar roteiro de teste do piloto em dados reais: sequência de ações, critérios de sucesso e decisão go/no-go.",
+            "[MVP · CORE] Rever formulários críticos do piloto para reduzir fricção no primeiro uso: projeto, furo, empregado, máquina, registo diário e medição.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",

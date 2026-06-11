@@ -8,6 +8,7 @@ from projetos.selectors.acesso import obter_contexto_admin_projetos
 from projetos.selectors.dashboard import (
     obter_alertas_dashboard,
     obter_cards_dashboard,
+    obter_checklist_piloto_operacional,
     obter_empresa_dashboard_por_id,
     obter_empresas_contexto_dashboard,
     obter_graficos_dashboard,
@@ -184,6 +185,7 @@ def montar_contexto_dashboard(*, request, contexto_admin, incluir_mapa=False):
                 empresa=empresa,
             )
         )
+        context["mvp_piloto"] = obter_checklist_piloto_operacional(empresa=empresa)
         context.update(
             obter_alertas_dashboard(
                 inicio=inicio,
