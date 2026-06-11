@@ -595,11 +595,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · DASHBOARD EMPREGADO] `Minha Área` do empregado passa a orientar a preparação do turno com furo, configuração por furo, materiais, medições, avarias e próximo registo.",
             "CONCLUIDO · [MVP · RELATORIOS] `Relatórios e Exportação` separa o núcleo técnico de terreno das exportações complementares/pós-MVP quando `SF_MVP_OPERACIONAL_FOCUS` está ativo.",
             "CONCLUIDO · [MVP · CHECKLIST PILOTO] Dashboard da empresa passa a mostrar progresso real da validação mínima do piloto operacional: empresa, projeto, 2 furos, 2 empregados, máquina, registos, medições, avarias, materiais e relatório técnico.",
+            "CONCLUIDO · [MVP · FORMULARIOS] Primeira orientação de uso adicionada aos formulários críticos do piloto (`Projeto`, `Furo`, `Empregado`, `Máquina`, `Registo Diário` e `Medição`) para reduzir fricção no arranque.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
             "[MVP · PRODUTO] Criar roteiro de teste do piloto em dados reais: sequência de ações, critérios de sucesso e decisão go/no-go.",
-            "[MVP · CORE] Rever formulários críticos do piloto para reduzir fricção no primeiro uso: projeto, furo, empregado, máquina, registo diário e medição.",
+            "[MVP · CORE] Rever obrigatoriedade/defaults dos campos nos formulários críticos do piloto para permitir criação rápida sem perder qualidade técnica.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",

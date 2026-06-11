@@ -1,0 +1,36 @@
+{% load i18n %}
+
+{% if sf_mvp_operacional_focus %}
+<section class="sf-mvp-form-hint" aria-label="{% trans 'Orientação de primeiro uso MVP' %}">
+    <div>
+        <div class="sf-mvp-form-kicker">{% trans "Primeiro uso do MVP" %}</div>
+        {% if mvp_form_context == "projeto" %}
+            <h2>{% trans "Cria primeiro a frente de trabalho" %}</h2>
+            <p>{% trans "Para validar o piloto, basta preencher nome, cliente/localização e estado. Depois adiciona pelo menos dois furos neste projeto." %}</p>
+        {% elif mvp_form_context == "furo" %}
+            <h2>{% trans "Regista o furo com o mínimo técnico útil" %}</h2>
+            <p>{% trans "Escolhe o projeto, define nome, tipo, profundidades e direção base. A configuração de perfuração será tratada no detalhe do próprio furo." %}</p>
+        {% elif mvp_form_context == "empregado" %}
+            <h2>{% trans "Cria a equipa mínima do piloto" %}</h2>
+            <p>{% trans "No piloto precisamos de dois empregados aprovados. Prioriza nome, função, email e credenciais de acesso para conseguirem lançar registos em terreno." %}</p>
+        {% elif mvp_form_context == "maquina" %}
+            <h2>{% trans "Liga a máquina à operação real" %}</h2>
+            <p>{% trans "Para o MVP, basta identificar a máquina, deixá-la ativa e associá-la aos projetos/furos onde pode trabalhar." %}</p>
+        {% elif mvp_form_context == "registo" %}
+            <h2>{% trans "O registo diário alimenta o relatório técnico" %}</h2>
+            <p>{% trans "Começa pelo planeamento quando existir; confirma projeto, furo, máquina, horas e metros. O bloco técnico completa a evidência do turno." %}</p>
+        {% elif mvp_form_context == "medicao" %}
+            <h2>{% trans "A medição valida a leitura técnica do furo" %}</h2>
+            <p>{% trans "Prioriza profundidade medida, inclinação e azimute reais. Coordenadas, imagem e observações ajudam a enriquecer a análise." %}</p>
+        {% else %}
+            <h2>{% trans "Preenche apenas o essencial para avançar" %}</h2>
+            <p>{% trans "Nesta fase, o objetivo é reduzir fricção e validar rapidamente o fluxo operacional no terreno." %}</p>
+        {% endif %}
+    </div>
+    <div class="sf-mvp-form-steps">
+        <span>{% trans "Guardar" %}</span>
+        <span>{% trans "Validar no painel" %}</span>
+        <span>{% trans "Continuar piloto" %}</span>
+    </div>
+</section>
+{% endif %}

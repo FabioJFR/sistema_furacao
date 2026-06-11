@@ -39,6 +39,8 @@
             </div>
         {% endif %}
 
+        {% include "projetos/partials/mvp_form_hint.html" with mvp_form_context="medicao" %}
+
         <form method="post" enctype="multipart/form-data" class="mdf-form">
             {% csrf_token %}
 
