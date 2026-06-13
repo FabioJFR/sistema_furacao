@@ -98,6 +98,26 @@ def listar_checklist_pos_deploy():
     ]
 
 
+def listar_comandos_deploy_operacional():
+    return [
+        {
+            "titulo": "Simular sem executar",
+            "comando": "DRY_RUN=1 bash deploy/deploy_operacional.sh",
+            "descricao": "Mostra a sequência completa sem alterar código, base de dados ou serviços.",
+        },
+        {
+            "titulo": "Executar deploy",
+            "comando": "DRY_RUN=0 BASE_URL=https://sistemafuracao.pt bash deploy/deploy_operacional.sh",
+            "descricao": "Atualiza código, dependências, migrations, static files, serviços e healthchecks.",
+        },
+        {
+            "titulo": "Executar com backup/rollback",
+            "comando": "DRY_RUN=0 BACKUP_CMD='pg_dump ...' ROLLBACK_ON_ERROR=1 ROLLBACK_CMD='...' bash deploy/deploy_operacional.sh",
+            "descricao": "Permite ligar backup e rollback explícito quando já existe plano validado para a janela de deploy.",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {

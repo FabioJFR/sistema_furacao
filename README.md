@@ -470,6 +470,16 @@ Comandos de validação e preparação:
 ./.venv/bin/python manage.py collectstatic --noinput
 ```
 
+Script operacional assistido:
+
+```bash
+DRY_RUN=1 bash deploy/deploy_operacional.sh
+DRY_RUN=0 BASE_URL=https://sistemafuracao.pt bash deploy/deploy_operacional.sh
+```
+
+Por defeito o script corre em `DRY_RUN=1`, mostrando os comandos sem os executar. Para produção, confirmar backup e variáveis de ambiente antes de usar `DRY_RUN=0`.
+Rollback automático fica desligado por defeito; se for necessário, configurar `ROLLBACK_ON_ERROR=1` e `ROLLBACK_CMD` com um plano validado antes da janela de deploy.
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

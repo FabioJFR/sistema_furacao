@@ -6,6 +6,7 @@ from plataforma.decorators import platform_admin_required
 from plataforma.selectors.riscos_deploy import (
     listar_checklist_pos_deploy,
     listar_checklist_pre_deploy,
+    listar_comandos_deploy_operacional,
     listar_resumo_riscos_deploy,
     listar_riscos_deploy,
     listar_smoke_test_piloto_mvp,
@@ -25,6 +26,7 @@ def riscos_deploy_dashboard(request):
         "resumo": listar_resumo_riscos_deploy(),
         "checklist_pre_deploy": listar_checklist_pre_deploy(),
         "checklist_pos_deploy": listar_checklist_pos_deploy(),
+        "comandos_deploy_operacional": listar_comandos_deploy_operacional(),
         "smoke_test_piloto_mvp": listar_smoke_test_piloto_mvp(),
         "tickets_friccoes_piloto_mvp": listar_tickets_friccoes_piloto_mvp(),
     }

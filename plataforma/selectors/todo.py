@@ -489,10 +489,10 @@ _AREAS_TODO = {
             "Pipeline operacional manual documentado (git pull, migrate, collectstatic, restart services).",
             "Ajustes de `ALLOWED_HOSTS`, cookies seguros e configuração de ambiente já aplicados em produção.",
             "Sitemap e robots já adicionados para indexação e SEO técnico.",
+            "CONCLUIDO · [INFRA · DEPLOY] Script único `deploy/deploy_operacional.sh` criado com `DRY_RUN=1` por defeito, backup opcional, atualização de código, dependências, checks, migrations, collectstatic, restart de serviços e healthchecks HTTP configuráveis.",
+            "CONCLUIDO · [INFRA · HEALTHCHECK] Página `Riscos de Deploy`, README e docs de produção passam a expor comandos oficiais do deploy assistido e healthchecks pós-deploy.",
         ],
         "proximos_passos": [
-            "Padronizar script único de deploy (pré-check, migrate, collectstatic, healthcheck e rollback).",
-            "Adicionar healthcheck automático pós-deploy (`curl` rotas críticas + validação de login).",
             "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
             "Separar logs por serviço/módulo com rotação automática (`logrotate`) e retenção definida.",
             "Configurar alertas de disponibilidade e erros 5xx (email/Slack) com limiares claros.",

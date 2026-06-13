@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from plataforma.models import Empresa, PerfilPlataforma
 from plataforma.selectors.riscos_deploy import (
+    listar_comandos_deploy_operacional,
     listar_smoke_test_piloto_mvp,
     listar_tickets_friccoes_piloto_mvp,
 )
@@ -51,6 +52,9 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertEqual(response_riscos.status_code, 200)
         self.assertContains(response_riscos, "Riscos de Deploy")
         self.assertContains(response_riscos, "Checklist pré-deploy")
+        self.assertContains(response_riscos, "Script operacional de deploy")
+        self.assertContains(response_riscos, "DRY_RUN=1 bash deploy/deploy_operacional.sh")
+        self.assertContains(response_riscos, "ROLLBACK_ON_ERROR=1")
         self.assertContains(response_riscos, "Smoke test do piloto após deploy")
         self.assertContains(response_riscos, "Criar furo")
         self.assertContains(response_riscos, "Gerar relatório técnico")
@@ -75,6 +79,15 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
             {"Criação", "Turno", "Materiais", "Medições", "Relatório", "Permissões"},
         )
         self.assertIn("regressão de permissão", tickets[-1]["ticket"])
+
+    def test_comandos_deploy_operacional_incluem_dry_run_e_execucao(self):
+        comandos = listar_comandos_deploy_operacional()
+
+        self.assertEqual(len(comandos), 3)
+        self.assertIn("DRY_RUN=1", comandos[0]["comando"])
+        self.assertIn("BASE_URL=https://sistemafuracao.pt", comandos[1]["comando"])
+        self.assertIn("BACKUP_CMD", comandos[2]["comando"])
+        self.assertIn("ROLLBACK_ON_ERROR=1", comandos[2]["comando"])
 
     def test_platform_admin_nao_superuser_nao_acede_features_nem_riscos(self):
         user = self._criar_user_com_perfil(

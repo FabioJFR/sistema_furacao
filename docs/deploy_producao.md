@@ -51,6 +51,23 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 ```
 
+Alternativa assistida pelo repositório:
+
+```bash
+DRY_RUN=1 bash deploy/deploy_operacional.sh
+DRY_RUN=0 BASE_URL=https://sistemafuracao.pt bash deploy/deploy_operacional.sh
+```
+
+Variáveis úteis do script:
+
+- `APP_DIR=/var/www/sistema_furacao`
+- `BRANCH=main`
+- `BASE_URL=https://sistemafuracao.pt`
+- `HEALTHCHECK_PATHS="/ /login/ /website/"`
+- `BACKUP_CMD="pg_dump ... && tar -czf media_backup.tar.gz media/"`
+- `ROLLBACK_ON_ERROR=1` e `ROLLBACK_CMD="git reset --hard <sha> && python manage.py migrate && sudo systemctl restart sistema_furacao"` apenas quando houver plano de rollback validado
+- `DRY_RUN=1` para simular, `DRY_RUN=0` para executar
+
 ## 5) Serviços de produção
 
 - Gunicorn systemd: usar modelo em `deploy/systemd/sistema_furacao.service`
