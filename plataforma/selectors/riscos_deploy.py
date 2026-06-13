@@ -138,6 +138,31 @@ def listar_comandos_logrotate():
     ]
 
 
+def listar_comandos_backup_operacional():
+    return [
+        {
+            "titulo": "Simular backup",
+            "comando": "DRY_RUN=1 bash deploy/backup_operacional.sh",
+            "descricao": "Mostra criação de pasta, dump PostgreSQL, arquivo media, manifest e limpeza por retenção sem escrever backups.",
+        },
+        {
+            "titulo": "Executar backup",
+            "comando": "DRY_RUN=0 BACKUP_DIR=/var/backups/sistema_furacao bash deploy/backup_operacional.sh",
+            "descricao": "Cria backup comprimido da base de dados e da pasta media com manifest e checksums.",
+        },
+        {
+            "titulo": "Testar restore",
+            "comando": "DRY_RUN=0 RESTORE_TEST_DB=sistema_furacao_restore_test bash deploy/restore_test_operacional.sh",
+            "descricao": "Restaura o dump mais recente numa base temporária e valida também o arquivo media.",
+        },
+        {
+            "titulo": "Ativar timers",
+            "comando": "sudo cp deploy/systemd/sf-backup-operacional.* deploy/systemd/sf-restore-test-operacional.* /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now sf-backup-operacional.timer sf-restore-test-operacional.timer",
+            "descricao": "Agenda backup diário e teste semanal de restore via systemd.",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {

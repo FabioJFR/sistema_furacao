@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from plataforma.models import Empresa, PerfilPlataforma
 from plataforma.selectors.riscos_deploy import (
+    listar_comandos_backup_operacional,
     listar_comandos_deploy_operacional,
     listar_comandos_logrotate,
     listar_smoke_test_piloto_mvp,
@@ -58,6 +59,8 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertContains(response_riscos, "ROLLBACK_ON_ERROR=1")
         self.assertContains(response_riscos, "Rotação automática de logs")
         self.assertContains(response_riscos, "sudo logrotate -d /etc/logrotate.d/sistema_furacao")
+        self.assertContains(response_riscos, "Backup automático com teste de restore")
+        self.assertContains(response_riscos, "deploy/restore_test_operacional.sh")
         self.assertContains(response_riscos, "Smoke test do piloto após deploy")
         self.assertContains(response_riscos, "Criar furo")
         self.assertContains(response_riscos, "Gerar relatório técnico")
@@ -99,6 +102,15 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertIn("cp deploy/logrotate/sistema_furacao", comandos[0]["comando"])
         self.assertIn("logrotate -d", comandos[1]["comando"])
         self.assertIn("logrotate -f", comandos[2]["comando"])
+
+    def test_comandos_backup_operacional_incluem_backup_restore_e_timers(self):
+        comandos = listar_comandos_backup_operacional()
+
+        self.assertEqual(len(comandos), 4)
+        self.assertIn("DRY_RUN=1", comandos[0]["comando"])
+        self.assertIn("backup_operacional.sh", comandos[1]["comando"])
+        self.assertIn("restore_test_operacional.sh", comandos[2]["comando"])
+        self.assertIn("sf-backup-operacional.timer", comandos[3]["comando"])
 
     def test_platform_admin_nao_superuser_nao_acede_features_nem_riscos(self):
         user = self._criar_user_com_perfil(

@@ -1,0 +1,13 @@
+[Unit]
+Description=Sistema Furacao - Teste periodico de restore
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=www-data
+WorkingDirectory=/var/www/sistema_furacao
+Environment="APP_DIR=/var/www/sistema_furacao"
+Environment="DRY_RUN=0"
+Environment="RESTORE_TEST_DB=sistema_furacao_restore_test"
+ExecStart=/usr/bin/env bash /var/www/sistema_furacao/deploy/restore_test_operacional.sh

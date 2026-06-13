@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer - Backup operacional diario (Sistema Furacao)
+
+[Timer]
+OnCalendar=*-*-* 02:15:00
+Persistent=true
+Unit=sf-backup-operacional.service
+
+[Install]
+WantedBy=timers.target

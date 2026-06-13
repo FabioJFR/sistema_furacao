@@ -492,11 +492,11 @@ _AREAS_TODO = {
             "CONCLUIDO · [INFRA · DEPLOY] Script único `deploy/deploy_operacional.sh` criado com `DRY_RUN=1` por defeito, backup opcional, atualização de código, dependências, checks, migrations, collectstatic, restart de serviços e healthchecks HTTP configuráveis.",
             "CONCLUIDO · [INFRA · HEALTHCHECK] Página `Riscos de Deploy`, README e docs de produção passam a expor comandos oficiais do deploy assistido e healthchecks pós-deploy.",
             "CONCLUIDO · [INFRA · LOGS] Configuração `deploy/logrotate/sistema_furacao` adicionada para rotação diária de logs Django/Nginx, com comandos de instalação/teste expostos em `Riscos de Deploy`, README e docs de produção.",
+            "CONCLUIDO · [INFRA · BACKUP] Scripts `deploy/backup_operacional.sh` e `deploy/restore_test_operacional.sh` adicionados com `DRY_RUN`, retenção, manifest/checksums, teste de restore em base temporária e timers systemd para backup diário/restore semanal.",
         ],
         "proximos_passos": [
             "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
             "Configurar alertas de disponibilidade e erros 5xx (email/Slack) com limiares claros.",
-            "Automatizar backup de base de dados e media com testes periódicos de restore.",
         ],
         "falta_fazer": [
             "CI/CD com ambiente de staging espelho da produção.",

@@ -89,6 +89,26 @@
         </div>
     </section>
 
+    <section class="deploy-risk-command-card deploy-risk-backup-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Backups e restore" %}</div>
+                <h2>{% trans "Backup automático com teste de restore" %}</h2>
+            </div>
+            <p>{% trans "Mantém cópias da base de dados e media com retenção definida, e valida periodicamente se o backup consegue ser restaurado." %}</p>
+        </div>
+
+        <div class="deploy-risk-command-grid">
+            {% for item in comandos_backup_operacional %}
+                <article class="deploy-risk-command-step">
+                    <strong>{{ item.titulo }}</strong>
+                    <code>{{ item.comando }}</code>
+                    <p>{{ item.descricao }}</p>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-smoke-card">
         <div class="deploy-risk-table-head">
             <div>

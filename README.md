@@ -487,6 +487,17 @@ sudo cp deploy/logrotate/sistema_furacao /etc/logrotate.d/sistema_furacao
 sudo logrotate -d /etc/logrotate.d/sistema_furacao
 ```
 
+Backups operacionais e teste de restore:
+
+```bash
+DRY_RUN=1 bash deploy/backup_operacional.sh
+DRY_RUN=0 BACKUP_DIR=/var/backups/sistema_furacao bash deploy/backup_operacional.sh
+DRY_RUN=0 RESTORE_TEST_DB=sistema_furacao_restore_test bash deploy/restore_test_operacional.sh
+sudo cp deploy/systemd/sf-backup-operacional.* deploy/systemd/sf-restore-test-operacional.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now sf-backup-operacional.timer sf-restore-test-operacional.timer
+```
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer - Teste semanal de restore (Sistema Furacao)
+
+[Timer]
+OnCalendar=Sun 03:30:00
+Persistent=true
+Unit=sf-restore-test-operacional.service
+
+[Install]
+WantedBy=timers.target

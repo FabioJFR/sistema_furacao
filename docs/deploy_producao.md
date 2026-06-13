@@ -97,6 +97,26 @@ A configuração roda diariamente:
 - `/var/www/sistema_furacao/logs/*.log` com retenção de 14 dias.
 - `/var/log/nginx/sistema_furacao*.log` com retenção de 30 dias.
 
+## 5.2) Backups e testes de restore
+
+```bash
+DRY_RUN=1 bash deploy/backup_operacional.sh
+DRY_RUN=0 BACKUP_DIR=/var/backups/sistema_furacao bash deploy/backup_operacional.sh
+DRY_RUN=0 RESTORE_TEST_DB=sistema_furacao_restore_test bash deploy/restore_test_operacional.sh
+sudo cp deploy/systemd/sf-backup-operacional.* deploy/systemd/sf-restore-test-operacional.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now sf-backup-operacional.timer sf-restore-test-operacional.timer
+```
+
+Por defeito, o backup cria uma pasta por execução em `/var/backups/sistema_furacao`, com:
+
+- `database.sql.gz` para a base de dados PostgreSQL.
+- `media.tar.gz` para a pasta `media/`.
+- `manifest.txt` com metadados e checksums.
+- retenção de 14 dias configurável por `RETENTION_DAYS`.
+
+O timer `sf-backup-operacional.timer` corre diariamente às 02:15 e o timer `sf-restore-test-operacional.timer` testa semanalmente o restore numa base temporária `sistema_furacao_restore_test`.
+
 ## 6) Verificação rápida
 
 ```bash
