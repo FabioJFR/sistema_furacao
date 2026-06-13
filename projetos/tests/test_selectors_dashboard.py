@@ -1,5 +1,5 @@
 from django.test import TestCase
-from projetos.selectors.dashboard import obter_cards_dashboard
+from projetos.selectors.dashboard import obter_cards_dashboard, obter_roteiro_piloto_operacional
 from projetos.models import Maquina, Material
 
 from .helpers import criar_empresa, criar_empregado, criar_furo, criar_projeto
@@ -21,3 +21,11 @@ class DashboardSelectorsTests(TestCase):
         self.assertEqual(dados["total_empregados"], 1)
         self.assertEqual(dados["total_maquinas"], 1)
         self.assertEqual(dados["total_materiais"], 1)
+
+    def test_obter_roteiro_piloto_operacional_define_fases_e_decisao(self):
+        roteiro = obter_roteiro_piloto_operacional()
+
+        self.assertEqual(len(roteiro["fases"]), 4)
+        self.assertEqual(roteiro["fases"][0]["titulo"], "Preparar base real")
+        self.assertIn("checklist", roteiro["criterios_go"][0].lower())
+        self.assertIn("Relatório técnico", roteiro["criterios_no_go"][2])

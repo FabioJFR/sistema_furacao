@@ -59,6 +59,51 @@
         </div>
     </section>
     {% endif %}
+
+    {% if mvp_roteiro_piloto %}
+    <section class="dsh-mvp-roadmap-card" aria-label="{% trans 'Roteiro de teste do piloto operacional' %}">
+        <div class="dsh-mvp-roadmap-head">
+            <div>
+                <div class="dsh-mvp-eyebrow dsh-mvp-eyebrow-dark">{% trans "Roteiro do piloto" %}</div>
+                <h2 class="dsh-mvp-progress-title">{% trans "Como validar o MVP em dados reais" %}</h2>
+                <p class="dsh-mvp-progress-copy">
+                    {% trans "Usa esta sequência curta para testar uma operação real de terreno antes de voltar a promover módulos financeiros, comerciais ou executivos." %}
+                </p>
+            </div>
+            <a href="{% url 'projetos:registo_admin_create' %}" class="dsh-mvp-roadmap-primary">{% trans "Começar turno teste" %}</a>
+        </div>
+
+        <div class="dsh-mvp-roadmap-steps">
+            {% for fase in mvp_roteiro_piloto.fases %}
+            <article class="dsh-mvp-roadmap-step">
+                <span>{{ fase.numero }}</span>
+                <strong>{{ fase.titulo }}</strong>
+                <p>{{ fase.descricao }}</p>
+                <em>{{ fase.resultado }}</em>
+            </article>
+            {% endfor %}
+        </div>
+
+        <div class="dsh-mvp-decision-grid">
+            <div class="dsh-mvp-decision-card is-go">
+                <strong>{% trans "Go: avançar piloto" %}</strong>
+                <ul>
+                    {% for criterio in mvp_roteiro_piloto.criterios_go %}
+                    <li>{{ criterio }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="dsh-mvp-decision-card is-no-go">
+                <strong>{% trans "No-go: corrigir antes" %}</strong>
+                <ul>
+                    {% for criterio in mvp_roteiro_piloto.criterios_no_go %}
+                    <li>{{ criterio }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
+    {% endif %}
     {% endif %}
 
     <!-- CARDS ESTRUTURA -->

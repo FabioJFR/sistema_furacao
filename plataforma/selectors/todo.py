@@ -596,11 +596,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · RELATORIOS] `Relatórios e Exportação` separa o núcleo técnico de terreno das exportações complementares/pós-MVP quando `SF_MVP_OPERACIONAL_FOCUS` está ativo.",
             "CONCLUIDO · [MVP · CHECKLIST PILOTO] Dashboard da empresa passa a mostrar progresso real da validação mínima do piloto operacional: empresa, projeto, 2 furos, 2 empregados, máquina, registos, medições, avarias, materiais e relatório técnico.",
             "CONCLUIDO · [MVP · FORMULARIOS] Primeira orientação de uso adicionada aos formulários críticos do piloto (`Projeto`, `Furo`, `Empregado`, `Máquina`, `Registo Diário` e `Medição`) para reduzir fricção no arranque.",
+            "CONCLUIDO · [MVP · ROTEIRO PILOTO] Dashboard da empresa passa a incluir roteiro de teste com fases, critérios de sucesso e decisão go/no-go para validar dados reais antes de reativar módulos pós-MVP no fluxo principal.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
-            "[MVP · PRODUTO] Criar roteiro de teste do piloto em dados reais: sequência de ações, critérios de sucesso e decisão go/no-go.",
             "[MVP · CORE] Rever obrigatoriedade/defaults dos campos nos formulários críticos do piloto para permitir criação rápida sem perder qualidade técnica.",
+            "[MVP · PILOTO] Executar o roteiro com dados reais de uma empresa e registar fricções de campo antes de abrir novas frentes comerciais/financeiras.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",

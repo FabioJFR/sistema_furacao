@@ -573,6 +573,50 @@ def obter_checklist_piloto_operacional(empresa=None):
     }
 
 
+def obter_roteiro_piloto_operacional():
+    fases = [
+        {
+            "numero": 1,
+            "titulo": "Preparar base real",
+            "descricao": "Criar empresa, projeto, 2 furos, 2 empregados aprovados e 1 máquina ativa.",
+            "resultado": "Equipa consegue iniciar uma frente real sem depender de módulos comerciais.",
+        },
+        {
+            "numero": 2,
+            "titulo": "Simular um turno completo",
+            "descricao": "Registar configuração do furo, produção diária, materiais usados, medição técnica e uma ocorrência/avaria.",
+            "resultado": "O trabalho de terreno fica rastreável do furo ao relatório técnico.",
+        },
+        {
+            "numero": 3,
+            "titulo": "Validar leitura de gestão",
+            "descricao": "Abrir dashboard, lista de registos, detalhe do furo e relatório/exportação técnica.",
+            "resultado": "Admin consegue perceber estado, produtividade, problemas e dados de suporte.",
+        },
+        {
+            "numero": 4,
+            "titulo": "Decidir go/no-go",
+            "descricao": "Confirmar se o fluxo serve uma operação piloto real antes de reativar finanças/ERP no menu principal.",
+            "resultado": "Decisão objetiva: avançar, corrigir bloqueios ou manter piloto controlado.",
+        },
+    ]
+    criterios_go = [
+        "Checklist do piloto com pelo menos 80% concluído.",
+        "Um empregado consegue fechar o turno sem ajuda técnica.",
+        "Admin consegue consultar furo, registos, materiais, medições e relatório técnico.",
+    ]
+    criterios_no_go = [
+        "Criação de furo/registo exige demasiados campos sem valor imediato.",
+        "Dados essenciais do terreno ficam espalhados ou difíceis de encontrar.",
+        "Relatório técnico não explica claramente o que aconteceu no turno.",
+    ]
+    return {
+        "fases": fases,
+        "criterios_go": criterios_go,
+        "criterios_no_go": criterios_no_go,
+    }
+
+
 
 def obter_alertas_dashboard(inicio=None, fim=None, projeto_id=None, empregado_id=None, empresa=None):
     materiais_stock_baixo = Material.objects.filter(

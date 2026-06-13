@@ -14,6 +14,7 @@ from projetos.selectors.dashboard import (
     obter_graficos_dashboard,
     obter_intervalo_filtros,
     obter_opcoes_filtros_dashboard,
+    obter_roteiro_piloto_operacional,
     resolver_empresa_contexto_global_dashboard,
 )
 from projetos.selectors.projetos import obter_projetos_mapa
@@ -186,6 +187,7 @@ def montar_contexto_dashboard(*, request, contexto_admin, incluir_mapa=False):
             )
         )
         context["mvp_piloto"] = obter_checklist_piloto_operacional(empresa=empresa)
+        context["mvp_roteiro_piloto"] = obter_roteiro_piloto_operacional()
         context.update(
             obter_alertas_dashboard(
                 inicio=inicio,

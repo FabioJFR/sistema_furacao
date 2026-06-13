@@ -215,6 +215,126 @@
     background: linear-gradient(90deg, #06b6d4, #16a34a);
 }
 
+.dsh-mvp-roadmap-card {
+    margin-bottom: 24px;
+    padding: 22px;
+    border: 1px solid #d9f99d;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at top right, rgba(132, 204, 22, 0.18), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.dsh-mvp-roadmap-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.dsh-mvp-roadmap-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #365314;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(54, 83, 20, 0.22);
+}
+
+.dsh-mvp-roadmap-primary:hover {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.dsh-mvp-roadmap-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.dsh-mvp-roadmap-step {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.dsh-mvp-roadmap-step span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
+    border-radius: 999px;
+    background: #ecfccb;
+    color: #3f6212;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dsh-mvp-roadmap-step strong,
+.dsh-mvp-decision-card strong {
+    display: block;
+    color: #0f172a;
+    font-size: 15px;
+}
+
+.dsh-mvp-roadmap-step p {
+    margin: 8px 0 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dsh-mvp-roadmap-step em {
+    display: block;
+    margin-top: 10px;
+    color: #166534;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.dsh-mvp-decision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.dsh-mvp-decision-card {
+    padding: 16px;
+    border-radius: 18px;
+    background: #fff;
+}
+
+.dsh-mvp-decision-card.is-go {
+    border: 1px solid #86efac;
+}
+
+.dsh-mvp-decision-card.is-no-go {
+    border: 1px solid #fed7aa;
+}
+
+.dsh-mvp-decision-card ul {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 .dsh-grid-estrutura,
 .dsh-grid-operacional {
     display: grid;
@@ -386,6 +506,14 @@
     }
 
     .dsh-mvp-progress-score {
+        width: 100%;
+    }
+
+    .dsh-mvp-roadmap-head {
+        display: grid;
+    }
+
+    .dsh-mvp-roadmap-primary {
         width: 100%;
     }
 }

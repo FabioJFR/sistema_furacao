@@ -45,6 +45,24 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
                     },
                 ],
             },
+            "mvp_roteiro_piloto": {
+                "fases": [
+                    {
+                        "numero": 1,
+                        "titulo": "Preparar base real",
+                        "descricao": "Criar empresa, projeto, furos, empregados e máquina.",
+                        "resultado": "Equipa pronta para iniciar piloto.",
+                    },
+                    {
+                        "numero": 2,
+                        "titulo": "Simular um turno completo",
+                        "descricao": "Registar produção, materiais, medição e ocorrência.",
+                        "resultado": "Turno rastreável.",
+                    },
+                ],
+                "criterios_go": ["Checklist do piloto com pelo menos 80% concluído."],
+                "criterios_no_go": ["Relatório técnico não explica claramente o turno."],
+            },
             "projetos": [],
         }
 
@@ -66,6 +84,10 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
         self.assertIn("Medições", html)
         self.assertIn("1 projeto criado", html)
         self.assertIn("Relatório técnico exportável", html)
+        self.assertIn("Como validar o MVP em dados reais", html)
+        self.assertIn("Preparar base real", html)
+        self.assertIn("Go: avançar piloto", html)
+        self.assertIn("No-go: corrigir antes", html)
 
     def test_dashboard_empresa_modo_completo_nao_mostra_centro_mvp(self):
         html = render_to_string(
@@ -75,3 +97,4 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
 
         self.assertNotIn("MVP operacional", html)
         self.assertNotIn("Painel de controlo do terreno", html)
+        self.assertNotIn("Como validar o MVP em dados reais", html)
