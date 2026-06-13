@@ -9,6 +9,7 @@ from plataforma.selectors.riscos_deploy import (
     listar_resumo_riscos_deploy,
     listar_riscos_deploy,
     listar_smoke_test_piloto_mvp,
+    listar_tickets_friccoes_piloto_mvp,
 )
 
 
@@ -25,5 +26,6 @@ def riscos_deploy_dashboard(request):
         "checklist_pre_deploy": listar_checklist_pre_deploy(),
         "checklist_pos_deploy": listar_checklist_pos_deploy(),
         "smoke_test_piloto_mvp": listar_smoke_test_piloto_mvp(),
+        "tickets_friccoes_piloto_mvp": listar_tickets_friccoes_piloto_mvp(),
     }
     return render(request, "plataforma/riscos_deploy.html", context)

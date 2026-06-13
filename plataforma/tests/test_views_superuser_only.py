@@ -3,7 +3,10 @@ from django.test import TestCase
 from django.urls import reverse
 
 from plataforma.models import Empresa, PerfilPlataforma
-from plataforma.selectors.riscos_deploy import listar_smoke_test_piloto_mvp
+from plataforma.selectors.riscos_deploy import (
+    listar_smoke_test_piloto_mvp,
+    listar_tickets_friccoes_piloto_mvp,
+)
 
 
 class PlataformaSuperuserOnlyViewsTests(TestCase):
@@ -51,6 +54,8 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertContains(response_riscos, "Smoke test do piloto após deploy")
         self.assertContains(response_riscos, "Criar furo")
         self.assertContains(response_riscos, "Gerar relatório técnico")
+        self.assertContains(response_riscos, "Matriz de tickets por fricção do piloto")
+        self.assertContains(response_riscos, "Simplificar formulário de registo diário")
 
     def test_smoke_test_piloto_mvp_define_fluxo_operacional_completo(self):
         passos = listar_smoke_test_piloto_mvp()
@@ -59,6 +64,17 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertEqual(passos[0]["passo"], "Criar projeto")
         self.assertIn("sem exigir campos técnicos completos", passos[1]["resultado"])
         self.assertEqual(passos[-1]["passo"], "Gerar relatório técnico")
+
+    def test_tickets_friccoes_piloto_mvp_cobrem_fluxos_criticos(self):
+        tickets = listar_tickets_friccoes_piloto_mvp()
+        fluxos = {item["fluxo"] for item in tickets}
+
+        self.assertEqual(len(tickets), 6)
+        self.assertSetEqual(
+            fluxos,
+            {"Criação", "Turno", "Materiais", "Medições", "Relatório", "Permissões"},
+        )
+        self.assertIn("regressão de permissão", tickets[-1]["ticket"])
 
     def test_platform_admin_nao_superuser_nao_acede_features_nem_riscos(self):
         user = self._criar_user_com_perfil(

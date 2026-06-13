@@ -73,6 +73,41 @@
         </div>
     </section>
 
+    <section class="deploy-risk-friction-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Após o smoke test" %}</div>
+                <h2>{% trans "Matriz de tickets por fricção do piloto" %}</h2>
+            </div>
+            <p>{% trans "Quando uma etapa falhar ou demorar demasiado, classifica a fricção por fluxo e cria uma tarefa pequena com dono e prioridade claros." %}</p>
+        </div>
+
+        <div class="deploy-risk-table-wrap">
+            <table class="deploy-risk-table deploy-risk-friction-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Fluxo" %}</th>
+                        <th>{% trans "Sintoma observado" %}</th>
+                        <th>{% trans "Ticket sugerido" %}</th>
+                        <th>{% trans "Prioridade" %}</th>
+                        <th>{% trans "Dono" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in tickets_friccoes_piloto_mvp %}
+                        <tr>
+                            <td class="deploy-risk-title">{{ item.fluxo }}</td>
+                            <td>{{ item.sintoma }}</td>
+                            <td>{{ item.ticket }}</td>
+                            <td><span class="deploy-risk-pill deploy-risk-pill-prioridade">{{ item.prioridade }}</span></td>
+                            <td>{{ item.dono }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <section class="deploy-risk-table-card">
         <div class="deploy-risk-table-head">
             <div>

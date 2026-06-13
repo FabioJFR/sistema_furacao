@@ -149,3 +149,50 @@ def listar_smoke_test_piloto_mvp():
             "evidencia": "Página de relatório/exportação técnica carregada sem erro.",
         },
     ]
+
+
+def listar_tickets_friccoes_piloto_mvp():
+    return [
+        {
+            "fluxo": "Criação",
+            "sintoma": "Projeto, furo, empregado ou máquina demora mais de 2 minutos a criar.",
+            "ticket": "Reduzir campos obrigatórios, melhorar defaults ou separar campos avançados.",
+            "prioridade": "Alta",
+            "dono": "Produto / Backend",
+        },
+        {
+            "fluxo": "Turno",
+            "sintoma": "Empregado não percebe onde lançar registo, paragem, metros ou observações.",
+            "ticket": "Simplificar formulário de registo diário e melhorar orientação contextual do turno.",
+            "prioridade": "Alta",
+            "dono": "Produto / UX / Backend",
+        },
+        {
+            "fluxo": "Materiais",
+            "sintoma": "Material ou movimento de stock não fica claramente associado a projeto/furo.",
+            "ticket": "Rever ligação material-projeto-furo e mensagens de confirmação de stock.",
+            "prioridade": "Média-alta",
+            "dono": "Operação / Backend",
+        },
+        {
+            "fluxo": "Medições",
+            "sintoma": "Medição não herda contexto do furo ou não aparece onde o utilizador espera.",
+            "ticket": "Rever detalhe do furo, lista de medições e defaults técnicos da medição.",
+            "prioridade": "Média-alta",
+            "dono": "Produto / Backend",
+        },
+        {
+            "fluxo": "Relatório",
+            "sintoma": "Relatório técnico não explica o turno ou exige dados financeiros/comerciais.",
+            "ticket": "Separar relatório técnico do modo completo e melhorar campos mínimos do relatório.",
+            "prioridade": "Alta",
+            "dono": "Produto / Relatórios",
+        },
+        {
+            "fluxo": "Permissões",
+            "sintoma": "Admin, empregado ou conta individual vê ações erradas ou fica bloqueado sem motivo claro.",
+            "ticket": "Adicionar regressão de permissão por perfil e mensagem de bloqueio mais explícita.",
+            "prioridade": "Alta",
+            "dono": "Backend / QA",
+        },
+    ]

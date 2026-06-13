@@ -599,11 +599,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · ROTEIRO PILOTO] Dashboard da empresa passa a incluir roteiro de teste com fases, critérios de sucesso e decisão go/no-go para validar dados reais antes de reativar módulos pós-MVP no fluxo principal.",
             "CONCLUIDO · [MVP · CORE FORMULARIOS] Defaults/fallbacks operacionais adicionados aos formulários críticos: furo pode arrancar só com projeto, máquina assume sonda operacional ativa, registo vem com data/zeros e medição sugere profundidade atual do furo.",
             "CONCLUIDO · [MVP · QUALIDADE] `Riscos de Deploy` passa a incluir smoke test/manual checklist do piloto para validar projeto, furo, empregado, máquina, registo, materiais, medição e relatório técnico após deploy.",
+            "CONCLUIDO · [MVP · FRIÇÕES] `Riscos de Deploy` passa a ter matriz para converter fricções do smoke test em tickets pequenos por fluxo: criação, turno, materiais, medições, relatório e permissões.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
-            "[MVP · PILOTO] Executar o roteiro/smoke test com dados reais de uma empresa e registar fricções de campo antes de abrir novas frentes comerciais/financeiras.",
-            "[MVP · QUALIDADE] Converter as fricções encontradas no smoke test em tickets pequenos por fluxo: criação, turno, materiais, medições, relatório e permissões.",
+            "[MVP · PILOTO] Executar o roteiro/smoke test no servidor com dados reais de uma empresa e registar fricções de campo antes de abrir novas frentes comerciais/financeiras.",
+            "[MVP · DECISÃO] Rever resultado do piloto com critério go/no-go: se o fluxo de terreno for autónomo, preparar próxima release; se não, corrigir tickets críticos antes de crescer.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",
