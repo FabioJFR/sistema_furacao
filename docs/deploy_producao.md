@@ -84,6 +84,19 @@ sudo systemctl restart nginx
 sudo systemctl enable --now sf-relatorios-agendados.timer
 ```
 
+## 5.1) Rotação de logs
+
+```bash
+sudo cp deploy/logrotate/sistema_furacao /etc/logrotate.d/sistema_furacao
+sudo logrotate -d /etc/logrotate.d/sistema_furacao
+sudo logrotate -f /etc/logrotate.d/sistema_furacao
+```
+
+A configuração roda diariamente:
+
+- `/var/www/sistema_furacao/logs/*.log` com retenção de 14 dias.
+- `/var/log/nginx/sistema_furacao*.log` com retenção de 30 dias.
+
 ## 6) Verificação rápida
 
 ```bash

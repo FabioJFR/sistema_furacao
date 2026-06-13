@@ -69,6 +69,26 @@
         </div>
     </section>
 
+    <section class="deploy-risk-command-card deploy-risk-log-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Logs e retenção" %}</div>
+                <h2>{% trans "Rotação automática de logs" %}</h2>
+            </div>
+            <p>{% trans "Instala esta configuração no servidor para evitar crescimento indefinido dos logs e manter histórico comprimido com retenção definida." %}</p>
+        </div>
+
+        <div class="deploy-risk-command-grid">
+            {% for item in comandos_logrotate %}
+                <article class="deploy-risk-command-step">
+                    <strong>{{ item.titulo }}</strong>
+                    <code>{{ item.comando }}</code>
+                    <p>{{ item.descricao }}</p>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-smoke-card">
         <div class="deploy-risk-table-head">
             <div>

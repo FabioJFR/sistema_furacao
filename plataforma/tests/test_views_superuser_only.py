@@ -5,6 +5,7 @@ from django.urls import reverse
 from plataforma.models import Empresa, PerfilPlataforma
 from plataforma.selectors.riscos_deploy import (
     listar_comandos_deploy_operacional,
+    listar_comandos_logrotate,
     listar_smoke_test_piloto_mvp,
     listar_tickets_friccoes_piloto_mvp,
 )
@@ -55,6 +56,8 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertContains(response_riscos, "Script operacional de deploy")
         self.assertContains(response_riscos, "DRY_RUN=1 bash deploy/deploy_operacional.sh")
         self.assertContains(response_riscos, "ROLLBACK_ON_ERROR=1")
+        self.assertContains(response_riscos, "Rotação automática de logs")
+        self.assertContains(response_riscos, "sudo logrotate -d /etc/logrotate.d/sistema_furacao")
         self.assertContains(response_riscos, "Smoke test do piloto após deploy")
         self.assertContains(response_riscos, "Criar furo")
         self.assertContains(response_riscos, "Gerar relatório técnico")
@@ -88,6 +91,14 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertIn("BASE_URL=https://sistemafuracao.pt", comandos[1]["comando"])
         self.assertIn("BACKUP_CMD", comandos[2]["comando"])
         self.assertIn("ROLLBACK_ON_ERROR=1", comandos[2]["comando"])
+
+    def test_comandos_logrotate_incluem_instalacao_validacao_e_rotacao(self):
+        comandos = listar_comandos_logrotate()
+
+        self.assertEqual(len(comandos), 3)
+        self.assertIn("cp deploy/logrotate/sistema_furacao", comandos[0]["comando"])
+        self.assertIn("logrotate -d", comandos[1]["comando"])
+        self.assertIn("logrotate -f", comandos[2]["comando"])
 
     def test_platform_admin_nao_superuser_nao_acede_features_nem_riscos(self):
         user = self._criar_user_com_perfil(

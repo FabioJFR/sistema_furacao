@@ -480,6 +480,13 @@ DRY_RUN=0 BASE_URL=https://sistemafuracao.pt bash deploy/deploy_operacional.sh
 Por defeito o script corre em `DRY_RUN=1`, mostrando os comandos sem os executar. Para produção, confirmar backup e variáveis de ambiente antes de usar `DRY_RUN=0`.
 Rollback automático fica desligado por defeito; se for necessário, configurar `ROLLBACK_ON_ERROR=1` e `ROLLBACK_CMD` com um plano validado antes da janela de deploy.
 
+Rotação de logs no servidor:
+
+```bash
+sudo cp deploy/logrotate/sistema_furacao /etc/logrotate.d/sistema_furacao
+sudo logrotate -d /etc/logrotate.d/sistema_furacao
+```
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

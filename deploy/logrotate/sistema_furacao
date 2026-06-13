@@ -1,0 +1,27 @@
+/var/www/sistema_furacao/logs/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    create 0640 ubuntu www-data
+    sharedscripts
+    postrotate
+        systemctl reload sistema_furacao >/dev/null 2>&1 || true
+    endscript
+}
+
+/var/log/nginx/sistema_furacao*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        systemctl reload nginx >/dev/null 2>&1 || true
+    endscript
+}

@@ -118,6 +118,26 @@ def listar_comandos_deploy_operacional():
     ]
 
 
+def listar_comandos_logrotate():
+    return [
+        {
+            "titulo": "Instalar configuração",
+            "comando": "sudo cp deploy/logrotate/sistema_furacao /etc/logrotate.d/sistema_furacao",
+            "descricao": "Ativa rotação diária dos logs Django e Nginx do Sistema Furação.",
+        },
+        {
+            "titulo": "Validar sintaxe",
+            "comando": "sudo logrotate -d /etc/logrotate.d/sistema_furacao",
+            "descricao": "Simula a rotação e mostra o que aconteceria sem alterar ficheiros.",
+        },
+        {
+            "titulo": "Forçar rotação controlada",
+            "comando": "sudo logrotate -f /etc/logrotate.d/sistema_furacao",
+            "descricao": "Executa rotação imediata após validar sintaxe e permissões.",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {
