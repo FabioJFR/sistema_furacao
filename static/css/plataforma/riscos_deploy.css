@@ -7,6 +7,7 @@
 
 .deploy-risk-note-card,
 .deploy-risk-card,
+.deploy-risk-smoke-card,
 .deploy-risk-table-card {
     background: var(--card, #ffffff);
     border: 1px solid var(--border, #e5e7eb);
@@ -41,6 +42,66 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
     margin-bottom: 24px;
+}
+
+.deploy-risk-smoke-card {
+    margin-bottom: 24px;
+    background:
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+}
+
+.deploy-risk-smoke-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.deploy-risk-smoke-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    border: 1px solid #dbeafe;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.deploy-risk-smoke-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.deploy-risk-smoke-step h3 {
+    margin: 0 0 8px;
+    color: #173e66;
+    font-size: 1rem;
+}
+
+.deploy-risk-smoke-step p,
+.deploy-risk-smoke-step small {
+    display: block;
+    margin: 0;
+    color: #42566f;
+    line-height: 1.55;
+}
+
+.deploy-risk-smoke-step p + p,
+.deploy-risk-smoke-step small {
+    margin-top: 6px;
+}
+
+.deploy-risk-smoke-step strong {
+    color: #0f172a;
 }
 
 .deploy-risk-card h2,

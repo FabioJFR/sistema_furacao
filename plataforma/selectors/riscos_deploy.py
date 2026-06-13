@@ -96,3 +96,56 @@ def listar_checklist_pos_deploy():
         "Testar um upload real e uma rota protegida por permissões.",
         "Registar qualquer anomalia e respetiva mitigação antes de fechar o deploy.",
     ]
+
+
+def listar_smoke_test_piloto_mvp():
+    return [
+        {
+            "passo": "Criar projeto",
+            "acao": "Entrar como empresa/admin e criar um projeto real com o mínimo de dados.",
+            "resultado": "Projeto aparece na lista e fica disponível para furos, máquinas, materiais e registos.",
+            "evidencia": "URL/detalhe do projeto ou captura da lista.",
+        },
+        {
+            "passo": "Criar furo",
+            "acao": "Criar um furo associado ao projeto usando os defaults do MVP.",
+            "resultado": "Furo grava sem exigir campos técnicos completos e mantém configuração técnica editável.",
+            "evidencia": "Detalhe do furo com configuração de início visível.",
+        },
+        {
+            "passo": "Criar empregado",
+            "acao": "Criar ou aprovar um empregado e confirmar acesso à Minha Área.",
+            "resultado": "Empregado vê furos/ações de turno e consegue iniciar registo operacional.",
+            "evidencia": "Minha Área do empregado com atalhos de furo, registo, materiais e medições.",
+        },
+        {
+            "passo": "Criar máquina",
+            "acao": "Registar uma máquina/sonda operacional e associar depois ao projeto/furo se necessário.",
+            "resultado": "Máquina fica ativa, operacional e visível para operação/avarias.",
+            "evidencia": "Lista/detalhe de máquinas com estado operacional.",
+        },
+        {
+            "passo": "Lançar registo diário",
+            "acao": "Criar um registo diário com projeto, furo, data, metros/observações e, se aplicável, paragem.",
+            "resultado": "Registo aparece na área de produção e alimenta dashboard/relatório técnico.",
+            "evidencia": "Registo criado e total de registos no dashboard atualizado.",
+        },
+        {
+            "passo": "Validar materiais",
+            "acao": "Criar material e testar entrada/levantamento/devolução mínima do fluxo.",
+            "resultado": "Material fica rastreável por projeto/furo e quantidade é apresentada corretamente.",
+            "evidencia": "Lista de materiais ou movimento de stock criado.",
+        },
+        {
+            "passo": "Registar medição",
+            "acao": "Criar uma medição no furo usando a profundidade sugerida e uma observação técnica.",
+            "resultado": "Medição guarda snapshot do furo e aparece no histórico/detalhe técnico.",
+            "evidencia": "Medição visível no furo ou lista de medições.",
+        },
+        {
+            "passo": "Gerar relatório técnico",
+            "acao": "Abrir relatórios do turno/exportação técnica após o registo diário.",
+            "resultado": "Admin consegue consultar/exportar dados técnicos sem depender de módulos financeiros.",
+            "evidencia": "Página de relatório/exportação técnica carregada sem erro.",
+        },
+    ]

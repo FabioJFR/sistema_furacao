@@ -49,6 +49,30 @@
         </article>
     </section>
 
+    <section class="deploy-risk-smoke-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "MVP operacional" %}</div>
+                <h2>{% trans "Smoke test do piloto após deploy" %}</h2>
+            </div>
+            <p>{% trans "Executa esta sequência numa empresa real ou de validação antes de abrir módulos pós-MVP no fluxo principal." %}</p>
+        </div>
+
+        <div class="deploy-risk-smoke-grid">
+            {% for item in smoke_test_piloto_mvp %}
+                <article class="deploy-risk-smoke-step">
+                    <span class="deploy-risk-smoke-index">{{ forloop.counter }}</span>
+                    <div>
+                        <h3>{{ item.passo }}</h3>
+                        <p><strong>{% trans "Ação:" %}</strong> {{ item.acao }}</p>
+                        <p><strong>{% trans "Resultado:" %}</strong> {{ item.resultado }}</p>
+                        <small><strong>{% trans "Evidência:" %}</strong> {{ item.evidencia }}</small>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-table-card">
         <div class="deploy-risk-table-head">
             <div>
