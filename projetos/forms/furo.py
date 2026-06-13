@@ -48,6 +48,49 @@ def _adicionar_erro_valor_negativo(form, campo_nome, valor, mensagem="O valor n�
         form.add_error(campo_nome, mensagem)
 
 
+def _configurar_defaults_piloto_furo(form, *, campos_opcionais=None):
+    campos_opcionais = campos_opcionais or []
+    defaults = {
+        "nome": "Furo",
+        "tipo": "fundo",
+        "estado": "ativo",
+        "profundidade_inicial": 0,
+        "profundidade_alvo_inicial": 0,
+        "profundidade_alvo_atual": 0,
+        "profundidade_atual": 0,
+        "profundidade_maxima_atingida": 0,
+        "inclinacao_planeada_inicial": 0,
+        "inclinacao_planeada_atual": 0,
+        "azimute_planeado_inicial": 0,
+        "azimute_planeado_atual": 0,
+        "inclinacao_real_atual": 0,
+        "azimute_real_atual": 0,
+        "magnetismo": 0,
+        "origem_este": 0,
+        "origem_norte": 0,
+        "origem_tvd": 0,
+        "sistema_coordenadas": "local",
+    }
+    help_texts = {
+        "nome": "Pode ajustar depois. O importante é identificar o furo no terreno.",
+        "profundidade_alvo_inicial": "Se ainda não houver alvo final confirmado, deixa 0 e atualiza após validação técnica.",
+        "inclinacao_planeada_inicial": "Para furos de superfície usa valor negativo; para fundo pode ficar 0 no arranque.",
+        "azimute_planeado_inicial": "Pode ficar 0 no piloto se ainda não foi medido/confirmado.",
+        "magnetismo": "Opcional no primeiro registo; atualiza quando houver leitura real.",
+        "sistema_coordenadas": "Usa Local no arranque, salvo se já trabalhas com UTM/WGS84.",
+        "detalhes": "Opcional: notas de terreno, referência da zona ou instruções iniciais.",
+    }
+    for campo, valor in defaults.items():
+        if campo in form.fields and form.fields[campo].initial in (None, ""):
+            form.fields[campo].initial = valor
+    for campo in campos_opcionais:
+        if campo in form.fields:
+            form.fields[campo].required = False
+    for campo, texto in help_texts.items():
+        if campo in form.fields:
+            form.fields[campo].help_text = texto
+
+
 def _validar_inclinacao_por_tipo(form, cleaned_data):
     erros = validar_inclinacoes_por_tipo_furo(
         tipo=cleaned_data.get("tipo"),
@@ -66,6 +109,7 @@ class BaseFuroForm(forms.ModelForm):
 
         _atribuir_empresa_furo(self.instance, empresa=self.empresa)
         self.fields["projeto"].queryset = _obter_queryset_projetos_empresa(self.empresa)
+        self.fields["projeto"].help_text = "Escolhe a frente de trabalho onde este furo será acompanhado."
 
     def _validar_empresa_projeto(self, projeto):
         empresa_id = _resolver_empresa_id(self.empresa) if self.empresa is not None else None
@@ -85,6 +129,31 @@ class BaseFuroForm(forms.ModelForm):
 
 
 class FuroForm(BaseFuroForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _configurar_defaults_piloto_furo(
+            self,
+            campos_opcionais=[
+                "profundidade_alvo_atual",
+                "profundidade_atual",
+                "profundidade_maxima_atingida",
+                "inclinacao_planeada_atual",
+                "azimute_planeado_atual",
+                "inclinacao_real_atual",
+                "azimute_real_atual",
+                "magnetismo",
+                "latitude",
+                "longitude",
+                "altitude",
+                "origem_este",
+                "origem_norte",
+                "origem_tvd",
+                "localizacao",
+                "local_sondagem",
+                "detalhes",
+            ],
+        )
+
     class Meta:
         model = Furo
         fields = [
@@ -199,6 +268,32 @@ class FuroForm(BaseFuroForm):
 
 
 class FuroCreateForm(BaseFuroForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _configurar_defaults_piloto_furo(
+            self,
+            campos_opcionais=[
+                "tipo",
+                "nome",
+                "estado",
+                "profundidade_inicial",
+                "profundidade_alvo_inicial",
+                "inclinacao_planeada_inicial",
+                "azimute_planeado_inicial",
+                "magnetismo",
+                "latitude",
+                "longitude",
+                "altitude",
+                "origem_este",
+                "origem_norte",
+                "origem_tvd",
+                "sistema_coordenadas",
+                "localizacao",
+                "local_sondagem",
+                "detalhes",
+            ],
+        )
+
     class Meta:
         model = Furo
         fields = [
@@ -286,6 +381,27 @@ class FuroCreateForm(BaseFuroForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         _atribuir_empresa_furo(instance, empresa=self.empresa)
+
+        if not instance.nome:
+            instance.nome = "Furo"
+        if not instance.tipo:
+            instance.tipo = "fundo"
+        if not instance.estado:
+            instance.estado = "ativo"
+        if not instance.sistema_coordenadas:
+            instance.sistema_coordenadas = "local"
+        for campo in [
+            "profundidade_inicial",
+            "profundidade_alvo_inicial",
+            "inclinacao_planeada_inicial",
+            "azimute_planeado_inicial",
+            "magnetismo",
+            "origem_este",
+            "origem_norte",
+            "origem_tvd",
+        ]:
+            if getattr(instance, campo) is None:
+                setattr(instance, campo, 0)
 
         instance.profundidade_alvo_atual = instance.profundidade_alvo_inicial
         instance.inclinacao_planeada_atual = instance.inclinacao_planeada_inicial

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 
 from ..models.maquina import Maquina, MaquinaTurno
 
@@ -131,6 +132,29 @@ class MaquinaForm(forms.ModelForm):
                 empresa_id=empresa_id
             ).order_by("nome")
 
+        for campo in ["projetos", "projeto_atual", "furos"]:
+            self.fields[campo].required = False
+        self.fields["estado"].required = False
+
+        defaults = {
+            "tipo": "Sonda",
+            "data_registo": timezone.localdate(),
+            "km": 0,
+            "horimetro": 0,
+            "valor": 0,
+            "estado": "operacional",
+            "ativo": True,
+        }
+        for campo, valor in defaults.items():
+            if campo in self.fields and self.fields[campo].initial in (None, ""):
+                self.fields[campo].initial = valor
+
+        self.fields["nome"].help_text = "Identificação usada no terreno. Ex.: Sonda 1, Atlas Copco 2."
+        self.fields["projetos"].help_text = "Opcional no primeiro registo; podes associar projetos/furos depois."
+        self.fields["furos"].help_text = "Opcional no arranque do MVP."
+        self.fields["estado"].help_text = "No piloto, assume Operacional salvo se a máquina já entrou avariada/parada."
+        self.fields["horimetro"].help_text = "Se ainda não houver leitura, deixa 0 e atualiza no primeiro turno."
+
     def clean_km(self):
         valor = self.cleaned_data.get("km")
         if valor is not None and valor < 0:
@@ -210,6 +234,29 @@ class MaquinaForm(forms.ModelForm):
             self.add_error("data_revisao", "A revisão não pode ser anterior à compra.")
 
         return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        _atribuir_empresa_maquina(instance, empresa=self.empresa)
+
+        if not instance.tipo:
+            instance.tipo = "Sonda"
+        if not instance.data_registo:
+            instance.data_registo = timezone.localdate()
+        if instance.km is None:
+            instance.km = 0
+        if instance.horimetro is None:
+            instance.horimetro = 0
+        if instance.valor is None:
+            instance.valor = 0
+        if not instance.estado:
+            instance.estado = "operacional"
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        return instance
 
 
 class MaquinaTurnoForm(forms.ModelForm):

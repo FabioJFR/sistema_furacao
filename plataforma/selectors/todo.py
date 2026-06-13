@@ -597,11 +597,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [MVP · CHECKLIST PILOTO] Dashboard da empresa passa a mostrar progresso real da validação mínima do piloto operacional: empresa, projeto, 2 furos, 2 empregados, máquina, registos, medições, avarias, materiais e relatório técnico.",
             "CONCLUIDO · [MVP · FORMULARIOS] Primeira orientação de uso adicionada aos formulários críticos do piloto (`Projeto`, `Furo`, `Empregado`, `Máquina`, `Registo Diário` e `Medição`) para reduzir fricção no arranque.",
             "CONCLUIDO · [MVP · ROTEIRO PILOTO] Dashboard da empresa passa a incluir roteiro de teste com fases, critérios de sucesso e decisão go/no-go para validar dados reais antes de reativar módulos pós-MVP no fluxo principal.",
+            "CONCLUIDO · [MVP · CORE FORMULARIOS] Defaults/fallbacks operacionais adicionados aos formulários críticos: furo pode arrancar só com projeto, máquina assume sonda operacional ativa, registo vem com data/zeros e medição sugere profundidade atual do furo.",
         ],
         "proximos_passos": [
             "[MVP · POS-MVP] Manter despesas, salários, preço por metro, clientes/contratos, compras, compliance e relatórios executivos como módulos opcionais, sem os promover no fluxo principal até validação do MVP de terreno.",
-            "[MVP · CORE] Rever obrigatoriedade/defaults dos campos nos formulários críticos do piloto para permitir criação rápida sem perder qualidade técnica.",
             "[MVP · PILOTO] Executar o roteiro com dados reais de uma empresa e registar fricções de campo antes de abrir novas frentes comerciais/financeiras.",
+            "[MVP · QUALIDADE] Criar smoke test/manual checklist de piloto para validar criação de projeto, furo, máquina, empregado, registo, material, medição e relatório técnico após deploy.",
         ],
         "falta_fazer": [
             "Funil completo de aquisição e retenção com eventos de produto padronizados.",

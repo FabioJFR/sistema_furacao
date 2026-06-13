@@ -307,6 +307,14 @@ class EmpregadoCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.empresa = empresa
         _atribuir_empresa_instance(self.instance, empresa=self.empresa)
+        self.fields["funcao"].required = False
+        self.fields["email"].required = False
+        self.fields["telefone"].required = False
+        self.fields["curriculo"].required = False
+        self.fields["nome"].help_text = "Para o MVP, basta identificar o trabalhador que vai operar no terreno."
+        self.fields["funcao"].help_text = "Opcional no arranque; podes completar função, salário e RH depois."
+        self.fields["email"].help_text = "Opcional se a conta for criada internamente agora e ativada mais tarde."
+        self.fields["curriculo"].help_text = "Documentação fica para pós-MVP ou validação administrativa."
 
     def clean(self):
         cleaned = super().clean()

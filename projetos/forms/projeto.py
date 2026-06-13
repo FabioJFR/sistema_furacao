@@ -33,6 +33,12 @@ class ProjetoForm(forms.ModelForm):
             if self.clientes_sugeridos:
                 self.fields["cliente"].widget.attrs["list"] = "projeto-cliente-sugestoes"
                 self.fields["cliente"].help_text = "Sugestões carregadas dos clientes já registados na empresa."
+        self.fields["nome"].help_text = "Para o MVP, basta um nome claro para abrir a frente de trabalho."
+        self.fields["cliente"].required = False
+        self.fields["cidade"].required = False
+        self.fields["pais"].required = False
+        self.fields["status"].initial = self.fields["status"].initial or "ativo"
+        self.fields["notas"].help_text = "Opcional: contexto útil para a equipa de terreno."
 
     class Meta:
         model = Projeto

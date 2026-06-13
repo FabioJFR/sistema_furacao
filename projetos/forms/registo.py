@@ -252,12 +252,17 @@ class RegistoDiarioForm(RegistoDiarioValidacoesMixin, forms.Form):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.empresa = empresa
+        if not self.is_bound:
+            self.fields["data"].initial = self.fields["data"].initial or timezone.localdate()
 
         if empresa is not None:
             empresa_id = _resolver_empresa_id(empresa)
             self.fields["empregado"].queryset = listar_empregados_empresa_qs(empresa_id)
             self.fields["projeto"].queryset = listar_projetos_empresa_qs(empresa_id)
             self.fields["furo"].queryset = listar_furos_empresa_qs(empresa_id)
+        self.fields["data"].help_text = "Por defeito fica hoje; altera apenas se estiveres a lançar um turno anterior."
+        self.fields["horas_paragem"].help_text = "Deixa 0 se não houve paragem."
+        self.fields["metros_furados"].help_text = "Pode ficar 0 se o turno foi preparação, manutenção ou ocorrência."
 
     def clean(self):
         cleaned_data = super().clean()
@@ -316,6 +321,21 @@ class BaseRegistoDiarioModelForm(RegistoDiarioValidacoesMixin, forms.ModelForm):
             "relatorio_foto": forms.FileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "observacoes": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.is_bound and self.instance._state.adding:
+            self.fields["data"].initial = self.fields["data"].initial or timezone.localdate()
+            self.fields["horas_paragem"].initial = 0
+            self.fields["metros_furados"].initial = 0
+
+        self.fields["planeamento_turno"].help_text = "Opcional: se existir planeamento, projeto/furo/horário são preenchidos a partir dele."
+        self.fields["projeto"].help_text = "Escolhe o projeto do turno; pode ser herdado do planeamento."
+        self.fields["furo"].help_text = "Escolhe o furo trabalhado; furos concluídos ficam ocultos em novos registos."
+        self.fields["data"].help_text = "Por defeito fica hoje; altera apenas se estiveres a lançar um turno anterior."
+        self.fields["horas_paragem"].help_text = "Deixa 0 se não houve paragem."
+        self.fields["metros_furados"].help_text = "Pode ficar 0 se o turno foi preparação, manutenção ou ocorrência."
+        self.fields["observacoes"].help_text = "Regista aqui contexto que ajude a explicar o turno no relatório técnico."
 
     def clean(self):
         cleaned = super().clean()

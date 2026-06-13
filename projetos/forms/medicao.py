@@ -27,6 +27,22 @@ class MedicaoForm(forms.ModelForm):
         self.empresa = empresa
 
         _atribuir_contexto_medicao(self.instance, furo=self.furo, empresa=self.empresa)
+        if self.furo is not None and not self.is_bound and self.instance._state.adding:
+            profundidade_atual = getattr(self.furo, "profundidade_atual", None)
+            profundidade_maxima = getattr(self.furo, "profundidade_maxima_atingida", None)
+            self.fields["profundidade_medida"].initial = (
+                profundidade_atual
+                if profundidade_atual not in (None, "")
+                else profundidade_maxima
+            )
+
+        self.fields["profundidade_medida"].required = True
+        self.fields["profundidade_medida"].help_text = "Campo mínimo da medição: profundidade onde a leitura/amostra foi feita."
+        self.fields["inclinacao_real_medida"].help_text = "Opcional se ainda não houver leitura de desvio."
+        self.fields["azimute_real_medido"].help_text = "Opcional se ainda não houver leitura de azimute."
+        self.fields["magnetismo"].help_text = "Opcional no primeiro uso; preenche quando houver leitura real."
+        self.fields["tipo_rocha"].help_text = "Opcional: descrição simples da rocha/amostra observada."
+        self.fields["observacoes"].help_text = "Notas livres para ajudar a interpretar a medição no relatório."
 
     class Meta:
         model = Medicao
