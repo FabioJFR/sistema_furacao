@@ -498,6 +498,18 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now sf-backup-operacional.timer sf-restore-test-operacional.timer
 ```
 
+Alertas de disponibilidade e erros 5xx:
+
+```bash
+DRY_RUN=1 bash deploy/monitor_disponibilidade.sh
+DRY_RUN=0 BASE_URL=https://sistemafuracao.pt MAX_5XX_RESPONSES=5 bash deploy/monitor_disponibilidade.sh
+sudo cp deploy/systemd/sf-monitor-disponibilidade.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now sf-monitor-disponibilidade.timer
+```
+
+Para envio de alertas, configurar `SLACK_WEBHOOK_URL` e/ou `ALERT_EMAIL`; o timer corre a cada 5 minutos e respeita `ALERT_COOLDOWN_SECONDS`.
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

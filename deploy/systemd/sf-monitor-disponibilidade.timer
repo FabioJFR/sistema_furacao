@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer - Monitor disponibilidade e erros 5xx (Sistema Furacao)
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+Unit=sf-monitor-disponibilidade.service
+
+[Install]
+WantedBy=timers.target

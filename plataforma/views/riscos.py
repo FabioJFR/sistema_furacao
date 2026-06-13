@@ -9,6 +9,7 @@ from plataforma.selectors.riscos_deploy import (
     listar_comandos_backup_operacional,
     listar_comandos_deploy_operacional,
     listar_comandos_logrotate,
+    listar_comandos_monitorizacao_operacional,
     listar_resumo_riscos_deploy,
     listar_riscos_deploy,
     listar_smoke_test_piloto_mvp,
@@ -31,6 +32,7 @@ def riscos_deploy_dashboard(request):
         "comandos_backup_operacional": listar_comandos_backup_operacional(),
         "comandos_deploy_operacional": listar_comandos_deploy_operacional(),
         "comandos_logrotate": listar_comandos_logrotate(),
+        "comandos_monitorizacao_operacional": listar_comandos_monitorizacao_operacional(),
         "smoke_test_piloto_mvp": listar_smoke_test_piloto_mvp(),
         "tickets_friccoes_piloto_mvp": listar_tickets_friccoes_piloto_mvp(),
     }

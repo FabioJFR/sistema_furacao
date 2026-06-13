@@ -109,6 +109,26 @@
         </div>
     </section>
 
+    <section class="deploy-risk-command-card deploy-risk-monitor-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Disponibilidade" %}</div>
+                <h2>{% trans "Alertas de disponibilidade e erros 5xx" %}</h2>
+            </div>
+            <p>{% trans "Verifica páginas críticas, conta respostas 5xx no Nginx e dispara alerta por Slack/email quando os limiares forem ultrapassados." %}</p>
+        </div>
+
+        <div class="deploy-risk-command-grid">
+            {% for item in comandos_monitorizacao_operacional %}
+                <article class="deploy-risk-command-step">
+                    <strong>{{ item.titulo }}</strong>
+                    <code>{{ item.comando }}</code>
+                    <p>{{ item.descricao }}</p>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-smoke-card">
         <div class="deploy-risk-table-head">
             <div>

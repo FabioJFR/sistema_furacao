@@ -117,6 +117,27 @@ Por defeito, o backup cria uma pasta por execução em `/var/backups/sistema_fur
 
 O timer `sf-backup-operacional.timer` corre diariamente às 02:15 e o timer `sf-restore-test-operacional.timer` testa semanalmente o restore numa base temporária `sistema_furacao_restore_test`.
 
+## 5.3) Monitorização de disponibilidade e 5xx
+
+```bash
+DRY_RUN=1 bash deploy/monitor_disponibilidade.sh
+DRY_RUN=0 BASE_URL=https://sistemafuracao.pt MAX_5XX_RESPONSES=5 bash deploy/monitor_disponibilidade.sh
+sudo cp deploy/systemd/sf-monitor-disponibilidade.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now sf-monitor-disponibilidade.timer
+```
+
+Variáveis úteis:
+
+- `HEALTHCHECK_PATHS="/ /login/ /website/"` define páginas críticas.
+- `MAX_5XX_RESPONSES=5` define o limite de respostas 5xx nas últimas linhas do access log.
+- `LOG_TAIL_LINES=2000` define a janela de leitura do log Nginx.
+- `SLACK_WEBHOOK_URL` envia alerta para Slack quando configurado.
+- `ALERT_EMAIL` envia alerta por email se o servidor tiver `mail` configurado.
+- `ALERT_COOLDOWN_SECONDS=1800` evita spam de alertas repetidos.
+
+O timer `sf-monitor-disponibilidade.timer` corre a cada 5 minutos.
+
 ## 6) Verificação rápida
 
 ```bash

@@ -1,0 +1,13 @@
+[Unit]
+Description=Sistema Furacao - Monitor disponibilidade e erros 5xx
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=www-data
+WorkingDirectory=/var/www/sistema_furacao
+Environment="APP_DIR=/var/www/sistema_furacao"
+Environment="DRY_RUN=0"
+ExecStart=/usr/bin/env bash /var/www/sistema_furacao/deploy/monitor_disponibilidade.sh

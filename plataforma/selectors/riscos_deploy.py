@@ -163,6 +163,26 @@ def listar_comandos_backup_operacional():
     ]
 
 
+def listar_comandos_monitorizacao_operacional():
+    return [
+        {
+            "titulo": "Simular monitorização",
+            "comando": "DRY_RUN=1 bash deploy/monitor_disponibilidade.sh",
+            "descricao": "Mostra healthchecks HTTP e leitura de 5xx sem enviar alertas.",
+        },
+        {
+            "titulo": "Executar monitor",
+            "comando": "DRY_RUN=0 BASE_URL=https://sistemafuracao.pt MAX_5XX_RESPONSES=5 bash deploy/monitor_disponibilidade.sh",
+            "descricao": "Valida disponibilidade e dispara alerta se houver indisponibilidade ou 5xx acima do limite.",
+        },
+        {
+            "titulo": "Ativar timer",
+            "comando": "sudo cp deploy/systemd/sf-monitor-disponibilidade.* /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now sf-monitor-disponibilidade.timer",
+            "descricao": "Agenda execução a cada 5 minutos via systemd.",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {

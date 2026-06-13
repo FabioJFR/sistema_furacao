@@ -493,10 +493,10 @@ _AREAS_TODO = {
             "CONCLUIDO · [INFRA · HEALTHCHECK] Página `Riscos de Deploy`, README e docs de produção passam a expor comandos oficiais do deploy assistido e healthchecks pós-deploy.",
             "CONCLUIDO · [INFRA · LOGS] Configuração `deploy/logrotate/sistema_furacao` adicionada para rotação diária de logs Django/Nginx, com comandos de instalação/teste expostos em `Riscos de Deploy`, README e docs de produção.",
             "CONCLUIDO · [INFRA · BACKUP] Scripts `deploy/backup_operacional.sh` e `deploy/restore_test_operacional.sh` adicionados com `DRY_RUN`, retenção, manifest/checksums, teste de restore em base temporária e timers systemd para backup diário/restore semanal.",
+            "CONCLUIDO · [INFRA · MONITOR] Script `deploy/monitor_disponibilidade.sh` criado para healthchecks, threshold de respostas 5xx, cooldown e alerta opcional por Slack/email, com timer systemd e comandos expostos em `Riscos de Deploy`.",
         ],
         "proximos_passos": [
             "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
-            "Configurar alertas de disponibilidade e erros 5xx (email/Slack) com limiares claros.",
         ],
         "falta_fazer": [
             "CI/CD com ambiente de staging espelho da produção.",
