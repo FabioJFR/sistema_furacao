@@ -7,6 +7,7 @@ urlpatterns = [
     path("projetos/", include("projetos.url_patterns.projetos")),
     path("furos/", include("projetos.url_patterns.furos")),
     path("empregados/", include("projetos.url_patterns.empregados")),
+    path("equipas/", include("projetos.url_patterns.equipas")),
     path("materiais/", include("projetos.url_patterns.materiais")),
     path("maquinas/", include("projetos.url_patterns.maquinas")),
     path("registos/", include("projetos.url_patterns.registos")),

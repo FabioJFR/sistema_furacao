@@ -75,6 +75,7 @@ class PlatformAdminNavigationTests(SimpleTestCase):
         self.assertIn('aria-label="Abrir menu Operação"', html)
         self.assertIn('aria-label="Abrir menu Registos"', html)
         self.assertIn("Planeamento", html)
+        self.assertIn("Equipas", html)
         self.assertNotIn('aria-label="Abrir menu Gestão"', html)
         self.assertNotIn('aria-label="Abrir menu Finanças"', html)
         self.assertNotIn('aria-label="Abrir menu Analytics"', html)

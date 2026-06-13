@@ -4,6 +4,7 @@ from .furos import *
 from .medicoes import *
 from .maquinas import *
 from .empregados import *
+from .equipas import *
 from .registos import *
 from .materiais import *
 from .configuracao_perfuracao import *

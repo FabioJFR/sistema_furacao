@@ -1,0 +1,32 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Apagar equipa" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/equipas.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="eqp-page">
+    <div class="eqp-wrap eqp-wrap-narrow">
+        <div class="eqp-delete-card">
+            <div class="eqp-kicker">{% trans "Confirmar ação" %}</div>
+            <h1>{% trans "Apagar equipa" %}</h1>
+            <p>
+                {% blocktrans with nome=equipa.nome %}
+                    Tens a certeza que queres apagar a equipa "{{ nome }}"?
+                {% endblocktrans %}
+            </p>
+            <p class="eqp-muted">
+                {% trans "Esta ação remove apenas a equipa. Os empregados continuam registados na empresa." %}
+            </p>
+            <form method="post" class="eqp-form-actions">
+                {% csrf_token %}
+                <a href="{% url 'projetos:equipa_list' %}" class="eqp-btn">{% trans "Cancelar" %}</a>
+                <button type="submit" class="eqp-primary-btn eqp-primary-danger">{% trans "Apagar equipa" %}</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -107,6 +107,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [VALIDAÇÃO · STOCK] Levantamentos/devoluções com material inválido ou fora do queryset autorizado passam a devolver erro de formulário, evitando erro 500 durante `full_clean()`.",
             "CONCLUIDO · [PERMISSÕES · MÁQUINAS] Regressões adicionadas para isolamento multiempresa em listagem, detalhe, edição, remoção e gestão de turnos de máquina.",
             "CONCLUIDO · [VALIDAÇÃO · MÁQUINAS] POST direto com projeto/furo fora do queryset autorizado fica bloqueado no formulário e não cria máquina indevida.",
+            "CONCLUIDO · [OPERAÇÃO · EQUIPAS] Novo atalho `Equipas` no menu `Operação` da empresa, com CRUD para criar equipas, definir nome e selecionar membros entre empregados aprovados da própria empresa.",
             "Nova camada de separação aplicada em `views/despesas.py`: resolução de contexto (admin/individual) e submissão de formulários centralizadas.",
             "Nova camada adicional em `views/despesas.py`: update e delete administrativo agora também orquestrados por service (`processar_submissao_form_despesa_update` e `processar_acao_apagar_despesa`).",
             "Nova camada adicional em `views/despesas.py`: fluxos GET/POST de create/update (admin/individual) unificados em builder (`processar_fluxo_form_despesa`) no `services/despesas.py`.",

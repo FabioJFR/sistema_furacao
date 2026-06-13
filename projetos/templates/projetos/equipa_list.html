@@ -1,0 +1,73 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Equipas" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/equipas.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="eqp-page">
+    <div class="eqp-wrap">
+        <div class="eqp-hero">
+            <div>
+                <div class="eqp-kicker">{% trans "Operação" %}</div>
+                <h1 class="eqp-title">👥 {% trans "Equipas" %}</h1>
+                <p class="eqp-subtitle">
+                    {% trans "Cria equipas de trabalho e seleciona os empregados pertencentes a cada equipa." %}
+                </p>
+            </div>
+            <a href="{% url 'projetos:equipa_create' %}" class="eqp-primary-btn">
+                + {% trans "Criar Equipa" %}
+            </a>
+        </div>
+
+        {% if equipas %}
+            <div class="eqp-grid">
+                {% for equipa in equipas %}
+                    <article class="eqp-card">
+                        <div class="eqp-card-head">
+                            <div>
+                                <div class="eqp-card-label">{% trans "Equipa" %}</div>
+                                <h2>{{ equipa.nome }}</h2>
+                            </div>
+                            <span class="eqp-status {% if equipa.ativo %}is-active{% endif %}">
+                                {% if equipa.ativo %}{% trans "Ativa" %}{% else %}{% trans "Inativa" %}{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="eqp-members">
+                            {% for membro in equipa.membros.all %}
+                                <span class="eqp-member">{{ membro.nome }}</span>
+                            {% empty %}
+                                <span class="eqp-muted">{% trans "Sem membros associados." %}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="eqp-card-foot">
+                            <span>
+                                {% blocktrans count total=equipa.membros.count %}
+                                    {{ total }} membro
+                                {% plural %}
+                                    {{ total }} membros
+                                {% endblocktrans %}
+                            </span>
+                            <div class="eqp-actions">
+                                <a href="{% url 'projetos:equipa_update' equipa.pk %}" class="eqp-btn">{% trans "Editar" %}</a>
+                                <a href="{% url 'projetos:equipa_delete' equipa.pk %}" class="eqp-btn eqp-btn-danger">{% trans "Apagar" %}</a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="eqp-empty">
+                <strong>{% trans "Ainda não existem equipas." %}</strong>
+                <p>{% trans "Cria a primeira equipa e seleciona os empregados que fazem parte dela." %}</p>
+                <a href="{% url 'projetos:equipa_create' %}" class="eqp-primary-btn">{% trans "Criar primeira equipa" %}</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

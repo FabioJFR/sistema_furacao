@@ -1,0 +1,63 @@
+{% extends "projetos/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/projeto/equipas.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="eqp-page">
+    <div class="eqp-wrap eqp-wrap-narrow">
+        <div class="eqp-hero">
+            <div>
+                <a href="{% url 'projetos:equipa_list' %}" class="eqp-back">← {% trans "Voltar às equipas" %}</a>
+                <div class="eqp-kicker">{% trans "Operação" %}</div>
+                <h1 class="eqp-title">
+                    {% if is_create %}👥 {% trans "Criar equipa" %}{% else %}✏️ {% trans "Editar equipa" %}{% endif %}
+                </h1>
+                <p class="eqp-subtitle">
+                    {% trans "Define o nome da equipa e seleciona os empregados da empresa que pertencem a ela." %}
+                </p>
+            </div>
+        </div>
+
+        <form method="post" class="eqp-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="eqp-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="eqp-form-card">
+                <div class="eqp-field">
+                    <label for="{{ form.nome.id_for_label }}">{% trans "Nome da equipa" %}</label>
+                    {{ form.nome }}
+                    {% if form.nome.help_text %}<small>{{ form.nome.help_text }}</small>{% endif %}
+                    {% if form.nome.errors %}<div class="eqp-errors">{{ form.nome.errors }}</div>{% endif %}
+                </div>
+
+                <div class="eqp-field">
+                    <label for="{{ form.membros.id_for_label }}">{% trans "Pertencentes à equipa" %}</label>
+                    {{ form.membros }}
+                    {% if form.membros.help_text %}<small>{{ form.membros.help_text }}</small>{% endif %}
+                    <small>{% trans "Dica: usa Cmd no Mac ou Ctrl no Windows para selecionar vários empregados." %}</small>
+                    {% if form.membros.errors %}<div class="eqp-errors">{{ form.membros.errors }}</div>{% endif %}
+                </div>
+
+                <label class="eqp-check">
+                    {{ form.ativo }}
+                    <span>{% trans "Equipa ativa" %}</span>
+                </label>
+                {% if form.ativo.errors %}<div class="eqp-errors">{{ form.ativo.errors }}</div>{% endif %}
+            </div>
+
+            <div class="eqp-form-actions">
+                <a href="{% url 'projetos:equipa_list' %}" class="eqp-btn">{% trans "Cancelar" %}</a>
+                <button type="submit" class="eqp-primary-btn">{% trans "Guardar equipa" %}</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

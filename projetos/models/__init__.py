@@ -14,6 +14,7 @@ from .empregado import (
     EmpregadoProjeto,
     EmpregadoFicheiro,
 )
+from .equipa import Equipa
 from .individual import Individual
 from .empregado_furo import EmpregadoFuro
 

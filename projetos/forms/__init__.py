@@ -9,6 +9,7 @@ from .furo import FuroForm, FuroCreateForm
 
 # Empregados
 from .empregado import *
+from .equipa import EquipaForm
 from .empregado_area import MeusDadosEmpregadoForm
 from .empregado_furo import EmpregadoFuroForm
 
