@@ -138,6 +138,18 @@ Variáveis úteis:
 
 O timer `sf-monitor-disponibilidade.timer` corre a cada 5 minutos.
 
+## 5.4) Runbooks de incidente e disaster recovery
+
+Documentação operacional:
+
+- `docs/runbooks/incidente_producao.md`
+- `docs/runbooks/disaster_recovery.md`
+
+Objetivos definidos:
+
+- Incidente SEV1: RTO 2 horas e RPO 24 horas.
+- Disaster recovery: RTO 4 horas e RPO 24 horas.
+
 ## 6) Verificação rápida
 
 ```bash

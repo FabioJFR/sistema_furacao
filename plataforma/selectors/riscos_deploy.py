@@ -183,6 +183,29 @@ def listar_comandos_monitorizacao_operacional():
     ]
 
 
+def listar_runbooks_operacionais():
+    return [
+        {
+            "titulo": "Incidente de produção",
+            "comando": "docs/runbooks/incidente_producao.md",
+            "descricao": "Fluxo SEV1/SEV2 com primeiros 10 minutos, diagnóstico, mitigação, comunicação e fecho.",
+            "meta": "RTO SEV1: 2h · RPO SEV1: 24h",
+        },
+        {
+            "titulo": "Disaster recovery",
+            "comando": "docs/runbooks/disaster_recovery.md",
+            "descricao": "Recuperação de servidor/base/media a partir de backup, reinstalação de serviços e validação final.",
+            "meta": "RTO DR: 4h · RPO DR: 24h",
+        },
+        {
+            "titulo": "Pós-mortem mínimo",
+            "comando": "Registar causa raiz, impacto, timeline, mitigação, ações preventivas e dono.",
+            "descricao": "Fecha o ciclo depois da recuperação, evitando repetir incidentes silenciosamente.",
+            "meta": "Obrigatório para SEV1/SEV2",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {

@@ -129,6 +129,27 @@
         </div>
     </section>
 
+    <section class="deploy-risk-command-card deploy-risk-runbook-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "Incidentes" %}</div>
+                <h2>{% trans "Runbooks de incidente e disaster recovery" %}</h2>
+            </div>
+            <p>{% trans "Referência curta para responder a incidentes, recuperar serviço com RTO/RPO definidos e fechar pós-mortem sem perder aprendizagem." %}</p>
+        </div>
+
+        <div class="deploy-risk-command-grid">
+            {% for item in runbooks_operacionais %}
+                <article class="deploy-risk-command-step">
+                    <strong>{{ item.titulo }}</strong>
+                    <code>{{ item.comando }}</code>
+                    <p>{{ item.descricao }}</p>
+                    <small class="deploy-risk-command-meta">{{ item.meta }}</small>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-smoke-card">
         <div class="deploy-risk-table-head">
             <div>

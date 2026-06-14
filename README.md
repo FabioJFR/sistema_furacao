@@ -510,6 +510,12 @@ sudo systemctl enable --now sf-monitor-disponibilidade.timer
 
 Para envio de alertas, configurar `SLACK_WEBHOOK_URL` e/ou `ALERT_EMAIL`; o timer corre a cada 5 minutos e respeita `ALERT_COOLDOWN_SECONDS`.
 
+Runbooks operacionais:
+
+- `docs/runbooks/incidente_producao.md`
+- `docs/runbooks/disaster_recovery.md`
+- RTO/RPO definidos para incidente SEV1 e disaster recovery.
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

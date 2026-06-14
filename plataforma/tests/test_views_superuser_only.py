@@ -8,6 +8,7 @@ from plataforma.selectors.riscos_deploy import (
     listar_comandos_deploy_operacional,
     listar_comandos_logrotate,
     listar_comandos_monitorizacao_operacional,
+    listar_runbooks_operacionais,
     listar_smoke_test_piloto_mvp,
     listar_tickets_friccoes_piloto_mvp,
 )
@@ -64,6 +65,8 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertContains(response_riscos, "deploy/restore_test_operacional.sh")
         self.assertContains(response_riscos, "Alertas de disponibilidade e erros 5xx")
         self.assertContains(response_riscos, "deploy/monitor_disponibilidade.sh")
+        self.assertContains(response_riscos, "Runbooks de incidente e disaster recovery")
+        self.assertContains(response_riscos, "docs/runbooks/disaster_recovery.md")
         self.assertContains(response_riscos, "Smoke test do piloto após deploy")
         self.assertContains(response_riscos, "Criar furo")
         self.assertContains(response_riscos, "Gerar relatório técnico")
@@ -122,6 +125,16 @@ class PlataformaSuperuserOnlyViewsTests(TestCase):
         self.assertIn("DRY_RUN=1", comandos[0]["comando"])
         self.assertIn("MAX_5XX_RESPONSES=5", comandos[1]["comando"])
         self.assertIn("sf-monitor-disponibilidade.timer", comandos[2]["comando"])
+
+    def test_runbooks_operacionais_definem_incidente_dr_e_pos_mortem(self):
+        runbooks = listar_runbooks_operacionais()
+
+        self.assertEqual(len(runbooks), 3)
+        self.assertIn("incidente_producao.md", runbooks[0]["comando"])
+        self.assertIn("RTO SEV1: 2h", runbooks[0]["meta"])
+        self.assertIn("disaster_recovery.md", runbooks[1]["comando"])
+        self.assertIn("RTO DR: 4h", runbooks[1]["meta"])
+        self.assertIn("Pós-mortem", runbooks[2]["titulo"])
 
     def test_platform_admin_nao_superuser_nao_acede_features_nem_riscos(self):
         user = self._criar_user_com_perfil(
