@@ -150,6 +150,26 @@
         </div>
     </section>
 
+    <section class="deploy-risk-command-card deploy-risk-ci-card">
+        <div class="deploy-risk-table-head">
+            <div>
+                <div class="deploy-risk-kicker">{% trans "CI/CD" %}</div>
+                <h2>{% trans "Gate automático de qualidade" %}</h2>
+            </div>
+            <p>{% trans "Valida alterações antes de release com PostgreSQL, migrations, testes, scripts de deploy e recolha de estáticos." %}</p>
+        </div>
+
+        <div class="deploy-risk-command-grid">
+            {% for item in comandos_ci_cd %}
+                <article class="deploy-risk-command-step">
+                    <strong>{{ item.titulo }}</strong>
+                    <code>{{ item.comando }}</code>
+                    <p>{{ item.descricao }}</p>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="deploy-risk-smoke-card">
         <div class="deploy-risk-table-head">
             <div>

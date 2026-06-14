@@ -495,12 +495,13 @@ _AREAS_TODO = {
             "CONCLUIDO · [INFRA · BACKUP] Scripts `deploy/backup_operacional.sh` e `deploy/restore_test_operacional.sh` adicionados com `DRY_RUN`, retenção, manifest/checksums, teste de restore em base temporária e timers systemd para backup diário/restore semanal.",
             "CONCLUIDO · [INFRA · MONITOR] Script `deploy/monitor_disponibilidade.sh` criado para healthchecks, threshold de respostas 5xx, cooldown e alerta opcional por Slack/email, com timer systemd e comandos expostos em `Riscos de Deploy`.",
             "CONCLUIDO · [INFRA · RUNBOOKS] Runbooks `docs/runbooks/incidente_producao.md` e `docs/runbooks/disaster_recovery.md` adicionados com severidades, RTO/RPO, diagnóstico, mitigação, restore e pós-mortem; resumo também exposto em `Riscos de Deploy`.",
+            "CONCLUIDO · [INFRA · CI/CD] Workflow `.github/workflows/ci.yml` adicionado como gate automático para push/PR em `main`, com PostgreSQL, scripts shell, checks Django, migrations, testes e collectstatic; plano de staging espelho documentado.",
         ],
         "proximos_passos": [
             "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
         ],
         "falta_fazer": [
-            "CI/CD com ambiente de staging espelho da produção.",
+            "Criar ambiente de staging real separado da produção e ligar deploy automático controlado após CI verde.",
         ],
         "estado_logica": "Intermédio: produção funcional, mas ainda dependente de execução manual e com observabilidade parcial.",
     },

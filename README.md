@@ -516,6 +516,11 @@ Runbooks operacionais:
 - `docs/runbooks/disaster_recovery.md`
 - RTO/RPO definidos para incidente SEV1 e disaster recovery.
 
+CI/CD:
+
+- `.github/workflows/ci.yml` valida push/PR para `main` com PostgreSQL, migrations, testes, scripts de deploy e `collectstatic`.
+- `docs/deploy_producao.md` documenta o próximo passo para staging espelho de produção.
+
 Notas importantes:
 
 - em produção, usar `gunicorn` + reverse proxy (Nginx/Caddy), não `runserver`

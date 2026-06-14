@@ -206,6 +206,26 @@ def listar_runbooks_operacionais():
     ]
 
 
+def listar_comandos_ci_cd():
+    return [
+        {
+            "titulo": "Gate automático",
+            "comando": ".github/workflows/ci.yml",
+            "descricao": "Executa em push/PR para main com PostgreSQL, migrations, testes, collectstatic e validação dos scripts de deploy.",
+        },
+        {
+            "titulo": "Validação local equivalente",
+            "comando": "python manage.py check && python manage.py test && python manage.py makemigrations --check --dry-run",
+            "descricao": "Sequência mínima para correr antes de abrir release quando não se espera pelo GitHub Actions.",
+        },
+        {
+            "titulo": "Staging espelho",
+            "comando": "docs/deploy_producao.md#55-cicd-e-staging",
+            "descricao": "Define o próximo passo: ambiente staging com variáveis, base e media isoladas antes do deploy real.",
+        },
+    ]
+
+
 def listar_smoke_test_piloto_mvp():
     return [
         {

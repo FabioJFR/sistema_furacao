@@ -150,6 +150,21 @@ Objetivos definidos:
 - Incidente SEV1: RTO 2 horas e RPO 24 horas.
 - Disaster recovery: RTO 4 horas e RPO 24 horas.
 
+## 5.5) CI/CD e staging
+
+Gate automático no GitHub:
+
+- Workflow: `.github/workflows/ci.yml`.
+- Corre em `push`, `pull_request` para `main` e manualmente por `workflow_dispatch`.
+- Usa PostgreSQL de CI, instala dependências sem os pacotes macOS `pyobjc-*`, valida scripts shell, executa `check`, `check --deploy`, `migrate`, `makemigrations --check --dry-run`, `test` e `collectstatic`.
+
+Staging espelho recomendado:
+
+- Criar servidor/serviço separado de produção com domínio próprio, por exemplo `staging.sistemafuracao.pt`.
+- Usar base de dados, pasta `media/`, secrets, webhooks e timers isolados da produção.
+- Aplicar o mesmo `deploy/deploy_operacional.sh`, mas com `BASE_URL` e variáveis de staging.
+- Só promover para produção depois do CI verde, deploy em staging e smoke test MVP validado.
+
 ## 6) Verificação rápida
 
 ```bash

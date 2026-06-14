@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  django-quality-gate:
+    name: Django quality gate
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: sistema_furacao_ci
+          POSTGRES_USER: sistema_furacao
+          POSTGRES_PASSWORD: sistema_furacao
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sistema_furacao -d sistema_furacao_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DJANGO_SECRET_KEY: ci-secret-key-with-enough-length-and-variety-1234567890
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost,http://127.0.0.1
+      POSTGRES_DB: sistema_furacao_ci
+      POSTGRES_USER: sistema_furacao
+      POSTGRES_PASSWORD: sistema_furacao
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: "5432"
+      DJANGO_EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      SITE_BASE_URL: http://localhost
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python - <<'PY' > /tmp/requirements-ci.txt
+          from pathlib import Path
+
+          for line in Path("requirements.txt").read_text().splitlines():
+              normalized = line.strip().lower()
+              if normalized.startswith("pyobjc-"):
+                  continue
+              print(line)
+          PY
+          python -m pip install -r /tmp/requirements-ci.txt
+
+      - name: Validate shell scripts
+        run: |
+          bash -n deploy/deploy_operacional.sh
+          bash -n deploy/backup_operacional.sh
+          bash -n deploy/restore_test_operacional.sh
+          bash -n deploy/monitor_disponibilidade.sh
+
+      - name: Django checks
+        run: |
+          python manage.py check
+          DJANGO_DEBUG=False \
+          DJANGO_SECURE_SSL_REDIRECT=True \
+          DJANGO_SESSION_COOKIE_SECURE=True \
+          DJANGO_CSRF_COOKIE_SECURE=True \
+          DJANGO_SECURE_HSTS_SECONDS=31536000 \
+          DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True \
+          DJANGO_SECURE_HSTS_PRELOAD=True \
+          python manage.py check --deploy
+
+      - name: Migrations
+        run: |
+          python manage.py migrate --noinput
+          python manage.py makemigrations --check --dry-run
+
+      - name: Tests
+        run: python manage.py test
+
+      - name: Static files
+        run: python manage.py collectstatic --noinput
