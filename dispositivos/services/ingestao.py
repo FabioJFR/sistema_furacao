@@ -1,15 +1,28 @@
-# dispositivos/services/ingestao.py
+from decimal import Decimal
+
 from django.db import transaction
 from django.db.models import Max
+from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
 from dispositivos.models import LeituraBrutaDispositivo, SurveyShot
 from projetos.models import Medicao
+
+
+def _normalizar_valor_para_json(valor):
+    if isinstance(valor, Decimal):
+        return str(valor)
+    if isinstance(valor, dict):
+        return {chave: _normalizar_valor_para_json(item) for chave, item in valor.items()}
+    if isinstance(valor, list):
+        return [_normalizar_valor_para_json(item) for item in valor]
+    return valor
+
 
 @transaction.atomic
 def guardar_leitura_e_shot(sessao, furo, payload_texto: str, dados: dict):
     leitura = LeituraBrutaDispositivo.objects.create(
         sessao=sessao,
         payload_texto=payload_texto,
-        payload_json=dados,
+        payload_json=_normalizar_valor_para_json(dados),
     )
 
     shot = SurveyShot.objects.create(
@@ -35,18 +48,11 @@ def guardar_leitura_e_shot(sessao, furo, payload_texto: str, dados: dict):
     return leitura, shot, medicao
 
 
-from django.db import transaction
-
-from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
-from dispositivos.models import LeituraBrutaDispositivo, SurveyShot
-from projetos.models import Medicao
-
-
 @transaction.atomic
 def guardar_leitura_dispositivo(*, sessao, raw_payload: str, furo=None):
     sessao = (
         sessao.__class__.objects.select_for_update()
-        .select_related("empresa", "furo")
+        .select_related("empresa")
         .get(pk=sessao.pk)
     )
 
@@ -68,7 +74,7 @@ def guardar_leitura_dispositivo(*, sessao, raw_payload: str, furo=None):
         empresa=sessao.empresa,
         sequencia=ultima_seq,
         payload_texto=raw_payload,
-        payload_json=dados,
+        payload_json=_normalizar_valor_para_json(dados),
     )
 
     shot = SurveyShot.objects.create(

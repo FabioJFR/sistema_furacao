@@ -1,18 +1,26 @@
 from decimal import Decimal
 from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
+from dispositivos.models import Dispositivo, LeituraBrutaDispositivo, SurveyShot
 from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
+from dispositivos.services.dashboard_capture import processar_criacao_sessao_captura
 from dispositivos.services.api_flow import construir_resposta_operacao_api
+from dispositivos.services.ingestao import guardar_leitura_dispositivo
 from dispositivos.services.magcruiser_import import parse_magcruiser_file
 from dispositivos.services.sessao import (
     _validar_dispositivo_empresa,
     _validar_empregado_empresa,
     _validar_furo_empresa,
+    criar_sessao_dispositivo,
+    ler_dispositivo_uma_vez,
 )
+from projetos.models import Medicao
+from projetos.tests.helpers import criar_empresa, criar_empregado, criar_furo, criar_projeto
 
 
 class MagCruiserPayloadParserTests(SimpleTestCase):
@@ -138,3 +146,113 @@ class SessaoDispositivoValidationTests(SimpleTestCase):
             "O furo não pertence à empresa do empregado autenticado.",
         ):
             _validar_furo_empresa(furo, empregado)
+
+
+class SessaoDispositivoPersistenceTests(TestCase):
+    def setUp(self):
+        self.empresa = criar_empresa(nome="Empresa Dispositivos")
+        self.projeto = criar_projeto(empresa=self.empresa, nome="Projeto Dispositivos")
+        self.furo = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo Dispositivos",
+            profundidade_alvo_inicial=250,
+            profundidade_alvo_atual=250,
+        )
+        self.empregado = criar_empregado(
+            empresa=self.empresa,
+            nome="Operador MagCruiser",
+        )
+        self.dispositivo = Dispositivo.objects.create(
+            empresa=self.empresa,
+            nome="MagCruiser USB",
+            tipo="magcruiser",
+            canal="usb_serial",
+            porta="/dev/ttyUSB0",
+            baudrate=115200,
+            ativo=True,
+        )
+
+    def test_processar_criacao_sessao_captura_cria_sessao_real(self):
+        resultado = processar_criacao_sessao_captura(
+            empresa_id=self.empresa.pk,
+            empregado=self.empregado,
+            dispositivo_id=self.dispositivo.pk,
+            furo_id=self.furo.pk,
+        )
+
+        self.assertTrue(resultado["ok"])
+        sessao = resultado["sessao"]
+        self.assertEqual(sessao.empresa, self.empresa)
+        self.assertEqual(sessao.dispositivo, self.dispositivo)
+        self.assertEqual(sessao.furo, self.furo)
+        self.assertEqual(sessao.empregado, self.empregado)
+        self.assertEqual(sessao.status, "criada")
+
+    def test_guardar_leitura_dispositivo_cria_leitura_shot_medicao_e_incrementa_sequencia(self):
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+
+        primeiro = guardar_leitura_dispositivo(
+            sessao=sessao,
+            raw_payload="DEPTH=12.50;INC=-3.20;AZI=181.00;MAG=44.20;TEMP=21.00",
+        )
+        segundo = guardar_leitura_dispositivo(
+            sessao=sessao,
+            raw_payload="DEPTH=13.50;INC=-3.40;AZI=182.00;MAG=44.30;TEMP=21.50",
+        )
+
+        self.assertEqual(primeiro["leitura"].sequencia, 1)
+        self.assertEqual(segundo["leitura"].sequencia, 2)
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 2)
+        self.assertEqual(SurveyShot.objects.filter(sessao=sessao, furo=self.furo).count(), 2)
+        self.assertEqual(Medicao.objects.filter(furo=self.furo, empresa=self.empresa).count(), 2)
+        self.assertEqual(segundo["leitura"].payload_json["profundidade"], "13.50")
+        self.assertEqual(segundo["shot"].temperatura, Decimal("21.50"))
+        self.assertEqual(segundo["medicao"].profundidade_medida, Decimal("13.50"))
+
+    @patch("dispositivos.services.sessao.construir_driver")
+    def test_ler_dispositivo_uma_vez_guarda_dados_e_encerra_sessao(self, construir_driver_mock):
+        driver = Mock()
+        driver.read_once.return_value = "DEPTH=20.00;INC=-5.00;AZI=180.00;MAG=42.00;TEMP=19.00"
+        construir_driver_mock.return_value = driver
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+
+        resultado = ler_dispositivo_uma_vez(sessao=sessao)
+
+        sessao.refresh_from_db()
+        driver.connect.assert_called_once()
+        driver.disconnect.assert_called_once()
+        self.assertEqual(sessao.status, "encerrada")
+        self.assertIsNotNone(sessao.terminado_em)
+        self.assertEqual(resultado["dados"]["profundidade"], Decimal("20.00"))
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 1)
+        self.assertEqual(SurveyShot.objects.filter(sessao=sessao).count(), 1)
+        self.assertEqual(Medicao.objects.filter(furo=self.furo).count(), 1)
+
+    @patch("dispositivos.services.sessao.construir_driver")
+    def test_ler_dispositivo_uma_vez_marca_erro_quando_hardware_falha(self, construir_driver_mock):
+        driver = Mock()
+        driver.connect.side_effect = RuntimeError("porta indisponível")
+        construir_driver_mock.return_value = driver
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+
+        with self.assertRaisesMessage(ValidationError, "porta indisponível"):
+            ler_dispositivo_uma_vez(sessao=sessao)
+
+        sessao.refresh_from_db()
+        driver.disconnect.assert_called_once()
+        self.assertEqual(sessao.status, "erro")
+        self.assertEqual(sessao.mensagem_erro, "porta indisponível")
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)

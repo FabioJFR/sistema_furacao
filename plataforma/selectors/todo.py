@@ -43,6 +43,7 @@ _AREAS_TODO = {
             "Terceira camada aplicada: teste de leitura USB (`api_testar_leitura_usb`) movido para service com orquestração de eventos.",
             "Refatoração estrutural concluída: `dispositivos/services/dashboard.py` passou a fachada e a implementação foi dividida em `dashboard_registry`, `dashboard_capture` e `dashboard_discovery`.",
             "Revisão curta final: procura Bluetooth também movida para service e validações duplicadas removidas das views.",
+            "CONCLUIDO · [AUDITORIA CODIGO · TESTES] Cobertura real de persistência adicionada para Dispositivos: criação de sessão de captura, ingestão MagCruiser com leitura/shot/medição, leitura via driver e falha de hardware marcando sessão como erro.",
             "Conector inicial MagCruiser implementado com importação por ficheiro (`CSV/LAS`) e pré-visualização antes de gravar.",
             "Deteção de nome de furo nas medições importadas (ex.: `hole`, `hole_name`, `furo`) com mapeamento automático para furos da empresa.",
             "Modos de aplicação da importação entregues: todas as medições, apenas última por furo, e criação automática de furos em falta.",
@@ -58,7 +59,7 @@ _AREAS_TODO = {
         "proximos_passos": [
             "Completar uniformização dos endpoints API restantes para usar o mesmo padrão de resposta/orquestração.",
             "Adicionar validações de consistência para entradas de telemetria em lote.",
-            "[AUDITORIA CODIGO · TESTES] Expandir a cobertura inicial de `dispositivos` para criação/ingestão real de sessões, bridge e falhas de hardware após a primeira cobertura de parser/API flow/validações multiempresa.",
+            "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para endpoints reais da API/bridge autenticada, permissões por empresa e cenários de telemetria em lote.",
             "Adicionar importação dedicada para `XLSX` mantendo o mesmo fluxo (preview -> validação -> gravação).",
             "Melhorar reconciliação automática de nomes de furo com regras de normalização/fuzzy matching configurável por empresa.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
