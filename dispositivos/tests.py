@@ -6,6 +6,8 @@ from unittest.mock import Mock, patch
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+from rest_framework.test import APIClient
 
 from dispositivos.models import Dispositivo, LeituraBrutaDispositivo, SurveyShot
 from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
@@ -21,7 +23,7 @@ from dispositivos.services.sessao import (
     ler_dispositivo_uma_vez,
 )
 from projetos.models import Medicao
-from projetos.tests.helpers import criar_empresa, criar_empregado, criar_furo, criar_projeto
+from projetos.tests.helpers import criar_empresa, criar_empregado, criar_furo, criar_projeto, criar_user
 
 
 class MagCruiserPayloadParserTests(SimpleTestCase):
@@ -285,4 +287,158 @@ class SessaoDispositivoPersistenceTests(TestCase):
         driver.disconnect.assert_called_once()
         self.assertEqual(sessao.status, "erro")
         self.assertEqual(sessao.mensagem_erro, "porta indisponível")
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)
+
+
+class DispositivoApiEndpointTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.empresa = criar_empresa(nome="Empresa API Dispositivos")
+        self.projeto = criar_projeto(empresa=self.empresa, nome="Projeto API Dispositivos")
+        self.furo = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo API Dispositivos",
+            profundidade_alvo_inicial=180,
+            profundidade_alvo_atual=180,
+        )
+        self.user = criar_user(username="operador_api_dispositivos")
+        self.empregado = criar_empregado(
+            empresa=self.empresa,
+            nome="Operador API Dispositivos",
+            user=self.user,
+        )
+        self.dispositivo = Dispositivo.objects.create(
+            empresa=self.empresa,
+            nome="MagCruiser API",
+            tipo="magcruiser",
+            canal="usb_serial",
+            porta="/dev/ttyUSB1",
+            baudrate=115200,
+            ativo=True,
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_api_criar_sessao_cria_sessao_para_empregado_autenticado(self):
+        response = self.client.post(
+            reverse("api_dispositivos_criar_sessao"),
+            {
+                "dispositivo": str(self.dispositivo.pk),
+                "furo": str(self.furo.pk),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["empresa"], self.empresa.pk)
+        self.assertEqual(response.data["dispositivo"], self.dispositivo.pk)
+        self.assertEqual(response.data["furo"], self.furo.pk)
+
+    def test_api_criar_sessao_bloqueia_dispositivo_de_outra_empresa(self):
+        empresa_externa = criar_empresa(nome="Empresa API Externa")
+        dispositivo_externo = Dispositivo.objects.create(
+            empresa=empresa_externa,
+            nome="MagCruiser Externo",
+            tipo="magcruiser",
+            canal="usb_serial",
+            porta="/dev/ttyUSB9",
+            baudrate=115200,
+            ativo=True,
+        )
+
+        response = self.client.post(
+            reverse("api_dispositivos_criar_sessao"),
+            {
+                "dispositivo": str(dispositivo_externo.pk),
+                "furo": str(self.furo.pk),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("não pertence", response.data["erro"])
+
+    def test_api_bridge_ler_guarda_medicao_em_sessao_ligada(self):
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+        sessao.status = "ligado"
+        sessao.save(update_fields=["status"])
+
+        response = self.client.post(
+            reverse("bridge_ler"),
+            {
+                "sessao_id": str(sessao.pk),
+                "payload": "DEPTH=30.00;INC=-6.00;AZI=182.00;MAG=41.20;TEMP=18.50",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["ok"])
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 1)
+        self.assertEqual(SurveyShot.objects.filter(sessao=sessao, furo=self.furo).count(), 1)
+        self.assertEqual(Medicao.objects.filter(furo=self.furo, empresa=self.empresa).count(), 1)
+
+    def test_api_bridge_ler_nao_expoe_sessao_de_outra_empresa(self):
+        empresa_externa = criar_empresa(nome="Empresa Bridge Externa")
+        projeto_externo = criar_projeto(empresa=empresa_externa, nome="Projeto Bridge Externo")
+        furo_externo = criar_furo(
+            empresa=empresa_externa,
+            projeto=projeto_externo,
+            nome="Furo Bridge Externo",
+        )
+        empregado_externo = criar_empregado(empresa=empresa_externa, nome="Empregado Bridge Externo")
+        dispositivo_externo = Dispositivo.objects.create(
+            empresa=empresa_externa,
+            nome="MagCruiser Bridge Externo",
+            tipo="magcruiser",
+            canal="usb_serial",
+            porta="/dev/ttyUSB8",
+            baudrate=115200,
+            ativo=True,
+        )
+        sessao_externa = criar_sessao_dispositivo(
+            dispositivo=dispositivo_externo,
+            furo=furo_externo,
+            empregado=empregado_externo,
+        )
+        sessao_externa.status = "ligado"
+        sessao_externa.save(update_fields=["status"])
+
+        response = self.client.post(
+            reverse("bridge_ler"),
+            {
+                "sessao_id": str(sessao_externa.pk),
+                "payload": "DEPTH=31.00;INC=-7.00;AZI=183.00",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao_externa).count(), 0)
+
+    def test_api_bridge_ler_payload_invalido_devolve_erro_controlado(self):
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+        sessao.status = "ligado"
+        sessao.save(update_fields=["status"])
+
+        response = self.client.post(
+            reverse("bridge_ler"),
+            {
+                "sessao_id": str(sessao.pk),
+                "payload": "ruido_sem_campos_obrigatorios",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.data["ok"])
+        self.assertIn("erro", response.data)
         self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)

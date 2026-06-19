@@ -1,3 +1,5 @@
+from decimal import DecimalException
+
 from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -109,10 +111,37 @@ class BridgeLeituraAPIView(APIView):
 
         sessao = obter_sessao_ligada_empresa(sessao_id=sessao_id, empresa_id=empregado.empresa_id)
 
-        resultado = guardar_leitura_dispositivo(
-            sessao=sessao,
-            raw_payload=payload,
-        )
+        try:
+            resultado = guardar_leitura_dispositivo(
+                sessao=sessao,
+                raw_payload=payload,
+            )
+        except KeyError as exc:
+            campo = exc.args[0] if exc.args else "campo obrigatório"
+            return Response(
+                {
+                    "ok": False,
+                    "erro": f"Payload inválido: campo obrigatório em falta ({campo}).",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except DecimalException:
+            return Response(
+                {
+                    "ok": False,
+                    "erro": "Payload inválido: confirme os valores numéricos da leitura.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except (ValueError, ValidationError) as exc:
+            erro = exc.messages[0] if hasattr(exc, "messages") and exc.messages else str(exc)
+            return Response(
+                {
+                    "ok": False,
+                    "erro": erro,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         return Response(
             {
