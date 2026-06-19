@@ -45,6 +45,75 @@
 
     </div>
 
+    <!-- OBSERVABILIDADE -->
+    <div class="device-panel bg-white rounded-xl shadow p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">{% trans "Observabilidade por dispositivo" %}</h2>
+                <p class="text-sm text-gray-500">
+                    {% trans "Disponibilidade estimada, erros, leituras e última atividade operacional." %}
+                </p>
+            </div>
+            <span class="text-xs uppercase tracking-wide text-slate-500 bg-slate-100 rounded-full px-3 py-1">
+                {% trans "Operação" %}
+            </span>
+        </div>
+
+        {% if observabilidade_dispositivos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 border-b">
+                            <th class="py-3 pr-4">{% trans "Dispositivo" %}</th>
+                            <th class="py-3 pr-4">{% trans "Disponibilidade" %}</th>
+                            <th class="py-3 pr-4">{% trans "Sessões" %}</th>
+                            <th class="py-3 pr-4">{% trans "Erros" %}</th>
+                            <th class="py-3 pr-4">{% trans "Leituras" %}</th>
+                            <th class="py-3 pr-4">{% trans "Latência média" %}</th>
+                            <th class="py-3">{% trans "Última atividade" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in observabilidade_dispositivos %}
+                            <tr class="border-b last:border-0">
+                                <td class="py-3 pr-4 font-semibold text-gray-800">
+                                    {{ item.dispositivo.nome }}
+                                    <span class="block text-xs text-gray-500">{{ item.dispositivo.get_canal_display }}</span>
+                                </td>
+                                <td class="py-3 pr-4">
+                                    {% if item.disponibilidade_percentual is not None %}
+                                        <span class="font-bold text-emerald-700">{{ item.disponibilidade_percentual }}%</span>
+                                    {% else %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 pr-4">{{ item.total_sessoes }}</td>
+                                <td class="py-3 pr-4">
+                                    {% if item.total_erros %}
+                                        <span class="font-bold text-red-700">{{ item.total_erros }}</span>
+                                    {% else %}
+                                        <span class="text-gray-600">0</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 pr-4">{{ item.total_leituras }}</td>
+                                <td class="py-3 pr-4">{{ item.latencia_media_label }}</td>
+                                <td class="py-3">
+                                    {% if item.ultima_atividade %}
+                                        {{ item.ultima_atividade|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">{% trans "Ainda não existem dispositivos para monitorizar." %}</p>
+        {% endif %}
+    </div>
+
     <!-- DETALHES -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 device-split-grid">
 

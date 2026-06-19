@@ -60,6 +60,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA EM LOTE] Importação MagCruiser passa a validar consistência antes da gravação: profundidade não negativa, inclinação/azimute dentro de intervalo e bloqueio de profundidades duplicadas por furo.",
             "CONCLUIDO · [DISPOSITIVOS · API LEGADA] Endpoint de guardar dispositivo detectado deixa de converter `baudrate` inline, passa a validação em service e responde erro JSON controlado sem criar registos inválidos.",
             "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO] Importação MagCruiser passa a reconciliar nomes de furo com normalização de maiúsculas/separadores e zeros à esquerda em blocos numéricos, evitando duplicados como `Furo 001` vs `FURO-1`.",
+            "CONCLUIDO · [DISPOSITIVOS · OBSERVABILIDADE] Dashboard passa a mostrar observabilidade por dispositivo com sessões, erros, leituras, disponibilidade estimada, latência média e última atividade.",
         ],
         "proximos_passos": [
             "Completar uniformização fina dos endpoints API restantes para usar o mesmo padrão de resposta/orquestração e reduzir helpers HTTP locais.",
@@ -70,10 +71,10 @@ _AREAS_TODO = {
         ],
         "falta_fazer": [
             "API pública para ingestão externa com autenticação forte e versionamento.",
-            "Observabilidade detalhada por dispositivo (latência, erro, disponibilidade).",
+            "Evoluir observabilidade para alertas automáticos, janelas temporais e métricas históricas por dispositivo.",
             "CONCLUIDO · [AUDITORIA CODIGO · TESTES] Placeholder de `dispositivos/tests.py` substituído por suíte inicial para parser MagCruiser, ficheiros CSV/LAS e API flow.",
         ],
-        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, validações base de telemetria em lote, reconciliação normalizada de nomes de furo, bridge autenticada coberta por regressões multiempresa e endpoints legados mais defensivos; pendências focadas em tolerâncias avançadas, fuzzy configurável e API externa forte.",
+        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, validações base de telemetria em lote, reconciliação normalizada de nomes de furo, observabilidade operacional por dispositivo, bridge autenticada coberta por regressões multiempresa e endpoints legados mais defensivos; pendências focadas em tolerâncias avançadas, fuzzy configurável, alertas e API externa forte.",
     },
     "projetos": {
         "nome": "Projetos",

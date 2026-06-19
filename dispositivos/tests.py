@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 from io import BytesIO
 from types import SimpleNamespace
@@ -7,10 +8,12 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from dispositivos.models import Dispositivo, LeituraBrutaDispositivo, SurveyShot
 from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
+from dispositivos.services.dashboard_page import construir_contexto_dashboard_dispositivos
 from dispositivos.services.dashboard_capture import processar_criacao_sessao_captura
 from dispositivos.services.api_flow import construir_resposta_operacao_api
 from dispositivos.services.ingestao import guardar_leitura_dispositivo
@@ -370,6 +373,42 @@ class SessaoDispositivoPersistenceTests(TestCase):
         self.assertEqual(resultado["furos_sem_match"], ["Furo Desconhecido"])
         self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 1)
         self.assertFalse(Furo.objects.filter(empresa=self.empresa, nome="FURO-1").exists())
+
+    def test_dashboard_observabilidade_calcula_disponibilidade_erros_e_latencia(self):
+        sessao_ok = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+        guardar_leitura_dispositivo(
+            sessao=sessao_ok,
+            raw_payload="DEPTH=14.00;INC=-3.20;AZI=181.00",
+        )
+        agora = timezone.now()
+        sessao_ok.iniciado_em = agora - timedelta(seconds=20)
+        sessao_ok.terminado_em = agora
+        sessao_ok.status = "encerrada"
+        sessao_ok.save(update_fields=["iniciado_em", "terminado_em", "status"])
+
+        sessao_erro = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+        sessao_erro.status = "erro"
+        sessao_erro.mensagem_erro = "porta indisponível"
+        sessao_erro.save(update_fields=["status", "mensagem_erro"])
+
+        contexto = construir_contexto_dashboard_dispositivos(empresa_id=self.empresa.pk)
+        linha = contexto["observabilidade_dispositivos"][0]
+
+        self.assertEqual(linha["dispositivo"], self.dispositivo)
+        self.assertEqual(linha["total_sessoes"], 2)
+        self.assertEqual(linha["total_erros"], 1)
+        self.assertEqual(linha["total_leituras"], 1)
+        self.assertEqual(linha["disponibilidade_percentual"], 50)
+        self.assertEqual(linha["latencia_media_segundos"], 20)
+        self.assertEqual(linha["latencia_media_label"], "20s")
 
 
 class DispositivoApiEndpointTests(TestCase):
