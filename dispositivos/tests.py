@@ -126,6 +126,45 @@ class MagCruiserFileParserTests(SimpleTestCase):
         ):
             parse_magcruiser_file(uploaded)
 
+    def test_parse_csv_rejeita_lote_com_profundidade_negativa(self):
+        uploaded = SimpleUploadedFile(
+            "profundidade-negativa.csv",
+            b"hole;depth;inc;azi\nF-101;-1;-2;90\n",
+            content_type="text/csv",
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "profundidade não pode ser negativa",
+        ):
+            parse_magcruiser_file(uploaded)
+
+    def test_parse_csv_rejeita_lote_com_angulos_fora_do_intervalo(self):
+        uploaded = SimpleUploadedFile(
+            "angulos-invalidos.csv",
+            b"hole;depth;inc;azi\nF-101;10;-95;361\n",
+            content_type="text/csv",
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "inclinação deve estar entre -90 e 90 graus",
+        ):
+            parse_magcruiser_file(uploaded)
+
+    def test_parse_csv_rejeita_lote_com_profundidade_duplicada_por_furo(self):
+        uploaded = SimpleUploadedFile(
+            "duplicados.csv",
+            b"hole;depth;inc;azi\nF-101;10;-2;90\nF-101;10;-3;91\nF-102;10;-4;92\n",
+            content_type="text/csv",
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "profundidade duplicada",
+        ):
+            parse_magcruiser_file(uploaded)
+
 
 class DispositivoApiFlowTests(SimpleTestCase):
     def test_resposta_operacao_api_preserva_payload_de_sucesso(self):

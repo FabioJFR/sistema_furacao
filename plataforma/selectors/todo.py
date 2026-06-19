@@ -57,11 +57,12 @@ _AREAS_TODO = {
             "Nova camada aplicada: captura serial de sessão (`capturar_leitura_serial_view`) extraída para service dedicado de orquestração.",
             "Nova camada adicional em `dispositivos/views.py`: respostas HTTP de endpoints API Bluetooth/USB padronizadas via helper único (`construir_http_response_operacao_api`) no `services/api_flow.py`.",
             "CONCLUIDO · [DISPOSITIVOS · API/BRIDGE] Endpoints reais de criação de sessão e bridge autenticada cobertos por testes, incluindo bloqueio multiempresa, ingestão válida e erro controlado para payload inválido.",
+            "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA EM LOTE] Importação MagCruiser passa a validar consistência antes da gravação: profundidade não negativa, inclinação/azimute dentro de intervalo e bloqueio de profundidades duplicadas por furo.",
         ],
         "proximos_passos": [
             "Completar uniformização dos endpoints API restantes para usar o mesmo padrão de resposta/orquestração.",
-            "Adicionar validações de consistência para entradas de telemetria em lote.",
-            "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para cenários de telemetria em lote, permissões avançadas por endpoint e API pública com autenticação forte.",
+            "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
+            "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para permissões avançadas por endpoint e API pública com autenticação forte.",
             "Melhorar reconciliação automática de nomes de furo com regras de normalização/fuzzy matching configurável por empresa.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],
@@ -70,7 +71,7 @@ _AREAS_TODO = {
             "Observabilidade detalhada por dispositivo (latência, erro, disponibilidade).",
             "CONCLUIDO · [AUDITORIA CODIGO · TESTES] Placeholder de `dispositivos/tests.py` substituído por suíte inicial para parser MagCruiser, ficheiros CSV/LAS e API flow.",
         ],
-        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, bridge autenticada coberta por regressões multiempresa e views principais mais leves após extração de API flow, contexto de páginas e captura serial; pendências focadas em telemetria em lote, reconciliação fuzzy e API externa forte.",
+        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, validações base de telemetria em lote, bridge autenticada coberta por regressões multiempresa e views principais mais leves após extração de API flow, contexto de páginas e captura serial; pendências focadas em tolerâncias avançadas, reconciliação fuzzy e API externa forte.",
     },
     "projetos": {
         "nome": "Projetos",

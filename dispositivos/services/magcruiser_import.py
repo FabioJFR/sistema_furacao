@@ -94,6 +94,37 @@ def _normalize_row(row):
     return normalized
 
 
+def _validar_consistencia_lote(rows):
+    erros = []
+    profundidades_por_furo = {}
+
+    for index, row in enumerate(rows, start=1):
+        prefixo = f"Entrada {index}"
+        depth = row["depth"]
+        inc = row["inc"]
+        azi = row["azi"]
+        chave_furo = _normalizar_nome_furo(row.get("hole_name")) or "__sessao__"
+
+        if depth < 0:
+            erros.append(f"{prefixo}: profundidade não pode ser negativa.")
+        if inc < Decimal("-90") or inc > Decimal("90"):
+            erros.append(f"{prefixo}: inclinação deve estar entre -90 e 90 graus.")
+        if azi < 0 or azi > Decimal("360"):
+            erros.append(f"{prefixo}: azimute deve estar entre 0 e 360 graus.")
+
+        profundidades = profundidades_por_furo.setdefault(chave_furo, set())
+        if depth in profundidades:
+            nome_furo = row.get("hole_name") or "furo da sessão"
+            erros.append(f"{prefixo}: profundidade duplicada para {nome_furo}.")
+        profundidades.add(depth)
+
+    if erros:
+        detalhe = " ".join(erros[:5])
+        if len(erros) > 5:
+            detalhe = f"{detalhe} (+{len(erros) - 5} erros adicionais)"
+        raise ValidationError(f"Telemetria em lote inválida. {detalhe}")
+
+
 def _parse_csv_text(texto):
     sample = texto[:2000]
     try:
@@ -241,6 +272,8 @@ def parse_magcruiser_file(uploaded_file):
         raise ValidationError(
             "Não foi possível extrair linhas válidas. Confirme colunas de profundidade, inclinação e azimute."
         )
+
+    _validar_consistencia_lote(rows)
 
     preview = rows[:20]
     return {
