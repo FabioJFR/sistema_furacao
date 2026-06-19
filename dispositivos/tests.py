@@ -14,7 +14,7 @@ from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
 from dispositivos.services.dashboard_capture import processar_criacao_sessao_captura
 from dispositivos.services.api_flow import construir_resposta_operacao_api
 from dispositivos.services.ingestao import guardar_leitura_dispositivo
-from dispositivos.services.magcruiser_import import parse_magcruiser_file
+from dispositivos.services.magcruiser_import import gravar_importacao_magcruiser, parse_magcruiser_file
 from dispositivos.services.sessao import (
     _validar_dispositivo_empresa,
     _validar_empregado_empresa,
@@ -22,7 +22,7 @@ from dispositivos.services.sessao import (
     criar_sessao_dispositivo,
     ler_dispositivo_uma_vez,
 )
-from projetos.models import Medicao
+from projetos.models import Furo, Medicao
 from projetos.tests.helpers import criar_empresa, criar_empregado, criar_furo, criar_projeto, criar_user
 
 
@@ -327,6 +327,49 @@ class SessaoDispositivoPersistenceTests(TestCase):
         self.assertEqual(sessao.status, "erro")
         self.assertEqual(sessao.mensagem_erro, "porta indisponível")
         self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)
+
+    def test_gravar_importacao_reconcilia_nome_furo_normalizado_sem_criar_duplicado(self):
+        furo_reconciliado = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo 001",
+            profundidade_alvo_inicial=100,
+            profundidade_alvo_atual=100,
+        )
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=furo_reconciliado,
+            empregado=self.empregado,
+        )
+
+        resultado = gravar_importacao_magcruiser(
+            sessao=sessao,
+            rows=[
+                {
+                    "hole_name": "FURO-1",
+                    "depth": Decimal("10"),
+                    "inc": Decimal("-2"),
+                    "azi": Decimal("90"),
+                    "mag": None,
+                    "temp": None,
+                },
+                {
+                    "hole_name": "Furo Desconhecido",
+                    "depth": Decimal("12"),
+                    "inc": Decimal("-3"),
+                    "azi": Decimal("91"),
+                    "mag": None,
+                    "temp": None,
+                },
+            ],
+            modo_aplicacao="all_existing",
+        )
+
+        self.assertEqual(resultado["total_gravadas"], 1)
+        self.assertEqual(resultado["total_ignoradas"], 1)
+        self.assertEqual(resultado["furos_sem_match"], ["Furo Desconhecido"])
+        self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 1)
+        self.assertFalse(Furo.objects.filter(empresa=self.empresa, nome="FURO-1").exists())
 
 
 class DispositivoApiEndpointTests(TestCase):

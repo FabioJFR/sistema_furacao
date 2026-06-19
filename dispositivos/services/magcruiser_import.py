@@ -1,5 +1,6 @@
 import csv
 import io
+import re
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
@@ -206,6 +207,41 @@ def _normalizar_nome_furo(nome):
     return slugify(str(nome or "").strip().lower())
 
 
+def _normalizar_blocos_numericos_nome(nome_normalizado):
+    partes = nome_normalizado.split("-")
+    normalizadas = []
+    for parte in partes:
+        if parte.isdigit():
+            normalizadas.append(str(int(parte)))
+        else:
+            normalizadas.append(parte)
+    return "-".join(normalizadas)
+
+
+def _chaves_reconciliacao_nome_furo(nome):
+    normalizado = _normalizar_nome_furo(nome)
+    if not normalizado:
+        return set()
+    sem_zeros = _normalizar_blocos_numericos_nome(normalizado)
+    return {
+        normalizado,
+        sem_zeros,
+        re.sub(r"[^a-z0-9]", "", normalizado),
+        re.sub(r"[^a-z0-9]", "", sem_zeros),
+    }
+
+
+def _encontrar_furo_por_nome_reconciliado(*, empresa, nome_furo):
+    chaves_entrada = _chaves_reconciliacao_nome_furo(nome_furo)
+    if not chaves_entrada:
+        return None
+
+    for furo in Furo.objects.filter(empresa=empresa).order_by("data", "nome"):
+        if chaves_entrada & _chaves_reconciliacao_nome_furo(furo.nome):
+            return furo
+    return None
+
+
 def _obter_projeto_importacao(empresa):
     projeto = (
         Projeto.objects.filter(empresa=empresa, nome__iexact="Importação MagCruiser")
@@ -227,6 +263,10 @@ def _obter_ou_criar_furo_por_nome(*, empresa, nome_furo, criar_em_falta):
         return None, False
 
     furo = Furo.objects.filter(empresa=empresa, nome__iexact=nome).order_by("data").first()
+    if furo:
+        return furo, False
+
+    furo = _encontrar_furo_por_nome_reconciliado(empresa=empresa, nome_furo=nome)
     if furo:
         return furo, False
 

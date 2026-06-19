@@ -59,12 +59,13 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · API/BRIDGE] Endpoints reais de criação de sessão e bridge autenticada cobertos por testes, incluindo bloqueio multiempresa, ingestão válida e erro controlado para payload inválido.",
             "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA EM LOTE] Importação MagCruiser passa a validar consistência antes da gravação: profundidade não negativa, inclinação/azimute dentro de intervalo e bloqueio de profundidades duplicadas por furo.",
             "CONCLUIDO · [DISPOSITIVOS · API LEGADA] Endpoint de guardar dispositivo detectado deixa de converter `baudrate` inline, passa a validação em service e responde erro JSON controlado sem criar registos inválidos.",
+            "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO] Importação MagCruiser passa a reconciliar nomes de furo com normalização de maiúsculas/separadores e zeros à esquerda em blocos numéricos, evitando duplicados como `Furo 001` vs `FURO-1`.",
         ],
         "proximos_passos": [
             "Completar uniformização fina dos endpoints API restantes para usar o mesmo padrão de resposta/orquestração e reduzir helpers HTTP locais.",
             "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
             "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para permissões avançadas por endpoint e API pública com autenticação forte.",
-            "Melhorar reconciliação automática de nomes de furo com regras de normalização/fuzzy matching configurável por empresa.",
+            "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],
         "falta_fazer": [
@@ -72,7 +73,7 @@ _AREAS_TODO = {
             "Observabilidade detalhada por dispositivo (latência, erro, disponibilidade).",
             "CONCLUIDO · [AUDITORIA CODIGO · TESTES] Placeholder de `dispositivos/tests.py` substituído por suíte inicial para parser MagCruiser, ficheiros CSV/LAS e API flow.",
         ],
-        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, validações base de telemetria em lote, bridge autenticada coberta por regressões multiempresa e endpoints legados mais defensivos; pendências focadas em tolerâncias avançadas, reconciliação fuzzy e API externa forte.",
+        "estado_logica": "Boa evolução e já bastante madura: fluxo MagCruiser funcional, histórico ativo, validações base de telemetria em lote, reconciliação normalizada de nomes de furo, bridge autenticada coberta por regressões multiempresa e endpoints legados mais defensivos; pendências focadas em tolerâncias avançadas, fuzzy configurável e API externa forte.",
     },
     "projetos": {
         "nome": "Projetos",
