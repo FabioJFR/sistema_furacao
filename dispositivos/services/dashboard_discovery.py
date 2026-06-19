@@ -2,7 +2,30 @@ from dispositivos.services.serial_service import (
     capturar_preview_serial_da_porta,
     inspecionar_dispositivo_bluetooth,
     listar_dispositivos_bluetooth,
+    listar_portas_seriais,
 )
+
+
+def processar_procura_portas_usb():
+    eventos = [
+        {"tipo": "info", "mensagem": "A procurar portas USB/serial disponíveis..."},
+    ]
+    try:
+        portas = listar_portas_seriais()
+    except Exception as exc:
+        eventos.append(
+            {"tipo": "erro", "mensagem": f"Erro ao procurar portas USB/serial: {exc}"}
+        )
+        return {"ok": False, "eventos": eventos, "portas": [], "status": 400}
+
+    total_portas = len(portas)
+    mensagem_total = (
+        "Foi encontrada 1 porta."
+        if total_portas == 1
+        else f"Foram encontradas {total_portas} portas."
+    )
+    eventos.append({"tipo": "info", "mensagem": mensagem_total})
+    return {"ok": True, "eventos": eventos, "portas": portas}
 
 
 def processar_procura_dispositivos_bluetooth():

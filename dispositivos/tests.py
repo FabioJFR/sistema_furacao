@@ -581,6 +581,29 @@ class DispositivoAdminApiEndpointTests(TestCase):
         self.user.save(update_fields=["is_superuser", "is_staff"])
         self.client.force_login(self.user)
 
+    @patch("dispositivos.services.dashboard_discovery.listar_portas_seriais")
+    def test_api_procurar_portas_usb_devolve_contrato_padronizado(self, listar_mock):
+        listar_mock.return_value = [
+            {"device": "/dev/ttyUSB0", "description": "MagCruiser"},
+        ]
+
+        response = self.client.get(reverse("dispositivos:api_procurar_portas_usb"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertEqual(response.json()["portas"], listar_mock.return_value)
+        self.assertIn("1 porta", response.json()["eventos"][-1]["mensagem"])
+
+    @patch("dispositivos.services.dashboard_discovery.listar_portas_seriais")
+    def test_api_procurar_portas_usb_devolve_erro_controlado(self, listar_mock):
+        listar_mock.side_effect = RuntimeError("driver indisponível")
+
+        response = self.client.get(reverse("dispositivos:api_procurar_portas_usb"))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+        self.assertIn("driver indisponível", response.json()["eventos"][-1]["mensagem"])
+
     def test_api_guardar_dispositivo_detectado_rejeita_baudrate_invalido(self):
         response = self.client.post(
             reverse("dispositivos:api_guardar_dispositivo_detectado"),

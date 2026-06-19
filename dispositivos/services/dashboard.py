@@ -15,6 +15,7 @@ from dispositivos.services.dashboard_capture import (
 )
 from dispositivos.services.dashboard_discovery import (
     processar_procura_dispositivos_bluetooth,
+    processar_procura_portas_usb,
     processar_escuta_dispositivo_detectado,
     processar_inspecao_bluetooth_detectado,
 )
@@ -33,6 +34,7 @@ __all__ = [
     "processar_escuta_dispositivo_detectado",
     "processar_inspecao_bluetooth_detectado",
     "processar_procura_dispositivos_bluetooth",
+    "processar_procura_portas_usb",
     "processar_registo_dispositivo_detectado",
     "processar_teste_leitura_usb",
     "validar_parametros_dispositivo_detectado",

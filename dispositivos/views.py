@@ -5,9 +5,6 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET, require_POST
-from dispositivos.services.serial_service import (
-    listar_portas_seriais,
-)
 from dispositivos.selectors.dashboard import (
     obter_dispositivo_ativo,
     construir_contexto_captura_dispositivo,
@@ -23,6 +20,7 @@ from dispositivos.services.dashboard import (
     processar_escuta_dispositivo_detectado,
     processar_inspecao_bluetooth_detectado,
     processar_procura_dispositivos_bluetooth,
+    processar_procura_portas_usb,
     processar_registo_dispositivo_detectado,
     processar_teste_leitura_usb,
 )
@@ -118,14 +116,17 @@ def api_capturar(request):
 @require_GET
 def api_procurar_portas_usb(request):
     _garantir_admin_api(request)
-
-    portas = listar_portas_seriais()
-    eventos = [
-        {"tipo": "info", "mensagem": "A procurar portas USB/serial disponíveis..."},
-        {"tipo": "info", "mensagem": f"Foram encontradas {len(portas)} portas."},
-    ]
-
-    return _json_ok({"eventos": eventos, "portas": portas})
+    resultado = processar_procura_portas_usb()
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "portas": r["portas"],
+        },
+        mensagem_erro_padrao="Falha na procura de portas USB/serial.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
+    )
 
 
 @login_required

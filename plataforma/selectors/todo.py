@@ -61,9 +61,10 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · API LEGADA] Endpoint de guardar dispositivo detectado deixa de converter `baudrate` inline, passa a validação em service e responde erro JSON controlado sem criar registos inválidos.",
             "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO] Importação MagCruiser passa a reconciliar nomes de furo com normalização de maiúsculas/separadores e zeros à esquerda em blocos numéricos, evitando duplicados como `Furo 001` vs `FURO-1`.",
             "CONCLUIDO · [DISPOSITIVOS · OBSERVABILIDADE] Dashboard passa a mostrar observabilidade por dispositivo com sessões, erros, leituras, disponibilidade estimada, latência média e última atividade.",
+            "CONCLUIDO · [DISPOSITIVOS · DESCOBERTA USB] Procura de portas USB/serial passa para service dedicado, usa o contrato HTTP comum e devolve erro JSON controlado quando o driver falha.",
         ],
         "proximos_passos": [
-            "Completar uniformização fina dos endpoints API restantes para usar o mesmo padrão de resposta/orquestração e reduzir helpers HTTP locais.",
+            "Completar uniformização fina dos endpoints API simulados restantes (`api_testar` e `api_capturar`) e reduzir helpers HTTP locais.",
             "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
             "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para permissões avançadas por endpoint e API pública com autenticação forte.",
             "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
