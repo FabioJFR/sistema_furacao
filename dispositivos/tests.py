@@ -1,4 +1,5 @@
 from decimal import Decimal
+from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -66,6 +67,35 @@ class MagCruiserFileParserTests(SimpleTestCase):
         self.assertEqual(row["azi"], Decimal("90"))
         self.assertEqual(row["mag"], Decimal("44.2"))
         self.assertEqual(row["temp"], Decimal("22"))
+
+    def test_parse_xlsx_normaliza_colunas_e_preview(self):
+        from openpyxl import Workbook
+
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.append(["furo", "profundidade", "inclinacao", "azimute", "magnetismo", "temperatura"])
+        sheet.append(["F-201", "15,5", "-4,5", 185, "43,1", 23])
+        buffer = BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
+        uploaded = SimpleUploadedFile(
+            "leituras.xlsx",
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        resultado = parse_magcruiser_file(uploaded)
+        row = resultado["rows"][0]
+
+        self.assertEqual(resultado["formato"], "xlsx")
+        self.assertEqual(resultado["total_linhas"], 1)
+        self.assertEqual(resultado["preview_rows"], resultado["rows"])
+        self.assertEqual(row["hole_name"], "F-201")
+        self.assertEqual(row["depth"], Decimal("15.5"))
+        self.assertEqual(row["inc"], Decimal("-4.5"))
+        self.assertEqual(row["azi"], Decimal("185"))
+        self.assertEqual(row["mag"], Decimal("43.1"))
+        self.assertEqual(row["temp"], Decimal("23"))
 
     def test_parse_las_extrai_ascii_validas(self):
         uploaded = SimpleUploadedFile(

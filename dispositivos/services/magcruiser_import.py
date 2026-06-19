@@ -140,6 +140,37 @@ def _parse_las_text(texto):
     return rows
 
 
+def _parse_xlsx_file(uploaded_file):
+    try:
+        from openpyxl import load_workbook
+    except ImportError as exc:  # pragma: no cover - dependência declarada em requirements.txt
+        raise ValidationError("Importação XLSX indisponível: instala `openpyxl`.") from exc
+
+    uploaded_file.seek(0)
+    try:
+        workbook = load_workbook(uploaded_file, data_only=True, read_only=True)
+    except Exception as exc:
+        raise ValidationError("Não foi possível ler o ficheiro XLSX.") from exc
+
+    sheet = workbook.active
+    rows_iter = sheet.iter_rows(values_only=True)
+    headers = next(rows_iter, None)
+    if not headers:
+        return []
+
+    rows = []
+    for values in rows_iter:
+        row = {
+            header: value
+            for header, value in zip(headers, values)
+            if header is not None
+        }
+        parsed = _normalize_row(row)
+        if parsed:
+            rows.append(parsed)
+    return rows
+
+
 def _normalizar_nome_furo(nome):
     return slugify(str(nome or "").strip().lower())
 
@@ -193,12 +224,16 @@ def parse_magcruiser_file(uploaded_file):
         raise ValidationError("Selecione um ficheiro para importar.")
 
     filename = (uploaded_file.name or "").lower()
-    texto = _decode_uploaded(uploaded_file)
 
-    if filename.endswith(".las"):
+    if filename.endswith(".xlsx"):
+        rows = _parse_xlsx_file(uploaded_file)
+        formato = "xlsx"
+    elif filename.endswith(".las"):
+        texto = _decode_uploaded(uploaded_file)
         rows = _parse_las_text(texto)
         formato = "las"
     else:
+        texto = _decode_uploaded(uploaded_file)
         rows = _parse_csv_text(texto)
         formato = "csv"
 
