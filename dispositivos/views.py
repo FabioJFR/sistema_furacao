@@ -19,6 +19,7 @@ from dispositivos.selectors.dashboard import (
     resolver_empresa_para_registo_por_furo,
 )
 from dispositivos.services.dashboard import (
+    normalizar_baudrate_detectado,
     processar_escuta_dispositivo_detectado,
     processar_inspecao_bluetooth_detectado,
     processar_procura_dispositivos_bluetooth,
@@ -190,9 +191,9 @@ def api_guardar_dispositivo_detectado(request):
     nome = (request.POST.get("name") or "").strip() or "Dispositivo detetado"
     identificador = (request.POST.get("identifier") or "").strip()
     descricao = (request.POST.get("description") or "").strip()
-    baudrate = int((request.POST.get("baudrate") or "115200").strip() or 115200)
 
     try:
+        baudrate = normalizar_baudrate_detectado(request.POST.get("baudrate"))
         empresa = _resolver_empresa_para_registo(request)
         resultado = processar_registo_dispositivo_detectado(
             empresa=empresa,
@@ -209,7 +210,7 @@ def api_guardar_dispositivo_detectado(request):
             json_ok_fn=_json_ok,
             json_erro_fn=_json_erro,
         )
-    except Exception as exc:
+    except ValueError as exc:
         return _json_erro(f"Não foi possível guardar o dispositivo: {exc}", status=400)
 
 

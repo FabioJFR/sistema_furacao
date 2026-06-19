@@ -481,3 +481,54 @@ class DispositivoApiEndpointTests(TestCase):
         self.assertFalse(response.data["ok"])
         self.assertIn("erro", response.data)
         self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)
+
+
+class DispositivoAdminApiEndpointTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.empresa = criar_empresa(nome="Empresa Admin API Dispositivos")
+        self.projeto = criar_projeto(empresa=self.empresa, nome="Projeto Admin API Dispositivos")
+        self.furo = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo Admin API Dispositivos",
+        )
+        self.user = criar_user(username="superuser_dispositivos")
+        self.user.is_superuser = True
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_superuser", "is_staff"])
+        self.client.force_login(self.user)
+
+    def test_api_guardar_dispositivo_detectado_rejeita_baudrate_invalido(self):
+        response = self.client.post(
+            reverse("dispositivos:api_guardar_dispositivo_detectado"),
+            {
+                "canal": "usb_serial",
+                "name": "MagCruiser Baudrate Inválido",
+                "identifier": "/dev/ttyUSB9",
+                "baudrate": "abc",
+                "furo_id": str(self.furo.pk),
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+        self.assertIn("Baudrate inválido", response.json()["eventos"][0]["mensagem"])
+        self.assertFalse(Dispositivo.objects.filter(empresa=self.empresa, porta="/dev/ttyUSB9").exists())
+
+    def test_api_guardar_dispositivo_detectado_usa_baudrate_padrao_quando_vazio(self):
+        response = self.client.post(
+            reverse("dispositivos:api_guardar_dispositivo_detectado"),
+            {
+                "canal": "usb_serial",
+                "name": "MagCruiser Baudrate Padrão",
+                "identifier": "/dev/ttyUSB7",
+                "baudrate": "",
+                "furo_id": str(self.furo.pk),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        dispositivo = Dispositivo.objects.get(empresa=self.empresa, porta="/dev/ttyUSB7")
+        self.assertEqual(dispositivo.baudrate, 115200)

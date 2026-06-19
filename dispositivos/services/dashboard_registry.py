@@ -1,6 +1,19 @@
 from dispositivos.models import Dispositivo
 
 
+def normalizar_baudrate_detectado(valor, *, default=115200):
+    texto = str(valor or "").strip()
+    if not texto:
+        return default
+    try:
+        baudrate = int(texto)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Baudrate inválido. Use um valor numérico positivo.") from exc
+    if baudrate <= 0:
+        raise ValueError("Baudrate inválido. Use um valor numérico positivo.")
+    return baudrate
+
+
 def guardar_dispositivo_detectado(*, empresa, canal, nome, identificador, descricao="", baudrate=115200):
     defaults = {
         "empresa": empresa,

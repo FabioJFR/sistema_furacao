@@ -20,6 +20,7 @@ from dispositivos.services.dashboard_discovery import (
 )
 from dispositivos.services.dashboard_registry import (
     guardar_dispositivo_detectado,
+    normalizar_baudrate_detectado,
     processar_registo_dispositivo_detectado,
     validar_parametros_dispositivo_detectado,
 )
@@ -27,6 +28,7 @@ from dispositivos.services.dashboard_registry import (
 __all__ = [
     "criar_sessao_dispositivo",
     "guardar_dispositivo_detectado",
+    "normalizar_baudrate_detectado",
     "processar_criacao_sessao_captura",
     "processar_escuta_dispositivo_detectado",
     "processar_inspecao_bluetooth_detectado",
