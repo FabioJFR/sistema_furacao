@@ -32,7 +32,11 @@ def resolver_empresa_api(user, *, empresa_id=""):
     if perfil and perfil.empresa_id:
         return perfil.empresa, None
 
-    empregado = Empregados.objects.filter(user=user).select_related("empresa").first()
+    empregado = (
+        Empregados.objects.filter(user=user, aprovado=True)
+        .select_related("empresa")
+        .first()
+    )
     if empregado and empregado.empresa_id:
         return empregado.empresa, None
 

@@ -5,7 +5,11 @@ from projetos.models import Empregados
 
 
 def obter_empregado_autenticado(user):
-    return Empregados.objects.filter(user=user).select_related("empresa").first()
+    return (
+        Empregados.objects.filter(user=user, aprovado=True)
+        .select_related("empresa")
+        .first()
+    )
 
 
 def obter_sessao_empresa(pk, empresa_id):

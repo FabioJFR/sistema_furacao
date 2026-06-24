@@ -7,9 +7,9 @@ from dispositivos.services.ingestao import guardar_leitura_dispositivo
 
 
 def _validar_empregado_empresa(empregado):
-    if not empregado or not empregado.empresa_id:
+    if not empregado or not empregado.empresa_id or not empregado.aprovado:
         raise ValidationError(
-            "O utilizador autenticado não está associado a um empregado com empresa válida."
+            "O utilizador autenticado não está associado a um empregado aprovado com empresa válida."
         )
 
 

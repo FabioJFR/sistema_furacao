@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from dispositivos.models import Dispositivo, LeituraBrutaDispositivo, SurveyShot
+from dispositivos.models import Dispositivo, LeituraBrutaDispositivo, SessaoDispositivo, SurveyShot
 from dispositivos.drivers.magcruiser.parser import parse_magcruiser_payload
 from dispositivos.services.dashboard_page import construir_contexto_dashboard_dispositivos
 from dispositivos.services.dashboard_capture import processar_criacao_sessao_captura
@@ -197,7 +197,7 @@ class SessaoDispositivoValidationTests(SimpleTestCase):
     def test_rejeita_empregado_sem_empresa(self):
         with self.assertRaisesMessage(
             ValidationError,
-            "O utilizador autenticado não está associado a um empregado com empresa válida.",
+            "O utilizador autenticado não está associado a um empregado aprovado com empresa válida.",
         ):
             _validar_empregado_empresa(SimpleNamespace(empresa_id=None))
 
@@ -439,6 +439,23 @@ class DispositivoApiEndpointTests(TestCase):
             ativo=True,
         )
         self.client.force_authenticate(self.user)
+
+    def test_api_criar_sessao_bloqueia_empregado_pendente(self):
+        self.empregado.aprovado = False
+        self.empregado.save(update_fields=["aprovado"])
+
+        response = self.client.post(
+            reverse("api_dispositivos_criar_sessao"),
+            {
+                "dispositivo": str(self.dispositivo.pk),
+                "furo": str(self.furo.pk),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("empregado aprovado", response.data["erro"])
+        self.assertFalse(SessaoDispositivo.objects.exists())
 
     def test_api_criar_sessao_cria_sessao_para_empregado_autenticado(self):
         response = self.client.post(

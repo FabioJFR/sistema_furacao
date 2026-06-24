@@ -62,6 +62,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO] Importação MagCruiser passa a reconciliar nomes de furo com normalização de maiúsculas/separadores e zeros à esquerda em blocos numéricos, evitando duplicados como `Furo 001` vs `FURO-1`.",
             "CONCLUIDO · [DISPOSITIVOS · OBSERVABILIDADE] Dashboard passa a mostrar observabilidade por dispositivo com sessões, erros, leituras, disponibilidade estimada, latência média e última atividade.",
             "CONCLUIDO · [DISPOSITIVOS · DESCOBERTA USB] Procura de portas USB/serial passa para service dedicado, usa o contrato HTTP comum e devolve erro JSON controlado quando o driver falha.",
+            "CONCLUIDO · [DISPOSITIVOS · AUTORIZAÇÃO API] APIs de sessão e bridge passam a aceitar apenas empregados aprovados, com validação em selector/service e regressão automatizada.",
         ],
         "proximos_passos": [
             "Completar uniformização fina dos endpoints API simulados restantes (`api_testar` e `api_capturar`) e reduzir helpers HTTP locais.",
@@ -252,6 +253,8 @@ _AREAS_TODO = {
             "CONCLUIDO · [SEGURANÇA · CLIENTES & CONTRATOS] Edição direta de ficha comercial passa a exigir cliente/ficha existente na empresa atual, evitando criação lateral por nome de cliente externo.",
         ],
         "proximos_passos": [
+            "[AUDITORIA 24/06/2026 · P1 · 3D MULTIEMPRESA] Associar Wireframe/Implicit/Block Model à empresa e filtrar listagem, conteúdo, configuração, download, exportação e remoção pelo contexto autorizado.",
+            "[AUDITORIA 24/06/2026 · ARQUITETURA] Dividir `views/gestao_empresa.py` e `views/modelos_3d.py` por domínio, mantendo as views focadas em HTTP e movendo regras para services/selectors testáveis.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: timeline comercial própria do cliente, juntando eventos da ficha comercial com renovações, adendas, estados e contactos-chave.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: exportação individual em PDF da ficha comercial do cliente, separada do dossiê ZIP do contrato.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: edição dedicada da ficha de cliente com contactos principais, contactos secundários, notas comerciais e classificação comercial própria.",
@@ -503,6 +506,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [INFRA · MONITOR] Script `deploy/monitor_disponibilidade.sh` criado para healthchecks, threshold de respostas 5xx, cooldown e alerta opcional por Slack/email, com timer systemd e comandos expostos em `Riscos de Deploy`.",
             "CONCLUIDO · [INFRA · RUNBOOKS] Runbooks `docs/runbooks/incidente_producao.md` e `docs/runbooks/disaster_recovery.md` adicionados com severidades, RTO/RPO, diagnóstico, mitigação, restore e pós-mortem; resumo também exposto em `Riscos de Deploy`.",
             "CONCLUIDO · [INFRA · CI/CD] Workflow `.github/workflows/ci.yml` adicionado como gate automático para push/PR em `main`, com PostgreSQL, scripts shell, checks Django, migrations, testes e collectstatic; plano de staging espelho documentado.",
+            "CONCLUIDO · [AUDITORIA 24/06/2026 · DEPENDÊNCIAS] Dependências `pyobjc` passam a usar marcador `sys_platform == darwin`, evitando instalação indevida no servidor Linux sem o filtro especial do CI.",
         ],
         "proximos_passos": [
             "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
@@ -561,8 +565,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [PERMISSÕES · SUBSCRIÇÕES] Reenvio de ativação de conta admin protegido no backend para superuser, com regressões para listagem, POST direto, GET e bloqueio de empresa_admin.",
             "CONCLUIDO · [PERMISSÕES · DASHBOARD PLATAFORMA] Cobertura adicionada para dashboard real da plataforma, validando métricas, bloqueio de empresa_admin/anónimo e atalhos reservados ao superuser.",
             "CONCLUIDO · [PERMISSÕES · FEATURES] Cobertura adicionada para mutação real de feature flags por empresa/conta individual, incluindo criação/remoção de overrides e POST sem alvo válido.",
+            "CONCLUIDO · [AUDITORIA 24/06/2026 · API] Empregados pendentes deixam de resolver empresa nas APIs de Furos e Dispositivos; acesso exige `aprovado=True` e fica coberto por regressões.",
+            "CONCLUIDO · [AUDITORIA 24/06/2026 · QUALITY GATE] Removido o placeholder `plataforma/tests.py` que colidia com o pacote `plataforma/tests/`; testes de ajuda, assiduidade e registo ficaram independentes do modo MVP, data atual e SMTP local.",
         ],
         "proximos_passos": [
+            "[AUDITORIA 24/06/2026 · P1 · 3D] Fechar isolamento multiempresa dos modelos 3D antes de ampliar o piloto a várias empresas/geólogos.",
+            "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
             "Prioridade imediata antes de novo commit/release/deploy: tratar hardening de segurança (`check --deploy`, HTTPS/HSTS/cookies seguras, `DEBUG=False`, segredos por ambiente, bridge keys só por header, rate limiting, MFA e antivírus real nos uploads).",
             "CONCLUIDO · [AUDITORIA CODIGO · SEGURANCA] Middleware de rate limit endurecido para ignorar `X-Forwarded-For` por defeito e confiar no header apenas com proxy controlado e testes de regressão.",
             "[AUDITORIA CODIGO · QUALIDADE] Priorizar a suite mínima dos módulos sem cobertura relevante, começando por `dispositivos`, `inspecao_ai` e APIs multiempresa.",

@@ -1,7 +1,7 @@
 from datetime import date
 from types import SimpleNamespace
 
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 from projetos.context_processors import menu_context
 from projetos.models import AssiduidadeRegisto, NotificacaoGestao
@@ -62,6 +62,7 @@ class MenuContextTests(TestCase):
         self.assertTrue(contexto["is_empregado_user"])
         self.assertEqual(contexto["total_notificacoes_empregado_abertas_menu"], 1)
 
+    @override_settings(SF_MVP_OPERACIONAL_FOCUS=False)
     def test_menu_context_expoe_ajuda_contextual_para_rota_principal(self):
         user = criar_user(username="admin_contextual")
         criar_perfil(user=user, tipo_acesso="empresa_admin", empresa=self.empresa)
@@ -76,6 +77,7 @@ class MenuContextTests(TestCase):
         self.assertEqual(contexto["ajuda_contextual_atual"]["titulo"], "Centro de Gestão")
         self.assertIn("#gestao-centro-de-gestao", contexto["ajuda_contextual_atual"]["url"])
 
+    @override_settings(SF_MVP_OPERACIONAL_FOCUS=False)
     def test_menu_context_ajusta_ajuda_contextual_para_rota_edicao(self):
         user = criar_user(username="admin_contextual_edicao")
         criar_perfil(user=user, tipo_acesso="empresa_admin", empresa=self.empresa)

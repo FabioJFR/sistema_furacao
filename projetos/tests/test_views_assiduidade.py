@@ -60,8 +60,15 @@ class AssiduidadePermissoesTests(TestCase):
         admin = self.criar_admin(username="admin_assiduidade", empresa=self.empresa)
         self.client.force_login(admin)
 
-        list_response = self.client.get(reverse("projetos:assiduidade_list"))
-        export_response = self.client.get(reverse("projetos:assiduidade_export_csv"))
+        filtros_periodo = {"mes": "5", "ano": "2026"}
+        list_response = self.client.get(
+            reverse("projetos:assiduidade_list"),
+            filtros_periodo,
+        )
+        export_response = self.client.get(
+            reverse("projetos:assiduidade_export_csv"),
+            filtros_periodo,
+        )
         export_text = export_response.content.decode("utf-8")
 
         self.assertEqual(list_response.status_code, 200)

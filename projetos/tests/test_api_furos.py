@@ -1,10 +1,12 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
-from rest_framework.test import APIRequestFactory, force_authenticate
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from projetos.api.views import FuroListAPIView, FuroVersaoListAPIView
+from projetos.tests.helpers import criar_empregado, criar_empresa, criar_user
 
 
 class FuroApiLimitTests(SimpleTestCase):
@@ -48,4 +50,26 @@ class FuroApiLimitTests(SimpleTestCase):
         self.assertEqual(
             response.data,
             {"erro": "Parâmetro 'limit' inválido. Usa um número inteiro."},
+        )
+
+
+class FuroApiPermissoesTests(TestCase):
+    def test_empregado_pendente_nao_acede_a_furos_da_empresa(self):
+        empresa = criar_empresa(nome="Empresa API Empregado Pendente")
+        user = criar_user(username="empregado_api_pendente")
+        criar_empregado(
+            empresa=empresa,
+            user=user,
+            nome="Empregado API Pendente",
+            aprovado=False,
+        )
+        client = APIClient()
+        client.force_authenticate(user)
+
+        response = client.get(reverse("api_v1_furos_list"))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.data["erro"],
+            "Conta sem empresa associada para acesso API.",
         )

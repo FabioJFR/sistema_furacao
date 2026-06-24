@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.contrib.sessions.backends.db import SessionStore
@@ -29,7 +30,8 @@ class EstadoComercialEmpresaTests(TestCase):
             periodos_cobranca_disponiveis=[1, 12],
         )
 
-    def test_registo_publico_cria_empresa_em_teste_e_subscricao_pendente(self):
+    @patch("website.services.enviar_email_confirmacao_conta")
+    def test_registo_publico_cria_empresa_em_teste_e_subscricao_pendente(self, enviar_email_mock):
         resultado = executar_registo(
             {
                 "username": "empresa_demo",
@@ -45,12 +47,13 @@ class EstadoComercialEmpresaTests(TestCase):
             }
         )
 
-        self.assertTrue(resultado.sucesso)
+        self.assertTrue(resultado.sucesso, resultado.erros)
         empresa = Empresa.objects.get(nome="Empresa Demo")
         subscricao = SubscricaoEmpresa.objects.get(empresa=empresa)
 
         self.assertEqual(empresa.status, "teste")
         self.assertEqual(subscricao.estado, "pendente")
+        enviar_email_mock.assert_called_once()
 
     def test_pagamento_confirmado_promove_empresa_e_subscricao_para_ativo(self):
         empresa = Empresa.objects.create(
