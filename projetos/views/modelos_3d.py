@@ -4,6 +4,7 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
@@ -47,6 +48,24 @@ def _queryset_modelos_3d(model_cls, request):
 
 def _get_modelo_3d_ou_404(model_cls, request, **lookup):
     return get_object_or_404(_queryset_modelos_3d(model_cls, request), **lookup)
+
+
+def _queryset_projetos_modelos_3d(request):
+    qs = Projeto.objects.select_related("empresa").order_by("nome")
+    empresa_modelo = _empresa_modelos_3d(request)
+    if empresa_modelo:
+        qs = qs.filter(empresa=empresa_modelo)
+    return qs
+
+
+def _resolver_projeto_upload_modelo_3d(request):
+    projeto_id = (request.POST.get("projeto_id") or "").strip()
+    if not projeto_id:
+        return None
+    try:
+        return _queryset_projetos_modelos_3d(request).get(pk=projeto_id)
+    except (Projeto.DoesNotExist, ValidationError, ValueError):
+        return None
 
 
 def _bytes_human_readable(size_bytes):
@@ -303,6 +322,7 @@ def modelo_3d_wireframe(request):
         return bloqueio
 
     empresa_modelo = _empresa_modelos_3d(request)
+    projetos_disponiveis = _queryset_projetos_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -318,6 +338,19 @@ def modelo_3d_wireframe(request):
                 messages.success(request, _("Ficheiro lido com sucesso. Pré-visualização técnica gerada."))
 
                 if action == "validate_and_save":
+                    projeto_modelo = _resolver_projeto_upload_modelo_3d(request)
+                    if request.POST.get("projeto_id") and not projeto_modelo:
+                        messages.error(request, _("Projeto inválido para associar ao wireframe."))
+                        return render(
+                            request,
+                            "projetos/modelo_3d_wireframe.html",
+                            {
+                                "wireframe_preview": preview,
+                                "wireframe_max_upload_mb": int(MAX_WIREFRAME_UPLOAD_BYTES / (1024 * 1024)),
+                                "wireframe_guardados": _queryset_modelos_3d(Modelo3DWireframe, request).select_related("criado_por", "empresa", "projeto")[:10],
+                                "projetos_modelos_3d": projetos_disponiveis,
+                            },
+                        )
                     extensao_limpa = (preview.get("extensao") or "").replace(".", "")
                     resumo = {
                         "linhas_preview": preview.get("linhas_preview") or [],
@@ -328,6 +361,7 @@ def modelo_3d_wireframe(request):
                     Modelo3DWireframe.objects.create(
                         criado_por=request.user,
                         empresa=empresa_modelo,
+                        projeto=projeto_modelo,
                         nome=preview.get("nome") or "wireframe",
                         formato=extensao_limpa,
                         conteudo_texto=preview.get("conteudo_texto") or "",
@@ -348,6 +382,7 @@ def modelo_3d_wireframe(request):
             "wireframe_preview": preview,
             "wireframe_max_upload_mb": int(MAX_WIREFRAME_UPLOAD_BYTES / (1024 * 1024)),
             "wireframe_guardados": historico_guardados,
+            "projetos_modelos_3d": projetos_disponiveis,
         },
     )
 
@@ -359,6 +394,7 @@ def modelo_3d_block_model(request):
     if bloqueio:
         return bloqueio
     empresa_modelo = _empresa_modelos_3d(request)
+    projetos_disponiveis = _queryset_projetos_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -373,6 +409,19 @@ def modelo_3d_block_model(request):
                 preview = resultado["preview"]
                 messages.success(request, _("Ficheiro block model lido com sucesso."))
                 if action == "validate_and_save":
+                    projeto_modelo = _resolver_projeto_upload_modelo_3d(request)
+                    if request.POST.get("projeto_id") and not projeto_modelo:
+                        messages.error(request, _("Projeto inválido para associar ao implicit model."))
+                        return render(
+                            request,
+                            "projetos/modelo_3d_implicit.html",
+                            {
+                                "implicit_preview": preview,
+                                "implicit_max_upload_mb": int(MAX_IMPLICIT_UPLOAD_BYTES / (1024 * 1024)),
+                                "implicit_guardados": _queryset_modelos_3d(Modelo3DImplicit, request).select_related("criado_por", "empresa", "projeto")[:10],
+                                "projetos_modelos_3d": projetos_disponiveis,
+                            },
+                        )
                     formato = (preview.get("extensao") or "").replace(".", "")
                     item = Modelo3DBlock.objects.create(
                         criado_por=request.user,
@@ -417,6 +466,7 @@ def modelo_3d_implicit(request):
     if bloqueio:
         return bloqueio
     empresa_modelo = _empresa_modelos_3d(request)
+    projetos_disponiveis = _queryset_projetos_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -432,10 +482,24 @@ def modelo_3d_implicit(request):
                 preview = resultado["preview"]
                 messages.success(request, _("Ficheiro implicit model lido com sucesso."))
                 if action == "validate_and_save":
+                    projeto_modelo = _resolver_projeto_upload_modelo_3d(request)
+                    if request.POST.get("projeto_id") and not projeto_modelo:
+                        messages.error(request, _("Projeto inválido para associar ao implicit model."))
+                        return render(
+                            request,
+                            "projetos/modelo_3d_implicit.html",
+                            {
+                                "implicit_preview": preview,
+                                "implicit_max_upload_mb": int(MAX_IMPLICIT_UPLOAD_BYTES / (1024 * 1024)),
+                                "implicit_guardados": _queryset_modelos_3d(Modelo3DImplicit, request).select_related("criado_por", "empresa", "projeto")[:10],
+                                "projetos_modelos_3d": projetos_disponiveis,
+                            },
+                        )
                     formato = (preview.get("extensao") or "").replace(".", "")
                     Modelo3DImplicit.objects.create(
                         criado_por=request.user,
                         empresa=empresa_modelo,
+                        projeto=projeto_modelo,
                         nome=preview.get("nome") or "implicit-model",
                         formato=formato,
                         dominio=dominio,
@@ -460,6 +524,7 @@ def modelo_3d_implicit(request):
             "implicit_preview": preview,
             "implicit_max_upload_mb": int(MAX_IMPLICIT_UPLOAD_BYTES / (1024 * 1024)),
             "implicit_guardados": historico_guardados,
+            "projetos_modelos_3d": projetos_disponiveis,
         },
     )
 
@@ -779,9 +844,7 @@ def block_model_create(request):
     if bloqueio:
         return bloqueio
     empresa_modelo = _empresa_modelos_3d(request)
-    projetos = Projeto.objects.select_related("empresa").order_by("nome")
-    if empresa_modelo:
-        projetos = projetos.filter(empresa=empresa_modelo)
+    projetos = _queryset_projetos_modelos_3d(request)
     if request.method == "POST":
         projeto_id = request.POST.get("projeto_id")
         nome = (request.POST.get("nome") or "").strip() or None

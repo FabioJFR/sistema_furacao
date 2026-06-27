@@ -139,12 +139,61 @@ class Modelos3DMultiempresaTests(TestCase):
 
         response = self.client.post(
             reverse("projetos:modelo_3d_wireframe"),
-            {"action": "validate_and_save", "wireframe_file": ficheiro},
+            {
+                "action": "validate_and_save",
+                "projeto_id": str(self.projeto.pk),
+                "wireframe_file": ficheiro,
+            },
         )
 
         self.assertEqual(response.status_code, 200)
         modelo = Modelo3DWireframe.objects.get(nome="novo-wireframe.obj")
         self.assertEqual(modelo.empresa, self.empresa)
+        self.assertEqual(modelo.projeto, self.projeto)
+
+    def test_upload_wireframe_rejeita_projeto_de_outra_empresa(self):
+        self.client.force_login(self.geologo_user)
+        ficheiro = SimpleUploadedFile(
+            "wireframe-externo.obj",
+            b"v 0 0 0\n",
+            content_type="text/plain",
+        )
+
+        response = self.client.post(
+            reverse("projetos:modelo_3d_wireframe"),
+            {
+                "action": "validate_and_save",
+                "projeto_id": str(self.projeto_externo.pk),
+                "wireframe_file": ficheiro,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Projeto inválido para associar ao wireframe.")
+        self.assertFalse(Modelo3DWireframe.objects.filter(nome="wireframe-externo.obj").exists())
+
+    def test_upload_implicit_geologo_fica_associado_a_projeto_da_empresa(self):
+        self.client.force_login(self.geologo_user)
+        ficheiro = SimpleUploadedFile(
+            "novo-implicit.csv",
+            b"x,y,z,dominio\n1,2,3,mineral\n",
+            content_type="text/csv",
+        )
+
+        response = self.client.post(
+            reverse("projetos:modelo_3d_implicit"),
+            {
+                "action": "validate_and_save",
+                "projeto_id": str(self.projeto.pk),
+                "dominio": "mineral",
+                "implicit_file": ficheiro,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        modelo = Modelo3DImplicit.objects.get(nome="novo-implicit.csv")
+        self.assertEqual(modelo.empresa, self.empresa)
+        self.assertEqual(modelo.projeto, self.projeto)
 
     def test_superuser_ve_modelos_3d_de_todas_as_empresas_e_legados(self):
         superuser = User.objects.create_superuser(

@@ -172,6 +172,7 @@ _AREAS_TODO = {
             "Hardening de rotas concluído para colisões de slug vs ações (`editar/apagar/3d`) em furos, projetos e empregados.",
             "CONCLUIDO · [MULTIEMPRESA · SUPERUSER] `Operação > Projetos` apresenta projetos de todas as empresas ao administrador global, transporta contexto nas ações e exige escolha explícita da empresa ao criar.",
             "CONCLUIDO · [AUDITORIA 24/06/2026 · 3D MULTIEMPRESA] Wireframe/Implicit passam a ter `empresa/projeto`; Wireframe, Block e Implicit filtram listagem, conteúdo, configuração, download, exportação e remoção pelo contexto autorizado.",
+            "CONCLUIDO · [AUDITORIA 24/06/2026 · 3D MULTIEMPRESA · FASE 2] Uploads Wireframe/Implicit já permitem associar projeto autorizado, mostram o projeto no histórico e rejeitam POST direto com projeto de outra empresa.",
             "CONCLUIDO · [GESTAO EMPRESA] Novo menu `Gestão` adicionado para contas de empresa/admin, com atalhos estruturais para controlo transversal da operação.",
             "CONCLUIDO · [GESTAO EMPRESA] Hub inicial criado com páginas base para: Clientes & Contratos, Planeamento, RH & Assiduidade, Compras & Fornecedores, Compliance & Segurança, Centro de Notificações e Relatórios Executivos.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` fase 1 entregue com modelo persistente, migração e CRUD completo (lista, criar, detalhe, editar e apagar).",
@@ -254,7 +255,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [SEGURANÇA · CLIENTES & CONTRATOS] Edição direta de ficha comercial passa a exigir cliente/ficha existente na empresa atual, evitando criação lateral por nome de cliente externo.",
         ],
         "proximos_passos": [
-            "[AUDITORIA 24/06/2026 · 3D MULTIEMPRESA · FASE 2] Criar UI opcional para associar uploads Wireframe/Implicit a projeto específico e comando de backfill assistido para modelos legados sem empresa.",
+            "[AUDITORIA 24/06/2026 · 3D MULTIEMPRESA · FASE 2] Criar comando de backfill assistido para modelos legados sem empresa/projeto, mantendo legados visíveis apenas ao superuser até decisão explícita.",
             "[AUDITORIA 24/06/2026 · ARQUITETURA] Dividir `views/gestao_empresa.py` e `views/modelos_3d.py` por domínio, mantendo as views focadas em HTTP e movendo regras para services/selectors testáveis.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: timeline comercial própria do cliente, juntando eventos da ficha comercial com renovações, adendas, estados e contactos-chave.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: exportação individual em PDF da ficha comercial do cliente, separada do dossiê ZIP do contrato.",
@@ -569,9 +570,10 @@ _AREAS_TODO = {
             "CONCLUIDO · [AUDITORIA 24/06/2026 · API] Empregados pendentes deixam de resolver empresa nas APIs de Furos e Dispositivos; acesso exige `aprovado=True` e fica coberto por regressões.",
             "CONCLUIDO · [AUDITORIA 24/06/2026 · QUALITY GATE] Removido o placeholder `plataforma/tests.py` que colidia com o pacote `plataforma/tests/`; testes de ajuda, assiduidade e registo ficaram independentes do modo MVP, data atual e SMTP local.",
             "CONCLUIDO · [AUDITORIA 24/06/2026 · 3D] Fechado isolamento base multiempresa dos modelos 3D: geólogos/admins de empresa deixam de ver, descarregar, configurar, exportar ou apagar modelos de outra empresa por URL direto.",
+            "CONCLUIDO · [AUDITORIA 24/06/2026 · 3D] Uploads Wireframe/Implicit passaram a aceitar associação opcional a projeto filtrado por empresa, com regressões para projeto autorizado e bloqueio de projeto externo.",
         ],
         "proximos_passos": [
-            "[AUDITORIA 24/06/2026 · 3D] Reforçar fase 2 com seleção explícita de projeto nos uploads Wireframe/Implicit e tratamento assistido dos modelos legados sem empresa.",
+            "[AUDITORIA 24/06/2026 · 3D] Criar tratamento assistido dos modelos legados sem empresa/projeto, com dry-run e proposta de associação por `criado_por`/empresa provável.",
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
             "Prioridade imediata antes de novo commit/release/deploy: tratar hardening de segurança (`check --deploy`, HTTPS/HSTS/cookies seguras, `DEBUG=False`, segredos por ambiente, bridge keys só por header, rate limiting, MFA e antivírus real nos uploads).",
             "CONCLUIDO · [AUDITORIA CODIGO · SEGURANCA] Middleware de rate limit endurecido para ignorar `X-Forwarded-For` por defeito e confiar no header apenas com proxy controlado e testes de regressão.",

@@ -60,6 +60,15 @@
                 class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
                 required
             >
+            <label class="block text-sm font-semibold text-slate-700">
+                {% trans "Projeto associado (opcional)" %}
+                <select name="projeto_id" class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-700">
+                    <option value="">{% trans "Sem projeto específico" %}</option>
+                    {% for projeto in projetos_modelos_3d %}
+                        <option value="{{ projeto.pk }}">{{ projeto.nome }}{% if projeto.empresa %} · {{ projeto.empresa.nome }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </label>
             <button type="submit" name="action" value="validate" class="inline-flex items-center rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">
                 {% trans "Validar ficheiro (servidor)" %}
             </button>
@@ -152,6 +161,7 @@
                         <th class="py-2 pr-4">{% trans "Data" %}</th>
                         <th class="py-2 pr-4">{% trans "Nome" %}</th>
                         <th class="py-2 pr-4">{% trans "Formato" %}</th>
+                        <th class="py-2 pr-4">{% trans "Projeto" %}</th>
                         <th class="py-2 pr-4">{% trans "Tamanho (bytes)" %}</th>
                         <th class="py-2 pr-4">{% trans "Utilizador" %}</th>
                         <th class="py-2 pr-4">{% trans "Ações" %}</th>
@@ -163,6 +173,7 @@
                         <td class="py-2 pr-4">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
                         <td class="py-2 pr-4">{{ item.nome }}</td>
                         <td class="py-2 pr-4">{{ item.formato|upper }}</td>
+                        <td class="py-2 pr-4">{% if item.projeto %}{{ item.projeto.nome }}{% else %}-{% endif %}</td>
                         <td class="py-2 pr-4">{{ item.tamanho_bytes }}</td>
                         <td class="py-2 pr-4">{% if item.criado_por %}{{ item.criado_por.username }}{% else %}-{% endif %}</td>
                         <td class="py-2 pr-4">
