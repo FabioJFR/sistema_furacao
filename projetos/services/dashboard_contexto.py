@@ -186,8 +186,9 @@ def montar_contexto_dashboard(*, request, contexto_admin, incluir_mapa=False):
                 empresa=empresa,
             )
         )
-        context["mvp_piloto"] = obter_checklist_piloto_operacional(empresa=empresa)
-        context["mvp_roteiro_piloto"] = obter_roteiro_piloto_operacional()
+        if user_is_global_admin(request.user):
+            context["mvp_piloto"] = obter_checklist_piloto_operacional(empresa=empresa)
+            context["mvp_roteiro_piloto"] = obter_roteiro_piloto_operacional()
         context.update(
             obter_alertas_dashboard(
                 inicio=inicio,

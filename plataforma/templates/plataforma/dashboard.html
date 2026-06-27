@@ -150,6 +150,60 @@
         </div>
     </div>
 
+    {% if request.user.is_superuser and mvp_piloto %}
+    <div class="card mvp-platform-card">
+        <div class="section-title">
+            <div>
+                <span class="mvp-platform-eyebrow">{% trans "Estado do MVP" %}</span>
+                <h2>{% trans "Validação mínima do MVP de terreno" %}</h2>
+                <p>
+                    {% trans "Informação interna reservada ao superuser para acompanhar se a plataforma está pronta para um piloto real." %}
+                    {% if mvp_empresa_piloto %}
+                        {% blocktrans with empresa=mvp_empresa_piloto.nome %}Empresa de referência: {{ empresa }}.{% endblocktrans %}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="mvp-platform-score">
+                <strong>{{ mvp_piloto.percentagem }}%</strong>
+                <span>{% blocktrans with feitos=mvp_piloto.concluidos total=mvp_piloto.total %}{{ feitos }}/{{ total }} concluídos{% endblocktrans %}</span>
+            </div>
+        </div>
+
+        <div class="mvp-platform-progress" aria-hidden="true">
+            <span style="width: {{ mvp_piloto.percentagem }}%;"></span>
+        </div>
+
+        <div class="mvp-platform-grid">
+            {% for item in mvp_piloto.itens %}
+                <a href="{% url item.url_name %}" class="mvp-platform-item {% if item.concluido %}is-ready{% endif %}">
+                    <span class="mvp-platform-check">{% if item.concluido %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+                    <strong>{{ item.titulo }}</strong>
+                    <small>{{ item.descricao }}</small>
+                    <em>{% blocktrans with atual=item.atual meta=item.meta %}{{ atual }}/{{ meta }} registado(s){% endblocktrans %}</em>
+                </a>
+            {% endfor %}
+        </div>
+
+        {% if mvp_roteiro_piloto %}
+            <div class="mvp-platform-roadmap">
+                <div>
+                    <h3>{% trans "Como validar o MVP em dados reais" %}</h3>
+                    <p>{% trans "Sequência interna de decisão go/no-go antes de voltar a promover módulos financeiros, comerciais ou executivos." %}</p>
+                </div>
+                <div class="mvp-platform-steps">
+                    {% for fase in mvp_roteiro_piloto.fases %}
+                        <article>
+                            <span>{{ fase.numero }}</span>
+                            <strong>{{ fase.titulo }}</strong>
+                            <p>{{ fase.descricao }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div class="layout">
         <div class="card">
             <div class="section-title">

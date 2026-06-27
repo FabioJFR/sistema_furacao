@@ -5,8 +5,8 @@ from django.test import SimpleTestCase
 
 
 class DashboardEmpresaTemplateTests(SimpleTestCase):
-    def _contexto_base(self, *, sf_mvp_operacional_focus):
-        user = SimpleNamespace(is_authenticated=True, is_superuser=False)
+    def _contexto_base(self, *, sf_mvp_operacional_focus, is_superuser=False):
+        user = SimpleNamespace(is_authenticated=True, is_superuser=is_superuser)
         return {
             "request": SimpleNamespace(user=user),
             "user": user,
@@ -66,10 +66,10 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
             "projetos": [],
         }
 
-    def test_dashboard_empresa_em_foco_mvp_mostra_centro_operacional(self):
+    def test_dashboard_superuser_em_foco_mvp_mostra_centro_operacional(self):
         html = render_to_string(
             "projetos/dashboard.html",
-            self._contexto_base(sf_mvp_operacional_focus=True),
+            self._contexto_base(sf_mvp_operacional_focus=True, is_superuser=True),
         )
 
         self.assertIn("MVP operacional", html)
@@ -88,6 +88,16 @@ class DashboardEmpresaTemplateTests(SimpleTestCase):
         self.assertIn("Preparar base real", html)
         self.assertIn("Go: avançar piloto", html)
         self.assertIn("No-go: corrigir antes", html)
+
+    def test_dashboard_empresa_em_foco_mvp_nao_mostra_estado_interno_mvp(self):
+        html = render_to_string(
+            "projetos/dashboard.html",
+            self._contexto_base(sf_mvp_operacional_focus=True),
+        )
+
+        self.assertNotIn("MVP operacional", html)
+        self.assertNotIn("Validação mínima do MVP de terreno", html)
+        self.assertNotIn("Como validar o MVP em dados reais", html)
 
     def test_dashboard_empresa_modo_completo_nao_mostra_centro_mvp(self):
         html = render_to_string(

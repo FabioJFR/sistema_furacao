@@ -18,6 +18,20 @@ class Modelo3DWireframe(models.Model):
         blank=True,
         related_name="modelos_wireframe_3d",
     )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_wireframe",
+    )
+    projeto = models.ForeignKey(
+        "projetos.Projeto",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_wireframe",
+    )
     nome = models.CharField(max_length=255)
     formato = models.CharField(max_length=10, choices=FORMATO_CHOICES)
     conteudo_texto = models.TextField(default="", blank=True)

@@ -11,6 +11,10 @@ from django.utils.translation import gettext as _
 from core.permissions import admin_required, user_can_access_3d_geologo
 from projetos.models import Modelo3DBlock, Modelo3DImplicit, Modelo3DWireframe, Projeto, Furo
 from projetos.selectors.block_model import obter_celulas_block_model, obter_dados_3d_block_model
+from projetos.selectors.modelos_3d import (
+    obter_queryset_modelos_3d_autorizado,
+    resolver_empresa_modelos_3d,
+)
 from projetos.services.block_model import (
     exportar_block_model_json,
     gerar_block_model_para_projeto,
@@ -31,6 +35,18 @@ def _garantir_superuser(request):
         return None
     messages.error(request, _("Esta área 3D avançada está disponível apenas para superuser/geólogo autorizado."))
     return redirect("projetos:dashboard")
+
+
+def _empresa_modelos_3d(request):
+    return resolver_empresa_modelos_3d(request.user)
+
+
+def _queryset_modelos_3d(model_cls, request):
+    return obter_queryset_modelos_3d_autorizado(model_cls, request.user)
+
+
+def _get_modelo_3d_ou_404(model_cls, request, **lookup):
+    return get_object_or_404(_queryset_modelos_3d(model_cls, request), **lookup)
 
 
 def _bytes_human_readable(size_bytes):
@@ -286,6 +302,7 @@ def modelo_3d_wireframe(request):
     if bloqueio:
         return bloqueio
 
+    empresa_modelo = _empresa_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -310,6 +327,7 @@ def modelo_3d_wireframe(request):
                     }
                     Modelo3DWireframe.objects.create(
                         criado_por=request.user,
+                        empresa=empresa_modelo,
                         nome=preview.get("nome") or "wireframe",
                         formato=extensao_limpa,
                         conteudo_texto=preview.get("conteudo_texto") or "",
@@ -318,7 +336,10 @@ def modelo_3d_wireframe(request):
                     )
                     messages.success(request, _("Ficheiro guardado na base de dados com sucesso."))
 
-    historico_guardados = Modelo3DWireframe.objects.select_related("criado_por")[:10]
+    historico_guardados = (
+        _queryset_modelos_3d(Modelo3DWireframe, request)
+        .select_related("criado_por", "empresa", "projeto")[:10]
+    )
 
     return render(
         request,
@@ -337,6 +358,7 @@ def modelo_3d_block_model(request):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
+    empresa_modelo = _empresa_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -354,6 +376,7 @@ def modelo_3d_block_model(request):
                     formato = (preview.get("extensao") or "").replace(".", "")
                     item = Modelo3DBlock.objects.create(
                         criado_por=request.user,
+                        empresa=empresa_modelo,
                         nome=preview.get("nome") or "block-model",
                         formato=formato,
                         conteudo_texto=preview.get("conteudo_texto") or "",
@@ -372,7 +395,10 @@ def modelo_3d_block_model(request):
                         messages.warning(request, _("Block model guardado, mas houve falha ao gerar células."))
                     messages.success(request, _("Block model guardado na base de dados com sucesso."))
 
-    historico_guardados = Modelo3DBlock.objects.select_related("criado_por")[:10]
+    historico_guardados = (
+        _queryset_modelos_3d(Modelo3DBlock, request)
+        .select_related("criado_por", "empresa", "projeto")[:10]
+    )
     return render(
         request,
         "projetos/modelo_3d_block_model.html",
@@ -390,6 +416,7 @@ def modelo_3d_implicit(request):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
+    empresa_modelo = _empresa_modelos_3d(request)
     preview = None
     if request.method == "POST":
         action = request.POST.get("action", "validate")
@@ -408,6 +435,7 @@ def modelo_3d_implicit(request):
                     formato = (preview.get("extensao") or "").replace(".", "")
                     Modelo3DImplicit.objects.create(
                         criado_por=request.user,
+                        empresa=empresa_modelo,
                         nome=preview.get("nome") or "implicit-model",
                         formato=formato,
                         dominio=dominio,
@@ -421,7 +449,10 @@ def modelo_3d_implicit(request):
                     )
                     messages.success(request, _("Implicit model guardado na base de dados com sucesso."))
 
-    historico_guardados = Modelo3DImplicit.objects.select_related("criado_por")[:10]
+    historico_guardados = (
+        _queryset_modelos_3d(Modelo3DImplicit, request)
+        .select_related("criado_por", "empresa", "projeto")[:10]
+    )
     return render(
         request,
         "projetos/modelo_3d_implicit.html",
@@ -439,7 +470,7 @@ def modelo_3d_wireframe_conteudo(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DWireframe, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DWireframe, request, pk=pk)
     if item.formato not in {"obj", "dxf"}:
         raise Http404
     if not (item.conteudo_texto or "").strip():
@@ -457,7 +488,7 @@ def modelo_3d_wireframe_download(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DWireframe, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DWireframe, request, pk=pk)
     if item.formato not in {"obj", "dxf"}:
         raise Http404
     nome = _nome_download_seguro(item)
@@ -474,7 +505,7 @@ def modelo_3d_wireframe_apagar(request, pk):
         return bloqueio
     if request.method != "POST":
         return redirect("projetos:modelo_3d_wireframe")
-    item = get_object_or_404(Modelo3DWireframe, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DWireframe, request, pk=pk)
     nome = item.nome
     item.delete()
     messages.success(request, _("Modelo wireframe '%(nome)s' removido com sucesso.") % {"nome": nome})
@@ -487,7 +518,7 @@ def modelo_3d_block_conteudo(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     if item.formato not in {"csv", "json"}:
         raise Http404
     if not (item.conteudo_texto or "").strip():
@@ -598,7 +629,7 @@ def modelo_3d_block_config(request, pk):
     if bloqueio:
         return JsonResponse({"ok": False, "erro": _("Acesso negado.")}, status=403)
 
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
 
     if request.method == "GET":
         resumo = item.resumo_json or {}
@@ -626,7 +657,7 @@ def modelo_3d_block_download(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     if item.formato not in {"csv", "json"}:
         raise Http404
     nome = _nome_download_seguro(item)
@@ -643,7 +674,7 @@ def modelo_3d_block_apagar(request, pk):
         return bloqueio
     if request.method != "POST":
         return redirect("projetos:modelo_3d_block_model")
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     nome = item.nome
     item.delete()
     messages.success(request, _("Modelo block '%(nome)s' removido com sucesso.") % {"nome": nome})
@@ -656,7 +687,7 @@ def modelo_3d_implicit_conteudo(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DImplicit, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DImplicit, request, pk=pk)
     if item.formato not in {"csv", "json"}:
         raise Http404
     if not (item.conteudo_texto or "").strip():
@@ -675,7 +706,7 @@ def modelo_3d_implicit_config(request, pk):
     if bloqueio:
         return JsonResponse({"ok": False, "erro": _("Acesso negado.")}, status=403)
 
-    item = get_object_or_404(Modelo3DImplicit, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DImplicit, request, pk=pk)
 
     if request.method == "GET":
         resumo = item.resumo_json or {}
@@ -703,7 +734,7 @@ def modelo_3d_implicit_download(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DImplicit, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DImplicit, request, pk=pk)
     if item.formato not in {"csv", "json"}:
         raise Http404
     nome = _nome_download_seguro(item)
@@ -720,7 +751,7 @@ def modelo_3d_implicit_apagar(request, pk):
         return bloqueio
     if request.method != "POST":
         return redirect("projetos:modelo_3d_implicit")
-    item = get_object_or_404(Modelo3DImplicit, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DImplicit, request, pk=pk)
     nome = item.nome
     item.delete()
     messages.success(request, _("Modelo implícito '%(nome)s' removido com sucesso.") % {"nome": nome})
@@ -733,7 +764,11 @@ def block_model_list(request):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    items = Modelo3DBlock.objects.select_related("empresa", "projeto", "criado_por").order_by("-criado_em")
+    items = (
+        _queryset_modelos_3d(Modelo3DBlock, request)
+        .select_related("empresa", "projeto", "criado_por")
+        .order_by("-criado_em")
+    )
     return render(request, "projetos/block_model_list.html", {"items": items})
 
 
@@ -743,7 +778,10 @@ def block_model_create(request):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
+    empresa_modelo = _empresa_modelos_3d(request)
     projetos = Projeto.objects.select_related("empresa").order_by("nome")
+    if empresa_modelo:
+        projetos = projetos.filter(empresa=empresa_modelo)
     if request.method == "POST":
         projeto_id = request.POST.get("projeto_id")
         nome = (request.POST.get("nome") or "").strip() or None
@@ -751,8 +789,9 @@ def block_model_create(request):
         sy = request.POST.get("tamanho_bloco_y") or "1"
         sz = request.POST.get("tamanho_bloco_z") or "1"
         try:
+            projeto = get_object_or_404(projetos, pk=projeto_id)
             model = gerar_block_model_para_projeto(
-                projeto_id=projeto_id,
+                projeto_id=projeto.pk,
                 nome=nome,
                 criado_por=request.user,
                 tamanho_bloco_x=float(sx),
@@ -761,7 +800,7 @@ def block_model_create(request):
             )
             messages.success(request, _("Block Model profissional gerado com sucesso."))
             return redirect("projetos:block_model_detail", pk=model.pk)
-        except Projeto.DoesNotExist:
+        except Http404:
             messages.error(request, _("Projeto inválido para gerar block model."))
         except Exception:
             messages.error(request, _("Não foi possível gerar o block model com os dados enviados."))
@@ -774,7 +813,10 @@ def block_model_detail(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock.objects.select_related("empresa", "projeto", "criado_por"), pk=pk)
+    item = get_object_or_404(
+        _queryset_modelos_3d(Modelo3DBlock, request).select_related("empresa", "projeto", "criado_por"),
+        pk=pk,
+    )
     celulas = obter_celulas_block_model(item)
     total = celulas.count()
     litologias = sorted({(c.litologia or "default") for c in celulas})
@@ -791,7 +833,10 @@ def block_model_3d(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock.objects.select_related("empresa", "projeto"), pk=pk)
+    item = get_object_or_404(
+        _queryset_modelos_3d(Modelo3DBlock, request).select_related("empresa", "projeto"),
+        pk=pk,
+    )
     dados = obter_dados_3d_block_model(item)
     furos = []
     if item.projeto_id:
@@ -826,7 +871,7 @@ def block_model_delete(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     if request.method == "POST":
         item.delete()
         messages.success(request, _("Block model removido com sucesso."))
@@ -840,7 +885,7 @@ def block_model_regenerate_cells(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     if request.method != "POST":
         return redirect("projetos:block_model_detail", pk=item.pk)
     try:
@@ -857,7 +902,7 @@ def block_model_export_json(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     payload = exportar_block_model_json(item)
     filename = f"block-model-profissional-{item.pk}.json"
     response = HttpResponse(
@@ -874,7 +919,7 @@ def block_model_export_csv(request, pk):
     bloqueio = _garantir_superuser(request)
     if bloqueio:
         return bloqueio
-    item = get_object_or_404(Modelo3DBlock, pk=pk)
+    item = _get_modelo_3d_ou_404(Modelo3DBlock, request, pk=pk)
     payload = exportar_block_model_json(item)
     cells = payload.get("cells") or []
 

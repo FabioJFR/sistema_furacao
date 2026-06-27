@@ -8,7 +8,7 @@
 
 {% block content %}
 <section class="p-0 m-0">
-    {% if sf_mvp_operacional_focus %}
+    {% if request.user.is_superuser and sf_mvp_operacional_focus %}
     <div class="dsh-mvp-hero">
         <div>
             <div class="dsh-mvp-eyebrow">{% trans "MVP operacional" %}</div>

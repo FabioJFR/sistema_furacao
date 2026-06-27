@@ -82,6 +82,8 @@ class PlataformaDashboardViewsTests(TestCase):
         self.assertNotContains(response, "Riscos de deploy")
         self.assertNotContains(response, "Gestão de features")
         self.assertNotContains(response, "Furos arquivados (base plataforma)")
+        self.assertNotContains(response, "Estado do MVP")
+        self.assertNotContains(response, "Validação mínima do MVP de terreno")
 
     def test_superuser_acede_dashboard_com_atalhos_reservados(self):
         user = self._criar_user_com_perfil(
@@ -98,6 +100,9 @@ class PlataformaDashboardViewsTests(TestCase):
         self.assertContains(response, "Riscos de deploy")
         self.assertContains(response, "Gestão de features")
         self.assertContains(response, "Furos arquivados (base plataforma)")
+        self.assertContains(response, "Estado do MVP")
+        self.assertContains(response, "Validação mínima do MVP de terreno")
+        self.assertContains(response, "Como validar o MVP em dados reais")
 
     def test_empresa_admin_nao_acede_dashboard_plataforma(self):
         user = self._criar_user_com_perfil(

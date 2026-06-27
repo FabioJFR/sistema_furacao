@@ -12,6 +12,10 @@ from plataforma.selectors.dashboard import (
     obter_metricas_contas_dashboard,
     obter_metricas_empresas_dashboard,
 )
+from projetos.selectors.dashboard import (
+    obter_checklist_piloto_operacional,
+    obter_roteiro_piloto_operacional,
+)
 
 # TODO futuro:
 # - substituir este padrão por selector/service dedicado para dashboard da plataforma
@@ -31,6 +35,7 @@ def dashboard_plataforma(request):
     alertas_renovacao = obter_alertas_renovacao_qs()
     utilizadores_online = listar_utilizadores_online()
     ultimos_logins = listar_ultimos_logins()
+    empresa_piloto = empresas_qs.first() if request.user.is_superuser else None
 
     context = {
         "perfil": perfil,
@@ -42,5 +47,13 @@ def dashboard_plataforma(request):
         "utilizadores_online": utilizadores_online,
         "ultimos_logins": ultimos_logins,
     }
+    if request.user.is_superuser:
+        context.update(
+            {
+                "mvp_empresa_piloto": empresa_piloto,
+                "mvp_piloto": obter_checklist_piloto_operacional(empresa=empresa_piloto),
+                "mvp_roteiro_piloto": obter_roteiro_piloto_operacional(),
+            }
+        )
 
     return render(request, "plataforma/dashboard.html", context)

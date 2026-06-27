@@ -18,6 +18,20 @@ class Modelo3DImplicit(models.Model):
         blank=True,
         related_name="modelos_implicit_3d",
     )
+    empresa = models.ForeignKey(
+        "plataforma.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_implicit",
+    )
+    projeto = models.ForeignKey(
+        "projetos.Projeto",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="modelos_3d_implicit",
+    )
     nome = models.CharField(max_length=255)
     formato = models.CharField(max_length=10, choices=FORMATO_CHOICES)
     dominio = models.CharField(max_length=100, blank=True, default="")
