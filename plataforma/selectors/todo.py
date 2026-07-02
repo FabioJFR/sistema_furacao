@@ -574,6 +574,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [AUDITORIA 24/06/2026 · 3D] Backfill assistido criado para modelos legados sem empresa/projeto, com dry-run seguro, aplicação explícita e regressões de não alteração/proposta/aplicação.",
             "CONCLUIDO · [RELEASE READINESS] Comando `release_readiness_check` criado para gate pré-demo/pré-deploy, validando configuração crítica, checks Django e migrações pendentes, com modo `--strict` para produção.",
             "CONCLUIDO · [RELEASE SMOKE] Comando `release_smoke_check` criado para validar rotas públicas críticas e, opcionalmente, login/rotas autenticadas antes/depois de release.",
+            "CONCLUIDO · [RELEASE SMOKE · PERFIS] `release_smoke_check` evoluído com `--profile` para validar jornadas autenticadas de superuser, empresa, empregado e individual com credenciais reais.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
@@ -585,7 +586,7 @@ _AREAS_TODO = {
             "Completar matriz de permissões com testes automatizados por endpoint e por perfil.",
             "Reforçar proteção de segredos/configuração sensível e revisão de variáveis de ambiente por ambiente.",
             "Executar varredura de segurança em dependências e corrigir CVEs com política de atualização.",
-            "Evoluir `release_smoke_check` com jornadas autenticadas por perfil e dados reais: empresa, empregado, projeto/furo, registo, materiais, medição e relatório técnico.",
+            "Evoluir `release_smoke_check` para aceitar rotas de detalhe com IDs reais opcionais: projeto/furo, registo, material, medição e relatório técnico.",
         ],
         "falta_fazer": [
             "Suite E2E completa para jornadas críticas multi-perfil.",

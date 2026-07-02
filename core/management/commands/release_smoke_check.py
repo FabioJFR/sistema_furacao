@@ -27,6 +27,37 @@ AUTH_ROUTES = [
     SmokeRoute("dashboard-operacional", "/app/dashboard/", (200, 302)),
 ]
 
+AUTH_OK = (200, 302)
+
+PROFILE_ROUTES = {
+    "superuser": [
+        SmokeRoute("superuser-plataforma", "/plataforma/dashboard/", AUTH_OK),
+        SmokeRoute("superuser-todo", "/plataforma/todo/", AUTH_OK),
+        SmokeRoute("superuser-riscos-deploy", "/plataforma/riscos-deploy/", AUTH_OK),
+    ],
+    "empresa": [
+        SmokeRoute("empresa-dashboard", "/app/dashboard/", AUTH_OK),
+        SmokeRoute("empresa-projetos", "/app/projetos/", AUTH_OK),
+        SmokeRoute("empresa-furos", "/app/furos/", AUTH_OK),
+        SmokeRoute("empresa-registos", "/app/registos/admin/", AUTH_OK),
+        SmokeRoute("empresa-materiais", "/app/materiais/", AUTH_OK),
+        SmokeRoute("empresa-gestao", "/app/gestao/", AUTH_OK),
+    ],
+    "empregado": [
+        SmokeRoute("empregado-minha-area", "/app/minha-area/", AUTH_OK),
+        SmokeRoute("empregado-meus-furos", "/app/minha-area/meus-furos/", AUTH_OK),
+        SmokeRoute("empregado-registos", "/app/registos/meus/", AUTH_OK),
+        SmokeRoute("empregado-materiais", "/app/minha-area/materiais-disponiveis/", AUTH_OK),
+        SmokeRoute("empregado-medicoes", "/app/minha-area/medicoes/", AUTH_OK),
+    ],
+    "individual": [
+        SmokeRoute("individual-minha-area", "/app/minha-area/", AUTH_OK),
+        SmokeRoute("individual-projetos", "/app/projetos/", AUTH_OK),
+        SmokeRoute("individual-furos", "/app/furos/", AUTH_OK),
+        SmokeRoute("individual-registos", "/app/registos/meus/", AUTH_OK),
+    ],
+}
+
 
 class Command(BaseCommand):
     help = "Executa smoke tests HTTP internos para validar rotas críticas antes/depois de release."
@@ -40,6 +71,15 @@ class Command(BaseCommand):
         )
         parser.add_argument("--username", default="", help="Utilizador para smoke autenticado opcional.")
         parser.add_argument("--password", default="", help="Password para smoke autenticado opcional.")
+        parser.add_argument(
+            "--profile",
+            choices=["base", "superuser", "empresa", "empregado", "individual", "all"],
+            default="base",
+            help=(
+                "Jornada autenticada a validar. Usa 'base' para rotas comuns ou um perfil "
+                "específico com credenciais reais desse tipo de conta."
+            ),
+        )
         parser.add_argument(
             "--public-only",
             action="store_true",
@@ -62,7 +102,9 @@ class Command(BaseCommand):
                 resultados.append(("auth-login", False, "Login falhou com as credenciais fornecidas."))
             else:
                 resultados.append(("auth-login", True, "Login autenticado com sucesso."))
-                resultados.extend(self._check_routes(client=client, routes=AUTH_ROUTES))
+                resultados.extend(
+                    self._check_routes(client=client, routes=self._auth_routes_for_profile(options["profile"]))
+                )
 
         falhas = [resultado for resultado in resultados if not resultado[1]]
 
@@ -86,6 +128,16 @@ class Command(BaseCommand):
     def _default_host(self):
         hosts = [host for host in getattr(settings, "ALLOWED_HOSTS", []) if host and host != "*"]
         return hosts[0] if hosts else "testserver"
+
+    def _auth_routes_for_profile(self, profile):
+        if profile == "base":
+            return AUTH_ROUTES
+        if profile == "all":
+            routes = list(AUTH_ROUTES)
+            for profile_routes in PROFILE_ROUTES.values():
+                routes.extend(profile_routes)
+            return routes
+        return AUTH_ROUTES + PROFILE_ROUTES[profile]
 
     def _check_routes(self, *, client, routes):
         resultados = []
