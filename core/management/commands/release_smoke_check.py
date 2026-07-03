@@ -10,6 +10,7 @@ class SmokeRoute:
     nome: str
     path: str
     allowed_statuses: tuple[int, ...] = (200,)
+    expected_content_type: str = ""
 
 
 PUBLIC_ROUTES = [
@@ -90,6 +91,11 @@ class Command(BaseCommand):
         parser.add_argument("--registo-id", default="", help="ID real de registo diário para smoke de detalhe opcional.")
         parser.add_argument("--material-id", default="", help="ID real de material para smoke de detalhe opcional.")
         parser.add_argument("--medicao-id", default="", help="ID real de medição para smoke de detalhe opcional.")
+        parser.add_argument(
+            "--include-report-pdf",
+            action="store_true",
+            help="Quando usado com --registo-id, valida também o PDF do relatório técnico desse registo.",
+        )
 
     def handle(self, *args, **options):
         host = options["host"] or self._default_host()
@@ -179,6 +185,13 @@ class Command(BaseCommand):
                 else f"/app/registos/admin/{options['registo_id']}/editar/"
             )
             routes.append(SmokeRoute("detail-registo", path, AUTH_OK))
+            if options.get("include_report_pdf"):
+                pdf_path = (
+                    f"/app/registos/meus/relatorios/{options['registo_id']}/pdf/"
+                    if employee_scope
+                    else f"/app/registos/admin/relatorios/{options['registo_id']}/pdf/"
+                )
+                routes.append(SmokeRoute("detail-relatorio-pdf", pdf_path, AUTH_OK, "application/pdf"))
 
         if options.get("material_id"):
             routes.append(SmokeRoute("detail-material", f"/app/materiais/{options['material_id']}/", AUTH_OK))
@@ -204,10 +217,16 @@ class Command(BaseCommand):
 
             ok = response.status_code in route.allowed_statuses
             esperado = "/".join(str(status) for status in route.allowed_statuses)
-            mensagem = (
-                f"{route.path} respondeu {response.status_code}."
-                if ok
-                else f"{route.path} respondeu {response.status_code}; esperado {esperado}."
-            )
+            mensagem = f"{route.path} respondeu {response.status_code}."
+            if not ok:
+                mensagem = f"{route.path} respondeu {response.status_code}; esperado {esperado}."
+            elif route.expected_content_type:
+                content_type = response.headers.get("Content-Type", "")
+                ok = content_type.startswith(route.expected_content_type)
+                mensagem = (
+                    f"{route.path} respondeu {response.status_code} com {content_type}."
+                    if ok
+                    else f"{route.path} respondeu Content-Type {content_type}; esperado {route.expected_content_type}."
+                )
             resultados.append((route.nome, ok, mensagem))
         return resultados

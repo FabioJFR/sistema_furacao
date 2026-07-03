@@ -125,6 +125,9 @@ class ReleaseSmokeCommandTests(TestCase):
             furo=furo,
             data=date(2026, 7, 3),
             metros_furados=1,
+            cliente="Cliente Smoke",
+            sonda="Sonda Smoke",
+            numero_relatorio="SMK-001",
         )
         stdout = StringIO()
 
@@ -146,6 +149,7 @@ class ReleaseSmokeCommandTests(TestCase):
             str(material.pk),
             "--medicao-id",
             str(medicao.pk),
+            "--include-report-pdf",
             stdout=stdout,
         )
 
@@ -153,6 +157,8 @@ class ReleaseSmokeCommandTests(TestCase):
         self.assertIn("[OK] detail-projeto", output)
         self.assertIn("[OK] detail-furo", output)
         self.assertIn("[OK] detail-registo", output)
+        self.assertIn("[OK] detail-relatorio-pdf", output)
+        self.assertIn("application/pdf", output)
         self.assertIn("[OK] detail-material", output)
         self.assertIn("[OK] detail-medicao", output)
 
