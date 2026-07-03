@@ -575,6 +575,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [RELEASE READINESS] Comando `release_readiness_check` criado para gate pré-demo/pré-deploy, validando configuração crítica, checks Django e migrações pendentes, com modo `--strict` para produção.",
             "CONCLUIDO · [RELEASE SMOKE] Comando `release_smoke_check` criado para validar rotas públicas críticas e, opcionalmente, login/rotas autenticadas antes/depois de release.",
             "CONCLUIDO · [RELEASE SMOKE · PERFIS] `release_smoke_check` evoluído com `--profile` para validar jornadas autenticadas de superuser, empresa, empregado e individual com credenciais reais.",
+            "CONCLUIDO · [RELEASE SMOKE · DETALHES] `release_smoke_check` passa a aceitar IDs reais opcionais (`--project-id`, `--furo-id`, `--registo-id`, `--material-id`, `--medicao-id`) para validar rotas de detalhe/edição antes e depois de deploy.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
@@ -586,7 +587,7 @@ _AREAS_TODO = {
             "Completar matriz de permissões com testes automatizados por endpoint e por perfil.",
             "Reforçar proteção de segredos/configuração sensível e revisão de variáveis de ambiente por ambiente.",
             "Executar varredura de segurança em dependências e corrigir CVEs com política de atualização.",
-            "Evoluir `release_smoke_check` para aceitar rotas de detalhe com IDs reais opcionais: projeto/furo, registo, material, medição e relatório técnico.",
+            "Evoluir `release_smoke_check` para validar o download/exportação de relatório técnico quando for fornecido um registo real com ficha técnica preenchida.",
         ],
         "falta_fazer": [
             "Suite E2E completa para jornadas críticas multi-perfil.",

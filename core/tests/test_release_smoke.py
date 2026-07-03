@@ -1,10 +1,12 @@
 from io import StringIO
+from datetime import date
 
 from django.contrib.auth.models import User
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 
-from projetos.tests.helpers import criar_empregado, criar_empresa, criar_perfil, criar_user
+from projetos.models import Material, Medicao, RegistoDiarioEmpregado
+from projetos.tests.helpers import criar_empregado, criar_empresa, criar_furo, criar_perfil, criar_projeto, criar_user
 
 
 @override_settings(ALLOWED_HOSTS=["testserver"])
@@ -85,6 +87,64 @@ class ReleaseSmokeCommandTests(TestCase):
         self.assertIn("[OK] empresa-dashboard", output)
         self.assertIn("[OK] empresa-projetos", output)
         self.assertIn("[OK] empresa-materiais", output)
+
+    def test_smoke_empresa_valida_rotas_de_detalhe_com_ids_reais(self):
+        empresa = criar_empresa(nome="Empresa Smoke")
+        user = criar_user(username="smoke_empresa_detail")
+        criar_perfil(user=user, tipo_acesso="empresa_admin", empresa=empresa)
+        empregado = criar_empregado(empresa=empresa, nome="Operador Smoke")
+        projeto = criar_projeto(empresa=empresa, nome="Projeto Smoke")
+        furo = criar_furo(empresa=empresa, projeto=projeto, nome="Furo Smoke")
+        material = Material.objects.create(
+            empresa=empresa,
+            projeto=projeto,
+            furo=furo,
+            nome="Material Smoke",
+            quantidade=10,
+        )
+        medicao = Medicao.objects.create(
+            furo=furo,
+            profundidade_medida=1.0,
+            inclinacao_real_medida=0,
+            azimute_real_medido=0,
+        )
+        registo = RegistoDiarioEmpregado.objects.create(
+            empregado=empregado,
+            empresa=empresa,
+            projeto=projeto,
+            furo=furo,
+            data=date(2026, 7, 3),
+            metros_furados=1,
+        )
+        stdout = StringIO()
+
+        call_command(
+            "release_smoke_check",
+            "--username",
+            "smoke_empresa_detail",
+            "--password",
+            "testpass123",
+            "--profile",
+            "empresa",
+            "--project-id",
+            str(projeto.pk),
+            "--furo-id",
+            str(furo.pk),
+            "--registo-id",
+            str(registo.pk),
+            "--material-id",
+            str(material.pk),
+            "--medicao-id",
+            str(medicao.pk),
+            stdout=stdout,
+        )
+
+        output = stdout.getvalue()
+        self.assertIn("[OK] detail-projeto", output)
+        self.assertIn("[OK] detail-furo", output)
+        self.assertIn("[OK] detail-registo", output)
+        self.assertIn("[OK] detail-material", output)
+        self.assertIn("[OK] detail-medicao", output)
 
     def test_smoke_empregado_valida_rotas_da_minha_area(self):
         empresa = criar_empresa(nome="Empresa Smoke")

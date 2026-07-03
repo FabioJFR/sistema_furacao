@@ -85,6 +85,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Executa apenas rotas públicas, mesmo que sejam fornecidas credenciais.",
         )
+        parser.add_argument("--project-id", default="", help="ID real de projeto para smoke de detalhe opcional.")
+        parser.add_argument("--furo-id", default="", help="ID real de furo para smoke de detalhe opcional.")
+        parser.add_argument("--registo-id", default="", help="ID real de registo diário para smoke de detalhe opcional.")
+        parser.add_argument("--material-id", default="", help="ID real de material para smoke de detalhe opcional.")
+        parser.add_argument("--medicao-id", default="", help="ID real de medição para smoke de detalhe opcional.")
 
     def handle(self, *args, **options):
         host = options["host"] or self._default_host()
@@ -103,7 +108,10 @@ class Command(BaseCommand):
             else:
                 resultados.append(("auth-login", True, "Login autenticado com sucesso."))
                 resultados.extend(
-                    self._check_routes(client=client, routes=self._auth_routes_for_profile(options["profile"]))
+                    self._check_routes(
+                        client=client,
+                        routes=self._auth_routes_for_profile(options["profile"], options=options),
+                    )
                 )
 
         falhas = [resultado for resultado in resultados if not resultado[1]]
@@ -129,15 +137,61 @@ class Command(BaseCommand):
         hosts = [host for host in getattr(settings, "ALLOWED_HOSTS", []) if host and host != "*"]
         return hosts[0] if hosts else "testserver"
 
-    def _auth_routes_for_profile(self, profile):
+    def _auth_routes_for_profile(self, profile, *, options=None):
         if profile == "base":
-            return AUTH_ROUTES
+            routes = list(AUTH_ROUTES)
+            routes.extend(self._detail_routes(options=options or {}, profile=profile))
+            return routes
         if profile == "all":
             routes = list(AUTH_ROUTES)
             for profile_routes in PROFILE_ROUTES.values():
                 routes.extend(profile_routes)
+            routes.extend(self._detail_routes(options=options or {}, profile=profile))
             return routes
-        return AUTH_ROUTES + PROFILE_ROUTES[profile]
+        routes = AUTH_ROUTES + PROFILE_ROUTES[profile]
+        routes.extend(self._detail_routes(options=options or {}, profile=profile))
+        return routes
+
+    def _detail_routes(self, *, options, profile):
+        routes = []
+        employee_scope = profile in {"empregado", "individual"}
+
+        if options.get("project_id"):
+            path = (
+                f"/app/minha-area/projetos/{options['project_id']}/"
+                if employee_scope
+                else f"/app/projetos/{options['project_id']}/"
+            )
+            routes.append(SmokeRoute("detail-projeto", path, AUTH_OK))
+
+        if options.get("furo_id"):
+            path = (
+                f"/app/minha-area/furos/{options['furo_id']}/"
+                if employee_scope
+                else f"/app/furos/{options['furo_id']}/"
+            )
+            routes.append(SmokeRoute("detail-furo", path, AUTH_OK))
+
+        if options.get("registo_id"):
+            path = (
+                f"/app/registos/meus/{options['registo_id']}/editar/"
+                if employee_scope
+                else f"/app/registos/admin/{options['registo_id']}/editar/"
+            )
+            routes.append(SmokeRoute("detail-registo", path, AUTH_OK))
+
+        if options.get("material_id"):
+            routes.append(SmokeRoute("detail-material", f"/app/materiais/{options['material_id']}/", AUTH_OK))
+
+        if options.get("medicao_id"):
+            path = (
+                f"/app/minha-area/medicoes/{options['medicao_id']}/"
+                if employee_scope
+                else f"/app/medicoes/{options['medicao_id']}/editar/"
+            )
+            routes.append(SmokeRoute("detail-medicao", path, AUTH_OK))
+
+        return routes
 
     def _check_routes(self, *, client, routes):
         resultados = []
