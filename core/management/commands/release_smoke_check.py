@@ -197,7 +197,7 @@ class Command(BaseCommand):
         resultados = []
         for route in routes:
             try:
-                response = client.get(route.path)
+                response = client.get(route.path, secure=True)
             except Exception as exc:
                 resultados.append((route.nome, False, f"Exceção em {route.path}: {exc}"))
                 continue

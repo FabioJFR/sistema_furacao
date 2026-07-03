@@ -21,6 +21,16 @@ class ReleaseSmokeCommandTests(TestCase):
         self.assertIn("[OK] login", output)
         self.assertIn("Resumo smoke:", output)
 
+    @override_settings(SECURE_SSL_REDIRECT=True)
+    def test_smoke_publico_usa_https_interno_e_nao_falha_com_redirect_ssl(self):
+        stdout = StringIO()
+
+        call_command("release_smoke_check", "--public-only", stdout=stdout)
+
+        output = stdout.getvalue()
+        self.assertIn("[OK] homepage", output)
+        self.assertNotIn("respondeu 301", output)
+
     def test_smoke_autenticado_valida_login_e_rotas_base(self):
         User.objects.create_superuser(
             username="smoke_super",
