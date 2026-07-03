@@ -19,6 +19,7 @@ from website import services
 
 REGISTO_STARTED_AT_SESSION_KEY = "website_registo_started_at"
 PUBLIC_LOGO_STATIC_PATH = static("img/sistema_furacao_logo.png")
+REGISTO_PUBLICO_ABERTO = False
 
 
 def _website_quick_links():
@@ -411,6 +412,27 @@ def registo(request):
     planos_contexto = selectors.construir_planos_contexto(planos_qs)
     tipos_conta_contexto = selectors.construir_tipos_conta_contexto()
 
+    context_base = {
+        "planos": planos_qs,
+        "planos_contexto": planos_contexto,
+        "tipos_conta_contexto": tipos_conta_contexto,
+        "registo_fechado": not REGISTO_PUBLICO_ABERTO,
+        **_website_public_meta(
+            request,
+            title="Registo | Sistema de Furação",
+            description="Pede acesso para testar o Sistema de Furação com acompanhamento.",
+            robots="index,follow",
+        ),
+    }
+
+    if not REGISTO_PUBLICO_ABERTO:
+        if request.method == "POST":
+            messages.info(
+                request,
+                _("De momento os registos estão fechados. Caso pretenda testar a plataforma, entre em contacto connosco."),
+            )
+        return render(request, "website/registo.html", context_base)
+
     if request.method == "POST":
         resultado = services.executar_registo(
             request.POST,
@@ -424,10 +446,8 @@ def registo(request):
                 request,
                 "website/registo.html",
                 {
-                    "planos": planos_qs,
+                    **context_base,
                     "dados": request.POST,
-                    "planos_contexto": planos_contexto,
-                    "tipos_conta_contexto": tipos_conta_contexto,
                 },
             )
 
@@ -442,17 +462,7 @@ def registo(request):
     return render(
         request,
         "website/registo.html",
-        {
-            "planos": planos_qs,
-            "planos_contexto": planos_contexto,
-            "tipos_conta_contexto": tipos_conta_contexto,
-            **_website_public_meta(
-                request,
-                title="Registo | Sistema de Furação",
-                description="Cria conta no Sistema de Furação e começa a avaliar a plataforma.",
-                robots="index,follow",
-            ),
-        },
+        context_base,
     )
 
 

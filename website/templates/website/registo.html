@@ -43,7 +43,11 @@
         </form>
         <h1>{% trans "Criar conta" %}</h1>
         <p class="page-intro">
-            {% trans "Escolhe o tipo de conta certo, segue a checklist inicial e entra na plataforma com o plano ajustado ao teu arranque." %}
+            {% if registo_fechado %}
+                {% trans "Estamos a preparar o acesso acompanhado para empresas e utilizadores que queiram testar a plataforma com contexto real de operação." %}
+            {% else %}
+                {% trans "Escolhe o tipo de conta certo, segue a checklist inicial e entra na plataforma com o plano ajustado ao teu arranque." %}
+            {% endif %}
         </p>
 
         {% if messages %}
@@ -57,6 +61,27 @@
             </div>
         {% endif %}
 
+        {% if registo_fechado %}
+            <div class="card registration-closed-card">
+                <span class="registration-closed-card__kicker">{% trans "Acesso temporariamente fechado" %}</span>
+                <h2>{% trans "De momento os registos estão fechados." %}</h2>
+                <p>
+                    {% trans "Caso pretenda testar o Sistema de Furação, entre em contacto connosco. Assim conseguimos preparar uma conta de demonstração, acompanhar o primeiro teste e garantir que a experiência está alinhada com a operação no terreno." %}
+                </p>
+                <div class="registration-closed-card__actions">
+                    <a href="mailto:sistemafuracao@gmail.com?subject=Pedido%20de%20teste%20-%20Sistema%20de%20Fura%C3%A7%C3%A3o" class="btn btn-primary">
+                        {% trans "Pedir acesso para teste" %}
+                    </a>
+                    <a href="{% url 'website:contactos' %}" class="btn btn-secondary">
+                        {% trans "Ver contactos" %}
+                    </a>
+                </div>
+                <p class="registration-closed-card__note">
+                    {% trans "As contas existentes continuam a poder entrar normalmente." %}
+                    <a href="{% url 'login' %}">{% trans "Entrar" %}</a>
+                </p>
+            </div>
+        {% else %}
         <div class="card">
             <form method="post">
                 {% csrf_token %}
@@ -201,9 +226,12 @@
                 </div>
             </form>
         </div>
+        {% endif %}
     </div>
-    {{ planos_contexto|json_script:"planos-contexto-data" }}
-    {{ tipos_conta_contexto|json_script:"tipos-conta-contexto-data" }}
-    <script src="{% static 'js/website/registo.js' %}"></script>
+    {% if not registo_fechado %}
+        {{ planos_contexto|json_script:"planos-contexto-data" }}
+        {{ tipos_conta_contexto|json_script:"tipos-conta-contexto-data" }}
+        <script src="{% static 'js/website/registo.js' %}"></script>
+    {% endif %}
 </body>
 </html>

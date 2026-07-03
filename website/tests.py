@@ -317,18 +317,19 @@ class RegistoPublicoViewTests(TestCase):
         payload.update(alteracoes)
         return payload
 
-    def test_get_apresenta_planos_e_inicia_sessao_antibot(self):
+    def test_get_mostra_registo_fechado_sem_iniciar_sessao_antibot(self):
         response = self.client.get(reverse("website:registo"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.plano_empresa.nome)
-        self.assertContains(response, self.plano_individual.nome)
+        self.assertContains(response, "De momento os registos estão fechados.")
+        self.assertContains(response, "Pedir acesso para teste")
         self.assertIn("planos_contexto", response.context)
-        self.assertIn("website_registo_started_at", self.client.session)
+        self.assertTrue(response.context["registo_fechado"])
+        self.assertNotIn("website_registo_started_at", self.client.session)
 
     @override_settings(REGISTO_MIN_SUBMISSION_SECONDS=0)
     @patch("website.services.enviar_email_confirmacao_conta")
-    def test_post_valido_cria_conta_mostra_sucesso_e_limpa_inicio_antibot(self, mock_email):
+    def test_post_com_registo_fechado_nao_cria_conta(self, mock_email):
         self.client.get(reverse("website:registo"))
 
         response = self.client.post(
@@ -337,17 +338,16 @@ class RegistoPublicoViewTests(TestCase):
             follow=True,
         )
 
-        self.assertRedirects(response, reverse("login"))
         self.assertContains(
             response,
-            "Conta criada com sucesso. Enviámos um email para confirmares a conta antes do primeiro login.",
+            "De momento os registos estão fechados. Caso pretenda testar a plataforma, entre em contacto connosco.",
         )
-        self.assertTrue(User.objects.filter(username="nova_empresa_web", is_active=False).exists())
+        self.assertFalse(User.objects.filter(username="nova_empresa_web").exists())
         self.assertNotIn("website_registo_started_at", self.client.session)
-        mock_email.assert_called_once()
+        mock_email.assert_not_called()
 
     @override_settings(REGISTO_MIN_SUBMISSION_SECONDS=0)
-    def test_post_invalido_mostra_erro_e_preserva_dados_submetidos(self):
+    def test_post_invalido_com_registo_fechado_nao_valida_payload(self):
         response = self.client.post(
             reverse("website:registo"),
             self.payload_empresa(aceitar_termos=""),
@@ -356,19 +356,18 @@ class RegistoPublicoViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(
             response,
-            "Tens de aceitar os Termos &amp; Condições e a Política de Privacidade para criar conta.",
+            "De momento os registos estão fechados. Caso pretenda testar a plataforma, entre em contacto connosco.",
         )
-        self.assertContains(response, "Nova Empresa Web")
         self.assertFalse(User.objects.filter(username="nova_empresa_web").exists())
 
     @override_settings(REGISTO_MIN_SUBMISSION_SECONDS=60)
-    def test_post_imediato_apos_get_e_bloqueado_pelo_antibot(self):
+    def test_post_com_registo_fechado_nao_executa_antibot(self):
         self.client.get(reverse("website:registo"))
 
         response = self.client.post(reverse("website:registo"), self.payload_empresa())
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "A submissão foi demasiado rápida. Aguarda alguns segundos e tenta novamente.")
+        self.assertContains(response, "De momento os registos estão fechados.")
         self.assertFalse(User.objects.filter(username="nova_empresa_web").exists())
 
 

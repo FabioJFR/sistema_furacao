@@ -8,7 +8,7 @@ O foco do MVP é a operação diária: projetos, furos, equipa, turnos, registos
 
 ## Estado atual
 
-- Versão atual: **v0.9.8**
+- Versão atual: **v0.9.9**
 - Estado: **desenvolvimento ativo**
 - Foco imediato: **MVP operacional de terreno**, **estabilização em servidor**, **correções de permissões/navegação** e **preparação de dados para IA futura**
 
@@ -22,6 +22,15 @@ O foco do MVP é a operação diária: projetos, furos, equipa, turnos, registos
 - **Base de dados:** PostgreSQL
 
 ---
+
+## Release 0.9.9 (resumo)
+
+Principais evoluções consolidadas nesta versão:
+
+- registo público temporariamente fechado para controlar acessos durante a fase de piloto/demo
+- página de registo atualizada com mensagem clara e contacto para pedido de teste acompanhado
+- gates de release reforçados com `release_readiness_check` e `release_smoke_check` com perfis autenticados
+- foco mantido nos tópicos pendentes das páginas TO DO, sem abrir novas frentes funcionais fora do MVP operacional
 
 ## Release 0.9.8 (resumo)
 

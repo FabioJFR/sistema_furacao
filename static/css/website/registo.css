@@ -52,6 +52,55 @@ body {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
+.registration-closed-card {
+    border: 1px solid #bfdbfe;
+    background:
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.20), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.registration-closed-card__kicker {
+    display: inline-flex;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.registration-closed-card h2 {
+    margin: 0 0 12px;
+    color: #0f172a;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.05;
+}
+
+.registration-closed-card p {
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.registration-closed-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.registration-closed-card__note {
+    margin: 22px 0 0;
+}
+
+.registration-closed-card__note a {
+    color: #1d4ed8;
+    font-weight: 800;
+}
+
 .row {
     margin-bottom: 16px;
 }
