@@ -578,11 +578,12 @@ _AREAS_TODO = {
             "CONCLUIDO · [RELEASE SMOKE · DETALHES] `release_smoke_check` passa a aceitar IDs reais opcionais (`--project-id`, `--furo-id`, `--registo-id`, `--material-id`, `--medicao-id`) para validar rotas de detalhe/edição antes e depois de deploy.",
             "CONCLUIDO · [RELEASE SMOKE · RELATÓRIO] `release_smoke_check` passa a validar o PDF do relatório técnico com `--include-report-pdf` quando recebe um `--registo-id`, confirmando também `Content-Type: application/pdf`.",
             "CONCLUIDO · [RELEASE SMOKE · CHECKLIST] `release_smoke_check` passa a imprimir um resumo copiável para checklist de deploy/piloto com comando seguro, host, modo, perfil, resultado e rotas validadas.",
+            "CONCLUIDO · [SEGURANÇA · BRIDGE KEYS] Regressões garantem que endpoints de bridge DJI e Drone S_F só aceitam autenticação por header `X-Bridge-Key`, rejeitando chaves em query string ou body.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
             "Antes de apresentação/deploy: executar `python manage.py release_readiness_check --strict` no servidor, com base real acessível, antivírus de uploads ativo e cache partilhada configurada.",
-            "Prioridade imediata antes de novo commit/release/deploy: tratar hardening remanescente de segurança (bridge keys só por header, MFA e verificação operacional do antivírus real nos uploads).",
+            "Prioridade imediata antes de novo commit/release/deploy: tratar hardening remanescente de segurança (MFA e verificação operacional do antivírus real nos uploads).",
             "CONCLUIDO · [AUDITORIA CODIGO · SEGURANCA] Middleware de rate limit endurecido para ignorar `X-Forwarded-For` por defeito e confiar no header apenas com proxy controlado e testes de regressão.",
             "[AUDITORIA CODIGO · QUALIDADE] Priorizar a suite mínima dos módulos sem cobertura relevante, começando por `dispositivos`, `inspecao_ai` e APIs multiempresa.",
             "[AUDITORIA CODIGO · MANUTENCAO] Inventariar `except Exception` defensivos, manter apenas fallbacks de borda com logging/telemetria claros e remover silêncios que escondam regressões.",
