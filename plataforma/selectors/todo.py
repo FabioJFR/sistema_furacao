@@ -577,6 +577,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [RELEASE SMOKE · PERFIS] `release_smoke_check` evoluído com `--profile` para validar jornadas autenticadas de superuser, empresa, empregado e individual com credenciais reais.",
             "CONCLUIDO · [RELEASE SMOKE · DETALHES] `release_smoke_check` passa a aceitar IDs reais opcionais (`--project-id`, `--furo-id`, `--registo-id`, `--material-id`, `--medicao-id`) para validar rotas de detalhe/edição antes e depois de deploy.",
             "CONCLUIDO · [RELEASE SMOKE · RELATÓRIO] `release_smoke_check` passa a validar o PDF do relatório técnico com `--include-report-pdf` quando recebe um `--registo-id`, confirmando também `Content-Type: application/pdf`.",
+            "CONCLUIDO · [RELEASE SMOKE · CHECKLIST] `release_smoke_check` passa a imprimir um resumo copiável para checklist de deploy/piloto com comando seguro, host, modo, perfil, resultado e rotas validadas.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
@@ -588,7 +589,7 @@ _AREAS_TODO = {
             "Completar matriz de permissões com testes automatizados por endpoint e por perfil.",
             "Reforçar proteção de segredos/configuração sensível e revisão de variáveis de ambiente por ambiente.",
             "Executar varredura de segurança em dependências e corrigir CVEs com política de atualização.",
-            "Evoluir `release_smoke_check` para produzir um resumo final copiável para checklist de deploy/piloto com comandos executados, perfil usado e rotas validadas.",
+            "Executar `release_smoke_check` com perfil e IDs reais no servidor durante o próximo piloto e anexar o checklist copiável às notas de release.",
         ],
         "falta_fazer": [
             "Suite E2E completa para jornadas críticas multi-perfil.",

@@ -135,6 +135,7 @@ class Command(BaseCommand):
                 f"Resumo smoke: {len(resultados) - len(falhas)} OK, {len(falhas)} erro(s)."
             )
         )
+        self._write_checklist(options=options, host=host, resultados=resultados, falhas=falhas)
 
         if falhas:
             raise CommandError("Smoke check falhou. Corrige as rotas antes de avançar.")
@@ -142,6 +143,47 @@ class Command(BaseCommand):
     def _default_host(self):
         hosts = [host for host in getattr(settings, "ALLOWED_HOSTS", []) if host and host != "*"]
         return hosts[0] if hosts else "testserver"
+
+    def _write_checklist(self, *, options, host, resultados, falhas):
+        modo = "public-only" if options.get("public_only") else "autenticado"
+        rotas_ok = [nome for nome, ok, _mensagem in resultados if ok]
+        rotas_falha = [nome for nome, ok, _mensagem in resultados if not ok]
+
+        self.stdout.write("")
+        self.stdout.write(self.style.MIGRATE_HEADING("Checklist copiável"))
+        self.stdout.write(f"- Comando: {self._build_safe_command(options=options, host=host)}")
+        self.stdout.write(f"- Host: {host}")
+        self.stdout.write(f"- Modo: {modo}")
+        self.stdout.write(f"- Perfil: {options.get('profile') or 'base'}")
+        self.stdout.write(f"- Resultado: {len(rotas_ok)} OK, {len(falhas)} erro(s)")
+        self.stdout.write(f"- Rotas OK: {', '.join(rotas_ok) if rotas_ok else '-'}")
+        self.stdout.write(f"- Rotas com erro: {', '.join(rotas_falha) if rotas_falha else '-'}")
+        if options.get("include_report_pdf"):
+            self.stdout.write("- PDF técnico: validado")
+
+    def _build_safe_command(self, *, options, host):
+        command = ["python manage.py release_smoke_check", "--host", host]
+        if options.get("public_only"):
+            command.append("--public-only")
+        else:
+            command.extend(["--profile", options.get("profile") or "base"])
+            if options.get("username"):
+                command.extend(["--username", options["username"], "--password", "<password>"])
+
+        for option_name, flag in (
+            ("project_id", "--project-id"),
+            ("furo_id", "--furo-id"),
+            ("registo_id", "--registo-id"),
+            ("material_id", "--material-id"),
+            ("medicao_id", "--medicao-id"),
+        ):
+            if options.get(option_name):
+                command.extend([flag, options[option_name]])
+
+        if options.get("include_report_pdf"):
+            command.append("--include-report-pdf")
+
+        return " ".join(command)
 
     def _auth_routes_for_profile(self, profile, *, options=None):
         if profile == "base":

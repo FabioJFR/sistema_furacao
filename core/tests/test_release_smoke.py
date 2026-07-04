@@ -20,6 +20,10 @@ class ReleaseSmokeCommandTests(TestCase):
         self.assertIn("[OK] homepage", output)
         self.assertIn("[OK] login", output)
         self.assertIn("Resumo smoke:", output)
+        self.assertIn("Checklist copiável", output)
+        self.assertIn("python manage.py release_smoke_check --host testserver --public-only", output)
+        self.assertIn("- Modo: public-only", output)
+        self.assertIn("- Rotas OK: homepage", output)
 
     @override_settings(SECURE_SSL_REDIRECT=True)
     def test_smoke_publico_usa_https_interno_e_nao_falha_com_redirect_ssl(self):
@@ -51,6 +55,14 @@ class ReleaseSmokeCommandTests(TestCase):
         output = stdout.getvalue()
         self.assertIn("[OK] auth-login", output)
         self.assertIn("[OK] redirect-pos-login", output)
+        self.assertIn(
+            "python manage.py release_smoke_check --host testserver --profile base "
+            "--username smoke_super --password <password>",
+            output,
+        )
+        self.assertIn("- Modo: autenticado", output)
+        self.assertIn("- Perfil: base", output)
+        self.assertNotIn("testpass123", output)
 
     def test_smoke_superuser_valida_rotas_de_plataforma(self):
         criar_empresa(nome="Empresa Smoke")
@@ -159,6 +171,7 @@ class ReleaseSmokeCommandTests(TestCase):
         self.assertIn("[OK] detail-registo", output)
         self.assertIn("[OK] detail-relatorio-pdf", output)
         self.assertIn("application/pdf", output)
+        self.assertIn("--include-report-pdf", output)
         self.assertIn("[OK] detail-material", output)
         self.assertIn("[OK] detail-medicao", output)
 
