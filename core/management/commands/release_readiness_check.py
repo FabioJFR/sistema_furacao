@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+import os
+import shutil
 
 from django.conf import settings
 from django.core import checks
@@ -116,13 +118,29 @@ class Command(BaseCommand):
             mensagem="HTTPS redirect e HSTS ativos." if settings.SECURE_SSL_REDIRECT and settings.SECURE_HSTS_SECONDS > 0 else "HTTPS redirect/HSTS incompletos.",
             detalhe="Para produção usa DJANGO_SECURE_SSL_REDIRECT=True e HSTS > 0.",
         )
+        antivirus_enabled = bool(settings.UPLOAD_VIRUS_SCAN_ENABLED and settings.UPLOAD_VIRUS_SCAN_FAIL_CLOSED)
+        antivirus_command = getattr(settings, "UPLOAD_VIRUS_SCAN_COMMAND", "clamscan")
+        antivirus_command_ok = self._antivirus_command_available(antivirus_command)
+        antivirus_ok = antivirus_enabled and antivirus_command_ok
+        detalhe_antivirus = (
+            f"Comando configurado: {antivirus_command}."
+            if antivirus_command_ok
+            else (
+                "Antes de vender/abrir uploads reais, ativa UPLOAD_VIRUS_SCAN_ENABLED=True, "
+                "fail-closed e garante que UPLOAD_VIRUS_SCAN_COMMAND aponta para um executável disponível."
+            )
+        )
         self._add(
             itens,
             slug="upload-antivirus",
-            ok=bool(settings.UPLOAD_VIRUS_SCAN_ENABLED and settings.UPLOAD_VIRUS_SCAN_FAIL_CLOSED),
+            ok=antivirus_ok,
             nivel="erro" if strict else "aviso",
-            mensagem="Antivírus de upload ativo em modo fail-closed." if settings.UPLOAD_VIRUS_SCAN_ENABLED and settings.UPLOAD_VIRUS_SCAN_FAIL_CLOSED else "Antivírus de upload não está em modo produção completo.",
-            detalhe="Antes de vender/abrir uploads reais, ativa UPLOAD_VIRUS_SCAN_ENABLED=True e fail-closed.",
+            mensagem=(
+                "Antivírus de upload ativo, fail-closed e executável disponível."
+                if antivirus_ok
+                else "Antivírus de upload não está operacional em modo produção completo."
+            ),
+            detalhe=detalhe_antivirus,
         )
         cache_backend = settings.CACHES.get("default", {}).get("BACKEND", "")
         cache_ok = "LocMemCache" not in cache_backend
@@ -135,6 +153,14 @@ class Command(BaseCommand):
             detalhe="Em produção multi-worker usa Redis/Memcached para rate limits consistentes.",
         )
         return itens
+
+    def _antivirus_command_available(self, command):
+        if not command:
+            return False
+        command = str(command).strip()
+        if os.path.isabs(command):
+            return os.path.isfile(command) and os.access(command, os.X_OK)
+        return shutil.which(command) is not None
 
     def _avaliar_django_checks(self, *, strict):
         mensagens = checks.run_checks(include_deployment_checks=strict)

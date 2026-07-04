@@ -1,4 +1,5 @@
 from io import StringIO
+import sys
 
 from django.core.management import CommandError, call_command
 from django.test import SimpleTestCase, override_settings
@@ -78,6 +79,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         SECURE_HSTS_SECONDS=31536000,
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -109,6 +111,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         SECURE_HSTS_SECONDS=31536000,
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -129,4 +132,39 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
 
         output = stdout.getvalue()
         self.assertIn("[OK] debug", output)
+        self.assertIn("[OK] upload-antivirus", output)
         self.assertIn("0 aviso(s), 0 erro(s)", output)
+
+    @override_settings(
+        DEBUG=False,
+        SECRET_KEY=STRONG_SECRET,
+        ALLOWED_HOSTS=["sistemafuracao.pt"],
+        SESSION_COOKIE_SECURE=True,
+        CSRF_COOKIE_SECURE=True,
+        SECURE_SSL_REDIRECT=True,
+        SECURE_HSTS_SECONDS=31536000,
+        UPLOAD_VIRUS_SCAN_ENABLED=True,
+        UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND="/caminho/inexistente/clamscan",
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                "LOCATION": "redis://127.0.0.1:6379/1",
+            }
+        },
+    )
+    def test_strict_falha_quando_antivirus_nao_esta_operacional(self):
+        stdout = StringIO()
+
+        with self.assertRaises(CommandError):
+            call_command(
+                "release_readiness_check",
+                "--strict",
+                "--skip-db",
+                "--skip-system-check",
+                stdout=stdout,
+            )
+
+        output = stdout.getvalue()
+        self.assertIn("[ERRO] upload-antivirus", output)
+        self.assertIn("executável disponível", output)
