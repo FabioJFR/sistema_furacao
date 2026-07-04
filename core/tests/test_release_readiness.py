@@ -3,11 +3,24 @@ import sys
 
 from django.core.management import CommandError, call_command
 from django.test import SimpleTestCase, override_settings
+from django.test.utils import ignore_warnings
 
 
 STRONG_SECRET = "release-readiness-secret-key-with-enough-length-and-variety-12345"
 
+SAFE_DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "sistema_furacao_prod",
+        "USER": "sistema_furacao_app",
+        "PASSWORD": "db-password-forte-para-testes",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
+}
 
+
+@ignore_warnings(message="Overriding setting DATABASES can lead to unexpected behavior.")
 class ReleaseReadinessCommandTests(SimpleTestCase):
     @override_settings(
         DEBUG=True,
@@ -80,6 +93,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        DATABASES=SAFE_DATABASES,
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -112,6 +126,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        DATABASES=SAFE_DATABASES,
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -132,6 +147,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
 
         output = stdout.getvalue()
         self.assertIn("[OK] debug", output)
+        self.assertIn("[OK] database-credentials", output)
         self.assertIn("[OK] upload-antivirus", output)
         self.assertIn("0 aviso(s), 0 erro(s)", output)
 
@@ -146,6 +162,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND="/caminho/inexistente/clamscan",
+        DATABASES=SAFE_DATABASES,
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -168,3 +185,47 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         output = stdout.getvalue()
         self.assertIn("[ERRO] upload-antivirus", output)
         self.assertIn("executável disponível", output)
+
+    @override_settings(
+        DEBUG=False,
+        SECRET_KEY=STRONG_SECRET,
+        ALLOWED_HOSTS=["sistemafuracao.pt"],
+        SESSION_COOKIE_SECURE=True,
+        CSRF_COOKIE_SECURE=True,
+        SECURE_SSL_REDIRECT=True,
+        SECURE_HSTS_SECONDS=31536000,
+        UPLOAD_VIRUS_SCAN_ENABLED=True,
+        UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        DATABASES={
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": "postgres_db",
+                "USER": "postgres",
+                "PASSWORD": "postgres",
+                "HOST": "127.0.0.1",
+                "PORT": "5432",
+            }
+        },
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                "LOCATION": "redis://127.0.0.1:6379/1",
+            }
+        },
+    )
+    def test_strict_falha_com_credenciais_default_de_base_de_dados(self):
+        stdout = StringIO()
+
+        with self.assertRaises(CommandError):
+            call_command(
+                "release_readiness_check",
+                "--strict",
+                "--skip-db",
+                "--skip-system-check",
+                stdout=stdout,
+            )
+
+        output = stdout.getvalue()
+        self.assertIn("[ERRO] database-credentials", output)
+        self.assertIn("POSTGRES_DB, POSTGRES_USER e POSTGRES_PASSWORD", output)

@@ -118,6 +118,23 @@ class Command(BaseCommand):
             mensagem="HTTPS redirect e HSTS ativos." if settings.SECURE_SSL_REDIRECT and settings.SECURE_HSTS_SECONDS > 0 else "HTTPS redirect/HSTS incompletos.",
             detalhe="Para produção usa DJANGO_SECURE_SSL_REDIRECT=True e HSTS > 0.",
         )
+        db_config = settings.DATABASES.get("default", {})
+        db_credentials_ok = self._database_credentials_safe(db_config)
+        self._add(
+            itens,
+            slug="database-credentials",
+            ok=db_credentials_ok,
+            nivel="erro" if strict else "aviso",
+            mensagem=(
+                "Credenciais da base de dados não usam defaults conhecidos."
+                if db_credentials_ok
+                else "Credenciais da base de dados parecem defaults/inseguras."
+            ),
+            detalhe=(
+                "Define POSTGRES_DB, POSTGRES_USER e POSTGRES_PASSWORD próprios do ambiente; "
+                "evita postgres/postgres/postgres_db em produção."
+            ),
+        )
         antivirus_enabled = bool(settings.UPLOAD_VIRUS_SCAN_ENABLED and settings.UPLOAD_VIRUS_SCAN_FAIL_CLOSED)
         antivirus_command = getattr(settings, "UPLOAD_VIRUS_SCAN_COMMAND", "clamscan")
         antivirus_command_ok = self._antivirus_command_available(antivirus_command)
@@ -153,6 +170,15 @@ class Command(BaseCommand):
             detalhe="Em produção multi-worker usa Redis/Memcached para rate limits consistentes.",
         )
         return itens
+
+    def _database_credentials_safe(self, db_config):
+        name = str(db_config.get("NAME") or "").strip().lower()
+        user = str(db_config.get("USER") or "").strip().lower()
+        password = str(db_config.get("PASSWORD") or "").strip()
+        unsafe_names = {"", "postgres", "postgres_db", "sistema_furacao", "test"}
+        unsafe_users = {"", "postgres", "admin", "root"}
+        unsafe_passwords = {"", "postgres", "password", "admin", "root", "123456", "sistema_furacao"}
+        return name not in unsafe_names and user not in unsafe_users and password.lower() not in unsafe_passwords
 
     def _antivirus_command_available(self, command):
         if not command:
