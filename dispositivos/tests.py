@@ -193,6 +193,38 @@ class DispositivoApiFlowTests(SimpleTestCase):
         self.assertEqual(resultado["mensagem_erro"], "Dispositivo indisponível.")
 
 
+class DispositivoApiSimuladaTests(TestCase):
+    def setUp(self):
+        self.user = criar_user(username="admin_dispositivos_simulados")
+        self.client.force_login(self.user)
+
+    def test_api_testar_simulada_usa_contrato_padronizado(self):
+        response = self.client.get("/app/dispositivos/api/testar/")
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["msg"], "Ligação simulada com sucesso")
+        self.assertEqual(payload["eventos"][0]["tipo"], "sucesso")
+
+    @patch("dispositivos.services.simulacao.random.randint", return_value=42)
+    @patch("dispositivos.services.simulacao.random.uniform", side_effect=[-3.456, 181.789])
+    @patch("dispositivos.services.simulacao.time.time", return_value=123456.0)
+    def test_api_capturar_simulada_usa_contrato_padronizado(self, *_mocks):
+        response = self.client.get("/app/dispositivos/api/capturar/")
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["payload"]["depth"], 42)
+        self.assertEqual(payload["payload"]["inclination"], -3.46)
+        self.assertEqual(payload["payload"]["azimuth"], 181.79)
+        self.assertEqual(payload["payload"]["timestamp"], 123456.0)
+        self.assertEqual(payload["eventos"][0]["tipo"], "sucesso")
+
+
 class SessaoDispositivoValidationTests(SimpleTestCase):
     def test_rejeita_empregado_sem_empresa(self):
         with self.assertRaisesMessage(

@@ -39,6 +39,10 @@ from dispositivos.services.api_flow import (
     construir_payload_dispositivo_guardado,
     construir_payload_escuta_dispositivo,
 )
+from dispositivos.services.simulacao import (
+    processar_captura_simulada,
+    processar_teste_simulado,
+)
 from dispositivos.services.dashboard_page import (
     construir_contexto_dashboard_dispositivos,
     construir_contexto_leituras_brutas_dispositivo,
@@ -48,8 +52,6 @@ from dispositivos.services.dashboard_page import (
     construir_contexto_shots_dispositivo,
 )
 from django.http import JsonResponse, HttpResponse
-import random
-import time
 
 MAGCRUISER_PREVIEW_SESSION_KEY = "magcruiser_import_preview"
 MAGCRUISER_REPORT_SESSION_KEY = "magcruiser_import_report"
@@ -90,26 +92,34 @@ def _resolver_empresa_para_registo(request):
 
 @login_required
 def api_testar(request):
-    return JsonResponse({
-        "status": "ok",
-        "msg": "Ligação simulada com sucesso"
-    })
+    resultado = processar_teste_simulado()
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "status": r["status_simulado"],
+            "msg": r["mensagem"],
+        },
+        mensagem_erro_padrao="Falha no teste simulado.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
+    )
 
 
 @login_required
 def api_capturar(request):
-    # Simulação de leitura real
-    fake_payload = {
-        "depth": random.randint(10, 100),
-        "inclination": round(random.uniform(-10, 10), 2),
-        "azimuth": round(random.uniform(0, 360), 2),
-        "timestamp": time.time()
-    }
-
-    return JsonResponse({
-        "status": "ok",
-        "payload": fake_payload
-    })
+    resultado = processar_captura_simulada()
+    return construir_http_response_operacao_api(
+        resultado=resultado,
+        payload_sucesso=lambda r: {
+            "eventos": r["eventos"],
+            "status": "ok",
+            "payload": r["payload"],
+        },
+        mensagem_erro_padrao="Falha na captura simulada.",
+        json_ok_fn=_json_ok,
+        json_erro_fn=_json_erro,
+    )
 
 
 @login_required

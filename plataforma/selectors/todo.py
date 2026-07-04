@@ -63,9 +63,9 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · OBSERVABILIDADE] Dashboard passa a mostrar observabilidade por dispositivo com sessões, erros, leituras, disponibilidade estimada, latência média e última atividade.",
             "CONCLUIDO · [DISPOSITIVOS · DESCOBERTA USB] Procura de portas USB/serial passa para service dedicado, usa o contrato HTTP comum e devolve erro JSON controlado quando o driver falha.",
             "CONCLUIDO · [DISPOSITIVOS · AUTORIZAÇÃO API] APIs de sessão e bridge passam a aceitar apenas empregados aprovados, com validação em selector/service e regressão automatizada.",
+            "CONCLUIDO · [DISPOSITIVOS · API SIMULADA] Endpoints simulados `api_testar` e `api_capturar` passam a usar service dedicado e o contrato HTTP comum, preservando campos legados e adicionando cobertura automatizada.",
         ],
         "proximos_passos": [
-            "Completar uniformização fina dos endpoints API simulados restantes (`api_testar` e `api_capturar`) e reduzir helpers HTTP locais.",
             "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
             "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para permissões avançadas por endpoint e API pública com autenticação forte.",
             "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
