@@ -94,6 +94,7 @@ def processar_gravacao_importacao_magcruiser(
         "total_ignoradas": resultado.get("total_ignoradas", 0),
         "furos_criados": resultado.get("furos_criados", 0),
         "furos_sem_match": resultado.get("furos_sem_match", []),
+        "sugestoes_furos_sem_match": resultado.get("sugestoes_furos_sem_match", []),
         "resumo_por_furo": resultado.get("resumo_por_furo", {}),
     }
 

@@ -406,6 +406,90 @@ class SessaoDispositivoPersistenceTests(TestCase):
         self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 1)
         self.assertFalse(Furo.objects.filter(empresa=self.empresa, nome="FURO-1").exists())
 
+    def test_gravar_importacao_reconcilia_nome_furo_fuzzy_configurado(self):
+        self.empresa.geologia_score_config = {
+            "magcruiser_reconciliacao": {
+                "fuzzy_threshold": "0.70",
+            }
+        }
+        self.empresa.save(update_fields=["geologia_score_config"])
+        furo_reconciliado = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo Norte 001",
+            profundidade_alvo_inicial=100,
+            profundidade_alvo_atual=100,
+        )
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=furo_reconciliado,
+            empregado=self.empregado,
+        )
+
+        resultado = gravar_importacao_magcruiser(
+            sessao=sessao,
+            rows=[
+                {
+                    "hole_name": "Furo Nrote 001",
+                    "depth": Decimal("10"),
+                    "inc": Decimal("-2"),
+                    "azi": Decimal("90"),
+                    "mag": None,
+                    "temp": None,
+                },
+            ],
+            modo_aplicacao="all_existing",
+        )
+
+        self.assertEqual(resultado["total_gravadas"], 1)
+        self.assertEqual(resultado["total_ignoradas"], 0)
+        self.assertEqual(resultado["furos_sem_match"], [])
+        self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 1)
+        self.assertFalse(Furo.objects.filter(empresa=self.empresa, nome="Furo Nrote 001").exists())
+
+    def test_gravar_importacao_sugere_furos_sem_match_quando_fuzzy_nao_e_seguro(self):
+        self.empresa.geologia_score_config = {
+            "magcruiser_reconciliacao": {
+                "fuzzy_threshold": "0.99",
+                "max_sugestoes": 2,
+            }
+        }
+        self.empresa.save(update_fields=["geologia_score_config"])
+        furo_reconciliado = criar_furo(
+            empresa=self.empresa,
+            projeto=self.projeto,
+            nome="Furo Norte 001",
+            profundidade_alvo_inicial=100,
+            profundidade_alvo_atual=100,
+        )
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=furo_reconciliado,
+            empregado=self.empregado,
+        )
+
+        resultado = gravar_importacao_magcruiser(
+            sessao=sessao,
+            rows=[
+                {
+                    "hole_name": "Furo Nrote 001",
+                    "depth": Decimal("10"),
+                    "inc": Decimal("-2"),
+                    "azi": Decimal("90"),
+                    "mag": None,
+                    "temp": None,
+                },
+            ],
+            modo_aplicacao="all_existing",
+        )
+
+        self.assertEqual(resultado["total_gravadas"], 0)
+        self.assertEqual(resultado["total_ignoradas"], 1)
+        self.assertEqual(resultado["furos_sem_match"], ["Furo Nrote 001"])
+        self.assertEqual(resultado["sugestoes_furos_sem_match"][0]["nome_importado"], "Furo Nrote 001")
+        self.assertEqual(resultado["sugestoes_furos_sem_match"][0]["sugestoes"][0]["nome"], "Furo Norte 001")
+        self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 0)
+
     def test_gravar_importacao_rejeita_saltos_acima_da_tolerancia_da_empresa(self):
         self.empresa.geologia_score_config = {
             "magcruiser_tolerancias": {

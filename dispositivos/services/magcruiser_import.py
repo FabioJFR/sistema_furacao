@@ -1,6 +1,7 @@
 import csv
 import io
 import re
+from difflib import SequenceMatcher
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
@@ -99,8 +100,24 @@ def _config_decimal_positivo(config, chave):
     valor = (config or {}).get(chave)
     if valor in (None, ""):
         return None
-    decimal = _to_decimal(valor)
+    try:
+        decimal = _to_decimal(valor)
+    except ValidationError:
+        return None
     if decimal is None or decimal <= 0:
+        return None
+    return decimal
+
+
+def _config_decimal_intervalo(config, chave, *, minimo, maximo):
+    valor = (config or {}).get(chave)
+    if valor in (None, ""):
+        return None
+    try:
+        decimal = _to_decimal(valor)
+    except ValidationError:
+        return None
+    if decimal is None or decimal < minimo or decimal > maximo:
         return None
     return decimal
 
@@ -112,6 +129,45 @@ def _obter_tolerancias_telemetria_empresa(empresa):
         "max_delta_depth": _config_decimal_positivo(tolerancias, "max_delta_depth"),
         "max_delta_inc": _config_decimal_positivo(tolerancias, "max_delta_inc"),
         "max_delta_azi": _config_decimal_positivo(tolerancias, "max_delta_azi"),
+    }
+
+
+def _obter_config_reconciliacao_empresa(empresa):
+    config = getattr(empresa, "geologia_score_config", None) or {}
+    reconciliacao = config.get("magcruiser_reconciliacao") or {}
+    fuzzy_threshold = _config_decimal_intervalo(
+        reconciliacao,
+        "fuzzy_threshold",
+        minimo=Decimal("0.01"),
+        maximo=Decimal("1"),
+    )
+    if fuzzy_threshold is None:
+        fuzzy_threshold = _config_decimal_intervalo(
+            reconciliacao,
+            "limiar_fuzzy",
+            minimo=Decimal("0.01"),
+            maximo=Decimal("1"),
+        )
+
+    suggestion_threshold = _config_decimal_intervalo(
+        reconciliacao,
+        "suggestion_threshold",
+        minimo=Decimal("0.01"),
+        maximo=Decimal("1"),
+    )
+    if suggestion_threshold is None and fuzzy_threshold is not None:
+        suggestion_threshold = max(Decimal("0.50"), fuzzy_threshold - Decimal("0.25"))
+
+    try:
+        max_sugestoes = int(reconciliacao.get("max_sugestoes", 3))
+    except (TypeError, ValueError):
+        max_sugestoes = 3
+    max_sugestoes = max(1, min(max_sugestoes, 10))
+
+    return {
+        "fuzzy_threshold": fuzzy_threshold,
+        "suggestion_threshold": suggestion_threshold,
+        "max_sugestoes": max_sugestoes,
     }
 
 
@@ -281,14 +337,66 @@ def _chaves_reconciliacao_nome_furo(nome):
     }
 
 
-def _encontrar_furo_por_nome_reconciliado(*, empresa, nome_furo):
+def _pontuar_similaridade_nome_furo(nome_origem, nome_candidato):
+    chaves_origem = _chaves_reconciliacao_nome_furo(nome_origem)
+    chaves_candidato = _chaves_reconciliacao_nome_furo(nome_candidato)
+    if not chaves_origem or not chaves_candidato:
+        return Decimal("0")
+
+    melhor = max(
+        SequenceMatcher(None, origem, candidato).ratio()
+        for origem in chaves_origem
+        for candidato in chaves_candidato
+        if origem and candidato
+    )
+    return Decimal(str(round(melhor, 4)))
+
+
+def _sugerir_furos_por_nome(*, empresa, nome_furo, reconciliacao_config):
+    suggestion_threshold = (reconciliacao_config or {}).get("suggestion_threshold")
+    if suggestion_threshold is None:
+        return []
+
+    candidatos = []
+    for furo in Furo.objects.filter(empresa=empresa).order_by("data", "nome"):
+        score = _pontuar_similaridade_nome_furo(nome_furo, furo.nome)
+        if score >= suggestion_threshold:
+            candidatos.append(
+                {
+                    "id": str(furo.pk),
+                    "nome": furo.nome,
+                    "score": float(score),
+                }
+            )
+
+    candidatos.sort(key=lambda item: (-item["score"], item["nome"]))
+    return candidatos[: (reconciliacao_config or {}).get("max_sugestoes", 3)]
+
+
+def _encontrar_furo_por_nome_reconciliado(*, empresa, nome_furo, reconciliacao_config=None):
     chaves_entrada = _chaves_reconciliacao_nome_furo(nome_furo)
     if not chaves_entrada:
         return None
 
-    for furo in Furo.objects.filter(empresa=empresa).order_by("data", "nome"):
+    furos = list(Furo.objects.filter(empresa=empresa).order_by("data", "nome"))
+    for furo in furos:
         if chaves_entrada & _chaves_reconciliacao_nome_furo(furo.nome):
             return furo
+
+    fuzzy_threshold = (reconciliacao_config or {}).get("fuzzy_threshold")
+    if fuzzy_threshold is None:
+        return None
+
+    melhor_furo = None
+    melhor_score = Decimal("0")
+    for furo in furos:
+        score = _pontuar_similaridade_nome_furo(nome_furo, furo.nome)
+        if score > melhor_score:
+            melhor_score = score
+            melhor_furo = furo
+
+    if melhor_furo and melhor_score >= fuzzy_threshold:
+        return melhor_furo
     return None
 
 
@@ -307,7 +415,7 @@ def _obter_projeto_importacao(empresa):
     )
 
 
-def _obter_ou_criar_furo_por_nome(*, empresa, nome_furo, criar_em_falta):
+def _obter_ou_criar_furo_por_nome(*, empresa, nome_furo, criar_em_falta, reconciliacao_config=None):
     nome = str(nome_furo or "").strip()
     if not nome:
         return None, False
@@ -316,7 +424,11 @@ def _obter_ou_criar_furo_por_nome(*, empresa, nome_furo, criar_em_falta):
     if furo:
         return furo, False
 
-    furo = _encontrar_furo_por_nome_reconciliado(empresa=empresa, nome_furo=nome)
+    furo = _encontrar_furo_por_nome_reconciliado(
+        empresa=empresa,
+        nome_furo=nome,
+        reconciliacao_config=reconciliacao_config,
+    )
     if furo:
         return furo, False
 
@@ -392,6 +504,7 @@ def gravar_importacao_magcruiser(*, sessao, rows, modo_aplicacao="all_existing")
         raise ValidationError("Modo de aplicação inválido.")
 
     criar_em_falta = modo == "all_create_missing"
+    reconciliacao_config = _obter_config_reconciliacao_empresa(sessao.empresa)
     if modo == "latest_existing":
         latest_map = {}
         for row in rows:
@@ -404,6 +517,7 @@ def gravar_importacao_magcruiser(*, sessao, rows, modo_aplicacao="all_existing")
     criadas = 0
     furos_criados = 0
     furos_sem_match = set()
+    sugestoes_furos_sem_match = {}
     resumo_por_furo = {}
     ignoradas = 0
     ultima_sequencia = (
@@ -421,9 +535,18 @@ def gravar_importacao_magcruiser(*, sessao, rows, modo_aplicacao="all_existing")
                 empresa=sessao.empresa,
                 nome_furo=nome_furo,
                 criar_em_falta=criar_em_falta,
+                reconciliacao_config=reconciliacao_config,
             )
             if not furo_destino:
-                furos_sem_match.add(str(nome_furo).strip())
+                nome_sem_match = str(nome_furo).strip()
+                furos_sem_match.add(nome_sem_match)
+                sugestoes = _sugerir_furos_por_nome(
+                    empresa=sessao.empresa,
+                    nome_furo=nome_sem_match,
+                    reconciliacao_config=reconciliacao_config,
+                )
+                if sugestoes:
+                    sugestoes_furos_sem_match[nome_sem_match] = sugestoes
                 resumo_por_furo[chave_resumo]["ignoradas"] += 1
                 ignoradas += 1
                 continue
@@ -445,5 +568,9 @@ def gravar_importacao_magcruiser(*, sessao, rows, modo_aplicacao="all_existing")
         "ultima_sequencia": ultima_sequencia,
         "furos_criados": furos_criados,
         "furos_sem_match": sorted(furos_sem_match),
+        "sugestoes_furos_sem_match": [
+            {"nome_importado": nome, "sugestoes": sugestoes_furos_sem_match[nome]}
+            for nome in sorted(sugestoes_furos_sem_match)
+        ],
         "resumo_por_furo": resumo_por_furo,
     }

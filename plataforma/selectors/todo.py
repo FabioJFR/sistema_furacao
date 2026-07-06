@@ -66,9 +66,9 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · API SIMULADA] Endpoints simulados `api_testar` e `api_capturar` passam a usar service dedicado e o contrato HTTP comum, preservando campos legados e adicionando cobertura automatizada.",
             "CONCLUIDO · [DISPOSITIVOS · API PÚBLICA] Cobertura reforçada para autenticação forte e permissões avançadas: anónimo é bloqueado e utilizador sem empregado aprovado não cria sessão nem ingere leituras.",
             "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA · TOLERÂNCIAS] Importação MagCruiser passa a aplicar tolerâncias configuráveis por empresa para saltos de profundidade, inclinação e azimute, bloqueando anomalias antes de gravar leituras.",
+            "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO FUZZY] Importação MagCruiser passa a aceitar regra fuzzy configurável por empresa e devolve sugestões de furos candidatos para revisão manual quando não há correspondência segura.",
         ],
         "proximos_passos": [
-            "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],
         "falta_fazer": [
