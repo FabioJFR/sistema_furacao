@@ -95,9 +95,51 @@ def _normalize_row(row):
     return normalized
 
 
-def _validar_consistencia_lote(rows):
+def _config_decimal_positivo(config, chave):
+    valor = (config or {}).get(chave)
+    if valor in (None, ""):
+        return None
+    decimal = _to_decimal(valor)
+    if decimal is None or decimal <= 0:
+        return None
+    return decimal
+
+
+def _obter_tolerancias_telemetria_empresa(empresa):
+    config = getattr(empresa, "geologia_score_config", None) or {}
+    tolerancias = config.get("magcruiser_tolerancias") or {}
+    return {
+        "max_delta_depth": _config_decimal_positivo(tolerancias, "max_delta_depth"),
+        "max_delta_inc": _config_decimal_positivo(tolerancias, "max_delta_inc"),
+        "max_delta_azi": _config_decimal_positivo(tolerancias, "max_delta_azi"),
+    }
+
+
+def _delta_azimute(valor_atual, valor_anterior):
+    delta = abs(valor_atual - valor_anterior)
+    return min(delta, Decimal("360") - delta)
+
+
+def _validar_salto_telemetria(*, erros, prefixo, row, anterior, tolerancias):
+    if not anterior or not tolerancias:
+        return
+
+    max_delta_depth = tolerancias.get("max_delta_depth")
+    max_delta_inc = tolerancias.get("max_delta_inc")
+    max_delta_azi = tolerancias.get("max_delta_azi")
+
+    if max_delta_depth is not None and abs(row["depth"] - anterior["depth"]) > max_delta_depth:
+        erros.append(f"{prefixo}: salto de profundidade acima da tolerância configurada ({max_delta_depth}).")
+    if max_delta_inc is not None and abs(row["inc"] - anterior["inc"]) > max_delta_inc:
+        erros.append(f"{prefixo}: salto de inclinação acima da tolerância configurada ({max_delta_inc}).")
+    if max_delta_azi is not None and _delta_azimute(row["azi"], anterior["azi"]) > max_delta_azi:
+        erros.append(f"{prefixo}: salto de azimute acima da tolerância configurada ({max_delta_azi}).")
+
+
+def _validar_consistencia_lote(rows, *, tolerancias=None):
     erros = []
     profundidades_por_furo = {}
+    anterior_por_furo = {}
 
     for index, row in enumerate(rows, start=1):
         prefixo = f"Entrada {index}"
@@ -118,6 +160,14 @@ def _validar_consistencia_lote(rows):
             nome_furo = row.get("hole_name") or "furo da sessão"
             erros.append(f"{prefixo}: profundidade duplicada para {nome_furo}.")
         profundidades.add(depth)
+        _validar_salto_telemetria(
+            erros=erros,
+            prefixo=prefixo,
+            row=row,
+            anterior=anterior_por_furo.get(chave_furo),
+            tolerancias=tolerancias,
+        )
+        anterior_por_furo[chave_furo] = row
 
     if erros:
         detalhe = " ".join(erros[:5])
@@ -331,6 +381,11 @@ def gravar_importacao_magcruiser(*, sessao, rows, modo_aplicacao="all_existing")
         raise ValidationError("A sessão precisa estar associada a um furo para gravar medições.")
     if not rows:
         raise ValidationError("Não há linhas para gravar.")
+
+    _validar_consistencia_lote(
+        rows,
+        tolerancias=_obter_tolerancias_telemetria_empresa(sessao.empresa),
+    )
 
     modo = (modo_aplicacao or "all_existing").strip()
     if modo not in {"all_existing", "latest_existing", "all_create_missing"}:

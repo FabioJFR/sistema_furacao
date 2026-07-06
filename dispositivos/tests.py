@@ -406,6 +406,81 @@ class SessaoDispositivoPersistenceTests(TestCase):
         self.assertEqual(SurveyShot.objects.filter(furo=furo_reconciliado).count(), 1)
         self.assertFalse(Furo.objects.filter(empresa=self.empresa, nome="FURO-1").exists())
 
+    def test_gravar_importacao_rejeita_saltos_acima_da_tolerancia_da_empresa(self):
+        self.empresa.geologia_score_config = {
+            "magcruiser_tolerancias": {
+                "max_delta_depth": "20",
+                "max_delta_inc": "5",
+                "max_delta_azi": "15",
+            }
+        }
+        self.empresa.save(update_fields=["geologia_score_config"])
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+
+        with self.assertRaisesMessage(ValidationError, "salto de profundidade acima da tolerância"):
+            gravar_importacao_magcruiser(
+                sessao=sessao,
+                rows=[
+                    {
+                        "hole_name": self.furo.nome,
+                        "depth": Decimal("10"),
+                        "inc": Decimal("-2"),
+                        "azi": Decimal("90"),
+                        "mag": None,
+                        "temp": None,
+                    },
+                    {
+                        "hole_name": self.furo.nome,
+                        "depth": Decimal("45"),
+                        "inc": Decimal("-2"),
+                        "azi": Decimal("92"),
+                        "mag": None,
+                        "temp": None,
+                    },
+                ],
+                modo_aplicacao="all_existing",
+            )
+
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)
+        self.assertEqual(SurveyShot.objects.filter(sessao=sessao).count(), 0)
+
+    def test_gravar_importacao_sem_tolerancia_configurada_mantem_comportamento_atual(self):
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+
+        resultado = gravar_importacao_magcruiser(
+            sessao=sessao,
+            rows=[
+                {
+                    "hole_name": self.furo.nome,
+                    "depth": Decimal("10"),
+                    "inc": Decimal("-2"),
+                    "azi": Decimal("90"),
+                    "mag": None,
+                    "temp": None,
+                },
+                {
+                    "hole_name": self.furo.nome,
+                    "depth": Decimal("45"),
+                    "inc": Decimal("-20"),
+                    "azi": Decimal("180"),
+                    "mag": None,
+                    "temp": None,
+                },
+            ],
+            modo_aplicacao="all_existing",
+        )
+
+        self.assertEqual(resultado["total_gravadas"], 2)
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 2)
+
     def test_dashboard_observabilidade_calcula_disponibilidade_erros_e_latencia(self):
         sessao_ok = criar_sessao_dispositivo(
             dispositivo=self.dispositivo,

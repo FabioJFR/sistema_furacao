@@ -65,9 +65,9 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · AUTORIZAÇÃO API] APIs de sessão e bridge passam a aceitar apenas empregados aprovados, com validação em selector/service e regressão automatizada.",
             "CONCLUIDO · [DISPOSITIVOS · API SIMULADA] Endpoints simulados `api_testar` e `api_capturar` passam a usar service dedicado e o contrato HTTP comum, preservando campos legados e adicionando cobertura automatizada.",
             "CONCLUIDO · [DISPOSITIVOS · API PÚBLICA] Cobertura reforçada para autenticação forte e permissões avançadas: anónimo é bloqueado e utilizador sem empregado aprovado não cria sessão nem ingere leituras.",
+            "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA · TOLERÂNCIAS] Importação MagCruiser passa a aplicar tolerâncias configuráveis por empresa para saltos de profundidade, inclinação e azimute, bloqueando anomalias antes de gravar leituras.",
         ],
         "proximos_passos": [
-            "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
             "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],
