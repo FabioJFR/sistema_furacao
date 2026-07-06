@@ -64,10 +64,10 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · DESCOBERTA USB] Procura de portas USB/serial passa para service dedicado, usa o contrato HTTP comum e devolve erro JSON controlado quando o driver falha.",
             "CONCLUIDO · [DISPOSITIVOS · AUTORIZAÇÃO API] APIs de sessão e bridge passam a aceitar apenas empregados aprovados, com validação em selector/service e regressão automatizada.",
             "CONCLUIDO · [DISPOSITIVOS · API SIMULADA] Endpoints simulados `api_testar` e `api_capturar` passam a usar service dedicado e o contrato HTTP comum, preservando campos legados e adicionando cobertura automatizada.",
+            "CONCLUIDO · [DISPOSITIVOS · API PÚBLICA] Cobertura reforçada para autenticação forte e permissões avançadas: anónimo é bloqueado e utilizador sem empregado aprovado não cria sessão nem ingere leituras.",
         ],
         "proximos_passos": [
             "Adicionar validações avançadas de telemetria em lote com tolerâncias configuráveis por empresa e alertas de anomalias operacionais.",
-            "[AUDITORIA CODIGO · TESTES] Expandir a cobertura de `dispositivos` para permissões avançadas por endpoint e API pública com autenticação forte.",
             "Evoluir reconciliação automática de nomes de furo para regras fuzzy configuráveis por empresa e sugestões manuais antes da gravação.",
             "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
         ],

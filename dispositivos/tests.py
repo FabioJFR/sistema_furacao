@@ -472,6 +472,38 @@ class DispositivoApiEndpointTests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
+    def test_api_publica_exige_autenticacao(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.post(
+            reverse("api_dispositivos_criar_sessao"),
+            {
+                "dispositivo": str(self.dispositivo.pk),
+                "furo": str(self.furo.pk),
+            },
+            format="json",
+        )
+
+        self.assertIn(response.status_code, {401, 403})
+        self.assertFalse(SessaoDispositivo.objects.exists())
+
+    def test_api_criar_sessao_bloqueia_utilizador_sem_empregado_aprovado(self):
+        user_sem_empregado = criar_user(username="api_sem_empregado")
+        self.client.force_authenticate(user_sem_empregado)
+
+        response = self.client.post(
+            reverse("api_dispositivos_criar_sessao"),
+            {
+                "dispositivo": str(self.dispositivo.pk),
+                "furo": str(self.furo.pk),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("empregado aprovado", response.data["erro"])
+        self.assertFalse(SessaoDispositivo.objects.exists())
+
     def test_api_criar_sessao_bloqueia_empregado_pendente(self):
         self.empregado.aprovado = False
         self.empregado.save(update_fields=["aprovado"])
@@ -488,6 +520,30 @@ class DispositivoApiEndpointTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("empregado aprovado", response.data["erro"])
         self.assertFalse(SessaoDispositivo.objects.exists())
+
+    def test_api_bridge_ler_bloqueia_utilizador_sem_empregado_aprovado(self):
+        sessao = criar_sessao_dispositivo(
+            dispositivo=self.dispositivo,
+            furo=self.furo,
+            empregado=self.empregado,
+        )
+        sessao.status = "ligado"
+        sessao.save(update_fields=["status"])
+        user_sem_empregado = criar_user(username="api_bridge_sem_empregado")
+        self.client.force_authenticate(user_sem_empregado)
+
+        response = self.client.post(
+            reverse("bridge_ler"),
+            {
+                "sessao_id": str(sessao.pk),
+                "payload": "DEPTH=30.00;INC=-6.00;AZI=182.00",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("empregado", response.data["erro"])
+        self.assertEqual(LeituraBrutaDispositivo.objects.filter(sessao=sessao).count(), 0)
 
     def test_api_criar_sessao_cria_sessao_para_empregado_autenticado(self):
         response = self.client.post(
