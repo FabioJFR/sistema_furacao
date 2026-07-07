@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 import calendar
 
+from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -121,6 +122,62 @@ DEFAULT_COMPLIANCE_SCORE_CONFIG = {
         "alto": 12,
     },
 }
+
+
+def _contar_modelo_empresa(app_label, model_name, empresa):
+    try:
+        model = apps.get_model(app_label, model_name)
+    except LookupError:
+        return 0
+    return model.objects.filter(empresa=empresa).count()
+
+
+def obter_metricas_operacionais_empresa(empresa):
+    return {
+        "total_projetos": _contar_modelo_empresa("projetos", "Projeto", empresa),
+        "total_furos": _contar_modelo_empresa("projetos", "Furo", empresa),
+        "total_empregados": _contar_modelo_empresa("projetos", "Empregados", empresa),
+    }
+
+
+def construir_contexto_empresa_detail(
+    *,
+    empresa,
+    perfil,
+    subscricao_atual,
+    movimentos_financeiros,
+    plano_trial_contexto,
+):
+    metricas = obter_metricas_operacionais_empresa(empresa)
+    return {
+        "empresa": empresa,
+        "perfil": perfil,
+        **metricas,
+        "subscricao_atual": subscricao_atual,
+        "movimentos_financeiros": movimentos_financeiros,
+        "alerta_renovacao": calcular_alerta_renovacao(subscricao_atual),
+        "plano_trial_contexto": plano_trial_contexto,
+    }
+
+
+def construir_contexto_alterar_plano_empresa(
+    *,
+    empresa,
+    perfil,
+    planos,
+    subscricao_atual,
+    estados_empresa,
+    plano_trial_contexto,
+):
+    return {
+        "empresa": empresa,
+        "perfil": perfil,
+        "planos": planos,
+        "subscricao_atual": subscricao_atual,
+        "estados_empresa": estados_empresa,
+        "titulo": f"Alterar Plano - {empresa.nome}",
+        "plano_trial_contexto": plano_trial_contexto,
+    }
 
 
 @transaction.atomic

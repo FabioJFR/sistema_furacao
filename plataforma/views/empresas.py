@@ -39,35 +39,13 @@ def empresa_detail_plataforma(request, pk):
     empresa = obter_empresa_com_plano(pk)
     subscricao_atual = obter_subscricao_atual_empresa(empresa)
     movimentos_financeiros = listar_movimentos_financeiros_empresa(empresa, limit=5)
-    alerta_renovacao = empresas_service.calcular_alerta_renovacao(subscricao_atual)
-    plano_trial_contexto = construir_contexto_trial_plano(getattr(empresa, "plano", None))
-
-    # =========================
-    # MÉTRICAS BASE (placeholder para evolução)
-    # =========================
-
-    # TODO futuro: substituir por queries reais (projetos, furos, empregados)
-    total_projetos = 0
-    total_furos = 0
-    total_empregados = 0
-
-    # =========================
-    # CONTEXTO
-    # =========================
-
-    context = {
-        "empresa": empresa,
-        "perfil": perfil,
-
-        # métricas
-        "total_projetos": total_projetos,
-        "total_furos": total_furos,
-        "total_empregados": total_empregados,
-        "subscricao_atual": subscricao_atual,
-        "movimentos_financeiros": movimentos_financeiros,
-        "alerta_renovacao": alerta_renovacao,
-        "plano_trial_contexto": plano_trial_contexto,
-    }
+    context = empresas_service.construir_contexto_empresa_detail(
+        empresa=empresa,
+        perfil=perfil,
+        subscricao_atual=subscricao_atual,
+        movimentos_financeiros=movimentos_financeiros,
+        plano_trial_contexto=construir_contexto_trial_plano(getattr(empresa, "plano", None)),
+    )
 
     return render(request, "plataforma/empresa_detail.html", context)
 
@@ -127,15 +105,14 @@ def alterar_plano_empresa(request, pk):
         )
         return redirect("plataforma:empresa_detail", pk=empresa.pk)
 
-    context = {
-        "empresa": empresa,
-        "perfil": perfil,
-        "planos": planos,
-        "subscricao_atual": subscricao_atual,
-        "estados_empresa": Empresa.STATUS_CHOICES,
-        "titulo": f"Alterar Plano - {empresa.nome}",
-        "plano_trial_contexto": construir_contexto_trial_plano(getattr(empresa, "plano", None)),
-    }
+    context = empresas_service.construir_contexto_alterar_plano_empresa(
+        empresa=empresa,
+        perfil=perfil,
+        planos=planos,
+        subscricao_atual=subscricao_atual,
+        estados_empresa=Empresa.STATUS_CHOICES,
+        plano_trial_contexto=construir_contexto_trial_plano(getattr(empresa, "plano", None)),
+    )
 
     return render(request, "plataforma/empresa_alterar_plano.html", context)
 

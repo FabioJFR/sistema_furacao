@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from plataforma.models import Empresa, PerfilPlataforma, Plano, SubscricaoEmpresa
+from projetos.tests.helpers import criar_empregado, criar_furo, criar_projeto
 
 
 class PlataformaEmpresasOnboardingViewsTests(TestCase):
@@ -98,6 +99,23 @@ class PlataformaEmpresasOnboardingViewsTests(TestCase):
         self.assertEqual(self.subscricao.valor, Decimal("240.00"))
         self.assertEqual(self.subscricao.proxima_renovacao, date(2026, 9, 15))
         self.assertTrue(self.subscricao.renovacao_definida_manualmente)
+
+    def test_empresa_detail_mostra_metricas_operacionais_reais(self):
+        user = self._criar_user_com_perfil(
+            username="platform_admin_empresas_metricas",
+            tipo_acesso="platform_admin",
+        )
+        projeto = criar_projeto(empresa=self.empresa, nome="Projeto Métricas")
+        criar_furo(empresa=self.empresa, projeto=projeto, nome="Furo Métricas")
+        criar_empregado(empresa=self.empresa, nome="Empregado Métricas")
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("plataforma:empresa_detail", args=[self.empresa.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_projetos"], 1)
+        self.assertEqual(response.context["total_furos"], 1)
+        self.assertEqual(response.context["total_empregados"], 1)
 
     def test_get_em_acoes_criticas_nao_altera_empresa(self):
         user = self._criar_user_com_perfil(
