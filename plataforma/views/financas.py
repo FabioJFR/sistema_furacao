@@ -4,17 +4,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from plataforma.decorators import platform_admin_required
-from plataforma.forms import EntradaValorForm
-from plataforma.selectors.financas import (
-    NATUREZA_ENTRADA,
-    NATUREZA_SAIDA,
-    destino_movimento_label,
-    listar_movimentos_financeiros,
-    obter_configuracao_paypal_principal,
-    obter_metricas_analytics_financas,
-    obter_metricas_movimentos,
-)
+from plataforma.selectors.financas import obter_configuracao_paypal_principal
 from plataforma.services.financas import (
+    construir_contexto_analytics_financas,
+    construir_contexto_entrada_financeira,
+    construir_contexto_paypal_config,
+    construir_contexto_saida_financeira,
     obter_movimento_edicao_saida,
     processar_fluxo_checkout_paypal_pagamento,
     processar_fluxo_configuracao_paypal,
@@ -42,18 +37,7 @@ def _aplicar_mensagem_por_nivel(request, acao):
 @login_required
 @platform_admin_required
 def financas_entrada_list(request):
-    movimentos = listar_movimentos_financeiros(natureza_fluxo=NATUREZA_ENTRADA)
-    metricas = obter_metricas_movimentos(movimentos)
-
-    context = {
-        "titulo": "Entrada de valores",
-        "descricao": "Registos financeiros que representam entradas ou valores a receber pela plataforma.",
-        "movimentos": movimentos,
-        **metricas,
-        "tipo_pagina": "entrada",
-        "form": EntradaValorForm(),
-    }
-    return render(request, "plataforma/finance_movimento_list.html", context)
+    return render(request, "plataforma/finance_movimento_list.html", construir_contexto_entrada_financeira())
 
 
 @login_required
@@ -75,37 +59,17 @@ def financas_saida_list(request):
             return redirect("plataforma:financas_saida_list")
         messages.error(request, resultado["mensagem"])
 
-    movimentos = listar_movimentos_financeiros(natureza_fluxo=NATUREZA_SAIDA)
-    metricas = obter_metricas_movimentos(movimentos)
-
-    context = {
-        "titulo": "Saída de valores",
-        "descricao": "Despesas e outras saídas financeiras da plataforma, incluindo alojamento, publicidade, domínio e HTTPS.",
-        "movimentos": movimentos,
-        **metricas,
-        "tipo_pagina": "saida",
-        "form": form,
-        "movimento_edicao": movimento_edicao,
-    }
+    context = construir_contexto_saida_financeira(
+        form=form,
+        movimento_edicao=movimento_edicao,
+    )
     return render(request, "plataforma/finance_movimento_list.html", context)
 
 
 @login_required
 @platform_admin_required
 def financas_analytics(request):
-    movimentos = listar_movimentos_financeiros()
-    metricas = obter_metricas_analytics_financas(movimentos)
-
-    ultimos_movimentos = list(movimentos[:10])
-    for movimento in ultimos_movimentos:
-        movimento.destino_label = destino_movimento_label(movimento)
-
-    context = {
-        "titulo": "Analytics Financeiro",
-        **metricas,
-        "ultimos_movimentos": ultimos_movimentos,
-    }
-    return render(request, "plataforma/finance_analytics.html", context)
+    return render(request, "plataforma/finance_analytics.html", construir_contexto_analytics_financas())
 
 
 @login_required
@@ -131,14 +95,7 @@ def financas_paypal_config(request):
             return redirect("plataforma:financas_paypal_config")
         messages.error(request, resultado["mensagem"])
 
-    return render(
-        request,
-        "plataforma/finance_paypal_config.html",
-        {
-            "titulo": "Configuração PayPal",
-            "form": form,
-        },
-    )
+    return render(request, "plataforma/finance_paypal_config.html", construir_contexto_paypal_config(form=form))
 
 
 @login_required

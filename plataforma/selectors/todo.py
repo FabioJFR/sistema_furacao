@@ -19,12 +19,12 @@ _AREAS_TODO = {
             "Nova camada de separação aplicada em `plataforma/views/planos.py`: create/update de plano unificados num builder (`processar_fluxo_form_plano`) em `services/planos.py`.",
             "Nova camada de separação aplicada em `plataforma/views/subscricoes.py`: construção de contexto da listagem movida para `services/subscricoes.py` (`construir_contexto_subscricao_list`).",
             "Nova camada adicional em `plataforma/views/empresas.py`: contextos de detalhe e alteração de plano movidos para builders em `services/empresas.py`, com métricas reais de projetos, furos e empregados no detalhe.",
+            "Nova camada adicional em `plataforma/views/financas.py`: contextos de entrada, saída, analytics e configuração PayPal centralizados em builders de `services/financas.py`, uniformizando as páginas financeiras.",
         ],
         "proximos_passos": [
             "Consolidar mais regras em services/selectors para reduzir lógica residual nas views de backoffice.",
             "Fechar ciclo de auditoria de permissões por tipo de conta com cenários automatizados.",
             "Expandir cobertura de internacionalização em mensagens de backend e validações de formulários.",
-            "Uniformizar ainda mais os fluxos financeiros (entrada/saída/config/paypal) com builders de contexto dedicados por página.",
         ],
         "falta_fazer": [
             "API versionada para operações administrativas críticas.",

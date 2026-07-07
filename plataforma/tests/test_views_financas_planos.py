@@ -158,6 +158,35 @@ class PlataformaFinancasPlanosViewsTests(TestCase):
         self.pagamento.refresh_from_db()
         self.assertEqual(self.pagamento.estado, "pendente")
 
+    def test_platform_admin_consulta_entrada_financeira_com_contexto_padronizado(self):
+        user = self._criar_user_com_perfil(
+            username="platform_admin_financas_entrada",
+            tipo_acesso="platform_admin",
+        )
+        MovimentoFinanceiroPlataforma.objects.create(
+            empresa=self.empresa,
+            plano=self.plano,
+            subscricao=self.subscricao,
+            tipo_movimento="cobranca",
+            natureza_fluxo="entrada",
+            categoria="subscricao",
+            metodo_pagamento="manual",
+            valor=Decimal("49.90"),
+            valor_bruto=Decimal("49.90"),
+            moeda="EUR",
+            descricao="Cobrança mensal",
+            estado="pendente",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("plataforma:financas_entrada_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["tipo_pagina"], "entrada")
+        self.assertEqual(response.context["total_movimentos"], 1)
+        self.assertEqual(response.context["total_valor"], Decimal("49.90"))
+        self.assertIn("form", response.context)
+
     def test_superuser_consegue_configurar_paypal_e_checkout_gratuito(self):
         user = self._criar_user_com_perfil(
             username="super_financas",

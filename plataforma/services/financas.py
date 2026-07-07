@@ -2,10 +2,16 @@ from decimal import Decimal
 
 from django.utils import timezone
 
-from plataforma.forms import ConfiguracaoPaypalForm, SaidaValorForm
+from plataforma.forms import ConfiguracaoPaypalForm, EntradaValorForm, SaidaValorForm
 from plataforma.models import MovimentoFinanceiroPlataforma
 from plataforma.selectors.financas import (
+    NATUREZA_ENTRADA,
+    NATUREZA_SAIDA,
+    destino_movimento_label,
+    listar_movimentos_financeiros,
     obter_configuracao_paypal_principal,
+    obter_metricas_analytics_financas,
+    obter_metricas_movimentos,
     obter_movimento_saida_por_pk,
     obter_pagamento_empresa_por_pk,
 )
@@ -18,6 +24,76 @@ def guardar_movimento_saida(form):
 
 def guardar_configuracao_paypal(form):
     return form.save()
+
+
+def construir_contexto_lista_movimentos_financeiros(
+    *,
+    titulo,
+    descricao,
+    tipo_pagina,
+    movimentos,
+    form,
+    movimento_edicao=None,
+):
+    metricas = obter_metricas_movimentos(movimentos)
+    context = {
+        "titulo": titulo,
+        "descricao": descricao,
+        "movimentos": movimentos,
+        **metricas,
+        "tipo_pagina": tipo_pagina,
+        "form": form,
+    }
+    if movimento_edicao is not None:
+        context["movimento_edicao"] = movimento_edicao
+    return context
+
+
+def construir_contexto_entrada_financeira():
+    movimentos = listar_movimentos_financeiros(natureza_fluxo=NATUREZA_ENTRADA)
+    return construir_contexto_lista_movimentos_financeiros(
+        titulo="Entrada de valores",
+        descricao="Registos financeiros que representam entradas ou valores a receber pela plataforma.",
+        tipo_pagina="entrada",
+        movimentos=movimentos,
+        form=EntradaValorForm(),
+    )
+
+
+def construir_contexto_saida_financeira(*, form, movimento_edicao):
+    movimentos = listar_movimentos_financeiros(natureza_fluxo=NATUREZA_SAIDA)
+    return construir_contexto_lista_movimentos_financeiros(
+        titulo="Saída de valores",
+        descricao=(
+            "Despesas e outras saídas financeiras da plataforma, incluindo alojamento, "
+            "publicidade, domínio e HTTPS."
+        ),
+        tipo_pagina="saida",
+        movimentos=movimentos,
+        form=form,
+        movimento_edicao=movimento_edicao,
+    )
+
+
+def construir_contexto_analytics_financas():
+    movimentos = listar_movimentos_financeiros()
+    metricas = obter_metricas_analytics_financas(movimentos)
+    ultimos_movimentos = list(movimentos[:10])
+    for movimento in ultimos_movimentos:
+        movimento.destino_label = destino_movimento_label(movimento)
+
+    return {
+        "titulo": "Analytics Financeiro",
+        **metricas,
+        "ultimos_movimentos": ultimos_movimentos,
+    }
+
+
+def construir_contexto_paypal_config(*, form):
+    return {
+        "titulo": "Configuração PayPal",
+        "form": form,
+    }
 
 
 def construir_form_configuracao_paypal(*, post_data=None, configuracao=None):
