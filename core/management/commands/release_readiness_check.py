@@ -11,6 +11,11 @@ from django.db.migrations.executor import MigrationExecutor
 from core.settings import secret_key_looks_unsafe
 
 
+MIGRACOES_CRITICAS = [
+    ("dispositivos", "0006_importacaodispositivohistorico"),
+]
+
+
 @dataclass
 class ReadinessItem:
     slug: str
@@ -241,7 +246,7 @@ class Command(BaseCommand):
                 )
             ]
 
-        return [
+        itens = [
             ReadinessItem(
                 slug="migrations",
                 ok=True,
@@ -249,6 +254,33 @@ class Command(BaseCommand):
                 mensagem="Sem migrações pendentes.",
             )
         ]
+        itens.extend(self._avaliar_migracoes_criticas(executor.loader))
+        return itens
+
+    def _avaliar_migracoes_criticas(self, loader):
+        aplicadas = set(getattr(loader, "applied_migrations", set()) or set())
+        itens = []
+        for app_label, migration_name in MIGRACOES_CRITICAS:
+            slug = f"migration:{app_label}.{migration_name}"
+            aplicada = (app_label, migration_name) in aplicadas
+            itens.append(
+                ReadinessItem(
+                    slug=slug,
+                    ok=aplicada,
+                    nivel="erro",
+                    mensagem=(
+                        f"Migração crítica {app_label}.{migration_name} aplicada."
+                        if aplicada
+                        else f"Migração crítica {app_label}.{migration_name} não está aplicada."
+                    ),
+                    detalhe=(
+                        ""
+                        if aplicada
+                        else "Executa python manage.py migrate e repete o readiness check antes de demo/deploy."
+                    ),
+                )
+            )
+        return itens
 
     def _add(self, itens, *, slug, ok, nivel, mensagem, detalhe=""):
         itens.append(

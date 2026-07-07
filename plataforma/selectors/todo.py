@@ -67,10 +67,9 @@ _AREAS_TODO = {
             "CONCLUIDO · [DISPOSITIVOS · API PÚBLICA] Cobertura reforçada para autenticação forte e permissões avançadas: anónimo é bloqueado e utilizador sem empregado aprovado não cria sessão nem ingere leituras.",
             "CONCLUIDO · [DISPOSITIVOS · TELEMETRIA · TOLERÂNCIAS] Importação MagCruiser passa a aplicar tolerâncias configuráveis por empresa para saltos de profundidade, inclinação e azimute, bloqueando anomalias antes de gravar leituras.",
             "CONCLUIDO · [DISPOSITIVOS · RECONCILIAÇÃO FUZZY] Importação MagCruiser passa a aceitar regra fuzzy configurável por empresa e devolve sugestões de furos candidatos para revisão manual quando não há correspondência segura.",
+            "CONCLUIDO · [DISPOSITIVOS · ROLLOUT MIGRAÇÃO] `release_readiness_check` passa a validar explicitamente que a migração crítica `dispositivos.0006_importacaodispositivohistorico` está aplicada antes de demo/deploy.",
         ],
-        "proximos_passos": [
-            "Concluir rollout operacional da migração `dispositivos.0006_importacaodispositivohistorico` em todos os ambientes (local e servidor).",
-        ],
+        "proximos_passos": [],
         "falta_fazer": [
             "API pública para ingestão externa com autenticação forte e versionamento.",
             "Evoluir observabilidade para alertas automáticos, janelas temporais e métricas históricas por dispositivo.",
@@ -581,6 +580,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [SEGURANÇA · BRIDGE KEYS] Regressões garantem que endpoints de bridge DJI e Drone S_F só aceitam autenticação por header `X-Bridge-Key`, rejeitando chaves em query string ou body.",
             "CONCLUIDO · [SEGURANÇA · ANTIVÍRUS UPLOADS] `release_readiness_check --strict` passa a validar que o antivírus de uploads está ativo, em fail-closed e com executável configurado realmente disponível.",
             "CONCLUIDO · [SEGURANÇA · SEGREDOS/DB] `release_readiness_check --strict` passa a reprovar credenciais default conhecidas de base de dados, reforçando a revisão de variáveis sensíveis por ambiente.",
+            "CONCLUIDO · [RELEASE READINESS · MIGRAÇÃO CRÍTICA] Gate pré-demo/pré-deploy valida explicitamente a migration `dispositivos.0006_importacaodispositivohistorico`, evitando regressão silenciosa do histórico de importações.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",

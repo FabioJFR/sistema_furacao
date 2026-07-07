@@ -1,9 +1,12 @@
 from io import StringIO
 import sys
+from types import SimpleNamespace
 
 from django.core.management import CommandError, call_command
 from django.test import SimpleTestCase, override_settings
 from django.test.utils import ignore_warnings
+
+from core.management.commands.release_readiness_check import Command
 
 
 STRONG_SECRET = "release-readiness-secret-key-with-enough-length-and-variety-12345"
@@ -229,3 +232,28 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         output = stdout.getvalue()
         self.assertIn("[ERRO] database-credentials", output)
         self.assertIn("POSTGRES_DB, POSTGRES_USER e POSTGRES_PASSWORD", output)
+
+    def test_migracao_critica_dispositivos_aplicada_fica_ok(self):
+        command = Command()
+        loader = SimpleNamespace(
+            applied_migrations={
+                ("dispositivos", "0006_importacaodispositivohistorico"),
+            }
+        )
+
+        itens = command._avaliar_migracoes_criticas(loader)
+
+        self.assertEqual(len(itens), 1)
+        self.assertTrue(itens[0].ok)
+        self.assertEqual(itens[0].slug, "migration:dispositivos.0006_importacaodispositivohistorico")
+
+    def test_migracao_critica_dispositivos_em_falta_fica_erro(self):
+        command = Command()
+        loader = SimpleNamespace(applied_migrations=set())
+
+        itens = command._avaliar_migracoes_criticas(loader)
+
+        self.assertEqual(len(itens), 1)
+        self.assertFalse(itens[0].ok)
+        self.assertEqual(itens[0].nivel, "erro")
+        self.assertIn("não está aplicada", itens[0].mensagem)
