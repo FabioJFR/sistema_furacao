@@ -581,11 +581,11 @@ _AREAS_TODO = {
             "CONCLUIDO · [SEGURANÇA · ANTIVÍRUS UPLOADS] `release_readiness_check --strict` passa a validar que o antivírus de uploads está ativo, em fail-closed e com executável configurado realmente disponível.",
             "CONCLUIDO · [SEGURANÇA · SEGREDOS/DB] `release_readiness_check --strict` passa a reprovar credenciais default conhecidas de base de dados, reforçando a revisão de variáveis sensíveis por ambiente.",
             "CONCLUIDO · [RELEASE READINESS · MIGRAÇÃO CRÍTICA] Gate pré-demo/pré-deploy valida explicitamente a migration `dispositivos.0006_importacaodispositivohistorico`, evitando regressão silenciosa do histórico de importações.",
+            "CONCLUIDO · [SEGURANÇA · MFA] `release_readiness_check --strict` passa a exigir `MFA_REQUIRED=True`, impedindo release/demo como produção pronta sem sinalização explícita de segundo fator para contas críticas.",
         ],
         "proximos_passos": [
             "[AUDITORIA 24/06/2026 · MANUTENÇÃO] Reduzir ficheiros de alto acoplamento, começando por `projetos/views/gestao_empresa.py` e `geologia/views/dashboard.py`.",
             "Antes de apresentação/deploy: executar `python manage.py release_readiness_check --strict` no servidor, com base real acessível, antivírus de uploads ativo e cache partilhada configurada.",
-            "Prioridade imediata antes de novo commit/release/deploy: tratar hardening remanescente de segurança (MFA).",
             "CONCLUIDO · [AUDITORIA CODIGO · SEGURANCA] Middleware de rate limit endurecido para ignorar `X-Forwarded-For` por defeito e confiar no header apenas com proxy controlado e testes de regressão.",
             "[AUDITORIA CODIGO · QUALIDADE] Priorizar a suite mínima dos módulos sem cobertura relevante, começando por `dispositivos`, `inspecao_ai` e APIs multiempresa.",
             "[AUDITORIA CODIGO · MANUTENCAO] Inventariar `except Exception` defensivos, manter apenas fallbacks de borda com logging/telemetria claros e remover silêncios que escondam regressões.",

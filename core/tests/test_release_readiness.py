@@ -96,6 +96,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        MFA_REQUIRED=True,
         DATABASES=SAFE_DATABASES,
         CACHES={
             "default": {
@@ -129,6 +130,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        MFA_REQUIRED=True,
         DATABASES=SAFE_DATABASES,
         CACHES={
             "default": {
@@ -152,6 +154,7 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         self.assertIn("[OK] debug", output)
         self.assertIn("[OK] database-credentials", output)
         self.assertIn("[OK] upload-antivirus", output)
+        self.assertIn("[OK] mfa-required", output)
         self.assertIn("0 aviso(s), 0 erro(s)", output)
 
     @override_settings(
@@ -223,6 +226,42 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         output = stdout.getvalue()
         self.assertIn("[ERRO] cache-rate-limit", output)
         self.assertIn("Redis/Memcached", output)
+
+    @override_settings(
+        DEBUG=False,
+        SECRET_KEY=STRONG_SECRET,
+        ALLOWED_HOSTS=["sistemafuracao.pt"],
+        SESSION_COOKIE_SECURE=True,
+        CSRF_COOKIE_SECURE=True,
+        SECURE_SSL_REDIRECT=True,
+        SECURE_HSTS_SECONDS=31536000,
+        UPLOAD_VIRUS_SCAN_ENABLED=True,
+        UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        MFA_REQUIRED=False,
+        DATABASES=SAFE_DATABASES,
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                "LOCATION": "redis://127.0.0.1:6379/1",
+            }
+        },
+    )
+    def test_strict_falha_quando_mfa_nao_esta_sinalizado(self):
+        stdout = StringIO()
+
+        with self.assertRaises(CommandError):
+            call_command(
+                "release_readiness_check",
+                "--strict",
+                "--skip-db",
+                "--skip-system-check",
+                stdout=stdout,
+            )
+
+        output = stdout.getvalue()
+        self.assertIn("[ERRO] mfa-required", output)
+        self.assertIn("MFA_REQUIRED=True", output)
 
     @override_settings(
         DEBUG=False,

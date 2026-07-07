@@ -174,6 +174,18 @@ class Command(BaseCommand):
             mensagem="Cache partilhável configurada para rate-limit." if cache_ok else "Cache local em memória configurada.",
             detalhe="Em produção multi-worker usa Redis/Memcached para rate limits consistentes.",
         )
+        mfa_required = bool(getattr(settings, "MFA_REQUIRED", False))
+        self._add(
+            itens,
+            slug="mfa-required",
+            ok=mfa_required,
+            nivel="erro" if strict else "aviso",
+            mensagem="MFA obrigatório sinalizado para produção." if mfa_required else "MFA obrigatório não está sinalizado.",
+            detalhe=(
+                "Antes de vender ou apresentar com contas reais, ativa MFA_REQUIRED=True e valida o fluxo operacional "
+                "de segundo fator para superuser/admins."
+            ),
+        )
         return itens
 
     def _database_credentials_safe(self, db_config):

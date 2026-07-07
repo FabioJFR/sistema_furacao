@@ -204,6 +204,7 @@ PASSWORD_RESET_RATE_LIMIT_MAX_ATTEMPTS = int(
 PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS = int(
     env("PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS", "600")
 )
+MFA_REQUIRED = env_bool("MFA_REQUIRED", False)
 # Só confiar no IP encaminhado quando o proxy reverso controla este header.
 RATE_LIMIT_TRUST_X_FORWARDED_FOR = env_bool(
     "RATE_LIMIT_TRUST_X_FORWARDED_FOR",
