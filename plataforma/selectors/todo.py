@@ -508,10 +508,9 @@ _AREAS_TODO = {
             "CONCLUIDO · [INFRA · RUNBOOKS] Runbooks `docs/runbooks/incidente_producao.md` e `docs/runbooks/disaster_recovery.md` adicionados com severidades, RTO/RPO, diagnóstico, mitigação, restore e pós-mortem; resumo também exposto em `Riscos de Deploy`.",
             "CONCLUIDO · [INFRA · CI/CD] Workflow `.github/workflows/ci.yml` adicionado como gate automático para push/PR em `main`, com PostgreSQL, scripts shell, checks Django, migrations, testes e collectstatic; plano de staging espelho documentado.",
             "CONCLUIDO · [AUDITORIA 24/06/2026 · DEPENDÊNCIAS] Dependências `pyobjc` passam a usar marcador `sys_platform == darwin`, evitando instalação indevida no servidor Linux sem o filtro especial do CI.",
+            "CONCLUIDO · [INFRA · RATE LIMIT] `release_readiness_check --strict` fica coberto por regressão para falhar quando a cache de produção usa `LocMemCache`, exigindo Redis/Memcached para rate limits consistentes entre workers.",
         ],
-        "proximos_passos": [
-            "[AUDITORIA CODIGO · RATE LIMIT] Confirmar no servidor a cache partilhada configurada por `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` para que rate limits não dependam de cache local por worker.",
-        ],
+        "proximos_passos": [],
         "falta_fazer": [
             "Criar ambiente de staging real separado da produção e ligar deploy automático controlado após CI verde.",
         ],

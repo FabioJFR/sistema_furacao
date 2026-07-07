@@ -200,6 +200,41 @@ class ReleaseReadinessCommandTests(SimpleTestCase):
         UPLOAD_VIRUS_SCAN_ENABLED=True,
         UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
         UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
+        DATABASES=SAFE_DATABASES,
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "tests",
+            }
+        },
+    )
+    def test_strict_falha_quando_cache_de_rate_limit_nao_e_partilhada(self):
+        stdout = StringIO()
+
+        with self.assertRaises(CommandError):
+            call_command(
+                "release_readiness_check",
+                "--strict",
+                "--skip-db",
+                "--skip-system-check",
+                stdout=stdout,
+            )
+
+        output = stdout.getvalue()
+        self.assertIn("[ERRO] cache-rate-limit", output)
+        self.assertIn("Redis/Memcached", output)
+
+    @override_settings(
+        DEBUG=False,
+        SECRET_KEY=STRONG_SECRET,
+        ALLOWED_HOSTS=["sistemafuracao.pt"],
+        SESSION_COOKIE_SECURE=True,
+        CSRF_COOKIE_SECURE=True,
+        SECURE_SSL_REDIRECT=True,
+        SECURE_HSTS_SECONDS=31536000,
+        UPLOAD_VIRUS_SCAN_ENABLED=True,
+        UPLOAD_VIRUS_SCAN_FAIL_CLOSED=True,
+        UPLOAD_VIRUS_SCAN_COMMAND=sys.executable,
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.postgresql",
