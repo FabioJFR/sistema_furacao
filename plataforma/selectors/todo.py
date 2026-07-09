@@ -22,6 +22,7 @@ _AREAS_TODO = {
             "Nova camada adicional em `plataforma/views/financas.py`: contextos de entrada, saída, analytics e configuração PayPal centralizados em builders de `services/financas.py`, uniformizando as páginas financeiras.",
             "Nova camada adicional em `plataforma/views/dashboard.py`: contexto completo da dashboard movido para `services/dashboard.py`, preservando métricas, utilizadores online e blocos MVP reservados ao superuser.",
             "Cobertura i18n backend reforçada em mensagens de acesso reservado nas views superuser (`TO DO`, `Riscos de Deploy` e `Features`).",
+            "Nova camada adicional em `plataforma/views/planos.py`: contextos de listagem e formulário de planos movidos para builders em `services/planos.py`, com regressão para métricas da listagem.",
         ],
         "proximos_passos": [
             "Consolidar mais regras em services/selectors para reduzir lógica residual nas views de backoffice.",

@@ -1,6 +1,11 @@
 from django.utils.translation import gettext as _
 
 from plataforma.forms.plano import PlanoForm
+from plataforma.selectors.planos import (
+    enriquecer_planos_com_contexto_trial,
+    listar_planos_dashboard,
+    plano_e_trial,
+)
 
 
 def alternar_plano_ativo(plano):
@@ -21,6 +26,28 @@ def construir_form_plano(*, post_data=None, instance=None):
     if post_data is not None:
         return PlanoForm(post_data, instance=instance)
     return PlanoForm(instance=instance)
+
+
+def construir_contexto_plano_list():
+    planos = listar_planos_dashboard()
+    enriquecer_planos_com_contexto_trial(planos)
+    return {
+        "planos": planos,
+        "planos_ativos": planos.filter(ativo=True).count(),
+        "planos_empresa": planos.filter(tipo="empresa").count(),
+        "planos_individuais": planos.filter(tipo="individual").count(),
+        "planos_trial": sum(1 for plano in planos if plano_e_trial(plano)),
+    }
+
+
+def construir_contexto_form_plano(*, form, titulo, plano=None):
+    context = {
+        "form": form,
+        "titulo": titulo,
+    }
+    if plano is not None:
+        context["plano"] = plano
+    return context
 
 
 def processar_submissao_plano_create(*, post_data):

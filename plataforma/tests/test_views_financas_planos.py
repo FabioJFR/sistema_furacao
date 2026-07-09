@@ -96,6 +96,28 @@ class PlataformaFinancasPlanosViewsTests(TestCase):
         self.assertFalse(plano_novo.permite_multiplos_utilizadores)
         self.assertFalse(plano_novo.acesso_dashboard_empresa)
 
+    def test_platform_admin_consulta_planos_com_metricas_padronizadas(self):
+        user = self._criar_user_com_perfil(
+            username="platform_admin_planos_metricas",
+            tipo_acesso="platform_admin",
+        )
+        Plano.objects.create(
+            nome="Plano Individual Métricas",
+            tipo="individual",
+            preco_mensal=Decimal("9.90"),
+            preco_anual=Decimal("99.00"),
+            ativo=False,
+            periodos_cobranca_disponiveis=[1, 12],
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("plataforma:plano_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["planos_ativos"], 1)
+        self.assertEqual(response.context["planos_empresa"], 1)
+        self.assertEqual(response.context["planos_individuais"], 1)
+
     def test_empresa_admin_nao_acede_a_planos_nem_financas(self):
         user = self._criar_user_com_perfil(
             username="empresa_admin_financas",
