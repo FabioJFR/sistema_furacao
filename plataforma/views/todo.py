@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 
 from plataforma.decorators import platform_admin_required
 from plataforma.selectors.todo import (
@@ -14,7 +15,7 @@ from plataforma.selectors.todo import (
 @platform_admin_required
 def todo_dashboard(request):
     if not request.user.is_superuser:
-        messages.error(request, "Esta área está reservada ao superutilizador.")
+        messages.error(request, _("Esta área está reservada ao superutilizador."))
         return redirect("plataforma:dashboard")
 
     context = {
@@ -28,7 +29,7 @@ def todo_dashboard(request):
 @platform_admin_required
 def todo_area_detail(request, area_slug):
     if not request.user.is_superuser:
-        messages.error(request, "Esta área está reservada ao superutilizador.")
+        messages.error(request, _("Esta área está reservada ao superutilizador."))
         return redirect("plataforma:dashboard")
 
     context = {

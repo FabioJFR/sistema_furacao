@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 
 from plataforma.decorators import platform_admin_required
 from plataforma.services.features import (
@@ -13,7 +14,7 @@ from plataforma.services.features import (
 @platform_admin_required
 def features_dashboard(request):
     if not request.user.is_superuser:
-        messages.error(request, "A gestão global de features está reservada ao superuser.")
+        messages.error(request, _("A gestão global de features está reservada ao superuser."))
         return redirect("plataforma:dashboard")
 
     tipo_alvo_param = (request.GET.get("tipo") or request.POST.get("tipo") or "empresa").strip()
