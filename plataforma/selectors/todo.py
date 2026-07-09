@@ -244,6 +244,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [VALIDAÇÃO · PLANEAMENTO] POST direto com projeto/furo/empregado/máquina fora do queryset autorizado passa a devolver erro de formulário, evitando erro 500 em `full_clean()`.",
             "CONCLUIDO · [GESTAO EMPRESA] `Compras & Fornecedores` evolução: cadastro de fornecedores (SLA e avaliação), propostas por pedido e comparação automática com scoring de preço/prazo (incluindo seleção rápida).",
             "CONCLUIDO · [GESTAO EMPRESA] `Relatórios Executivos` evolução: histórico/auditoria de envios (manual, agendado e executar agora) com estado, destinatários, anexos e erro técnico.",
+            "CONCLUIDO · [ARQUITETURA · GESTAO EMPRESA] Filtros dos Relatórios Executivos e cálculo de período de agendamento movidos de `views/gestao_empresa.py` para `services/gestao_relatorios.py`, com testes diretos ao service.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: anexos de contrato, adendas contratuais, configuração de renovação automática e janela de alerta por contrato, com detalhe comercial reforçado.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: histórico real de renovações, adendas editáveis e leitura financeira acumulada por contrato com vencimento efetivo.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: alertas comerciais operacionais (vencimento, suspensão, follow-up e ausência de contacto) e timeline comercial por cliente/contrato.",

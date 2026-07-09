@@ -1,15 +1,20 @@
-from datetime import date, time
+from datetime import date, datetime, time
 from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from projetos.models import (
     AgendamentoRelatorioExecutivo,
     Despesa,
     HistoricoEnvioRelatorioExecutivo,
 )
-from projetos.services.gestao_relatorios import EnvioRelatorioResultado
+from projetos.services.gestao_relatorios import (
+    EnvioRelatorioResultado,
+    construir_filtros_periodo_agendamento,
+    normalizar_filtros_relatorio_executivo,
+)
 
 from .helpers import criar_empresa, criar_perfil, criar_projeto, criar_user
 
@@ -88,6 +93,21 @@ class RelatoriosExecutivosMultiempresaTests(TestCase):
         self.assertNotContains(response_csv, self.projeto_externo.nome)
         self.assertContains(response_csv, "150.00")
         self.assertNotContains(response_csv, "999.00")
+
+    def test_service_normaliza_filtros_relatorio_executivo(self):
+        filtros = normalizar_filtros_relatorio_executivo(
+            {"data_inicio": " 2026-05-01 ", "data_fim": " 2026-05-31 "}
+        )
+
+        self.assertEqual(filtros, {"data_inicio": "2026-05-01", "data_fim": "2026-05-31"})
+
+    def test_service_constroi_periodo_agendamento_semanal(self):
+        agendamento = AgendamentoRelatorioExecutivo(frequencia="semanal", hora_execucao=time(8, 0))
+        referencia = timezone.make_aware(datetime(2026, 5, 20, 10, 0))
+
+        filtros = construir_filtros_periodo_agendamento(agendamento=agendamento, referencia=referencia)
+
+        self.assertEqual(filtros, {"data_inicio": "2026-05-14", "data_fim": "2026-05-20"})
 
     def test_agendamento_e_criado_e_atualizado_apenas_para_empresa_atual(self):
         response = self.client.post(

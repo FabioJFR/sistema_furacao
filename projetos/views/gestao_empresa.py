@@ -69,8 +69,10 @@ from projetos.services.gestao_compliance import (
 )
 from projetos.services.gestao_relatorios import (
     calcular_proximo_envio_agendado,
+    construir_filtros_periodo_agendamento,
     construir_url_relatorio_com_filtros,
     enviar_relatorio_executivo_email,
+    normalizar_filtros_relatorio_executivo,
     normalizar_destinos,
     resolver_destinos_relatorio,
 )
@@ -1896,7 +1898,7 @@ def gestao_relatorios_executivos(request):
     if resposta_erro:
         return resposta_erro
 
-    filtros = _obter_filtros_relatorio_executivo(request)
+    filtros = normalizar_filtros_relatorio_executivo(request.GET)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     default_email = (empresa.responsavel_email or empresa.email or "").strip()
     form_email = RelatorioExecutivoEmailForm(
@@ -2014,7 +2016,7 @@ def gestao_relatorios_export_csv(request):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
-    filtros = _obter_filtros_relatorio_executivo(request)
+    filtros = normalizar_filtros_relatorio_executivo(request.GET)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     csv_bytes = _gerar_relatorio_csv_bytes(filtros=filtros, relatorio=relatorio)
 
@@ -2030,7 +2032,7 @@ def gestao_relatorios_export_xlsx(request):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
-    filtros = _obter_filtros_relatorio_executivo(request)
+    filtros = normalizar_filtros_relatorio_executivo(request.GET)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     xlsx_bytes = _gerar_relatorio_xlsx_bytes(filtros=filtros, relatorio=relatorio)
 
@@ -2046,7 +2048,7 @@ def gestao_relatorios_export_pdf(request):
     empresa, resposta_erro = _resolver_empresa_admin(request)
     if resposta_erro:
         return resposta_erro
-    filtros = _obter_filtros_relatorio_executivo(request)
+    filtros = normalizar_filtros_relatorio_executivo(request.GET)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     try:
         pdf_bytes = _gerar_relatorio_pdf_bytes(empresa=empresa, filtros=filtros, relatorio=relatorio)
@@ -2070,7 +2072,7 @@ def gestao_relatorios_enviar_email(request):
     if resposta_erro:
         return resposta_erro
 
-    filtros = _obter_filtros_relatorio_executivo(request)
+    filtros = normalizar_filtros_relatorio_executivo(request.GET)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
 
     form = RelatorioExecutivoEmailForm(request.POST)
@@ -2153,33 +2155,8 @@ def gestao_relatorios_enviar_email(request):
     return redirect(construir_url_relatorio_com_filtros(filtros=filtros))
 
 
-def _obter_filtros_relatorio_executivo(request):
-    return {
-        "data_inicio": (request.GET.get("data_inicio") or "").strip(),
-        "data_fim": (request.GET.get("data_fim") or "").strip(),
-    }
-
-
-def _filtros_periodo_agendamento(*, agendamento, referencia=None):
-    referencia = referencia or timezone.now()
-    hoje = timezone.localtime(referencia).date()
-    if agendamento.frequencia == "diario":
-        inicio = hoje - timedelta(days=1)
-        fim = inicio
-    elif agendamento.frequencia == "semanal":
-        fim = hoje
-        inicio = hoje - timedelta(days=6)
-    else:  # mensal
-        inicio = hoje.replace(day=1)
-        fim = hoje
-    return {
-        "data_inicio": inicio.isoformat(),
-        "data_fim": fim.isoformat(),
-    }
-
-
 def _executar_envio_agendado_empresa(*, empresa, agendamento, referencia=None, origem="agendado"):
-    filtros = _filtros_periodo_agendamento(agendamento=agendamento, referencia=referencia)
+    filtros = construir_filtros_periodo_agendamento(agendamento=agendamento, referencia=referencia)
     relatorio = _montar_relatorio_executivo(empresa=empresa, filtros=filtros)
     destinos_agendamento = normalizar_destinos(agendamento.destinos or "")
     destinos = resolver_destinos_relatorio(empresa=empresa, destinos_form=destinos_agendamento)

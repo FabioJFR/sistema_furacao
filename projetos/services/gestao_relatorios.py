@@ -30,6 +30,31 @@ def construir_url_relatorio_com_filtros(*, filtros: dict) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
+def normalizar_filtros_relatorio_executivo(query_params) -> dict:
+    return {
+        "data_inicio": (query_params.get("data_inicio") or "").strip(),
+        "data_fim": (query_params.get("data_fim") or "").strip(),
+    }
+
+
+def construir_filtros_periodo_agendamento(*, agendamento, referencia=None) -> dict:
+    referencia = referencia or timezone.now()
+    hoje = timezone.localtime(referencia).date()
+    if agendamento.frequencia == "diario":
+        inicio = hoje - timedelta(days=1)
+        fim = inicio
+    elif agendamento.frequencia == "semanal":
+        fim = hoje
+        inicio = hoje - timedelta(days=6)
+    else:  # mensal
+        inicio = hoje.replace(day=1)
+        fim = hoje
+    return {
+        "data_inicio": inicio.isoformat(),
+        "data_fim": fim.isoformat(),
+    }
+
+
 def normalizar_destinos(destinos_texto: str) -> list[str]:
     raw = (destinos_texto or "").strip()
     if not raw:
