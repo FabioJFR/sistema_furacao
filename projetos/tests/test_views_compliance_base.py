@@ -142,6 +142,18 @@ class ComplianceBaseMultiempresaTests(TestCase):
         self.assertNotContains(response, self.auditoria_externa.titulo)
         self.assertNotContains(response, self.plano_externo.titulo)
 
+    def test_export_dashboard_compliance_normaliza_filtros_invalidos(self):
+        response = self.client.get(
+            reverse("projetos:gestao_compliance_dashboard_export_csv"),
+            {"janela_dias": "invalida", "compare_janela": "false"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        conteudo = response.content.decode("utf-8-sig")
+        self.assertIn("Empresa Compliance 1", conteudo)
+        self.assertIn("Janela dias,total", conteudo)
+
     def test_admin_nao_cria_objetos_base_com_projeto_ou_responsavel_externo(self):
         cenarios = [
             (

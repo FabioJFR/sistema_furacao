@@ -1,4 +1,6 @@
 import calendar
+import csv
+import io
 from datetime import date, datetime, time, timedelta
 
 from django.db.models import Count
@@ -50,6 +52,117 @@ def guardar_evidencia_compliance_form(
     evidencia.acao_preventiva = acao_preventiva
     evidencia.save()
     return evidencia
+
+
+def normalizar_filtros_dashboard_compliance(query_params):
+    janela_raw = (query_params.get("janela_dias") or "").strip()
+    compare_raw = (query_params.get("compare_janela") or "").strip()
+
+    try:
+        janela_dias = int(janela_raw) if janela_raw else 0
+    except (TypeError, ValueError):
+        janela_dias = 0
+    if janela_dias not in {0, 7, 30, 90}:
+        janela_dias = 0
+
+    compare_janela = str(int(bool(compare_raw and compare_raw not in {"0", "false", "False"})))
+
+    return {
+        "check_status": (query_params.get("check_status") or "").strip(),
+        "inc_status": (query_params.get("inc_status") or "").strip(),
+        "aud_status": (query_params.get("aud_status") or "").strip(),
+        "acao_status": (query_params.get("acao_status") or "").strip(),
+        "plano_status": (query_params.get("plano_status") or "").strip(),
+        "prev_status": (query_params.get("prev_status") or "").strip(),
+        "drill_projeto": (query_params.get("drill_projeto") or "").strip(),
+        "drill_responsavel": (query_params.get("drill_responsavel") or "").strip(),
+        "janela_dias": janela_dias,
+        "compare_janela": compare_janela,
+    }
+
+
+def gerar_dashboard_compliance_csv_bytes(*, empresa, dashboard_eficacia, filtros):
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+
+    writer.writerow(["Empresa", empresa.nome])
+    writer.writerow(["Janela dias", filtros.get("janela_dias") or "total"])
+    writer.writerow(["Referência", dashboard_eficacia.get("referencia")])
+    writer.writerow([])
+
+    resumo = dashboard_eficacia.get("resumo", {})
+    writer.writerow(["Resumo"])
+    writer.writerow(["Total ações", resumo.get("total_acoes", 0)])
+    writer.writerow(["Total concluídas", resumo.get("total_concluidas", 0)])
+    writer.writerow(["Total abertas", resumo.get("total_abertas", 0)])
+    writer.writerow(["Total vencidas", resumo.get("total_vencidas", 0)])
+    writer.writerow(["Taxa global fecho", resumo.get("taxa_global_fecho", 0.0)])
+    writer.writerow(["Taxa SLA global", resumo.get("taxa_sla_global", 0.0)])
+    writer.writerow(["Tempo médio fecho global", resumo.get("tempo_medio_fecho_global", 0.0)])
+    writer.writerow([])
+
+    snapshots = dashboard_eficacia.get("snapshots", {})
+    if snapshots.get("atual") and snapshots.get("anterior"):
+        writer.writerow(["Snapshot comparativo"])
+        writer.writerow(["Período", "Abertas", "Concluídas", "Vencidas", "SLA", "Fecho médio"])
+        writer.writerow([
+            f"Atual ({snapshots['atual']['inicio']} a {snapshots['atual']['fim']})",
+            snapshots["atual"]["abertas"],
+            snapshots["atual"]["concluidas"],
+            snapshots["atual"]["vencidas"],
+            snapshots["atual"]["taxa_sla"],
+            snapshots["atual"]["tempo_medio_fecho"],
+        ])
+        writer.writerow([
+            f"Anterior ({snapshots['anterior']['inicio']} a {snapshots['anterior']['fim']})",
+            snapshots["anterior"]["abertas"],
+            snapshots["anterior"]["concluidas"],
+            snapshots["anterior"]["vencidas"],
+            snapshots["anterior"]["taxa_sla"],
+            snapshots["anterior"]["tempo_medio_fecho"],
+        ])
+        writer.writerow([
+            "Delta",
+            snapshots["delta_abertas"],
+            snapshots["delta_concluidas"],
+            snapshots["delta_vencidas"],
+            snapshots["delta_sla"],
+            snapshots["delta_tempo_medio"],
+        ])
+        writer.writerow([])
+
+    writer.writerow(["Previsão por responsável"])
+    writer.writerow(["Responsável", "Abertas", "Vencidas", "Score base", "Score ajustado", "Risco", "SLA histórico", "Fecho histórico", "Tempo médio histórico"])
+    for item in dashboard_eficacia.get("previsao_incumprimento", {}).get("responsaveis", []):
+        writer.writerow([
+            item.get("nome"),
+            item.get("abertas", 0),
+            item.get("vencidas", 0),
+            item.get("score", 0.0),
+            item.get("score_ajustado", 0.0),
+            item.get("risco", ""),
+            item.get("taxa_sla_historica", 0.0),
+            item.get("taxa_fecho_historica", 0.0),
+            item.get("tempo_medio_fecho_historico", 0.0),
+        ])
+    writer.writerow([])
+
+    writer.writerow(["Previsão por projeto"])
+    writer.writerow(["Projeto", "Abertas", "Vencidas", "Score base", "Score ajustado", "Risco", "SLA histórico", "Fecho histórico", "Tempo médio histórico"])
+    for item in dashboard_eficacia.get("previsao_incumprimento", {}).get("projetos", []):
+        writer.writerow([
+            item.get("nome"),
+            item.get("abertas", 0),
+            item.get("vencidas", 0),
+            item.get("score", 0.0),
+            item.get("score_ajustado", 0.0),
+            item.get("risco", ""),
+            item.get("taxa_sla_historica", 0.0),
+            item.get("taxa_fecho_historica", 0.0),
+            item.get("tempo_medio_fecho_historico", 0.0),
+        ])
+
+    return buffer.getvalue().encode("utf-8-sig")
 
 
 def registar_fecho_formal_acao_corretiva(*, acao, user, cleaned_data):

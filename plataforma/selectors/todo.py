@@ -224,6 +224,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [GESTAO EMPRESA] `Compliance & Segurança` evolução: scoring de risco ajustável por empresa, com pesos/limiares configuráveis em `Definições` e impacto direto nas previsões por responsável/projeto.",
             "CONCLUIDO · [GESTAO EMPRESA] `Compliance & Segurança` evolução: drill-down clicável até à ação concreta e previsão enriquecida com histórico real de SLA, taxa de fecho e tempo médio por responsável/projeto.",
             "CONCLUIDO · [GESTAO EMPRESA] `Compliance & Segurança` evolução: filtros temporais avançados (total/7/30/90 dias), snapshots comparativos entre janelas e exportação CSV do dashboard de eficácia.",
+            "CONCLUIDO · [ARQUITETURA · GESTAO EMPRESA] Normalização dos filtros e geração CSV do dashboard de Compliance movidas de `views/gestao_empresa.py` para `services/gestao_compliance.py`, com regressão para filtros inválidos.",
             "CONCLUIDO · [GESTAO EMPRESA] `Relatórios Executivos` evolução: filtro por período (início/fim), resumo consolidado (Financeiro + RH + Compliance) e exportação CSV/XLSX alinhada com os filtros.",
             "CONCLUIDO · [GESTAO EMPRESA] `Relatórios Executivos` evolução: comparativo financeiro por projeto (metros, registos, custo, receita estimada, margem) visível no ecrã e exportado em CSV/XLSX.",
             "CONCLUIDO · [GESTAO EMPRESA] `Relatórios Executivos` evolução: envio por email com destinatários configuráveis e anexos CSV/XLSX respeitando os filtros aplicados.",
