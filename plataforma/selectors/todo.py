@@ -189,6 +189,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [GESTAO EMPRESA] `Centro de Notificações` fase 2 parcial: notificações com responsável, prazo e estado (SLA operacional).",
             "CONCLUIDO · [GESTAO EMPRESA] `Relatórios Executivos` fase 2 parcial: exportação direta em CSV e XLSX.",
             "CONCLUIDO · [GESTAO EMPRESA] `Centro de Notificações` evolução: filtros por estado/prioridade, SLA calculado (OK/Em risco/Atrasado) e mudança rápida de estado.",
+            "CONCLUIDO · [ARQUITETURA · GESTAO EMPRESA] Filtros, fila/KPIs e cálculo de SLA do Centro de Notificações movidos de `views/gestao_empresa.py` para `services/gestao_notificacoes.py`, com testes diretos ao service.",
             "CONCLUIDO · [GESTAO EMPRESA] `Centro de Notificações` evolução: exportação CSV com filtros aplicados.",
             "CONCLUIDO · [PERMISSÕES · NOTIFICAÇÕES] Regressões adicionadas para isolamento multiempresa em listagem, exportação CSV, edição, remoção e mudança de estado de notificações.",
             "CONCLUIDO · [VALIDAÇÃO · NOTIFICAÇÕES] POST direto com responsável fora do queryset autorizado passa a devolver erro de formulário sem criar/alterar notificações.",

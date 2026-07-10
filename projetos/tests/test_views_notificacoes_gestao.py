@@ -3,6 +3,11 @@ from django.urls import reverse
 from django.utils import timezone
 
 from projetos.models import NotificacaoGestao
+from projetos.services.gestao_notificacoes import (
+    calcular_sla_notificacao,
+    filtrar_notificacoes_gestao,
+    normalizar_filtros_notificacoes,
+)
 
 from .helpers import criar_empregado, criar_empresa, criar_perfil, criar_user
 
@@ -59,6 +64,36 @@ class NotificacoesGestaoMultiempresaTests(TestCase):
         self.assertEqual(response_csv.status_code, 200)
         self.assertContains(response_csv, self.notificacao.titulo)
         self.assertNotContains(response_csv, self.notificacao_externa.titulo)
+
+    def test_service_normaliza_e_filtra_notificacoes(self):
+        filtros = normalizar_filtros_notificacoes({"estado": " aberta ", "prioridade": " alta "})
+
+        notificacoes = list(filtrar_notificacoes_gestao(empresa=self.empresa, filtros=filtros))
+
+        self.assertEqual(filtros, {"estado": "aberta", "prioridade": "alta"})
+        self.assertEqual(notificacoes, [self.notificacao])
+
+    def test_service_calcula_sla_notificacao(self):
+        referencia = timezone.now()
+        self.notificacao.prazo = referencia + timezone.timedelta(hours=2)
+        notificacao_atrasada = NotificacaoGestao.objects.create(
+            empresa=self.empresa,
+            titulo="Notificação Atrasada",
+            prioridade="alta",
+            estado="aberta",
+            prazo=referencia - timezone.timedelta(hours=1),
+        )
+        notificacao_resolvida = NotificacaoGestao.objects.create(
+            empresa=self.empresa,
+            titulo="Notificação Resolvida",
+            prioridade="baixa",
+            estado="resolvida",
+            prazo=referencia - timezone.timedelta(days=1),
+        )
+
+        self.assertEqual(calcular_sla_notificacao(self.notificacao, referencia=referencia), "Em risco")
+        self.assertEqual(calcular_sla_notificacao(notificacao_atrasada, referencia=referencia), "Atrasado")
+        self.assertEqual(calcular_sla_notificacao(notificacao_resolvida, referencia=referencia), "OK")
 
     def test_admin_nao_cria_notificacao_com_responsavel_externo(self):
         response = self.client.post(

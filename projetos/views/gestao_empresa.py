@@ -72,6 +72,12 @@ from projetos.services.gestao_compras import (
     filtrar_pedidos_compra,
     normalizar_filtros_compras,
 )
+from projetos.services.gestao_notificacoes import (
+    calcular_sla_notificacao,
+    construir_contexto_centro_notificacoes,
+    filtrar_notificacoes_gestao,
+    normalizar_filtros_notificacoes,
+)
 from projetos.services.gestao_relatorios import (
     calcular_proximo_envio_agendado,
     construir_filtros_periodo_agendamento,
@@ -1637,55 +1643,8 @@ def gestao_notificacoes(request):
     if resposta_erro:
         return resposta_erro
 
-    pendentes_empregado = Empregados.objects.filter(empresa=empresa, aprovado=False).count()
-    assiduidade_pendente = AssiduidadeRegisto.objects.filter(empresa=empresa, estado="pendente").count()
-    avarias_abertas = MaquinaAvaria.objects.filter(empresa=empresa).exclude(status="resolvida").count()
-    planeamentos_pendentes = PlaneamentoTurno.objects.filter(empresa=empresa, estado="planeado").count()
-
-    fila = []
-    if pendentes_empregado:
-        fila.append([_("Alta"), _("Empregados pendentes"), str(pendentes_empregado)])
-    if avarias_abertas:
-        fila.append([_("Alta"), _("Avarias em aberto"), str(avarias_abertas)])
-    if assiduidade_pendente:
-        fila.append([_("Média"), _("Assiduidade pendente"), str(assiduidade_pendente)])
-    if planeamentos_pendentes:
-        fila.append([_("Média"), _("Planeamentos por confirmar"), str(planeamentos_pendentes)])
-    estado_filtro = request.GET.get("estado", "").strip()
-    prioridade_filtro = request.GET.get("prioridade", "").strip()
-    notificacoes_qs = NotificacaoGestao.objects.filter(empresa=empresa)
-    if estado_filtro:
-        notificacoes_qs = notificacoes_qs.filter(estado=estado_filtro)
-    if prioridade_filtro:
-        notificacoes_qs = notificacoes_qs.filter(prioridade=prioridade_filtro)
-    notificacoes = (
-        notificacoes_qs
-        .select_related("responsavel")
-        .order_by("estado", "prazo", "-criado_em")[:20]
-    )
-
-    agora = timezone.now()
-    linhas_notificacoes = []
-    for n in notificacoes:
-        if n.prazo is None or n.estado == "resolvida":
-            sla = _("OK")
-        elif n.prazo < agora:
-            sla = _("Atrasado")
-        elif (n.prazo - agora).total_seconds() <= 24 * 3600:
-            sla = _("Em risco")
-        else:
-            sla = _("OK")
-        linhas_notificacoes.append(
-            {
-                "id": n.id,
-                "titulo": n.titulo,
-                "prioridade": n.get_prioridade_display(),
-                "estado": n.get_estado_display(),
-                "responsavel": n.responsavel.nome if n.responsavel else "-",
-                "prazo": n.prazo.strftime("%d/%m/%Y %H:%M") if n.prazo else "-",
-                "sla": sla,
-            }
-        )
+    filtros = normalizar_filtros_notificacoes(request.GET)
+    contexto_notificacoes = construir_contexto_centro_notificacoes(empresa=empresa, filtros=filtros)
 
     return render(
         request,
@@ -1693,13 +1652,10 @@ def gestao_notificacoes(request):
         {
             "titulo": _("Centro de Notificações"),
             "descricao": _("Fila operacional de pendências com prioridade."),
-            "kpis": [
-                {"titulo": _("Pendências críticas"), "valor": str(pendentes_empregado + avarias_abertas)},
-                {"titulo": _("Pendências médias"), "valor": str(assiduidade_pendente + planeamentos_pendentes)},
-            ],
-            "fila": fila,
-            "notificacoes": linhas_notificacoes,
-            "filtros": {"estado": estado_filtro, "prioridade": prioridade_filtro},
+            "kpis": contexto_notificacoes["kpis"],
+            "fila": contexto_notificacoes["fila"],
+            "notificacoes": contexto_notificacoes["notificacoes"],
+            "filtros": filtros,
             "estado_choices": [("", _("Todos"))] + list(NotificacaoGestao.ESTADO_CHOICES),
             "prioridade_choices": [("", _("Todos"))] + list(NotificacaoGestao.PRIORIDADE_CHOICES),
             "proximos_passos": [
@@ -1718,13 +1674,8 @@ def gestao_notificacoes_export_csv(request):
     if resposta_erro:
         return resposta_erro
 
-    estado_filtro = request.GET.get("estado", "").strip()
-    prioridade_filtro = request.GET.get("prioridade", "").strip()
-    queryset = NotificacaoGestao.objects.filter(empresa=empresa)
-    if estado_filtro:
-        queryset = queryset.filter(estado=estado_filtro)
-    if prioridade_filtro:
-        queryset = queryset.filter(prioridade=prioridade_filtro)
+    filtros = normalizar_filtros_notificacoes(request.GET)
+    queryset = filtrar_notificacoes_gestao(empresa=empresa, filtros=filtros)
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="notificacoes_gestao.csv"'
@@ -1733,14 +1684,6 @@ def gestao_notificacoes_export_csv(request):
 
     agora = timezone.now()
     for n in queryset.select_related("responsavel").order_by("estado", "prazo", "-criado_em"):
-        if n.prazo is None or n.estado == "resolvida":
-            sla = "OK"
-        elif n.prazo < agora:
-            sla = "Atrasado"
-        elif (n.prazo - agora).total_seconds() <= 24 * 3600:
-            sla = "Em risco"
-        else:
-            sla = "OK"
         writer.writerow(
             [
                 n.titulo,
@@ -1749,7 +1692,7 @@ def gestao_notificacoes_export_csv(request):
                 n.get_estado_display(),
                 n.responsavel.nome if n.responsavel else "",
                 n.prazo.strftime("%d/%m/%Y %H:%M") if n.prazo else "",
-                sla,
+                calcular_sla_notificacao(n, referencia=agora),
                 n.detalhes or "",
             ]
         )
