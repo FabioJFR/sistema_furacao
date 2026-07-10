@@ -67,6 +67,11 @@ from projetos.services.gestao_compliance import (
     registar_fecho_formal_acao_corretiva,
     sincronizar_alertas_automaticos_compliance,
 )
+from projetos.services.gestao_compras import (
+    avaliar_propostas_pedido,
+    filtrar_pedidos_compra,
+    normalizar_filtros_compras,
+)
 from projetos.services.gestao_relatorios import (
     calcular_proximo_envio_agendado,
     construir_filtros_periodo_agendamento,
@@ -156,69 +161,6 @@ def _registar_historico_envio_relatorio(
             getattr(empresa, "id", None),
             origem,
         )
-
-
-def _obter_filtros_compras(request):
-    return {
-        "estado": (request.GET.get("estado") or "").strip(),
-        "prioridade": (request.GET.get("prioridade") or "").strip(),
-        "projeto_id": (request.GET.get("projeto_id") or "").strip(),
-        "categoria": (request.GET.get("categoria") or "").strip(),
-        "q": (request.GET.get("q") or "").strip(),
-    }
-
-
-def _filtrar_pedidos_compra(*, empresa, filtros):
-    qs = PedidoCompra.objects.filter(empresa=empresa).select_related("projeto", "solicitado_por")
-
-    if filtros.get("estado"):
-        qs = qs.filter(estado=filtros["estado"])
-    if filtros.get("prioridade"):
-        qs = qs.filter(prioridade=filtros["prioridade"])
-    if filtros.get("projeto_id"):
-        qs = qs.filter(projeto_id=filtros["projeto_id"])
-    if filtros.get("categoria"):
-        qs = qs.filter(categoria__icontains=filtros["categoria"])
-    if filtros.get("q"):
-        qs = qs.filter(descricao__icontains=filtros["q"])
-
-    return qs.order_by("-criado_em")
-
-
-def _avaliar_propostas_pedido(*, pedido):
-    propostas = list(
-        pedido.propostas_fornecedor.select_related("fornecedor").order_by("valor_proposto", "prazo_entrega_dias", "-criado_em")
-    )
-    if not propostas:
-        return []
-
-    valores = [float(p.valor_proposto or 0.0) for p in propostas]
-    prazos = [int(p.prazo_entrega_dias or 0) for p in propostas]
-    min_valor, max_valor = min(valores), max(valores)
-    min_prazo, max_prazo = min(prazos), max(prazos)
-    range_valor = max(max_valor - min_valor, 1e-9)
-    range_prazo = max(max_prazo - min_prazo, 1e-9)
-
-    avaliadas = []
-    for proposta in propostas:
-        valor = float(proposta.valor_proposto or 0.0)
-        prazo = int(proposta.prazo_entrega_dias or 0)
-        score_valor = (max_valor - valor) / range_valor
-        score_prazo = (max_prazo - prazo) / range_prazo
-        # Peso de decisão: 60% preço, 40% prazo.
-        score_total = (score_valor * 0.6) + (score_prazo * 0.4)
-        avaliadas.append(
-            {
-                "obj": proposta,
-                "score_total": score_total,
-            }
-        )
-
-    avaliadas.sort(key=lambda item: item["score_total"], reverse=True)
-    melhor_id = avaliadas[0]["obj"].id if avaliadas else None
-    for item in avaliadas:
-        item["is_melhor"] = item["obj"].id == melhor_id
-    return avaliadas
 
 
 def _render_secao(request, *, slug, titulo, descricao, proximos_passos, kpis=None, linhas=None):
@@ -379,7 +321,7 @@ def gestao_compras_fornecedores(request):
         return resposta_erro
 
     hoje = timezone.localdate()
-    filtros = _obter_filtros_compras(request)
+    filtros = normalizar_filtros_compras(request.GET)
     despesas = Despesa.objects.filter(empresa=empresa)
     total = despesas.aggregate(total=Sum("valor"))["total"] or 0
     total_mes = despesas.filter(data__year=hoje.year, data__month=hoje.month).aggregate(total=Sum("valor"))["total"] or 0
@@ -389,7 +331,7 @@ def gestao_compras_fornecedores(request):
         .order_by("-total")[:8]
     )
     recentes = despesas.select_related("projeto", "furo", "maquina").order_by("-data", "-criado_em")[:8]
-    pedidos_qs = _filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
+    pedidos_qs = filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
     pedidos = pedidos_qs[:20]
     pedidos_info = []
     projetos_choices = Projeto.objects.filter(empresa=empresa).order_by("nome").values("id", "nome")
@@ -489,8 +431,8 @@ def gestao_compras_export_csv(request):
     if resposta_erro:
         return resposta_erro
 
-    filtros = _obter_filtros_compras(request)
-    pedidos = _filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
+    filtros = normalizar_filtros_compras(request.GET)
+    pedidos = filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="pedidos_compra.csv"'
@@ -534,8 +476,8 @@ def gestao_compras_export_xlsx(request):
     if resposta_erro:
         return resposta_erro
 
-    filtros = _obter_filtros_compras(request)
-    pedidos = _filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
+    filtros = normalizar_filtros_compras(request.GET)
+    pedidos = filtrar_pedidos_compra(empresa=empresa, filtros=filtros)
 
     wb = Workbook()
     ws = wb.active
@@ -788,7 +730,7 @@ def gestao_pedido_compra_comparar(request, pk):
         messages.error(request, _("Pedido não encontrado."))
         return redirect("projetos:gestao_compras_fornecedores")
 
-    propostas_avaliadas = _avaliar_propostas_pedido(pedido=pedido)
+    propostas_avaliadas = avaliar_propostas_pedido(pedido=pedido)
     return render(
         request,
         "projetos/gestao_pedido_compra_comparar.html",
@@ -810,7 +752,7 @@ def gestao_pedido_compra_selecionar_melhor(request, pk):
         messages.error(request, _("Pedido não encontrado."))
         return redirect("projetos:gestao_compras_fornecedores")
 
-    propostas_avaliadas = _avaliar_propostas_pedido(pedido=pedido)
+    propostas_avaliadas = avaliar_propostas_pedido(pedido=pedido)
     if not propostas_avaliadas:
         messages.error(request, _("Não existem propostas para comparar neste pedido."))
         return redirect("projetos:gestao_pedido_compra_comparar", pk=pedido.pk)

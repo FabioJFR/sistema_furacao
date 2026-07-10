@@ -202,6 +202,7 @@ _AREAS_TODO = {
             "CONCLUIDO · [VALIDAÇÃO · ASSIDUIDADE] POST direto com empregado/projeto fora do queryset autorizado passa a devolver erro de formulário, evitando erro 500 em `full_clean()`.",
             "CONCLUIDO · [GESTAO EMPRESA] `Clientes & Contratos` evolução: filtros por cliente/estado/projeto/vencimento + KPIs de vencidos e alertas de 7/30 dias.",
             "CONCLUIDO · [GESTAO EMPRESA] `Compras & Fornecedores` evolução: filtros operacionais (estado, prioridade, projeto, categoria, pesquisa) e exportação de pedidos em CSV/XLSX com filtros aplicados.",
+            "CONCLUIDO · [ARQUITETURA · GESTAO EMPRESA] Filtros de Compras & Fornecedores e scoring de propostas movidos de `views/gestao_empresa.py` para `services/gestao_compras.py`, com testes diretos ao service.",
             "CONCLUIDO · [PERMISSÕES · COMPRAS] Regressões adicionadas para isolamento multiempresa em listagem, exportação CSV, criação/edição/remoção de pedidos, fornecedores e propostas.",
             "CONCLUIDO · [VALIDAÇÃO · COMPRAS] POST direto com projeto, solicitante ou fornecedor fora do queryset autorizado passa a devolver erro de formulário sem criar/alterar dados de outra empresa.",
             "CONCLUIDO · [PERMISSÕES · COMPRAS] Seleção automática/manual de propostas e mudança de estado de pedidos protegidas contra pedidos/propostas de outra empresa.",

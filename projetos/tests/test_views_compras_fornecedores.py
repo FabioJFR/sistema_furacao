@@ -4,6 +4,11 @@ from django.test import TestCase
 from django.urls import reverse
 
 from projetos.models import FornecedorCompra, PedidoCompra, PropostaFornecedorCompra
+from projetos.services.gestao_compras import (
+    avaliar_propostas_pedido,
+    filtrar_pedidos_compra,
+    normalizar_filtros_compras,
+)
 
 from .helpers import criar_empregado, criar_empresa, criar_perfil, criar_projeto, criar_user
 
@@ -116,6 +121,38 @@ class ComprasFornecedoresMultiempresaTests(TestCase):
         self.assertEqual(response_csv.status_code, 200)
         self.assertContains(response_csv, self.pedido.descricao)
         self.assertNotContains(response_csv, self.pedido_externo.descricao)
+
+    def test_service_normaliza_e_filtra_pedidos_compra(self):
+        filtros = normalizar_filtros_compras(
+            {
+                "estado": " pendente ",
+                "prioridade": " media ",
+                "projeto_id": f" {self.projeto.pk} ",
+                "categoria": " Ferramentas ",
+                "q": " Interno ",
+            }
+        )
+
+        pedidos = list(filtrar_pedidos_compra(empresa=self.empresa, filtros=filtros))
+
+        self.assertEqual(filtros["estado"], "pendente")
+        self.assertEqual(filtros["prioridade"], "media")
+        self.assertEqual(filtros["projeto_id"], str(self.projeto.pk))
+        self.assertEqual(pedidos, [self.pedido])
+
+    def test_service_avalia_melhor_proposta_por_preco_e_prazo(self):
+        proposta_cara = PropostaFornecedorCompra.objects.create(
+            pedido=self.pedido,
+            fornecedor=self.fornecedor,
+            valor_proposto=300,
+            prazo_entrega_dias=10,
+        )
+
+        avaliadas = avaliar_propostas_pedido(pedido=self.pedido)
+
+        self.assertEqual(avaliadas[0]["obj"], self.proposta)
+        self.assertTrue(avaliadas[0]["is_melhor"])
+        self.assertIn(proposta_cara, [item["obj"] for item in avaliadas])
 
     def test_admin_nao_cria_pedido_com_projeto_ou_solicitante_externo(self):
         response_projeto = self.client.post(
